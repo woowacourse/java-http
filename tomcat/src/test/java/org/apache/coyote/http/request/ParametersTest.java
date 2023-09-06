@@ -7,8 +7,9 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class QueryParametersTest {
+class ParametersTest {
 
     @Test
     void fromUrlContent_메서드는_유효한_url을_전달하면_QueryParameters를_초기화한다() {

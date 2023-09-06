@@ -1,6 +1,5 @@
 package org.apache.coyote.context;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -16,8 +15,12 @@ import org.apache.coyote.http.request.Url;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HttpMethod;
 import org.apache.coyote.http.util.HttpVersion;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("NonAsciiCharacters")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class HelloWorldContextTest {
 
     @Test

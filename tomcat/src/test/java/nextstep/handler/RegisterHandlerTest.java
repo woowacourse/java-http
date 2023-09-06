@@ -3,7 +3,6 @@ package nextstep.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import nextstep.handler.RegisterHandler;
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
 import org.apache.coyote.http.request.HttpRequestBody;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class RegisterHandlerTest {
 

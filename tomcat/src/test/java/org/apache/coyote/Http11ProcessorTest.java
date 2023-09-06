@@ -10,9 +10,13 @@ import java.util.List;
 import org.apache.coyote.context.HelloWorldContext;
 import nextstep.handler.WelcomeHandler;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
+@SuppressWarnings("NonAsciiCharacters")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class Http11ProcessorTest {
 
     @Test

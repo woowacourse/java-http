@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.headers.HttpHeaderType.*;
 import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
 
@@ -54,23 +53,13 @@ public class RegisterHandler implements HttpHandler {
 
 	private static HttpResponse register(final String body) {
 		final Map<String, String> parseQuery = QueryParser.parse(body);
-
 		final User user = new User(
 			parseQuery.get(QUERY_ACCOUNT_KEY),
 			parseQuery.get(QUERY_PASSWORD_KEY),
 			parseQuery.get(QUERY_EMAIL_KEY)
 		);
-
 		InMemoryUserRepository.save(user);
-
-		final String responseBody = "";
-		final HttpHeaders headers = HttpHeaders.of(responseBody, HTML);
-		headers.put(LOCATION.getValue(), REGISTER_SUCCESS_LOCATION);
-		return new HttpResponse(
-			TEMPORARILY_MOVED_302,
-			responseBody,
-			headers
-		);
+		return HttpResponse.redirect(REGISTER_SUCCESS_LOCATION);
 	}
 
 	private static HttpResponse servingStaticResource() throws RuntimeException {

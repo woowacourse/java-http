@@ -94,7 +94,7 @@ class LoginHandlerTest {
 			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 0 \r\n" +
-				"Location: http://localhost:8080/index.html \r\n" +
+				"Location: /index.html \r\n" +
 				"\r\n";
 
 			assertThat(actual.buildResponse())
@@ -122,7 +122,7 @@ class LoginHandlerTest {
 			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 0 \r\n" +
-				"Location: http://localhost:8080/index.html \r\n" +
+				"Location: /index.html \r\n" +
 				"Set-cookie: JSESSIONID=" + uuidValue + " \r\n" +
 				"\r\n";
 

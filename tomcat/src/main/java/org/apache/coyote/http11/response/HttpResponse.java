@@ -28,7 +28,7 @@ public class HttpResponse {
 
 	public String buildResponse() {
 		return String.join("\r\n",
-			HTTP_1_1.getContent() + statusCode.buildResponse(),
+			HTTP_1_1.getContent() + " " + statusCode.buildResponse(),
 			headers.build(),
 			body
 		);

@@ -11,7 +11,7 @@ public class InMemoryUserRepository {
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        final var user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 

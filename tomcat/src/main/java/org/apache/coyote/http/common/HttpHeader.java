@@ -1,4 +1,4 @@
-package org.apache.coyote.http.request;
+package org.apache.coyote.http.common;
 
 import java.util.Arrays;
 

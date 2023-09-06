@@ -1,5 +1,9 @@
 package org.apache.coyote.http.request;
 
+import org.apache.coyote.http.common.HttpBody;
+import org.apache.coyote.http.common.HttpHeader;
+import org.apache.coyote.http.common.HttpHeaders;
+
 import java.util.Map;
 
 public class HttpRequest {

@@ -7,6 +7,7 @@ import org.apache.coyote.handler.mapping.RegisterMapping;
 import org.apache.coyote.handler.mapping.RegisterPageMapping;
 import org.apache.coyote.handler.mapping.StaticFileMapping;
 import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -34,5 +35,14 @@ public class FrontHandler {
         }
 
         return response;
+    }
+    public HttpResponse handle2(final HttpRequest httpRequest) throws IOException {
+        for (final HandlerMapping mapping : handlerMapping) {
+            if (mapping.supports(httpRequest)) {
+                return mapping.handle2(httpRequest);
+            }
+        }
+
+        return null;
     }
 }

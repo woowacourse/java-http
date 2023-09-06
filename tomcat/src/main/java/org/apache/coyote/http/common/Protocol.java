@@ -1,4 +1,4 @@
-package org.apache.coyote.http.request;
+package org.apache.coyote.http.common;
 
 import java.util.Arrays;
 
@@ -17,5 +17,9 @@ public enum Protocol {
                 .filter(protocol -> protocol.name.equalsIgnoreCase(target))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 프로토콜 입니다."));
+    }
+
+    public String getName() {
+        return name;
     }
 }

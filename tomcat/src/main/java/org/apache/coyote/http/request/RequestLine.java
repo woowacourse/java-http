@@ -1,5 +1,7 @@
 package org.apache.coyote.http.request;
 
+import org.apache.coyote.http.common.Protocol;
+
 public class RequestLine {
 
     private final HttpMethod httpMethod;

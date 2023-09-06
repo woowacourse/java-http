@@ -1,4 +1,4 @@
-package org.apache.coyote.http.request;
+package org.apache.coyote.http.common;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public class HttpHeaders {
 
     public String get(final HttpHeader headerName) {
         if (!headers.containsKey(headerName)) {
-            throw new IllegalStateException("HttpRquest 에 존재하지 않는 HttpHeader 입니다.");
+            throw new IllegalStateException("HttpRequest 에 존재하지 않는 HttpHeader 입니다.");
         }
 
         return headers.get(headerName);
@@ -20,5 +20,13 @@ public class HttpHeaders {
 
     public boolean containsKey(final HttpHeader headerName) {
         return headers.containsKey(headerName);
+    }
+
+    public void add(final HttpHeaders httpHeaders) {
+        headers.putAll(httpHeaders.getHeaders());
+    }
+
+    public Map<HttpHeader, String> getHeaders() {
+        return headers;
     }
 }

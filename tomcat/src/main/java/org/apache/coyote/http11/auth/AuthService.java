@@ -25,6 +25,13 @@ public class AuthService {
     private final SessionRepository sessionRepository = new SessionRepository();
 
     public ResponseEntity login(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+        final String account = requestBody.getBy("account");
+        final String password = requestBody.getBy("password");
+        ResponseEntity responseEntity = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(this::getSuccessLoginResponse)
+                .orElseGet(() -> new ResponseEntity(UNAUTHORIZED, UNAUTHORIZED_PAGE));
+
         if (requestLine.method().isGet()) {
             final Cookie cookie = requestHeader.getCookie();
             final Session session = sessionRepository.getSession(cookie.get(COOKIE_NAME));
@@ -33,12 +40,8 @@ public class AuthService {
             }
             return new ResponseEntity(OK, LOGIN_PAGE);
         }
-        final String account = requestBody.getBy("account");
-        final String password = requestBody.getBy("password");
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .map(this::getSuccessLoginResponse)
-                .orElseGet(() -> new ResponseEntity(UNAUTHORIZED, UNAUTHORIZED_PAGE));
+
+        return responseEntity;
     }
 
     private ResponseEntity getSuccessLoginResponse(final User user) {

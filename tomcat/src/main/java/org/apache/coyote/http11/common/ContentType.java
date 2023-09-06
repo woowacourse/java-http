@@ -42,16 +42,16 @@ public enum ContentType {
 
     public static void validate(final String contentTypeStrings) {
         final var invalidStrings = Arrays.stream(contentTypeStrings.split(","))
-                .anyMatch(ContentType::isNotContentType);
+                .noneMatch(ContentType::isContentType);
 
         if (invalidStrings) {
             throw new IllegalArgumentException("invalid content type string");
         }
     }
 
-    private static boolean isNotContentType(final String contentTypeString) {
+    private static boolean isContentType(final String contentTypeString) {
         return Arrays.stream(values())
-                .noneMatch(contentType -> contentType.matches(contentTypeString));
+                .anyMatch(contentType -> contentType.matches(contentTypeString));
     }
 
     private boolean matches(final String contentTypeString) {

@@ -1,8 +1,11 @@
 package org.apache.coyote.http11.common.header;
 
+import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_TYPE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.common.ContentType;
 
 public abstract class Headers {
 
@@ -26,16 +29,16 @@ public abstract class Headers {
 
     public abstract boolean isType(HeaderName headerName);
 
+    protected String add(final HeaderName headerName, final String headerValue) {
+        return values.put(headerName, headerValue);
+    }
+
     protected boolean contains(final HeaderName headerName) {
         return values.containsKey(headerName);
     }
 
     protected String find(final HeaderName headerName) {
         return values.get(headerName);
-    }
-
-    protected String add(final HeaderName headerName, final String headerValue) {
-        return values.put(headerName, headerValue);
     }
 
     @Override
@@ -46,7 +49,16 @@ public abstract class Headers {
 
         return values.entrySet()
                 .stream()
-                .map(entry -> entry.getKey().getName() + ": " + entry.getValue())
+                .map(entry -> format(entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining(LINE_SEPARATOR, "", LINE_SEPARATOR));
+    }
+
+    private String format(final HeaderName headerName, final String value) {
+        final var name = headerName.getName();
+
+        if (CONTENT_TYPE.getName().equals(name)) {
+            return String.join(": ", name, ContentType.withCharset(value));
+        }
+        return String.join(": ", name, value);
     }
 }

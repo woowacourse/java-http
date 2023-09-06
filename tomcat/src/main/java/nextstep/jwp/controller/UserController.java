@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.response.Response.redirect;
+
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.Cookies;
@@ -20,16 +22,16 @@ public class UserController {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> redirectLoginUser(request, user))
-                .orElseGet(() -> Response.redirect("/401.html"));
+                .orElseGet(() -> redirect("/401.html").build());
     }
 
     private static Response redirectLoginUser(final Request request, final User user) {
         final var session = request.getSession();
         session.setAttribute("user", user);
-        final var redirect = Response.redirect("/index.html");
-        redirect.addSetCookie(Cookies.ofJSessionId(session.getId()));
 
-        return redirect;
+        return redirect("/index.html")
+                .addSetCookie(Cookies.ofJSessionId(session.getId()))
+                .build();
     }
 
     public static Response register(final Request request) {
@@ -39,10 +41,12 @@ public class UserController {
         final var password = form.findSingleByKey("password");
 
         if (InMemoryUserRepository.isExistByAccount(account)) {
-            return Response.redirect("/401.html");
+            return redirect("/401.html")
+                    .build();
         }
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return Response.redirect("/index.html");
+        return redirect("/index.html")
+                .build();
     }
 }

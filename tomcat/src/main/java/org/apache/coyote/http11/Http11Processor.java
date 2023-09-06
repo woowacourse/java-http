@@ -1,12 +1,20 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+import nextstep.jwp.Handler;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,21 +35,41 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            List<String> requestHeader = readRequestHeader(bufferedReader);
+            RequestBody requestBody = readRequestBody(requestHeader, bufferedReader);
 
-            final var responseBody = "Hello world!";
+            HttpRequest httpRequest = HttpRequest.of(requestHeader, requestBody);
+            HttpResponse httpResponse = Handler.run(httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
+
+    private List<String> readRequestHeader(BufferedReader bufferedReader) throws IOException {
+        List<String> request = new ArrayList<>();
+        String line;
+        while (!(line = bufferedReader.readLine()).isBlank()) {
+            request.add(line);
+        }
+        return request;
+    }
+
+    private RequestBody readRequestBody(List<String> headers, BufferedReader bufferedReader) throws IOException {
+        int contentLength = 0;
+        for (String header: headers) {
+            if (header.startsWith("Content-Length")) {
+                contentLength = Integer.parseInt(header.split(" ")[1]);
+            }
+        }
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return RequestBody.from(new String(buffer));
+    }
+
 }

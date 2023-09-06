@@ -26,7 +26,7 @@ public class RegisterController extends AbstractPathController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final String account = request.getParameter(ACCOUNT_KEY);
         final String password = request.getParameter(PASSWORD_KEY);
         final String email = request.getParameter(EMAIL_KEY);
@@ -45,7 +45,7 @@ public class RegisterController extends AbstractPathController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final HttpSession session = request.getSession(false);
 
         if (session != null) {

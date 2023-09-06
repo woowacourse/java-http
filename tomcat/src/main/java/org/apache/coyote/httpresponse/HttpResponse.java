@@ -18,9 +18,15 @@ public class HttpResponse {
     private final HttpStatus httpStatus;
     private final CookieHeader cookieHeader;
     private final ResponseHeaders responseHeaders;
-    private final String contentBody;
+    private final ContentBody contentBody;
 
-    public HttpResponse(final String httpVersion, final HttpStatus httpStatus, final CookieHeader cookieHeader, final ResponseHeaders responseHeaders, final String contentBody) {
+    public HttpResponse(
+            final String httpVersion,
+            final HttpStatus httpStatus,
+            final CookieHeader cookieHeader,
+            final ResponseHeaders responseHeaders,
+            final ContentBody contentBody
+    ) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
         this.cookieHeader = cookieHeader;
@@ -29,7 +35,7 @@ public class HttpResponse {
     }
 
     public static HttpResponse init(final String httpVersion) {
-        log.debug("===========================================");
+        log.debug("======================================================================");
         log.debug("Http Response");
         log.debug("Response Http Version: {}", httpVersion);
         return new HttpResponse(httpVersion, null, CookieHeader.blank(), null, null);
@@ -45,15 +51,17 @@ public class HttpResponse {
     }
 
     public HttpResponse setContent(final String path) {
-        final String contentBody = ResourceReader.read(path);
-        final ResponseHeaders responseHeaders = ResponseHeaders.of(path, contentBody);
+        final String content = ResourceReader.read(path);
+        final ContentBody newContentBody = new ContentBody(content);
+        final ResponseHeaders newResponseHeaders = ResponseHeaders.of(path, newContentBody);
         log.debug("Content-Path: {}", path);
-        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, responseHeaders, contentBody);
+        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, newResponseHeaders, newContentBody);
     }
 
     public HttpResponse setBlankContent() {
-        final ResponseHeaders responseHeaders = ResponseHeaders.init();
-        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, responseHeaders, "");
+        final ResponseHeaders blankResponseHeader = ResponseHeaders.init();
+        final ContentBody blankContentBody = ContentBody.noContent();
+        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieHeader, blankResponseHeader, blankContentBody);
     }
 
     public HttpResponse setLocationHeader(final String path) {
@@ -65,15 +73,16 @@ public class HttpResponse {
     public byte[] getBytes() {
         final StringBuilder stringBuilder = new StringBuilder();
         final String responseLine = makeResponseLine();
-        stringBuilder.append(responseLine).append(System.lineSeparator());
+        stringBuilder.append(responseLine).append("\r\n");
         if (cookieHeader.isExist()) {
-            stringBuilder.append(cookieHeader.getFormattedValue()).append(System.lineSeparator());
+            stringBuilder.append(cookieHeader.getFormattedValue()).append("\r\n");
         }
-        stringBuilder.append(responseHeaders.getFormattedHeaders()).append(System.lineSeparator()).append(contentBody);
+        stringBuilder.append(responseHeaders.getFormattedHeaders()).append("\r\n");
+        stringBuilder.append(contentBody.getValue());
         return stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     private String makeResponseLine() {
-        return httpVersion + DELIMITER + httpStatus.getHttpStatus() + " ";
+        return httpVersion + DELIMITER + httpStatus.getHttpStatus() + DELIMITER;
     }
 }

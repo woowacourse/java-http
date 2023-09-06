@@ -1,13 +1,15 @@
 package org.apache.coyote.httpresponse.header;
 
+import org.apache.coyote.httpresponse.ContentBody;
+
 public class ContentLengthHeader implements ResponseHeader {
 
     private static final String DELIMITER = ": ";
 
-    private final String content;
+    private final ContentBody contentBody;
 
-    public ContentLengthHeader(final String content) {
-        this.content = content;
+    public ContentLengthHeader(final ContentBody contentBody) {
+        this.contentBody = contentBody;
     }
 
     @Override
@@ -16,6 +18,6 @@ public class ContentLengthHeader implements ResponseHeader {
     }
 
     private int countBytes() {
-        return content.getBytes().length;
+        return contentBody.getValue().getBytes().length;
     }
 }

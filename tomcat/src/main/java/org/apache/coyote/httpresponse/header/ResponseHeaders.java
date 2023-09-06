@@ -1,5 +1,7 @@
 package org.apache.coyote.httpresponse.header;
 
+import org.apache.coyote.httpresponse.ContentBody;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,10 +18,10 @@ public class ResponseHeaders {
         return new ResponseHeaders(new HashMap<>());
     }
 
-    public static ResponseHeaders of(final String path, final String content) {
+    public static ResponseHeaders of(final String path, final ContentBody contentBody) {
         final Map<ResponseHeaderType, ResponseHeader> headers = new LinkedHashMap<>();
         headers.put(ResponseHeaderType.CONTENT_TYPE, ContentTypeHeader.from(path));
-        headers.put(ResponseHeaderType.CONTENT_LENGTH, new ContentLengthHeader(content));
+        headers.put(ResponseHeaderType.CONTENT_LENGTH, new ContentLengthHeader(contentBody));
         return new ResponseHeaders(headers);
     }
 

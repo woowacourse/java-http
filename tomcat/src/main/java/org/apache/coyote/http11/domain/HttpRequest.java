@@ -14,9 +14,9 @@ public class HttpRequest {
     private static final String HEADER_DELIMITER = ": ";
 
     private final HttpRequestHeader requestHeader;
-    private final HttpRequestBody requestBody;
+    private final Map<String, String> requestBody;
 
-    private HttpRequest(final HttpRequestHeader requestHeader, final HttpRequestBody requestBody) {
+    private HttpRequest(final HttpRequestHeader requestHeader, final Map<String, String> requestBody) {
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
     }
@@ -28,8 +28,8 @@ public class HttpRequest {
         if (contentLength == null) {
             return new HttpRequest(httpRequestHeader, null);
         }
-        final HttpRequestBody httpRequestBody = parseHttpRequestBody(bufferedReader, Integer.parseInt(contentLength));
-        return new HttpRequest(httpRequestHeader, httpRequestBody);
+        final Map<String, String> requestBody = parseHttpRequestBody(bufferedReader, Integer.parseInt(contentLength));
+        return new HttpRequest(httpRequestHeader, requestBody);
     }
 
     private static List<String> parseHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -55,18 +55,29 @@ public class HttpRequest {
         return new HttpRequestHeader(method, uri, version, requestHeaders);
     }
 
-    private static HttpRequestBody parseHttpRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+    private static Map<String, String> parseHttpRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         final String body = new String(buffer);
-        return HttpRequestBody.from(body);
+        return splitBody(body);
+    }
+
+    private static Map<String, String> splitBody(final String body) {
+        final Map<String, String> requestBody = new HashMap<>();
+        final String[] splitBodies = body.split("&");
+        for (final String splitBody : splitBodies) {
+            final String[] keyAndValue = splitBody.split("=");
+            requestBody.put(keyAndValue[0], keyAndValue[1]);
+        }
+
+        return requestBody;
     }
 
     public String getUri() {
         return requestHeader.getUri();
     }
 
-    public HttpRequestBody getBody() {
+    public Map<String, String> getBody() {
         return requestBody;
     }
 

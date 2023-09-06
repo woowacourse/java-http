@@ -6,12 +6,11 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.domain.HttpRequest;
+import org.apache.coyote.http11.util.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class LoginController extends Controller {
@@ -21,36 +20,27 @@ public class LoginController extends Controller {
     @Override
     public String run(final HttpRequest request) throws IOException {
         final String parsedUri = request.getUri();
-        final Map<String, String> queryStrings = parseQueryStrings(parsedUri);
-        if (queryStrings.isEmpty()) {
-            final FileResolver file = FileResolver.findFile(parsedUri);
-            return file.getResponse();
+        final String method = request.getMethod();
+        if (HttpMethod.hasBody(method)) {
+            return login(request.getBody());
         }
-        return login(queryStrings);
+        final FileResolver file = FileResolver.findFile(parsedUri);
+        return file.getResponse();
     }
 
-    private Map<String, String> parseQueryStrings(final String parsedUri) {
-        if (!parsedUri.contains("?")) {
-            return Collections.emptyMap();
-        }
-        final int index = parsedUri.indexOf("?");
-        final String queryStringUri = parsedUri.substring(index + 1);
-        final String[] strings = queryStringUri.split("&");
-        Map<String, String> queryStrings = new HashMap<>();
-        for (final String string : strings) {
-            final String[] keyValue = string.split("=");
-            queryStrings.put(keyValue[0], keyValue[1]);
-        }
-        return queryStrings;
-    }
+    private String login(final Map<String, String> body) {
+        log.info("queryStrings = ", body);
 
-    private String login(final Map<String, String> queryStrings) {
-        log.info("queryStrings = ", queryStrings);
-
-        if (isValidUser(queryStrings)) {
+        if (isValidUser(body)) {
             return createRedirectResponse("/index.html");
         }
         return createRedirectResponse("/401.html");
+    }
+
+    private boolean isValidUser(final Map<String, String> body) {
+        final User account = InMemoryUserRepository.findByAccount(body.get("account"))
+                                                   .orElseThrow(() -> new IllegalArgumentException("잘못된 유저 정보입니다."));
+        return account.checkPassword(body.get("password"));
     }
 
     private String createRedirectResponse(final String fileName) {
@@ -59,11 +49,5 @@ public class LoginController extends Controller {
                 "Location: " + fileName + " ",
                 ""
         );
-    }
-
-    private boolean isValidUser(final Map<String, String> queryStrings) {
-        final User account = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                                                   .orElseThrow(() -> new IllegalArgumentException("잘못된 유저 정보입니다."));
-        return account.checkPassword(queryStrings.get("password"));
     }
 }

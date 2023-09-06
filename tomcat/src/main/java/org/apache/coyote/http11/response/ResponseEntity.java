@@ -14,6 +14,7 @@ import java.util.HashMap;
 public class ResponseEntity {
 
     public static final String STATIC_RESOURCE_DIRECTORY = "static";
+    private static final String BAD_REQUEST_FILE = "/404.html";
 
     private final HttpStatus httpStatus;
     private final HttpCookie httpCookie;
@@ -46,6 +47,10 @@ public class ResponseEntity {
     public static ResponseEntity of(final HttpStatus httpStatus, final String resourcePath) {
         try {
             final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + resourcePath);
+
+            if (resourceFileUrl == null) {
+                return ResponseEntity.of(HttpStatus.BAD_REQUEST, BAD_REQUEST_FILE);
+            }
 
             return new ResponseEntity(
                     httpStatus,

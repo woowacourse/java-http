@@ -24,28 +24,30 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public HttpResponse handle(HttpRequest request) throws IOException {
-        if (isIndexPage(request)) {
+        String uri = request.getUri();
+
+        if (isIndexPage(request, uri)) {
             return HttpResponse.ok("Hello world!", ContentType.HTML);
         }
 
-        if (request.getUri().equals("/login")) {
+        if (uri.equals("/login")) {
             return login(request);
         }
 
-        if (request.getUri().equals("/register")) {
+        if (uri.equals("/register")) {
             return signUp(request);
         }
 
-        if (isStaticFile(request.getUri()) && request.getMethod() == HttpMethod.GET) {
-            System.out.println(request.getUri());
-            return getFile(request.getUri());
+        if (isStaticFile(uri) && request.getMethod() == HttpMethod.GET) {
+            System.out.println(uri);
+            return getFile(uri);
         }
 
         return getFile("/404.html");
     }
 
-    private boolean isIndexPage(HttpRequest request) {
-        return request.getUri().equals("/") && request.getMethod() == HttpMethod.GET;
+    private boolean isIndexPage(HttpRequest request, String uri) {
+        return uri.equals("/") && request.getMethod() == HttpMethod.GET;
     }
 
     private HttpResponse getFile(String uri) throws IOException {

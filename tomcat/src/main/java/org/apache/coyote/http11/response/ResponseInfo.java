@@ -4,18 +4,18 @@ import java.net.URL;
 
 public class ResponseInfo {
     private final URL resource;
-    private final int httpStatus;
-    private final String statusName;
+    private final int httpStatusCode;
+    private final String statusMessage;
     private final String cookie;
 
-    public ResponseInfo(URL resource, int httpStatus, String statusName) {
-        this(resource, httpStatus, statusName, null);
+    public ResponseInfo(URL resource, int httpStatusCode, String statusMessage) {
+        this(resource, httpStatusCode, statusMessage, null);
     }
 
-    public ResponseInfo(URL resource, int httpStatus, String statusName, String cookie) {
+    public ResponseInfo(URL resource, int httpStatusCode, String statusMessage, String cookie) {
         this.resource = resource;
-        this.httpStatus = httpStatus;
-        this.statusName = statusName;
+        this.httpStatusCode = httpStatusCode;
+        this.statusMessage = statusMessage;
         this.cookie = cookie;
     }
 
@@ -23,12 +23,12 @@ public class ResponseInfo {
         return resource;
     }
 
-    public int getHttpStatus() {
-        return httpStatus;
+    public int getHttpStatusCode() {
+        return httpStatusCode;
     }
 
-    public String getStatusName() {
-        return statusName;
+    public String getStatusMessage() {
+        return statusMessage;
     }
 
     public String getCookie() {

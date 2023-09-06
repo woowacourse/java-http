@@ -23,7 +23,9 @@ public class HttpRequest {
 
     private static RequestHeader readHeader(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder();
-        for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
+
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !"".equals(line)) {
             stringBuilder.append(line).append("\r\n");
         }
         return RequestHeader.from(stringBuilder.toString());

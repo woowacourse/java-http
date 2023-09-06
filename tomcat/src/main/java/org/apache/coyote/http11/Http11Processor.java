@@ -22,7 +22,7 @@ import java.util.List;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String RESOURCE_PATH = "static";
+    private static final String RESOURCE_PATH = "static";
     private final Socket connection;
     private final List<RequestHandler> handlers = new ArrayList<>();
 
@@ -44,9 +44,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+             final var outputStream = connection.getOutputStream()) {
+
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final ResponseInfo responseInfo = handleRequest(httpRequest);
@@ -85,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
         if (responseInfo.getCookie() != null) {
             return String.join(
                     "\r\n",
-                    "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName(),
+                    "HTTP/1.1 " + responseInfo.getHttpStatusCode() + " " + responseInfo.getStatusMessage(),
                     "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "Set-Cookie: " + "JSESSIONID=" + responseInfo.getCookie() + " ",
@@ -95,7 +96,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join(
                 "\r\n",
-                "HTTP/1.1 " + responseInfo.getHttpStatus() + " " + responseInfo.getStatusName() + " \r\n" +
+                "HTTP/1.1 " + responseInfo.getHttpStatusCode() + " " + responseInfo.getStatusMessage() + " \r\n" +
                         "Content-Type: " + contentType(responseInfo.getResource().getPath()) + ";charset=utf-8 \r\n" +
                         "Content-Length: " + responseBody.getBytes().length + " \r\n\r\n" + responseBody);
 

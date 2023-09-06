@@ -25,10 +25,10 @@ public class MemberService {
 
     public static HttpResponse login(HttpRequest request) {
         String body = request.getBody();
-        Map<String, String> requestParam = parseForm(body);
-        if (doesParamContainsAccountAndPassword(requestParam)) {
-            String account = requestParam.get(ACCOUNT);
-            String password = requestParam.get(PASSWORD);
+        Map<String, String> requestBody = parseRequestParams(body);
+        if (doesParamContainsAccountAndPassword(requestBody)) {
+            String account = requestBody.get(ACCOUNT);
+            String password = requestBody.get(PASSWORD);
             Member foundMember = MemberRepository.findMember(account);
             Session session = addSession(foundMember);
             if (isValidMember(password, foundMember)) {
@@ -47,10 +47,10 @@ public class MemberService {
 
     public static HttpResponse register(HttpRequest httpRequest) {
         String body = httpRequest.getBody();
-        Map<String, String> requestParam = parseForm(body);
-        if (doesParamContainsAccountPasswordAndEmail(requestParam)) {
-            Member member = new Member(requestParam.get(ACCOUNT), requestParam.get(PASSWORD),
-                    requestParam.get(EMAIL));
+        Map<String, String> requestBody = parseRequestParams(body);
+        if (doesParamContainsAccountPasswordAndEmail(requestBody)) {
+            Member member = new Member(requestBody.get(ACCOUNT), requestBody.get(PASSWORD),
+                    requestBody.get(EMAIL));
             if (!MemberRepository.exists(member.getAccount())) {
                 MemberRepository.register(member);
                 Session session = addSession(member);
@@ -81,7 +81,7 @@ public class MemberService {
         return requestParam.containsKey(ACCOUNT) && requestParam.containsKey(PASSWORD);
     }
 
-    private static Map<String, String> parseForm(String body) {
+    private static Map<String, String> parseRequestParams(String body) {
         Map<String, String> queryString = new HashMap<>();
         String[] queryStrings = body.split("&");
         for (String singleQueryString : queryStrings) {

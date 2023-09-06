@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request.requestLine;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.exception.IllegalRequestLineException;
 import org.apache.coyote.http11.request.requestLine.requestUri.RequestUri;
+import org.apache.coyote.http11.request.requestLine.requestUri.ResourcePath;
 
 import java.util.Objects;
 import java.util.StringTokenizer;
@@ -33,6 +34,14 @@ public class RequestLine {
                 RequestUri.from(stringTokenizer.nextToken()),
                 HttpVersion.from(stringTokenizer.nextToken())
         );
+    }
+
+    public boolean isMethodOf(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
+
+    public ResourcePath getResourcePath() {
+        return requestUri.getResourcePath();
     }
 
     public HttpMethod getHttpMethod() {

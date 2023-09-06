@@ -36,8 +36,7 @@ public class Controller {
     }
 
     public ResponseEntity run() {
-        final RequestUri requestUri = httpRequest.getRequestLine().getRequestUri();
-        final ResourcePath resourcePath = requestUri.getResourcePath();
+        final ResourcePath resourcePath = httpRequest.getResourcePath();
         if (resourcePath.isRootPath()) {
             return new ResponseEntity(HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
         }

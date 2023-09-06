@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
 import org.apache.coyote.http11.request.requestLine.RequestLine;
+import org.apache.coyote.http11.request.requestLine.requestUri.ResourcePath;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,10 +42,6 @@ public class HttpRequest {
     }
 
     private static String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        return readNextChunk(bufferedReader);
-    }
-
-    private static String readNextChunk(final BufferedReader bufferedReader) throws IOException {
         List<String> requestHeaders = new ArrayList<>();
 
         String nextRequestHeaderLine = bufferedReader.readLine();
@@ -67,7 +65,26 @@ public class HttpRequest {
     }
 
     public boolean isRequestOf(final HttpMethod httpMethod) {
-        return requestLine.getHttpMethod() == httpMethod;
+        return requestLine.isMethodOf(httpMethod);
+    }
+
+    public boolean hasSessionId() {
+        return requestHeaders.containsKey(COOKIE);
+    }
+
+    public String findSessionIdFromRequestHeaders(final String sessionKey) {
+        final String cookieValue = requestHeaders.search(COOKIE);
+        final HttpCookie cookie = HttpCookie.from(cookieValue);
+
+        return cookie.search(sessionKey);
+    }
+
+    public HttpVersion getHttpVersion() {
+        return requestLine.getHttpVersion();
+    }
+
+    public ResourcePath getResourcePath() {
+        return requestLine.getResourcePath();
     }
 
     public RequestLine getRequestLine() {
@@ -80,17 +97,6 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
-    }
-
-    public boolean hasSessionId() {
-        return requestHeaders.getRequestHeader().containsKey(COOKIE);
-    }
-
-    public String findSessionIdFromRequestHeaders(final String sessionKey) {
-        final String cookieValue = requestHeaders.search(COOKIE);
-        final HttpCookie cookie = HttpCookie.from(cookieValue);
-
-        return cookie.search(sessionKey);
     }
 
     @Override

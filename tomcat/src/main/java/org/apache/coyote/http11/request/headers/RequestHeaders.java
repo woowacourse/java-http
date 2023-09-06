@@ -47,6 +47,10 @@ public class RequestHeaders {
         return requestHeader.get(key);
     }
 
+    public boolean containsKey(final String headerKey) {
+        return requestHeader.containsKey(headerKey);
+    }
+
     public Map<String, String> getRequestHeader() {
         return requestHeader;
     }

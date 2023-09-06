@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -35,7 +37,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))
+        ) {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final Controller controller = new Controller(httpRequest);
@@ -43,8 +47,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpResponse response = HttpResponse.of(httpRequest.getRequestLine().getHttpVersion(), responseEntity);
 
-            outputStream.write(response.convertToString().getBytes());
-            outputStream.flush();
+            bufferedWriter.write(response.convertToString());
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

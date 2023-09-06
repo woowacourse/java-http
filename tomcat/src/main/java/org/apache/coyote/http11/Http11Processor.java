@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.FrontHandler;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

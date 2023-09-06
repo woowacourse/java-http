@@ -1,4 +1,4 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.request;
 
 public class StartLine {
 

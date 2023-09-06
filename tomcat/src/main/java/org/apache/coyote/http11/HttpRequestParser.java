@@ -1,21 +1,21 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http.HttpBody;
-import org.apache.coyote.http.HttpHeader;
-import org.apache.coyote.http.HttpHeaders;
-import org.apache.coyote.http.HttpMethod;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.Protocol;
-import org.apache.coyote.http.RequestUri;
-import org.apache.coyote.http.StartLine;
+import org.apache.coyote.http.request.HttpBody;
+import org.apache.coyote.http.request.HttpHeader;
+import org.apache.coyote.http.request.HttpHeaders;
+import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.Protocol;
+import org.apache.coyote.http.request.RequestUri;
+import org.apache.coyote.http.request.StartLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.coyote.http.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http.HttpMethod.POST;
+import static org.apache.coyote.http.request.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http.request.HttpMethod.POST;
 
 public class HttpRequestParser {
 

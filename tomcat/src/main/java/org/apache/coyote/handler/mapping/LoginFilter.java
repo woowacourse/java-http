@@ -1,8 +1,8 @@
 package org.apache.coyote.handler.mapping;
 
 import org.apache.coyote.http.LoginManager;
-import org.apache.coyote.http.Session;
-import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionManager;
 
 import java.util.Map;
 

@@ -1,4 +1,6 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.session;
+
+import org.apache.coyote.http.LoginManager;
 
 import java.util.HashMap;
 import java.util.Map;

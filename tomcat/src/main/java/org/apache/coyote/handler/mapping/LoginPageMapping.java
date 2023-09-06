@@ -2,8 +2,8 @@ package org.apache.coyote.handler.mapping;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpCookie;
+import org.apache.coyote.http.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http.HttpHeader.COOKIE;
+import static org.apache.coyote.http.request.HttpHeader.COOKIE;
 
 public class LoginPageMapping extends LoginFilter implements HandlerMapping {
 

@@ -1,6 +1,6 @@
 package org.apache.coyote.handler.mapping;
 
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 
 import java.io.File;
 import java.io.IOException;

@@ -6,7 +6,7 @@ import org.apache.coyote.handler.mapping.LoginPageMapping;
 import org.apache.coyote.handler.mapping.RegisterMapping;
 import org.apache.coyote.handler.mapping.RegisterPageMapping;
 import org.apache.coyote.handler.mapping.StaticFileMapping;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 
 import java.io.IOException;
 import java.util.HashSet;

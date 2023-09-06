@@ -1,12 +1,14 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.exception.InvalidRequestException;
+
 public class RequestLine {
 
-    private final String requestMethod;
+    private final RequestMethod requestMethod;
     private final String requestUrl;
     private final String requestProtocol;
 
-    public RequestLine(final String requestMethod, final String requestUrl, final String requestProtocol) {
+    public RequestLine(final RequestMethod requestMethod, final String requestUrl, final String requestProtocol) {
         this.requestMethod = requestMethod;
         this.requestUrl = requestUrl;
         this.requestProtocol = requestProtocol;
@@ -14,13 +16,14 @@ public class RequestLine {
 
     public static RequestLine from(final String line) {
         String[] requestParts = line.split(" ");
-        if(requestParts.length != 3) {
-            throw new IllegalArgumentException(); //todo : 유효하지 않은 헤더 예외처리
+        if (requestParts.length != 3) {
+            throw new InvalidRequestException();
         }
-        return new RequestLine(requestParts[0], requestParts[1], requestParts[2]);
+        RequestMethod requestMethod = RequestMethod.getRequestMethod(requestParts[0]);
+        return new RequestLine(requestMethod, requestParts[1], requestParts[2]);
     }
 
-    public String getRequestMethod() {
+    public RequestMethod getRequestMethod() {
         return requestMethod;
     }
 

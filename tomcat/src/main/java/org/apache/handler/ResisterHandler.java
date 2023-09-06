@@ -16,6 +16,7 @@ public class ResisterHandler implements RequestHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ResisterHandler.class);
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
+    private static final String METHOD_NOT_ALLOWED_PAGE = "/405.html";
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
@@ -27,7 +28,10 @@ public class ResisterHandler implements RequestHandler {
             return doGet();
         }
 
-        throw new IllegalArgumentException("일치하는 Method 타입이 없습니다.");
+        String content = FileReader.read(METHOD_NOT_ALLOWED_PAGE);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, content);
+        httpResponse.setContentType(ContentType.TEXT_HTML);
+        return httpResponse;
     }
 
     public HttpResponse doPost(HttpRequest httpRequest) throws IOException {
@@ -41,8 +45,9 @@ public class ResisterHandler implements RequestHandler {
         InMemoryUserRepository.save(user);
         LOG.info("회원가입 성공한 회원 : {}", user);
         String content = FileReader.read(INDEX_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
         httpResponse.setContentType(ContentType.TEXT_HTML);
+        httpResponse.setLocation(INDEX_PAGE);
         return httpResponse;
     }
 

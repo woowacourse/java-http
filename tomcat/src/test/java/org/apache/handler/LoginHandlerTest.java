@@ -1,12 +1,12 @@
 package org.apache.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import org.apache.common.Session;
 import org.apache.common.SessionManager;
 import org.apache.request.HttpRequest;
@@ -29,15 +29,14 @@ class LoginHandlerTest {
         void GET_요청이면_200_상태코드를_반환한다() throws IOException {
             String httpRequestMessage = String.join("\r\n",
                     "GET /login HTTP/1.1",
-                    "Host: localhost:8080",
-                    "Connection: keep-alive"
+                    "Host: localhost:8080"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            LoginHandler loginHandler = new LoginHandler();
+            RequestHandler requestHandler = new LoginHandler();
 
-            HttpResponse httpResponse = loginHandler.handle(httpRequest);
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
             String expected = String.join("\r\n",
                     "HTTP/1.1 200 OK "
@@ -50,18 +49,17 @@ class LoginHandlerTest {
             String httpRequestMessage = String.join("\r\n",
                     "GET /login HTTP/1.1",
                     "Host: localhost:8080",
-                    "Connection: keep-alive",
                     "Cookie: JSESSIONID=f47ac10b-58cc-4372-a567-0e02b2c3d479"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            LoginHandler loginHandler = new LoginHandler();
+            RequestHandler requestHandler = new LoginHandler();
             Session session = new Session("f47ac10b-58cc-4372-a567-0e02b2c3d479");
             session.setAttribute("user", "user");
             SessionManager.add(session);
 
-            HttpResponse httpResponse = loginHandler.handle(httpRequest);
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
             String expected = String.join("\r\n",
                     "HTTP/1.1 302 FOUND "
@@ -75,7 +73,6 @@ class LoginHandlerTest {
             String httpRequestMessage = String.join("\r\n",
                     "POST /login HTTP/1.1",
                     "Host: localhost:8080",
-                    "Connection: keep-alive",
                     "Content-Length: " + body.getBytes().length,
                     "",
                     body
@@ -83,29 +80,31 @@ class LoginHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            LoginHandler loginHandler = new LoginHandler();
+            RequestHandler requestHandler = new LoginHandler();
 
-            HttpResponse httpResponse = loginHandler.handle(httpRequest);
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
             assertThat(httpResponse.getResponse()).contains("HTTP/1.1 302 FOUND ", "Set-Cookie: JSESSIONID=");
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"DELETE", "PUT", "PATCH"})
-        void GET_POST_요청이_아니면_예외가_발생한다(String method) throws IOException {
+        void GET_POST_요청이_아니면_405_상태코드를_반환한다(String method) throws IOException {
             String httpRequestMessage = String.join("\r\n",
                     ""+ method + " /login HTTP/1.1",
-                    "Host: localhost:8080",
-                    "Connection: keep-alive"
+                    "Host: localhost:8080"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            LoginHandler loginHandler = new LoginHandler();
+            RequestHandler requestHandler = new LoginHandler();
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
-            assertThatThrownBy(() -> loginHandler.handle(httpRequest))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("일치하는 Method 타입이 없습니다.");
+            List<String> responses = List.of(
+                    "HTTP/1.1 405 METHOD_NOT_ALLOWED ",
+                    "Content-Type: text/html;charset=utf-8 "
+            );
+            assertThat(httpResponse.getResponse()).contains(responses.get(0), responses.get(1));
         }
     }
 }

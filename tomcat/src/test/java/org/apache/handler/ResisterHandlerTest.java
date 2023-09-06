@@ -18,43 +18,64 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class FileHandlerTest {
+class ResisterHandlerTest {
 
     @Nested
-    class HTML_파일을_처리할_때 {
+    class 회원_등록_페이지_요청_시 {
 
         @Test
-        void 정상적으로_응답_후_200_상태코드를_반환한다() throws IOException {
+        void GET_요청이면_200_상태코드를_반환한다() throws IOException {
             String httpRequestMessage = String.join("\r\n",
-                    "GET /index.html HTTP/1.1",
+                    "GET /register HTTP/1.1",
                     "Host: localhost:8080"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new FileHandler();
+            RequestHandler requestHandler = new ResisterHandler();
 
             HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
-            List<String> responses = List.of(
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 "
+            String expected = String.join("\r\n",
+                    "HTTP/1.1 200 OK "
             );
-            assertThat(httpResponse.getResponse()).contains(responses.get(0), responses.get(1));
+            assertThat(httpResponse.getResponse()).contains(expected);
+        }
+
+        @Test
+        void POST_요청이면_302_상태코드를_반환한다() throws IOException {
+            String body = "account=gray&password=1234&email=gray@gmail.com";
+            String httpRequestMessage = String.join("\r\n",
+                    "POST /register HTTP/1.1",
+                    "Host: localhost:8080",
+                    "Content-Length: " + body.getBytes().length,
+                    "",
+                    body
+            );
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            RequestHandler requestHandler = new ResisterHandler();
+
+            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+
+            String expected = String.join("\r\n",
+                    "HTTP/1.1 302 FOUND "
+            );
+            assertThat(httpResponse.getResponse()).contains(expected);
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"DELETE", "PUT", "PATCH"})
-        void GET_또는_POST_요청이_아니면_405_상태코드를_발생한다(String method) throws IOException {
+        void GET_POST_요청이_아니면_405_상태코드를_반환한다(String method) throws IOException {
             String httpRequestMessage = String.join("\r\n",
-                    "" + method + " /index.html HTTP/1.1",
+                    ""+ method + " /register HTTP/1.1",
                     "Host: localhost:8080"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new FileHandler();
-
+            RequestHandler requestHandler = new LoginHandler();
             HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
             List<String> responses = List.of(

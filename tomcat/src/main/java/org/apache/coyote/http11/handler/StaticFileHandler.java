@@ -1,20 +1,18 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.exception.NotExistFileException;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.apache.coyote.http11.common.HttpStatus.OK;
 import static org.apache.coyote.http11.common.HttpStatus.FOUND;
+import static org.apache.coyote.http11.common.HttpStatus.OK;
 
 public class StaticFileHandler {
 
@@ -47,14 +45,12 @@ public class StaticFileHandler {
     }
 
     private static String findResponseBody(final String requestURI) throws IOException {
-        URL requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestURI);
-        try (BufferedReader br = new BufferedReader(new FileReader(requestedFile.getFile(), Charset.forName("UTF-8")))) {
-            StringBuilder sb = new StringBuilder();
-            String str;
-            while ((str = br.readLine()) != null) {
-                sb.append(str + "\n");
-            }
-            return sb.toString();
+        try {
+            URL requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestURI);
+            Path path = Paths.get(requestedFile.getPath());
+            return String.valueOf(Files.readAllBytes(path));
+        } catch (NullPointerException e) {
+            throw new NotExistFileException();
         }
     }
 }

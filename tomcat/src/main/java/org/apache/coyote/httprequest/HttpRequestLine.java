@@ -1,10 +1,14 @@
 package org.apache.coyote.httprequest;
 
 import org.apache.coyote.httprequest.exception.InvalidHttpRequestLineException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class HttpRequestLine {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpRequestLine.class);
 
     private static final String DELIMITER = " ";
     public static final int REQUEST_LINE_ELEMENT_COUNT = 3;
@@ -23,6 +27,7 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine from(final String requestLine) {
+        log.debug("Request line : {}", requestLine);
         final List<String> parsedRequestLine = parseByDelimiter(requestLine);
         return new HttpRequestLine(
                 RequestMethod.from(parsedRequestLine.get(REQUEST_METHOD_INDEX)),

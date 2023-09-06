@@ -1,5 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
+import java.util.List;
+import org.apache.coyote.handler.Handler;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -8,16 +10,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import support.fixture.HandlerFixtures;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private List<Handler> handlers = HandlerFixtures.handlers();
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, handlers);
 
         // when
         processor.process(socket);
@@ -44,7 +49,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, handlers);
 
         // when
         processor.process(socket);

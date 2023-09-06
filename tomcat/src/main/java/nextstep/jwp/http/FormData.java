@@ -1,7 +1,6 @@
 package nextstep.jwp.http;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -19,12 +18,11 @@ public class FormData {
     }
 
     public static FormData from(HttpBody httpBody) {
-        String formData = httpBody.getHttpBody();
-
-        if (formData == null || formData.isBlank()) {
-            return new FormData(Collections.emptyMap());
+        if (httpBody == null) {
+            throw new IllegalArgumentException("httpBody is Null");
         }
 
+        String formData = httpBody.getHttpBody();
         String[] params = formData.split(FORM_DATA_DELIMITER);
 
         Map<String, String> paramMap = Arrays.stream(params)
@@ -36,11 +34,11 @@ public class FormData {
     }
 
     public String get(String key) {
-        if (params.containsKey(key)) {
-            return params.get(key);
+        if (key == null) {
+            throw new IllegalArgumentException("FormData key is Null");
         }
 
-        return null;
+        return params.get(key);
     }
 
 }

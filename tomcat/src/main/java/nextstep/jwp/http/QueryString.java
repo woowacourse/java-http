@@ -1,7 +1,6 @@
 package nextstep.jwp.http;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,14 +17,15 @@ public class QueryString {
     }
 
     public static QueryString from(String line) {
-        if ("".equals(line)) {
-            return new QueryString(Collections.emptyMap());
+        if (line == null) {
+            throw new IllegalArgumentException("line is Null");
         }
 
         String[] params = line.split(QUERY_STRING_DELIMITER);
 
         Map<String, String> paramMap = Arrays.stream(params)
                 .map(param -> param.split(KEY_VALUE_DELIMITER))
+                .filter(param -> param.length == 2)
                 .collect(Collectors.toMap(param -> param[KEY_INDEX], param -> param[VALUE_INDEX]));
 
         return new QueryString(paramMap);
@@ -36,11 +36,11 @@ public class QueryString {
     }
 
     public String get(String key) {
-        if (params.containsKey(key)) {
-            return params.get(key);
+        if (key == null) {
+            throw new IllegalArgumentException("QueryString key is Null");
         }
 
-        return null;
+        return params.get(key);
     }
 
 }

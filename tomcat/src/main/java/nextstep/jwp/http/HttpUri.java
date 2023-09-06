@@ -12,15 +12,24 @@ public class HttpUri {
         this.queryString = queryString;
     }
 
+    private HttpUri(String nativePath) {
+        this(nativePath, QueryString.from(""));
+    }
+
     public static HttpUri from(String fullPath) {
+        if (fullPath == null) {
+            throw new IllegalArgumentException("HttpUri fullPath is Null");
+        }
+
         int index = fullPath.indexOf(QUERY_STRING_DELIMITER);
 
         if (index == QUERY_STRING_NOT_EXIST_INDEX) {
-            return new HttpUri(fullPath, QueryString.from(""));
+            return new HttpUri(fullPath);
         }
 
         String nativePath = fullPath.substring(0, index);
         QueryString queryString = QueryString.from(fullPath.substring(index + 1));
+
         return new HttpUri(nativePath, queryString);
     }
 

@@ -9,6 +9,10 @@ public class HttpBody {
     }
 
     public static HttpBody from(String httpBody) {
+        if (httpBody == null) {
+            throw new IllegalArgumentException("HttpBody is Null");
+        }
+
         return new HttpBody(httpBody);
     }
 

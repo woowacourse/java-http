@@ -34,15 +34,32 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    public void setLocation(String value) {
-        httpHeaders.put(HeaderType.LOCATION.getValue(), value);
-    }
-
     public void addHeader(String key, String value) {
+        validateKey(key);
+        validateValue(value);
+
         httpHeaders.put(key, value);
     }
 
+    private void validateKey(String key) {
+        if (key == null) {
+            throw new IllegalArgumentException("Header Key is Null");
+        }
+    }
+
+    private void validateValue(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Header Value is Null");
+        }
+    }
+
+    public void setLocation(String value) {
+        addHeader(HeaderType.LOCATION.getValue(), value);
+    }
+
     public boolean containsKey(String key) {
+        validateKey(key);
+
         return httpHeaders.containsKey(key);
     }
 
@@ -54,11 +71,9 @@ public class HttpHeaders {
     }
 
     public String get(String key) {
-        if (containsKey(key)) {
-            return httpHeaders.get(key);
-        }
+        validateKey(key);
 
-        return null;
+        return httpHeaders.get(key);
     }
 
 }

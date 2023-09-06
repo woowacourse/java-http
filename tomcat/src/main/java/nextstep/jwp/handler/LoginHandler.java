@@ -54,7 +54,7 @@ public class LoginHandler implements RequestHandler {
     private HttpResponse handleGetMethod(HttpRequest request) throws IOException {
         if (request.hasCookie()) {
             HttpCookie cookie = request.getCookie();
-            String jSessionId = cookie.getJSessionId();
+            String jSessionId = cookie.get("JSESSIONID");
             Session session = SESSION_MANAGER.findSession(jSessionId);
             User user = (User) session.getAttribute("user");
 

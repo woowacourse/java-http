@@ -18,8 +18,7 @@ public class StaticFileMapping implements HandlerMapping {
     @Override
     public boolean supports(final HttpRequest httpRequest) {
         return httpRequest.isGetRequest() &&
-                ("/".equals(httpRequest.getRequestUri().getRequestUri()) ||
-                        httpRequest.getRequestUri().getRequestUri().endsWith(".html") ||
+                (httpRequest.getRequestUri().getRequestUri().endsWith(".html") ||
                         httpRequest.getRequestUri().getRequestUri().endsWith(".js") ||
                         httpRequest.getRequestUri().getRequestUri().endsWith(".css") ||
                         httpRequest.getRequestUri().getRequestUri().endsWith(".ico")
@@ -29,17 +28,9 @@ public class StaticFileMapping implements HandlerMapping {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         final String requestUri = httpRequest.getRequestUri().getRequestUri();
-        if ("/".equals(requestUri)) {
-            return HttpResponse.builder()
-                    .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.TEXT.getValue())))
-                    .body(new HttpBody("Hello world!"))
-                    .build();
-        }
+        final String filePath = "static" + requestUri;
 
         if (requestUri.endsWith(".html")) {
-            final String filePath = "static" + requestUri;
-
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
                     .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.HTML.getValue())))
@@ -48,8 +39,6 @@ public class StaticFileMapping implements HandlerMapping {
         }
 
         if (requestUri.endsWith(".js")) {
-            final String filePath = "static" + requestUri;
-
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
                     .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.JS.getValue())))
@@ -58,8 +47,6 @@ public class StaticFileMapping implements HandlerMapping {
         }
 
         if (requestUri.endsWith(".css")) {
-            final String filePath = "static" + requestUri;
-
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
                     .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.CSS.getValue())))
@@ -68,8 +55,6 @@ public class StaticFileMapping implements HandlerMapping {
         }
 
         if (requestUri.endsWith(".ico")) {
-            final String filePath = "static" + requestUri;
-
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
                     .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.ICO.getValue())))

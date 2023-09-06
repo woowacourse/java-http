@@ -1,6 +1,7 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.handler.mapping.HandlerMapping;
+import org.apache.coyote.handler.mapping.HomePageMapping;
 import org.apache.coyote.handler.mapping.LoginMapping;
 import org.apache.coyote.handler.mapping.LoginPageMapping;
 import org.apache.coyote.handler.mapping.RegisterMapping;
@@ -18,6 +19,7 @@ public class FrontHandler {
     private static final Set<HandlerMapping> handlerMapping = new HashSet<>();
 
     static {
+        handlerMapping.add(new HomePageMapping());
         handlerMapping.add(new StaticFileMapping());
         handlerMapping.add(new LoginMapping());
         handlerMapping.add(new LoginPageMapping());

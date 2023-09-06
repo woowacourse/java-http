@@ -27,7 +27,7 @@ public class LoginController extends AbstractPathController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final String account = request.getParameter(ACCOUNT_KEY);
         final String password = request.getParameter(PASSWORD_KEY);
 
@@ -42,6 +42,7 @@ public class LoginController extends AbstractPathController {
         final HttpCookie cookie = HttpCookie.fromSessionId(session.getId());
 
         response.addCookie(cookie);
+        response.sendRedirect("/index.html");
     }
 
     private boolean isInvalidQueryParameter(final String targetParameter) {
@@ -49,7 +50,7 @@ public class LoginController extends AbstractPathController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final HttpSession session = request.getSession(false);
 
         if (session != null) {
@@ -57,7 +58,7 @@ public class LoginController extends AbstractPathController {
 
             if (user != null) {
                 response.sendRedirect("/index.html");
-                return;
+                return ;
             }
         }
         response.sendRedirect("/login.html");

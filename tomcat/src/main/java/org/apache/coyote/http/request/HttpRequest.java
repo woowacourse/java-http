@@ -41,4 +41,8 @@ public class HttpRequest {
     public String getParameter(final String name) {
         return request.findParameterValue(name);
     }
+
+    public Request request() {
+        return request;
+    }
 }

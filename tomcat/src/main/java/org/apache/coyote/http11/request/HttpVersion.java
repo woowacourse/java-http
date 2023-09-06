@@ -23,4 +23,8 @@ public enum HttpVersion {
 			.findAny()
 			.orElseThrow(NoSuchElementException::new);
 	}
+
+	public String getContent() {
+		return content;
+	}
 }

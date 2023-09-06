@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import static org.apache.coyote.http11.headers.HttpHeaderType.*;
+import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
 
 import java.io.File;
@@ -13,7 +14,6 @@ import java.util.UUID;
 import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.headers.HttpHeaders;
-import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -67,7 +67,7 @@ public class LoginHandler implements HttpHandler {
 		//user가 없는 경우 예외처리 고민하기
 		log.info(user.toString());
 		final String body = "";
-		final HttpHeaders headers = resolveHeader(body);
+		final HttpHeaders headers = HttpHeaders.of(body, HTML);
 		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
 		return new HttpResponse(
 			TEMPORARILY_MOVED_302,
@@ -84,7 +84,7 @@ public class LoginHandler implements HttpHandler {
 			return new HttpResponse(
 				OK_200,
 				body,
-				resolveHeader(body)
+				HttpHeaders.of(body, HTML)
 			);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -112,7 +112,7 @@ public class LoginHandler implements HttpHandler {
 
 	private static HttpResponse loginSuccessResponse(final User user, final HttpRequest request) {
 		final String body = "";
-		final HttpHeaders headers = resolveHeader(body);
+		final HttpHeaders headers = HttpHeaders.of(body, HTML);
 		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
 		if (!request.isExistJSessionId()) {
 			issueJSessionId(user, headers);
@@ -130,12 +130,5 @@ public class LoginHandler implements HttpHandler {
 		session.setAttributes(SESSION_USER_KEY, user);
 		SessionManager.add(session);
 		headers.put(SET_COOKIE.getValue(), JSESSIONID_KEY + jSessionId);
-	}
-
-	private static HttpHeaders resolveHeader(final String body) {
-		final HttpHeaders headers = new HttpHeaders();
-		headers.put(CONTENT_TYPE.getValue(), MimeType.HTML.getValue());
-		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
-		return headers;
 	}
 }

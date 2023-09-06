@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestBody {
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final String NEXT_SIGN = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final Map<String, String> values;
 
@@ -20,10 +24,10 @@ public class RequestBody {
             return new RequestBody();
         }
         HashMap<String, String> values = new HashMap<>();
-        String[] keyAndValue = body.split("&");
+        String[] keyAndValue = body.split(NEXT_SIGN);
         for (String element : keyAndValue) {
-            String[] split = element.split("=");
-            values.put(split[0], split[1]);
+            String[] split = element.split(KEY_VALUE_DELIMITER);
+            values.put(split[KEY_INDEX], split[VALUE_INDEX]);
         }
         return new RequestBody(values);
     }

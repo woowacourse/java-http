@@ -21,17 +21,21 @@ public class Request {
 
     private final HttpCookie httpCookie;
 
+    private final Session session;
+
     private final String body;
 
     public Request(final RequestLine requestLine,
                    final Headers headers,
                    final RequestParameters requestParameters,
                    final HttpCookie httpCookie,
+                   final Session session,
                    final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestParameters = requestParameters;
         this.httpCookie = httpCookie;
+        this.session = session;
         this.body = body;
     }
 
@@ -51,7 +55,10 @@ public class Request {
         final String cookieHeader = headers.getValue(COOKIE);
         final HttpCookie httpCookie = HttpCookie.from(cookieHeader);
 
-        return new Request(requestLine, headers, requestParameters, httpCookie, body);
+        final String jsessionid = httpCookie.findCookie("JSESSIONID");
+        final Session session = SessionManager.findSession(jsessionid);
+
+        return new Request(requestLine, headers, requestParameters, httpCookie, session, body);
     }
 
     private static String getBody(final BufferedReader bufferedReader, final Headers headers) throws IOException {
@@ -105,6 +112,10 @@ public class Request {
 
     public HttpCookie getHttpCookie() {
         return httpCookie;
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     public String getBody() {

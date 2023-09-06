@@ -4,11 +4,9 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.request.Session;
-import org.apache.coyote.http11.request.SessionManager;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +18,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 
-import static org.apache.coyote.http11.header.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.http11.request.RequestMethod.GET;
 import static org.apache.coyote.http11.request.RequestMethod.POST;
 import static org.apache.coyote.http11.response.Response.getUnauthorizedResponse;
@@ -53,8 +49,8 @@ public class Http11Processor implements Runnable, Processor {
             final Request request = Request.from(bufferedReader);
 
             final Response response = handle(request);
-            response.decideContentType(request);
-            response.decideContentLength();
+
+            response.decideHeaders(request);
 
             outputStream.write(response.parseString().getBytes());
             outputStream.flush();
@@ -80,40 +76,31 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
-            final String jSessionIdName = "JSESSIONID";
-            final String userSessionKey = "user";
-            if (request.getHttpCookie().existCookie(jSessionIdName)) {
-                final String jSessionIdValue = request.getHttpCookie().findCookie(jSessionIdName);
-                if (!SessionManager.existSession(jSessionIdValue)) {
-                    final Session session = new Session(jSessionIdValue);
-                    SessionManager.add(session);
-                }
-                final Session session = SessionManager.findSession(jSessionIdValue);
-                final User user = (User) session.getAttribute(userSessionKey);
-                if (user == null) {
-                    return Response.getRedirectResponse("index.html");
-                }
+            final Session session = request.getSession();
+            final User user = (User) session.getAttribute("user");
+            if (user == null) {
+                // TODO: 9/6/23 GET POST 나누고 이 부분 login으로 리다이렉토로 변경
                 return Response.getRedirectResponse("index.html");
             }
-
             final String account = requestParameters.getValue("account");
             if (account == null) {
+                // TODO: 9/6/23 /login으로 변경 필요
                 return findStaticResource("/login.html");
             }
+
             final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account);
             if (maybeUser.isEmpty()) {
                 return getUnauthorizedResponse();
             }
-            final User user = maybeUser.get();
-            if (!user.checkPassword(requestParameters.getValue("password"))) {
+            final User findUser = maybeUser.get();
+            if (!findUser.checkPassword(requestParameters.getValue("password"))) {
                 return getUnauthorizedResponse();
             }
-            log.info("user: {}", user);
+            log.info("user: {}", findUser);
 
-            final Response redirectResponse = Response.getRedirectResponse("index.html");
-            // TODO: 9/6/23 getHeader 메서드 삭제가하거나 방어적 복사로 헤더 외부에서 변경 불가능하도록 변경
-            final Session session = getSession(request, redirectResponse.getHeaders());
-            session.setAttribute(userSessionKey, user);
+            session.setAttribute("user", findUser);
+
+            return Response.getRedirectResponse("index.html");
         }
 
         if ("/register".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
@@ -132,19 +119,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return Response.getNotFoundResponse();
-    }
-
-    private Session getSession(final Request request, final Headers headers) {
-        final String jSessionIdName = "JSESSIONID";
-        if (!request.getHttpCookie().existCookie(jSessionIdName)) {
-            final String sessionId = UUID.randomUUID().toString();
-            final Session session = new Session(sessionId);
-            SessionManager.add(session);
-            headers.addHeader(SET_COOKIE, jSessionIdName + "=" + sessionId);
-            return session;
-        }
-        final String name = request.getHttpCookie().findCookie(jSessionIdName);
-        return SessionManager.findSession(request.getHttpCookie().findCookie(name));
     }
 
     private Response findStaticResource(final String requestUri) throws IOException, URISyntaxException {

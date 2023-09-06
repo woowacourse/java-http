@@ -7,6 +7,10 @@ public class HttpCookie {
 
     private final Map<String, String> httpCookie;
 
+    public HttpCookie() {
+        this(new HashMap<>());
+    }
+
     private HttpCookie(final Map<String, String> httpCookie) {
         this.httpCookie = httpCookie;
     }
@@ -21,8 +25,8 @@ public class HttpCookie {
         final String[] cookies = cookieHeader.split(";");
         for (String cookie : cookies) {
             final String[] cookieNameAndValue = cookie.trim().split("=");
-            final String cookieName = cookieNameAndValue[0];
-            final String cookieValue = cookieNameAndValue[1];
+            final String cookieName = cookieNameAndValue[0].toLowerCase();
+            final String cookieValue = cookieNameAndValue[1].toLowerCase();
             httpCookie.put(cookieName, cookieValue);
         }
         return new HttpCookie(httpCookie);
@@ -39,10 +43,10 @@ public class HttpCookie {
     }
 
     public void addCookie(final String key, final String value) {
-        httpCookie.put(key, value);
+        httpCookie.put(key.toLowerCase(), value);
     }
 
-    public String findCookie(final String name) {
-        return httpCookie.getOrDefault(name, "");
+    public String findCookie(final String key) {
+        return httpCookie.getOrDefault(key.toLowerCase(), "");
     }
 }

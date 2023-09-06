@@ -3,11 +3,13 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.header.EntityHeader;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.RequestHeader;
-import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.Session;
+import org.apache.coyote.http11.request.SessionManager;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.header.ResponseHeader.LOCATION;
+import static org.apache.coyote.http11.header.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.http11.response.StatusCode.FOUND;
 
 public class Response {
@@ -46,7 +48,30 @@ public class Response {
         return new Response(new StatusLine(FOUND), unauthorizedHeaders, "");
     }
 
-    public void decideContentType(final Request request) {
+    public String parseString() {
+        return String.join("\r\n",
+                statusLine.parseResponse(),
+                headers.parseResponse(),
+                "",
+                body);
+    }
+
+    public void decideHeaders(final Request request) {
+        decideSetSession(request);
+        decideContentType(request);
+        decideContentLength();
+    }
+
+    private void decideSetSession(final Request request) {
+        final Session session = request.getSession();
+        if (session.isAvailable()) {
+            headers.addHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
+            return;
+        }
+        SessionManager.remove(session);
+    }
+
+    private void decideContentType(final Request request) {
         final String acceptHeaderValue = request.getHeaders().getValue(RequestHeader.ACCEPT);
         final String requestPath = request.getRequestLine().getRequestPath();
         final String contentTypeValue = decideResponseContentType(acceptHeaderValue, requestPath);
@@ -65,17 +90,9 @@ public class Response {
         return "text/html;charset=utf-8";
     }
 
-    public void decideContentLength() {
+    private void decideContentLength() {
         final byte[] bytes = body.getBytes();
         headers.addHeader(EntityHeader.CONTENT_LENGTH, String.valueOf(bytes.length));
-    }
-
-    public String parseString() {
-        return String.join("\r\n",
-                statusLine.parseResponse(),
-                headers.parseResponse(),
-                "",
-                body);
     }
 
     public StatusLine getStatusLine() {

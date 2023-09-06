@@ -17,6 +17,11 @@ public class SessionManager {
     }
 
     public static Session findSession(final String id) {
+        if (id == null || "".equals(id) || !SESSIONS.containsKey(id)) {
+            final Session session = new Session();
+            SESSIONS.put(session.getId(), session);
+            return session;
+        }
         return SESSIONS.get(id);
     }
 

@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         if (requestHeader.getHeaderValue("Content-Type") == null) {
             return null;
         }
-        int contentLength = Integer.valueOf(requestHeader.getHeaderValue("Content-Length"));
+        int contentLength = Integer.parseInt(requestHeader.getHeaderValue("Content-Length"));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);

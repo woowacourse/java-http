@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class RequestHeader {
-    final private Map<String, String> headers;
+    private final Map<String, String> headers;
 
     public RequestHeader(final Map<String, String> headers) {
         this.headers = headers;

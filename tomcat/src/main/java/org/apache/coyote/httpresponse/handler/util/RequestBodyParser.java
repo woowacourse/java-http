@@ -6,6 +6,9 @@ import org.apache.coyote.httprequest.RequestBody;
 
 public class RequestBodyParser {
 
+    private RequestBodyParser() {
+    }
+
     public static User parse(final RequestBody requestBody) {
         final String content = requestBody.getContents();
         final QueryString parsedValue = QueryString.from(content);

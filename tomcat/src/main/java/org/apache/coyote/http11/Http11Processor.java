@@ -1,10 +1,12 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.ContentType.TEXT_CSS;
+import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
+import static org.apache.coyote.http11.HttpStatus.OK;
 import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
 import java.io.BufferedReader;
@@ -82,26 +84,38 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (httpRequest.method() == GET) {
             if (httpRequest.uri().equals("/")) {
-                return HttpResponse.ok("Hello world!");
+                return HttpResponse.status(OK)
+                        .body("Hello world!")
+                        .contentType(TEXT_HTML)
+                        .build();
             }
             if (httpRequest.uri().equals("/login")) {
                 Optional<String> jsessionid = httpRequest.getCookie(JSESSIONID);
                 if (jsessionid.isPresent()) {
                     return loginWithSession(jsessionid.get());
                 }
-                return HttpResponse.ok(resourceLoader.loadResourceAsString("static/login.html"));
+                return HttpResponse.status(OK)
+                        .body(resourceLoader.loadResourceAsString("static/login.html"))
+                        .contentType(TEXT_HTML)
+                        .build();
             }
             if (httpRequest.uri().equals("/register")) {
-                return HttpResponse.ok(resourceLoader.loadResourceAsString("static/register.html"));
+                return HttpResponse.status(OK)
+                        .body(resourceLoader.loadResourceAsString("static/register.html"))
+                        .contentType(TEXT_HTML)
+                        .build();
             }
-
-            HttpResponse httpResponse =
-                    HttpResponse.ok(resourceLoader.loadResourceAsString("static" + httpRequest.uri()));
             Optional<String> acceptHeader = httpRequest.getHeader("Accept");
             if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
-                httpResponse.setContentType(TEXT_CSS);
+                return HttpResponse.status(OK)
+                        .body(resourceLoader.loadResourceAsString("static" + httpRequest.uri()))
+                        .contentType(TEXT_CSS)
+                        .build();
             }
-            return httpResponse;
+            return HttpResponse.status(OK)
+                    .body(resourceLoader.loadResourceAsString("static" + httpRequest.uri()))
+                    .contentType(TEXT_HTML)
+                    .build();
         }
         throw new HttpException(BAD_REQUEST, "지원되지 않는 요청입니다");
     }
@@ -117,23 +131,24 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        HttpResponse httpResponse = HttpResponse.from(FOUND);
-        httpResponse.sendRedirect(INDEX_HTML);
-        return httpResponse;
+        return HttpResponse.status(FOUND)
+                .redirectUri(INDEX_HTML)
+                .build();
     }
 
     private HttpResponse loginWithSession(String jsessionid) {
         SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.findSession(jsessionid)
                 .orElseThrow(() -> new HttpException(UNAUTHORIZED, "잘못된 세션 아이디입니다"));
-        session.getAttribute("user")
-                .orElseThrow(() -> new HttpException(UNAUTHORIZED, "세션에 회원정보가 존재하지 않습니다"));
-        HttpResponse httpResponse = HttpResponse.from(FOUND);
-        httpResponse.sendRedirect(INDEX_HTML);
-        return httpResponse;
+        if (session.getAttribute("user").isEmpty()) {
+            throw new HttpException(UNAUTHORIZED, "세션에 회원정보가 존재하지 않습니다");
+        }
+        return HttpResponse.status(FOUND)
+                .redirectUri(INDEX_HTML)
+                .build();
     }
 
-    private HttpResponse login(HttpRequest httpRequest) throws IOException {
+    private HttpResponse login(HttpRequest httpRequest) {
         FormData formData = FormData.from(httpRequest.getBody());
         String account = formData.get("account");
         String password = formData.get("password");
@@ -145,15 +160,11 @@ public class Http11Processor implements Runnable, Processor {
             session.setAttribute("user", user.get());
             SessionManager sessionManager = new SessionManager();
             sessionManager.add(session);
-            return getRedirectResponseWithCookie(jsessionid);
+            return HttpResponse.status(FOUND)
+                    .redirectUri(INDEX_HTML)
+                    .cookie(JSESSIONID, jsessionid)
+                    .build();
         }
         throw new HttpException(UNAUTHORIZED, "아이디나 비밀번호를 확인해주세요");
-    }
-
-    private HttpResponse getRedirectResponseWithCookie(String jsessionid) {
-        HttpResponse httpResponse = HttpResponse.from(FOUND);
-        httpResponse.sendRedirect(INDEX_HTML);
-        httpResponse.addCookie(JSESSIONID, jsessionid);
-        return httpResponse;
     }
 }

@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpStatus.OK;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,41 +25,15 @@ public class HttpResponse {
     private final HttpCookie httpCookie;
     private final String body;
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String body) {
+    private HttpResponse(HttpStatus httpStatus, Map<String, String> headers, HttpCookie httpCookie, String body) {
         this.httpStatus = httpStatus;
         this.headers = headers;
-        this.httpCookie = HttpCookie.empty();
+        this.httpCookie = httpCookie;
         this.body = body;
     }
 
-    public static HttpResponse from(HttpStatus httpStatus) {
-        return new HttpResponse(httpStatus, new LinkedHashMap<>(), EMPTY);
-    }
-
-    public static HttpResponse from(HttpStatus httpStatus, ContentType contentType, String body) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(CONTENT_TYPE, contentType.value());
-        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        return new HttpResponse(httpStatus, headers, body);
-    }
-
-    public static HttpResponse ok(String body) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(CONTENT_TYPE, ContentType.TEXT_HTML.value());
-        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        return new HttpResponse(OK, headers, body);
-    }
-
-    public void setContentType(ContentType contentType) {
-        headers.put(CONTENT_TYPE, contentType.value());
-    }
-
-    public void sendRedirect(String redirectUri) {
-        headers.put(LOCATION, redirectUri);
-    }
-
-    public void addCookie(String cookieName, String cookieValue) {
-        httpCookie.addCookie(cookieName, cookieValue);
+    public static Builder status(HttpStatus httpStatus) {
+        return new Builder(httpStatus);
     }
 
     public byte[] getBytes() {
@@ -82,5 +54,53 @@ public class HttpResponse {
                 .map(key -> key + COLON + headers.get(key) + BLANK)
                 .collect(Collectors.toList());
         return String.join(SEPARATOR, formattedHeaders);
+    }
+
+    public static class Builder {
+
+        private final HttpStatus httpStatus;
+        private final HttpCookie httpCookie;
+        private ContentType contentType;
+        private String redirectUri;
+        private String body;
+
+        private Builder(HttpStatus httpStatus) {
+            this.httpStatus = httpStatus;
+            httpCookie = HttpCookie.empty();
+        }
+
+        public Builder contentType(ContentType contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+
+        public Builder redirectUri(String redirectUri) {
+            this.redirectUri = redirectUri;
+            return this;
+        }
+
+        public Builder cookie(String name, String value) {
+            httpCookie.addCookie(name, value);
+            return this;
+        }
+
+        public Builder body(String body) {
+            this.body = body;
+            return this;
+        }
+
+        public HttpResponse build() {
+            Map<String, String> headers = new LinkedHashMap<>();
+            if (contentType != null) {
+                headers.put(CONTENT_TYPE, contentType.value());
+            }
+            if (redirectUri != null) {
+                headers.put(LOCATION, redirectUri);
+            }
+            if (body != null) {
+                headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+            }
+            return new HttpResponse(httpStatus, headers, httpCookie, body);
+        }
     }
 }

@@ -13,6 +13,9 @@ public class ExceptionHandler {
         int code = httpStatus.statusCode();
         ResourceLoader resourceLoader = new ResourceLoader();
         String body = resourceLoader.loadResourceAsString(String.format(RESOURCE_PATH_FORMAT, code));
-        return HttpResponse.from(httpStatus, TEXT_HTML, body);
+        return HttpResponse.status(httpStatus)
+                .contentType(TEXT_HTML)
+                .body(body)
+                .build();
     }
 }

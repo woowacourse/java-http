@@ -1,5 +1,8 @@
 package org.apache.coyote.http.response;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.util.HeaderDto;
@@ -11,7 +14,7 @@ public class Response {
     private final HttpVersion version;
     private final HttpStatusCode statusCode;
     private final HttpResponseHeaders headers;
-    private final HttpCookie cookie;
+    private final List<HttpCookie> cookies;
     private final String body;
 
     private Response(
@@ -20,20 +23,20 @@ public class Response {
             final HttpResponseHeaders headers,
             final String body
     ) {
-        this(version, statusCode, headers, HttpCookie.EMPTY, body);
+        this(version, statusCode, headers, Collections.emptyList(), body);
     }
 
     private Response(
             final HttpVersion version,
             final HttpStatusCode statusCode,
             final HttpResponseHeaders headers,
-            final HttpCookie cookie,
+            final List<HttpCookie> cookies,
             final String body
     ) {
         this.version = version;
         this.statusCode = statusCode;
         this.headers = headers;
-        this.cookie = cookie;
+        this.cookies = cookies;
         this.body = body;
     }
 
@@ -54,26 +57,27 @@ public class Response {
             final HttpStatusCode statusCode,
             final ContentType contentType,
             final String body,
-            final HttpCookie cookie,
+            final List<HttpCookie> cookies,
             final HeaderDto... headerContents
     ) {
         final HttpResponseHeaders headers = HttpResponseHeaders.of(contentType, body, headerContents);
 
-        return new Response(request.version(), statusCode, headers, cookie, body);
+        return new Response(request.version(), statusCode, headers, cookies, body);
     }
 
     public String convertResponseMessage() {
-        if (HttpCookie.EMPTY.equals(cookie)) {
+        if (cookies.isEmpty()) {
             return String.join(HttpConsts.CRLF,
                     convertStartLine(),
                     headers.convertHeaders(),
                     HttpConsts.BLANK,
                     body);
         }
+
         return String.join(HttpConsts.CRLF,
                 convertStartLine(),
                 headers.convertHeaders(),
-                cookie.convertHeaders(),
+                convertCookies(),
                 HttpConsts.BLANK,
                 body);
     }
@@ -82,5 +86,7 @@ public class Response {
         return version.versionContent() + HttpConsts.SPACE + statusCode.convertHttpStatusMessage() + HttpConsts.SPACE;
     }
 
-
+    private String convertCookies() {
+        return cookies.stream().map(HttpCookie::convertHeaders).collect(Collectors.joining(HttpConsts.CRLF));
+    }
 }

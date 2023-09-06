@@ -32,7 +32,7 @@ public class StaticFileMapping implements HandlerMapping {
         if ("/".equals(requestUri)) {
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.HTML.getValue())))
+                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.TEXT.getValue())))
                     .body(new HttpBody("Hello world!"))
                     .build();
         }

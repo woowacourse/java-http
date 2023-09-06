@@ -2,6 +2,7 @@ package org.apache.coyote.http.response;
 
 public enum ContentType {
 
+    TEXT("text/plain;charset=utf-8"),
     HTML("text/html;charset=utf-8"),
     CSS("text/css;charset=utf-8"),
     JS("text/javascript;charset=utf-8"),

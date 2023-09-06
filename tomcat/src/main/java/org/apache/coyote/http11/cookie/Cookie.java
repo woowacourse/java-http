@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class Cookie {
 
-    public static final String DATA_SEPARATOR = "; ";
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
+    private static final String DATA_SEPARATOR = "; ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private static String NAME = "Cookie";
 
     private Map<String, String> values;

@@ -13,9 +13,11 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class RegisterPageController implements Controller {
 
+    private static final String PATH = "/register";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return "/register".equals(httpRequest.getPath())
+        return PATH.equals(httpRequest.getPath())
                 && HttpMethod.GET == httpRequest.getHttpMethod();
     }
 

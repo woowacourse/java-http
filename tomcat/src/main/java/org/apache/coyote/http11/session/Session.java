@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class Session {
 
-    private static String NAME = "JSESSIONID";
+    private static final String NAME = "JSESSIONID";
 
     private final String id;
     private final Map<String, Object> values = new HashMap<>();

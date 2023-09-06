@@ -16,9 +16,11 @@ import org.apache.coyote.http11.session.SessionManager;
 
 public class LoginPageController implements Controller {
 
+    private static final String PATH = "/login";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return "/login".equals(httpRequest.getPath())
+        return PATH.equals(httpRequest.getPath())
                 && HttpMethod.GET == httpRequest.getHttpMethod();
     }
 

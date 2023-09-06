@@ -21,10 +21,13 @@ import org.slf4j.LoggerFactory;
 public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String PATH = "/login";
+    private static final String INDEX_PAGE_PATH = "/index.html";
+    private static final String UNAUTHORIZED_PAGE_PATH = "/401.html";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return "/login".equals(httpRequest.getPath())
+        return PATH.equals(httpRequest.getPath())
                 && HttpMethod.POST == httpRequest.getHttpMethod();
     }
 
@@ -40,17 +43,16 @@ public class LoginController implements Controller {
 
             final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
             if (extractSessionId(httpRequest) == null) {
-                log.info("세션이 없지롱");
                 final Session session = createSession(user);
                 httpResponse.addHeader(SET_COOKIE, Session.getName() + "=" + session.getId());
             }
-            httpResponse.addHeader(LOCATION, "/index.html");
+            httpResponse.addHeader(LOCATION, INDEX_PAGE_PATH);
 
             return httpResponse;
         } catch (IllegalArgumentException exception) {
             log.info("login fail! : " + exception.getMessage());
             final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
-            httpResponse.addHeader(LOCATION, "/401.html");
+            httpResponse.addHeader(LOCATION, UNAUTHORIZED_PAGE_PATH);
             return httpResponse;
         }
     }

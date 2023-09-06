@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.coyote.http11.common.HttpVersion;
 import org.apache.coyote.http11.common.Session;
@@ -69,12 +68,9 @@ public class RequestHandler {
     }
 
     private Response handleLoginPage() {
-        final Session session = request.getSession(false);
-        if (Objects.isNull(session)) {
+        if (request.hasUserInSession()) {
             return getStaticPateResponse(LOGIN_HTML, OK);
         }
-        final User user = (User) session.get("user");
-        LOGGER.info("user {}", user);
         return Response.generateRedirectResponse(INDEX_HTML);
     }
 
@@ -131,7 +127,7 @@ public class RequestHandler {
     private Response successLogin(final User user) {
         LOGGER.info("user {}", user);
         final Response response = Response.generateRedirectResponse(INDEX_HTML);
-        Session session = request.getSession(true);
+        Session session = request.getSession();
         session.put("user", user);
         response.setCookie(String.join(KEY_VALUE_DELIMITER, JSESSIONID, session.getId()));
         return response;

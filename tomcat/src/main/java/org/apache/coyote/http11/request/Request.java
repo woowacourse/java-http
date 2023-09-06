@@ -16,6 +16,7 @@ import nextstep.jwp.model.User;
 
 public class Request {
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String JSESSIONID = "JSESSIONID";
     private final RequestLine line;
     private final RequestHeader header;
     private final RequestBody body;
@@ -54,14 +55,35 @@ public class Request {
         return body.parseToUser();
     }
 
-    public Session getSession(final boolean isNew) {
-        if (isNew) {
+
+
+    public Session getSession() {
+        if (hasSession()) {
             final Session session = Session.generate();
             sessionManager.add(session.getId(), session);
             return session;
         }
-        final String jsessionid = cookie.findByKey("JSESSIONID");
+        final String jsessionid = cookie.findByKey(JSESSIONID);
         return sessionManager.getById(jsessionid);
+    }
+
+    private boolean hasSession() {
+        final String jsessionid = cookie.findByKey(JSESSIONID);
+        return !Objects.isNull(jsessionid);
+    }
+
+    public boolean hasUserInSession() {
+        final String jsessionid = cookie.findByKey(JSESSIONID);
+        if (Objects.isNull(jsessionid)) {
+            return false;
+        }
+
+        final Session session = sessionManager.getById(jsessionid);
+        if (Objects.isNull(session)) {
+            return false;
+        }
+
+        return !Objects.isNull(session.get("user"));
     }
 
     public RequestLine getLine() {

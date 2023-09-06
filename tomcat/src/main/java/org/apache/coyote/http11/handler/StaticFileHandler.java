@@ -5,11 +5,10 @@ import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.apache.coyote.http11.common.HttpStatus.FOUND;
 import static org.apache.coyote.http11.common.HttpStatus.OK;
@@ -47,8 +46,7 @@ public class StaticFileHandler {
     private static String findResponseBody(final String requestURI) throws IOException {
         try {
             URL requestedFile = ClassLoader.getSystemClassLoader().getResource("static" + requestURI);
-            Path path = Paths.get(requestedFile.getPath());
-            return String.valueOf(Files.readAllBytes(path));
+            return new String(Files.readAllBytes(new File(requestedFile.getFile()).toPath()));
         } catch (NullPointerException e) {
             throw new NotExistFileException();
         }

@@ -96,7 +96,7 @@ public class PathRequestHandler implements RequestHandler {
             if (cookieValues.containsKey(SESSION_COOKIE_KEY)) {
                 final String sessionId = cookieValues.get(SESSION_COOKIE_KEY);
 
-                return InMemorySessionRepository.isExist(new Session(sessionId));
+                return InMemorySessionRepository.isExist(new Session(sessionId.strip()));
             }
         }
         return false;

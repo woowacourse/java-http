@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.SessionManager;
-import org.apache.coyote.http.util.HttpMethod;
-import org.apache.coyote.http.util.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -14,17 +12,8 @@ class HttpRequestTest {
     @Test
     void 생성자는_Request를_전달하면_HttpRequest를_초기화한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/index.html");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
 
         final HttpRequest actual = new HttpRequest(request);
 
@@ -34,17 +23,8 @@ class HttpRequestTest {
     @Test
     void getHeader_메서드는_전달한_헤더_이름의_값을_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/index.html");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final HttpRequest httpRequest = new HttpRequest(request);
 
         final String actual = httpRequest.getHeader("Content-Type");
@@ -58,14 +38,10 @@ class HttpRequestTest {
         final HttpSession expected = new HttpSession();
         sessionManager.add(expected);
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8 \r\n Cookie: JSESSIONID=" + expected.getId());
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/index.html");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(
                 headers,
-                method,
-                version,
-                url,
+                requestLine,
                 HttpRequestBody.EMPTY,
                 Parameters.EMPTY,
                 HttpCookie.fromSessionId(expected.getId())
@@ -81,17 +57,8 @@ class HttpRequestTest {
     @Test
     void 파라미터가_없는_getSession_메서드는_세션이_없으면_세션을_생성해_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/index.html");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         request.initSessionManager(new SessionManager());
         final HttpRequest httpRequest = new HttpRequest(request);
 
@@ -106,14 +73,10 @@ class HttpRequestTest {
         final HttpSession expected = new HttpSession();
         sessionManager.add(expected);
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8 \r\n Cookie: JSESSIONID=" + expected.getId());
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/index.html");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
         final Request request = new Request(
                 headers,
-                method,
-                version,
-                url,
+                requestLine,
                 HttpRequestBody.EMPTY,
                 Parameters.EMPTY,
                 HttpCookie.fromSessionId(expected.getId())
@@ -129,17 +92,8 @@ class HttpRequestTest {
     @Test
     void getSession_메서드에_false를_전달하면_세션이_없으면_null을_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/index.html");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         request.initSessionManager(new SessionManager());
         final HttpRequest httpRequest = new HttpRequest(request);
 
@@ -151,14 +105,10 @@ class HttpRequestTest {
     @Test
     void getParameter_메서드는_전달한_파라미터_이름의_값을_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/login?user=gugu");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
+        final RequestLine requestLine = RequestLine.from("GET /login?user=gugu HTTP/1.1");
         final Request request = new Request(
                 headers,
-                method,
-                version,
-                url,
+                requestLine,
                 HttpRequestBody.EMPTY,
                 Parameters.fromUrlContent("?user=gugu")
         );

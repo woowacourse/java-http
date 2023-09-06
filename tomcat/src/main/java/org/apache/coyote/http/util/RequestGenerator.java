@@ -7,28 +7,22 @@ import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
-import org.apache.coyote.http.request.Url;
+import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.util.exception.InvalidRequestBodyException;
 
 public class RequestGenerator {
 
-    private static final int START_LINE_METHOD_INDEX = 0;
-    private static final int START_LINE_URL_INDEX = 1;
-    private static final int START_LINE_HTTP_VERSION = 2;
     private static final int INVALID_READ_COUNT = -1;
 
     public Request generate(final BufferedReader bufferedReader) throws IOException {
-        final String[] startLineTokens = bufferedReader.readLine()
-                                                       .split(HttpConsts.SPACE);
-        final HttpMethod httpMethod = HttpMethod.findMethod(startLineTokens[START_LINE_METHOD_INDEX]);
-        final Url url = Url.from(startLineTokens[START_LINE_URL_INDEX]);
-        final HttpVersion httpVersion = HttpVersion.findVersion(startLineTokens[START_LINE_HTTP_VERSION]);
+        final String requestLineContent = bufferedReader.readLine();
+        final RequestLine requestLine = RequestLine.from(requestLineContent);
         final HttpRequestHeaders headers = readRequestHeaders(bufferedReader);
         final HttpRequestBody body = readRequestBody(bufferedReader, headers);
-        final Parameters parameters = readQueryParameters(url, body);
+        final Parameters parameters = readQueryParameters(requestLine, body);
         final HttpCookie cookie = convertCookie(headers);
 
-        return new Request(headers, httpMethod, httpVersion, url, body, parameters, cookie);
+        return new Request(headers, requestLine, body, parameters, cookie);
     }
 
     private HttpRequestHeaders readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -68,8 +62,8 @@ public class RequestGenerator {
         return new HttpRequestBody(bodyContent);
     }
 
-    private Parameters readQueryParameters(final Url url, final HttpRequestBody body) {
-        final String content = url.url();
+    private Parameters readQueryParameters(final RequestLine requestLine, final HttpRequestBody body) {
+        final String content = requestLine.url().url();
         final Parameters parameters = Parameters.fromUrlContent(content);
 
         if (parameters != Parameters.EMPTY || body.isEmpty()) {

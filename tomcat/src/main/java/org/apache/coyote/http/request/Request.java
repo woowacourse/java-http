@@ -9,9 +9,7 @@ import org.apache.coyote.http.util.HttpVersion;
 public class Request {
 
     private final HttpRequestHeaders headers;
-    private final HttpMethod method;
-    private final HttpVersion version;
-    private final Url url;
+    private final RequestLine requestLine;
     private final HttpRequestBody body;
     private final Parameters parameters;
     private final HttpCookie cookie;
@@ -19,28 +17,22 @@ public class Request {
 
     public Request(
             final HttpRequestHeaders headers,
-            final HttpMethod method,
-            final HttpVersion version,
-            final Url url,
+            final RequestLine requestLine,
             final HttpRequestBody body,
             final Parameters parameters
     ) {
-        this(headers, method, version, url, body, parameters, HttpCookie.EMPTY);
+        this(headers, requestLine, body, parameters, HttpCookie.EMPTY);
     }
 
     public Request(
             final HttpRequestHeaders headers,
-            final HttpMethod method,
-            final HttpVersion version,
-            final Url url,
+            final RequestLine requestLine,
             final HttpRequestBody body,
             final Parameters parameters,
             final HttpCookie cookie
     ) {
         this.headers = headers;
-        this.method = method;
-        this.version = version;
-        this.url = url;
+        this.requestLine = requestLine;
         this.body = body;
         this.parameters = parameters;
         this.cookie = cookie;
@@ -59,23 +51,23 @@ public class Request {
     }
 
     public boolean matchesByMethod(final HttpMethod method) {
-        return this.method.matches(method);
+        return requestLine.matchesByMethod(method);
     }
 
     public boolean matchesByPathExcludingContextPath(final String targetPath, final String contextPath) {
-        return url.matchesByPathExcludingContextPath(targetPath, contextPath);
+        return requestLine.matchesByPathExcludingContextPath(targetPath, contextPath);
     }
 
     public boolean matchesByContextPath(final String contextPath) {
-        return url.startsWithContextPath(contextPath);
+        return requestLine.matchesByContextPath(contextPath);
     }
 
     public boolean isWelcomePageRequest(final String contextPath) {
-        return url.isWelcomePageUrl(contextPath);
+        return requestLine.isWelcomePageRequest(contextPath);
     }
 
     public boolean isStaticResource() {
-        return url.isStaticResource();
+        return requestLine.isStaticResource();
     }
 
     public boolean hasQueryParameters() {
@@ -83,15 +75,15 @@ public class Request {
     }
 
     public HttpVersion version() {
-        return version;
+        return requestLine.version();
     }
 
     public String url() {
-        return url.url();
+        return requestLine.url().url();
     }
 
     public String resourceName() {
-        return url.resourceName();
+        return requestLine.url().resourceName();
     }
 
     public HttpSession getSession(final boolean create) {

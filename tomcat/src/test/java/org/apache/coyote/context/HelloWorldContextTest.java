@@ -4,17 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import nextstep.handler.WelcomeHandler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
-import nextstep.handler.WelcomeHandler;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
-import org.apache.coyote.http.request.Url;
+import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.response.Response;
-import org.apache.coyote.http.util.HttpMethod;
-import org.apache.coyote.http.util.HttpVersion;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -52,17 +50,8 @@ class HelloWorldContextTest {
     @Test
     void supports_메서드는_rootContextPath에_해당하는_request면_true를_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final HelloWorldContext context = new HelloWorldContext("/");
 
         final boolean actual = context.supports(request);
@@ -73,17 +62,8 @@ class HelloWorldContextTest {
     @Test
     void supports_메서드는_rootContextPath에_해당하지_않는_request면_false를_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final HelloWorldContext context = new HelloWorldContext("/hello");
 
         final boolean actual = context.supports(request);
@@ -94,17 +74,8 @@ class HelloWorldContextTest {
     @Test
     void service_메서드는_주어진_요청을_처리하고_response를_반환한다() throws IOException {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final HelloWorldContext context = new HelloWorldContext("/");
         context.addHandler(new WelcomeHandler());
 

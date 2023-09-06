@@ -6,9 +6,7 @@ import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;
 import org.apache.coyote.http.request.Request;
-import org.apache.coyote.http.request.Url;
-import org.apache.coyote.http.util.HttpMethod;
-import org.apache.coyote.http.util.HttpVersion;
+import org.apache.coyote.http.request.RequestLine;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -20,17 +18,8 @@ class ResponseTest {
     @Test
     void of_메서드는_필요한_데이터를_전달하면_Response를_초기화한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final String body = "Hello World!";
 
         final Response actual = Response.of(request, HttpStatusCode.OK, ContentType.TEXT_HTML, body);
@@ -41,17 +30,8 @@ class ResponseTest {
     @Test
     void convertResponseMessage_메서드는_Response를_문자열로_변환해_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final HttpMethod method = HttpMethod.findMethod("get");
-        final Url url = Url.from("/");
-        final HttpVersion version = HttpVersion.findVersion("HTTP/1.1");
-        final Request request = new Request(
-                headers,
-                method,
-                version,
-                url,
-                HttpRequestBody.EMPTY,
-                Parameters.EMPTY
-        );
+        final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final String body = "Hello World!";
         final Response response = Response.of(request, HttpStatusCode.OK, ContentType.TEXT_HTML, body);
 

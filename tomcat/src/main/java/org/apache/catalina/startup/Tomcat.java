@@ -31,12 +31,12 @@ public class Tomcat {
         }
     }
 
-    public Container addContainer(final String rootContextPath) {
-        return addContainer(rootContextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
+    public Container addContainer(final String contextPath) {
+        return addContainer(contextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
     }
 
-    public Container addContainer(final String rootContextPath, final String staticResourcePath) {
-        final HelloWorldContext context = new HelloWorldContext(rootContextPath, staticResourcePath);
+    public Container addContainer(final String contextPath, final String staticResourcePath) {
+        final HelloWorldContext context = new HelloWorldContext(contextPath, staticResourcePath);
 
         this.containers.add(context);
 

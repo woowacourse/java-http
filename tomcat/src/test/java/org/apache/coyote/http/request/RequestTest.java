@@ -168,9 +168,9 @@ class RequestTest {
                 HttpRequestBody.EMPTY,
                 Parameters.EMPTY
         );
-        final String rootContextPath = "/";
+        final String contextPath = "/";
 
-        final boolean actual = request.matchesByRootContextPath(rootContextPath);
+        final boolean actual = request.matchesByRootContextPath(contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -189,9 +189,9 @@ class RequestTest {
                 HttpRequestBody.EMPTY,
                 Parameters.EMPTY
         );
-        final String rootContextPath = "/hello";
+        final String contextPath = "/hello";
 
-        final boolean actual = request.matchesByRootContextPath(rootContextPath);
+        final boolean actual = request.matchesByRootContextPath(contextPath);
 
         assertThat(actual).isFalse();
     }

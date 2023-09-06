@@ -59,12 +59,12 @@ public class Url {
         return target;
     }
 
-    public boolean matchesByPathExcludingRootContextPath(final String targetPath, final String rootContextPath) {
-        if (HttpConsts.SLASH.equals(rootContextPath)) {
+    public boolean matchesByPathExcludingRootContextPath(final String targetPath, final String contextPath) {
+        if (HttpConsts.SLASH.equals(contextPath)) {
             return path.equals(targetPath);
         }
 
-        final String[] pathTokens = path.split(rootContextPath);
+        final String[] pathTokens = path.split(contextPath);
 
         if (pathTokens.length < VALID_PATH_TOKEN_LENGTH) {
             return false;
@@ -73,8 +73,8 @@ public class Url {
         return targetPath.equals(pathTokens[pathTokens.length - 1]);
     }
 
-    public boolean isWelcomePageUrl(final String rootContextPath) {
-        return path.equals(rootContextPath);
+    public boolean isWelcomePageUrl(final String contextPath) {
+        return path.equals(contextPath);
     }
 
     public boolean isStaticResource() {
@@ -85,8 +85,8 @@ public class Url {
         return resourceName.contains(STATIC_RESOURCE_EXTENSION_SEPARATOR);
     }
 
-    public boolean startsWithRootContextPath(final String rootContextPath) {
-        return path.startsWith(rootContextPath);
+    public boolean startsWithRootContextPath(final String contextPath) {
+        return path.startsWith(contextPath);
     }
 
     public String url() {

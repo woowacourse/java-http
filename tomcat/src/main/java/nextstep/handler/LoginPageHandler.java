@@ -23,16 +23,16 @@ public class LoginPageHandler implements Handler {
     }
 
     @Override
-    public boolean supports(final Request request, final String rootContextPath) {
-        return isGetMethod(request) && isLoginPageRequest(request, rootContextPath);
+    public boolean supports(final Request request, final String contextPath) {
+        return isGetMethod(request) && isLoginPageRequest(request, contextPath);
     }
 
     private boolean isGetMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.GET);
     }
 
-    private boolean isLoginPageRequest(final Request request, final String rootContextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, rootContextPath);
+    private boolean isLoginPageRequest(final Request request, final String contextPath) {
+        return request.matchesByPathExcludingRootContextPath(path, contextPath);
     }
 
     @Override

@@ -22,10 +22,10 @@ class UrlTest {
     void matchesByPath_메서드는_path와_rootContextPath를_전달할때_path가_일치하면_true를_반환한다() {
         final String path = "/hello/login";
         final String equalTargetPath = "/login";
-        final String rootContextPath = "/hello";
+        final String contextPath = "/hello";
         final Url url = Url.from(path);
 
-        final boolean actual = url.matchesByPathExcludingRootContextPath(equalTargetPath, rootContextPath);
+        final boolean actual = url.matchesByPathExcludingRootContextPath(equalTargetPath, contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -34,10 +34,10 @@ class UrlTest {
     void matchesByPath_메서드는_path와_rootContextPath를_전달할때_path가_일치하지_않으면_false를_반환한다() {
         final String path = "/hello/login";
         final String notEqualTargetPath = "/loginabc";
-        final String rootContextPath = "/hello";
+        final String contextPath = "/hello";
         final Url url = Url.from(path);
 
-        final boolean actual = url.matchesByPathExcludingRootContextPath(notEqualTargetPath, rootContextPath);
+        final boolean actual = url.matchesByPathExcludingRootContextPath(notEqualTargetPath, contextPath);
 
         assertThat(actual).isFalse();
     }
@@ -45,10 +45,10 @@ class UrlTest {
     @Test
     void isWelcomePageUrl_메서드는_url이_welcome_page인_경우_true를_반환한다() {
         final String path = "/";
-        final String rootContextPath = "/";
+        final String contextPath = "/";
         final Url url = Url.from(path);
 
-        final boolean actual = url.isWelcomePageUrl(rootContextPath);
+        final boolean actual = url.isWelcomePageUrl(contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -56,10 +56,10 @@ class UrlTest {
     @Test
     void isWelcomePageUrl_메서드는_url이_welcome_page가_아닌_경우_false를_반환한다() {
         final String path = "/login";
-        final String rootContextPath = "/";
+        final String contextPath = "/";
         final Url url = Url.from(path);
 
-        final boolean actual = url.isWelcomePageUrl(rootContextPath);
+        final boolean actual = url.isWelcomePageUrl(contextPath);
 
         assertThat(actual).isFalse();
     }
@@ -88,9 +88,9 @@ class UrlTest {
     void startsWithRootContextPath_메서드는_path가_rootContextPath로_시작하면_true를_반환한다() {
         final String path = "/login";
         final Url url = Url.from(path);
-        final String rootContextPath = "/";
+        final String contextPath = "/";
 
-        final boolean actual = url.startsWithRootContextPath(rootContextPath);
+        final boolean actual = url.startsWithRootContextPath(contextPath);
 
         assertThat(actual).isTrue();
     }
@@ -99,9 +99,9 @@ class UrlTest {
     void startsWithRootContextPath_메서드는_path가_rootContextPath로_시작하지_않으면_false를_반환한다() {
         final String path = "/login";
         final Url url = Url.from(path);
-        final String rootContextPath = "/hello";
+        final String contextPath = "/hello";
 
-        final boolean actual = url.startsWithRootContextPath(rootContextPath);
+        final boolean actual = url.startsWithRootContextPath(contextPath);
 
         assertThat(actual).isFalse();
     }

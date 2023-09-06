@@ -12,16 +12,16 @@ public class WelcomeHandler implements Handler {
     private static final String WELCOME_PAGE_CONTENT = "Hello World!";
 
     @Override
-    public boolean supports(final Request request, final String rootContextPath) {
-        return isGetMethod(request) && isWelcomePageRequest(request, rootContextPath);
+    public boolean supports(final Request request, final String contextPath) {
+        return isGetMethod(request) && isWelcomePageRequest(request, contextPath);
     }
 
     private boolean isGetMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.GET);
     }
 
-    private boolean isWelcomePageRequest(final Request request, final String rootContextPath) {
-        return request.isWelcomePageRequest(rootContextPath);
+    private boolean isWelcomePageRequest(final Request request, final String contextPath) {
+        return request.isWelcomePageRequest(contextPath);
     }
 
     @Override

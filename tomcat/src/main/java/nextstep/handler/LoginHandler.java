@@ -29,16 +29,16 @@ public class LoginHandler implements Handler {
     }
 
     @Override
-    public boolean supports(final Request request, final String rootContextPath) {
-        return isPostMethod(request) && isLoginRequest(request, rootContextPath) && request.hasQueryParameters();
+    public boolean supports(final Request request, final String contextPath) {
+        return isPostMethod(request) && isLoginRequest(request, contextPath) && request.hasQueryParameters();
     }
 
     private boolean isPostMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.POST);
     }
 
-    private boolean isLoginRequest(final Request request, final String rootContextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, rootContextPath);
+    private boolean isLoginRequest(final Request request, final String contextPath) {
+        return request.matchesByPathExcludingRootContextPath(path, contextPath);
     }
 
     @Override

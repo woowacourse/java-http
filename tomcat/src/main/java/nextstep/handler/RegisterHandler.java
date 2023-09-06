@@ -28,16 +28,16 @@ public class RegisterHandler implements Handler {
     }
 
     @Override
-    public boolean supports(final Request request, final String rootContextPath) {
-        return isPostMethod(request) && isRegisterRequest(request, rootContextPath);
+    public boolean supports(final Request request, final String contextPath) {
+        return isPostMethod(request) && isRegisterRequest(request, contextPath);
     }
 
     private boolean isPostMethod(final Request request) {
         return request.matchesByMethod(HttpMethod.POST);
     }
 
-    private boolean isRegisterRequest(final Request request, final String rootContextPath) {
-        return request.matchesByPathExcludingRootContextPath(path, rootContextPath) && request.hasQueryParameters();
+    private boolean isRegisterRequest(final Request request, final String contextPath) {
+        return request.matchesByPathExcludingRootContextPath(path, contextPath) && request.hasQueryParameters();
     }
 
     @Override

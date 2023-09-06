@@ -22,34 +22,34 @@ public class HelloWorldContext implements Container {
     private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String DEFAULT_STATIC_RESOURCE_PATH_PREFIX = "static/";
 
-    private final String rootContextPath;
+    private final String contextPath;
     private final String staticResourcePath;
     private final List<Handler> handlers = new ArrayList<>();
     private final Handler resourceHandler;
 
-    public HelloWorldContext(final String rootContextPath) {
-        this(rootContextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
+    public HelloWorldContext(final String contextPath) {
+        this(contextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
     }
 
-    public HelloWorldContext(final String rootContextPath, final String staticResourcePath) {
-        this(rootContextPath, staticResourcePath, new ResourceHandler());
+    public HelloWorldContext(final String contextPath, final String staticResourcePath) {
+        this(contextPath, staticResourcePath, new ResourceHandler());
     }
 
     public HelloWorldContext(
-            final String rootContextPath,
+            final String contextPath,
             final String staticResourcePath,
             final Handler resourceHandler
     ) {
-        validateRootContextPath(rootContextPath);
+        validateRootContextPath(contextPath);
         validatePath(staticResourcePath);
 
-        this.rootContextPath = rootContextPath;
+        this.contextPath = contextPath;
         this.staticResourcePath = staticResourcePath;
         this.resourceHandler = resourceHandler;
     }
 
-    private void validateRootContextPath(final String rootContextPath) {
-        if (rootContextPath == null || !rootContextPath.startsWith(HttpConsts.SLASH)) {
+    private void validateRootContextPath(final String contextPath) {
+        if (contextPath == null || !contextPath.startsWith(HttpConsts.SLASH)) {
             throw new InvalidRootContextPathException();
         }
     }
@@ -62,7 +62,7 @@ public class HelloWorldContext implements Container {
 
     @Override
     public boolean supports(final Request request) {
-        return request.matchesByRootContextPath(rootContextPath);
+        return request.matchesByRootContextPath(contextPath);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class HelloWorldContext implements Container {
 
     private Response process(final Request request) throws IOException {
         for (final Handler handler : handlers) {
-            if (handler.supports(request, rootContextPath)) {
+            if (handler.supports(request, contextPath)) {
                 request.initSessionManager(SESSION_MANAGER);
                 return handler.service(request, staticResourcePath);
             }
@@ -86,7 +86,7 @@ public class HelloWorldContext implements Container {
     }
 
     private Response processStaticResources(final Request request) throws IOException {
-        if (resourceHandler.supports(request, rootContextPath)) {
+        if (resourceHandler.supports(request, contextPath)) {
             return resourceHandler.service(request, staticResourcePath);
         }
 

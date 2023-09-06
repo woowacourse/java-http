@@ -62,16 +62,16 @@ public class Request {
         return this.method.matches(method);
     }
 
-    public boolean matchesByPathExcludingRootContextPath(final String targetPath, final String rootContextPath) {
-        return url.matchesByPathExcludingRootContextPath(targetPath, rootContextPath);
+    public boolean matchesByPathExcludingRootContextPath(final String targetPath, final String contextPath) {
+        return url.matchesByPathExcludingRootContextPath(targetPath, contextPath);
     }
 
-    public boolean matchesByRootContextPath(final String rootContextPath) {
-        return url.startsWithRootContextPath(rootContextPath);
+    public boolean matchesByRootContextPath(final String contextPath) {
+        return url.startsWithRootContextPath(contextPath);
     }
 
-    public boolean isWelcomePageRequest(final String rootContextPath) {
-        return url.isWelcomePageUrl(rootContextPath);
+    public boolean isWelcomePageRequest(final String contextPath) {
+        return url.isWelcomePageUrl(contextPath);
     }
 
     public boolean isStaticResource() {

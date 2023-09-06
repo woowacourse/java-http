@@ -1,6 +1,5 @@
-package org.apache.coyote.httprequest;
+package org.apache.coyote.httprequest.header;
 
-import org.apache.coyote.httprequest.header.RequestHeaderType;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

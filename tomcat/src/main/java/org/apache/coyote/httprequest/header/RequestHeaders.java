@@ -42,7 +42,7 @@ public class RequestHeaders {
             if (!headerType.isUnsupportedHeader()) {
                 log.debug("\t\tHeader : {}", line);
                 headers.put(headerType, headerType.saveRequestHeader(headerValue.trim()));
-            }
+            } else log.trace("지원하지 않는 헤더 타입. 헤더 이름: {}, 헤더 값: {}", headerName, headerValue);
         }
         return new RequestHeaders(headers, cookieHeader);
     }

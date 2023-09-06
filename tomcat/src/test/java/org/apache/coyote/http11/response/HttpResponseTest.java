@@ -16,7 +16,6 @@ class HttpResponseTest {
         httpResponse.addHeader("Content-Type", "text/html; charset=utf-8");
         byte[] body = "Hello World".getBytes();
         httpResponse.setResponseBody(body);
-        httpResponse.addHeader("Content-Length", String.valueOf(body.length));
 
         var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html; charset=utf-8\r\n" +

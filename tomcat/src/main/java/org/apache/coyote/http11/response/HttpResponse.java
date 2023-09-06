@@ -7,28 +7,26 @@ public class HttpResponse {
 
     private static final String EMPTY_LINE = "";
     private static final String NEW_LINE = "\r\n";
-    private static final String COOKIES_DELIMITER = "; ";
-    private final HttpResponseCookies cookies;
-    private final HttpResponseHeaders headers;
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private final HttpResponseHeaders httpResponseHeaders;
     private HttpResponseStartLine httpResponseStartLine;
     private String responseBody;
 
     public HttpResponse() {
-        this.cookies = HttpResponseCookies.empty();
-        this.headers = HttpResponseHeaders.empty();
+        this.httpResponseHeaders = HttpResponseHeaders.empty();
     }
 
     public void sendRedirect(final String location) {
         httpResponseStartLine = HttpResponseStartLine.of(StatusCode.FOUND);
-        headers.add(HttpHeaders.LOCATION, location);
+        httpResponseHeaders.add(HttpHeaders.LOCATION, location);
     }
 
     public void addCookie(final String key, final String value) {
-        cookies.add(key, value);
+        httpResponseHeaders.add(HttpHeaders.SET_COOKIE, key + KEY_VALUE_DELIMITER + value);
     }
 
     public void addHeader(final String name, final String value) {
-        headers.add(name, value);
+        httpResponseHeaders.add(name, value);
     }
 
     public void setHttpResponseStartLine(final StatusCode statusCode) {
@@ -36,7 +34,7 @@ public class HttpResponse {
     }
 
     public void setResponseBody(final byte[] responseBody) {
-        headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.length));
+        httpResponseHeaders.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.length));
         this.responseBody = new String(responseBody);
     }
 
@@ -57,20 +55,9 @@ public class HttpResponse {
     }
 
     private String generateHeaders() {
-        String cookiesValue = generateCookies();
-        if (!cookiesValue.isBlank()) {
-            headers.add(HttpHeaders.SET_COOKIE, cookiesValue);
-        }
-        return headers.getEntrySet()
+        return httpResponseHeaders.getHeaders()
                 .stream()
                 .map(header -> String.format("%s: %s", header.getKey(), header.getValue()))
                 .collect(Collectors.joining(NEW_LINE));
-    }
-
-    private String generateCookies() {
-        return cookies.getEntrySet()
-                .stream()
-                .map(header -> String.format("%s=%s", header.getKey(), header.getValue()))
-                .collect(Collectors.joining(COOKIES_DELIMITER));
     }
 }

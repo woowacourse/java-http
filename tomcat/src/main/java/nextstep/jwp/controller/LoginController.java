@@ -43,9 +43,6 @@ public class LoginController extends AbstractController {
                 Session session = request.getSession();
                 session.setAttribute("user", user);
                 response.addCookie(JSESSIONID, request.getSession().getId());
-                response.addCookie("hello", request.getSession().getId());
-                response.addCookie("bye", request.getSession().getId());
-                response.addCookie("good", request.getSession().getId());
                 response.sendRedirect("/index.html");
                 return;
             }

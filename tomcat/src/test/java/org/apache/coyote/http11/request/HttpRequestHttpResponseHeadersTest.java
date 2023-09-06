@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class HttpRequestHeadersTest {
+class HttpRequestHttpResponseHeadersTest {
     @Test
     void request_헤더_생성_테스트() throws IOException {
         final String request = String.join("\r\n",

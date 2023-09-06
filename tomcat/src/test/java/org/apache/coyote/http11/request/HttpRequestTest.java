@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.request.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -101,5 +102,39 @@ class HttpRequestTest {
 
         // then
         assertThat(contentLength).isEqualTo(10);
+    }
+
+    @Test
+    void Request_Line의_구성을_확인한다() {
+        // given
+        String requestLine = "POST /login HTTP/1.1 ";
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 10 ");
+        HttpRequest request = HttpRequest.of(requestLine, requestHeader);
+
+        // when
+        boolean actual = request.consistsOf(POST, "/login", "/login.html");
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void Request_Line에_Query_String_이_있는지_확인한다() {
+        // given
+        String requestLine = "GET /login?account=gugu&password=password HTTP/1.1 ";
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 10 ");
+        HttpRequest request = HttpRequest.of(requestLine, requestHeader);
+
+        // when
+        boolean actual = request.hasQueryString();
+
+        // then
+        assertThat(actual).isTrue();
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class HttpRequest {
@@ -29,8 +30,21 @@ public class HttpRequest {
         return requestHeader.hasContent();
     }
 
+    public boolean consistsOf(HttpMethod httpMethod, String... requestUris) {
+        return Arrays.stream(requestUris)
+                .anyMatch(requestUri -> requestLine.consistsOf(httpMethod, requestUri));
+    }
+
+    public boolean hasQueryString() {
+        return requestLine.hasQueryString();
+    }
+
     public int contentLength() {
         return requestHeader.contentLength();
+    }
+
+    public String requestUri() {
+        return requestLine.requestUri();
     }
 
     public RequestLine requestLine() {
@@ -46,6 +60,9 @@ public class HttpRequest {
     }
 
     public void setRequestBody(String requestBody) {
+        if (requestBody.isBlank()) {
+            return;
+        }
         this.requestBody = RequestBody.from(requestBody);
     }
 

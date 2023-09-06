@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.line.vo.QueryString;
 
 public class Path {
 
-    private static String DEFAULT_URL_QUERY_STRING_SEPARATOR = "\\?";
+    private static final String DEFAULT_URL_QUERY_STRING_SEPARATOR = "\\?";
 
     private final DefaultPath defaultPath;
     private final QueryString queryString;

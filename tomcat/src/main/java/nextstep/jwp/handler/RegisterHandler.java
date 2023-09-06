@@ -13,6 +13,7 @@ import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.HttpStatusLine;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.model.User;
 
@@ -36,13 +37,14 @@ public class RegisterHandler implements RequestHandler {
     private HttpResponse handlePostMethod(HttpRequest request) {
         HttpStatus httpStatus = HttpStatus.FOUND;
         HttpVersion httpVersion = request.getHttpVersion();
+        HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
         HttpBody httpBody = request.getHttpBody();
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
         httpHeaders.setLocation("/index.html");
 
         join(httpBody);
 
-        return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+        return new HttpResponse(httpStatusLine, httpHeaders, httpBody);
     }
 
     private void join(HttpBody httpBody) {
@@ -59,11 +61,12 @@ public class RegisterHandler implements RequestHandler {
     private HttpResponse handleGetMethod(HttpRequest request) throws IOException {
         HttpStatus httpStatus = HttpStatus.OK;
         HttpVersion httpVersion = request.getHttpVersion();
+        HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
         URL url = getClass().getClassLoader().getResource("static/register.html");
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 
-        return new HttpResponse(httpVersion, httpStatus, httpHeaders, httpBody);
+        return new HttpResponse(httpStatusLine, httpHeaders, httpBody);
     }
 
 }

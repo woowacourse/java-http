@@ -1,16 +1,22 @@
 package nextstep.jwp.http;
 
 public enum HttpStatus {
-    OK("200 OK"),
-    FOUND("302 FOUND");
+    OK("200", "OK"),
+    FOUND("302", "FOUND");
 
-    private final String value;
+    private final String code;
+    private final String text;
 
-    HttpStatus(String value) {
-        this.value = value;
+    HttpStatus(String code, String text) {
+        this.code = code;
+        this.text = text;
     }
 
-    public String getValue() {
-        return value;
+    public String getCode() {
+        return code;
+    }
+
+    public String getText() {
+        return text;
     }
 }

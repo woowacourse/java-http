@@ -2,21 +2,18 @@ package nextstep.jwp.http;
 
 public class HttpResponse {
 
-    private static final String REQUEST_LINE_FORMAT = "%s %s ";
+    private static final String REQUEST_LINE_FORMAT = "%s %s %s ";
 
-    private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
+    private final HttpStatusLine httpStatusLine;
     private final HttpHeaders httpHeaders;
     private final HttpBody httpBody;
 
     public HttpResponse(
-            HttpVersion httpVersion,
-            HttpStatus httpStatus,
+            HttpStatusLine httpStatusLine,
             HttpHeaders httpHeaders,
             HttpBody httpBody
     ) {
-        this.httpVersion = httpVersion;
-        this.httpStatus = httpStatus;
+        this.httpStatusLine = httpStatusLine;
         this.httpHeaders = httpHeaders;
         this.httpBody = httpBody;
     }
@@ -26,8 +23,12 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
+        String httpVersion = httpStatusLine.getHttpVersion().getValue();
+        String httpStatusCode = httpStatusLine.getHttpStatus().getCode();
+        String httpStatusText = httpStatusLine.getHttpStatus().getText();
+
         String response = String.join("\r\n",
-                String.format(REQUEST_LINE_FORMAT, httpVersion.getValue(), httpStatus.getValue()),
+                String.format(REQUEST_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusText),
                 httpHeaders.getHeaders(),
                 "",
                 httpBody.getMessage());

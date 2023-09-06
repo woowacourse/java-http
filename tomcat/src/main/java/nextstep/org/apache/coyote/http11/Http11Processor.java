@@ -1,5 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
+import static nextstep.org.apache.coyote.http11.HttpUtil.*;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +33,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String EMPTY_LINE = "";
     private static final String RESOURCES_PATH_PREFIX = "static";
     private static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
+    private static final String FORM_VALUES_DELIMITER = "&";
+    private static final String FORM_KEY_VALUE_DELIMITER = "=";
 
     private final Socket connection;
     private final HandlerMapper handlerMapper;
@@ -60,10 +64,8 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> parsedBody = new HashMap<>();
             if (requestHeaders.containsKey("Content-Length")) {
                 String requestBody = extractRequestBody(bufferedReader, requestHeaders);
-                Arrays.asList(requestBody.split("&")).forEach(parsedData -> {
-                    String[] splited = parsedData.split("=");
-                    parsedBody.put(splited[KEY_INDEX], splited[VALUE_INDEX]);
-                });
+                parseMultipleValues(parsedBody,
+                        requestBody, FORM_VALUES_DELIMITER, FORM_KEY_VALUE_DELIMITER);
             }
 
             HttpCookie httpCookie = new HttpCookie();
@@ -73,11 +75,8 @@ public class Http11Processor implements Runnable, Processor {
 
             Map<String, String> queryParams = new HashMap<>();
             if (startLine.hasQueryString()) {
-                Arrays.asList(startLine.getQueryString().split("&"))
-                        .forEach(queryParam -> {
-                            String[] splited = queryParam.split("=");
-                            queryParams.put(splited[KEY_INDEX], splited[VALUE_INDEX]);
-                        });
+                parseMultipleValues(queryParams,
+                        startLine.getQueryString(), "&", "=");
             }
 
             String response = null;

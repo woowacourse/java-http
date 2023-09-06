@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
-import java.util.Arrays;
+import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,18 +9,14 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String SET_COOKIE_HEADER = "Set-Cookie: %s \r\n";
-    private static final String COOKIE_DELIMITER = "; ";
-    private static final String KEY_VALUE_DELIMITER = "=";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
+    private static final String COOKIE_VALUES_DELIMITER = "; ";
+    private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
 
     private final Map<String, String> cookie = new HashMap<>();
 
-    public void parseCookieHeaders(String cookieHeaders) {
-        Arrays.asList(cookieHeaders.split(COOKIE_DELIMITER)).forEach(header -> {
-            String[] splited = header.split(KEY_VALUE_DELIMITER);
-            cookie.put(splited[KEY_INDEX], splited[VALUE_INDEX]);
-        });
+    public void parseCookieHeaders(String cookieHeaderValues) {
+        parseMultipleValues(cookie,
+                cookieHeaderValues, COOKIE_VALUES_DELIMITER, COOKIE_KEY_VALUE_DELIMITER);
     }
 
     public void set(String key, String value) {
@@ -40,8 +37,8 @@ public class HttpCookie {
 
     public String createSetCookieHeader() {
         String cookies = cookie.entrySet().stream()
-                .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
-                .collect(Collectors.joining(COOKIE_DELIMITER));
+                .map(entry -> entry.getKey() + COOKIE_KEY_VALUE_DELIMITER + entry.getValue())
+                .collect(Collectors.joining(COOKIE_VALUES_DELIMITER));
         return String.format(SET_COOKIE_HEADER, cookies);
     }
 }

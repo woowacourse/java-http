@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class HttpRequestParser {
     public Map<String, String> findQueryStrings() {
         String path = findPath();
         if (!path.contains(QUERY_PARAMETER_DELIMITER)) {
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
         String queryString = path.split(QUERY_PARAMETER_DELIMITER_REGEX)[1];
         return Arrays.stream(queryString.split("&"))

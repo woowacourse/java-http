@@ -9,7 +9,7 @@ import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class DefaultResourceHandlers implements ResourceHandler {
+public class DefaultResourceHandler implements ResourceHandler {
 
     private static final String PATH = "/";
 

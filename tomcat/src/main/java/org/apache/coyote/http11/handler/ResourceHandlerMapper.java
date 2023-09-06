@@ -10,7 +10,7 @@ public class ResourceHandlerMapper {
     private static final ResourceHandler unsupportedResourceHandler = new UnsupportedResourceHandler();
 
     static {
-        handlers.add(new DefaultResourceHandlers());
+        handlers.add(new DefaultResourceHandler());
         handlers.add(new StaticResourceHandler());
     }
 

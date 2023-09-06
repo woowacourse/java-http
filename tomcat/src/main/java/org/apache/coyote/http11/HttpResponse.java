@@ -20,16 +20,10 @@ public class HttpResponse {
     private static final String EQUAL = "=";
     private static final String SEPARATOR = "\r\n";
 
-    private final HttpStatus httpStatus;
-    private final Map<String, String> headers;
-    private final HttpCookie httpCookie;
-    private final String body;
+    private final byte[] bytes;
 
-    private HttpResponse(HttpStatus httpStatus, Map<String, String> headers, HttpCookie httpCookie, String body) {
-        this.httpStatus = httpStatus;
-        this.headers = headers;
-        this.httpCookie = httpCookie;
-        this.body = body;
+    private HttpResponse(byte[] bytes) {
+        this.bytes = bytes;
     }
 
     public static Builder status(HttpStatus httpStatus) {
@@ -37,23 +31,7 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        List<String> response = new ArrayList<>();
-        response.add(HTTP_VERSION + BLANK + httpStatus.statusCode() + BLANK + httpStatus + BLANK);
-        response.add(getHeaders());
-        httpCookie.getCookie(JSESSIONID).ifPresent(jsessionid ->
-                response.add(SET_COOKIE + COLON + JSESSIONID + EQUAL + jsessionid + BLANK)
-        );
-        response.add(EMPTY);
-        response.add(body);
-        String join = String.join(SEPARATOR, response);
-        return join.getBytes();
-    }
-
-    private String getHeaders() {
-        List<String> formattedHeaders = headers.keySet().stream()
-                .map(key -> key + COLON + headers.get(key) + BLANK)
-                .collect(Collectors.toList());
-        return String.join(SEPARATOR, formattedHeaders);
+        return bytes;
     }
 
     public static class Builder {
@@ -100,7 +78,25 @@ public class HttpResponse {
             if (body != null) {
                 headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
             }
-            return new HttpResponse(httpStatus, headers, httpCookie, body);
+            return new HttpResponse(getBytes(headers));
+        }
+
+        private byte[] getBytes(Map<String, String> headers) {
+            List<String> response = new ArrayList<>();
+            response.add(HTTP_VERSION + BLANK + httpStatus.statusCode() + BLANK + httpStatus + BLANK);
+            response.add(stringify(headers));
+            httpCookie.getCookie(JSESSIONID)
+                    .ifPresent(id -> response.add(SET_COOKIE + COLON + JSESSIONID + EQUAL + id + BLANK));
+            response.add(EMPTY);
+            response.add(body);
+            return String.join(SEPARATOR, response).getBytes();
+        }
+
+        private String stringify(Map<String, String> headers) {
+            List<String> formattedHeaders = headers.keySet().stream()
+                    .map(key -> key + COLON + headers.get(key) + BLANK)
+                    .collect(Collectors.toList());
+            return String.join(SEPARATOR, formattedHeaders);
         }
     }
 }

@@ -13,6 +13,9 @@ public class ResourceFinder {
 
     private static final String DEFAULT_PATH = "static";
 
+    private ResourceFinder() {
+    }
+
     public static String getStaticResource(String path) throws IOException, URISyntaxException, NotFoundException {
         try {
             URI resource = Objects.requireNonNull(Thread.currentThread()

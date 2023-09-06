@@ -15,6 +15,9 @@ import java.util.Map;
 
 public class HandlerMapper {
 
+    private HandlerMapper() {
+    }
+
     private static final Map<RequestPath, Controller> CONTROLLER_MAP = Map.of(
             RequestPath.WELCOME_GET, new WelcomeController(),
             RequestPath.INDEX_GET, new IndexController(),

@@ -38,13 +38,12 @@ public class LoginController {
     public ResponseEntity getLogin(final HttpRequest httpRequest) {
         if (httpRequest.hasSessionId()) {
             final String jsessionId = httpRequest.findSessionIdFromRequestHeaders(JSESSIONID);
-            final Session session = SessionManager.findSession(jsessionId);
-            if (session == null) {
-                final String loginPath = DIRECTORY_SEPARATOR + LOGIN_FILE;
-                return ResponseEntity.of(HttpStatus.OK, loginPath);
-            }
-
-            return loginSuccess((User) session.getAttribute("user"));
+            return SessionManager.findSession(jsessionId)
+                                 .map(session -> loginSuccess((User) session.getAttribute("user")))
+                                 .orElseGet(() -> {
+                                     final String loginPath = DIRECTORY_SEPARATOR + LOGIN_FILE;
+                                     return ResponseEntity.of(HttpStatus.OK, loginPath);
+                                 });
         }
 
         final String loginPath = DIRECTORY_SEPARATOR + LOGIN_FILE;

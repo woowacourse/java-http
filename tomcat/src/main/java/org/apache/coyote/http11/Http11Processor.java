@@ -66,7 +66,6 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
-            System.out.println("requestLine : "+requestLine);
             final String httpMethod = parseHttpMethod(requestLine);// HTTP method를 읽음 (예: GET)
             headers = parseRequestHeaders(br); // header를 읽음
             storeJsessionId();
@@ -79,14 +78,10 @@ public class Http11Processor implements Runnable, Processor {
             final String path = parseHttpRequest(requestLine); // 파싱된 HTTP 요청에서 경로 추출
             final String parsedPath = parsePath(path, httpMethod); // 경로를 기반으로 정적 파일을 읽고 응답 생성
 
-            System.out.println("path: "+ path);
-            System.out.println("parsedPath: "+ parsedPath);
-
             final String responseBody = readStaticFile(parsedPath);
             final String contentType = getContentType(parsedPath); //content type을 다르게 준다
             final String response = createResponse(contentType, responseBody, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
 
-            System.out.println(response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -112,7 +107,6 @@ public class Http11Processor implements Runnable, Processor {
         String line;
         while (!(line = br.readLine()).equals(EMPTY)) {
             lines.add(line);
-            System.out.println("line : " + line);
         }
         return lines;
     }
@@ -279,7 +273,6 @@ public class Http11Processor implements Runnable, Processor {
             return UNAUTHORIZED_HTML.getValue();
         }
 
-        System.out.println("is contain? : " + SessionManager.isValidHttpCookie(httpCookie));
         if (!SessionManager.isValidHttpCookie(httpCookie)) {
             return LOGIN_HTML.getValue();
         }

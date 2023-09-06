@@ -1,29 +1,29 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RequestBody {
-    final private Map<String, String> contents;
+    private final Map<String, String> contents;
 
     public RequestBody(final Map<String, String> contents) {
         this.contents = contents;
     }
 
     public static RequestBody from(final String input) {
-        Map<String, String> contents = new HashMap<>();
-        String[] body = input.split("&");
-        for(String part : body) {
-            String[] componentOfPart = part.split("=");
-            contents.put(componentOfPart[0], componentOfPart[1]);
-        }
+        Map<String, String> contents = new LinkedHashMap<>();
+        Arrays.stream(input.split("&"))
+                .map(part -> part.split("="))
+                .forEach(parts -> contents.put(parts[0], parts[1]));
         return new RequestBody(contents);
     }
 
-    public String getContentValue(final String header) {
-        if(!contents.containsKey(header)) {
+    public String getContentValue(final String key) {
+        if(!contents.containsKey(key)) {
             return null;
         }
-        return contents.get(header);
+        return contents.get(key);
     }
 }

@@ -1,6 +1,7 @@
 package cache.com.example;
 
 import cache.com.example.version.ResourceVersion;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ class GreetingControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())
                 .expectBody(String.class).returnResult();
-
+        log.info("\nResponse Header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
     }
 
@@ -64,6 +65,7 @@ class GreetingControllerTest {
                 .expectHeader().exists(HttpHeaders.ETAG)
                 .expectBody(String.class).returnResult();
 
+        log.info("\nResponse Header\n{}", response.getResponseHeaders());
         log.info("response body\n{}", response.getResponseBody());
     }
 

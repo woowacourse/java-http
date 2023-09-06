@@ -29,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final int KEY_INDEX = 0;
     public static final int VALUE_INDEX = 1;
     public static final String EMPTY_LINE = "";
-    public static final String RESOURCES_PREFIX = "static";
+    public static final String RESOURCES_PATH_PREFIX = "static";
     public static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
 
     private final Socket connection;
@@ -182,7 +182,7 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        String resourceName = RESOURCES_PREFIX + requestURL;
+        String resourceName = RESOURCES_PATH_PREFIX + requestURL;
         if (!resourceName.contains(".")) {
             resourceName += ".html";
         }

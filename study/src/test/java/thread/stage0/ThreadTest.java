@@ -5,15 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 자바로 동시에 여러 작업을 처리할 때 스레드를 사용한다.
- * 스레드 객체를 직접 생성하는 방법부터 알아보자.
- * 진행하면서 막히는 부분은 아래 링크를 참고해서 해결한다.
- *
- * Thread Objects
- * https://docs.oracle.com/javase/tutorial/essential/concurrency/threads.html
- *
- * Defining and Starting a Thread
- * https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html
+ * 자바로 동시에 여러 작업을 처리할 때 스레드를 사용한다. 스레드 객체를 직접 생성하는 방법부터 알아보자. 진행하면서 막히는 부분은 아래 링크를 참고해서 해결한다.
+ * <p>
+ * Thread Objects https://docs.oracle.com/javase/tutorial/essential/concurrency/threads.html
+ * <p>
+ * Defining and Starting a Thread https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html
  */
 class ThreadTest {
 
@@ -30,15 +26,14 @@ class ThreadTest {
         Thread thread = new ExtendedThread("hello thread");
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        thread.start();
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        thread.join();
     }
 
     /**
-     * Runnable 인터페이스를 사용하는 방법도 있다.
-     * 주석을 참고하여 테스트 코드를 작성하고, 테스트를 실행시켜서 메시지가 잘 나오는지 확인한다.
+     * Runnable 인터페이스를 사용하는 방법도 있다. 주석을 참고하여 테스트 코드를 작성하고, 테스트를 실행시켜서 메시지가 잘 나오는지 확인한다.
      */
     @Test
     void testRunnableThread() throws InterruptedException {
@@ -46,10 +41,10 @@ class ThreadTest {
         Thread thread = new Thread(new RunnableThread("hello thread"));
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        thread.start();
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        thread.join();
     }
 
     private static final class ExtendedThread extends Thread {

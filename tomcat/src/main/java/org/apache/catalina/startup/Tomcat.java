@@ -5,6 +5,9 @@ import java.util.List;
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.LoginHandler;
+import org.apache.coyote.handler.LoginPageHandler;
+import org.apache.coyote.handler.RegisterHandler;
+import org.apache.coyote.handler.RegisterPageHandler;
 import org.apache.coyote.handler.StaticFileHandler;
 import org.apache.coyote.handler.WelcomePageHandler;
 import org.slf4j.Logger;
@@ -34,7 +37,10 @@ public class Tomcat {
     return List.of(
         new LoginHandler(),
         new StaticFileHandler(),
-        new WelcomePageHandler()
+        new LoginPageHandler(),
+        new WelcomePageHandler(),
+        new RegisterHandler(),
+        new RegisterPageHandler()
     );
   }
 }

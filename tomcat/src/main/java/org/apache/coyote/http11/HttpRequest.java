@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 import org.apache.catalina.HttpSession;
 import org.apache.catalina.Manager;
@@ -45,16 +46,19 @@ public class HttpRequest {
             // ignored
         }
 
-        if (session == null) {
-            String uuid = UUID.randomUUID().toString();
+        if (Objects.isNull(session)) {
+            String uuid = UUID.randomUUID()
+                    .toString();
             session = new HttpSession(uuid);
             manager.add(session);
+            return session;
         }
 
         if (create) {
             session.invalidate();
             manager.remove(session);
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUID.randomUUID()
+                    .toString();
             session = new HttpSession(uuid);
             manager.add(session);
         }

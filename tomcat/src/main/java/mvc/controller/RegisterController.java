@@ -1,6 +1,6 @@
 package mvc.controller;
 
-import mvc.controller.exception.InvalidQueryParameterException;
+import mvc.controller.exception.InvalidParameterException;
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.HttpRequest;
@@ -32,7 +32,7 @@ public class RegisterController extends AbstractPathController {
         final String email = request.getParameter(EMAIL_KEY);
 
         if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password) || isInvalidQueryParameter(email)) {
-            throw new InvalidQueryParameterException();
+            throw new InvalidParameterException();
         }
 
         userService.register(account, password, email);

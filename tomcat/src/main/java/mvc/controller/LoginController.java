@@ -1,6 +1,6 @@
 package mvc.controller;
 
-import mvc.controller.exception.InvalidQueryParameterException;
+import mvc.controller.exception.InvalidParameterException;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http.HttpCookie;
@@ -32,7 +32,7 @@ public class LoginController extends AbstractPathController {
         final String password = request.getParameter(PASSWORD_KEY);
 
         if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password)) {
-            throw new InvalidQueryParameterException();
+            throw new InvalidParameterException();
         }
 
         final User loginUser = userService.login(account, password);

@@ -14,7 +14,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.context.exception.UnsupportedApiException;
-import mvc.controller.exception.InvalidQueryParameterException;
+import mvc.controller.exception.InvalidParameterException;
 import nextstep.jwp.application.exception.LoginFailureException;
 import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
 import org.apache.coyote.http.request.Request;
@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     private Response processRequest(final Request request, final Container context) throws IOException {
         try {
             return context.service(request);
-        } catch (final InvalidQueryParameterException | AlreadyExistsAccountException e) {
+        } catch (final InvalidParameterException | AlreadyExistsAccountException e) {
             return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, e.getMessage());
         } catch (final LoginFailureException e) {
             return Response.of(

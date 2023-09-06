@@ -12,6 +12,9 @@ public class StaticFileLoader {
 
     public static String load(String fileName) throws IOException {
         URL resource = StaticFileLoader.class.getClassLoader().getResource(STATIC + fileName);
+        if (resource == null) {
+            return "";
+        }
         Path path = new File(resource.getPath()).toPath();
         return new String(Files.readAllBytes(path));
     }

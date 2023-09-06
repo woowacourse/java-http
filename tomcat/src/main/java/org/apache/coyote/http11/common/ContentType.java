@@ -16,6 +16,10 @@ public enum ContentType {
         this.detail = detail;
     }
 
+    public String getExtension() {
+        return extension;
+    }
+
     public String getDetail() {
         return detail;
     }

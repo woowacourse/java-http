@@ -8,10 +8,10 @@ public class RequestUri {
     public static final String START_MARK_OF_EXTENSION = ".";
     public static final int HAS_NO_EXTENSION = -1;
 
-    private final String detail;
+    private final String value;
 
-    private RequestUri(final String detail) {
-        this.detail = detail;
+    private RequestUri(final String value) {
+        this.value = value;
     }
 
     public static RequestUri create(String line) {
@@ -23,14 +23,14 @@ public class RequestUri {
     }
 
     public String getExtension() {
-        int idx = detail.indexOf(START_MARK_OF_EXTENSION);
+        int idx = value.indexOf(START_MARK_OF_EXTENSION);
         if (idx == HAS_NO_EXTENSION) {
             return "";
         }
-        return detail.substring(idx);
+        return value.substring(idx);
     }
 
-    public String getDetail() {
-        return detail;
+    public String getValue() {
+        return value;
     }
 }

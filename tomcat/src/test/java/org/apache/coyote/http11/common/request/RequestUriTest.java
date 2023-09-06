@@ -19,7 +19,7 @@ class RequestUriTest {
         RequestUri requestUri = RequestUri.create(input);
 
         // then
-        assertThat(requestUri.getDetail()).isEqualTo("/login");
+        assertThat(requestUri.getValue()).isEqualTo("/login");
     }
 
     @Test
@@ -31,7 +31,7 @@ class RequestUriTest {
         RequestUri requestUri = RequestUri.create(input);
 
         // then
-        assertThat(requestUri.getDetail()).isEqualTo("/login");
+        assertThat(requestUri.getValue()).isEqualTo("/login");
     }
 
     @Test

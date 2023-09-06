@@ -1,87 +1,59 @@
 package org.apache.coyote.http11.response;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import org.apache.coyote.http11.session.Session;
+
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpResponse {
-    private static final ClassLoader classLoader = HttpResponse.class.getClassLoader();
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
-    private static final String BLANK = "";
-    private static final String SPACE = " ";
-    private static final String CRLF = "\r\n";
 
-    private final String responseStatus;
-    private final ResponseHeaders headers;
+    private final ResponseLine startLine;
+    private final Map<String, String> headers;
     private final String responseBody;
 
-    public HttpResponse(
-            final String responseStatus,
-            final ResponseHeaders headers,
-            final String responseBody
-    ) {
-        this.responseStatus = responseStatus;
-        this.headers = headers;
+    public HttpResponse(HttpStatus httpStatus, String responseBody,
+                        ContentType contentType, String redirectUrl) {
+        this.startLine = new ResponseLine(httpStatus);
+        this.headers = new LinkedHashMap<>();
+        initHeader(contentType, responseBody, redirectUrl);
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(HttpStatus status, String filePath) {
-        ResponseHeaders headers = new ResponseHeaders();
 
-        if (status == HttpStatus.FOUND) {
-            headers.setLocation(filePath);
-            return new HttpResponse(status.getCode(), headers, null);
-        }
-
-        String body = readStaticFile(filePath);
-        headers.setContentType(getContentType(filePath));
-        headers.setContentLength(body.getBytes().length);
-
-        return new HttpResponse(status.getCode(), headers, body);
+    public HttpResponse(final HttpStatus httpStatus, final String responseBody, final ContentType contentType) {
+        this.startLine = new ResponseLine(httpStatus);
+        this.headers = new LinkedHashMap<>();
+        initHeader(contentType, responseBody);
+        this.responseBody = responseBody;
     }
 
-    private static String getContentType(String filePath) {
-        final String[] fileNameSplit = filePath.split("\\.");
-        final String fileType = fileNameSplit[fileNameSplit.length - 1];
-
-        if (fileType.equals("html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (fileType.equals("css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (fileType.equals("js")) {
-            return "application/javascript";
-        }
-
-        if (filePath.equals("/")) {
-            return "text/html;charset=utf-8";
-        }
-        return null;
+    private void initHeader(final ContentType contentType, final String responseBody, final String redirectUrl) {
+        initHeader(contentType, responseBody);
+        headers.put("Location", redirectUrl);
     }
 
-    private static String readStaticFile(String fileName) {
-        String filePath = "static/" + fileName;
-        URL res = classLoader.getResource(filePath);
+    private void initHeader(ContentType contentType, String responseBody) {
+        headers.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+    }
 
-        try {
-            return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
-        } catch (IOException e) {
-            return "Hello world!";
-        }
+    public void addJSessionId(final Session session) {
+        headers.put("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     @Override
     public String toString() {
-        return String.join(CRLF,
-                HTTP_VERSION + responseStatus + SPACE,
-                headers.toString(),
-                (responseBody != null) ? responseBody : BLANK
-        );
+        return String.join("\r\n",
+                startLine + " ",
+                printHeader() + "\n",
+                responseBody);
     }
 
-    public byte[] getBytes() {
-        return toString().getBytes();
+    public String printHeader() {
+        return headers.entrySet().stream()
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }

@@ -5,6 +5,8 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.exception.MissMatchPasswordException;
+import org.apache.coyote.http11.exception.NotExistAccountException;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.RequestLine;
@@ -14,18 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.coyote.http11.common.HttpStatus.FOUND;
+import static org.apache.coyote.http11.common.constant.SessionConstant.SESSION_COOKIE_NAME;
 
 public class LoginHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-
-    private static final String LOGIN_ACCOUNT = "account";
-
-    private static final String LOGIN_PASSWORD = "password";
-
-    private static final String HEADER_COOKIE = "Cookie";
-
-    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private LoginHandler() {
     }
@@ -44,19 +39,19 @@ public class LoginHandler {
     }
 
     private static boolean isAuthenticated(final RequestHeader requestHeader) {
-        HttpCookie cookie = HttpCookie.from(requestHeader.getHeaderValue(HEADER_COOKIE));
+        HttpCookie cookie = HttpCookie.from(requestHeader.getHeaderValue("Cookie"));
         String jsessionId = cookie.getCookieValue(SESSION_COOKIE_NAME);
         return jsessionId != null && SessionManager.findSession(jsessionId) != null;
     }
 
     private static HttpResponse login(final RequestBody requestBody) {
         try {
-            String account = requestBody.getContentValue(LOGIN_ACCOUNT);
-            String password = requestBody.getContentValue(LOGIN_PASSWORD);
+            String account = requestBody.getContentValue("account");
+            String password = requestBody.getContentValue("password");
             User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException()); //todo : 해당하는 계정이 존재하지 않는다
+                    .orElseThrow(NotExistAccountException::new);
             if (!user.checkPassword(password)) {
-                throw new RuntimeException(); //todo :비밀번호가 일치하지 않는다.
+                throw new MissMatchPasswordException();
             }
             return successToLogin(user);
         } catch (RuntimeException e) {

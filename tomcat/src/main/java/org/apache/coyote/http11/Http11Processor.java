@@ -2,15 +2,14 @@ package org.apache.coyote.http11;
 
 import static java.util.stream.Collectors.joining;
 
+import handler.Controller;
+import handler.RequestHandler;
+import handler.RequestHandlerMapping;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.controller.IndexController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,17 +20,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Map<String, Controller> handlerMapping = new HashMap<>();
+    private final RequestHandler requestHandler = new RequestHandlerMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        init();
-    }
-
-    private void init() {
-        handlerMapping.put("/", new IndexController());
-        handlerMapping.put("/login", new LoginController());
-        handlerMapping.put("/register", new RegisterController());
     }
 
     @Override
@@ -55,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
                 view = requestUri;
                 httpResponse.setStatusCode(HttpStatusCode.OK);
             } else {
-                final Controller controller = handlerMapping.get(requestUri);
+                final Controller controller = requestHandler.getHandler(requestUri);
                 view = controller.run(httpRequest, httpResponse);
             }
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.Container;
+import org.apache.coyote.Context;
 import org.apache.coyote.context.HelloWorldContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +15,10 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final List<Container> containers = new ArrayList<>();
+    private final List<Context> contexts = new ArrayList<>();
 
     public void start() {
-        Connector connector = new Connector(containers);
+        Connector connector = new Connector(contexts);
         connector.start();
 
         try {
@@ -31,14 +31,14 @@ public class Tomcat {
         }
     }
 
-    public Container addContainer(final String contextPath) {
+    public Context addContainer(final String contextPath) {
         return addContainer(contextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
     }
 
-    public Container addContainer(final String contextPath, final String staticResourcePath) {
+    public Context addContainer(final String contextPath, final String staticResourcePath) {
         final HelloWorldContext context = new HelloWorldContext(contextPath, staticResourcePath);
 
-        this.containers.add(context);
+        this.contexts.add(context);
 
         return context;
     }

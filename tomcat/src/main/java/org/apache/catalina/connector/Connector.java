@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
-import org.apache.coyote.Container;
+import org.apache.coyote.Context;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,20 +19,20 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final List<Container> containers;
+    private final List<Context> contexts;
     private boolean stopped;
 
     public Connector() {
         this(DEFAULT_PORT, Collections.emptyList(), DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final List<Container> containers) {
-        this(DEFAULT_PORT, containers, DEFAULT_ACCEPT_COUNT);
+    public Connector(final List<Context> contexts) {
+        this(DEFAULT_PORT, contexts, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final List<Container> containers, final int acceptCount) {
+    public Connector(final int port, final List<Context> contexts, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.containers = containers;
+        this.contexts = contexts;
         this.stopped = false;
     }
 
@@ -74,7 +74,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, containers);
+        var processor = new Http11Processor(connection, contexts);
         new Thread(processor).start();
     }
 

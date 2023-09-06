@@ -3,7 +3,7 @@ package org.apache.coyote.context;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.Container;
+import org.apache.coyote.Context;
 import org.apache.coyote.Handler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
@@ -17,7 +17,7 @@ import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.exception.UnsupportedHttpMethodException;
 
-public class HelloWorldContext implements Container {
+public class HelloWorldContext implements Context {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
     private static final String DEFAULT_STATIC_RESOURCE_PATH_PREFIX = "static/";

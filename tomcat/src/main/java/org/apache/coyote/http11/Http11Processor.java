@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.util.List;
 import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Container;
+import org.apache.coyote.Context;
 import org.apache.coyote.Processor;
 import org.apache.coyote.context.exception.UnsupportedApiException;
 import mvc.controller.exception.InvalidParameterException;
@@ -35,11 +35,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final List<Container> containers;
+    private final List<Context> contexts;
 
-    public Http11Processor(final Socket connection, final List<Container> containers) {
+    public Http11Processor(final Socket connection, final List<Context> contexts) {
         this.connection = connection;
-        this.containers = containers;
+        this.contexts = contexts;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
                 final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {
             final Request request = RequestGenerator.generate(bufferedReader);
-            final Container context = findContext(request);
+            final Context context = findContext(request);
             final Response response = processRequest(request, context);
 
             bufferedWriter.write(response.convertResponseMessage());
@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Response processRequest(final Request request, final Container context) throws IOException {
+    private Response processRequest(final Request request, final Context context) throws IOException {
         try {
             return context.service(request);
         } catch (final InvalidParameterException | AlreadyExistsAccountException e) {
@@ -92,10 +92,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Container findContext(final Request request) {
-        for (final Container container : containers) {
-            if (container.supports(request)) {
-                return container;
+    private Context findContext(final Request request) {
+        for (final Context context : contexts) {
+            if (context.supports(request)) {
+                return context;
             }
         }
         throw new InvalidRequestPathException();

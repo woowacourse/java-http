@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
                     Session session = new Session(UUID.randomUUID().toString());
                     session.setAttribute("user", user);
                     sessionManager.add(session);
-                    httpResponse.setStatus("302 Found");
+                    httpResponse.setStatus(HttpStatus.FOUND);
                     httpResponse.setRedirectUrl("/index.html");
                     httpResponse.setCookie("JSESSIONID=" + session.getId());
 

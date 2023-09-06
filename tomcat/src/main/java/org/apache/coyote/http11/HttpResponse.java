@@ -4,13 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
-    private final StringBuilder status = new StringBuilder();
+    private HttpStatus status;
     private final Map<String, String> headers = new HashMap<>();
     private final StringBuilder body = new StringBuilder();
 
     public String createResponse() {
         StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append("HTTP/1.1 ").append(status).append("\r\n");
+        responseBuilder.append("HTTP/1.1 ")
+                .append(status.getCode()).append(" ")
+                .append(status.getReasonPhrase()).append("\r\n");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             responseBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
         }
@@ -19,8 +21,8 @@ public class HttpResponse {
         return responseBuilder.toString();
     }
 
-    public void setStatus(String value) {
-        status.append(value);
+    public void setStatus(HttpStatus httpStatus) {
+        this.status = httpStatus;
     }
 
     public void setCookie(String value) {

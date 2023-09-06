@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
@@ -61,10 +62,11 @@ public class HttpRequest {
 
     public Session getSession() {
         final Optional<String> sessionId = headers.getCookie("JSESSIONID");
-        final var localSession = SessionManager.getInstance().findSession(sessionId.orElse(""));
+        final var sessionManager = SessionManager.getInstance();
+        final var localSession = sessionManager.findSession(sessionId.orElse(""));
 
         if (localSession == null) {
-            return SessionManager.getInstance().create();
+            return new Session(UUID.randomUUID().toString(), sessionManager);
         }
         return localSession;
     }

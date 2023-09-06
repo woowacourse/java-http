@@ -28,6 +28,10 @@ public class User {
         return account;
     }
 
+    public User putId(Long id){
+        return new User(id,account,password,email);
+    }
+
     @Override
     public String toString() {
         return "User{" +

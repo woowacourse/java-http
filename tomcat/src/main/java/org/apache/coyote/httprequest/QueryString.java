@@ -1,9 +1,9 @@
 package org.apache.coyote.httprequest;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class QueryString {
 
@@ -19,12 +19,12 @@ public class QueryString {
     }
 
     public static QueryString from(final String queryStrings) {
-        final List<String> eachQueries = List.of(queryStrings.split(DELIMITER));
-        final Map<String, String> queries = new HashMap<>();
-        for (String query : eachQueries) {
-            final List<String> keyAndValue = List.of(query.split(KEY_VALUE_SPLITTER));
-            queries.put(keyAndValue.get(KEY_INDEX), keyAndValue.get(VALUE_INDEX));
-        }
+        final Map<String, String> queries = Arrays.stream(queryStrings.split(DELIMITER))
+                .map(query -> query.split(KEY_VALUE_SPLITTER))
+                .collect(Collectors.toMap(
+                        keyAndValue -> keyAndValue[KEY_INDEX],
+                        keyAndValue -> keyAndValue[VALUE_INDEX]
+                ));
         return new QueryString(queries);
     }
 

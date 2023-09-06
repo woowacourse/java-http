@@ -25,8 +25,8 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.startLine().uri().path().equals("/login")
-                && request.startLine().method().equals("POST");
+        return request.requestLine().uri().path().equals("/login")
+                && request.requestLine().method().equals("POST");
     }
 
     @Override

@@ -18,13 +18,6 @@ public class HttpResponse {
         this.writer = writer;
     }
 
-    private void setContentLength() {
-        if (messageBody == null) {
-            return;
-        }
-        headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
-    }
-
     public void setStatusLine(StatusLine statusLine) {
         this.statusLine = statusLine;
     }
@@ -32,6 +25,13 @@ public class HttpResponse {
     public void setMessageBody(String messageBody) {
         this.messageBody = messageBody;
         setContentLength();
+    }
+
+    private void setContentLength() {
+        if (messageBody == null) {
+            return;
+        }
+        headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
     }
 
     public void addHeader(String name, String value) {

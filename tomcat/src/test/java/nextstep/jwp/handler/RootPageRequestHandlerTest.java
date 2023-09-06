@@ -3,7 +3,7 @@ package nextstep.jwp.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.catalina.servlet.request.HttpRequest;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.HttpStatus;
 import org.apache.catalina.servlet.response.StatusLine;
@@ -24,7 +24,7 @@ class RootPageRequestHandlerTest {
     void test() {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET / HTTP/1.1 "))
+                .startLine(RequestLine.from("GET / HTTP/1.1 "))
                 .build();
         HttpResponse response = new HttpResponse();
 

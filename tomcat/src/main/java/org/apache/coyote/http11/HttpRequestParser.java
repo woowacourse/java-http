@@ -7,17 +7,17 @@ import java.util.List;
 import org.apache.catalina.servlet.request.Body;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 
 public class HttpRequestParser {
 
     public static HttpRequest parse(BufferedReader reader) {
-        StartLine startLine = StartLine.from(readLine(reader));
+        RequestLine requestLine = RequestLine.from(readLine(reader));
         List<String> headerLines = getHeaderLines(reader);
         RequestHeaders requestHeaders = RequestHeaders.from(headerLines);
         Body body = parseBody(reader, contentLength(requestHeaders));
         return HttpRequest.builder()
-                .startLine(startLine)
+                .startLine(requestLine)
                 .headers(requestHeaders)
                 .body(body)
                 .build();

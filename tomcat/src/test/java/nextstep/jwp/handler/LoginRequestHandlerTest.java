@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.catalina.servlet.request.Body;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
@@ -29,13 +29,13 @@ class LoginRequestHandlerTest {
     void POST_이면서_login으로_들어온_요청만_처리한다() {
         // given
         HttpRequest onlyPost = HttpRequest.builder()
-                .startLine(StartLine.from("POST /dd HTTP/1.1"))
+                .startLine(RequestLine.from("POST /dd HTTP/1.1"))
                 .build();
         HttpRequest onlyLogin = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login HTTP/1.1"))
+                .startLine(RequestLine.from("GET /login HTTP/1.1"))
                 .build();
         HttpRequest match = HttpRequest.builder()
-                .startLine(StartLine.from("POST /login HTTP/1.1"))
+                .startLine(RequestLine.from("POST /login HTTP/1.1"))
                 .build();
 
         // when & then
@@ -48,7 +48,7 @@ class LoginRequestHandlerTest {
     void 로그인에_성공하면_session_쿠키를_제공하고_index_html로_redirect() {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("POST /login HTTP/1.1"))
+                .startLine(RequestLine.from("POST /login HTTP/1.1"))
                 .headers(RequestHeaders.from(List.of(
                                 "Content-Type: application/x-www-form-urlencoded",
                                 "Content-Length: 30"
@@ -79,7 +79,7 @@ class LoginRequestHandlerTest {
         void 계정정보가_잘못된_경우() {
             // given
             HttpRequest request = HttpRequest.builder()
-                    .startLine(StartLine.from("POST /login HTTP/1.1"))
+                    .startLine(RequestLine.from("POST /login HTTP/1.1"))
                     .headers(RequestHeaders.from(List.of(
                                     "Content-Type: application/x-www-form-urlencoded",
                                     "Content-Length: 27"
@@ -103,7 +103,7 @@ class LoginRequestHandlerTest {
         void 로그인_정보가_없는_경우() {
             // given
             HttpRequest request = HttpRequest.builder()
-                    .startLine(StartLine.from("POST /login HTTP/1.1"))
+                    .startLine(RequestLine.from("POST /login HTTP/1.1"))
                     .headers(RequestHeaders.from(List.of(
                                     "Content-Type: application/x-www-form-urlencoded",
                                     "Content-Length: 14"

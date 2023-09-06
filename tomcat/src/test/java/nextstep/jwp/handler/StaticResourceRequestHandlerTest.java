@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.util.List;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.HttpStatus;
 import org.apache.catalina.servlet.response.StatusLine;
@@ -29,7 +29,7 @@ class StaticResourceRequestHandlerTest {
     void 요청에서_원하는_정적_파일을들_읽어_응답한다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET /index.html HTTP/1.1 "))
+                .startLine(RequestLine.from("GET /index.html HTTP/1.1 "))
                 .headers(RequestHeaders.from(
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )
@@ -53,7 +53,7 @@ class StaticResourceRequestHandlerTest {
     void 확장자가_없는_경우_html_파일을_반환한다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login HTTP/1.1 "))
+                .startLine(RequestLine.from("GET /login HTTP/1.1 "))
                 .headers(RequestHeaders.from(
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )

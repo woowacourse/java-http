@@ -10,7 +10,7 @@ public class RootPageRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.startLine().uri().path().equals("/");
+        return request.requestLine().uri().path().equals("/");
     }
 
     @Override

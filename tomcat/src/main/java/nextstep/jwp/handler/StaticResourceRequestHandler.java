@@ -17,7 +17,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public void handle(HttpRequest request, HttpResponse response) {
-        URI uri = request.startLine().uri();
+        URI uri = request.requestLine().uri();
         String responseBody = ResourceFileUtil.readAll("static" + path(uri));
         response.setStatusLine(new StatusLine(OK));
         response.addHeader("Content-Type", contentType(uri) + "charset=utf-8");

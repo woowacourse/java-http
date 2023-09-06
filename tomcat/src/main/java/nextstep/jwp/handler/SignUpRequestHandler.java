@@ -15,8 +15,8 @@ public class SignUpRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.startLine().uri().path().equals("/register")
-                && request.startLine().method().equals("POST");
+        return request.requestLine().uri().path().equals("/register")
+                && request.requestLine().method().equals("POST");
     }
 
     @Override

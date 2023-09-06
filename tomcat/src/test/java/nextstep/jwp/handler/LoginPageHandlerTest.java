@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestHeaders;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.HttpStatus;
 import org.apache.catalina.servlet.response.StatusLine;
@@ -32,13 +32,13 @@ class LoginPageHandlerTest {
     void GET이면서_login_으로_들어온_요청만_처리한다() {
         // given
         HttpRequest onlyGet = HttpRequest.builder()
-                .startLine(StartLine.from("GET /dd HTTP/1.1"))
+                .startLine(RequestLine.from("GET /dd HTTP/1.1"))
                 .build();
         HttpRequest onlyLogin = HttpRequest.builder()
-                .startLine(StartLine.from("POST /login HTTP/1.1"))
+                .startLine(RequestLine.from("POST /login HTTP/1.1"))
                 .build();
         HttpRequest match = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login HTTP/1.1"))
+                .startLine(RequestLine.from("GET /login HTTP/1.1"))
                 .build();
 
         // when & then
@@ -53,7 +53,7 @@ class LoginPageHandlerTest {
         Session session = new Session(UUID.randomUUID().toString());
         SessionManager.add(session);
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login HTTP/1.1"))
+                .startLine(RequestLine.from("GET /login HTTP/1.1"))
                 .headers(RequestHeaders.from(List.of(
                         "Cookie: JSESSIONID=" + session.id()
                 )))
@@ -76,7 +76,7 @@ class LoginPageHandlerTest {
     void 쿠키는_있으나_세션정보가_없다면_login_화면을_보여준다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login HTTP/1.1"))
+                .startLine(RequestLine.from("GET /login HTTP/1.1"))
                 .headers(RequestHeaders.from(List.of(
                         "Cookie: JSESSIONID=" + "1234"
                 )))
@@ -103,7 +103,7 @@ class LoginPageHandlerTest {
         Session session = new Session(UUID.randomUUID().toString());
         SessionManager.add(session);
         HttpRequest request = HttpRequest.builder()
-                .startLine(StartLine.from("GET /login HTTP/1.1"))
+                .startLine(RequestLine.from("GET /login HTTP/1.1"))
                 .build();
         HttpResponse response = new HttpResponse();
 

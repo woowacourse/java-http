@@ -4,13 +4,13 @@ import org.apache.catalina.servlet.session.Cookies;
 
 public class HttpRequest {
 
-    private final StartLine startLine;
+    private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final Cookies cookies;
     private final Body body;
 
-    private HttpRequest(StartLine startLine, RequestHeaders requestHeaders, Body body) {
-        this.startLine = startLine;
+    private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, Body body) {
+        this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.body = body;
         this.cookies = extractCookie(requestHeaders);
@@ -31,8 +31,8 @@ public class HttpRequest {
         return new HttpRequestBuilder();
     }
 
-    public StartLine startLine() {
-        return startLine;
+    public RequestLine requestLine() {
+        return requestLine;
     }
 
     public RequestHeaders headers() {
@@ -49,12 +49,12 @@ public class HttpRequest {
 
     public static class HttpRequestBuilder {
 
-        private StartLine startLine;
+        private RequestLine requestLine;
         private RequestHeaders requestHeaders;
         private Body body;
 
-        public HttpRequestBuilder startLine(StartLine startLine) {
-            this.startLine = startLine;
+        public HttpRequestBuilder startLine(RequestLine requestLine) {
+            this.requestLine = requestLine;
             return this;
         }
 
@@ -69,7 +69,7 @@ public class HttpRequest {
         }
 
         public HttpRequest build() {
-            return new HttpRequest(startLine, requestHeaders, body);
+            return new HttpRequest(requestLine, requestHeaders, body);
         }
     }
 }

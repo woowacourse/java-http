@@ -1,26 +1,26 @@
 package org.apache.catalina.servlet.request;
 
-public class StartLine {
+public class RequestLine {
 
-    private static final StartLine EMPTY = new StartLine(null, null, null);
+    private static final RequestLine EMPTY = new RequestLine(null, null, null);
 
     private final String method;
     private final URI uri;
     private final String httpVersion;
 
-    private StartLine(String method, URI uri, String httpVersion) {
+    private RequestLine(String method, URI uri, String httpVersion) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
     }
 
-    public static StartLine from(String startLine) {
+    public static RequestLine from(String startLine) {
         if (startLine == null) {
             return EMPTY;
         }
         String[] elements = startLine.split(" ");
         validateStartLine(elements);
-        return new StartLine(
+        return new RequestLine(
                 elements[0],
                 URI.from(elements[1]),
                 elements[2]

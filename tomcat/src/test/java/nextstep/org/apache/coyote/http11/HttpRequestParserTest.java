@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import org.apache.catalina.servlet.request.Body;
 import org.apache.catalina.servlet.request.HttpRequest;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -29,7 +29,7 @@ class HttpRequestParserTest {
         sb.append("User-Agent: Insomnia/2023.5.7\r\n");
         sb.append("Accept: */*\r\n");
         String requestString = sb.toString();
-        StartLine expectedStartLine = StartLine.from("GET /index.html HTTP/1.1");
+        RequestLine expectedRequestLine = RequestLine.from("GET /index.html HTTP/1.1");
         Map<String, String> expectedHeaders = Map.of(
                 "Host", "localhost:8080",
                 "User-Agent", "Insomnia/2023.5.7",
@@ -43,9 +43,9 @@ class HttpRequestParserTest {
         HttpRequest request = HttpRequestParser.parse(br);
 
         // then
-        assertThat(request.startLine())
+        assertThat(request.requestLine())
                 .usingRecursiveComparison()
-                .isEqualTo(expectedStartLine);
+                .isEqualTo(expectedRequestLine);
         assertThat(request.headers().headers())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedHeaders);
@@ -66,7 +66,7 @@ class HttpRequestParserTest {
                 + "\tname: \"mallang\"\n"
                 + "}");
         String requestString = sb.toString();
-        StartLine expectedStartLine = StartLine.from("POST /post HTTP/1.1");
+        RequestLine expectedRequestLine = RequestLine.from("POST /post HTTP/1.1");
         Map<String, String> expectedHeaders = Map.of(
                 "Host", "localhost:8080",
                 "User-Agent", "Insomnia/2023.5.7",
@@ -84,9 +84,9 @@ class HttpRequestParserTest {
         HttpRequest request = HttpRequestParser.parse(br);
 
         // then
-        assertThat(request.startLine())
+        assertThat(request.requestLine())
                 .usingRecursiveComparison()
-                .isEqualTo(expectedStartLine);
+                .isEqualTo(expectedRequestLine);
         assertThat(request.headers().headers())
                 .usingRecursiveComparison()
                 .isEqualTo(expectedHeaders);

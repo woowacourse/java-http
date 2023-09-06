@@ -8,7 +8,7 @@ import nextstep.jwp.handler.RequestHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
 import org.apache.catalina.servlet.request.HttpRequest;
-import org.apache.catalina.servlet.request.StartLine;
+import org.apache.catalina.servlet.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -27,8 +27,8 @@ class HandlerMappingTest {
                 new LoginPageHandler(),
                 new RootPageRequestHandler()
         ));
-        StartLine startLine = StartLine.from("GET /login HTTP/1.1");
-        HttpRequest request = HttpRequest.builder().startLine(startLine).build();
+        RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
+        HttpRequest request = HttpRequest.builder().startLine(requestLine).build();
 
         // when
         RequestHandler handler = handlerMapping.getHandler(request);

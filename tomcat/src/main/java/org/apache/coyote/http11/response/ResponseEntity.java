@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.common.HttpCookie;
-import org.apache.coyote.http11.response.headers.ContentType;
+import org.apache.coyote.http11.common.header.ContentTypeValue;
+import org.apache.coyote.http11.common.header.HttpCookie;
 import org.apache.coyote.http11.response.statusLine.HttpStatus;
 
 import java.io.IOException;
@@ -17,29 +17,29 @@ public class ResponseEntity {
 
     private final HttpStatus httpStatus;
     private final HttpCookie httpCookie;
-    private final ContentType contentType;
+    private final ContentTypeValue contentTypeValue;
     private final String content;
 
     public ResponseEntity(
             final HttpStatus httpStatus,
             final HttpCookie httpCookie,
-            final ContentType contentType,
+            final ContentTypeValue contentTypeValue,
             final String content
     ) {
         this.httpStatus = httpStatus;
         this.httpCookie = httpCookie;
-        this.contentType = contentType;
+        this.contentTypeValue = contentTypeValue;
         this.content = content;
     }
 
     public ResponseEntity(
             final HttpStatus httpStatus,
-            final ContentType contentType,
+            final ContentTypeValue contentTypeValue,
             final String content
     ) {
         this.httpStatus = httpStatus;
         this.httpCookie = new HttpCookie(new HashMap<>());
-        this.contentType = contentType;
+        this.contentTypeValue = contentTypeValue;
         this.content = content;
     }
 
@@ -58,12 +58,12 @@ public class ResponseEntity {
         }
     }
 
-    private static ContentType calculateContentType(final URL resourceFileUrl) {
+    private static ContentTypeValue calculateContentType(final URL resourceFileUrl) {
         if (resourceFileUrl.toString().endsWith(".css")) {
-            return ContentType.TEXT_CSS;
+            return ContentTypeValue.TEXT_CSS;
         }
 
-        return ContentType.TEXT_HTML;
+        return ContentTypeValue.TEXT_HTML;
     }
 
     public static ResponseEntity of(final HttpStatus httpStatus, final HttpCookie httpCookie, final String resourcePath) {
@@ -93,8 +93,8 @@ public class ResponseEntity {
         return httpCookie;
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public ContentTypeValue getContentType() {
+        return contentTypeValue;
     }
 
     public String getContent() {

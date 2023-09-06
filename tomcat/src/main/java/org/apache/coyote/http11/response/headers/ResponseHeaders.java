@@ -1,96 +1,42 @@
 package org.apache.coyote.http11.response.headers;
 
-import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.common.header.ContentLength;
+import org.apache.coyote.http11.common.header.ContentType;
+import org.apache.coyote.http11.common.header.HeaderProperty;
+import org.apache.coyote.http11.common.header.HeaderValue;
+import org.apache.coyote.http11.common.header.SetCookie;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-import java.util.Objects;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
-    private static final String SET_COOKIE = "Set-Cookie";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String KEY_VALUE_DELIMITER = ": ";
-    private static final String SPACE = " ";
-    private static final String NEW_LINE = "\r\n";
-
-    private final HttpCookie httpCookie;
-    private final ContentType contentType;
-    private final int contentLength;
-
-    private ResponseHeaders(final HttpCookie httpCookie, final ContentType contentType, final int contentLength) {
-        this.httpCookie = httpCookie;
-        this.contentType = contentType;
-        this.contentLength = contentLength;
-    }
+    private final Map<HeaderProperty, HeaderValue> headers = new EnumMap<>(HeaderProperty.class);
 
     public static ResponseHeaders from(final ResponseEntity responseEntity) {
-        return new ResponseHeaders(
-                responseEntity.getHttpCookie(),
-                responseEntity.getContentType(),
-                responseEntity.calculateContentLength()
-        );
+        final ResponseHeaders responseHeaders = new ResponseHeaders();
+        if (responseEntity.getHttpCookie() != null) {
+            responseHeaders.addHeader(new SetCookie(responseEntity.getHttpCookie()));
+        }
+        responseHeaders.addHeader(new ContentLength(responseEntity.calculateContentLength()));
+        responseHeaders.addHeader(new ContentType(responseEntity.getContentType()));
+
+        return responseHeaders;
     }
 
     public String convertToString() {
-        if (httpCookie.isEmpty()) {
-            return String.join(NEW_LINE,
-                    convertContentType(),
-                    convertContentLength()
-            );
-        }
+        List<String> headerStrings = headers.keySet()
+                                            .stream()
+                                            .map(property -> headers.get(property).convertToString())
+                                            .collect(Collectors.toList());
 
-        return String.join(NEW_LINE,
-                convertSetCookie(),
-                convertContentType(),
-                convertContentLength()
-        );
+        return String.join(System.lineSeparator(), headerStrings);
     }
 
-    private String convertSetCookie() {
-        return new StringBuilder().append(SET_COOKIE).append(KEY_VALUE_DELIMITER)
-                                  .append(httpCookie.convertToString()).append(SPACE)
-                                  .toString();
-    }
-
-    private String convertContentType() {
-        return new StringBuilder().append(CONTENT_TYPE).append(KEY_VALUE_DELIMITER)
-                                  .append(contentType.convertToString()).append(SPACE)
-                                  .toString();
-    }
-
-    private String convertContentLength() {
-        return new StringBuilder().append(CONTENT_LENGTH).append(KEY_VALUE_DELIMITER).append(contentLength)
-                                  .append(SPACE)
-                                  .toString();
-    }
-
-    public ContentType getContentType() {
-        return contentType;
-    }
-
-    public int getContentLength() {
-        return contentLength;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final ResponseHeaders that = (ResponseHeaders) o;
-        return contentLength == that.contentLength && contentType == that.contentType;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(contentType, contentLength);
-    }
-
-    @Override
-    public String toString() {
-        return "ResponseHeaders{" +
-                "contentType=" + contentType +
-                ", contentLength=" + contentLength +
-                '}';
+    public void addHeader(final HeaderValue header) {
+        headers.put(header.getHeaderProperty(), header);
     }
 }

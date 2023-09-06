@@ -1,9 +1,13 @@
 package org.apache.coyote.http11.request.headers;
 
+import org.apache.coyote.http11.common.header.HeaderProperty;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringTokenizer;
+
+import static org.apache.coyote.http11.common.header.HeaderProperty.CONTENT_LENGTH;
 
 public class RequestHeaders {
 
@@ -32,7 +36,7 @@ public class RequestHeaders {
     }
 
     public boolean isContentLengthNull() {
-        return !requestHeader.containsKey("Content-Length");
+        return !requestHeader.containsKey(CONTENT_LENGTH.getPropertyName());
     }
 
     public int getContentLength() {
@@ -40,15 +44,15 @@ public class RequestHeaders {
             return 0;
         }
 
-        return Integer.parseInt(requestHeader.get("Content-Length"));
+        return Integer.parseInt(requestHeader.get(CONTENT_LENGTH.getPropertyName()));
     }
 
-    public String search(final String key) {
-        return requestHeader.get(key);
+    public String search(final HeaderProperty property) {
+        return requestHeader.get(property.getPropertyName());
     }
 
-    public boolean containsKey(final String headerKey) {
-        return requestHeader.containsKey(headerKey);
+    public boolean containsKey(final HeaderProperty property) {
+        return requestHeader.containsKey(property.getPropertyName());
     }
 
     public Map<String, String> getRequestHeader() {

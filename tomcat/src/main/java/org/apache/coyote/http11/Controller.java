@@ -2,16 +2,15 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
+import org.apache.coyote.http11.common.header.ContentTypeValue;
+import org.apache.coyote.http11.common.header.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
-import org.apache.coyote.http11.request.requestLine.requestUri.RequestUri;
 import org.apache.coyote.http11.request.requestLine.requestUri.ResourcePath;
 import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.coyote.http11.response.statusLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ public class Controller {
     public ResponseEntity run() {
         final ResourcePath resourcePath = httpRequest.getResourcePath();
         if (resourcePath.isRootPath()) {
-            return new ResponseEntity(HttpStatus.OK, ContentType.TEXT_HTML, "Hello world!");
+            return new ResponseEntity(HttpStatus.OK, ContentTypeValue.TEXT_HTML, "Hello world!");
         }
 
         if (resourcePath.is("/login")) {

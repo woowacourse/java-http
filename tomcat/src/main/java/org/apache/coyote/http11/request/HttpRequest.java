@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.common.header.HttpCookie;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
 import org.apache.coyote.http11.request.requestLine.HttpMethod;
@@ -14,10 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static org.apache.coyote.http11.common.header.HeaderProperty.COOKIE;
+
 public class HttpRequest {
 
     private static final String NEW_LINE = "\r\n";
-    private static final String COOKIE = "Cookie";
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;

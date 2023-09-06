@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.common;
 
+import org.apache.coyote.http11.common.header.HttpCookie;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpCookieTest {
+class HttpSetCookieTest {
 
     @Test
     @DisplayName("쿠키 문자열을 파싱하여 저장한다.")

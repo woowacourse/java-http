@@ -19,7 +19,7 @@ public class Cookies {
     }
 
     public static Cookies from(final String cookieHeader) {
-        if (cookieHeader.isEmpty()) {
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
             return new Cookies();
         }
 

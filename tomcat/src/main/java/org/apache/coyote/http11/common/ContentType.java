@@ -1,11 +1,8 @@
 package org.apache.coyote.http11.common;
 
-import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 public enum ContentType {
@@ -28,28 +25,42 @@ public enum ContentType {
         this.contentTypeStrings = contentTypeStrings;
     }
 
-    public static Optional<ContentType> from(final String contentTypeString) {
-        if (Objects.isNull(contentTypeString)) {
-            return Optional.empty();
-        }
+    public static String withCharset(final String contentTypeString) {
 
-        return Arrays.stream(values())
-                .filter(contentType -> contentType.matches(contentTypeString))
-                .findFirst();
+        return withCharset(contentTypeString, "utf-8");
     }
 
-    private boolean matches(final String contentTypeString) {
+    public static String withCharset(final String contentTypeString, final String charset) {
+        validate(contentTypeString);
 
-        return Arrays.stream(this.contentTypeStrings)
-                .anyMatch(contentType -> contentType.equalsIgnoreCase(contentTypeString.trim()));
-    }
-
-    public String withCharset(final String charset) {
         if (StringUtils.isBlank(charset)) {
             throw new IllegalArgumentException("charset cannot be empty");
         }
 
-        return format("%s;charset=%s", this.toString(), trim(charset));
+        return String.format("%s;charset=%s", contentTypeString, trim(charset));
+    }
+
+    public static void validate(final String contentTypeStrings) {
+        final var invalidStrings = Arrays.stream(contentTypeStrings.split(","))
+                .anyMatch(ContentType::isNotContentType);
+
+        if (invalidStrings) {
+            throw new IllegalArgumentException("invalid content type string");
+        }
+    }
+
+    private static boolean isNotContentType(final String contentTypeString) {
+        return Arrays.stream(values())
+                .noneMatch(contentType -> contentType.matches(contentTypeString));
+    }
+
+    private boolean matches(final String contentTypeString) {
+        if (contentTypeString == null) {
+            return false;
+        }
+
+        return Arrays.stream(this.contentTypeStrings)
+                .anyMatch(contentType -> contentType.equalsIgnoreCase(contentTypeString.trim()));
     }
 
     @Override

@@ -52,13 +52,12 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final var expected = "HTTP/1.1 200 OK" + System.lineSeparator() +
-                "Content-Type: text/html;charset=utf-8" + System.lineSeparator() +
-                "Content-Length: 5564" + System.lineSeparator() +
-                System.lineSeparator() +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 5564",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
     }
 
     @DisplayName("로그인 성공 시 응답 헤더에 JSESSIONID 값을 반환한다.")

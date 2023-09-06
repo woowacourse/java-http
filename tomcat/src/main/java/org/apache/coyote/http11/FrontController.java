@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.common.ContentType.HTML;
 import static org.apache.coyote.http11.common.Method.GET;
 import static org.apache.coyote.http11.common.Method.POST;
 import static org.apache.coyote.http11.common.Status.BAD_REQUEST;
@@ -13,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.SessionManager.Session;
+import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
@@ -42,7 +44,7 @@ public class FrontController {
         final var session = request.getSession();
 
         if ("/".equals(uri)) {
-            return Response.of(OK, "text/html", "Hello world!");
+            return Response.of(OK, ContentType.withCharset(HTML.toString()), "Hello world!");
         }
         if ("/login".equals(uri)) {
             return responseByLogin(session, "/login.html");
@@ -92,7 +94,7 @@ public class FrontController {
 
         final var path = Paths.get(url.getPath());
         final var responseBody = new String(Files.readAllBytes(path));
-        return Response.of(OK, Files.probeContentType(path), responseBody);
+        return Response.of(OK, ContentType.withCharset(Files.probeContentType(path), "utf-8"), responseBody);
     }
 
     private static Response post(final Request request) {

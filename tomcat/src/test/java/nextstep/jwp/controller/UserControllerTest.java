@@ -1,13 +1,13 @@
 package nextstep.jwp.controller;
 
 import static java.util.UUID.randomUUID;
+import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.SessionManager.Session;
 import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -25,7 +25,7 @@ class UserControllerTest {
 
         final Response response = UserController.login(
                 Request.of("post", "/login",
-                        new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
+                        Map.of(COOKIE, Cookies.ofJSessionId(session.getId())),
                         "account=gugu&password=password"));
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);
@@ -39,7 +39,7 @@ class UserControllerTest {
 
         final Response response = UserController.login(
                 Request.of("post", "/login",
-                        new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
+                        Map.of(COOKIE, Cookies.ofJSessionId(session.getId())),
                         "account=dodo&password=password"));
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);

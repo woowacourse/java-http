@@ -6,7 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.header.EntityHeaders;
+import org.apache.coyote.http11.common.header.HeaderName;
 import org.apache.coyote.http11.request.Request;
 
 public class RequestReader {
@@ -17,40 +18,35 @@ public class RequestReader {
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
-
     public Request read() throws IOException {
         final var requestHead = reader.readLine();
         final var head = requestHead.split(" ");
         final var method = head[0];
         final var uri = head[1];
 
-        final var headers = readHeaders();
-        final var body = readBody(headers);
+        final var allHeaders = readHeaders();
+        final var body = readBody(new EntityHeaders(allHeaders));
 
-        return Request.of(
-                method,
-                uri,
-                headers,
-                body
-        );
+        return Request.of(method, uri, allHeaders, body);
     }
 
-    private Headers readHeaders() throws IOException {
-        final Map<String, String> headers = new HashMap<>();
+    private Map<HeaderName, String> readHeaders() throws IOException {
+        final Map<HeaderName, String> headers = new HashMap<>();
         String line;
         while (!"".equals((line = reader.readLine()))) {
-            final var header = line.split(": ");
-            final var value = header[1].trim();
-            final var key = header[0];
-            headers.put(key, value);
+            final var headerPair = line.split(": ");
+            final var key = headerPair[0];
+            final var value = headerPair[1].trim();
+
+            headers.put(HeaderName.find(key), value);
         }
 
-        return new Headers(headers);
+        return headers;
     }
 
-    private String readBody(final Headers headers) throws IOException {
+    private String readBody(final EntityHeaders headers) throws IOException {
         if (headers.hasContentLength()) {
-            final var contentLength = Integer.parseInt(headers.find("Content-Length"));
+            final var contentLength = Integer.parseInt(headers.getContentLength());
             final var buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
 

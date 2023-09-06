@@ -1,31 +1,55 @@
 package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.http11.common.ContentType.HTML;
-import static org.apache.coyote.http11.common.ContentType.TEXT;
+import static org.apache.coyote.http11.common.ContentType.withCharset;
 import static org.apache.coyote.http11.common.Status.FOUND;
+import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.header.HeaderName.LOCATION;
 
-import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.common.Headers;
+import java.util.Map;
 import org.apache.coyote.http11.common.Status;
+import org.apache.coyote.http11.common.header.EntityHeaders;
+import org.apache.coyote.http11.common.header.GeneralHeaders;
+import org.apache.coyote.http11.common.header.HeaderName;
+import org.apache.coyote.http11.common.header.ResponseHeaders;
 
 public class Response {
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private final Status status;
-    private final ContentType contentType;
-    private final Headers headers;
+    private final GeneralHeaders generalHeaders;
+    private final ResponseHeaders responseHeaders;
+    private final EntityHeaders entityHeaders;
     private final String body;
 
     private Response(
             final Status status,
-            final ContentType contentType,
+            final GeneralHeaders generalHeaders,
+            final ResponseHeaders responseHeaders,
+            final EntityHeaders entityHeaders,
             final String body
     ) {
         this.status = status;
-        this.contentType = contentType;
-        this.headers = new Headers();
+        this.generalHeaders = generalHeaders;
+        this.responseHeaders = responseHeaders;
+        this.entityHeaders = entityHeaders;
         this.body = body;
+    }
+
+    public static Response of(
+            final Status status,
+            final Map<HeaderName, String> allHeaders,
+            final String body
+    ) {
+        return new Response(
+                status,
+                new GeneralHeaders(allHeaders),
+                new ResponseHeaders(allHeaders),
+                new EntityHeaders(allHeaders),
+                body
+        );
     }
 
     public static Response of(
@@ -33,25 +57,24 @@ public class Response {
             final String contentTypeString,
             final String body
     ) {
-        final var contentType = ContentType.from(contentTypeString)
-                .orElse(TEXT);
-
-        return new Response(status, contentType, body);
+        return new Response(
+                status,
+                new GeneralHeaders(),
+                new ResponseHeaders(),
+                new EntityHeaders(Map.of(
+                        CONTENT_TYPE, contentTypeString,
+                        CONTENT_LENGTH, String.valueOf(body.getBytes().length)
+                )),
+                body
+        );
     }
 
     public static Response redirect(final String location) {
-        final var response = Response.of(FOUND, HTML.toString(), "");
-        response.addLocation(location);
-
-        return response;
-    }
-
-    public void addLocation(final String location) {
-        headers.addLocation(location);
+        return Response.of(FOUND, Map.of(LOCATION, location, CONTENT_TYPE, withCharset(HTML.toString(), "utf-8")), "");
     }
 
     public void addSetCookie(final String cookie) {
-        headers.addSetCookie(cookie);
+        responseHeaders.addSetCookie(cookie);
     }
 
     public Status getStatus() {
@@ -59,11 +82,11 @@ public class Response {
     }
 
     public String getLocation() {
-        return headers.getLocation();
+        return responseHeaders.getLocation();
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public String getContentType() {
+        return entityHeaders.getContentType();
     }
 
     public String getBody() {
@@ -76,11 +99,9 @@ public class Response {
 
     @Override
     public String toString() {
-        return "HTTP/1.1 " + status.getCode() + " " + status.name() + LINE_SEPARATOR
-                + "Content-Type: " + contentType.withCharset("utf-8") + LINE_SEPARATOR
-                + "Content-Length: " + body.getBytes().length + LINE_SEPARATOR
-                + headers
-                + LINE_SEPARATOR
-                + body;
+        return String.join(LINE_SEPARATOR,
+                "HTTP/1.1 " + status.getCode() + " " + status.name(),
+                generalHeaders.toString() + responseHeaders.toString() + entityHeaders.toString(),
+                body);
     }
 }

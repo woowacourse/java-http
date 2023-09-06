@@ -3,41 +3,73 @@ package org.apache.coyote.http11.request;
 import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
 
 import java.net.URI;
+import java.util.Map;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.SessionManager.Session;
-import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Method;
+import org.apache.coyote.http11.common.header.EntityHeaders;
+import org.apache.coyote.http11.common.header.GeneralHeaders;
+import org.apache.coyote.http11.common.header.HeaderName;
+import org.apache.coyote.http11.common.header.RequestHeaders;
 
 public class Request {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
     private final Method method;
     private final String uri;
-    private final Headers headers;
+    private final GeneralHeaders generalHeaders;
+    private final RequestHeaders requestHeaders;
+    private final EntityHeaders entityHeaders;
     private final String body;
 
     private Request(
             final Method method,
             final String uri,
-            final Headers headers,
+            final GeneralHeaders generalHeaders,
+            final RequestHeaders requestHeaders,
+            final EntityHeaders entityHeaders,
             final String body
     ) {
         this.method = method;
         this.uri = uri;
-        this.headers = headers;
+        this.generalHeaders = generalHeaders;
+        this.requestHeaders = requestHeaders;
+        this.entityHeaders = entityHeaders;
         this.body = body;
     }
 
     public static Request of(
             final String methodName,
             final String requestURI,
-            final Headers headers,
+            final GeneralHeaders generalHeaders,
+            final RequestHeaders requestHeaders,
+            final EntityHeaders entityHeaders,
             final String body
     ) {
         final var method = Method.find(methodName)
                 .orElseThrow(() -> new IllegalArgumentException("invalid method"));
 
-        return new Request(method, requestURI, headers, body);
+        return new Request(method, requestURI, generalHeaders, requestHeaders, entityHeaders, body);
+    }
+
+    public static Request of(
+            final String methodName,
+            final String requestURI,
+            final Map<HeaderName, String> headers,
+            final String body
+    ) {
+        final var method = Method.find(methodName)
+                .orElseThrow(() -> new IllegalArgumentException("invalid method"));
+
+        return new Request(
+                method,
+                requestURI,
+                new GeneralHeaders(headers),
+                new RequestHeaders(headers),
+                new EntityHeaders(headers),
+                body
+        );
     }
 
     public String getPath() {
@@ -57,7 +89,7 @@ public class Request {
     }
 
     private String findSessionId() {
-        final var cookies = headers.getCookie();
+        final var cookies = Cookies.from(requestHeaders.getCookie());
 
         return cookies.findByName(SESSION_ID_COOKIE_NAME);
     }
@@ -70,10 +102,11 @@ public class Request {
     public String toString() {
         return "Request{" +
                 "method=" + method +
-                ", URI='" + uri + '\'' +
-                ", headers='" + headers + '\'' +
+                ", uri='" + uri + '\'' +
+                ", generalHeaders=" + generalHeaders +
+                ", requestHeaders=" + requestHeaders +
+                ", entityHeaders=" + entityHeaders +
                 ", body='" + body + '\'' +
                 '}';
     }
-
 }

@@ -1,10 +1,9 @@
-package nextstep.org.apache.coyote.http11;
-
-import org.apache.coyote.http11.HttpExtensionType;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class HttpExtensionTypeTest {
 
@@ -27,7 +26,7 @@ class HttpExtensionTypeTest {
     void from_emptyExtension() {
         // given
         final String extension = "EmptyExtension";
-        final String expected = "text/html";
+        final String expected = HttpExtensionType.HTML.getContentType();
 
         // when
         final HttpExtensionType actual = HttpExtensionType.from(extension);

@@ -12,10 +12,6 @@ public class Session {
         this.id = id;
     }
 
-    public String getId() {
-        return id;
-    }
-
     public Object getAttribute(final String name) {
         return values.get(name);
     }
@@ -30,5 +26,9 @@ public class Session {
 
     public void invalidate() {
         values.clear();
+    }
+
+    public String getId() {
+        return id;
     }
 }

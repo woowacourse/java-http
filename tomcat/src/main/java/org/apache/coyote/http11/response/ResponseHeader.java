@@ -23,6 +23,13 @@ public class ResponseHeader {
         elements.put("Set-Cookie", cookie.toString());
     }
 
+    public String getValue(final String key) {
+        if (elements.containsKey(key)) {
+            return elements.get(key);
+        }
+        return "";
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

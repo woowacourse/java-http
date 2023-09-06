@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toMap;
 
 public class HttpCookie {
 
@@ -25,7 +25,7 @@ public class HttpCookie {
             return new HttpCookie();
         }
         return Arrays.stream(cookieHeader.split("; "))
-                .map(it -> it.split("="))
+                .map(it -> it.split("=", 2))
                 .collect(collectingAndThen(
                         toMap(it -> it[0], it -> it[1]),
                         HttpCookie::new

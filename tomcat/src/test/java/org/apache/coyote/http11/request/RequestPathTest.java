@@ -1,15 +1,13 @@
-package nextstep.org.apache.coyote.http11.request;
-
-import org.apache.coyote.http11.HttpExtensionType;
-import org.apache.coyote.http11.request.RequestPath;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.coyote.http11.HttpExtensionType;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class RequestPathTest {
 
@@ -26,7 +24,8 @@ class RequestPathTest {
 
         // then
         assertAll(
-                () -> assertThat(requestPath.getResource()).isEqualTo(expectedResource),
+                () -> assertThat(requestPath.getResource())
+                        .isEqualTo(expectedResource + expectedExtensionType.getExtension()),
                 () -> assertThat(requestPath.getQueryParameter()).isEmpty()
         );
     }

@@ -12,10 +12,6 @@ public class ResponseBody {
         this.content = content;
     }
 
-    public static ResponseBody empty() {
-        return new ResponseBody(HttpExtensionType.HTML, "");
-    }
-
     public static ResponseBody html(final String content) {
         return new ResponseBody(HttpExtensionType.HTML, content);
     }

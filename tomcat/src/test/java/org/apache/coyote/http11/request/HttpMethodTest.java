@@ -1,12 +1,11 @@
-package nextstep.org.apache.coyote.http11.request;
-
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import nextstep.jwp.exception.NotAllowedMethodException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class HttpMethodTest {
 
@@ -32,7 +31,6 @@ class HttpMethodTest {
 
         // when & then
         assertThatThrownBy(() -> HttpMethod.from(request))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("해당하는 HttpMethod가 존재하지 않습니다.");
+                .isInstanceOf(NotAllowedMethodException.class);
     }
 }

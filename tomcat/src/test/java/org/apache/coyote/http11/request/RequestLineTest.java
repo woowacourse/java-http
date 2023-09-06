@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.request.HttpMethod;

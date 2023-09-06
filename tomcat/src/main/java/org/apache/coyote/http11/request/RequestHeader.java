@@ -11,10 +11,6 @@ public class RequestHeader {
         this.elements = elements;
     }
 
-    public boolean hasNotContent() {
-        return !elements.containsKey("Content-Type");
-    }
-
     public String geHeaderValue(final String key) {
         return Optional.ofNullable(elements.get(key))
                 .orElse("");

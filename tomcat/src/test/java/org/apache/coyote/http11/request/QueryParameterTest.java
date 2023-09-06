@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.request.QueryParameter;
 import org.junit.jupiter.api.DisplayName;

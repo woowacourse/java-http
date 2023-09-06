@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.controller.base.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.mapper.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;

@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.Constant.COOKIE_DELIMITER;
-import static org.apache.coyote.http11.Constant.COOKIE_SEPARATOR;
+import static org.apache.coyote.http11.common.Constant.COOKIE_DELIMITER;
+import static org.apache.coyote.http11.common.Constant.COOKIE_SEPARATOR;
 
 public class Cookie {
 

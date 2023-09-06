@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.Constant.EQUALS_VALUE;
-import static org.apache.coyote.http11.Constant.PARAM_SEPARATOR;
+import static org.apache.coyote.http11.common.Constant.EQUALS_VALUE;
+import static org.apache.coyote.http11.common.Constant.PARAM_SEPARATOR;
 
 public class Params {
 

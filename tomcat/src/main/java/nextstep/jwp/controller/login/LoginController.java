@@ -1,11 +1,11 @@
 package nextstep.jwp.controller.login;
 
 import javassist.NotFoundException;
-import nextstep.jwp.controller.base.AbstractController;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.handler.mapper.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.header.Status;

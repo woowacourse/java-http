@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response.header;
 
-import static org.apache.coyote.http11.Constant.URI_SEPARATOR;
+import static org.apache.coyote.http11.common.Constant.URI_SEPARATOR;
 
 public enum Status {
 

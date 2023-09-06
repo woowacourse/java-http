@@ -1,4 +1,4 @@
-package nextstep.jwp.controller.base;
+package org.apache.coyote.http11.handler.mapper.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

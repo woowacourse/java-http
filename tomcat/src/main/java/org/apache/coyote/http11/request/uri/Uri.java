@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.request.uri;
 
-import static org.apache.coyote.http11.Constant.QUERY_PARAMS_LETTER;
-import static org.apache.coyote.http11.Constant.RESOURCE_LETTER;
-import static org.apache.coyote.http11.Constant.URI_SEPARATOR;
+import static org.apache.coyote.http11.common.Constant.QUERY_PARAMS_LETTER;
+import static org.apache.coyote.http11.common.Constant.RESOURCE_LETTER;
+import static org.apache.coyote.http11.common.Constant.URI_SEPARATOR;
 
 public class Uri {
 

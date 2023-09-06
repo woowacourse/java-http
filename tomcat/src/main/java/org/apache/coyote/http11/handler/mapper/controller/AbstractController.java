@@ -1,4 +1,4 @@
-package nextstep.jwp.controller.base;
+package org.apache.coyote.http11.handler.mapper.controller;
 
 import nextstep.jwp.exception.UnsupportedMethodException;
 import org.apache.coyote.http11.request.HttpRequest;

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response.header;
 
 import java.util.Arrays;
 
-import static org.apache.coyote.http11.Constant.CONTENT_TYPE_SEPARATOR;
+import static org.apache.coyote.http11.common.Constant.CONTENT_TYPE_SEPARATOR;
 
 public enum ContentType {
 

@@ -4,8 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.Constant.HEADER_DELIMITER;
-import static org.apache.coyote.http11.Constant.HEADER_SPACE;
+import static org.apache.coyote.http11.common.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.http11.common.Constant.HEADER_SPACE;
 
 public class Headers {
 

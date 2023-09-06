@@ -1,7 +1,7 @@
 package nextstep.jwp.controller.index;
 
-import nextstep.jwp.controller.base.AbstractController;
 import nextstep.jwp.exception.UnsupportedMethodException;
+import org.apache.coyote.http11.handler.mapper.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

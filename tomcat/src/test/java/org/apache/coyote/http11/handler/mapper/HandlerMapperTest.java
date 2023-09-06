@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.handler.mapper;
 
-import nextstep.jwp.controller.base.Controller;
 import nextstep.jwp.controller.login.LoginController;
+import org.apache.coyote.http11.handler.mapper.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

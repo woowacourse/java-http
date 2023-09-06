@@ -71,6 +71,6 @@ public class HttpResponse {
 
     private void serializeBody(final StringBuilder response) {
         response.append(BLANK_LINE).append(CRLF);
-        response.append(body.getValue()).append(SPACE).append(CRLF);
+        response.append(body.getValue());
     }
 }

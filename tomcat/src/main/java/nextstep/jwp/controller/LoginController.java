@@ -24,6 +24,8 @@ public class LoginController implements Controller {
     private static final String PATH = "/login";
     private static final String INDEX_PAGE_PATH = "/index.html";
     private static final String UNAUTHORIZED_PAGE_PATH = "/401.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
@@ -35,11 +37,11 @@ public class LoginController implements Controller {
     public HttpResponse handle(final HttpRequest httpRequest) {
         try {
             final Map<String, String> data = QueryStringUtil.parse(httpRequest.getBody());
-            final String account = data.get("account");
-            final String password = data.get("password");
-            log.info("login request: account=" + account + ", password=" + password);
+            checkQueryParameter(data);
+            final String account = data.get(ACCOUNT);
+            final String password = data.get(PASSWORD);
             final User user = findUser(account, password);
-            log.info("login success!");
+            log.info("login success! : user = {}", user);
 
             final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
             if (extractSessionId(httpRequest) == null) {
@@ -54,6 +56,12 @@ public class LoginController implements Controller {
             final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
             httpResponse.addHeader(LOCATION, UNAUTHORIZED_PAGE_PATH);
             return httpResponse;
+        }
+    }
+
+    private void checkQueryParameter(final Map<String, String> data) {
+        if(!data.containsKey(ACCOUNT) || !data.containsKey(PASSWORD)){
+            throw new IllegalArgumentException("쿼리 파라미터가 비었어요~");
         }
     }
 

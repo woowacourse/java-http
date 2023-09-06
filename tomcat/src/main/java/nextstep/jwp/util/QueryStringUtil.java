@@ -14,6 +14,9 @@ public class QueryStringUtil {
 
     public static Map<String, String> parse(final String queryString) {
         Map<String, String> data = new HashMap<>();
+        if(queryString == null){
+            return data;
+        }
         final String[] split = queryString.split(DATA_SEPARATOR);
         for (String each : split) {
             final String[] keyAndValue = each.split("=");

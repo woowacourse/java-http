@@ -17,11 +17,9 @@ public class HandlerMapper {
     private static final Handler HANDLER_NONE_MATCHED_DEFAULT = new BadRequestHandler();
 
     public Handler find(HttpRequest httpRequest) {
-        for (Handler handler : HANDLERS) {
-            if (handler.supports(httpRequest)) {
-                return handler;
-            }
-        }
-        return HANDLER_NONE_MATCHED_DEFAULT;
+        return HANDLERS.stream()
+                .filter(handler -> handler.supports(httpRequest))
+                .findFirst()
+                .orElse(HANDLER_NONE_MATCHED_DEFAULT);
     }
 }

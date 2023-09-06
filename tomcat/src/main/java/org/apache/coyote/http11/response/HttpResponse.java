@@ -13,11 +13,10 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    @Override
-    public String toString() {
+    public String toResponseFormat() {
         return String.join("\r\n",
-                statusLine.toString(),
-                header.toString(),
+                statusLine.toResponseFormat(),
+                header.toResponseFormat(),
                 "",
                 responseBody.getBody());
     }

@@ -16,8 +16,7 @@ public enum HttpStatusCode {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
+    public String toResponseFormat() {
         return String.format("%d %s", code, type);
     }
 }

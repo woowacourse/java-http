@@ -20,8 +20,7 @@ public class HttpResponseHeaders {
         headers.put(headerType, value);
     }
 
-    @Override
-    public String toString() {
+    public String toResponseFormat() {
         return headers.entrySet().stream()
                 .map(entry -> String.format("%s: %s ", entry.getKey().getType(), entry.getValue()))
                 .collect(Collectors.joining("\r\n"));

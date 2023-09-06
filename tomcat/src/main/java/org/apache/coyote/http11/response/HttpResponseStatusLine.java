@@ -10,8 +10,7 @@ public class HttpResponseStatusLine {
         this.statusCode = statusCode;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s %s ", httpVersion, statusCode.toString());
+    public String toResponseFormat() {
+        return String.format("%s %s ", httpVersion, statusCode.toResponseFormat());
     }
 }

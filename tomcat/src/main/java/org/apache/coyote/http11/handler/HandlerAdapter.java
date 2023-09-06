@@ -12,13 +12,13 @@ public class HandlerAdapter {
     public RequestHandler find(final HttpRequest request) {
         HttpRequestUri uri = request.getUri();
 
-        if (uri.contains(LOGIN_URI)) {
+        if (uri.containsPath(LOGIN_URI)) {
             return new LoginHandler();
         }
-        if (uri.same(DEFAULT_URI)) {
+        if (uri.samePath(DEFAULT_URI)) {
             return new DefaultHandler();
         }
-        if (uri.contains(REGISTER_URI)) {
+        if (uri.containsPath(REGISTER_URI)) {
             return new RegisterHandler();
         }
         return new ResourceHandler();

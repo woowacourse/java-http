@@ -59,7 +59,7 @@ public abstract class RequestHandler {
 
     HttpResponse getResource(HttpRequest httpRequest, HttpStatusCode code) throws IOException {
         HttpRequestUri requestUri = httpRequest.getUri();
-        final URL resource = getClass().getClassLoader().getResource(DIRECTORY + requestUri.getValue());
+        final URL resource = getClass().getClassLoader().getResource(DIRECTORY + requestUri.getPath());
 
         File file = new File(resource.getFile());
         String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);

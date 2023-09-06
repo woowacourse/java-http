@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -9,8 +7,8 @@ import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StaticResourceContentType;
 
 public class StaticResourceHandler implements RequestHandler {
 
@@ -19,17 +17,12 @@ public class StaticResourceHandler implements RequestHandler {
         if (!handleable(httpRequest)) {
             return HttpResponse.notFound();
         }
-        final String target = httpRequest.getRequestTarget();
-        final String responseBody = new String(getResourceByteArray(target));
-        final Optional<StaticResourceContentType> findContentType =
-            StaticResourceContentType.find(target);
 
-        return findContentType.map(
-            contentType -> HttpResponse.ok(
-                contentType.convertToHeaderMessage(UTF_8),
-                responseBody
-            )
-        ).orElseGet(HttpResponse::notFound);
+        final String requestTarget = httpRequest.getRequestTarget();
+        final String body = new String(getResourceByteArray(requestTarget));
+        final Optional<ContentType> findContentType = ContentType.find(requestTarget);
+
+        return createResponse(findContentType, body);
     }
 
     @Override
@@ -37,16 +30,27 @@ public class StaticResourceHandler implements RequestHandler {
         return Objects.nonNull(getResource(httpRequest.getRequestTarget()));
     }
 
+    private URL getResource(final String targetUrl) {
+        return getClass().getClassLoader().getResource("static" + targetUrl);
+    }
+
     private byte[] getResourceByteArray(final String targetUrl) throws IOException {
         final URL resource = getResource(targetUrl);
-        if (Objects.isNull(resource)) {
-            throw new IllegalArgumentException("해당 리소스가 존재하지 않습니다. 경로 : " + targetUrl);
-        }
 
         return Files.readAllBytes(new File(resource.getFile()).toPath());
     }
 
-    private URL getResource(final String targetUrl) {
-        return getClass().getClassLoader().getResource("static" + targetUrl);
+    private HttpResponse createResponse(
+        final Optional<ContentType> contentType,
+        final String body
+    ) {
+        if (contentType.isEmpty()) {
+            return HttpResponse.notFound();
+        }
+        final ContentType responseContentType = contentType.get();
+        if (responseContentType == ContentType.HTML) {
+            return HttpResponse.ok(ContentType.HTML_UTF8, body);
+        }
+        return HttpResponse.ok(responseContentType, body);
     }
 }

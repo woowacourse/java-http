@@ -13,8 +13,9 @@ import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.RequestHandlerMapper;
+import org.apache.coyote.http11.header.HeaderName;
+import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,14 +66,14 @@ public class Http11Processor implements Runnable, Processor {
             headerLines.add(headerLine);
             headerLine = bufferedReader.readLine();
         }
-        final HttpRequestHeaders headers = new HttpRequestHeaders(headerLines);
+        final Headers headers = new Headers(headerLines);
 
         final String contentLengthHeader = "content-length";
         String body = "";
 
-        if (headers.containsHeader(contentLengthHeader)) {
+        if (headers.containsHeader(HeaderName.CONTENT_LENGTH.toString())) {
             final String contentLengthValue = headers.getHeaderValue(contentLengthHeader);
-            final int bodyLength = Integer.parseInt(contentLengthValue);
+            final int bodyLength = Integer.parseInt(contentLengthValue.strip());
 
             final StringBuilder bodyBuilder = new StringBuilder();
 

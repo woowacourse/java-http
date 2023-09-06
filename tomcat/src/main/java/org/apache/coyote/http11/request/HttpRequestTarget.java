@@ -4,6 +4,9 @@ import java.util.Map;
 
 public class HttpRequestTarget {
 
+    private static final char QUERY_STRING_DELIMITER = '?';
+    private static final String EMPTY_QUERY_STRING = "";
+    
     private final String path;
     private final HttpRequestQueryString queryString;
 
@@ -13,26 +16,26 @@ public class HttpRequestTarget {
     }
 
     private String extractPath(final String targetUrl) {
-        final int questionMarkIndex = targetUrl.indexOf('?');
-        if (questionMarkIndex != -1) {
-            return targetUrl.substring(0, questionMarkIndex);
+        final int delimiterIndex = targetUrl.indexOf(QUERY_STRING_DELIMITER);
+        if (delimiterIndex != -1) {
+            return targetUrl.substring(0, delimiterIndex);
         }
         return targetUrl;
     }
 
     private String extractQueryString(final String targetUrl) {
-        final int questionMarkIndex = targetUrl.indexOf('?');
-        if (questionMarkIndex != -1) {
-            return targetUrl.substring(questionMarkIndex + 1);
+        final int delimiterIndex = targetUrl.indexOf(QUERY_STRING_DELIMITER);
+        if (delimiterIndex != -1) {
+            return targetUrl.substring(delimiterIndex + 1);
         }
-        return "";
+        return EMPTY_QUERY_STRING;
     }
 
     public String getPath() {
         return path;
     }
 
-    public boolean containsParameterKey(final String parameterKey) {
+    public boolean containsParameter(final String parameterKey) {
         return queryString.contains(parameterKey);
     }
 

@@ -18,7 +18,7 @@ public class HttpRequestQueryString {
         parameters = parseQueryString(queryString);
     }
 
-    private Map<String, String> parseQueryString(String queryString) {
+    private Map<String, String> parseQueryString(final String queryString) {
         if (Objects.isNull(queryString) || queryString.isEmpty()) {
             return Collections.emptyMap();
         }

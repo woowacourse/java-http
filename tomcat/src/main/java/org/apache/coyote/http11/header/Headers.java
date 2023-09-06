@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.header;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,21 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpRequestHeaders {
+public class Headers {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_PARTS_COUNT = 2;
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final Map<String, String> headers;
+    private final Map<String, String> values;
 
-    public HttpRequestHeaders(final List<String> header) {
-        this.headers = parseHeader(header);
+    public Headers(final List<String> header) {
+        this.values = parseHeader(header);
     }
 
-    public static HttpRequestHeaders empty() {
-        return new HttpRequestHeaders(Collections.emptyList());
+    public static Headers empty() {
+        return new Headers(Collections.emptyList());
     }
 
     private Map<String, String> parseHeader(final List<String> headerLines) {
@@ -35,21 +35,21 @@ public class HttpRequestHeaders {
     }
 
     public boolean containsHeader(final String headerName) {
-        return headers.containsKey(headerName);
+        return values.containsKey(headerName.toLowerCase());
     }
 
     public String getHeaderValue(final String headerName) {
-        return headers.get(headerName.toLowerCase());
+        return values.get(headerName.toLowerCase());
     }
 
-    public Map<String, String> getHeaders() {
-        return new HashMap<>(headers);
+    public Map<String, String> getValues() {
+        return new HashMap<>(values);
     }
 
     @Override
     public String toString() {
-        return "HttpRequestHeaders{" +
-            "headers=" + headers +
-            '}';
+        return values.entrySet().stream()
+            .map(entry -> entry.getKey() + " = " + entry.getValue())
+            .collect(Collectors.joining(System.lineSeparator()));
     }
 }

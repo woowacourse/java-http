@@ -18,17 +18,17 @@ public class RequestHeaders {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final Map<RequestHeaderType, RequestHeader> headers;
+    private final Map<RequestHeaderType, String> headers;
     private final CookieRequestHeader cookieRequestHeader;
 
-    private RequestHeaders(final Map<RequestHeaderType, RequestHeader> headers, final CookieRequestHeader cookieRequestHeader) {
+    private RequestHeaders(final Map<RequestHeaderType, String> headers, final CookieRequestHeader cookieRequestHeader) {
         this.headers = headers;
         this.cookieRequestHeader = cookieRequestHeader;
     }
 
     public static RequestHeaders from(final String lines, final String delimiter) {
         log.debug("Request Headers: ");
-        final Map<RequestHeaderType, RequestHeader> headers = new EnumMap<>(RequestHeaderType.class);
+        final Map<RequestHeaderType, String> headers = new EnumMap<>(RequestHeaderType.class);
         CookieRequestHeader cookieHeader = CookieRequestHeader.blank();
         for(final String line : lines.split(delimiter)) {
             final List<String> parsedHeader = parseByDelimiter(line);
@@ -41,7 +41,7 @@ public class RequestHeaders {
             final RequestHeaderType headerType = RequestHeaderType.from(headerName);
             if (!headerType.isUnsupportedHeader()) {
                 log.debug("\t\tHeader : {}", line);
-                headers.put(headerType, headerType.saveRequestHeader(headerValue.trim()));
+                headers.put(headerType, headerType.saveValue(headerValue.trim()));
             } else log.trace("지원하지 않는 헤더 타입. 헤더 이름: {}, 헤더 값: {}", headerName, headerValue);
         }
         return new RequestHeaders(headers, cookieHeader);
@@ -61,12 +61,12 @@ public class RequestHeaders {
 
     public int getContentLength() {
         if (headers.containsKey(RequestHeaderType.CONTENT_LENGTH)) {
-            return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH).getValue());
+            return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH));
         }
         return 0;
     }
 
     public CookieRequestHeader getCookieHeader() {
-        return this.cookieRequestHeader;
+        return cookieRequestHeader;
     }
 }

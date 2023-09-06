@@ -1,20 +1,21 @@
 package org.apache.coyote.httprequest.header;
 
-import org.apache.coyote.httprequest.exception.UnsupportedHeaderTypeException;
-
 import java.util.Arrays;
+import java.util.function.Function;
 
 public enum RequestHeaderType {
-    HOST("Host"),
-    CONNECTION("Connection"),
-    ACCEPT("Accept"),
-    UNSUPPORTED_HEADER("지원하지 않는 타입"),
-    CONTENT_LENGTH("Content-Length");
+    HOST("Host", HostHeader::from),
+    CONNECTION("Connection", ConnectionHeader::from),
+    ACCEPT("Accept", AcceptHeader::from),
+    CONTENT_LENGTH("Content-Length", ContentLengthHeader::new),
+    UNSUPPORTED_HEADER("Unsupported-Header", UnsupportedHeader::new);
 
     private final String headerName;
+    private final Function<String, RequestHeader> headerFactory;
 
-    RequestHeaderType(final String headerName) {
+    RequestHeaderType(final String headerName, final Function<String, RequestHeader> headerFactory) {
         this.headerName = headerName;
+        this.headerFactory = headerFactory;
     }
 
     public static RequestHeaderType from(final String headerName) {
@@ -28,17 +29,7 @@ public enum RequestHeaderType {
         return this == UNSUPPORTED_HEADER;
     }
 
-    public RequestHeader saveRequestHeader(final String value) {
-        if (this == HOST) {
-            return HostHeader.from(value);
-        } else if (this == CONNECTION) {
-            return ConnectionHeader.from(value);
-        } else if (this == ACCEPT) {
-            return AcceptHeader.from(value);
-        } else if (this == CONTENT_LENGTH) {
-            return new ContentLengthHeader(value);
-        } else {
-            throw new UnsupportedHeaderTypeException();
-        }
+    public String saveValue(final String value) {
+        return headerFactory.apply(value).getValue();
     }
 }

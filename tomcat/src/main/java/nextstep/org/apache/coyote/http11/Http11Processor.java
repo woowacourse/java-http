@@ -81,11 +81,11 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String response = null;
-            String requestedUrl = startLine.getUrl();
+            String requestPath = startLine.getPath();
 
-            Object handler = handlerMapper.mapHandler(requestedUrl);
+            Object handler = handlerMapper.mapHandler(requestPath);
             if (Objects.nonNull(handler) && startLine.getHttpMethod().equals("POST")
-                    && requestedUrl.equals("/login")) {
+                    && requestPath.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.login(httpCookie,
                         parsedBody.get("account"),
@@ -102,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (Objects.nonNull(handler) && startLine.getHttpMethod().equals("POST")
-                    && requestedUrl.equals("/register")) {
+                    && requestPath.equals("/register")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.register(parsedBody.get("account"),
                         parsedBody.get("password"), parsedBody.get("email"));
@@ -118,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 // Todo: createResponseBody() pageController로 위임해보기
                 // Todo: 헤더에 담긴 sessionId 유효성 검증
-                if (requestedUrl.contains("/login") && httpCookie.hasCookie("JSESSIONID")) {
+                if (requestPath.contains("/login") && httpCookie.hasCookie("JSESSIONID")) {
                     response = String.join("\r\n",
                             "HTTP/1.1 302 Found ",
                             "Location: /index.html ",
@@ -128,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                String responseBody = createResponseBody(requestedUrl);
+                String responseBody = createResponseBody(requestPath);
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         String.format("Content-Type: %s;charset=utf-8 ", contentType),

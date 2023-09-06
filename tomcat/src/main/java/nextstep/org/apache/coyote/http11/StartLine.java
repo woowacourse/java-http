@@ -8,27 +8,27 @@ public class StartLine {
 
     private static final String START_LINE_DELIMITER = " ";
     private static final int HTTP_METHOD_INDEX = 0;
-    private static final int URL_INDEX = 1;
+    private static final int REQUEST_TARGET_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
     private static final String QUERY_PARAM_DELIMITER = "?";
 
     private String httpMethod;
-    private String url;
+    private String path;
     private String httpVersion;
     private String queryString = null;
 
     public StartLine(String startLine) {
         List<String> parsed = Arrays.asList(startLine.split(START_LINE_DELIMITER));
         httpMethod = parsed.get(HTTP_METHOD_INDEX);
-        parseUrl(parsed);
+        parsePath(parsed);
         httpVersion = parsed.get(HTTP_VERSION_INDEX);
     }
 
-    private void parseUrl(List<String> parsed) {
-        url = parsed.get(URL_INDEX);
-        if (url.contains(QUERY_PARAM_DELIMITER)) {
-            int queryParamIndex = url.indexOf(QUERY_PARAM_DELIMITER);
-            url = parsed.get(URL_INDEX).substring(0, queryParamIndex);
+    private void parsePath(List<String> parsed) {
+        path = parsed.get(REQUEST_TARGET_INDEX);
+        if (path.contains(QUERY_PARAM_DELIMITER)) {
+            int queryParamIndex = path.indexOf(QUERY_PARAM_DELIMITER);
+            path = parsed.get(REQUEST_TARGET_INDEX).substring(0, queryParamIndex);
             queryString = parsed.get(queryParamIndex + 1);
         }
     }
@@ -41,8 +41,8 @@ public class StartLine {
         return httpMethod;
     }
 
-    public String getUrl() {
-        return url;
+    public String getPath() {
+        return path;
     }
 
     public String getQueryString() {

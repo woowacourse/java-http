@@ -12,8 +12,8 @@ class QueryStringUtilTest {
         final String queryString = "account=irene&password=1234";
         final Map<String, String> parse = QueryStringUtil.parse(queryString);
 
-        assertThat(parse.get("account")).isEqualTo("irene");
-        assertThat(parse.get("password")).isEqualTo("1234");
+        assertThat(parse).containsEntry("account", "irene")
+                .containsEntry("password", "1234");
     }
 
     @Test

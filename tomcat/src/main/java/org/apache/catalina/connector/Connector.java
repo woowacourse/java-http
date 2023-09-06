@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,20 +17,20 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int MAX_THREAD = 10;
+    private static final int DEFAULT_THREAD = 1;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD);
     }
 
     public Connector(final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(Math.max(1, maxThread));
+        this.executorService = Executors.newFixedThreadPool(checkMaxThread(maxThread));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -54,6 +55,10 @@ public class Connector implements Runnable {
 
     private int checkAcceptCount(final int acceptCount) {
         return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+    }
+
+    private int checkMaxThread(int maxThread) {
+        return Math.max(maxThread, DEFAULT_THREAD);
     }
 
     public void start() {
@@ -90,10 +95,32 @@ public class Connector implements Runnable {
 
     public void stop() {
         stopped = true;
+        gracefulShutdown();
         try {
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    /***
+     * <a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ExecutorService.html">Graceful Shutdown</a>
+     */
+    private void gracefulShutdown() {
+        executorService.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            executorService.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 }

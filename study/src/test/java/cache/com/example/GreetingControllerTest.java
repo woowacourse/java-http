@@ -29,7 +29,7 @@ class GreetingControllerTest {
     void testNoCachePrivate() {
         final var response = webTestClient
                 .get()
-                .uri("/")
+                .uri("/cache-control")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())

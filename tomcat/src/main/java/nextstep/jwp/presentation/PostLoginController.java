@@ -46,12 +46,11 @@ public class PostLoginController implements Controller {
             httpRequestParser.addHeader("Cookie", SESSION_ID + "=" + uuid);
             return;
         }
-        //cookies에 잇는 cookie들로 Cookie header 만들어줘
         String existedCookie = joinExistedCookie(cookies);
         httpRequestParser.addHeader("Cookie", existedCookie + "; " + SESSION_ID + "=" + uuid);
     }
 
-    private static String joinExistedCookie(Map<String, String> cookies) {
+    private String joinExistedCookie(Map<String, String> cookies) {
         return cookies.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .reduce((cookie1, cookie2) -> cookie1 + "; " + cookie2)

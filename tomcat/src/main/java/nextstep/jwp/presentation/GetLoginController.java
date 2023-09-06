@@ -24,19 +24,6 @@ public class GetLoginController implements Controller {
         if (cookies.containsKey(SESSION_ID) && SessionManager.isAlreadyLogin(cookies.get(SESSION_ID))) {
             return httpResponseBuilder.buildStaticFileRedirectResponse(httpRequestParser, "/index.html");
         }
-        processQueryString(httpRequestParser);
         return httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, "/login.html");
-    }
-
-    private void processQueryString(HttpRequestParser httpRequestParser) {
-        Map<String, String> queryStrings = httpRequestParser.findQueryStrings();
-        if (queryStrings.containsKey("account") && queryStrings.containsKey("password")) {
-            String account = queryStrings.get("account");
-            String password = queryStrings.get("password");
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
-            if (user.checkPassword(password)) {
-                log.info("{}", user);
-            }
-        }
     }
 }

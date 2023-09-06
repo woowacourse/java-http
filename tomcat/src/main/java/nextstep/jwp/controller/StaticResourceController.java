@@ -5,8 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Stream;
-import nextstep.jwp.controller.rest.ResponseEntity;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;

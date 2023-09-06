@@ -1,4 +1,4 @@
-package org.apache.catalina.manager;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -5,17 +5,17 @@ import java.util.List;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.rest.LoginController;
 import nextstep.jwp.controller.rest.RegisterController;
-import nextstep.jwp.controller.rest.ResponseEntity;
+import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.controller.StaticResourceController;
 import nextstep.servlet.filter.Interceptor;
-import nextstep.servlet.filter.LoginInterceptor;
+import nextstep.servlet.filter.SessionInterceptor;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class DispatcherServlet {
 
     private final List<Interceptor> interceptors = List.of(
-            new LoginInterceptor()
+            new SessionInterceptor()
     );
 
     private final List<Controller> controllers = List.of(

@@ -4,9 +4,10 @@ import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
 import static nextstep.jwp.controller.StaticResourceController.UNAUTHORIZED_PAGE;
 
 import java.util.NoSuchElementException;
+import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.manager.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;

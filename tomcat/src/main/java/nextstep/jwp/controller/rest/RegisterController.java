@@ -3,6 +3,7 @@ package nextstep.jwp.controller.rest;
 import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
 import static nextstep.jwp.controller.StaticResourceController.REGISTER_PAGE;
 
+import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpMethod;

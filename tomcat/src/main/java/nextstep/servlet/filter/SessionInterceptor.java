@@ -5,7 +5,7 @@ import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class LoginInterceptor implements Interceptor {
+public class SessionInterceptor implements Interceptor {
 
     @Override
     public boolean supports(HttpRequest request) {

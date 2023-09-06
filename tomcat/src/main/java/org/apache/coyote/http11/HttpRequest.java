@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.catalina.manager.Session;
-import org.apache.catalina.manager.SessionManager;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 

@@ -13,7 +13,8 @@ public class Handler {
             HttpResponse response = requestHandler.handle(request);
             return HttpResponseParser.parse(response);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            HttpResponse response = HttpResponse.found("/500.html");
+            return HttpResponseParser.parse(response);
         }
     }
 }

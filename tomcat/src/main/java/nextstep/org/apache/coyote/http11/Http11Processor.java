@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     public static final int KEY_INDEX = 0;
     public static final int VALUE_INDEX = 1;
     public static final String EMPTY_LINE = "";

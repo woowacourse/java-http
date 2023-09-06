@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.Protocol;
 
 public class RequestParser {
 
@@ -26,22 +29,22 @@ public class RequestParser {
     }
 
     public Request parse() throws IOException {
-        RequestUrl requestUrl = readUrl(bufferedReader.readLine());
-        RequestContentType requestContentType = getResourceType();
+        RequestLine requestLine = readUrl(bufferedReader.readLine());
+        ContentType contentType = getResourceType();
 
-        return new Request(requestUrl, requestContentType);
+        return new Request(requestLine, contentType);
     }
 
-    private RequestUrl readUrl(String message) {
-        String pathLine = readLine(message);
+    private RequestLine readUrl(String message) {
+        String path = readLine(message);
 
-        String requestPath = pathLine.split(QUERY_STRING_SPLIT_DELIMITER)[0];
-        if (hasNoQueryParameter(pathLine)) {
-            return RequestUrl.of(requestPath, new HashMap<>());
+        String requestPath = path.split(QUERY_STRING_SPLIT_DELIMITER)[0];
+        if (hasNoQueryParameter(path)) {
+            return new RequestLine(HttpMethod.GET, requestPath, Protocol.HTTP1_1, new HashMap<>()); // 차후에 from 사용
         }
 
-        Map<String, String> requestQueryString = getRequestQueryString(pathLine);
-        return RequestUrl.of(requestPath, requestQueryString);
+        Map<String, String> requestQueryString = getRequestQueryString(path);
+        return new RequestLine(HttpMethod.GET, requestPath, Protocol.HTTP1_1, requestQueryString);
     }
 
     private String readLine(String message) {
@@ -64,14 +67,14 @@ public class RequestParser {
         return requestQueryString;
     }
 
-    private RequestContentType getResourceType() throws IOException {
+    private ContentType getResourceType() throws IOException {
         String header;
         while ((header = bufferedReader.readLine()) != null) {
             if (header.startsWith(ACCEPT_HEADER) || header.startsWith(CONTENT_TYPE)) {
                 String resourceType = readLine(header);
-                return RequestContentType.findResourceType(resourceType.split(SPLIT_VALUE_DELIMITER)[0]);
+                return ContentType.from(resourceType.split(SPLIT_VALUE_DELIMITER)[0]);
             }
         }
-        return RequestContentType.HTML;
+        return ContentType.HTML;
     }
 }

@@ -10,7 +10,7 @@ public class Response {
         this.responseBody = responseBody;
     }
 
-    public String getResponse() {
-        return String.join("\r\n", responseHeader.getHeader(), " ", responseBody.getBody());
+    public byte[] getResponseBytes() {
+        return String.join("\r\n", responseHeader.getHeader(), responseBody.getBody()).getBytes();
     }
 }

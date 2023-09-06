@@ -18,11 +18,11 @@ public class ResponseHeader {
 
     public String getHeader() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(protocol.getValue() + " " + httpStatus.getStatusCode() + " " + httpStatus.getStatus() + " ");
+        stringBuilder.append(protocol.getValue() + " " + httpStatus.getStatusCode() + " " + httpStatus.getStatus() + "\r\n");
         for (Entry<String, String> entry : headers.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            stringBuilder.append(key + ": " + value + " ");
+            stringBuilder.append(key + ": " + value + "\r\n");
         }
         return stringBuilder.toString();
     }

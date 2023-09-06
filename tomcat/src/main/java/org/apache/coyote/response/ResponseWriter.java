@@ -17,11 +17,11 @@ public class ResponseWriter {
     }
 
     public void writeResponse(Request request) throws URISyntaxException, IOException {
-        String responseBody = readResponseBody(request.getUrl());
-        String response = getResponse(request, responseBody);
+//        String responseBody = readResponseBody(request.getUrl());
+//        String response = getResponse(request, responseBody);
 
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+//        outputStream.write(response.getBytes());
+//        outputStream.flush();
     }
 
     private String readResponseBody(URL resource) throws URISyntaxException, IOException {
@@ -39,9 +39,9 @@ public class ResponseWriter {
 
     private String getResponseHeader(Request request, String responseBody) {
         String status = "200 OK ";
-        if (!request.isExists()) {
-            status = "404 NOT_FOUND ";
-        }
+//        if (!request.isExists()) {
+//            status = "404 NOT_FOUND ";
+//        }
 
         return String.join("\r\n",
                 "HTTP/1.1 " + status,

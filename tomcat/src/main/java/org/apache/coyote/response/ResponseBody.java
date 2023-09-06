@@ -4,8 +4,12 @@ public class ResponseBody {
 
     private final String body;
 
-    ResponseBody(String body) {
+    public ResponseBody(String body) {
         this.body = body;
+    }
+
+    public String getLength() {
+        return String.valueOf(body.getBytes().length);
     }
 
     public String getBody() {

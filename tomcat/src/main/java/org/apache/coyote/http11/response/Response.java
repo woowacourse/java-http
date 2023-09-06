@@ -12,19 +12,6 @@ import static org.apache.coyote.http11.response.StatusCode.FOUND;
 
 public class Response {
 
-    public static final Response NOT_FOUND_RESPONSE;
-    public static final Response UNAUTHORIZED_RESPONSE;
-
-    static {
-        final Headers notFoundHeaders = new Headers();
-        notFoundHeaders.addHeader(LOCATION, "/404.html");
-        NOT_FOUND_RESPONSE = new Response(new StatusLine(FOUND), notFoundHeaders, "");
-
-        final Headers unauthorizedHeaders = new Headers();
-        unauthorizedHeaders.addHeader(LOCATION, "/401.html");
-        UNAUTHORIZED_RESPONSE = new Response(new StatusLine(FOUND), unauthorizedHeaders, "");
-    }
-
     private final StatusLine statusLine;
     private final Headers headers;
     private final String body;
@@ -45,6 +32,18 @@ public class Response {
         final Headers redirectHeaders = new Headers();
         redirectHeaders.addHeader(LOCATION, path);
         return new Response(new StatusLine(FOUND), redirectHeaders, "");
+    }
+
+    public static Response getNotFoundResponse() {
+        final Headers notFoundHeaders = new Headers();
+        notFoundHeaders.addHeader(LOCATION, "/404.html");
+        return new Response(new StatusLine(FOUND), notFoundHeaders, "");
+    }
+
+    public static Response getUnauthorizedResponse() {
+        final Headers unauthorizedHeaders = new Headers();
+        unauthorizedHeaders.addHeader(LOCATION, "/401.html");
+        return new Response(new StatusLine(FOUND), unauthorizedHeaders, "");
     }
 
     public void decideContentType(final Request request) {

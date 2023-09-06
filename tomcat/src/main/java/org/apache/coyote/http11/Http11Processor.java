@@ -25,7 +25,7 @@ import java.util.UUID;
 import static org.apache.coyote.http11.header.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.http11.request.RequestMethod.GET;
 import static org.apache.coyote.http11.request.RequestMethod.POST;
-import static org.apache.coyote.http11.response.Response.UNAUTHORIZED_RESPONSE;
+import static org.apache.coyote.http11.response.Response.getUnauthorizedResponse;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -102,11 +102,11 @@ public class Http11Processor implements Runnable, Processor {
             }
             final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account);
             if (maybeUser.isEmpty()) {
-                return UNAUTHORIZED_RESPONSE;
+                return getUnauthorizedResponse();
             }
             final User user = maybeUser.get();
             if (!user.checkPassword(requestParameters.getValue("password"))) {
-                return UNAUTHORIZED_RESPONSE;
+                return getUnauthorizedResponse();
             }
             log.info("user: {}", user);
 
@@ -131,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
             return Response.getRedirectResponse("login");
         }
 
-        return Response.NOT_FOUND_RESPONSE;
+        return Response.getNotFoundResponse();
     }
 
     private Session getSession(final Request request, final Headers headers) {
@@ -153,7 +153,7 @@ public class Http11Processor implements Runnable, Processor {
         final URL fileURL = classLoader.getResource(name);
 
         if (fileURL == null) {
-            return Response.NOT_FOUND_RESPONSE;
+            return Response.getNotFoundResponse();
         }
 
         final URI fileURI = fileURL.toURI();

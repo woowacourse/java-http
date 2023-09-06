@@ -1,10 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final RequestGenerator REQUEST_GENERATOR = new RequestGenerator();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -43,16 +47,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream();
-                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            final RequestGenerator requestGenerator = new RequestGenerator();
-            final Request request = requestGenerator.generate(bufferedReader);
+        try (final InputStream inputStream = connection.getInputStream();
+                final OutputStream outputStream = connection.getOutputStream();
+                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream))) {
+            final Request request = REQUEST_GENERATOR.generate(bufferedReader);
             final Container context = findContext(request);
             final Response response = context.service(request);
 
-            outputStream.write(response.convertResponseMessage().getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
+            bufferedWriter.write(response.convertResponseMessage());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

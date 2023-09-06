@@ -130,7 +130,7 @@ public class Http11Processor implements Runnable, Processor {
         final String email = body.get("email");
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        writeRedirectResponse(outputStream, "/login.html");
+        writeResponse(outputStream, getLoginResponse(user));
     }
 
     private void writeLoginResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {

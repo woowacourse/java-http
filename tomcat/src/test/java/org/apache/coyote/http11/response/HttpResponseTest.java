@@ -19,7 +19,7 @@ class HttpResponseTest {
 		final HttpResponse actual = HttpResponse.redirect(location);
 
 		final HttpHeaders httpHeaders = HttpHeaders.of("", MimeType.HTML);
-		httpHeaders.put(LOCATION.getValue(), location);
+		httpHeaders.addLocation(location);
 		final HttpResponse expected = new HttpResponse(
 			TEMPORARILY_MOVED_302,
 			"",
@@ -28,5 +28,18 @@ class HttpResponseTest {
 		assertThat(actual)
 			.usingRecursiveComparison()
 			.isEqualTo(expected);
+	}
+
+	@Test
+	@DisplayName("set-cookie를 추가할 수 있다.")
+	void addSetCookie() {
+		final String setCookieValue = "set-cookie Value";
+		final String location = "/index.html";
+		final HttpResponse actual = HttpResponse.redirect(location);
+
+		actual.addSetCookie(setCookieValue);
+
+		assertThat(actual.buildResponse())
+			.contains(String.format("%s: %s", SET_COOKIE.getValue(), setCookieValue));
 	}
 }

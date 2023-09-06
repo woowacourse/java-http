@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.headers.HttpHeaderType.*;
 import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
 
@@ -17,7 +16,6 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.QueryParser;
@@ -104,24 +102,18 @@ public class LoginHandler implements HttpHandler {
 	}
 
 	private static HttpResponse loginSuccessResponse(final User user, final HttpRequest request) {
-		final String body = "";
-		final HttpHeaders headers = HttpHeaders.of(body, HTML);
-		headers.put(LOCATION.getValue(), LOGIN_SUCCESS_LOCATION);
+		final HttpResponse response = HttpResponse.redirect(LOGIN_SUCCESS_LOCATION);
 		if (!request.isExistJSessionId()) {
-			issueJSessionId(user, headers);
+			issueJSessionId(user, response);
 		}
-		return new HttpResponse(
-			HttpStatusCode.TEMPORARILY_MOVED_302,
-			body,
-			headers
-		);
+		return response;
 	}
 
-	private static void issueJSessionId(User user, HttpHeaders headers) {
+	private static void issueJSessionId(final User user, final HttpResponse response) {
 		final String jSessionId = UUID.randomUUID().toString();
 		final Session session = new Session(jSessionId);
 		session.setAttributes(SESSION_USER_KEY, user);
 		SessionManager.add(session);
-		headers.put(SET_COOKIE.getValue(), JSESSIONID_KEY + jSessionId);
+		response.addSetCookie(JSESSIONID_KEY + jSessionId);
 	}
 }

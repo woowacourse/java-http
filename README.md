@@ -13,11 +13,11 @@
     - [x] body
     - [x] endPoint
     - [x] headers
-- [ ] http 응답 구현하기(리팩터링)
-    - [x\] redirect 응답을 생성하기
-    - [ ] httpStatusCode
-    - [ ] body
-    - [ ] httpHeaders
+- [x] http 응답 구현하기(리팩터링)
+    - [x] redirect 응답을 생성하기
+    - [x] httpStatusCode
+    - [x] body
+    - [x] httpHeaders
 - [x] /login API 요청 처리
     - [x] 요청한 회원을 조회 후 로깅
     - [x] login.html 반환
@@ -36,4 +36,3 @@
 - [x] http session
     - [x] 로그인된 상태에서 GET /login 접근 시 index.html로 리다이렉트 처리
     - [x] 로그인 성공하면 session을 저장하기
-- [ ] HeaderResolver util 클래스 만들기

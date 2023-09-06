@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import static org.apache.coyote.http11.headers.HttpHeaderType.*;
 import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
@@ -77,13 +78,12 @@ class HttpHeadersTest {
 
 		final HttpHeaders actual = HttpHeaders.of(body, HTML);
 
-		final HttpHeaders expected = new HttpHeaders();
-		expected.put(CONTENT_TYPE.getValue(), HTML.getValue());
-		expected.put(CONTENT_LENGTH.getValue(), "5");
-
-		assertThat(actual)
-			.usingRecursiveComparison()
-			.isEqualTo(expected);
+		assertAll(
+			() -> assertThat(actual.get(CONTENT_TYPE.getValue()))
+				.contains(HTML.getValue()),
+			() -> assertThat(actual.get(CONTENT_LENGTH.getValue()))
+				.contains("5")
+		);
 	}
 
 	@Test

@@ -47,10 +47,10 @@ public class HttpHeaders {
 	}
 
 	public static HttpHeaders of(final String body, final MimeType mimeType) {
-		final HttpHeaders headers = new HttpHeaders();
+		final Map<String, String> headers = new LinkedHashMap<>();
 		headers.put(CONTENT_TYPE.getValue(), mimeType.getValue());
 		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
-		return headers;
+		return new HttpHeaders(headers, new HttpCookie());
 	}
 
 	public String build() {
@@ -58,13 +58,6 @@ public class HttpHeaders {
 			.map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
 			.collect(joining(LINE_SEPARATOR))
 			+ LINE_SEPARATOR;
-	}
-
-	public void put(final String key, final String value) {
-		if (key.equals(COOKIE.getValue())) {
-			//추후 cookie를 추가하는 로직이 생기면 그때 처리
-		}
-		headers.put(key, value);
 	}
 
 	public void addLocation(final String location) {

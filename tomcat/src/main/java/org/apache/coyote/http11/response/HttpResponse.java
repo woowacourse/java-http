@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.headers.HttpHeaderType.*;
 import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.apache.coyote.http11.request.HttpVersion.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
@@ -22,8 +21,12 @@ public class HttpResponse {
 	public static HttpResponse redirect(final String location) {
 		final String body = "";
 		final HttpHeaders httpHeaders = HttpHeaders.of(body, HTML);
-		httpHeaders.put(LOCATION.getValue(), location);
+		httpHeaders.addLocation(location);
 		return new HttpResponse(TEMPORARILY_MOVED_302, body, httpHeaders);
+	}
+
+	public void addSetCookie(final String setCookieValue) {
+		headers.addSetCookie(setCookieValue);
 	}
 
 	public String buildResponse() {

@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 public class DefaultPath {
 
     private static String DEFAULT_PATH_PATTERN = "^/([\\w/.-]*)$";
+    private static Pattern compiledPattern = Pattern.compile(DEFAULT_PATH_PATTERN);
 
     private final String value;
 
@@ -19,7 +20,6 @@ public class DefaultPath {
     }
 
     private static void validateDefaultPath(String path) {
-        Pattern compiledPattern = Pattern.compile(DEFAULT_PATH_PATTERN);
         Matcher matcher = compiledPattern.matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("유효하지 않은 URI입니다. 올바른 URI인지 다시 확인해주세요.");

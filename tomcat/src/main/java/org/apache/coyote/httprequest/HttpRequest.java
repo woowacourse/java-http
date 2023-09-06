@@ -70,18 +70,18 @@ public class HttpRequest {
 
     public Session getSession(final boolean create) {
         final SessionManager sessionManager = SessionManager.getInstance();
-        if (hasJSessionId()) {
-            final String jSessionId = requestHeaders.getCookieHeader().getJSessionId();
-            final Session session = sessionManager.findSession(jSessionId);
-            if (session == null && create) {
-                return createSession(sessionManager);
-            }
-            return session;
+        final String jSessionId = requestHeaders.getCookieHeader().getJSessionId();
+        if (jSessionId == null) {
+            return createSession(sessionManager);
         }
-        return createSession(sessionManager);
+        final Session session = sessionManager.findSession(jSessionId);
+        if (session == null && create) {
+            return createSession(sessionManager);
+        }
+        return session;
     }
 
-    public Session createSession(final SessionManager sessionManager) {
+    private Session createSession(final SessionManager sessionManager) {
         final Session newSession = new Session(UUID.randomUUID().toString());
         sessionManager.add(newSession);
         return newSession;

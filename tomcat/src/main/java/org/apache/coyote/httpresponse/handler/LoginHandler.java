@@ -2,7 +2,7 @@ package org.apache.coyote.httpresponse.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.common.CookieHeader;
+import org.apache.coyote.http11.cookie.CookieResponseHeader;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.QueryString;
@@ -62,10 +62,10 @@ public class LoginHandler implements Handler {
         throw new UnauthorizedException("비밀번호가 잘못되었습니다.");
     }
 
-    private CookieHeader createCookie(final HttpRequest request, final User user) {
+    private CookieResponseHeader createCookie(final HttpRequest request, final User user) {
         final Session session = request.getSession(true);
         session.setAttribute(SESSION_ATTRIBUTE_OF_USER, user);
-        return CookieHeader.createByJSessionId(session.getId());
+        return CookieResponseHeader.createByJSessionId(session.getId());
     }
 
     private HttpResponse handleGet(final HttpRequest request) {

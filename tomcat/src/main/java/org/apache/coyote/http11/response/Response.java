@@ -7,6 +7,8 @@ import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.request.Request;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.header.ResponseHeader.LOCATION;
+import static org.apache.coyote.http11.response.StatusCode.FOUND;
 
 public class Response {
 
@@ -15,12 +17,12 @@ public class Response {
 
     static {
         final Headers notFoundHeaders = new Headers();
-        notFoundHeaders.addHeader(ResponseHeader.LOCATION, "/404.html");
-        NOT_FOUND_RESPONSE = new Response(new StatusLine(StatusCode.FOUND), notFoundHeaders, "");
+        notFoundHeaders.addHeader(LOCATION, "/404.html");
+        NOT_FOUND_RESPONSE = new Response(new StatusLine(FOUND), notFoundHeaders, "");
 
         final Headers unauthorizedHeaders = new Headers();
-        unauthorizedHeaders.addHeader(ResponseHeader.LOCATION, "/401.html");
-        UNAUTHORIZED_RESPONSE = new Response(new StatusLine(StatusCode.FOUND), unauthorizedHeaders, "");
+        unauthorizedHeaders.addHeader(LOCATION, "/401.html");
+        UNAUTHORIZED_RESPONSE = new Response(new StatusLine(FOUND), unauthorizedHeaders, "");
     }
 
     private final StatusLine statusLine;
@@ -37,6 +39,12 @@ public class Response {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
+    }
+
+    public static Response getRedirectResponse(final String path) {
+        final Headers redirectHeaders = new Headers();
+        redirectHeaders.addHeader(LOCATION, path);
+        return new Response(new StatusLine(FOUND), redirectHeaders, "");
     }
 
     public void decideContentType(final Request request) {
@@ -69,6 +77,18 @@ public class Response {
                 headers.parseResponse(),
                 "",
                 body);
+    }
+
+    public StatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     @Override

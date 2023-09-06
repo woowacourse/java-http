@@ -10,8 +10,6 @@ import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.request.Session;
 import org.apache.coyote.http11.request.SessionManager;
 import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.response.StatusCode;
-import org.apache.coyote.http11.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.coyote.http11.header.ResponseHeader.LOCATION;
 import static org.apache.coyote.http11.header.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.http11.request.RequestMethod.GET;
 import static org.apache.coyote.http11.request.RequestMethod.POST;
@@ -94,14 +91,9 @@ public class Http11Processor implements Runnable, Processor {
                 final Session session = SessionManager.findSession(jSessionIdValue);
                 final User user = (User) session.getAttribute(userSessionKey);
                 if (user == null) {
-                    final Headers headers = new Headers();
-                    // TODO: 9/4/23 쿠키 삭제하는 작업 추가해야 함
-                    headers.addHeader(LOCATION, "/index.html");
-                    return new Response(new StatusLine(StatusCode.FOUND), headers, "");
+                    return Response.getRedirectResponse("index.html");
                 }
-                final Headers headers = new Headers();
-                headers.addHeader(LOCATION, "/index.html");
-                return new Response(new StatusLine(StatusCode.FOUND), headers, "");
+                return Response.getRedirectResponse("index.html");
             }
 
             final String account = requestParameters.getValue("account");
@@ -118,13 +110,10 @@ public class Http11Processor implements Runnable, Processor {
             }
             log.info("user: {}", user);
 
-            final Headers headers = new Headers();
-            headers.addHeader(LOCATION, "/index.html");
-
-            final Session session = getSession(request, headers);
+            final Response redirectResponse = Response.getRedirectResponse("index.html");
+            // TODO: 9/6/23 getHeader 메서드 삭제가하거나 방어적 복사로 헤더 외부에서 변경 불가능하도록 변경
+            final Session session = getSession(request, redirectResponse.getHeaders());
             session.setAttribute(userSessionKey, user);
-
-            return new Response(new StatusLine(StatusCode.FOUND), headers, "");
         }
 
         if ("/register".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
@@ -137,12 +126,9 @@ public class Http11Processor implements Runnable, Processor {
             final String email = requestParameters.getValue("email");
 
             final User user = new User(account, password, email);
-
             InMemoryUserRepository.save(user);
 
-            final Headers headers = new Headers();
-            headers.addHeader(LOCATION, "/login");
-            return new Response(new StatusLine(StatusCode.FOUND), headers, "");
+            return Response.getRedirectResponse("login");
         }
 
         return Response.NOT_FOUND_RESPONSE;

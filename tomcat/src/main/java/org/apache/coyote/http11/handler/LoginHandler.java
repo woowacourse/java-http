@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class LoginHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final List<HttpMethod> ALLOWED_METHOD = List.of(HttpMethod.GET, HttpMethod.POST);
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
@@ -32,7 +33,7 @@ public class LoginHandler implements Handler {
         if (httpMethod == HttpMethod.POST) {
             return doPost(request);
         }
-        throw new MethodNotAllowedException(List.of(HttpMethod.GET, HttpMethod.POST));
+        throw new MethodNotAllowedException(ALLOWED_METHOD);
     }
 
     private HttpResponse doGet(HttpRequest request) throws IOException {

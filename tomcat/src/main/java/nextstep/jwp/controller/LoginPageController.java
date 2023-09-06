@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.HttpResponseHeader.LOCATION;
 
 import java.io.IOException;
 import org.apache.coyote.http11.cookie.Cookie;
@@ -18,7 +19,7 @@ public class LoginPageController implements Controller {
 
     private static final String PATH = "/login";
     private static final String UNAUTHENTICATED_USER_VIEW_NAME = "login";
-    private static final String AUTHENTICATED_USER_VIEW_NAME = "index";
+    private static final String AUTHENTICATED_USER_PAGE_PATH = "/index.html";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
@@ -36,7 +37,9 @@ public class LoginPageController implements Controller {
         if (session == null) {
             return resolveViewPage(UNAUTHENTICATED_USER_VIEW_NAME, StatusCode.OK);
         }
-        return resolveViewPage(AUTHENTICATED_USER_VIEW_NAME, StatusCode.FOUND);
+        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
+        httpResponse.addHeader(LOCATION, AUTHENTICATED_USER_PAGE_PATH);
+        return httpResponse;
     }
 
     private String extractSessionId(final HttpRequest httpRequest) {

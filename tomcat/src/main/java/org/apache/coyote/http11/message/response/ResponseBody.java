@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ResponseBody {
 
-    private final String body;
+    private final String content;
 
-    public ResponseBody(String body) {
-        this.body = body;
+    public ResponseBody(String content) {
+        this.content = content;
     }
 
     public static ResponseBody ofEmpty() {
@@ -16,6 +16,6 @@ public class ResponseBody {
 
     @Override
     public String toString() {
-        return body;
+        return content;
     }
 }

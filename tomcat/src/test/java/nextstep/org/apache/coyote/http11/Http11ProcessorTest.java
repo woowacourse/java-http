@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.servlet.DispatcherServletManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);
@@ -59,7 +60,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);
@@ -90,7 +91,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);
@@ -120,7 +121,7 @@ class Http11ProcessorTest {
 
             InMemoryUserRepository.save(new User(1L, "gugu", "password", "ttset@dsffd.com"));
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);
@@ -144,7 +145,7 @@ class Http11ProcessorTest {
 
             InMemoryUserRepository.save(new User(1L, "gugu", "password", "ttset@dsffd.com"));
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);
@@ -173,7 +174,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);
@@ -204,7 +205,7 @@ class Http11ProcessorTest {
 
             final var socket = new StubSocket(httpRequest);
 
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
 
             // when
             processor.process(socket);

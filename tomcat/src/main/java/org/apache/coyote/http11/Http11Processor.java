@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.servlet.DispatcherServlet;
+import org.apache.catalina.servlet.ServletManger;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger LOGGER = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ServletManger servletManger;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final ServletManger servletManger) {
         this.connection = connection;
+        this.servletManger = servletManger;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final var request = HttpRequest.from(reader);
             final var response = HttpResponse.createBasicResponseFrom(request);
-            new DispatcherServlet().service(request, response);
+            servletManger.createServlet().service(request, response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

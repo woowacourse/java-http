@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
@@ -73,7 +74,9 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        final Session localSession = SessionManager.getInstance().findSession(headers.getCookie("JSESSIONID"));
+        final Optional<String> sessionId = headers.getCookie("JSESSIONID");
+        final var localSession = SessionManager.getInstance().findSession(sessionId.orElse(""));
+
         if (localSession == null) {
             return SessionManager.getInstance().create();
         }

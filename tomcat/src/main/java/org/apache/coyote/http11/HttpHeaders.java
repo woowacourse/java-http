@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
@@ -79,12 +80,16 @@ public class HttpHeaders {
         return headers;
     }
 
-    public String getCookie(String key) {
-        return Arrays.stream(headers.get(COOKIE).split(";"))
+    public Optional<String> getCookie(String key) {
+        final String cookies = headers.get(COOKIE);
+        if (cookies == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(cookies.split(";"))
                      .filter(cookie -> cookie.contains(key))
-                     .map(cookie -> cookie.split(COOKIE_KEY_VALUE_DEMLIMITER)[1])
+                     .map(cookie -> Optional.of(cookie.split(COOKIE_KEY_VALUE_DEMLIMITER)[1]))
                      .findAny()
-                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 쿠키입니다."));
+                     .orElseGet(Optional::empty);
     }
 
     public void put(String key, String value) {

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_TYPE;
@@ -13,10 +13,10 @@ import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class StaticResourceHandler extends Handler {
+public class StaticResourceServlet extends Servlet {
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+    public HttpResponse service(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestURI();
         String absolutePath = requestURI.absolutePath();
 

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
+import jakarta.servlet.Servlet;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.HttpVersion;

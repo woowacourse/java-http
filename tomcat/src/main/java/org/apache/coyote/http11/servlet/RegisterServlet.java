@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import static org.apache.coyote.http11.PagePathMapper.*;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
@@ -16,21 +16,21 @@ import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class RegisterHandler extends Handler {
+public class RegisterServlet extends Servlet {
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+    public HttpResponse service(HttpRequest httpRequest) throws IOException {
         if (httpRequest.getMethod().isEqualTo(HttpMethod.GET)) {
-            return responseWhenHttpMethodIsGet(httpRequest);
+            return doGet(httpRequest);
         }
         if (httpRequest.getMethod().isEqualTo(HttpMethod.POST)) {
-            return responseWhenHttpMethodIsPost(httpRequest);
+            return doPost(httpRequest);
         }
 
         throw new IllegalArgumentException();
     }
 
-    private HttpResponse responseWhenHttpMethodIsGet(HttpRequest httpRequest) throws IOException {
+    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         String absolutePath = REGISTER_PAGE.path();
 
         String resource = findResourceWithPath(absolutePath);
@@ -44,7 +44,7 @@ public class RegisterHandler extends Handler {
                 headers, responseBody);
     }
 
-    private HttpResponse responseWhenHttpMethodIsPost(HttpRequest httpRequest) {
+    private HttpResponse doPost(HttpRequest httpRequest) {
         saveUser(httpRequest);
         String absolutePath = INDEX_PAGE.path();
 

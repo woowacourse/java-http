@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -7,31 +7,31 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
-public class Handlers {
+public class Servlets {
 
-    private static final Map<String, Handler> mappings;
+    private static final Map<String, Servlet> mappings;
 
     static {
         mappings = new HashMap<>();
-        mappings.put("/", new RootHandler());
-        mappings.put("/index", new IndexHandler());
-        mappings.put("/login", new LoginHandler());
-        mappings.put("/register", new RegisterHandler());
+        mappings.put("/", new RootServlet());
+        mappings.put("/index", new IndexServlet());
+        mappings.put("/login", new LoginServlet());
+        mappings.put("/register", new RegisterServlet());
     }
 
-    private Handlers() {
+    private Servlets() {
     }
 
-    public static HttpResponse handle(HttpRequest httpRequest) throws IOException {
+    public static HttpResponse service(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestURI();
         String absolutePath = requestURI.absolutePath();
 
-        Handler handler = mappings.entrySet().stream()
+        Servlet servlet = mappings.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(absolutePath))
                 .findFirst()
                 .map(Map.Entry::getValue)
-                .orElseGet(StaticResourceHandler::new);
+                .orElseGet(StaticResourceServlet::new);
 
-        return handler.handle(httpRequest);
+        return servlet.service(httpRequest);
     }
 }

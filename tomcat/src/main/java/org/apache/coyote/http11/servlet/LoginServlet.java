@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import static org.apache.coyote.http11.PagePathMapper.*;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
@@ -18,21 +18,21 @@ import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class LoginHandler extends Handler {
+public class LoginServlet extends Servlet {
 
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+    public HttpResponse service(HttpRequest httpRequest) throws IOException {
         HttpMethod httpMethod = httpRequest.getMethod();
         if (httpMethod.isEqualTo(HttpMethod.GET)) {
-            return responseWhenHttpMethodIsGet(httpRequest);
+            return doGet(httpRequest);
         }
         if (httpMethod.isEqualTo(HttpMethod.POST)) {
-            return responseWhenHttpMethodIsPost(httpRequest);
+            return doPost(httpRequest);
         }
 
         throw new IllegalArgumentException();
     }
 
-    private HttpResponse responseWhenHttpMethodIsGet(HttpRequest httpRequest) throws IOException {
+    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         Headers requestHeaders = httpRequest.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
 
@@ -65,7 +65,7 @@ public class LoginHandler extends Handler {
                 headers, responseBody);
     }
 
-    private HttpResponse responseWhenHttpMethodIsPost(HttpRequest httpRequest) {
+    private HttpResponse doPost(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getBody();
         Map<String, String> formData = requestBody.getAsFormData();
 

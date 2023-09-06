@@ -1,5 +1,6 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
+import jakarta.servlet.http.HttpServlet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -7,14 +8,14 @@ import java.nio.file.Files;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
-public abstract class Handler {
+public abstract class Servlet {
 
     private static final String RESOURCE_BASE_PATH = "static/";
 
-    abstract HttpResponse handle(HttpRequest httpRequest) throws IOException;
+    abstract HttpResponse service(HttpRequest httpRequest) throws IOException;
 
     protected String findResourceWithPath(String absolutePath) throws IOException {
-        URL resourceUrl = Handler.class.getClassLoader().getResource(RESOURCE_BASE_PATH + absolutePath);
+        URL resourceUrl = Servlet.class.getClassLoader().getResource(RESOURCE_BASE_PATH + absolutePath);
         return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
     }
 }

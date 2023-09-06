@@ -114,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (startLine.getHttpMethod().equals("GET") && Objects.isNull(response)) {
-                String contentType = negotiateContent(requestHeaders.get("Accept"));
+                String contentType = selectFirstContentTypeOrDefault(requestHeaders.get("Accept"));
 
                 // Todo: createResponseBody() pageController로 위임해보기
                 // Todo: 헤더에 담긴 sessionId 유효성 검증
@@ -159,7 +159,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String negotiateContent(String acceptHeader) {
+    private String selectFirstContentTypeOrDefault(String acceptHeader) {
         if (Objects.isNull(acceptHeader)) {
             return "text/html";
         }

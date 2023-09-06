@@ -18,9 +18,9 @@ import org.apache.coyote.http11.exception.PageNotFoundException;
 
 public class HttpResponse {
 
-    final Status status;
-    final Map<String, String> headers;
-    final String body;
+    private final Status status;
+    private final Map<String, String> headers;
+    private final String body;
 
     public HttpResponse(final Status status, final String body) {
         this.status = status;

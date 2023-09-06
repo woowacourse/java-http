@@ -24,12 +24,13 @@ public class HttpRequest {
     private static final int SPLIT_LIMIT_SIZE = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    final Method method;
-    final String path;
-    final Map<String, String> queryParams;
-    final Map<String, String> headers;
-    final Map<String, String> cookies;
-    String body;
+
+    private final Method method;
+    private final String path;
+    private final Map<String, String> queryParams;
+    private final Map<String, String> headers;
+    private final Map<String, String> cookies;
+    private String body;
 
     public HttpRequest(final Method method,
                        final String path,

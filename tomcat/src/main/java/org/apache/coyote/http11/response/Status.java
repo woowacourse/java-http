@@ -7,8 +7,8 @@ public enum Status {
     NOT_FOUND(404, "Not Found"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
-    final int code;
-    final String name;
+    private final int code;
+    private final String name;
 
     Status(final int code, final String name) {
         this.code = code;

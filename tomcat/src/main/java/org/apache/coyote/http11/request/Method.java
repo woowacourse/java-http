@@ -6,7 +6,7 @@ public enum Method {
     GET("GET"),
     POST("POST");
 
-    final String name;
+    private final String name;
 
     Method(final String name) {
         this.name = name;

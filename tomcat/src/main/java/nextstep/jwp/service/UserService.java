@@ -23,7 +23,7 @@ public class UserService {
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException(account);
         }
-        log.info(user.toString());
+        log.info("{}", user);
 
         return setSession(user);
     }

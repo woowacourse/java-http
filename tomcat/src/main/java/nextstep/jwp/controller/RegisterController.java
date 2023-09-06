@@ -18,20 +18,20 @@ public class RegisterController extends AbstractController {
     private static final String SUFFIX = ".html";
 
     @Override
-    public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        byte[] file = FileIOUtils.getFileInBytes(PREFIX + req.getPath() + SUFFIX);
-        resp.setHttpResponseStartLine(StatusCode.OK);
-        resp.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
-        resp.setResponseBody(file);
+    public void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        byte[] file = FileIOUtils.getFileInBytes(PREFIX + request.getPath() + SUFFIX);
+        response.setHttpResponseStartLine(StatusCode.OK);
+        response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
+        response.setResponseBody(file);
     }
 
     @Override
-    public void doPost(final HttpRequest req, final HttpResponse resp) {
-        RequestParam requestParam = RequestParam.of(req.getRequestBody());
+    public void doPost(final HttpRequest request, final HttpResponse response) {
+        RequestParam requestParam = RequestParam.of(request.getRequestBody());
         Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
 
         if (findAccount.isPresent()) {
-            resp.sendRedirect("/401.html");
+            response.sendRedirect("/401.html");
             return;
         }
         User user = new User(
@@ -40,9 +40,9 @@ public class RegisterController extends AbstractController {
                 requestParam.get("email")
         );
         InMemoryUserRepository.save(user);
-        Session session = req.getSession();
+        Session session = request.getSession();
         session.setAttribute("user", user);
 
-        resp.sendRedirect("/index.html");
+        response.sendRedirect("/index.html");
     }
 }

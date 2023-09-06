@@ -19,37 +19,37 @@ public class LoginController extends AbstractController {
     private static final String JSESSIONID = "JSESSIONID";
 
     @Override
-    public void doGet(final HttpRequest req, final HttpResponse resp) throws IOException {
-        if (req.getSession().containskey("user")) {
-            resp.setHttpResponseStartLine(StatusCode.FOUND);
-            resp.sendRedirect("/index.html");
+    public void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        if (request.getSession().containskey("user")) {
+            response.setHttpResponseStartLine(StatusCode.FOUND);
+            response.sendRedirect("/index.html");
             return;
         }
-        resp.setHttpResponseStartLine(StatusCode.OK);
-        byte[] file = FileIOUtils.getFileInBytes(PREFIX+req.getPath()+SUFFIX);
-        resp.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
-        resp.setResponseBody(file);
+        response.setHttpResponseStartLine(StatusCode.OK);
+        byte[] file = FileIOUtils.getFileInBytes(PREFIX+request.getPath()+SUFFIX);
+        response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
+        response.setResponseBody(file);
     }
 
     @Override
-    public void doPost(final HttpRequest req, final HttpResponse resp) {
-        RequestParam requestParam = RequestParam.of(req.getRequestBody());
+    public void doPost(final HttpRequest request, final HttpResponse response) {
+        RequestParam requestParam = RequestParam.of(request.getRequestBody());
 
         Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
 
         if (findAccount.isPresent()) {
             User user = findAccount.get();
             if (user.checkPassword(requestParam.get("password"))) {
-                Session session = req.getSession();
+                Session session = request.getSession();
                 session.setAttribute("user", user);
-                resp.addCookie(JSESSIONID, req.getSession().getId());
-                resp.addCookie("hello", req.getSession().getId());
-                resp.addCookie("bye", req.getSession().getId());
-                resp.addCookie("good", req.getSession().getId());
-                resp.sendRedirect("/index.html");
+                response.addCookie(JSESSIONID, request.getSession().getId());
+                response.addCookie("hello", request.getSession().getId());
+                response.addCookie("bye", request.getSession().getId());
+                response.addCookie("good", request.getSession().getId());
+                response.sendRedirect("/index.html");
                 return;
             }
         }
-        resp.sendRedirect("/401.html");
+        response.sendRedirect("/401.html");
     }
 }

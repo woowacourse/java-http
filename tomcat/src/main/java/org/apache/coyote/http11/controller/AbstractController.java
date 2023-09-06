@@ -7,20 +7,20 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(final HttpRequest req, final HttpResponse res) throws Exception {
-        if (req.isSameMethod(HttpMethod.GET)) {
-            doGet(req, res);
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+        if (request.isSameMethod(HttpMethod.GET)) {
+            doGet(request, response);
         }
-        if (req.isSameMethod(HttpMethod.POST)) {
-            doPost(req, res);
+        if (request.isSameMethod(HttpMethod.POST)) {
+            doPost(request, response);
         }
     }
 
-    protected void doGet(final HttpRequest req, final HttpResponse resp) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         throw new UnsupportedOperationException();
     }
 
-    protected void doPost(final HttpRequest req, final HttpResponse resp) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         throw new UnsupportedOperationException();
     }
 }

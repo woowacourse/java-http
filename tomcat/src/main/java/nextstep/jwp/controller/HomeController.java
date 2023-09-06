@@ -9,10 +9,10 @@ import org.apache.coyote.http11.response.StatusCode;
 public class HomeController extends AbstractController {
 
     @Override
-    public void doGet(final HttpRequest req, final HttpResponse resp) {
-        resp.setHttpResponseStartLine(StatusCode.OK);
+    public void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setHttpResponseStartLine(StatusCode.OK);
         byte[] body = "Hello world!".getBytes();
-        resp.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
-        resp.setResponseBody(body);
+        response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
+        response.setResponseBody(body);
     }
 }

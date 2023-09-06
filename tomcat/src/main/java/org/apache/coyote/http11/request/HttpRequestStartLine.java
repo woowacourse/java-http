@@ -14,11 +14,11 @@ public class HttpRequestStartLine {
     }
 
     public static HttpRequestStartLine from(final String startLine) {
-        String[] startLineInfo = startLine.split(" ");
+        final String[] startLineInfo = startLine.split(" ");
 
-        HttpRequestMethod httpRequestMethod = HttpRequestMethod.from(startLineInfo[0]);
-        HttpRequestUri requestUri = HttpRequestUri.from(startLineInfo[1]);
-        String httpVersion = startLineInfo[2];
+        final HttpRequestMethod httpRequestMethod = HttpRequestMethod.from(startLineInfo[0]);
+        final HttpRequestUri requestUri = HttpRequestUri.from(startLineInfo[1]);
+        final String httpVersion = startLineInfo[2];
 
         return new HttpRequestStartLine(httpRequestMethod, requestUri, httpVersion);
     }

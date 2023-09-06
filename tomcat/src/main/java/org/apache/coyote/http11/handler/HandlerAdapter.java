@@ -10,7 +10,7 @@ public class HandlerAdapter {
     public static final String REGISTER_URI = "/register";
 
     public RequestHandler find(final HttpRequest request) {
-        HttpRequestUri uri = request.getUri();
+        final HttpRequestUri uri = request.getUri();
 
         if (uri.containsPath(LOGIN_URI)) {
             return new LoginHandler();

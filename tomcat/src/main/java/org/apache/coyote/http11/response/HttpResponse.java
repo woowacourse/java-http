@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 public class HttpResponse {
+
     private final HttpResponseStatusLine statusLine;
     private final HttpResponseHeaders header;
     private final HttpResponseBody responseBody;

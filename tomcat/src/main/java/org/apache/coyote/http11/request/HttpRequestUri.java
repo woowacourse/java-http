@@ -21,18 +21,18 @@ public class HttpRequestUri {
         this.queryString = queryString;
     }
 
-    public static HttpRequestUri from(String uri) {
+    public static HttpRequestUri from(final String uri) {
         if (!uri.contains(URI_DELIMITER)) {
             return new HttpRequestUri(uri, null);
         }
         return parseQueryString(uri);
     }
 
-    private static HttpRequestUri parseQueryString(String uri) {
-        String[] uriElements = uri.split(URI_DELIMITER);
-        String path = uriElements[KEY_INDEX];
+    private static HttpRequestUri parseQueryString(final String uri) {
+        final String[] uriElements = uri.split(URI_DELIMITER);
+        final String path = uriElements[KEY_INDEX];
 
-        Map<String, String> queryString = Pattern.compile(QUERY_ENTRY_DELIMITER)
+        final Map<String, String> queryString = Pattern.compile(QUERY_ENTRY_DELIMITER)
                 .splitAsStream(uriElements[VALUE_INDEX].trim())
                 .map(queryEntry -> queryEntry.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toUnmodifiableMap(query -> query[KEY_INDEX], query -> query[VALUE_INDEX]));
@@ -40,11 +40,11 @@ public class HttpRequestUri {
         return new HttpRequestUri(path, queryString);
     }
 
-    public boolean containsPath(String path) {
+    public boolean containsPath(final String path) {
         return this.path.contains(path);
     }
 
-    public boolean samePath(String path) {
+    public boolean samePath(final String path) {
         return this.path.equals(path);
     }
 

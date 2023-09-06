@@ -42,9 +42,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = createHttpRequest(inputStream);
-            RequestHandler requestHandler = findHandler(httpRequest);
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            final HttpRequest httpRequest = createHttpRequest(inputStream);
+            final RequestHandler requestHandler = findHandler(httpRequest);
+            final HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
@@ -54,28 +54,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestHandler findHandler(final HttpRequest httpRequest) {
-        HandlerAdapter handlerAdapter = new HandlerAdapter();
+        final HandlerAdapter handlerAdapter = new HandlerAdapter();
         return handlerAdapter.find(httpRequest);
     }
 
     private HttpRequest createHttpRequest(final InputStream inputStream) throws IOException {
-        InputStreamReader reader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-        String startLine = bufferedReader.readLine();
-        HttpRequestStartLine requestStartLine = HttpRequestStartLine.from(startLine);
-        HttpRequestHeaders httpRequestHeaders = getRequestHeader(bufferedReader);
+        final InputStreamReader reader = new InputStreamReader(inputStream);
+        final BufferedReader bufferedReader = new BufferedReader(reader);
+        final String startLine = bufferedReader.readLine();
+        final HttpRequestStartLine requestStartLine = HttpRequestStartLine.from(startLine);
+        final HttpRequestHeaders httpRequestHeaders = getRequestHeader(bufferedReader);
 
         if (!httpRequestHeaders.contains(CONTENT_LENGTH_HEADER)) {
             return HttpRequest.of(requestStartLine, httpRequestHeaders);
         }
 
-        HttpRequestBody httpRequestBody = getRequestBody(bufferedReader, httpRequestHeaders);
+        final HttpRequestBody httpRequestBody = getRequestBody(bufferedReader, httpRequestHeaders);
         return HttpRequest.of(requestStartLine, httpRequestHeaders, httpRequestBody);
     }
 
     private HttpRequestHeaders getRequestHeader(final BufferedReader bufferedReader) throws IOException {
         String line;
-        List<String> headers = new ArrayList<>();
+        final List<String> headers = new ArrayList<>();
         while (!(line = bufferedReader.readLine()).equals(EMPTY_INPUT)) {
             headers.add(line);
         }
@@ -85,10 +85,10 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequestBody getRequestBody(final BufferedReader bufferedReader,
                                            final HttpRequestHeaders httpRequestHeaders)
             throws IOException {
-        int contentLength = Integer.parseInt(httpRequestHeaders.getValue(CONTENT_LENGTH_HEADER));
-        char[] buffer = new char[contentLength];
+        final int contentLength = Integer.parseInt(httpRequestHeaders.getValue(CONTENT_LENGTH_HEADER));
+        final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
+        final String requestBody = new String(buffer);
 
         return new HttpRequestBody(requestBody);
     }

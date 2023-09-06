@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 public class HttpRequest {
+
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeaders header;
     private final HttpRequestBody body;

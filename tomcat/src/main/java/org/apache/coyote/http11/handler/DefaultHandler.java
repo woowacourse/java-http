@@ -16,14 +16,14 @@ public class DefaultHandler extends RequestHandler {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        String responseBody = DEFAULT_MESSAGE;
-        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getHttpVersion(), OK);
+        final String responseBody = DEFAULT_MESSAGE;
+        final HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getHttpVersion(), OK);
 
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
+        final HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
         httpResponseHeaders.add(CONTENT_TYPE, CONTENT_TYPE_HTML);
         httpResponseHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
 
-        HttpResponseBody body = new HttpResponseBody(responseBody);
+        final HttpResponseBody body = new HttpResponseBody(responseBody);
 
         return new HttpResponse(statusLine, httpResponseHeaders, body);
     }

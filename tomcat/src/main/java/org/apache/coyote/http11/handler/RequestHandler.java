@@ -43,37 +43,37 @@ public abstract class RequestHandler {
 
     HttpResponse getPage(HttpRequest httpRequest, String resourcePath, HttpStatusCode statusCode) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
-        var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
+        final HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
                 httpRequest.getStartLine().getHttpVersion(), statusCode);
 
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
+        final HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
         httpResponseHeaders.add(CONTENT_TYPE, CONTENT_TYPE_HTML);
         httpResponseHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
 
-        HttpResponseBody body = new HttpResponseBody(responseBody);
+        final HttpResponseBody body = new HttpResponseBody(responseBody);
 
         return new HttpResponse(statusLine, httpResponseHeaders, body);
     }
 
     HttpResponse getResource(HttpRequest httpRequest, HttpStatusCode code) throws IOException {
-        HttpRequestUri requestUri = httpRequest.getUri();
+        final HttpRequestUri requestUri = httpRequest.getUri();
         final URL resource = getClass().getClassLoader().getResource(DIRECTORY + requestUri.getPath());
 
-        File file = new File(resource.getFile());
-        String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+        final File file = new File(resource.getFile());
+        final String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
 
-        var responseBody = new String(Files.readAllBytes(file.toPath()));
+        final String responseBody = new String(Files.readAllBytes(file.toPath()));
 
-        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
+        final HttpResponseStatusLine statusLine = new HttpResponseStatusLine(
                 httpRequest.getStartLine().getHttpVersion(), code);
 
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
+        final HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
         httpResponseHeaders.add(CONTENT_TYPE, String.format("text/%s;charset=utf-8", extension));
         httpResponseHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
 
-        HttpResponseBody body = new HttpResponseBody(responseBody);
+        final HttpResponseBody body = new HttpResponseBody(responseBody);
 
         return new HttpResponse(statusLine, httpResponseHeaders, body);
     }
@@ -82,21 +82,21 @@ public abstract class RequestHandler {
         return getPage(httpRequest, DIRECTORY + NOT_FOUND_RESOURCE, NOT_FOUND);
     }
 
-    HttpResponse getRedirectPage(HttpRequest httpRequest, String redirectPath, HttpStatusCode statusCode) {
-        HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getHttpVersion(), statusCode);
+    HttpResponse getRedirectPage(final HttpRequest httpRequest, final String redirectPath, final HttpStatusCode statusCode) {
+        final HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getHttpVersion(), statusCode);
 
-        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
+        final HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
         httpResponseHeaders.add(CONTENT_TYPE, CONTENT_TYPE_HTML);
         httpResponseHeaders.add(CONTENT_LENGTH, String.valueOf(EMPTY.getBytes().length));
         httpResponseHeaders.add(LOCATION, redirectPath);
 
-        HttpResponseBody body = new HttpResponseBody(EMPTY);
+        final HttpResponseBody body = new HttpResponseBody(EMPTY);
 
         return new HttpResponse(statusLine, httpResponseHeaders, body);
     }
 
     Map<String, String> parseRequestBody(final String body) {
-        Map<String, String> requestBody = new HashMap<>();
+        final Map<String, String> requestBody = new HashMap<>();
         Arrays.stream(body.split(ENTRY_DELIMITER))
                 .forEach(value -> requestBody.put(value.split(KEY_VALUE_DELIMITER)[KEY_INDEX],
                         value.split(KEY_VALUE_DELIMITER)[VALUE_INDEX]));

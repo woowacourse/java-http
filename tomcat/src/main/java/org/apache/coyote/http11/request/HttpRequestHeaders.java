@@ -16,17 +16,17 @@ public class HttpRequestHeaders {
     }
 
     public static HttpRequestHeaders from(final List<String> headers) {
-        HashMap<String, String> httpHeaders = new HashMap<>();
+        final HashMap<String, String> httpHeaders = new HashMap<>();
         headers.forEach(header -> httpHeaders.put(header.split(DELIMITER)[KEY_INDEX], header.split(DELIMITER)[VALUE_INDEX]));
 
         return new HttpRequestHeaders(httpHeaders);
     }
 
-    public String getValue(String header) {
+    public String getValue(final String header) {
         return headers.get(header);
     }
 
-    public boolean contains(String header) {
+    public boolean contains(final String header) {
         return headers.containsKey(header);
     }
 }

@@ -4,7 +4,6 @@ import org.apache.coyote.http.LoginManager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class SessionManager implements LoginManager {
 
@@ -17,10 +16,6 @@ public class SessionManager implements LoginManager {
 
     @Override
     public boolean isAlreadyLogined(final String id) {
-        if (Objects.nonNull(SESSIONS.get(id))) {
-            return true;
-        }
-
-        return false;
+        return SESSIONS.get(id) != null;
     }
 }

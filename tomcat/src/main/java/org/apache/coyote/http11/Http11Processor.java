@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -121,9 +119,7 @@ public class Http11Processor implements Runnable, Processor {
             return handler.handle(request);
         } catch (MethodNotAllowedException e) {
             HttpResponse response = METHOD_NOT_ALLOWED_HANDLER.handle(request);
-            List<String> allowedMethods = e.getAllowedMethods().stream()
-                .map(Enum::name)
-                .collect(toList());
+            List<String> allowedMethods = e.getAllowedMethods();
             response.setHeader("Allow", allowedMethods);
             return response;
         } catch (NoSuchFileException e) {

@@ -1,5 +1,7 @@
 package org.apache.coyote.exception;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import org.apache.coyote.common.HttpMethod;
 
@@ -12,7 +14,9 @@ public class MethodNotAllowedException extends RuntimeException{
         this.allowedMethod = allowedMethod;
     }
 
-    public List<HttpMethod> getAllowedMethods() {
-        return allowedMethod;
+    public List<String> getAllowedMethods() {
+        return allowedMethod.stream()
+            .map(HttpMethod::name)
+            .collect(toList());
     }
 }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11.domain;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,7 @@ public class HttpRequest {
     final int length = Integer.parseInt(contentLength);
     final char[] buffer = new char[length];
     br.read(buffer);
-    return new String(buffer);
+    return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
   }
 
   private static List<String> readWhileEmptyLine(final BufferedReader br) throws IOException {

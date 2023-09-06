@@ -12,17 +12,15 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
+    private static final HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
+    private static final FrontController frontController = new FrontController();
+
 
     private final Socket connection;
-    private final HttpRequestParser httpRequestParser;
-    private final HttpResponseBuilder httpResponseBuilder;
-    private final FrontController frontController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.httpRequestParser = new HttpRequestParser();
-        this.httpResponseBuilder = new HttpResponseBuilder();
-        this.frontController = new FrontController();
     }
 
     @Override

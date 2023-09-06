@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.request.Method.GET;
 import static org.apache.coyote.http11.request.Method.POST;
+import static org.apache.coyote.http11.request.RequestHeader.ACCEPT;
+import static org.apache.coyote.http11.response.ResponseHeader.LOCATION;
+import static org.apache.coyote.http11.response.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.http11.response.Status.FOUND;
 import static org.apache.coyote.http11.response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.response.Status.NOT_FOUND;
@@ -9,6 +12,7 @@ import static org.apache.coyote.http11.response.Status.OK;
 import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
 import static org.apache.coyote.http11.utils.Constant.BASE_PATH;
 import static org.apache.coyote.http11.utils.Constant.COOKIE_DELIMITER;
+import static org.apache.coyote.http11.utils.Constant.EMPTY;
 import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
 import static org.apache.coyote.http11.utils.Parser.parseFormData;
 
@@ -26,7 +30,9 @@ import org.apache.coyote.http11.exception.PageNotFoundException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.http11.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         final HttpRequest request = readRequestHeader(bufferedReader);
-        final String contentLength = request.getHeader("Content-Length");
+        final String contentLength = request.getHeader(RequestHeader.CONTENT_LENGTH);
         if (contentLength != null) {
             final String requestBody = readRequestBody(bufferedReader, Integer.parseInt(contentLength));
             request.setBody(requestBody);
@@ -154,9 +160,9 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse handleAuthResponse(final HttpRequest request, final String uuid) {
         final HttpResponse response = new HttpResponse(FOUND);
 
-        response.addHeader("Location", "/index.html");
+        response.addHeader(LOCATION, "/index.html");
         if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
-            response.addHeader("Set-Cookie", SESSION_COOKIE_NAME + COOKIE_DELIMITER + uuid);
+            response.addHeader(SET_COOKIE, SESSION_COOKIE_NAME + COOKIE_DELIMITER + uuid);
         }
         return response;
     }
@@ -169,9 +175,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void checkContentType(final HttpRequest request, final HttpResponse response) {
-        final String accept = request.getHeader("Accept");
+        final String accept = request.getHeader(ACCEPT);
         if (accept != null && accept.contains("css")) {
-            response.addHeader("Content-Type", "text/css;charset=utf-8 ");
+            response.addHeader(ResponseHeader.CONTENT_LENGTH, "text/css;charset=utf-8 ");
         }
     }
 

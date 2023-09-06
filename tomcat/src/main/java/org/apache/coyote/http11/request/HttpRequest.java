@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
+    private static final String QUERY_STRING_DELIMITER = "\\?";
     private static final String SPLIT_DELIMITER = " ";
     private static final int REQUEST_LINE_INDEX = 0;
     private static final int METHOD_INDEX = 0;
@@ -23,8 +24,6 @@ public class HttpRequest {
     private static final int SPLIT_LIMIT_SIZE = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    public static final String QUERY_STRING_DELIMITER = "\\?";
-
     final Method method;
     final String path;
     final Map<String, String> queryParams;
@@ -119,8 +118,8 @@ public class HttpRequest {
         return queryParams.get(parameterName);
     }
 
-    public String getHeader(final String headerName) {
-        return headers.get(headerName);
+    public String getHeader(final RequestHeader header) {
+        return headers.get(header.getName());
     }
 
     public boolean isCookieExist(final String cookieName) {

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.response.ResponseHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.ResponseHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.utils.Constant.EMPTY;
 import static org.apache.coyote.http11.utils.Constant.HEADER_DELIMITER;
 import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
@@ -23,11 +25,11 @@ public class HttpResponse {
     public HttpResponse(final Status status, final String body) {
         this.status = status;
         this.headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8 ");
+        headers.put(CONTENT_TYPE.getName(), "text/html;charset=utf-8 ");
 
         this.body = body;
         if (body.length() > 0) {
-            headers.put("Content-Length", body.getBytes().length + " ");
+            headers.put(CONTENT_LENGTH.getName(), body.getBytes().length + " ");
         }
     }
 
@@ -49,8 +51,8 @@ public class HttpResponse {
         }
     }
 
-    public void addHeader(final String headerName, final String value) {
-        headers.put(headerName, value);
+    public void addHeader(final ResponseHeader header, final String value) {
+        headers.put(header.getName(), value);
     }
 
     public String getResponse() {

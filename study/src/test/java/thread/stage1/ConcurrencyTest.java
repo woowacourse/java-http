@@ -2,7 +2,7 @@ package thread.stage1;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까? - 상태를 가진 한 객체를 여러 스레드에서 동시에 접근할 경우 - static 변수를 가진 객체를 여러 스레드에서 동시에 접근할
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  */
 class ConcurrencyTest {
 
-  @Test
+  @RepeatedTest(1_000)
   void test() throws InterruptedException {
     final User user = new User("gugu");
     final var userServlet = new UserServlet();

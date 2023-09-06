@@ -10,7 +10,7 @@ public class DefaultPath {
 
     private final String value;
 
-    public DefaultPath(String value) {
+    private DefaultPath(String value) {
         this.value = value;
     }
 

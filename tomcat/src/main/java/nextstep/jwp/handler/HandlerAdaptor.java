@@ -11,9 +11,10 @@ public class HandlerAdaptor {
     private static final Map<String, RequestHandler> HANDLERS = new ConcurrentHashMap<>();
 
     static {
-        HANDLERS.put("/index", IndexHandler.getInstance());
-        HANDLERS.put("/login", LoginHandler.getInstance());
-        HANDLERS.put("/register", RegisterHandler.getInstance());
+        HANDLERS.put("/", new HomeHandler());
+        HANDLERS.put("/index", new IndexHandler());
+        HANDLERS.put("/login", new LoginHandler());
+        HANDLERS.put("/register", new RegisterHandler());
     }
 
     private HandlerAdaptor() {
@@ -26,13 +27,9 @@ public class HandlerAdaptor {
     }
 
     private static RequestHandler extractHandler(String nativePath) {
-        if ("/".equals(nativePath)) {
-            return HomeHandler.getInstance();
-        }
-
         return HANDLERS.keySet()
                 .stream()
-                .filter(nativePath::startsWith)
+                .filter(nativePath::equals)
                 .findAny()
                 .map(HANDLERS::get)
                 .orElseGet(ResourceHandler::getInstance);

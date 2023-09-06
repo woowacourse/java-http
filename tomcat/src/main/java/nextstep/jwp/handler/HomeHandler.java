@@ -9,15 +9,6 @@ import nextstep.jwp.http.HttpVersion;
 
 public class HomeHandler implements RequestHandler {
 
-    private static final RequestHandler HANDLER = new HomeHandler();
-
-    private HomeHandler() {
-    }
-
-    public static RequestHandler getInstance() {
-        return HANDLER;
-    }
-
     @Override
     public HttpResponse handle(HttpRequest request) {
         HttpStatus httpStatus = HttpStatus.OK;

@@ -27,16 +27,8 @@ import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements RequestHandler {
 
-    private static final RequestHandler HANDLER = new LoginHandler();
     private static final Manager SESSION_MANAGER = SessionManager.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(LoginHandler.class);
-
-    private LoginHandler() {
-    }
-
-    public static RequestHandler getInstance() {
-        return HANDLER;
-    }
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {

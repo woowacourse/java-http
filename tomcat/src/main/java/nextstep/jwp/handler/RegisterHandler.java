@@ -18,15 +18,6 @@ import nextstep.jwp.model.User;
 
 public class RegisterHandler implements RequestHandler {
 
-    private static final RequestHandler HANDLER = new RegisterHandler();
-
-    private RegisterHandler() {
-    }
-
-    public static RequestHandler getInstance() {
-        return HANDLER;
-    }
-
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         HttpMethod httpMethod = request.getHttpMethod();

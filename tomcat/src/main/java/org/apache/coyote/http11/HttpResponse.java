@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.HttpHeaders;
 
 public class HttpResponse {
 
@@ -21,15 +22,15 @@ public class HttpResponse {
 
     public static HttpResponse ok(String responseBody, ContentType contentType) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType.value + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+        headers.put(HttpHeaders.CONTENT_TYPE, contentType.value + ";charset=utf-8");
+        headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
         return new HttpResponse(headers, HttpStatus.OK, responseBody);
     }
 
     public static HttpResponse found(String location) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Length", "0");
-        headers.put("Location", location);
+        headers.put(HttpHeaders.CONTENT_LENGTH, "0");
+        headers.put(HttpHeaders.LOCATION, location);
         return new HttpResponse(headers, HttpStatus.FOUND, "");
     }
 

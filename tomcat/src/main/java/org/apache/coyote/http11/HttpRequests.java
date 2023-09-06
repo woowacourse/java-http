@@ -10,6 +10,7 @@ public enum HttpRequests {
     INDEX("GET", "/index.html", "static/index.html", "200", "OK", "text/html"),
     CSS("GET", "/css/styles.css", "static/css/styles.css", "200", "OK", "text/css"),
     LOGIN("GET", "/login", "static/login.html", "200", "OK", "text/html"),
+    LOGIN_POST("POST", "/login", "/index.html", "302", "Found", "text/html"),
     SCRIPT_JS("GET", "/js/scripts.js", "static/js/scripts.js", "200", "OK", "Application/javascript"),
     CHART_AREA_JS("GET", "/assets/chart-area.js", "static/assets/chart-area.js", "200", "OK", "Application/javascript"),
     CHART_BAR_JS("GET", "/assets/chart-bar.js", "static/assets/chart-bar.js", "200", "OK", "Application/javascript"),

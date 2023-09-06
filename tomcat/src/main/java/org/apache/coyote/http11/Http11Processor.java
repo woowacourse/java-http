@@ -2,8 +2,13 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.generator.RandomSessionIdGenerator;
+import nextstep.jwp.generator.SessionIdGenerator;
 import nextstep.jwp.model.User;
+import org.apache.cookie.Cookie;
 import org.apache.coyote.Processor;
+import org.apache.session.Session;
+import org.apache.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequests httpRequests = HttpRequests.ofResourceNameAndMethod(resourceName, httpMethod);
 
-            String response = toHttpResponse(httpRequests, resourceName, httpRequestHeaders, reader).serialize();
+            String response = toHttpResponse(httpRequests, httpRequestHeaders, reader).serialize();
             outputStream.write(response.getBytes());
             outputStream.flush();
 
@@ -88,29 +93,47 @@ public class Http11Processor implements Runnable, Processor {
                 );
     }
 
-    public HttpResponse toHttpResponse(HttpRequests httpRequests, String resourceName, Map<String, String> httpRequestHeaders, BufferedReader reader) throws IOException, URISyntaxException {
+    public HttpResponse toHttpResponse(HttpRequests httpRequests, Map<String, String> httpRequestHeaders, BufferedReader reader) throws IOException, URISyntaxException {
         if (httpRequests.equals(HttpRequests.HELLO)) {
             String responseBody = "Hello world!";
             return HttpResponse.of(httpRequests, responseBody);
         }
-        if (httpRequests.equals(HttpRequests.LOGIN) && resourceName.contains("?")) {
-            int index = resourceName.indexOf("?");
-            String queryString = resourceName.substring(index + 1);
-            Map<String, String> queryParams = new HashMap<>();
-            List<String> querys = Arrays.stream(queryString.split("&")).collect(Collectors.toList());
-            for (String query : querys) {
-                String[] keyAndValue = query.split("=");
-                queryParams.put(keyAndValue[0], keyAndValue[1]);
-            }
-            Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
-            if (user.isEmpty() || !user.get().checkPassword(queryParams.get("password"))) {
-                Path path = HttpRequests.UNAUTHORIZED.readPath();
-                byte[] fileBytes = readBytes(path);
-                String responseBody = new String(fileBytes);
-                return HttpResponse.of(httpRequests, responseBody);
-            }
-            return HttpResponse.ofLoginRedirect(HttpRequests.FOUND);
+        if (httpRequests.equals(HttpRequests.LOGIN)) {
+            Cookie cookie = Cookie.from(httpRequestHeaders.get("Cookie"));
+            if (cookie.hasJSessionId()) {
+                String jsessionid = cookie.getCookies().get("JSESSIONID");
+                if (SessionManager.findSession(jsessionid) != null) {
+                    Session session = SessionManager.findSession(jsessionid);
+                    if (session.getAttribute("user") != null) {
+                        return HttpResponse.ofLoginRedirect(HttpRequests.FOUND, jsessionid);
+                    }
 
+                }
+            }
+        }
+        if (httpRequests.equals(HttpRequests.LOGIN_POST)) {
+            if (httpRequestHeaders.containsKey("Content-Length")) {
+                String body = readHttpBody(httpRequestHeaders, reader);
+                Map<String, String> userInfo = Arrays.stream(body.split("&"))
+                        .map(value -> value.split("="))
+                        .collect(Collectors.toMap(value -> value[0], value -> value[1]));
+                Optional<User> user = InMemoryUserRepository.findByAccount(userInfo.get("account"));
+                if (user.isEmpty() || !user.get().checkPassword(userInfo.get("password"))) {
+                    Path path = HttpRequests.UNAUTHORIZED.readPath();
+                    byte[] fileBytes = readBytes(path);
+                    String responseBody = new String(fileBytes);
+                    return HttpResponse.of(httpRequests, responseBody);
+                }
+                log.info("user = {}", user.get());
+                SessionIdGenerator sessionIdGenerator = new RandomSessionIdGenerator();
+                String jSessionId = sessionIdGenerator.generate();
+                Map<String, Object> value = new HashMap<>();
+                value.put("user", user.get());
+                Session session = new Session(jSessionId, value);
+                SessionManager.add(session);
+
+                return HttpResponse.ofLoginRedirect(httpRequests, jSessionId);
+            }
         }
         if (httpRequests.equals(HttpRequests.REGISTER_MEMBER)) {
             if (httpRequestHeaders.containsKey("Content-Length")) {
@@ -143,6 +166,4 @@ public class Http11Processor implements Runnable, Processor {
     private byte[] readBytes(Path path) throws IOException {
         return Files.readAllBytes(path);
     }
-
-
 }

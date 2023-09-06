@@ -98,6 +98,11 @@ public class Request {
         return "";
     }
 
+    public boolean isMatching(final String requestPath, final RequestMethod requestMethod) {
+        return requestLine.isMatching(requestPath, requestMethod);
+    }
+
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

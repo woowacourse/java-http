@@ -68,14 +68,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response mapPath(final Request request) throws IOException, URISyntaxException {
-        final String requestPath = request.getRequestLine().getRequestPath();
         final RequestParameters requestParameters = request.getRequestParameters();
 
-        if ("/".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
+        if (request.isMatching("/", GET)) {
             return new Response("Hello world!");
         }
 
-        if ("/login".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
+        if (request.isMatching("/login", GET)) {
             final Session session = request.getSession();
             final User user = (User) session.getAttribute("user");
             if (user == null) {
@@ -103,11 +102,11 @@ public class Http11Processor implements Runnable, Processor {
             return Response.getRedirectResponse("index.html");
         }
 
-        if ("/register".equals(requestPath) && request.getRequestLine().getRequestMethod() == GET) {
+        if (request.isMatching("/register", GET)) {
             return findStaticResource("/register.html");
         }
 
-        if ("/register".equals(requestPath) && request.getRequestLine().getRequestMethod() == POST) {
+        if (request.isMatching("/register", POST)) {
             final String account = requestParameters.getValue("account");
             final String password = requestParameters.getValue("password");
             final String email = requestParameters.getValue("email");

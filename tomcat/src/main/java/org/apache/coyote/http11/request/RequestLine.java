@@ -23,18 +23,23 @@ public class RequestLine {
         final String requestUriValue = requestFirstLineElements[1];
         final String requestProtocolValue = requestFirstLineElements[2];
 
-        final String path = getString(requestUriValue);
+        final String path = getPath(requestUriValue);
         final RequestMethod requestMethod = RequestMethod.from(requestMethodValue);
         final Protocol protocol = Protocol.from(requestProtocolValue);
 
         return new RequestLine(requestMethod, path, protocol);
     }
 
-    private static String getString(final String requestUriValue) {
-        if (requestUriValue.contains("?")) {
-            return requestUriValue.substring(0, requestUriValue.indexOf("?"));
+    private static String getPath(final String requestUri) {
+        if (requestUri.contains("?")) {
+            return requestUri.substring(0, requestUri.indexOf("?"));
         }
-        return requestUriValue;
+        return requestUri;
+    }
+
+    public boolean isMatching(final String requestPath, final RequestMethod requestMethod) {
+        return this.requestPath.equals(requestPath)
+                && this.requestMethod == requestMethod;
     }
 
     public RequestMethod getRequestMethod() {

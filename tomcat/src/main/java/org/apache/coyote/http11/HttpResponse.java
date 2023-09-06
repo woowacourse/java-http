@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
 public class HttpResponse {
 
     public static final String CRLF = "\r\n";
-    public static final String EMPTY_STRING = "";
+    public static final String EMPTY = "";
     public static final String BLANK = " ";
     public static final String HTTP_1_1 = "HTTP/1.1";
 
@@ -24,7 +24,7 @@ public class HttpResponse {
                         final Headers headers) {
         this.httpStatus = requireNonNull(httpStatus);
         this.contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
-        this.body = ResponseBody.from(ofNullable(body).orElse(EMPTY_STRING));
+        this.body = ResponseBody.from(ofNullable(body).orElse(EMPTY));
         this.headers = ofNullable(headers).orElse(new Headers());
     }
 
@@ -56,7 +56,7 @@ public class HttpResponse {
 
     private String getBodyHeaders() {
         if (body.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
         StringBuilder builder = new StringBuilder();
         return builder.append(contentType)
@@ -68,7 +68,7 @@ public class HttpResponse {
 
     private String getBody() {
         if (body.isEmpty()) {
-            return EMPTY_STRING;
+            return EMPTY;
         }
         return CRLF + body.getBody();
     }

@@ -2,7 +2,7 @@ package org.apache.coyote.httpresponse.header;
 
 import org.apache.coyote.httpresponse.ContentBody;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,8 +14,8 @@ public class ResponseHeaders {
         this.headers = headers;
     }
 
-    public static ResponseHeaders init() {
-        return new ResponseHeaders(new HashMap<>());
+    public static ResponseHeaders blank() {
+        return new ResponseHeaders(new EnumMap<>(ResponseHeaderType.class));
     }
 
     public static ResponseHeaders of(final String path, final ContentBody contentBody) {

@@ -5,7 +5,8 @@ public enum HttpStatus {
     CREATED(201, "Created"),
     FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized"),
-    METHOD_NOT_ALLOWED(405, "Method Not Allowed");
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private static final String DELIMITER = " ";
     private final int value;

@@ -28,7 +28,6 @@ public class RegisterHandler implements Handler {
         return HttpResponse
                 .init(request.getHttpVersion())
                 .setHttpStatus(HttpStatus.CREATED)
-                .setBlankContent()
                 .setLocationHeader("/index.html");
     }
 

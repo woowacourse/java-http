@@ -38,7 +38,12 @@ public class HttpResponse {
         log.debug("======================================================================");
         log.debug("Http Response");
         log.debug("Response Http Version: {}", httpVersion);
-        return new HttpResponse(httpVersion, null, CookieResponseHeader.blank(), null, null);
+        return new HttpResponse(
+                httpVersion,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                CookieResponseHeader.blank(),
+                ResponseHeaders.blank(),
+                ContentBody.noContent());
     }
 
     public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
@@ -56,12 +61,6 @@ public class HttpResponse {
         final ResponseHeaders newResponseHeaders = ResponseHeaders.of(path, newContentBody);
         log.debug("Content-Path: {}", path);
         return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieResponseHeader, newResponseHeaders, newContentBody);
-    }
-
-    public HttpResponse setBlankContent() {
-        final ResponseHeaders blankResponseHeader = ResponseHeaders.init();
-        final ContentBody blankContentBody = ContentBody.noContent();
-        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieResponseHeader, blankResponseHeader, blankContentBody);
     }
 
     public HttpResponse setLocationHeader(final String path) {

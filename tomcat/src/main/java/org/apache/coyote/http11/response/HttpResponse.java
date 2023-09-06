@@ -56,7 +56,7 @@ public class HttpResponse {
     }
 
     public String getResponse() {
-        final String formattedStatus = formatStatus(status);
+        final String formattedStatus = status.getStatusLine();
         final String formattedHeaders = headers.keySet().stream()
                 .map(this::formatHeader)
                 .collect(Collectors.joining(LINE_SEPARATOR));
@@ -66,10 +66,6 @@ public class HttpResponse {
                 formattedHeaders,
                 EMPTY,
                 body);
-    }
-
-    private String formatStatus(final Status status) {
-        return status.getCode() + " " + status.getName() + " ";
     }
 
     private String formatHeader(final String header) {

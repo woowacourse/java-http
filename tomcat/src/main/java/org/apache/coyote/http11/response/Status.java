@@ -15,6 +15,10 @@ public enum Status {
         this.name = name;
     }
 
+    public String getStatusLine() {
+        return code + " " + name + " ";
+    }
+
     public int getCode() {
         return code;
     }

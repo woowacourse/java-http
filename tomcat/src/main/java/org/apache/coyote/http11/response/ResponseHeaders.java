@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,9 +14,11 @@ public class ResponseHeaders {
 
 
     private final Map<String, String> headers;
+    private final Cookie cookie;
 
     public ResponseHeaders() {
         this.headers = new LinkedHashMap<>();
+        this.cookie = new Cookie();
     }
 
     public void setContentType(final String contentType) {
@@ -32,11 +33,19 @@ public class ResponseHeaders {
         headers.put(LOCATION, location);
     }
 
+    public void setCookie(final String cookieName, final String value) {
+        cookie.setAttribute(cookieName, value);
+    }
+
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> header : headers.entrySet()){
+        if (cookie.isPresent()) {
+            sb.append(cookie.getHeaderString());
+            sb.append(CRLF);
+        }
+        for (Map.Entry<String, String> header : headers.entrySet()) {
             sb.append(header.getKey() + DELIMITER + header.getValue() + SPACE + CRLF);
         }
         return sb.toString();

@@ -73,6 +73,10 @@ public class HttpResponse {
         }
     }
 
+    public void setCookie(final String cookieName, final String value) {
+        headers.setCookie(cookieName, value);
+    }
+
     @Override
     public String toString() {
         return String.join(CRLF,

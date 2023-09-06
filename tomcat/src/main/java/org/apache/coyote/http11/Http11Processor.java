@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,6 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PAGE = "/login.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String REGISTER_PAGE = "/register.html";
+    private static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
 
     private final Socket connection;
 
@@ -69,8 +71,13 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (request.getMethod().equals("POST")) {
                 final boolean isAuthenticated = processLogin(request);
-                final String redirectUrlPath = isAuthenticated ? INDEX_PAGE : UNAUTHORIZED_PAGE;
-                return HttpResponse.of(HttpStatus.FOUND, redirectUrlPath);
+                if (isAuthenticated) {
+                    final UUID sessionId = UUID.randomUUID();
+                    final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
+                    response.setCookie(JSESSIONID_COOKIE_NAME, sessionId.toString());
+                    return response;
+                }
+                return HttpResponse.of(HttpStatus.FOUND, UNAUTHORIZED_PAGE);
             }
         }
 
@@ -81,6 +88,9 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (request.getMethod().equals("POST")) {
                 processRegister(request);
+                final UUID sessionId = UUID.randomUUID();
+                final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
+                response.setCookie(JSESSIONID_COOKIE_NAME, sessionId.toString());
                 return HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
             }
         }
@@ -106,18 +116,19 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    public void processRegister(final HttpRequest request) {
+    public User processRegister(final HttpRequest request) {
         if (!request.containsBody(ACCOUNT_KEY) || !request.containsBody(PASSWORD_KEY) || !request.containsBody(EMAIL_KEY)) {
-            return;
+            return null;
         }
         final String account = request.getBody(ACCOUNT_KEY);
         final String password = request.getBody(PASSWORD_KEY);
         final String email = request.getBody(EMAIL_KEY);
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return;
+            return null;
         }
         final User registeredUser = new User(account, password, email);
         InMemoryUserRepository.save(registeredUser);
+        return registeredUser;
     }
 }

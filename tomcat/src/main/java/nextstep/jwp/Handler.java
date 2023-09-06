@@ -11,7 +11,6 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.cookie.HttpCookie;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestURI;
@@ -22,6 +21,9 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.coyote.http11.request.HttpMethod.GET;
+import static org.apache.coyote.http11.request.HttpMethod.POST;
+
 public class Handler {
 
     private static final Logger log = LoggerFactory.getLogger(Handler.class);
@@ -31,15 +33,15 @@ public class Handler {
     }
 
     public static HttpResponse run(HttpRequest httpRequest) throws IOException {
-        RequestURI requestURI = httpRequest.getRequestUrl();
-        if (requestURI.isLoginPage() && httpRequest.getHttpMethod().isEqualTo(HttpMethod.GET)) {
+        RequestURI requestURI = httpRequest.getRequestLine().getRequestURI();
+        if (requestURI.isLoginPage() && httpRequest.isMethod(GET)) {
             return HttpResponse.builder()
                     .httpStatus(HttpStatus.OK)
                     .responseBody(parseResponseBody(requestURI.getResourcePath()))
                     .contentType(httpRequest.contentType())
                     .build();
         }
-        if (requestURI.isLoginPage() && httpRequest.getHttpMethod().isEqualTo(HttpMethod.POST)) {
+        if (requestURI.isLoginPage() && httpRequest.isMethod(POST)) {
             return doLogin(httpRequest);
         }
         if (requestURI.isHome()) {

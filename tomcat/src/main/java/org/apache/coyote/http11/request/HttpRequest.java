@@ -51,6 +51,10 @@ public class HttpRequest {
         return headers.getOrDefault(key, "");
     }
 
+    public boolean isMethod(HttpMethod httpMethod) {
+        return requestLine.isMethod(httpMethod);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

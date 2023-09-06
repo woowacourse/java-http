@@ -25,6 +25,10 @@ public class RequestLine {
         );
     }
 
+    public boolean isMethod(HttpMethod httpMethod) {
+        return httpMethod.isEqualTo(httpMethod);
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

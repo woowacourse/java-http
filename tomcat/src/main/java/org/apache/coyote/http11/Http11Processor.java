@@ -11,7 +11,10 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -150,18 +153,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String addSession(final User user) {
-        final String sessionId = UUID.randomUUID().toString();
-        final var session = new Session(sessionId);
+        final var session = Session.create();
         session.setAttribute("user", user);
         SESSION_MANAGER.add(session);
-        return sessionId;
+        return session.getId();
     }
 
     private User findUserBySessionId(final String sessionId) {
         if (sessionId == null) {
             return null;
         }
-        final Session session = SESSION_MANAGER.findSession(sessionId);
+        final Session session = SESSION_MANAGER.findSession(sessionId)
+                .orElseGet(Session::create);
         return (User) session.getAttribute("user");
     }
 

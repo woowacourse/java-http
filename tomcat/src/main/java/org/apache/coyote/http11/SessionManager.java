@@ -4,6 +4,7 @@ import org.apache.catalina.Manager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class SessionManager implements Manager {
 
@@ -15,8 +16,8 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(final String id) {
-        return SESSIONS.get(id);
+    public Optional<Session> findSession(final String id) {
+        return Optional.ofNullable(SESSIONS.get(id));
     }
 
     @Override

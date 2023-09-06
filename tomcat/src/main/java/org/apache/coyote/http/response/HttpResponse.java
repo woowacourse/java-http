@@ -45,7 +45,7 @@ public class HttpResponse {
             return response.toString();
         }
 
-        response.append(HttpHeader.CONTENT_LENGTH)
+        response.append(HttpHeader.CONTENT_LENGTH.getValue())
                 .append(HEADER_DELIMETER)
                 .append(body.getValue().getBytes().length)
                 .append(SPACE).append(CRLF);

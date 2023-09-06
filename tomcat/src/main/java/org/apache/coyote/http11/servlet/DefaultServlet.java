@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
 import org.apache.coyote.http11.common.ContentType;
@@ -9,7 +9,7 @@ import org.apache.coyote.http11.common.response.HttpResponse;
 import org.apache.coyote.http11.common.response.StatusCode;
 import org.apache.coyote.http11.util.StaticFileLoader;
 
-public class DefaultHandler implements Handler {
+public class DefaultServlet implements Servlet {
 
     @Override
     public HttpResponse handle(final HttpRequest request) throws IOException {

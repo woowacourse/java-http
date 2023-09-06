@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -17,9 +17,9 @@ import org.apache.coyote.http11.util.StaticFileLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements Handler {
+public class LoginServlet implements Servlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
     public static final String ACCOUNT = "account";
     public static final String PASSWORD = "password";
     public static final String USER = "user";

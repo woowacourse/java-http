@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
@@ -7,7 +7,7 @@ import org.apache.coyote.http11.common.request.HttpRequest;
 import org.apache.coyote.http11.common.response.HttpResponse;
 import org.apache.coyote.http11.common.response.StatusCode;
 
-public class HelloWorldHandler implements Handler {
+public class HelloWorldServlet implements Servlet {
 
     public static final String HELLO_WORLD = "Hello world!";
 

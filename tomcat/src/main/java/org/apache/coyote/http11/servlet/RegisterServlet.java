@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -14,7 +14,7 @@ import org.apache.coyote.http11.common.response.StatusCode;
 import org.apache.coyote.http11.util.Parser;
 import org.apache.coyote.http11.util.StaticFileLoader;
 
-public class RegisterHandler implements Handler {
+public class RegisterServlet implements Servlet {
 
     public static final String REGISTER_PAGE = "/register.html";
     public static final String ACCOUNT = "account";

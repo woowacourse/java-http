@@ -5,7 +5,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.header.Headers;
-import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.RequestParameters;
 import org.apache.coyote.http11.request.Session;
@@ -17,12 +16,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.apache.coyote.http11.header.ResponseHeader.*;
+import static org.apache.coyote.http11.header.ResponseHeader.LOCATION;
+import static org.apache.coyote.http11.header.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.http11.request.RequestMethod.GET;
 import static org.apache.coyote.http11.request.RequestMethod.POST;
 import static org.apache.coyote.http11.response.Response.UNAUTHORIZED_RESPONSE;

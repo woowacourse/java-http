@@ -1,12 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import jakarta.servlet.http.HttpSession;
-import org.apache.catalina.Manager;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class SessionManager {
 

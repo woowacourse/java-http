@@ -6,7 +6,7 @@ import java.util.Map;
 public class QueryString {
     private static final String INIT_SIGN = "?";
     private static final String NEXT_SIGN = "&";
-    private static final String KEY_VALUE_SIGN = "=";
+    private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -17,24 +17,24 @@ public class QueryString {
     }
 
     public static QueryString from(String uri) {
-        Map<String, String> queryStrings = new HashMap<>();
+        Map<String, String> value = new HashMap<>();
         int index = uri.indexOf(INIT_SIGN);
         if (index != -1) {
             String[] queryString = uri.substring(index + 1).split(NEXT_SIGN);
-            readQueryString(queryString, queryStrings);
+            readQueryString(queryString, value);
         }
-        return new QueryString(queryStrings);
+        return new QueryString(value);
     }
 
-    private static void readQueryString(String[] queryString, Map<String, String> queryStrings) {
+    private static void readQueryString(String[] queryString, Map<String, String> value) {
         for (String element : queryString) {
-            String[] keyAndValue = element.split(KEY_VALUE_SIGN);
-            queryStrings.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
+            String[] keyAndValue = element.split(KEY_VALUE_DELIMITER);
+            value.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
         }
     }
 
     public String getValueOf(String key) {
-        return values.get(key);
+        return values.getOrDefault(key, "");
     }
 
     public Map<String, String> getValues() {

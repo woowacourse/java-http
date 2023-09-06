@@ -39,7 +39,7 @@ class AppTest {
             thread.join();
         }
 
-        assertThat(count.intValue()).isEqualTo(2);
+        assertThat(count.intValue()).isEqualTo(5); // yml에서 threads.max의 값
     }
 
     private static void incrementIfOk(final HttpResponse<String> response) {

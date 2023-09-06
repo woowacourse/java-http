@@ -1,61 +1,40 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class RequestLine {
 
-    private final String requestMethod;
-    private final String path;
-    private final Map<String, String> query;
+    public static final int REQUEST_METHOD_INDEX = 0;
+    public static final int REQUEST_URL_INDEX = 1;
+    public static final int HTTP_VERSION_INDEX = 2;
+    private final HttpMethod httpMethod;
+    private final String requestUrl;
+    private final String version;
 
-    private RequestLine(String requestMethod, String path, Map<String, String> query) {
-        this.requestMethod = requestMethod;
-        this.path = path;
-        this.query = query;
+    private RequestLine(HttpMethod httpMethod, String requestUrl, String version) {
+        this.httpMethod = httpMethod;
+        this.requestUrl = requestUrl;
+        this.version = version;
     }
 
     public static RequestLine from(String line) {
-        String[] splitLine = line.split(" ");
+        String[] splitLine = StringUtils.split(line, " ");
+        HttpMethod method = HttpMethod.from(splitLine[REQUEST_METHOD_INDEX]);
+        String url = splitLine[REQUEST_URL_INDEX];
+        String version = splitLine[HTTP_VERSION_INDEX];
 
-        String method = splitLine[0];
-        String uri = splitLine[1];
-
-        int index = uri.indexOf("?");
-
-        if (index == -1 ) {
-            return new RequestLine(method, uri, Map.of());
-        }
-
-        String path = uri.substring(0, index);
-        String queryString = uri.substring(index + 1);
-        Map<String, String> query = Arrays.stream(queryString.split("&"))
-                .map(str -> str.split("="))
-                .collect(Collectors.toMap(
-                        s -> s[0],
-                        s -> s[1]
-                ));
-        return new RequestLine(method, path, query);
+        return new RequestLine(method, url, version);
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public String getQueryParameter(String queryKey) {
-        return query.get(queryKey);
-    }
-
-    public boolean containsQuery() {
-        return !query.isEmpty();
-    }
-
-    public boolean containsQuery(final String key) {
-        return query.containsKey(key);
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
     }
 
     public String getMethod() {
-        return requestMethod;
+        return httpMethod.getMethod();
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
     }
 }

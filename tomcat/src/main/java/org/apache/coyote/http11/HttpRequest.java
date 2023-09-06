@@ -3,8 +3,11 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
+
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final HttpRequestLine httpRequestLine;
     private final Map<String, String> headers;
@@ -58,5 +61,9 @@ public class HttpRequest {
 
     public Map<String, String> getCookie() {
         return cookies;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
     }
 }

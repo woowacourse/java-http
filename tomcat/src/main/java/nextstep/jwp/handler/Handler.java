@@ -1,6 +1,6 @@
 package nextstep.jwp.handler;
 
-import java.io.IOException;
+import nextstep.jwp.controller.Controller;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -11,12 +11,13 @@ public class Handler {
     private static final RequestHandler requestHandler = new RequestHandler(new SessionManager());
 
     public static String handle(HttpRequest request) {
+        Controller controller = RequestMapping.getController(request);
+        HttpResponse response = new HttpResponse();
         try {
-            HttpResponse response = requestHandler.handle(request);
+            controller.service(request, response);
             return HttpResponseParser.parse(response);
-        } catch (IOException e) {
-            HttpResponse response = HttpResponse.found("/500.html");
-            return HttpResponseParser.parse(response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

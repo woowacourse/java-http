@@ -6,10 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpResponse {
 
-    private final Map<String, String> headers;
-    private final HttpStatus httpStatus;
-    private final String body;
-    private final Map<String, String> cookies = new ConcurrentHashMap<>();
+    private Map<String, String> headers = new LinkedHashMap<>();
+    private HttpStatus httpStatus;
+    private String body = "";
+    private Map<String, String> cookies = new ConcurrentHashMap<>();
+
+    public HttpResponse() {
+        headers.put(HttpHeaders.CONTENT_TYPE, "text/html;charset=utf-8");
+    }
 
     public HttpResponse(Map<String, String> headers,
                         HttpStatus httpStatus, String body) {
@@ -17,7 +21,6 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
         this.body = body;
     }
-
     public static HttpResponse ok(String responseBody, ContentType contentType) {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put(HttpHeaders.CONTENT_TYPE, contentType.value + ";charset=utf-8");
@@ -27,7 +30,6 @@ public class HttpResponse {
 
     public static HttpResponse found(String location) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(HttpHeaders.CONTENT_LENGTH, "0");
         headers.put(HttpHeaders.LOCATION, location);
         return new HttpResponse(headers, HttpStatus.FOUND, "");
     }
@@ -48,4 +50,21 @@ public class HttpResponse {
         return cookies;
     }
 
+    public void setBody(String body) {
+        this.body = body;
+        headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+    }
+
+    public void toRedirect(String redirectUrl) {
+        this.httpStatus = HttpStatus.FOUND;
+        headers.put(HttpHeaders.LOCATION, redirectUrl);
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void setHeader(String key, String value) {
+        headers.put(key, value);
+    }
 }

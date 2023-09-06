@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -44,7 +43,6 @@ public class RequestHandler {
         }
 
         if (isStaticFile(uri) && request.getMethod() == HttpMethod.GET) {
-            System.out.println(uri);
             return getFile(uri);
         }
 
@@ -85,7 +83,7 @@ public class RequestHandler {
             if (user.checkPassword(queryString.get("password"))) {
                 log.info(user.toString());
                 HttpResponse response = HttpResponse.found("/index.html");
-                addCookieAndSession(response, user);
+//                addCookieAndSession(response, user);
                 return response;
             }
         }
@@ -113,12 +111,6 @@ public class RequestHandler {
         return false;
     }
 
-    private void addCookieAndSession(HttpResponse response, User user) {
-        String uuid = UUID.randomUUID().toString();
-        Session session = SessionManager.createSession(uuid);
-        session.setAttribute("user", user);
-        response.getCookie().put("JSESSIONID", uuid);
-    }
 
     private HttpResponse signUp(HttpRequest request) throws IOException {
         if (request.getMethod() == HttpMethod.GET) {

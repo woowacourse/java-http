@@ -22,7 +22,7 @@ public class SessionManager implements Manager {
         return SESSIONS.get(id);
     }
 
-    public static Session createSession(String key) {
+    public Session createSession(String key) {
         Session session = new Session(key);
         SESSIONS.put(key, session);
         return session;

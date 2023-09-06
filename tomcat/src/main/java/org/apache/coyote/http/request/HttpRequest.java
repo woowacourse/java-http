@@ -4,26 +4,26 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final StartLine startLine;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final HttpBody httpBody;
 
-    public HttpRequest(final StartLine startLine, final HttpHeaders headers, final HttpBody httpBody) {
-        this.startLine = startLine;
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final HttpBody httpBody) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.httpBody = httpBody;
     }
 
     public boolean isPostRequest() {
-        return startLine.isPostMethod();
+        return requestLine.isPostMethod();
     }
 
     public boolean isGetRequest() {
-        return startLine.isGetMethod();
+        return requestLine.isGetMethod();
     }
 
     public boolean containsRequestUri(final String uri) {
-        return startLine.containsRequestUri(uri);
+        return requestLine.containsRequestUri(uri);
     }
 
     public boolean containsHeader(final HttpHeader headerName) {
@@ -39,6 +39,6 @@ public class HttpRequest {
     }
 
     public RequestUri getRequestUri() {
-        return startLine.getRequestUri();
+        return requestLine.getRequestUri();
     }
 }

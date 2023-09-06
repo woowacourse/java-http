@@ -1,13 +1,13 @@
 package org.apache.coyote.http.request;
 
-public class StartLine {
+public class RequestLine {
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
 
     private final Protocol protocol;
 
-    public StartLine(final HttpMethod httpMethod, final RequestUri requestUri, final Protocol protocol) {
+    public RequestLine(final HttpMethod httpMethod, final RequestUri requestUri, final Protocol protocol) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.protocol = protocol;

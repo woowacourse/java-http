@@ -6,8 +6,8 @@ import org.apache.coyote.http.request.HttpHeaders;
 import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Protocol;
+import org.apache.coyote.http.request.RequestLine;
 import org.apache.coyote.http.request.RequestUri;
-import org.apache.coyote.http.request.StartLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,20 +30,20 @@ public class HttpRequestParser {
             return null;
         }
 
-        final StartLine startLine = parseStartLine(firstLine);
+        final RequestLine requestLine = parseStartLine(firstLine);
         final HttpHeaders headers = parseHeader(bufferedReader);
-        final HttpBody requestBody = parseRequestBody(startLine.getHttpMethod(), headers, bufferedReader);
+        final HttpBody requestBody = parseRequestBody(requestLine.getHttpMethod(), headers, bufferedReader);
 
-        return new HttpRequest(startLine, headers, requestBody);
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 
-    private StartLine parseStartLine(final String startLine) {
+    private RequestLine parseStartLine(final String startLine) {
         final String[] parsedStartLine = startLine.split(SPACE);
         final HttpMethod httpMethod = HttpMethod.from(parsedStartLine[0]);
         final RequestUri requestUri = new RequestUri(parsedStartLine[1]);
         final Protocol httpProtocol = Protocol.from(parsedStartLine[2]);
 
-        return new StartLine(httpMethod, requestUri, httpProtocol);
+        return new RequestLine(httpMethod, requestUri, httpProtocol);
     }
 
     private HttpHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {

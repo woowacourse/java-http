@@ -23,7 +23,7 @@ public class StartLine {
     public static StartLine create(final String line) {
         String[] targets = line.split(DELIMITER);
 
-        HttpMethod method = HttpMethod.valueOf(targets[METHOD_IDX]);
+        HttpMethod method = HttpMethod.from(targets[METHOD_IDX]);
 
         String uriWithParams = targets[URI_IDX];
         RequestUri uri = RequestUri.create(uriWithParams);

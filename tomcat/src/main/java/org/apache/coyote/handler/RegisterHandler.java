@@ -45,7 +45,7 @@ public class RegisterHandler implements Handler {
         final String password = request.findQueryParameterValue(PASSWORD_KEY);
         final String email = request.findQueryParameterValue(EMAIL_KEY);
 
-        if (account == null || password == null || email == null) {
+        if (isInvalidQueryParameter(account) || isInvalidQueryParameter(password) || isInvalidQueryParameter(email)) {
             return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, HttpConsts.BLANK);
         }
 
@@ -60,5 +60,9 @@ public class RegisterHandler implements Handler {
                 HttpConsts.BLANK,
                 new HeaderDto("Location", "/login")
         );
+    }
+
+    private boolean isInvalidQueryParameter(final String targetParameter) {
+        return targetParameter == null || targetParameter.isEmpty() || targetParameter.isBlank();
     }
 }

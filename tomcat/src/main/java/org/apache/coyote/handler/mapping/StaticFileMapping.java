@@ -19,7 +19,7 @@ public class StaticFileMapping implements HandlerMapping {
     public boolean supports(final HttpRequest httpRequest) {
         return httpRequest.isGetRequest() &&
                 ("/".equals(httpRequest.getRequestUri().getRequestUri()) ||
-                        "/index.html".equals(httpRequest.getRequestUri().getRequestUri()) ||
+                        httpRequest.getRequestUri().getRequestUri().endsWith(".html") ||
                         httpRequest.getRequestUri().getRequestUri().endsWith(".js") ||
                         httpRequest.getRequestUri().getRequestUri().endsWith(".css") ||
                         httpRequest.getRequestUri().getRequestUri().endsWith(".ico")
@@ -37,11 +37,13 @@ public class StaticFileMapping implements HandlerMapping {
                     .build();
         }
 
-        if ("/index.html".equals(requestUri)) {
+        if (requestUri.endsWith(".html")) {
+            final String filePath = "static" + requestUri;
+
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
                     .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.HTML.getValue())))
-                    .body(HttpBody.file("static/index.html"))
+                    .body(HttpBody.file(filePath))
                     .build();
         }
 

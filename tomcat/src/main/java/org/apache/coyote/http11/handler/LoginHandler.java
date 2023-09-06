@@ -26,7 +26,7 @@ public class LoginHandler {
     }
 
     public static HttpResponse handle(final RequestLine requestLine, final RequestHeader requestHeader, final RequestBody requestBody) {
-        if (requestLine.getRequestMethod().equals("GET")) {
+        if (requestLine.getRequestMethod().isSameRequestMethod("GET")) {
             if (isAuthenticated(requestHeader)) {
                 return new HttpResponseBuilder().init()
                         .httpStatus(FOUND)

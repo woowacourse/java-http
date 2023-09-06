@@ -21,4 +21,10 @@ public enum RequestMethod {
                 .findFirst()
                 .orElseThrow(InvalidRequestException::new);
     }
+
+    public boolean isSameRequestMethod(String value) {
+        return Arrays.stream(RequestMethod.values())
+                .anyMatch(requestMethod -> requestMethod.name().equals(value));
+
+    }
 }

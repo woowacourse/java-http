@@ -16,7 +16,7 @@ public class RegisterHandler {
     }
 
     public static HttpResponse handle(final RequestLine requestLine, final RequestHeader requestHeader, final RequestBody requestBody) {
-        if (requestLine.getRequestMethod().equals("GET")) {
+        if (requestLine.getRequestMethod().isSameRequestMethod("GET")) {
             return StaticFileHandler.handle("/register.html",requestHeader);
         }
         return register(requestBody);

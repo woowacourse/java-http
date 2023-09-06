@@ -36,7 +36,7 @@ public class Parser {
         }
         String[] split = line.split(COOKIE_REGEX);
 
-        Map<String, String> cookies = new LinkedHashMap<>();
+        Map<String, String> cookies = new HashMap<>();
         for (String piece : split) {
             int idx = piece.indexOf(DELIMITER);
             cookies.put(piece.substring(0, idx), piece.substring(idx + 1));

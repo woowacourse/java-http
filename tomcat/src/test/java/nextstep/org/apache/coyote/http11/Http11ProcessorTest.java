@@ -109,13 +109,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         //then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 302 Found";
-        var contentLength = "Content-Length: " + new File(resource.getPath()).length();
 
         assertAll(
                 () -> assertThat(socket.output()).contains(expected),
-                () -> assertThat(socket.output()).contains(contentLength)
+                () -> assertThat(socket.output()).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(socket.output()).contains("Location: ")
         );
     }
 
@@ -192,15 +191,12 @@ class Http11ProcessorTest {
 
         //when
         processor.process(socket);
-
         //then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 302 Found";
-        String contentLength = "Content-Length: " + new File(resource.getPath()).length();
 
         assertAll(
                 () -> assertThat(socket.output()).contains(expected),
-                () -> assertThat(socket.output()).contains(contentLength),
+                () -> assertThat(socket.output()).contains("Location: "),
                 () -> assertThatCode(() -> findByAccount("newnew").get()).doesNotThrowAnyException(),
                 () -> assertThat(findByAccount("newnew").get().getPassword()).isEqualTo("1234")
         );

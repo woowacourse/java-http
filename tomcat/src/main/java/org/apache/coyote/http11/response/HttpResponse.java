@@ -10,12 +10,19 @@ public class HttpResponse {
     private static final String CHARSET_POSTFIX = "; charset=utf-8";
     private static final String ACCEPT_DELIMITER = ",";
     private static final String TEXT_TYPE = "text";
+    private static final String HTTP11 = "HTTP/1.1";
 
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     private StatusCode statusCode;
     private String protocol;
     private String body;
+
+    public HttpResponse() {
+        this.protocol = HTTP11;
+        this.statusCode = StatusCode.OK;
+        this.body = "";
+    }
 
     public String format() {
         StringBuilder sb = new StringBuilder();
@@ -59,5 +66,10 @@ public class HttpResponse {
     public HttpResponse protocol(String protocol) {
         this.protocol = protocol;
         return this;
+    }
+
+    public HttpResponse redirect(String url) {
+        return this.statusCode(StatusCode.FOUND)
+                   .addHeader(Header.LOCATION.getName(), url);
     }
 }

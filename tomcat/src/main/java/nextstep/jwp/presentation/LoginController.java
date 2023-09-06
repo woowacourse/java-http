@@ -4,6 +4,7 @@ package nextstep.jwp.presentation;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.FileIOReader;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -16,7 +17,7 @@ public class LoginController implements Controller {
     private static final String JSESSIONID = "JSESSIONID";
 
     private static final LoginController instance = new LoginController();
-    private static final String NOT_FOUND = "/401.html";
+    private static final String UNAUTHORIZED = "/401.html";
 
     private LoginController() {
     }
@@ -48,53 +49,36 @@ public class LoginController implements Controller {
                 request.getBodyValue("password"),
                 request.getBodyValue("email")
         ));
-        String responseBody = FileIOReader.readFile(INDEX);
         return response.contentType(request.getAccept())
-                       .statusCode(StatusCode.FOUND)
-                       .body(responseBody)
-                       .protocol(request.getProtocolVersion())
-                       .addHeader(Header.LOCATION.getName(), INDEX);
+                       .redirect(INDEX);
     }
 
     private HttpResponse registerPage(HttpRequest request, HttpResponse response) {
         String responseBody = FileIOReader.readFile(request.getRequestUrl());
         return response.contentType(request.getAccept())
-                       .statusCode(StatusCode.OK)
-                       .protocol(request.getProtocolVersion())
                        .body(responseBody);
     }
 
     private HttpResponse loginPage(HttpRequest request, HttpResponse response) {
         if (request.getSession().getAttribute("user") != null) {
-            String responseBody = FileIOReader.readFile(INDEX);
             return response.contentType(request.getAccept())
-                           .statusCode(StatusCode.FOUND)
-                           .body(responseBody)
-                           .protocol(request.getProtocolVersion())
-                           .addHeader(Header.LOCATION.getName(), INDEX);
+                           .redirect(INDEX);
         }
         String responseBody = FileIOReader.readFile(request.getRequestUrl());
         return response.contentType(request.getAccept())
-                       .statusCode(StatusCode.OK)
-                       .protocol(request.getProtocolVersion())
                        .body(responseBody);
     }
 
     private HttpResponse tryLogin(HttpRequest request, HttpResponse response) {
         try {
             login(request, response);
-            String responseBody = FileIOReader.readFile(INDEX);
             return response.contentType(request.getAccept())
-                           .statusCode(StatusCode.FOUND)
-                           .body(responseBody)
-                           .protocol(request.getProtocolVersion())
-                           .addHeader(Header.LOCATION.getName(), INDEX);
+                           .redirect(INDEX);
 
         } catch (IllegalArgumentException e) {
-            String responseBody = FileIOReader.readFile(NOT_FOUND);
-            return response.contentType(request.getAccept())
+            String responseBody = FileIOReader.readFile(UNAUTHORIZED);
+            return response.contentType(ContentType.HTML.getType())
                            .statusCode(StatusCode.UNAUTHORIZED)
-                           .protocol(request.getProtocolVersion())
                            .body(responseBody);
         }
     }

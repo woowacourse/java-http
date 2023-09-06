@@ -41,7 +41,9 @@ public class HttpRequest {
         if (headers.containsKey(Header.COOKIE.getName())) {
             this.cookie = new Cookie(headers.get(Header.COOKIE.getName()));
         }
-        this.session = (Session) SessionManager.getInstance().findSession(cookie.getValue(JSESSIONID));
+        if (cookie != null) {
+            this.session = (Session) SessionManager.getInstance().findSession(cookie.getValue(JSESSIONID));
+        }
     }
 
     private void readBody() throws IOException {

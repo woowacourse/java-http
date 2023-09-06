@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import org.apache.coyote.http11.exception.RequestBodyNotProvidedException;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpMethod;
@@ -42,12 +40,22 @@ public class RequestExtractor {
     }
 
     private static Headers extractHeaders(BufferedReader reader) throws IOException {
-        List<String> headers = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
         String line;
         while (!(line = reader.readLine()).isBlank()) {
-            headers.add(line);
+            lines.add(line);
         }
-        return Headers.fromLines(headers);
+        return convertLinesToHeaders(lines);
+    }
+
+    private static Headers convertLinesToHeaders(List<String> lines) {
+        Map<String, String> headers = new HashMap<>();
+
+        lines.stream()
+                .map(each -> each.split(": "))
+                .forEach(each -> headers.put(each[0], each[1]));
+
+        return new Headers(headers);
     }
 
     private static RequestBody extractBodyIfExists(BufferedReader reader,

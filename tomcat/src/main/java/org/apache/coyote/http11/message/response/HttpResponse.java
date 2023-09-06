@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.message.response;
 
-import java.util.Map;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpStatus;
@@ -10,13 +9,12 @@ public class HttpResponse {
 
     private HttpVersion httpVersion;
     private HttpStatus httpStatus;
-    private Headers headers;
+    private Headers headers = Headers.ofEmpty();
     private ResponseBody responseBody;
 
+
     public static HttpResponse init() {
-        HttpResponse httpResponse = new HttpResponse();
-        httpResponse.setHeaders(Headers.fromMap(Map.of()));
-        return httpResponse;
+        return new HttpResponse();
     }
 
     public HttpResponse setHttpVersion(HttpVersion httpVersion) {
@@ -34,16 +32,10 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setHeaders(Headers headers) {
-        this.headers = headers;
-        return this;
-    }
-
     public HttpResponse setResponseBody(ResponseBody responseBody) {
         this.responseBody = responseBody;
         return this;
     }
-
 
     public byte[] getBytes() {
         String statusLine = httpVersion + " " + httpStatus + " ";

@@ -13,6 +13,7 @@ import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpConsts;
+import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,7 @@ public class LoginHandler implements Handler {
                     ContentType.JSON,
                     user.toString(),
                     cookie,
-                    new HeaderDto("Location", "/index.html")
+                    new HeaderDto(HttpHeaderConsts.LOCATION, "/index.html")
             );
         } catch (LoginFailureException ex) {
             log.info("login failed : ", ex);
@@ -80,7 +81,7 @@ public class LoginHandler implements Handler {
                     HttpStatusCode.FOUND,
                     ContentType.JSON,
                     HttpConsts.BLANK,
-                    new HeaderDto("Location", "/401.html")
+                    new HeaderDto(HttpHeaderConsts.LOCATION, "/401.html")
             );
         }
     }

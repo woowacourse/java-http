@@ -10,6 +10,7 @@ import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpConsts;
+import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.HttpMethod;
 
 public class RegisterHandler implements Handler {
@@ -58,7 +59,7 @@ public class RegisterHandler implements Handler {
                 HttpStatusCode.FOUND,
                 ContentType.JSON,
                 HttpConsts.BLANK,
-                new HeaderDto("Location", "/login")
+                new HeaderDto(HttpHeaderConsts.LOCATION, "/login")
         );
     }
 

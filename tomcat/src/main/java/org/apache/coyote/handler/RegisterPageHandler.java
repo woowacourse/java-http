@@ -64,7 +64,7 @@ public class RegisterPageHandler implements Handler {
                         ContentType.JSON,
                         user.toString(),
                         request.getCookie(),
-                        new HeaderDto("Location", "/index.html")
+                        new HeaderDto(HttpHeaderConsts.LOCATION, "/index.html")
                 );
             }
         }

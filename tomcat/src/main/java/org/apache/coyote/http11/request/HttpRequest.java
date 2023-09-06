@@ -8,16 +8,16 @@ import java.util.Map;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeaders requestHeaders;
+    private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
     public HttpRequest(
             final RequestLine requestLine,
-            final RequestHeaders requestHeaders,
+            final RequestHeader requestHeader,
             final RequestBody requestBody
     ) {
         this.requestLine = requestLine;
-        this.requestHeaders = requestHeaders;
+        this.requestHeader = requestHeader;
         this.requestBody = requestBody;
     }
 
@@ -32,17 +32,17 @@ public class HttpRequest {
             headers.put(split[0], split[1]);
             line = bufferedReader.readLine();
         }
-        final RequestHeaders requestHeaders = new RequestHeaders(headers);
+        final RequestHeader requestHeader = new RequestHeader(headers);
         if (!bufferedReader.ready()) {
-            return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
+            return new HttpRequest(requestLine, requestHeader, RequestBody.empty());
         }
 
-        final int contentLength = Integer.parseInt(requestHeaders.geHeaderValue("Content-Length"));
+        final int contentLength = Integer.parseInt(requestHeader.geHeaderValue("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
 
         final RequestBody requestBody = RequestBody.parse(new String(buffer));
-        return new HttpRequest(requestLine, requestHeaders, requestBody);
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
     public RequestLine getRequestLine() {
@@ -61,8 +61,8 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public RequestHeaders getRequestHeaders() {
-        return requestHeaders;
+    public RequestHeader getRequestHeaders() {
+        return requestHeader;
     }
 
     public Map<String, String> getQueryParameter() {

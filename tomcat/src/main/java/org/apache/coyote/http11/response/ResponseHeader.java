@@ -4,29 +4,29 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
 
-public class ResponseHeaders {
+public class ResponseHeader {
 
-    private final Map<String, String> headers;
+    private final Map<String, String> elements;
 
-    private ResponseHeaders(final Map<String, String> headers) {
-        this.headers = headers;
+    private ResponseHeader(final Map<String, String> elements) {
+        this.elements = elements;
     }
 
-    public static ResponseHeaders from(final ResponseBody responseBody) {
+    public static ResponseHeader from(final ResponseBody responseBody) {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put("Content-Type", responseBody.getHttpExtensionType().getContentType());
         headers.put("Content-Length", String.valueOf(responseBody.getLength()));
-        return new ResponseHeaders(headers);
+        return new ResponseHeader(headers);
     }
 
     public void addCookie(final HttpCookie cookie) {
-        headers.put("Set-Cookie", cookie.toString());
+        elements.put("Set-Cookie", cookie.toString());
     }
 
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        headers.forEach((key, value) -> stringBuilder.append(key).append(": ").append(value).append(" \r\n"));
+        elements.forEach((key, value) -> stringBuilder.append(key).append(": ").append(value).append(" \r\n"));
         return stringBuilder.toString();
     }
 }

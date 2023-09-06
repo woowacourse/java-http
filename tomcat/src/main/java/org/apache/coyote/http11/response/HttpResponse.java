@@ -6,23 +6,23 @@ import org.apache.coyote.http11.HttpStatusCode;
 public class HttpResponse {
 
     private final StatusLine statusLine;
-    private final ResponseHeaders responseHeaders;
+    private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
     private HttpResponse(
             final StatusLine statusLine,
-            final ResponseHeaders responseHeaders,
+            final ResponseHeader responseHeader,
             final ResponseBody responseBody
     ) {
         this.statusLine = statusLine;
-        this.responseHeaders = responseHeaders;
+        this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
     public static HttpResponse of(final HttpStatusCode httpStatusCode, final ResponseBody responseBody) {
-        final ResponseHeaders responseHeaders = ResponseHeaders.from(responseBody);
+        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
         final StatusLine statusLine = new StatusLine(httpStatusCode);
-        return new HttpResponse(statusLine, responseHeaders, responseBody);
+        return new HttpResponse(statusLine, responseHeader, responseBody);
     }
 
     public static HttpResponse withCookie(
@@ -30,18 +30,18 @@ public class HttpResponse {
             final ResponseBody responseBody,
             final HttpCookie httpCookie
     ) {
-        final ResponseHeaders responseHeaders = ResponseHeaders.from(responseBody);
-        responseHeaders.addCookie(httpCookie);
+        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+        responseHeader.addCookie(httpCookie);
         final StatusLine statusLine = new StatusLine(httpStatusCode);
-        return new HttpResponse(statusLine, responseHeaders, responseBody);
+        return new HttpResponse(statusLine, responseHeader, responseBody);
     }
 
     public StatusLine getStatusLine() {
         return statusLine;
     }
 
-    public ResponseHeaders getResponseHeaders() {
-        return responseHeaders;
+    public ResponseHeader getResponseHeaders() {
+        return responseHeader;
     }
 
     public ResponseBody getResponseBody() {
@@ -50,7 +50,7 @@ public class HttpResponse {
 
     public String toString() {
         return statusLine + "\r\n" +
-                responseHeaders + "\r\n" +
+                responseHeader + "\r\n" +
                 responseBody.getContent();
     }
 }

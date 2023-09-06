@@ -33,11 +33,6 @@ public enum HttpExtensionType {
                 .orElse(HTML);
     }
 
-    public static boolean hasExtensionType(final String requestUri) {
-        return Arrays.stream(values())
-                .anyMatch(it -> requestUri.endsWith(it.getExtension()));
-    }
-
     public String getExtension() {
         return extension;
     }

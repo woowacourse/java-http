@@ -9,6 +9,7 @@ public enum HttpStatusCode {
     BAD_REQUEST("400", "Bad Request"),
     METHOD_NOT_ALLOWED("405", "Method Not Allowed"),
     NOT_FOUND("404", "Not Found"),
+    NOT_ACCEPTABLE("406", "Not Acceptable"),
     INTERNAL_SERVER_ERROR("500", "Internal Server Error");
 
     private final String code;

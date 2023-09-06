@@ -1,6 +1,7 @@
 package org.apache.coyote.http.response;
 
 import java.util.Arrays;
+import org.apache.coyote.http.response.exception.UnsupportedAcceptException;
 
 public enum ContentType {
 
@@ -22,9 +23,9 @@ public enum ContentType {
 
     public static ContentType findContentType(final String... targetType) {
         return Arrays.stream(ContentType.values())
-                .filter(contentType -> hasType(contentType, targetType))
-                .findAny()
-                .orElse(ContentType.JSON);
+                     .filter(contentType -> hasType(contentType, targetType))
+                     .findAny()
+                     .orElseThrow(UnsupportedAcceptException::new);
     }
 
     private static boolean hasType(final ContentType contentType, final String[] target) {

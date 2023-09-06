@@ -21,6 +21,7 @@ import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.response.exception.UnsupportedAcceptException;
 import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.HttpHeaderConsts;
@@ -87,6 +88,8 @@ public class Http11Processor implements Runnable, Processor {
             );
         } catch (final UnsupportedApiException e) {
             return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, e.getMessage());
+        } catch (final UnsupportedAcceptException e) {
+            return Response.of(request, HttpStatusCode.NOT_ACCEPTABLE, ContentType.JSON, e.getMessage());
         }
     }
 

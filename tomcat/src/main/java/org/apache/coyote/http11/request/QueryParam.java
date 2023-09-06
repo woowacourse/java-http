@@ -13,7 +13,7 @@ public class QueryParam {
 	}
 
 	public static QueryParam from(final String query) {
-		if (query.isEmpty()) {
+		if (query == null) {
 			return new QueryParam(Map.of());
 		}
 

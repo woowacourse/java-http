@@ -5,6 +5,7 @@ import java.net.URI;
 public class RequestLine {
 
 	private static final String DELIMITER = " ";
+
 	private final HttpMethod httpMethod;
 	private final String path;
 	private final QueryParam queryParam;
@@ -28,5 +29,21 @@ public class RequestLine {
 		final HttpVersion httpVersion = HttpVersion.from(splitRequest[2]);
 
 		return new RequestLine(httpMethod, path, queryParam, httpVersion);
+	}
+
+	public boolean equalPath(final String path) {
+		return this.path.equals(path);
+	}
+
+	public QueryParam getQueryParam() {
+		return queryParam;
+	}
+
+	public HttpMethod getHttpMethod() {
+		return httpMethod;
+	}
+
+	public String getPath() {
+		return path;
 	}
 }

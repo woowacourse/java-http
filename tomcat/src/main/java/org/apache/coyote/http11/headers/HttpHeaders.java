@@ -28,7 +28,6 @@ public class HttpHeaders {
 
 	public static HttpHeaders from(final String httpRequest) {
 		final Map<String, String> headerMaps = stream(httpRequest.split(LINE_SEPARATOR))
-			.skip(1)
 			.map(headerLine -> headerLine.split(HEADER_DELIMITER, 2))
 			.collect(toMap(
 				header -> header[0].trim(),

@@ -25,7 +25,12 @@ class StaticResourceHandlerTest {
 		@Test
 		@DisplayName("endpoint가 resources에 있는 파일인 경우 true를 반환한다.")
 		void success() {
-			final HttpRequest request = HttpRequestBuilder.from("GET /index.html HTTP/1.1 ").build();
+			final HttpRequest request = HttpRequestBuilder
+				.from(String.join("\r\n",
+					"GET /index.html HTTP/1.1 ",
+					"Host: localhost:8080 "
+				))
+				.build();
 
 			final boolean supported = HANDLER.isSupported(request);
 
@@ -36,7 +41,12 @@ class StaticResourceHandlerTest {
 		@Test
 		@DisplayName("endpoint가 resources에 없는 파일인 경우 false를 반환한다.")
 		void fail() {
-			final HttpRequest request = HttpRequestBuilder.from("GET /aaa HTTP/1.1 ").build();
+			final HttpRequest request = HttpRequestBuilder
+				.from(String.join("\r\n",
+					"GET /index1.html HTTP/1.1 ",
+					"Host: localhost:8080 "
+				))
+				.build();
 
 			final boolean supported = HANDLER.isSupported(request);
 

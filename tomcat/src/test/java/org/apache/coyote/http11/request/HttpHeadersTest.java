@@ -16,7 +16,6 @@ class HttpHeadersTest {
 	void createHttpHeader() {
 		//given
 		final String httpRequest = String.join("\r\n",
-			"GET /index.html HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"Cookie: salty=fries",
@@ -42,7 +41,6 @@ class HttpHeadersTest {
 	void isExistJSessionId() {
 		//given
 		final String httpRequest = String.join("\r\n",
-			"GET /index.html HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"Cookie: JSESSIONID=str",
@@ -59,7 +57,6 @@ class HttpHeadersTest {
 	void findJSessionId() {
 		final String jSessionId = "str";
 		final String httpRequest = String.join("\r\n",
-			"GET /index.html HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"Cookie: JSESSIONID=" + jSessionId,

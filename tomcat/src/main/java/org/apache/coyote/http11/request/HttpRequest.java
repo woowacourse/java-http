@@ -7,35 +7,30 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 
 public class HttpRequest {
 
-	private final HttpMethod httpMethod;
-	private final String endPoint;
-	private final QueryParam queryParam;
+	private final RequestLine requestLine;
 	private final HttpHeaders headers;
 	private final String body;
 
-	private HttpRequest(final HttpMethod httpMethod, final String endPoint, final QueryParam queryParam,
-		final HttpHeaders headers, final String body) {
-		this.httpMethod = httpMethod;
-		this.endPoint = endPoint;
-		this.queryParam = queryParam;
+	private HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final String body) {
+		this.requestLine = requestLine;
 		this.headers = headers;
 		this.body = body;
 	}
 
-	public HttpMethod getHttpMethod() {
-		return httpMethod;
+	public boolean equalPath(final String endPoint) {
+		return requestLine.equalPath(endPoint);
 	}
 
-	public String getEndPoint() {
-		return endPoint;
+	public QueryParam getQueryParam() {
+		return requestLine.getQueryParam();
+	}
+
+	public HttpMethod getHttpMethod() {
+		return requestLine.getHttpMethod();
 	}
 
 	public HttpHeaders getHeaders() {
 		return headers;
-	}
-
-	public QueryParam getQueryParam() {
-		return queryParam;
 	}
 
 	public Optional<String> getBody() {
@@ -50,29 +45,26 @@ public class HttpRequest {
 		return headers.findJSessionId();
 	}
 
+	public String getPath() {
+		return requestLine.getPath();
+	}
+
 	public static class HttpRequestBuilder {
-		private final HttpMethod httpMethod;
-		private final String endPoint;
-		private final QueryParam queryParam;
+
+		private final RequestLine requestLine;
 		private final HttpHeaders headers;
 		private String body;
 
-		private HttpRequestBuilder(HttpMethod httpMethod, String endPoint, QueryParam queryParam, HttpHeaders headers) {
-			this.httpMethod = httpMethod;
-			this.endPoint = endPoint;
-			this.queryParam = queryParam;
+		public HttpRequestBuilder(final RequestLine requestLine, final HttpHeaders headers) {
+			this.requestLine = requestLine;
 			this.headers = headers;
 		}
 
 		public static HttpRequestBuilder from(final String requestHeader) {
-			final String[] requestFirstLine = requestHeader.split(" ", 3);
-
-			final HttpMethod httpMethod = HttpMethod.valueOf(requestFirstLine[0].toUpperCase());
-			final String uri = requestFirstLine[1];
-			final QueryParam queryParam = QueryParam.from(uri);
-			final String endPoint = extractEndPoint(uri);
-			final HttpHeaders httpHeaders = HttpHeaders.from(requestHeader);
-			return new HttpRequestBuilder(httpMethod, endPoint, queryParam, httpHeaders);
+			final String[] splitRequest = requestHeader.split("\r\n", 2);
+			final RequestLine requestLine = RequestLine.from(splitRequest[0]);
+			final HttpHeaders httpHeaders = HttpHeaders.from(splitRequest[1]);
+			return new HttpRequestBuilder(requestLine, httpHeaders);
 		}
 
 		public HttpRequestBuilder body(final String body) {
@@ -88,17 +80,8 @@ public class HttpRequest {
 
 		public HttpRequest build() {
 			return new HttpRequest(
-				httpMethod, endPoint, queryParam, headers, body
+				requestLine, headers, body
 			);
-		}
-
-		private static String extractEndPoint(final String uri) {
-			//TODO: 추후 리팩터링 시 endPoint와 queryParam 묶는 클래스 생성
-			final int index = uri.indexOf("?");
-			if (index == -1) {
-				return uri;
-			}
-			return uri.substring(0, index);
 		}
 	}
 }

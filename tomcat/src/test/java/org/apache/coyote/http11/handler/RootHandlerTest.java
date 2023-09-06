@@ -41,7 +41,14 @@ class RootHandlerTest {
 		@Test
 		@DisplayName("/로 접근하면 true를 반환한다.")
 		void success() {
-			final HttpRequest request = HttpRequestBuilder.from("GET / HTTP/1.1 ").build();
+			final String plainRequest = String.join("\r\n",
+				"GET / HTTP/1.1 ",
+				"Host: localhost:8080 ",
+				"Connection: keep-alive ",
+				"",
+				"");
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
+				.build();
 
 			final boolean supported = new RootHandler().isSupported(request);
 
@@ -52,7 +59,14 @@ class RootHandlerTest {
 		@Test
 		@DisplayName("/외 경로로 접근하면 true를 반환한다.")
 		void fail() {
-			final HttpRequest request = HttpRequestBuilder.from("GET /invalid HTTP/1.1 ").build();
+			final String plainRequest = String.join("\r\n",
+				"GET /a HTTP/1.1 ",
+				"Host: localhost:8080 ",
+				"Connection: keep-alive ",
+				"",
+				"");
+			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
+				.build();
 
 			final boolean supported = new RootHandler().isSupported(request);
 

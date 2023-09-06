@@ -40,8 +40,8 @@ class HttpRequestTest {
 		assertAll(
 			() -> assertThat(actual.getHttpMethod())
 				.isEqualTo(HttpMethod.GET),
-			() -> assertThat(actual.getEndPoint())
-				.isEqualTo("/index.html"),
+			() -> assertThat(actual.equalPath("/index.html"))
+				.isTrue(),
 			() -> assertThat(actual.getHeaders())
 				.usingRecursiveComparison()
 				.isEqualTo(expectedHeader),

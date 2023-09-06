@@ -39,7 +39,7 @@ public class StaticResourceHandler implements HttpHandler {
 	}
 
 	private HttpHeaders resolveHeader(final HttpRequest request, final String body) {
-		final MimeType mimeType = MimeType.parseEndpoint(request.getEndPoint());
+		final MimeType mimeType = MimeType.parseEndpoint(request.getPath());
 		final HttpHeaders headers = new HttpHeaders();
 		headers.put(CONTENT_TYPE.getValue(), mimeType.getValue());
 		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
@@ -48,6 +48,6 @@ public class StaticResourceHandler implements HttpHandler {
 
 	private URL extractURL(final HttpRequest request) {
 		return getClass().getClassLoader()
-			.getResource(RESOURCE_PREFIX.concat(request.getEndPoint()));
+			.getResource(RESOURCE_PREFIX.concat(request.getPath()));
 	}
 }

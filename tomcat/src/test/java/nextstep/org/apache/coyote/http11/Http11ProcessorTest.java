@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import support.StubSocket;
@@ -63,4 +65,14 @@ class Http11ProcessorTest {
 
 		assertThat(socket.output()).isEqualTo(expected);
 	}
+
+	@Test
+	@DisplayName("")
+	void Test() {
+		URI uri = URI.create("/index?id=name");
+
+		System.out.println(uri.getPath());
+		System.out.println(uri.getQuery());
+	}
+
 }

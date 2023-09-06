@@ -14,7 +14,7 @@ public class RootHandler implements HttpHandler {
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
-		return request.getEndPoint().equals(END_POINT);
+		return request.equalPath(END_POINT);
 	}
 
 	@Override

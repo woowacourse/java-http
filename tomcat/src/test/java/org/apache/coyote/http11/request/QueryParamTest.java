@@ -22,9 +22,8 @@ class QueryParamTest {
 			.stream()
 			.map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
 			.collect(Collectors.joining("&"));
-		final String endPoint = "/index.html?" + queryString;
 
-		final QueryParam actual = QueryParam.from(endPoint);
+		final QueryParam actual = QueryParam.from(queryString);
 
 		final QueryParam expected = new QueryParam(
 			Map.of(

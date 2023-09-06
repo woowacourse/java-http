@@ -21,22 +21,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
-import static org.apache.coyote.http11.Url.INDEX;
-import static org.apache.coyote.http11.Url.LOGIN;
-import static org.apache.coyote.http11.Url.LOGIN_HTML;
-import static org.apache.coyote.http11.Url.LOGIN_WITH_PARAM;
-import static org.apache.coyote.http11.Url.REGISTER;
-import static org.apache.coyote.http11.Url.REGISTER_HTML;
-import static org.apache.coyote.http11.Url.STATIC;
-import static org.apache.coyote.http11.Url.UNAUTHORIZED;
-import static org.apache.coyote.http11.Url.isContainParam;
+import static org.apache.coyote.http11.enums.ContentType.getContentType;
+import static org.apache.coyote.http11.enums.Path.INDEX_URL;
+import static org.apache.coyote.http11.enums.Path.LOGIN_HTML;
+import static org.apache.coyote.http11.enums.Path.LOGIN_URL;
+import static org.apache.coyote.http11.enums.Path.LOGIN_WITH_PARAM_URL;
+import static org.apache.coyote.http11.enums.Path.REGISTER_HTML;
+import static org.apache.coyote.http11.enums.Path.REGISTER_URL;
+import static org.apache.coyote.http11.enums.Path.STATIC;
+import static org.apache.coyote.http11.enums.Path.UNAUTHORIZED_HTML;
+import static org.apache.coyote.http11.enums.Path.isContainParam;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final char COLON = ':';
     private static final String EMPTY = "";
-    private static final String CSS = ".css";
     private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
     private static final HttpCookie httpCookie = new HttpCookie();
     private static final String POST_HTTP_METHOD = "POST";
@@ -45,6 +44,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INVALID_HTTP_REQUEST_MESSAGE = "Invalid HTTP request";
     private static final String PARAMETER_DELIM = "&";
     private static final char EQUALS = '=';
+    private static final char COLON = ':';
     private static Map<String, String> headers;
     private final Socket connection;
 
@@ -66,7 +66,8 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
-            final String httpMethod = parseHttpMethod(requestLine);  // HTTP method를 읽음 (예: GET)
+            System.out.println("requestLine : "+requestLine);
+            final String httpMethod = parseHttpMethod(requestLine);// HTTP method를 읽음 (예: GET)
             headers = parseRequestHeaders(br); // header를 읽음
             storeJsessionId();
 
@@ -77,10 +78,15 @@ public class Http11Processor implements Runnable, Processor {
 
             final String path = parseHttpRequest(requestLine); // 파싱된 HTTP 요청에서 경로 추출
             final String parsedPath = parsePath(path, httpMethod); // 경로를 기반으로 정적 파일을 읽고 응답 생성
-            final String responseBody = readStaticFile(parsedPath);
-            final String contentType = getContentType(path); // css인 경우 content type을 다르게 준다
-            final var response = getResponse(path, contentType, responseBody, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
 
+            System.out.println("path: "+ path);
+            System.out.println("parsedPath: "+ parsedPath);
+
+            final String responseBody = readStaticFile(parsedPath);
+            final String contentType = getContentType(parsedPath); //content type을 다르게 준다
+            final String response = createResponse(contentType, responseBody, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
+
+            System.out.println(response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -88,46 +94,60 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void storeJsessionId() {
-        if (isContainJsessionId()) {
-            httpCookie.changeJSessionId(parseJsessionId());
-        }
-        httpCookie.createJSession();
+    private String parseHttpMethod(final String requestLine) throws IOException {
+        // 요청 라인을 공백으로 분리하여 경로를 추출
+        String[] requestParts = requestLine.split(" ");
+        return requestParts[0];
     }
 
-    private String getResponse(final String path, final String contentType, final String responseBody, final String parsedPath) {
-        if (path.contains(LOGIN_WITH_PARAM.getUrl()) && parsedPath.equals(INDEX.getUrl()) && !isContainJsessionId()) {
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Set-Cookie: " + "JSESSIONID=" + httpCookie.getJSessionId() + " ",
-                    "Content-Type: " + contentType + "charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
+    private Map<String, String> parseRequestHeaders(final BufferedReader br) throws IOException {
+        final List<String> lines = readAllLinesBeforeBody(br);
+        final Map<String, String> headers = parseHeaderLines(lines);
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + "charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
+        return headers;
     }
 
-    private boolean isContainJsessionId() {
-        if (headers.containsKey("Cookie")) {
-            final String cookieValue = headers.get("Cookie");
-            String[] cookiePairs = cookieValue.split("; ");
-            for (String cookiePair : cookiePairs) {
-                String[] parts = cookiePair.split("=");
-                if (parts[0].equals("JSESSIONID")) {
-                    return true;
-                }
+    private List<String> readAllLinesBeforeBody(final BufferedReader br) throws IOException {
+        final List<String> lines = new ArrayList<>();
+        String line;
+        while (!(line = br.readLine()).equals(EMPTY)) {
+            lines.add(line);
+            System.out.println("line : " + line);
+        }
+        return lines;
+    }
+
+    private Map<String, String> parseHeaderLines(final List<String> lines) {
+        Map<String, String> headers = new HashMap<>();
+
+        String lineForParse;
+        for (int i = 0; i < getEmptyLineIndex(lines); i++) {
+            lineForParse = lines.get(i);
+            int colonIndex = lineForParse.indexOf(COLON);
+            if (colonIndex != -1) {
+                String key = lineForParse.substring(0, colonIndex).trim();
+                String value = lineForParse.substring(colonIndex + 1).trim();
+                headers.put(key, value);
             }
         }
 
-        return false;
+        return headers;
+    }
+
+    private int getEmptyLineIndex(final List<String> lines) {
+        int emptyLineIndex = lines.indexOf(EMPTY);
+        if (emptyLineIndex == -1) {
+            emptyLineIndex = lines.size();
+        }
+        return emptyLineIndex;
+    }
+
+    private String storeJsessionId() {
+        if (isContainJsessionId()) {
+            return httpCookie.changeJSessionId(parseJsessionId());
+        }
+        return httpCookie.createJSession();
+
     }
 
     private String parseJsessionId() {
@@ -153,48 +173,33 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private Map<String, String> parseRequestHeaders(final BufferedReader br) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        final List<String> lines = readAllLines(br);
+    private void registerUser(final String requestBody) throws IOException {
+        Map<String, String> userData = parseUserDataFromRequestBody(requestBody);
+        String parsedAccount = userData.get("account");
+        String parsedEmail = userData.get("email");
+        String parsedPassword = userData.get("password");
 
-        String lineForParse;
-        for (int i = 0; i < getEmptyLineIndex(lines); i++) {
-            lineForParse = lines.get(i);
-            int colonIndex = lineForParse.indexOf(COLON);
-            if (colonIndex != -1) {
-                String key = lineForParse.substring(0, colonIndex).trim();
-                String value = lineForParse.substring(colonIndex + 1).trim();
-                headers.put(key, value);
+        final User user = new User(parsedAccount, parsedPassword, parsedEmail);
+        InMemoryUserRepository.save(user);
+        log.info(USER_SAVE_SUCCESS_MESSAGE);
+    }
+
+    private Map<String, String> parseUserDataFromRequestBody(final String requestBody) {
+        Map<String, String> userData = new HashMap<>();
+        StringTokenizer st = new StringTokenizer(requestBody, PARAMETER_DELIM);
+
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken();
+            int equalsIndex = token.indexOf(EQUALS);
+
+            if (equalsIndex != -1) {
+                String key = token.substring(0, equalsIndex);
+                String value = token.substring(equalsIndex + 1);
+                userData.put(key, value);
             }
         }
-        return headers;
-    }
 
-    private List<String> readAllLines(final BufferedReader br) throws IOException {
-        final List<String> lines = new ArrayList<>();
-        String line;
-        while (!(line = br.readLine()).equals(EMPTY)) {
-            lines.add(line);
-        }
-        return lines;
-    }
-
-    private int getEmptyLineIndex(final List<String> lines) {
-        int emptyLineIndex = lines.indexOf(EMPTY);
-        if (emptyLineIndex == -1) {
-            emptyLineIndex = lines.size();
-        }
-        return emptyLineIndex;
-    }
-
-    private String getContentType(final String path) {
-        final String contentType;
-        if (path.endsWith(CSS)) {
-            contentType = "text/css;";
-        } else {
-            contentType = "text/html;";
-        }
-        return contentType;
+        return userData;
     }
 
     private String parseHttpRequest(final String requestLine) throws IOException {
@@ -207,10 +212,22 @@ public class Http11Processor implements Runnable, Processor {
         throw new IOException(INVALID_HTTP_REQUEST_MESSAGE); // 유효하지 않은 요청 처리
     }
 
-    private String parseHttpMethod(final String requestLine) throws IOException {
-        // 요청 라인을 공백으로 분리하여 경로를 추출
-        String[] requestParts = requestLine.split(" ");
-        return requestParts[0];
+    private String parsePath(final String path, final String httpMethod) {
+        String url = INDEX_URL.getValue();
+
+        if (path.contains(LOGIN_URL.getValue())) {
+            url = getPathForLogin(path);
+        }
+
+        if (path.equals(REGISTER_URL.getValue())) {
+            url = getPathForRegister(httpMethod);
+        }
+
+        if (path.matches(JS_ICO_CSS_REGEX)) {
+            url = STATIC.getValue() + path;
+        }
+
+        return url;
     }
 
     private String readStaticFile(final String parsedPath) throws IOException {
@@ -230,45 +247,48 @@ public class Http11Processor implements Runnable, Processor {
         return content.toString();
     }
 
-    private String parsePath(final String path, final String httpMethod) {
-        String url = INDEX.getUrl();
-
-        if (path.contains(LOGIN.getUrl())) {
-            url = getPathForLogin(path);
+    private String createResponse(final String contentType, final String responseBody, final String path) {
+        if(path.equals(UNAUTHORIZED_HTML.getValue())) {
+            return Response.of(contentType, responseBody, "401 Unauthorized");
         }
 
-        if (path.equals(REGISTER.getUrl())) {
-            url = getPathForRegister(httpMethod);
+        if (path.equals(LOGIN_WITH_PARAM_URL.getValue()) && !httpCookie.isJsessionEmpty()) {
+            return Response.of(contentType, responseBody, httpCookie);
         }
 
-        if (path.matches(JS_ICO_CSS_REGEX)) {
-            url = STATIC.getUrl() + path;
+        return Response.of(contentType, responseBody);
+    }
+
+    private boolean isContainJsessionId() {
+        if (headers.containsKey("Cookie")) {
+            final String cookieValue = headers.get("Cookie");
+            String[] cookiePairs = cookieValue.split("; ");
+            for (String cookiePair : cookiePairs) {
+                String[] parts = cookiePair.split("=");
+                if (parts[0].equals("JSESSIONID")) {
+                    return true;
+                }
+            }
         }
 
-        return url;
+        return false;
     }
 
     private String getPathForLogin(final String path) {
         if (isContainParam(path) && !isValidUser(path)) {
-            return UNAUTHORIZED.getUrl();
+            return UNAUTHORIZED_HTML.getValue();
         }
 
+        System.out.println("is contain? : " + SessionManager.isValidHttpCookie(httpCookie));
         if (!SessionManager.isValidHttpCookie(httpCookie)) {
-            return LOGIN_HTML.getUrl();
+            return LOGIN_HTML.getValue();
         }
 
-        return INDEX.getUrl();
-    }
-
-    private String getPathForRegister(final String httpMethod) {
-        if (httpMethod.equals(POST_HTTP_METHOD)) {
-            return INDEX.getUrl();
-        }
-        return REGISTER_HTML.getUrl();
+        return INDEX_URL.getValue();
     }
 
     private boolean isValidUser(final String path) {
-        String noUrlPath = path.replace(LOGIN_WITH_PARAM.getUrl(), EMPTY);
+        String noUrlPath = path.replace(LOGIN_WITH_PARAM_URL.getValue(), EMPTY);
         Map<String, String> loginData = parseLoginData(noUrlPath);
         String parsedAccount = loginData.get("account");
         String parsedPassword = loginData.get("password");
@@ -305,32 +325,10 @@ public class Http11Processor implements Runnable, Processor {
         return loginData;
     }
 
-    private void registerUser(final String requestBody) throws IOException {
-        Map<String, String> userData = parseRequestBody(requestBody);
-        String parsedAccount = userData.get("account");
-        String parsedEmail = userData.get("email");
-        String parsedPassword = userData.get("password");
-
-        final User user = new User(parsedAccount, parsedPassword, parsedEmail);
-        InMemoryUserRepository.save(user);
-        log.info(USER_SAVE_SUCCESS_MESSAGE);
-    }
-
-    private Map<String, String> parseRequestBody(final String requestBody) {
-        Map<String, String> userData = new HashMap<>();
-        StringTokenizer st = new StringTokenizer(requestBody, PARAMETER_DELIM);
-
-        while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-            int equalsIndex = token.indexOf(EQUALS);
-
-            if (equalsIndex != -1) {
-                String key = token.substring(0, equalsIndex);
-                String value = token.substring(equalsIndex + 1);
-                userData.put(key, value);
-            }
+    private String getPathForRegister(final String httpMethod) {
+        if (httpMethod.equals(POST_HTTP_METHOD)) {
+            return INDEX_URL.getValue();
         }
-
-        return userData;
+        return REGISTER_HTML.getValue();
     }
 }

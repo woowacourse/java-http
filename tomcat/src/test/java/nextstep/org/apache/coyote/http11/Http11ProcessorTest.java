@@ -25,7 +25,6 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK",
                 "Content-Length: 12",
@@ -83,6 +82,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+
         var expectedContentType = "text/css";
 
         assertThat(socket.output()).contains(expectedContentType);

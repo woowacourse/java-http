@@ -15,6 +15,10 @@ public class Request {
         this.contentType = contentType;
     }
 
+    public boolean hasQueryString() {
+        return !requestLine.getQueryString().isEmpty();
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }

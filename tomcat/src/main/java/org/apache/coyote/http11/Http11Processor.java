@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.adapter.DefaultAdapter;
+import org.apache.coyote.adapter.StringAdapter;
 import org.apache.coyote.adapter.LoginAdapter;
 import org.apache.coyote.adapter.ResourceAdapter;
 import org.apache.coyote.request.Request;
@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response doHandler(Request request) {
         if (request.isSamePath("/")) {
-            return new DefaultAdapter().doHandle(request);
+            return new StringAdapter().doHandle(request);
         }
         if (request.isSamePath("/login")) {
             return new LoginAdapter().doHandle(request);

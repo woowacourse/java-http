@@ -3,6 +3,7 @@ package org.apache.coyote.context;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.application.UserService;
 import org.apache.coyote.Container;
 import org.apache.coyote.Handler;
 import org.apache.coyote.context.exception.InvalidRootContextPathException;
@@ -23,6 +24,7 @@ import org.apache.coyote.http.util.exception.UnsupportedHttpMethodException;
 public class HelloWorldContext implements Container {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
+    private static final UserService USER_SERVICE = new UserService();
     private static final String DEFAULT_STATIC_RESOURCE_PATH_PREFIX = "static/";
 
     private final String rootContextPath;
@@ -48,7 +50,7 @@ public class HelloWorldContext implements Container {
 
     private void initHandlers() {
         handlers.add(new WelcomeHandler(rootContextPath));
-        handlers.add(new LoginHandler("/login", rootContextPath));
+        handlers.add(new LoginHandler("/login", rootContextPath, USER_SERVICE));
         handlers.add(new LoginPageHandler("/login", rootContextPath, "login.html", staticResourcePath));
         handlers.add(new RegisterPageHandler("/register", rootContextPath, "register.html", staticResourcePath));
         handlers.add(new RegisterHandler("/register", rootContextPath));

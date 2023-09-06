@@ -15,11 +15,14 @@ import org.apache.coyote.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.context.HelloWorldContext;
 import org.apache.coyote.handler.exception.InvalidQueryParameterException;
+import org.apache.coyote.handler.exception.LoginFailureException;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.util.HeaderDto;
 import org.apache.coyote.http.util.HttpConsts;
+import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.RequestGenerator;
 import org.apache.coyote.http11.exception.InvalidRequestPathException;
 import org.slf4j.Logger;
@@ -70,6 +73,14 @@ public class Http11Processor implements Runnable, Processor {
             return context.service(request);
         } catch (final InvalidQueryParameterException e) {
             return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, HttpConsts.BLANK);
+        } catch (final LoginFailureException e) {
+            return Response.of(
+                    request,
+                    HttpStatusCode.FOUND,
+                    ContentType.JSON,
+                    HttpConsts.BLANK,
+                    new HeaderDto(HttpHeaderConsts.LOCATION, "/401.html")
+            );
         }
     }
 

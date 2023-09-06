@@ -1,11 +1,10 @@
 package org.apache.coyote.handler;
 
 import java.io.IOException;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Handler;
 import org.apache.coyote.handler.exception.InvalidQueryParameterException;
-import org.apache.coyote.handler.exception.LoginFailureException;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.request.Request;
@@ -13,25 +12,22 @@ import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.util.HeaderDto;
-import org.apache.coyote.http.util.HttpConsts;
 import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.HttpMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements Handler {
 
     public static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-
     private final String path;
     private final String rootContextPath;
+    private final UserService userService;
 
-    public LoginHandler(final String path, final String rootContextPath) {
+    public LoginHandler(final String path, final String rootContextPath, final UserService userService) {
         this.path = path;
         this.rootContextPath = rootContextPath;
+        this.userService = userService;
     }
 
     @Override
@@ -56,44 +52,23 @@ public class LoginHandler implements Handler {
             throw new InvalidQueryParameterException();
         }
 
-        try {
-            final User user = InMemoryUserRepository.findByAccount(account)
-                                                    .orElseThrow(LoginFailureException::new);
+        final User loginUser = userService.login(account, password);
 
-            validatePassword(password, user);
+        final HttpSession session = request.getSession(true);
+        session.setAttribute(ACCOUNT_KEY, loginUser);
+        final HttpCookie cookie = HttpCookie.fromSessionId(session.getId());
 
-            final HttpSession session = request.getSession(true);
-            session.setAttribute(ACCOUNT_KEY, user);
-            final HttpCookie cookie = HttpCookie.fromSessionId(session.getId());
-
-            return Response.of(
-                    request,
-                    HttpStatusCode.FOUND,
-                    ContentType.JSON,
-                    user.toString(),
-                    cookie,
-                    new HeaderDto(HttpHeaderConsts.LOCATION, "/index.html")
-            );
-        } catch (LoginFailureException ex) {
-            log.info("login failed : ", ex);
-
-            return Response.of(
-                    request,
-                    HttpStatusCode.FOUND,
-                    ContentType.JSON,
-                    HttpConsts.BLANK,
-                    new HeaderDto(HttpHeaderConsts.LOCATION, "/401.html")
-            );
-        }
+        return Response.of(
+                request,
+                HttpStatusCode.FOUND,
+                ContentType.JSON,
+                loginUser.toString(),
+                cookie,
+                new HeaderDto(HttpHeaderConsts.LOCATION, "/index.html")
+        );
     }
 
     private boolean isInvalidQueryParameter(final String targetParameter) {
         return targetParameter == null || targetParameter.isEmpty() || targetParameter.isBlank();
-    }
-
-    private void validatePassword(final String password, final User user) {
-        if (!user.checkPassword(password)) {
-            throw new LoginFailureException();
-        }
     }
 }

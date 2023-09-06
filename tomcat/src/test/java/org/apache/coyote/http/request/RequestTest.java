@@ -339,7 +339,7 @@ class RequestTest {
     }
 
     @Test
-    void getSession_메서드는_false를_전달하면_세션이_없을_시_새로운_세션을_반환한다() {
+    void getSession_메서드는_false를_전달하면_세션이_없을_시_null을_반환한다() {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final HttpMethod method = HttpMethod.findMethod("get");
         final Url url = Url.from("/index.html");

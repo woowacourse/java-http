@@ -30,7 +30,7 @@ class StaticResourceRequestHandlerTest {
     void 요청에서_원하는_정적_파일을들_읽어_응답한다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(RequestLine.from("GET /index.html HTTP/1.1 "))
+                .requestLine(RequestLine.from("GET /index.html HTTP/1.1 "))
                 .headers(RequestHeaders.from(
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )
@@ -55,7 +55,7 @@ class StaticResourceRequestHandlerTest {
     void css_정적_파일을_읽어_응답한다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(RequestLine.from("GET /css/styles.css HTTP/1.1 "))
+                .requestLine(RequestLine.from("GET /css/styles.css HTTP/1.1 "))
                 .headers(RequestHeaders.from(
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )
@@ -79,7 +79,7 @@ class StaticResourceRequestHandlerTest {
     void js_정적_파일을_읽어_응답한다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(RequestLine.from("GET /js/scripts.js HTTP/1.1 "))
+                .requestLine(RequestLine.from("GET /js/scripts.js HTTP/1.1 "))
                 .headers(RequestHeaders.from(
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )
@@ -103,7 +103,7 @@ class StaticResourceRequestHandlerTest {
     void 확장자가_없는_경우_html_파일을_반환한다() throws IOException {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(RequestLine.from("GET /login HTTP/1.1 "))
+                .requestLine(RequestLine.from("GET /login HTTP/1.1 "))
                 .headers(RequestHeaders.from(
                         List.of("Host: localhost:8080 ", "Connection: keep-alive "))
                 )

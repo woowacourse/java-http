@@ -19,7 +19,7 @@ public class HttpRequestParser {
         RequestHeaders requestHeaders = RequestHeaders.from(headerLines);
         Body body = parseBody(reader, contentLength(requestHeaders));
         return HttpRequest.builder()
-                .startLine(requestLine)
+                .requestLine(requestLine)
                 .headers(requestHeaders)
                 .body(body)
                 .build();

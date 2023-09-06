@@ -26,13 +26,13 @@ class SignUpRequestHandlerTest {
     void POST_이면서_register으로_들어온_요청만_처리한다() {
         // given
         HttpRequest onlyPost = HttpRequest.builder()
-                .startLine(RequestLine.from("POST /dd HTTP/1.1"))
+                .requestLine(RequestLine.from("POST /dd HTTP/1.1"))
                 .build();
         HttpRequest onlyRegister = HttpRequest.builder()
-                .startLine(RequestLine.from("GET /register HTTP/1.1"))
+                .requestLine(RequestLine.from("GET /register HTTP/1.1"))
                 .build();
         HttpRequest match = HttpRequest.builder()
-                .startLine(RequestLine.from("POST /register HTTP/1.1"))
+                .requestLine(RequestLine.from("POST /register HTTP/1.1"))
                 .build();
 
         // when & then
@@ -45,7 +45,7 @@ class SignUpRequestHandlerTest {
     void 회원가입에_성공하면_index_html로_redirect() {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(RequestLine.from("POST /register HTTP/1.1"))
+                .requestLine(RequestLine.from("POST /register HTTP/1.1"))
                 .headers(RequestHeaders.from(List.of(
                                 "Content-Type: application/x-www-form-urlencoded",
                                 "Content-Length: 55"

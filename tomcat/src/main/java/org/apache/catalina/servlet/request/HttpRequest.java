@@ -53,7 +53,7 @@ public class HttpRequest {
         private RequestHeaders requestHeaders;
         private Body body;
 
-        public HttpRequestBuilder startLine(RequestLine requestLine) {
+        public HttpRequestBuilder requestLine(RequestLine requestLine) {
             this.requestLine = requestLine;
             return this;
         }

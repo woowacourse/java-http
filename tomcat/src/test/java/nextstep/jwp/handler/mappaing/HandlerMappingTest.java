@@ -28,7 +28,7 @@ class HandlerMappingTest {
                 new RootPageRequestHandler()
         ));
         RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
-        HttpRequest request = HttpRequest.builder().startLine(requestLine).build();
+        HttpRequest request = HttpRequest.builder().requestLine(requestLine).build();
 
         // when
         RequestHandler handler = handlerMapping.getHandler(request);

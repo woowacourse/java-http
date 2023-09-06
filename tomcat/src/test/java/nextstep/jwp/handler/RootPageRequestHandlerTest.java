@@ -24,7 +24,7 @@ class RootPageRequestHandlerTest {
     void test() {
         // given
         HttpRequest request = HttpRequest.builder()
-                .startLine(RequestLine.from("GET / HTTP/1.1 "))
+                .requestLine(RequestLine.from("GET / HTTP/1.1 "))
                 .build();
         HttpResponse response = new HttpResponse();
 

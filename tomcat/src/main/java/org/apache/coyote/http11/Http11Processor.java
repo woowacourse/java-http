@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final ViewRenderer VIEW_RENDERER = new ViewRenderer();
+    private static final ViewRenderer viewRenderer = new ViewRenderer();
 
     private final Socket connection;
     private final HttpControllers httpControllers;
@@ -39,20 +39,20 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequestDecoder requestParser = new HttpRequestDecoder();
-            HttpRequest httpRequest = requestParser.decode(inputStream);
-            Optional<String> sessionId = httpRequest.getSessionId();
+            HttpRequestDecoder requestDecoder = new HttpRequestDecoder();
+            HttpRequest httpRequest = requestDecoder.decode(inputStream);
 
+            Optional<String> sessionId = httpRequest.getSessionId();
             Session session = SessionManager.findSession(sessionId.orElse(null));
 
             HttpResponse httpResponse = new HttpResponse();
-            HttpController controller = httpControllers.get(httpRequest.getPath());
-            if (controller != null) {
-                controller.service(httpRequest, httpResponse, session);
-            }
+            Optional<HttpController> controller = httpControllers.get(httpRequest.getPath());
+            controller.ifPresent(
+                httpController -> httpController.service(httpRequest, httpResponse, session)
+            );
 
             if (!httpResponse.isCompleted()) {
-                VIEW_RENDERER.render(httpRequest, httpResponse);
+                viewRenderer.render(httpRequest, httpResponse);
             }
 
             SessionManager.manageSession(httpResponse, session);

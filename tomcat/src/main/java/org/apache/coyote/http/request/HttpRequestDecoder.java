@@ -1,61 +1,43 @@
 package org.apache.coyote.http.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import org.apache.coyote.http.MediaType;
+import java.io.InputStreamReader;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpHeaderConverter;
-import org.apache.coyote.util.ByteUtil;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
-
-import static org.apache.coyote.http.MediaType.APPLICATION_X_WWW_FORM_URL_ENCODED;
 
 public class HttpRequestDecoder {
 
-    private static final int MAXIMUM_BUFFER_LEN = 8192;
-    private static final String REQUEST_LINE_HEADER_DELIMITER = "HTTP/1.1";
-    private static final String HEADER_BODY_DELIMITER = "\r\n\r\n";
-
     public HttpRequest decode(InputStream inputStream) {
-        HttpRequestLine httpRequestLine = decodeRequestLine(inputStream);
-        HttpHeader httpHeader = decodeHeader(inputStream);
-        Map<String, String> parameters = decodeBody(httpHeader.getContentLength(),
-            httpHeader.getMediaType(), inputStream);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        return new HttpRequest(httpRequestLine, httpHeader, parameters);
+        HttpRequestLine httpRequestLine = decodeRequestLine(bufferedReader);
+        HttpHeader httpHeader = decodeHeader(bufferedReader);
+        String body = decodeBody(httpHeader.getContentLength(), bufferedReader);
+
+        return new HttpRequest(httpRequestLine, httpHeader, body);
     }
 
-    private HttpRequestLine decodeRequestLine(InputStream inputStream) {
-        byte[] source = new byte[MAXIMUM_BUFFER_LEN];
-        byte[] target = REQUEST_LINE_HEADER_DELIMITER.getBytes(StandardCharsets.UTF_8);
-        int sourceLength = ByteUtil.readStreamUntilEndsWith(inputStream, source, target);
-
-        return HttpRequestLine.decode(new String(source, 0, sourceLength));
-    }
-
-    private HttpHeader decodeHeader(InputStream inputStream) {
-        byte[] source = new byte[MAXIMUM_BUFFER_LEN];
-        byte[] target = HEADER_BODY_DELIMITER.getBytes(StandardCharsets.UTF_8);
-        int sourceLength = ByteUtil.readStreamUntilEndsWith(inputStream, source, target);
-
-        return HttpHeaderConverter.decode(new String(source, 0, sourceLength));
-    }
-
-    private Map<String, String> decodeBody(int contentLength, MediaType mediaType,
-        InputStream inputStream) {
-        if (contentLength <= 0) {
-            return Collections.emptyMap();
+    private HttpRequestLine decodeRequestLine(BufferedReader bufferedReader) {
+        try {
+            return HttpRequestLine.decode(bufferedReader.readLine());
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
-        if (mediaType != APPLICATION_X_WWW_FORM_URL_ENCODED) {
-            throw new IllegalArgumentException("지원 되지 않는 타입입니다. 타입: " + mediaType.value);
+    }
+
+    private HttpHeader decodeHeader(BufferedReader bufferedReader) {
+        return HttpHeaderConverter.decode(bufferedReader);
+    }
+
+    private String decodeBody(int contentLength, BufferedReader bufferedReader) {
+        char[] buffer = new char[contentLength];
+        try {
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
-
-        byte[] source = new byte[contentLength];
-        ByteUtil.readStreamOfLength(inputStream, source, contentLength);
-        String body = new String(source, 0, contentLength);
-
-        return HttpParameterDecoder.decode(body);
     }
 }

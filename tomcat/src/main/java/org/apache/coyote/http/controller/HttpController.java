@@ -20,10 +20,10 @@ public abstract class HttpController implements Controller {
     }
 
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse, Session session) {
-        throw new IllegalArgumentException();
+        throw new UnsupportedOperationException();
     }
 
     public void doPost(HttpRequest httpRequest, HttpResponse httpResponse, Session session) {
-        throw new IllegalArgumentException();
+        throw new UnsupportedOperationException();
     }
 }

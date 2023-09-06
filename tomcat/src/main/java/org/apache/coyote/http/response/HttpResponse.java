@@ -1,14 +1,14 @@
 package org.apache.coyote.http.response;
 
-import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
+import static org.apache.coyote.http.HeaderKey.CONTENT_LENGTH;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpHeaderConverter;
 import org.apache.coyote.http.MediaType;
-import org.apache.coyote.http.cookie.Cookie;
+import org.apache.coyote.http.request.ContentType;
 
 public class HttpResponse {
 
@@ -41,15 +41,11 @@ public class HttpResponse {
     }
 
     public void addHeader(String key, String value) {
-        header.setValue(key, value);
+        header.addValue(key, value);
     }
 
     public boolean contains(String key) {
-        return !header.getValue(key).isEmpty();
-    }
-
-    public List<String> getHeader(String key) {
-        return header.getValue(key);
+        return header.getValue(key).isPresent();
     }
 
     public void setStatusCode(StatusCode statusCode) {
@@ -57,12 +53,8 @@ public class HttpResponse {
         this.isCompleted = true;
     }
 
-    public MediaType getMediaType() {
-        return header.getMediaType();
-    }
-
-    public void setMediaType(MediaType mediaType) {
-        header.setMediaType(mediaType);
+    public void setContentType(MediaType mediaType, Charset charset) {
+        header.setContentType(mediaType, charset);
     }
 
     public void setBody(String body) {
@@ -71,26 +63,15 @@ public class HttpResponse {
         addHeader(CONTENT_LENGTH.value, String.valueOf(bytes.length));
     }
 
-    public String getForwardPath() {
-        return forwardPath;
+    public HttpHeader getHeader() {
+        return header;
     }
 
-    public void addCookie(Cookie cookie) {
-        header.addCookie(cookie);
+    public Optional<ContentType> getContentType() {
+        return header.getContentType();
     }
 
-    public void setCharset(Charset charset) {
-        header.setCharset(charset);
-    }
-
-    @Override
-    public String toString() {
-        return "HttpResponse{" +
-            "statusCode=" + statusCode +
-            ", header=" + header +
-            ", body='" + body + '\'' +
-            ", forwardPath='" + forwardPath + '\'' +
-            ", isCompleted=" + isCompleted +
-            '}';
+    public Optional<String> getForwardPath() {
+        return Optional.ofNullable(forwardPath);
     }
 }

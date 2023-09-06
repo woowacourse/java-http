@@ -14,8 +14,7 @@ public class HomeController extends HttpController {
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse, Session session) {
         httpResponse.setStatusCode(StatusCode.OK);
-        httpResponse.setMediaType(MediaType.TEXT_HTML);
-        httpResponse.setCharset(UTF_8);
+        httpResponse.setContentType(MediaType.TEXT_HTML, UTF_8);
         httpResponse.setBody("Hello world!");
     }
 }

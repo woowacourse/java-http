@@ -1,0 +1,42 @@
+package org.apache.coyote.http.request;
+
+public class HttpRequestUri {
+
+    private static final String PATH_PARAMETER_DELIMITER = "\\?";
+
+    private final String path;
+    private final HttpParameters parameters;
+
+    private HttpRequestUri(String path, HttpParameters parameters) {
+        this.path = path;
+        this.parameters = parameters;
+    }
+
+    public static HttpRequestUri from(String requestUriString) {
+        String[] split = requestUriString.split(PATH_PARAMETER_DELIMITER);
+        String queryString = 1 < split.length ? split[1] : "";
+        return new HttpRequestUri(
+            decodePath(split[0]),
+            decodeQueryString(queryString)
+        );
+    }
+
+    private static String decodePath(String path) {
+        if (path.equals("/")) {
+            return "/home";
+        }
+        return path;
+    }
+
+    private static HttpParameters decodeQueryString(String queryString) {
+        return HttpParameters.from(queryString);
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public HttpParameters getParameters() {
+        return parameters;
+    }
+}

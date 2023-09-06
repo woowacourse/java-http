@@ -3,7 +3,7 @@ package nextstep.jwp.ui;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpHeader.HEADER_KEY;
+import org.apache.coyote.http.HeaderKey;
 import org.apache.coyote.http.controller.HttpController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -27,6 +27,6 @@ public class RegisterController extends HttpController {
 
         InMemoryUserRepository.save(user);
         httpResponse.setStatusCode(StatusCode.FOUND);
-        httpResponse.addHeader(HEADER_KEY.LOCATION.value, "/index.html");
+        httpResponse.addHeader(HeaderKey.LOCATION.value, "/index.html");
     }
 }

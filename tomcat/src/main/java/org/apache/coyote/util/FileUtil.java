@@ -10,6 +10,8 @@ import static java.util.stream.Collectors.joining;
 
 public class FileUtil {
 
+    private static final String CRLF = "\r\n";
+
     private FileUtil() {
     }
 
@@ -23,6 +25,6 @@ public class FileUtil {
         );
 
         return bufferedReader.lines()
-                .collect(joining("\r\n")) + "\r\n";
+                .collect(joining(CRLF)) + CRLF;
     }
 }

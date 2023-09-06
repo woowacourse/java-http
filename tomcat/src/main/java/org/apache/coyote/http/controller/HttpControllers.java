@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.util.FileUtil;
 import org.reflections.Reflections;
@@ -61,7 +62,7 @@ public class HttpControllers {
         }
     }
 
-    public HttpController get(String path) {
-        return controllers.get(path);
+    public Optional<HttpController> get(String path) {
+        return Optional.ofNullable(controllers.get(path));
     }
 }

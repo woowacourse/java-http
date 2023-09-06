@@ -7,32 +7,24 @@ import java.util.UUID;
 
 public class Session {
 
-    public static final String REQUEST_COOKIE_KEY = "JSESSIONID";
+    public static final String COOKIE_KEY = "JSESSIONID";
 
-    private final UUID jsessionId;
-    private final Map<String, Object> session = new HashMap<>();
+    private final UUID id;
+    private final Map<String, Object> values = new HashMap<>();
 
     public Session() {
-        this.jsessionId = UUID.randomUUID();
+        this.id = UUID.randomUUID();
     }
 
     public void addValue(String key, Object value) {
-        session.put(key, value);
+        values.put(key, value);
     }
 
     public Optional<Object> getValue(String key) {
-        return Optional.ofNullable(session.get(key));
+        return Optional.ofNullable(values.get(key));
     }
 
-    public String getJsessionId() {
-        return jsessionId.toString();
-    }
-
-    @Override
-    public String toString() {
-        return "Session{" +
-            "jsessionId=" + jsessionId +
-            ", session=" + session +
-            '}';
+    public String getId() {
+        return id.toString();
     }
 }

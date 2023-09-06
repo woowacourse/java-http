@@ -1,182 +1,72 @@
 package org.apache.coyote.http;
 
-import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_LENGTH;
-import static org.apache.coyote.http.HttpHeader.HEADER_KEY.CONTENT_TYPE;
+import static org.apache.coyote.http.HeaderKey.CONTENT_LENGTH;
+import static org.apache.coyote.http.HeaderKey.CONTENT_TYPE;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import org.apache.coyote.http.cookie.Cookie;
 import org.apache.coyote.http.cookie.Cookies;
+import org.apache.coyote.http.request.ContentType;
 import org.apache.coyote.http.session.Session;
 
 public class HttpHeader {
 
     private final Map<String, List<String>> header;
-    private MediaType mediaType;
-    private Charset charset;
-    private int contentLength;
-    private Cookies cookies;
+    private final Cookies cookies;
 
-    private HttpHeader(Map<String, List<String>> header, MediaType mediaType, Charset charset, int contentLength,
-        Cookies cookies) {
+    private HttpHeader(Map<String, List<String>> header, Cookies cookies) {
         this.header = header;
-        this.mediaType = mediaType;
-        this.charset = charset;
-        this.contentLength = contentLength;
         this.cookies = cookies;
     }
 
     public HttpHeader() {
-        this(new HashMap<>(), null, null, 0, Cookies.from());
+        this(new HashMap<>(), Cookies.EMPTY_COOKIE);
     }
 
     public static HttpHeader from(Map<String, List<String>> header) {
-        String[] mediaTypeAndCharset = readContentType(header);
-        MediaType mediaType = null;
-        Charset charset = null;
-        if (mediaTypeAndCharset.length > 0) {
-            mediaType = MediaType.fromValue(mediaTypeAndCharset[0]);
-            charset = readCharset(mediaTypeAndCharset);
-        }
-
         Cookies cookies = Cookies.from(header);
-        int contentLength = readContentLength(header);
-
-        return new HttpHeader(header, mediaType, charset, contentLength, cookies);
+        return new HttpHeader(header, cookies);
     }
 
-    private static String[] readContentType(Map<String, List<String>> header) {
-        List<String> contentType = header.get(CONTENT_TYPE.value);
-        if (contentType == null) {
-            return new String[0];
-        }
-
-        String contentTypeValue = contentType.get(0);
-        return contentTypeValue.split(";");
+    public Optional<String> getSessionId() {
+        return cookies.getCookie(Session.COOKIE_KEY);
     }
 
-    private static Charset readCharset(String[] mediaTypeAndCharset) {
-        if (mediaTypeAndCharset.length < 2) {
-            return null;
-        }
-        String charset = mediaTypeAndCharset[1];
-        if (!charset.substring("charset=".length()).equalsIgnoreCase("utf-8")) {
-            throw new IllegalArgumentException("지원하지 않는 인코딩 방식입니다.");
-        }
-        return StandardCharsets.UTF_8;
-    }
-
-    private static int readContentLength(Map<String, List<String>> header) {
-        List<String> contentLength = header.get(CONTENT_LENGTH.value);
-        if (contentLength == null) {
-            return 0;
-        }
-        return Integer.parseInt(contentLength.get(0));
-    }
-
-    public Optional<Cookie> findSessionIdCookie() {
-        return cookies.findCookie(Session.REQUEST_COOKIE_KEY);
-    }
-
-    public String getContentType() {
-        String contentType = null;
-        if (mediaType != null) {
-            contentType = mediaType.value;
-            if (charset != null) {
-                contentType += ";charset=" + charset.name().toLowerCase();
-            }
-        }
-
-        return contentType;
-    }
-
-    public Map<String, List<String>> getHeader() {
+    public Map<String, List<String>> getHeaders() {
         return new HashMap<>(header);
     }
 
-    public MediaType getMediaType() {
-        return mediaType;
-    }
-
-    public Charset getCharset() {
-        return charset;
+    public Optional<String> getValue(String key) {
+        List<String> values = getValues(key);
+        if (values.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(values.get(0));
     }
 
     public int getContentLength() {
-        return contentLength;
+        return Integer.parseInt(getValue(CONTENT_LENGTH.value).orElse("0"));
     }
 
-    public List<String> getValue(String key) {
+    public List<String> getValues(String key) {
         return new ArrayList<>(header.getOrDefault(key, Collections.emptyList()));
     }
 
-    public void setValue(String key, String value) {
+    public void addValue(String key, String value) {
         List<String> values = header.computeIfAbsent(key, ignored -> new ArrayList<>());
         values.add(value);
     }
 
-    public void setMediaType(MediaType mediaType) {
-        this.mediaType = mediaType;
+    public void setContentType(MediaType mediaType, Charset charset) {
+        addValue(CONTENT_TYPE.value, ContentType.of(mediaType, charset).getValue());
     }
 
-    public void setCharset(Charset charset) {
-        this.charset = charset;
-    }
-
-    public void addCookie(Cookie cookie) {
-        cookies.addCookie(cookie);
-    }
-
-    public Cookies getCookies() {
-        return cookies;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        HttpHeader that = (HttpHeader) o;
-        return contentLength == that.contentLength && Objects.equals(header, that.header)
-            && mediaType == that.mediaType && Objects.equals(charset, that.charset);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(header, mediaType, charset, contentLength);
-    }
-
-    @Override
-    public String toString() {
-        return "HttpHeader{" +
-            "header=" + header +
-            ", mediaType=" + mediaType +
-            ", charset=" + charset +
-            ", contentLength=" + contentLength +
-            '}';
-    }
-
-    public enum HEADER_KEY {
-
-        CONTENT_LENGTH("Content-Length"),
-        CONTENT_TYPE("Content-Type"),
-        LOCATION("Location"),
-        SET_COOKIE("Set-Cookie");
-
-        public final String value;
-
-        HEADER_KEY(String value) {
-            this.value = value;
-        }
+    public Optional<ContentType> getContentType() {
+        return getValue(CONTENT_TYPE.value).map(ContentType::of);
     }
 }

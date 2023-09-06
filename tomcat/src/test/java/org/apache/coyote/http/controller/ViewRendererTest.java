@@ -19,7 +19,7 @@ class ViewRendererTest {
         response.forward("/index.html");
         viewRenderer.render(request, response);
 
-        assertThat(response.getMediaType()).isEqualTo(MediaType.TEXT_HTML);
+        assertThat(response.getContentType().get().getMediaType()).isEqualTo(MediaType.TEXT_HTML);
     }
 
     @Test
@@ -30,7 +30,7 @@ class ViewRendererTest {
 
         viewRenderer.render(request, response);
 
-        assertThat(response.getMediaType()).isEqualTo(MediaType.TEXT_JAVASCRIPT);
+        assertThat(response.getContentType().get().getMediaType()).isEqualTo(MediaType.TEXT_JAVASCRIPT);
     }
 
     @Test
@@ -41,6 +41,6 @@ class ViewRendererTest {
 
         viewRenderer.render(request, response);
 
-        assertThat(response.getMediaType()).isEqualTo(MediaType.TEXT_HTML);
+        assertThat(response.getContentType().get().getMediaType()).isEqualTo(MediaType.TEXT_HTML);
     }
 }

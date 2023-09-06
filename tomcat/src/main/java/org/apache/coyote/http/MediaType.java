@@ -27,8 +27,8 @@ public enum MediaType {
 
     public static MediaType fromFilePath(String filePath) {
         return Arrays.stream(values())
-                .filter(contentType -> filePath.endsWith(contentType.fileExtension))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 타입입니다. 경로: " + filePath));
+                     .filter(contentType -> filePath.endsWith(contentType.fileExtension))
+                     .findFirst()
+                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 타입입니다. 경로: " + filePath));
     }
 }

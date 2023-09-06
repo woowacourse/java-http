@@ -5,7 +5,5 @@ import org.apache.coyote.http11.HttpResponse;
 
 public interface Interceptor {
 
-    boolean supports(HttpRequest request);
-
     boolean preHandle(HttpRequest request, HttpResponse response);
 }

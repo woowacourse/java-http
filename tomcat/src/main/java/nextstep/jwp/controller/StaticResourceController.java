@@ -28,7 +28,7 @@ public class StaticResourceController implements Controller {
     @Override
     public boolean canHandle(HttpRequest request) {
         final String path = request.getPath();
-        return path.substring(path.lastIndexOf("/") + 1).contains(".") || (staticRequestPaths.contains(path) && !request.hasQueryStrings() && request.getMethod() == HttpMethod.GET);
+        return path.substring(path.lastIndexOf("/") + 1).contains(".") || (staticRequestPaths.contains(path) && request.getMethod() == HttpMethod.GET);
     }
 
     @Override

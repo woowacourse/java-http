@@ -2,21 +2,27 @@ package nextstep.servlet;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.controller.StaticResourceController;
 import nextstep.jwp.controller.rest.LoginController;
 import nextstep.jwp.controller.rest.RegisterController;
 import nextstep.servlet.filter.Interceptor;
 import nextstep.servlet.filter.SessionInterceptor;
 import org.apache.catalina.servlet.Servlet;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.RequestLine;
 
 public class DispatcherServlet implements Servlet {
 
-    private final List<Interceptor> interceptors = List.of(
-            new SessionInterceptor()
+    private final Map<List<RequestLine>, Interceptor> interceptors = Map.of(
+            List.of(
+                    new RequestLine(HttpMethod.GET, "/login"),
+                    new RequestLine(HttpMethod.POST, "/login")
+            )
+            , new SessionInterceptor()
     );
 
     private final List<Controller> controllers = List.of(
@@ -32,7 +38,7 @@ public class DispatcherServlet implements Servlet {
     public void service(HttpRequest request, HttpResponse response) throws IOException {
         if (passInterceptors(request, response)) {
             final var controller = findController(request);
-            final ResponseEntity responseEntity = controller.handle(request);
+            final var responseEntity = controller.handle(request);
 
             response.setStatus(responseEntity.getStatusCode());
             responseEntity.getHeaders().forEach(response::setHeader);
@@ -41,9 +47,9 @@ public class DispatcherServlet implements Servlet {
     }
 
     private boolean passInterceptors(HttpRequest request, HttpResponse response) {
-        return interceptors.stream()
-                           .filter(interceptor -> interceptor.supports(request))
-                           .allMatch(interceptor -> interceptor.preHandle(request, response));
+        return interceptors.entrySet().stream()
+                           .filter(interceptorEntry -> interceptorEntry.getKey().contains(request.getRequestLine()))
+                           .allMatch(interceptorEntry -> interceptorEntry.getValue().preHandle(request, response));
     }
 
     private Controller findController(HttpRequest request) {

@@ -10,27 +10,18 @@ import org.apache.catalina.session.SessionManager;
 public class HttpRequest {
 
     private static final String HEADER_BODY_DELIMITER = "";
-    private static final String PATH_QUERY_STRING_DELIMITER = "\\?";
     private static final String INDEX_HTML = "/index.html";
     private static final int URI_INDEX = 0;
-    private static final int METHOD_INDEX = 0;
-    private static final int PATH_AND_PARAMETER_INDEX = 1;
-    private static final int PATH_INDEX = 0;
-    private static final int QUERY_PARAM_INDEX = 1;
 
 
-    private final HttpMethod method;
-    private final String path;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private final QueryStrings queryStrings;
     private final String body;
     private final JsonProperties jsonProperties;
 
-    private HttpRequest(HttpMethod method, String path, HttpHeaders headers, QueryStrings queryStrings, String body, JsonProperties jsonProperties) {
-        this.method = method;
-        this.path = path;
+    private HttpRequest(RequestLine requestLine, HttpHeaders headers,String body, JsonProperties jsonProperties) {
+        this.requestLine = requestLine;
         this.headers = headers;
-        this.queryStrings = queryStrings;
         this.body = body;
         this.jsonProperties = jsonProperties;
     }
@@ -39,7 +30,6 @@ public class HttpRequest {
         final var request = new ArrayList<String>();
         String line;
         var body = "";
-        QueryStrings queryStrings = null;
         JsonProperties properties = null;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
@@ -56,21 +46,17 @@ public class HttpRequest {
         }
 
         final String[] uri = request.get(URI_INDEX).split(" ");
-        final var method = HttpMethod.of(uri[METHOD_INDEX]);
-        final var fullPath = uri[PATH_AND_PARAMETER_INDEX];
+        var requestLine = RequestLine.from(uri);
 
-        if (fullPath.contains("?")) {
-            final String[] pathAndQueryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER);
-            final var path = pathAndQueryParams[PATH_INDEX].trim();
-            queryStrings = new QueryStrings(pathAndQueryParams[QUERY_PARAM_INDEX].trim());
-            return new HttpRequest(method, path, header, queryStrings, body, properties);
-        }
-
-        return new HttpRequest(method, fullPath, header, queryStrings, body, properties);
+        return new HttpRequest(requestLine, header, body, properties);
     }
 
     public boolean hasQueryStrings() {
-        return queryStrings != null;
+        return requestLine.hasQueryStrings();
+    }
+
+    public boolean hasCookie(String key) {
+        return headers.hasCookie(key);
     }
 
     public Session getSession() {
@@ -83,16 +69,20 @@ public class HttpRequest {
         return localSession;
     }
 
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
     public HttpHeaders getHeaders() {
         return headers;
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getQueryString(String key) {
-        return queryStrings.getValue(key);
+        return requestLine.getQueryStrings().getValue(key);
     }
 
     public String getJsonProperty(String key) {
@@ -100,14 +90,11 @@ public class HttpRequest {
     }
 
     public String getPath() {
+        var path = requestLine.getPath();
         if (path.equals("/")) {
             return INDEX_HTML;
         }
         return path;
-    }
-
-    public boolean hasCookie(String key) {
-        return headers.hasCookie(key);
     }
 
 }

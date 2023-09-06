@@ -31,7 +31,7 @@ public class HttpRequest {
     }
 
     public HttpSession getHttpSession() {
-        return getHttpSession(false);
+        return getHttpSession(true);
     }
 
     public HttpSession getHttpSession(boolean create) {

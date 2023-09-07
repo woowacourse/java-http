@@ -1,23 +1,18 @@
 package org.apache.coyote.http11.common.request;
 
-import org.apache.coyote.http11.common.HttpVersion;
-
 public class StartLine {
     public static final String DELIMITER = " ";
     public static final int METHOD_IDX = 0;
     public static final int URI_IDX = 1;
-    public static final int VERSION_IDX = 2;
+
     private final HttpMethod method;
     private final RequestUri uri;
     private final QueryParams params;
-    private final HttpVersion version;
 
-    private StartLine(final HttpMethod method, final RequestUri uri, final QueryParams params,
-                      final HttpVersion version) {
+    private StartLine(final HttpMethod method, final RequestUri uri, final QueryParams params) {
         this.method = method;
         this.uri = uri;
         this.params = params;
-        this.version = version;
     }
 
     public static StartLine create(final String line) {
@@ -29,9 +24,7 @@ public class StartLine {
         RequestUri uri = RequestUri.create(uriWithParams);
         QueryParams params = QueryParams.create(uriWithParams);
 
-        HttpVersion httpVersion = HttpVersion.fromDetail(targets[VERSION_IDX]);
-
-        return new StartLine(method, uri, params, httpVersion);
+        return new StartLine(method, uri, params);
     }
 
     public RequestUri getUri() {

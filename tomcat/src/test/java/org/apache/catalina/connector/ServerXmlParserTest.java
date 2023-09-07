@@ -13,7 +13,7 @@ class ServerXmlParserTest {
     @Test
     void SERVER_XML_파일을_파싱할_수_있다() {
         // given, when, then
-        assertThatCode(() -> ServerXmlParser.parse())
+        assertThatCode(ServerXmlParser::parse)
                 .doesNotThrowAnyException();
     }
 }

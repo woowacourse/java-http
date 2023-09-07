@@ -13,7 +13,7 @@ public class Tomcat {
 
     public void start() {
         ConnectorConfiguration configuration = ServerXmlParser.parse();
-        var connector = new Connector(configuration);
+        Connector connector = new Connector(configuration);
         connector.start();
 
         try {

@@ -9,7 +9,7 @@ public class InMemoryUserRepository {
 
     private static final Map<Long, User> database = new ConcurrentHashMap<>();
 
-    private static AtomicLong counter = new AtomicLong();
+    private static final AtomicLong counter = new AtomicLong();
 
     static {
         final User user = new User("gugu", "password", "hkkang@woowahan.com");

@@ -1,111 +1,91 @@
 package org.apache.coyote.http;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class HttpResponseBuilder {
 
-    private static final String STATIC_DIRECTORY = "static";
     private static final String LINE_FEED = "\r\n";
     private static final String SPACE = " ";
-    private static final List<String> STATIC_PATH = List.of(".css", ".js", ".ico", ".html", ".svg");
 
-    public String buildStaticFileOkResponse(HttpRequest httpRequest, String path) throws IOException {
-        String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
+    public static String buildStaticFileOkResponse(HttpRequest httpRequest, HttpResponse httpResponse, String path) throws IOException {
+        String status = joinStatus(HttpStatus.OK.getHttpStatusCode(), HttpStatus.OK.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
-        String contentType = joinContentType(ContentType.findType(path));
-        String content = getContent(path);
-        String contentLength = joinContentLength(content);
 
-        return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequest) +
-                contentType + SPACE + LINE_FEED +
-                contentLength + SPACE + LINE_FEED +
-                LINE_FEED +
-                content;
+        String startLine = joinStartLine(status, protocol);
+        httpResponse.updateStartLine(startLine);
+        httpResponse.updateFileMessageBody(path);
+
+        appendCookie(httpRequest, httpResponse);
+        httpResponse.addHeader("Content-Type", ContentType.findType(path));
+        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+
+        return httpResponse.joinResponse();
     }
 
-    private String joinContentLength(String content) {
-        return "Content-Length: " + content.getBytes().length;
+    private static String joinContentType(String contentType) {
+        return contentType + "; charset=utf-8";
     }
 
-    private String joinContentType(String path) {
-        return "Content-Type: " + path + ";charset=utf-8";
-    }
-
-    public String buildStaticFileRedirectResponse(HttpRequest httpRequest, String redirectPath) throws IOException {
-        String status = HttpStatus.REDIRECT.getHttpStatusCode() + SPACE + HttpStatus.REDIRECT.getHttpStatusMessage();
+    public static String buildStaticFileRedirectResponse(HttpRequest httpRequest, HttpResponse httpResponse, String redirectPath) throws IOException {
+        String status = joinStatus(HttpStatus.REDIRECT.getHttpStatusCode(), HttpStatus.REDIRECT.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
-        String contentType = joinContentType(ContentType.HTML.getType());
-        String content = getContent(redirectPath);
-        String contentLength = joinContentLength(content);
+        String startLine = joinStartLine(status, protocol);
 
-        return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequest) +
-                contentType + SPACE + LINE_FEED +
-                contentLength + SPACE + LINE_FEED +
-                "Location: " + redirectPath + SPACE + LINE_FEED +
-                content;
+        httpResponse.updateStartLine(startLine);
+        httpResponse.updateFileMessageBody(redirectPath);
+
+        appendCookie(httpRequest, httpResponse);
+        httpResponse.addHeader("Location", redirectPath);
+        httpResponse.addHeader("Content-Type", joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+
+        return httpResponse.joinResponse();
     }
 
-    public String buildStaticFileNotFoundResponse(HttpRequest httpRequest) throws IOException {
-        String status = HttpStatus.NOT_FOUND.getHttpStatusCode() + SPACE + HttpStatus.NOT_FOUND.getHttpStatusMessage();
-        String protocol = httpRequest.getProtocol().getName();
-        String contentType = joinContentType(ContentType.HTML.getType());
-        String content = getContent("/404.html");
-        String contentLength = joinContentLength(content);
-
-        return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequest) +
-                contentType + SPACE + LINE_FEED +
-                contentLength + SPACE + LINE_FEED +
-                LINE_FEED +
-                content;
+    private static String joinStatus(String statusCode, String statusMessage) {
+        return statusCode + SPACE + statusMessage;
     }
 
-    public String buildCustomResponse(HttpRequest httpRequest, String content) {
-        String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequest.getProtocol().getName();
-        String contentType = joinContentType(ContentType.HTML.getType());
-        String contentLength = joinContentLength(content);
-
-        return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequest) +
-                contentType + SPACE + LINE_FEED +
-                contentLength + SPACE + LINE_FEED +
-                LINE_FEED +
-                content;
-    }
-
-    private String getContent(String path) throws IOException {
-        URL resource = getClass().getClassLoader().getResource(STATIC_DIRECTORY + path);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    private String findCookie(HttpRequest httpRequest) {
-        Map<String, String> cookies = httpRequest.findCookies();
-        if (!isStaticPath(httpRequest.getPath()) && !cookies.isEmpty()) {
-
-            StringBuilder cookieHeader = new StringBuilder();
-            Set<Map.Entry<String, String>> entries = cookies.entrySet();
-            String collect = entries.stream()
-                    .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue())
-                    .reduce((cookie1, cookie2) -> cookie1 + "; " + SPACE + LINE_FEED + cookie2)
-                    .orElse("");
-            cookieHeader.append(collect);
-
-            return cookieHeader.toString() + SPACE + LINE_FEED;
+    private static void appendCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
+        Set<Map.Entry<String, String>> entries = httpRequest.findCookies().entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+            httpResponse.addCookie(entry.getKey(), entry.getValue());
         }
-        return "";
     }
 
-    private boolean isStaticPath(String path) {
-        return STATIC_PATH.stream().anyMatch(path::endsWith);
+    private static String joinStartLine(String status, String protocol) {
+        return protocol + SPACE + status + SPACE + LINE_FEED;
     }
 
+    public static String buildStaticFileNotFoundResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        String status = joinStatus(HttpStatus.NOT_FOUND.getHttpStatusCode(), HttpStatus.NOT_FOUND.getHttpStatusMessage());
+        String protocol = httpRequest.getProtocol().getName();
+        String startLine = joinStartLine(status, protocol);
+
+        httpResponse.updateStartLine(startLine);
+        httpResponse.updateFileMessageBody("/404.html");
+
+        appendCookie(httpRequest, httpResponse);
+        httpResponse.addHeader("Content-Type", joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+
+        return httpResponse.joinResponse();
+    }
+
+    public static String buildCustomResponse(HttpRequest httpRequest, HttpResponse httpResponse, String content) {
+        String status = joinStatus(HttpStatus.OK.getHttpStatusCode(), HttpStatus.OK.getHttpStatusMessage());
+        String protocol = httpRequest.getProtocol().getName();
+
+        String startLine = joinStartLine(status, protocol);
+        httpResponse.updateStartLine(startLine);
+        httpResponse.updateMessageBody(content);
+
+        appendCookie(httpRequest, httpResponse);
+        httpResponse.addHeader("Content-Type", joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+
+        return httpResponse.joinResponse();
+    }
 }

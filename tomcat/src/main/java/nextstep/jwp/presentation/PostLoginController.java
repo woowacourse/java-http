@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import org.apache.coyote.http.SessionManager;
 
@@ -17,16 +18,16 @@ public class PostLoginController implements Controller {
     private static final String KEY_VALUE_SEPARATOR = "=";
 
     @Override
-    public String process(HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException {
+    public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String[] splitRequestBody = httpRequest.getMessageBody().split("&");
         String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
         String password = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
             addSession(user, httpRequest);
-            return redirect(password, user, httpRequest, httpResponseBuilder);
+            return redirect(password, user, httpRequest, httpResponse);
         } catch (UserNotFoundException e) {
-            return httpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, "/401.html");
+            return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
         }
     }
 
@@ -57,10 +58,10 @@ public class PostLoginController implements Controller {
                 .orElse("");
     }
 
-    private String redirect(String password, User user, HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException {
+    private String redirect(String password, User user, HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (user.checkPassword(password)) {
-            return httpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, "/index.html");
+            return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
         }
-        return httpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, "/401.html");
+        return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
     }
 }

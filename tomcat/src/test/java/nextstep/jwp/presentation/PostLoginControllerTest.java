@@ -1,9 +1,9 @@
 package nextstep.jwp.presentation;
 
+import coyote.http.RequestFixture;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
-import org.apache.coyote.http.HttpResponseBuilder;
-import coyote.http.RequestFixture;
+import org.apache.coyote.http.HttpResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PostLoginControllerTest {
 
+    private final HttpResponse httpResponse = new HttpResponse();
+
     @Test
     void processIfUserExist() throws IOException {
         //given
@@ -23,15 +25,14 @@ class PostLoginControllerTest {
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         PostLoginController postLoginController = new PostLoginController();
-        HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = postLoginController.process(httpRequest, httpResponseBuilder);
+        String response = postLoginController.process(httpRequest, httpResponse);
 
         //then
         Assertions.assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),
                 () -> assertThat(response).contains("Content-Length: 5564")
         );
@@ -45,15 +46,14 @@ class PostLoginControllerTest {
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         PostLoginController postLoginController = new PostLoginController();
-        HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = postLoginController.process(httpRequest, httpResponseBuilder);
+        String response = postLoginController.process(httpRequest, httpResponse);
 
         //then
         Assertions.assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /401.html"),
                 () -> assertThat(response).contains("Content-Length: 2426")
         );

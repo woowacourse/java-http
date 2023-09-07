@@ -13,7 +13,7 @@ class ContentTypeTest {
     void findType() {
         //given
         List<String> path = List.of("/css/style.css", "/favicon.ico", "/js/index.js", "/index.html");
-        List<String> contentType = List.of("text/css", "text/css", "text/javascript", "text/html");
+        List<String> contentType = List.of("text/css", "text/css", "text/javascript", "text/html; charset=utf-8");
 
         //when
         String type = ContentType.findType(path.get(0));

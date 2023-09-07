@@ -1,9 +1,9 @@
 package nextstep.jwp.presentation;
 
+import coyote.http.RequestFixture;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
-import org.apache.coyote.http.HttpResponseBuilder;
-import coyote.http.RequestFixture;
+import org.apache.coyote.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class StaticControllerTest {
+
+    private final HttpResponse httpResponse = new HttpResponse();
 
     @Test
     void processCSS() throws IOException {
@@ -23,15 +25,14 @@ class StaticControllerTest {
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         StaticController staticController = new StaticController();
-        HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = staticController.process(httpRequest, httpResponseBuilder);
+        String response = staticController.process(httpRequest, httpResponse);
 
         //then
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
-                () -> assertThat(response).contains("Content-Type: text/css;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/css"),
                 () -> assertThat(response).contains("Content-Length: 211991")
         );
     }
@@ -44,15 +45,14 @@ class StaticControllerTest {
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         StaticController staticController = new StaticController();
-        HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = staticController.process(httpRequest, httpResponseBuilder);
+        String response = staticController.process(httpRequest, httpResponse);
 
         //then
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Content-Length: 5564")
         );
     }

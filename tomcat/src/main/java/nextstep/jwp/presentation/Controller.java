@@ -1,10 +1,10 @@
 package nextstep.jwp.presentation;
 
 import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponseBuilder;
+import org.apache.coyote.http.HttpResponse;
 
 import java.io.IOException;
 
 public interface Controller {
-    String process(HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException;
+    String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
 }

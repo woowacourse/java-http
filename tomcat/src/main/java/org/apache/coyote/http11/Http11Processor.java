@@ -5,6 +5,7 @@ import nextstep.jwp.presentation.handler.FrontController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +37,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
 
-            String response = frontController.process(httpRequest, httpResponseBuilder);
+            String response = frontController.process(httpRequest, httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import coyote.http.RequestFixture;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RootControllerTest {
 
+    private final HttpResponse httpResponse = new HttpResponse();
+
     @Test
     void process() throws IOException {
         //given
@@ -23,15 +26,14 @@ class RootControllerTest {
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         RootController rootController = new RootController();
-        HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = rootController.process(httpRequest, httpResponseBuilder);
+        String response = rootController.process(httpRequest, httpResponse);
 
         //then
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Content-Length: 12"),
                 () -> assertThat(response).contains("Hello world!")
         );

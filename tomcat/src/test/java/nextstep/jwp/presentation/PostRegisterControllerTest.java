@@ -2,6 +2,7 @@ package nextstep.jwp.presentation;
 
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
 import coyote.http.RequestFixture;
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PostRegisterControllerTest {
 
+    private final HttpResponse httpResponse = new HttpResponse();
+
     @Test
     void process() throws IOException {
         //given
@@ -23,15 +26,14 @@ class PostRegisterControllerTest {
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         PostRegisterController postRegisterController = new PostRegisterController();
-        HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = postRegisterController.process(httpRequest, httpResponseBuilder);
+        String response = postRegisterController.process(httpRequest, httpResponse);
 
         //then
         Assertions.assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),
                 () -> assertThat(response).contains("Content-Length: 5564")
         );

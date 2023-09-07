@@ -3,7 +3,7 @@ package nextstep.jwp.presentation.handler;
 import nextstep.jwp.presentation.*;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponseBuilder;
+import org.apache.coyote.http.HttpResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -30,12 +30,12 @@ public class FrontController {
         postMappingControllers.put("/register", new PostRegisterController());
     }
 
-    public String process(HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException {
+    public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         HttpMethod method = httpRequest.getMethod();
         String path = httpRequest.getPath();
         Controller controller = findController(method, path);
 
-        return controller.process(httpRequest, httpResponseBuilder);
+        return controller.process(httpRequest, httpResponse);
     }
 
     public Controller findController(HttpMethod method, String path) {

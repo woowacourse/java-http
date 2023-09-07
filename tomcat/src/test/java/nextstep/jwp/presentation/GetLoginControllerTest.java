@@ -2,10 +2,7 @@ package nextstep.jwp.presentation;
 
 import coyote.http.RequestFixture;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestParser;
-import org.apache.coyote.http.HttpResponseBuilder;
-import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GetLoginControllerTest {
 
+    private final HttpResponse httpResponse = new HttpResponse();
+
     @Test
     void process() throws IOException {
         //given
@@ -29,13 +28,14 @@ class GetLoginControllerTest {
         GetLoginController getLoginController = new GetLoginController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
+
         //when
-        String response = getLoginController.process(httpRequest, httpResponseBuilder);
+        String response = getLoginController.process(httpRequest, httpResponse);
 
         //then
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Content-Length: 3797")
         );
     }
@@ -55,12 +55,12 @@ class GetLoginControllerTest {
         SessionManager.add(sessionId, new User("test", "test", "test"));
 
         //when
-        String response = getLoginController.process(httpRequest, httpResponseBuilder);
+        String response = getLoginController.process(httpRequest, httpResponse);
 
         //then
         Assertions.assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
-                () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
+                () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),
                 () -> assertThat(response).contains("Content-Length: 5564")
         );

@@ -37,4 +37,15 @@ public class HttpRequestHeader {
     public HttpCookie getCookie() {
         return cookie;
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequestHeader{" +
+                "method='" + method + '\'' +
+                ", uri='" + uri + '\'' +
+                ", version='" + version + '\'' +
+                ", cookie=" + cookie +
+                ", headerValues=" + headerValues +
+                '}';
+    }
 }

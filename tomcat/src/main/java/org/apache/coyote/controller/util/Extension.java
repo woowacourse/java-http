@@ -7,6 +7,7 @@ public enum Extension {
     CSS(".css", HttpResponse.CSS_CONTENT_TYPE),
     JS(".js", HttpResponse.JS_CONTENT_TYPE),
     HTML(".html", HttpResponse.HTML_CONTENT_TYPE),
+    INDEX("/", HttpResponse.HTML_CONTENT_TYPE),
     ;
 
     private final String value;

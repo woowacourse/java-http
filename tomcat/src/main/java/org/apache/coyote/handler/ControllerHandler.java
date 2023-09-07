@@ -28,6 +28,6 @@ public enum ControllerHandler {
                      .filter(handler -> handler.uri != null && handler.uri.equals(uri))
                      .map(handler -> handler.getController.get())
                      .findAny()
-                     .orElseGet(() -> FileController.from(uri));
+                     .orElseGet(FileController::from);
     }
 }

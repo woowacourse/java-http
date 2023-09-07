@@ -95,4 +95,12 @@ public class HttpRequest {
     public HttpCookie getCookie() {
         return requestHeader.getCookie();
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "requestHeader=" + requestHeader +
+                ", requestBody=" + requestBody +
+                '}';
+    }
 }

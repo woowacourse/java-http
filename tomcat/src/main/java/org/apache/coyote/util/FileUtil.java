@@ -1,30 +1,27 @@
 package org.apache.coyote.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.Objects;
 
-import static java.util.stream.Collectors.joining;
-
 public class FileUtil {
-
-    private static final String CRLF = "\r\n";
 
     private FileUtil() {
     }
 
     public static String readStaticFile(String uri) {
-        InputStream inputStream = FileUtil.class
-                .getClassLoader()
-                .getResourceAsStream(uri);
-
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-            Objects.requireNonNull(inputStream, "파일을 찾을 수 없습니다. 파일: " + uri), StandardCharsets.UTF_8)
-        );
-
-        return bufferedReader.lines()
-                .collect(joining(CRLF)) + CRLF;
+        URL resource = FileUtil.class
+            .getClassLoader()
+            .getResource(uri);
+        try {
+            URL url = Objects.requireNonNull(resource, "파일을 찾을 수 없습니다. 파일: " + uri);
+            return new String(
+                Files.readAllBytes(new File(url.getFile()).toPath())
+            );
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 }

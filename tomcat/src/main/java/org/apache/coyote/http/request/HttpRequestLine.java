@@ -21,8 +21,6 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine decode(String requestLineString) {
-        log.info("request line: {}", requestLineString);
-
         String[] tokens = requestLineString.split(REQUEST_LINE_DELIMITER);
         validateRequestLine(tokens);
 

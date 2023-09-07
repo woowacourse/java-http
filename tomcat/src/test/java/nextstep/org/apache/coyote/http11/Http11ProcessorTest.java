@@ -2,10 +2,12 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -13,7 +15,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
-    void process() {
+    void 루트경로로_요청을_보내면_index_페이지를_응답한다() throws IOException {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
@@ -22,23 +24,31 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final var expected = String.join("\r\n",
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String resourceFile = resource.getFile();
+        final Path path = Paths.get(resourceFile);
+        final List<String> fileLines = Files.readAllLines(path);
+
+        final String responseBody = String.join(System.lineSeparator(), fileLines);
+
+        final var expected = String.join(System.lineSeparator(),
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Type: text/html ",
                 "",
-                "Hello world!");
+                responseBody);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void index() throws IOException {
+    void index_페이지를_응답한다() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Accept: text/html",
                 "",
                 "");
 
@@ -50,11 +60,18 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String resourceFile = resource.getFile();
+        final Path path = Paths.get(resourceFile);
+        final List<String> fileLines = Files.readAllLines(path);
+
+        final String responseBody = String.join(System.lineSeparator(), fileLines);
+
+        final var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 200 OK ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Type: text/html ",
+                "",
+                responseBody);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

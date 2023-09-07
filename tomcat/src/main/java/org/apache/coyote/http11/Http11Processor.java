@@ -65,7 +65,6 @@ public class Http11Processor implements Runnable, Processor {
             return requestUri;
         }
         final Controller controller = requestHandler.getHandler(requestUri);
-
         return controller.run(httpRequest, httpResponse);
     }
 
@@ -74,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeResponseString(final HttpResponse httpResponse) {
-        return String.join("\r\n",
+        return String.join(System.lineSeparator(),
                 makeResponseCode(httpResponse),
                 makeResponseHeaders(httpResponse),
                 "",
@@ -92,6 +91,6 @@ public class Http11Processor implements Runnable, Processor {
         return headers.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(joining("\r\n"));
+                .collect(joining(System.lineSeparator()));
     }
 }

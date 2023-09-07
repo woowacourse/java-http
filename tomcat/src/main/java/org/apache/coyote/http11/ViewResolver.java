@@ -17,7 +17,7 @@ public class ViewResolver {
         final String resourceFile = getFile(resource);
         final Path path = Paths.get(resourceFile);
         final List<String> fileLines = readFileLines(path);
-        return String.join("\n", fileLines);
+        return String.join(System.lineSeparator(), fileLines);
     }
 
     private String getFile(final URL resource) {

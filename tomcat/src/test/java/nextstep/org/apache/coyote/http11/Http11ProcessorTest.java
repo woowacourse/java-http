@@ -24,11 +24,11 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 404 Not Found ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: 13 ",
                 "",
-                "Hello world!");
+                "404 Not Found");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

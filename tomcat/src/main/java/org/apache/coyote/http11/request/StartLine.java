@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.HttpVersion;
 
+import java.util.Optional;
+
 public class StartLine {
 
     private static final String SEPARATOR = " ";
@@ -59,8 +61,8 @@ public class StartLine {
         return path;
     }
 
-    public QueryString getQueryString() {
-        return queryString;
+    public Optional<QueryString> getQueryString() {
+        return Optional.ofNullable(queryString);
     }
 
     public HttpVersion getVersion() {

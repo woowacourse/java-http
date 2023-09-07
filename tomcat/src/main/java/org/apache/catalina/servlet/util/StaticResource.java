@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.catalina.servlet.util;
 
 public class StaticResource {
 

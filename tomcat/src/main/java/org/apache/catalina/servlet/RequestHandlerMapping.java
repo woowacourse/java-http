@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.servlet;
 
 import java.util.List;
-import org.apache.coyote.http11.handler.DefaultHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.RegisterHandler;
-import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.catalina.servlet.handler.DefaultHandler;
+import org.apache.catalina.servlet.handler.LoginHandler;
+import org.apache.catalina.servlet.handler.RegisterHandler;
+import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.coyote.http11.request.Request;
 
 public class RequestHandlerMapping {

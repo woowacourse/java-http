@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.common.header;
 
-import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_TYPE;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ public abstract class Headers {
 
     private String format(final String headerName, final String value) {
 
-        if (CONTENT_TYPE.getValue().equals(headerName)) {
+        if (HeaderName.CONTENT_TYPE.getValue().equals(headerName)) {
             return String.join(": ", headerName, ContentType.withCharset(value));
         }
         return String.join(": ", headerName, value);

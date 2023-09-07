@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.servlet.handler;
 
 import static org.apache.coyote.http11.common.Method.GET;
 

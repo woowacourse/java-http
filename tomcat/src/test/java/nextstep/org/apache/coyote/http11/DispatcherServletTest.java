@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.common.header.HeaderName.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.http11.DispatcherServlet;
+import org.apache.catalina.servlet.DispatcherServlet;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;

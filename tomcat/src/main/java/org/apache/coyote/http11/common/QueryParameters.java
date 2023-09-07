@@ -3,7 +3,7 @@ package org.apache.coyote.http11.common;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.util.StringFormatParser;
+import org.apache.catalina.servlet.util.StringFormatParser;
 
 public class QueryParameters {
 

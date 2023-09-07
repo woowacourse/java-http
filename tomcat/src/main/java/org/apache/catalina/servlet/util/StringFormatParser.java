@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.catalina.servlet.util;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

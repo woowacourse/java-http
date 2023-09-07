@@ -58,5 +58,5 @@ public class RequestLine {
                 ", protocol=" + protocol +
                 '}';
     }
-    
+
 }

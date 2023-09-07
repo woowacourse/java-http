@@ -29,7 +29,7 @@ public class RegisterServlet implements Servlet {
             return doPost(request);
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET+", "+HttpMethod.POST);
+        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET + ", " + HttpMethod.POST);
         return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
     }
 
@@ -42,10 +42,19 @@ public class RegisterServlet implements Servlet {
         return HttpResponse.create(StatusCode.OK, headers, content);
     }
 
-    private static HttpResponse doPost(final HttpRequest request) {
+    private static HttpResponse doPost(final HttpRequest request) throws IOException {
         QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
 
-        User user = new User(params.getParam(ACCOUNT), params.getParam(PASSWORD), params.getParam(EMAIL));
+        if (params.getParam(ACCOUNT).isEmpty() || params.getParam(PASSWORD).isEmpty() || params.getParam(EMAIL).isEmpty()) {
+            String content = StaticFileLoader.load(Page.BAD_REQUEST.getUri());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
+            headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
+
+            return HttpResponse.create(StatusCode.BAD_REQUEST, headers, content);
+        }
+        User user = new User(params.getParam(ACCOUNT).get(), params.getParam(PASSWORD).get(), params.getParam(EMAIL).get());
         InMemoryUserRepository.save(user);
 
         HttpHeaders headers = new HttpHeaders();

@@ -21,9 +21,9 @@ class ParserTest {
         QueryParams queryParams = Parser.parseToQueryParams(line);
 
         // then
-        assertThat(queryParams.getParam("name")).isEqualTo("oing");
-        assertThat(queryParams.getParam("age")).isEqualTo("24");
-        assertThat(queryParams.getParam("gender")).isEqualTo("female");
+        assertThat(queryParams.getParam("name").get()).isEqualTo("oing");
+        assertThat(queryParams.getParam("age").get()).isEqualTo("24");
+        assertThat(queryParams.getParam("gender").get()).isEqualTo("female");
     }
 
     @Test

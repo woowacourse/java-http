@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.common.request;
 
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.util.Parser;
 
 public class QueryParams {
@@ -27,7 +28,7 @@ public class QueryParams {
         return new QueryParams(null);
     }
 
-    public String getParam(String name) {
-        return params.get(name);
+    public Optional<String> getParam(String name) {
+        return Optional.ofNullable(params.get(name));
     }
 }

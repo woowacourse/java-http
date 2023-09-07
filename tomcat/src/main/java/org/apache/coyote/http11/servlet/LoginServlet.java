@@ -33,7 +33,7 @@ public class LoginServlet implements Servlet {
             return doPost(request);
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET+", "+HttpMethod.POST);
+        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET + ", " + HttpMethod.POST);
         return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
     }
 
@@ -50,10 +50,21 @@ public class LoginServlet implements Servlet {
         return HttpResponse.create(StatusCode.OK, headers, content);
     }
 
-    private HttpResponse doPost(final HttpRequest request) {
+    private HttpResponse doPost(final HttpRequest request) throws IOException {
         QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
-        String account = params.getParam(ACCOUNT);
-        String password = params.getParam(PASSWORD);
+
+        if (params.getParam(ACCOUNT).isEmpty() || params.getParam(PASSWORD).isEmpty()) {
+            String content = StaticFileLoader.load(Page.BAD_REQUEST.getUri());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
+            headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
+
+            return HttpResponse.create(StatusCode.BAD_REQUEST, headers, content);
+        }
+
+        String account = params.getParam(ACCOUNT).get();
+        String password = params.getParam(PASSWORD).get();
 
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

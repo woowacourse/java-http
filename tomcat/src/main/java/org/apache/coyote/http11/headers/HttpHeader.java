@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.http11.headers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,7 @@ public class HttpHeader {
     return new HttpHeader(headers);
   }
 
-  public String get(final String key) {
+  public String getHeader(final String key) {
     return this.headers.get(key);
   }
 

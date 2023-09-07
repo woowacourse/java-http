@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.http11.requestline;
 
 import java.util.HashMap;
 import java.util.Map;

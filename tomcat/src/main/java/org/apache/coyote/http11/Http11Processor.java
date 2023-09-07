@@ -20,9 +20,7 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.HttpHeader;
-import org.apache.coyote.http11.domain.HttpRequest;
-import org.apache.coyote.http11.domain.RequestLine;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,27 +49,25 @@ public class Http11Processor implements Runnable, Processor {
   @Override
   public void process(final Socket connection) {
     try (
-        final var inputStream = bufferingInputStream(connection.getInputStream());
+        final var bufferedReader = bufferingInputStream(connection.getInputStream());
         final var outputStream = connection.getOutputStream()
     ) {
-      final HttpRequest request = HttpRequest.from(inputStream);
-      final RequestLine requestLine = request.getRequestLine();
-      final HttpHeader header = request.getHeader();
-      final String body = request.getBody();
-
+      final HttpRequest request = HttpRequest.from(bufferedReader);
       final SessionManager sessionManager = new SessionManager();
       final String response;
 
-      final String url = requestLine.getUrl();
+      final String url = request.getUrl();
       if (url.equals("/login")) {
-        final String sessionId = header.getCookie(JSESSIONID);
-        response = login(sessionManager, sessionId, requestLine.getParams());
+        final String sessionId = request.getCookie(JSESSIONID);
+        final String account = request.getParam("account");
+        final String password = request.getParam("password");
+        response = login(sessionManager, sessionId, account, password);
       } else if (url.equals("/register")) {
-        final Map<String, String> bodyParams = extractParams(body);
+        final Map<String, String> bodyParams = extractParams(request.getBody());
         response = register(bodyParams);
       } else {
         final String responseBody = readContentsFromFile(url);
-        final String contentType = getContentType(header.get("Accept"));
+        final String contentType = getContentType(request.getHeader("Accept"));
         response = response200(contentType, responseBody);
       }
 
@@ -85,13 +81,12 @@ public class Http11Processor implements Runnable, Processor {
   private String login(
       final SessionManager sessionManager,
       final String sessionId,
-      final Map<String, String> params
+      final String account,
+      final String password
   ) {
-    final String account = params.get("account");
-    final String password = params.get("password");
     if (isAuthorized(sessionId, sessionManager)) {
       return response302(INDEX_PAGE);
-    } else if (account == null) {
+    } else if (account == null || password == null) {
       return response302(LOGIN_PAGE);
     }
     return authorize(account, password, sessionManager);
@@ -100,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
   private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
     return sessionId != null && sessionManager.findSession(sessionId) != null;
   }
-  
+
   private String register(final Map<String, String> body) {
     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
     InMemoryUserRepository.save(user);

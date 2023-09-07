@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.headers.HttpHeader;
+import org.apache.coyote.http11.requestline.RequestLine;
 
 public class HttpRequest {
 
@@ -24,7 +26,7 @@ public class HttpRequest {
   public static HttpRequest from(final BufferedReader br) throws IOException {
     final RequestLine requestLine = RequestLine.from(br.readLine());
     final HttpHeader header = HttpHeader.from(readWhileEmptyLine(br));
-    final String body = readBody(br, header.get(CONTENT_LENGTH));
+    final String body = readBody(br, header.getHeader(CONTENT_LENGTH));
     return new HttpRequest(requestLine, header, body);
   }
 
@@ -50,12 +52,20 @@ public class HttpRequest {
     return lines;
   }
 
-  public RequestLine getRequestLine() {
-    return this.requestLine;
+  public String getUrl() {
+    return this.requestLine.getUrl();
   }
 
-  public HttpHeader getHeader() {
-    return this.header;
+  public String getParam(final String key) {
+    return this.requestLine.getParam(key);
+  }
+
+  public String getHeader(final String key) {
+    return this.header.getHeader(key);
+  }
+
+  public String getCookie(final String key) {
+    return this.header.getCookie(key);
   }
 
   public String getBody() {

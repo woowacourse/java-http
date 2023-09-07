@@ -1,17 +1,14 @@
-package org.apache.coyote.http11.domain;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.apache.coyote.http11.requestline;
 
 public class RequestLine {
 
   private final String method;
   private final String url;
   private final String version;
-  private final Map<String, String> params;
+  private final HttpParam params;
 
   public RequestLine(final String method, final String url, final String version,
-      final Map<String, String> params) {
+      final HttpParam params) {
     this.method = method;
     this.url = url;
     this.version = version;
@@ -23,22 +20,17 @@ public class RequestLine {
     final String method = tokens[0];
     final String uri = tokens[1];
     final String url = parseUrl(uri);
-    final Map<String, String> params = parseParams(uri);
+    final HttpParam params = HttpParam.from(parseQueryString(uri));
     final String version = tokens[2];
     return new RequestLine(method, url, version, params);
   }
 
-  private static Map<String, String> parseParams(final String uri) {
-    final Map<String, String> params = new HashMap<>();
+  private static String parseQueryString(final String uri) {
     final int index = uri.indexOf("?");
     if (index == -1) {
-      return params;
+      return "";
     }
-    for (final String queryString : uri.substring(index + 1).split("&")) {
-      final String[] tokens = queryString.split("=", 2);
-      params.put(tokens[0].trim(), tokens[1].trim());
-    }
-    return params;
+    return uri.substring(index + 1);
   }
 
   private static String parseUrl(final String uri) {
@@ -61,7 +53,7 @@ public class RequestLine {
     return this.version;
   }
 
-  public Map<String, String> getParams() {
-    return this.params;
+  public String getParam(final String key) {
+    return this.params.get(key);
   }
 }

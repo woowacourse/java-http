@@ -7,7 +7,7 @@ public class User {
     private final String password;
     private final String email;
 
-    public User(Long id, String account, String password, String email) {
+    private User(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;
@@ -16,6 +16,10 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    public User persist(Long userId) {
+        return new User(userId, account, password, email);
     }
 
     public boolean checkPassword(String password) {

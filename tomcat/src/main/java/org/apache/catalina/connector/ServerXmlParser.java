@@ -36,7 +36,7 @@ public class ServerXmlParser {
 
     private static Document parseServerDocument() {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             ClassLoader classLoader = ServerXmlParser.class.getClassLoader();

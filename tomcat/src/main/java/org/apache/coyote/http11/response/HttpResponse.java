@@ -37,7 +37,19 @@ public class HttpResponse {
         return new HttpResponse(httpProtocol, httpStatus, null);
     }
 
-    private String toHeaderFormat() {
+    public String toResponseFormat() {
+        StringJoiner joiner = new StringJoiner(Constants.CRLF);
+        joiner.add(getStatusLine());
+        joiner.add(getHeaderLines());
+        joiner.add(body);
+        return joiner.toString();
+    }
+
+    private String getStatusLine() {
+        return String.format("%s %s %s ", httpProtocol.getProtocol(), httpStatus.getCode(), httpStatus.getMessage());
+    }
+
+    private String getHeaderLines() {
         StringJoiner joiner = new StringJoiner(Constants.CRLF);
         for (var entry : this.headers.entrySet()) {
             String name = entry.getKey();
@@ -48,19 +60,7 @@ public class HttpResponse {
         return joiner.toString();
     }
 
-    public String toResponseFormat() {
-        StringJoiner joiner = new StringJoiner(Constants.CRLF);
-        joiner.add(String.format("%s %s %s ", httpProtocol.getProtocol(), httpStatus.getCode(), httpStatus.getMessage()));
-        joiner.add(toHeaderFormat());
-        joiner.add(body);
-        return joiner.toString();
-    }
-
     public void addHeader(HeaderType headerType, String value) {
         headers.put(headerType.getType(), value);
-    }
-
-    public Map<String, String> getHeaders() {
-        return Map.copyOf(headers);
     }
 }

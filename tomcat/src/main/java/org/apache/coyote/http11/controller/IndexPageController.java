@@ -7,6 +7,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class IndexPageController implements Controller {
+
     @Override
     public ResponseEntity service(HttpRequest request) {
         String requestURI = request.getHttpRequestStartLine().getPath();

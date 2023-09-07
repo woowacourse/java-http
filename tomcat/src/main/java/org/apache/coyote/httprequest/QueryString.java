@@ -5,6 +5,7 @@ import org.apache.coyote.httprequest.exception.InvalidQueryStringFormatException
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class QueryString {
@@ -44,5 +45,18 @@ public class QueryString {
 
     public boolean isEmpty() {
         return queries.isEmpty();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof QueryString)) return false;
+        QueryString that = (QueryString) o;
+        return Objects.equals(queries, that.queries);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(queries);
     }
 }

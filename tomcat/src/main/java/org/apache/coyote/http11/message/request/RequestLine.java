@@ -1,6 +1,8 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
 
 import java.util.Optional;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.HttpProtocol;
 
 public class RequestLine {
 
@@ -55,7 +57,6 @@ public class RequestLine {
     }
 
     public Optional<String> parseFileExtensionFromPath() {
-        // TODO: 2023-09-04 Path 도메인으로 이동
         final String path = getPath();
         if (!path.contains(PATH_EXTENSION_DELIMITER)) {
             return Optional.empty();

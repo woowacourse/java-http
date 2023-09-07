@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.apache.coyote.http11.session.Cookie;
+import org.apache.coyote.http11.message.Cookie;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 

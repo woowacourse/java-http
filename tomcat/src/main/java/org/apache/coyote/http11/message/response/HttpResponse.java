@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.response;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,12 @@ import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.session.Cookie;
+import org.apache.coyote.http11.message.ContentType;
+import org.apache.coyote.http11.message.Cookie;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpProtocol;
+import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {

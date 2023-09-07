@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.message.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

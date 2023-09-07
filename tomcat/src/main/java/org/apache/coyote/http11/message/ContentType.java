@@ -3,6 +3,8 @@ package org.apache.coyote.http11.message;
 import java.util.Arrays;
 import java.util.Optional;
 import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestLine;
 
 public enum ContentType {
 

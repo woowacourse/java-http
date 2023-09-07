@@ -45,7 +45,7 @@ public class RequestURL {
     }
 
     private static void validate(final String line) {
-        if (line.isBlank() && line.isEmpty()) {
+        if (line.isBlank()) {
             throw new InvalidRequestLineException();
         }
     }

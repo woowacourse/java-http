@@ -8,6 +8,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.NotCorrectPasswordException;
 import org.apache.coyote.http11.exception.NotFoundAccountException;
+import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -73,7 +74,10 @@ public class Http11Processor implements Runnable, Processor {
             return getRespondByMethod(httpRequest);
         } catch (NotFoundAccountException | NotCorrectPasswordException e) {
             return foundResponse(httpRequest, UNAUTHORIZED_PATH);
-        } catch (Exception e) {
+        } catch (ResourceNotFoundException e){
+            return foundResponse(httpRequest, NOT_FOUND_PATH);
+        }
+        catch (Exception e) {
             return foundResponse(httpRequest, INTERNAL_SERVER_PATH);
         }
     }

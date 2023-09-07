@@ -15,6 +15,7 @@ public class User {
     }
 
     public User(String account, String password, String email) {
+        // todo: 회원가입 시 빈 입력 값 검증 로직
         this(null, account, password, email);
     }
 

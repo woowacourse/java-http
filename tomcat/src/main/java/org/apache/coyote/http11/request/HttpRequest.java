@@ -35,11 +35,10 @@ public class HttpRequest {
     }
 
     private static MessageBody createRequestBody(BufferedReader br, RequestHeaders headers) throws IOException {
-        String body = br.readLine();
-        if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue()) || body == null) {
+        if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue())) {
             return MessageBody.empty();
         }
-        return MessageBody.from(body);
+        return MessageBody.from(br.readLine());
     }
 
     public boolean isParamRequest() {

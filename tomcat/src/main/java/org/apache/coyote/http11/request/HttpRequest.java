@@ -35,14 +35,11 @@ public class HttpRequest {
     }
 
     private static MessageBody createRequestBody(BufferedReader br, RequestHeaders headers) throws IOException {
-        if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue()) || br.readLine() == null) {
-            return MessageBody.from("");
+        String body = br.readLine();
+        if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue()) || body == null) {
+            return MessageBody.empty();
         }
-        int contentLength = Integer.parseInt(headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue()));
-        char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        return MessageBody.from(requestBody);
+        return MessageBody.from(body);
     }
 
     public String getHeader(final String headerKey) {

@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.servlet.ServletManger;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -15,19 +18,40 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_MAX_NUMBER = 250;
+    private static final int CORE_POOL_SIZE = 10;
+    private static final long THREAD_ALIVE_TIME = 60L;
 
     private final ServerSocket serverSocket;
     private final ServletManger servletManger;
+    private final ThreadPoolExecutor threadPool;
     private boolean stopped;
 
     public Connector(ServletManger servletManger) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, servletManger);
+        this(
+                DEFAULT_PORT,
+                DEFAULT_ACCEPT_COUNT,
+                servletManger,
+                DEFAULT_THREAD_MAX_NUMBER
+        );
     }
 
-    public Connector(final int port, final int acceptCount, ServletManger servletManger) {
+    public Connector(
+            final int port,
+            final int acceptCount,
+            final ServletManger servletManger,
+            final int threadMaxNumber
+    ) {
         this.servletManger = servletManger;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.threadPool = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                threadMaxNumber,
+                THREAD_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new SynchronousQueue<>()
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -58,7 +82,9 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            while (threadPool.getActiveCount() < threadPool.getMaximumPoolSize()) {
+                process(serverSocket.accept());
+            }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -69,7 +95,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, servletManger);
-        new Thread(processor).start();
+        threadPool.execute(processor);
     }
 
     public void stop() {

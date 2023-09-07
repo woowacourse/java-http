@@ -1,29 +1,39 @@
 package org.apache.coyote.http11.request;
 
 public class HttpRequestStartLine {
+    private static final String QUERY_DELIMITER = "?";
+
     private final HttpMethod httpMethod;
     private final String path;
-    private final String query;
-    private final String httpVersion;
+    private final Query query;
+    private final String version;
 
-    private HttpRequestStartLine(final HttpMethod httpMethod, final String path, final String query, final String httpVersion) {
+    private HttpRequestStartLine(final HttpMethod httpMethod, final String path, final Query query, final String version) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.query = query;
-        this.httpVersion = httpVersion;
+        this.version = version;
     }
 
-    public static HttpRequestStartLine from(String startLine) {
-        final String[] splitLine = startLine.split(" ");
-        String path = splitLine[1];
-        String query = "";
-        if (path.indexOf("?") != -1) {
-            query = path.substring(path.indexOf("?") + 1);
-        }
+    public static HttpRequestStartLine from(final String startLine) {
+        final String[] startLines = startLine.split(" ");
+        String path = startLines[1];
+        final Query query = extractQuery(path);
         if (path.equals("/login") || path.equals("/register")) {
             path = path + ".html";
         }
-        return new HttpRequestStartLine(HttpMethod.valueOf(splitLine[0]), path, query, splitLine[2]);
+        return new HttpRequestStartLine(HttpMethod.valueOf(startLines[0]), path, query, startLines[2]);
+    }
+
+    private static Query extractQuery(final String path) {
+        if (isExistQuery(path)) {
+            return Query.from(path.substring(path.indexOf(QUERY_DELIMITER) + 1));
+        }
+        return Query.empty();
+    }
+
+    private static boolean isExistQuery(final String path) {
+        return path.indexOf(QUERY_DELIMITER) != -1;
     }
 
     public HttpMethod getHttpMethod() {
@@ -34,11 +44,11 @@ public class HttpRequestStartLine {
         return path;
     }
 
-    public String getQuery() {
+    public Query getQuery() {
         return query;
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
+    public String getVersion() {
+        return version;
     }
 }

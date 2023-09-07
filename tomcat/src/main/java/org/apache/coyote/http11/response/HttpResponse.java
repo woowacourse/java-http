@@ -35,7 +35,7 @@ public class HttpResponse {
         HttpStatus httpStatus = responseEntity.getHttpStatus();
 
         if (responseBody == null) {
-            responseBody = generateResponseBody(location);
+            responseBody = findResponseBodyFrom(location);
         }
 
         if (httpStatus == HttpStatus.FOUND) {
@@ -61,6 +61,12 @@ public class HttpResponse {
                 .build();
     }
 
+    private static HttpResponseBody findResponseBodyFrom(String location) throws IOException {
+        URL resource = ClassLoader.getSystemClassLoader().getResource("static" + location);
+        File file = new File(resource.getFile());
+        return HttpResponseBody.from(new String(Files.readAllBytes(file.toPath())));
+    }
+
     public String getResponse() throws IOException {
         String responseStatusLine = String.format("%s %s %s ",
                 httpResponseStatusLine.getHttpProtocolVersion().getName(),
@@ -79,12 +85,6 @@ public class HttpResponse {
                 BLANK_LINE,
                 responseBody
         );
-    }
-
-    private static HttpResponseBody generateResponseBody(String location) throws IOException {
-        URL resource = ClassLoader.getSystemClassLoader().getResource("static" + location);
-        File file = new File(resource.getFile());
-        return HttpResponseBody.from(new String(Files.readAllBytes(file.toPath())));
     }
 
     private String generateHeaders(HttpResponseHeaders headers) {

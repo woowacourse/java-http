@@ -44,8 +44,8 @@ public class HttpResponse {
             String formatResponse = String.join(
                     DELIMITER,
                     generateHttpStatus(httpStatus),
-                    generateLocation(responseEntity),
-                    generateCookie(responseEntity)
+                    generateLocation(responseEntity.getLocation()),
+                    generateCookie(responseEntity.getHttpCookie())
             );
             return new HttpResponse(formatResponse);
         }
@@ -71,8 +71,7 @@ public class HttpResponse {
         return String.format("HTTP/1.1 %s %s ", status.getStatusCode(), status.name());
     }
 
-    private static String generateLocation(ResponseEntity responseEntity) {
-        String location = responseEntity.getLocation();
+    private static String generateLocation(String location) {
         if (location == null) {
             return "";
         }
@@ -91,8 +90,7 @@ public class HttpResponse {
         return String.format("Content-Length: %s ", body.getBytes().length);
     }
 
-    private static String generateCookie(ResponseEntity responseEntity) {
-        HttpCookie httpCookie = responseEntity.getHttpCookie();
+    private static String generateCookie(HttpCookie httpCookie) {
         if (httpCookie == null) {
             return "";
         }

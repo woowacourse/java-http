@@ -7,6 +7,7 @@ import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
 
+import org.apache.coyote.http11.common.Protocol;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.common.header.EntityHeaders;
 import org.apache.coyote.http11.common.header.GeneralHeaders;
@@ -16,21 +17,20 @@ public class Response {
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
-    private final Status status;
+    private final StatusLine statusLine;
     private final GeneralHeaders generalHeaders;
     private final ResponseHeaders responseHeaders;
     private final EntityHeaders entityHeaders;
     private final String body;
 
-    // TODO StatusLine 포장
     private Response(
-            final Status status,
+            final StatusLine statusLine,
             final GeneralHeaders generalHeaders,
             final ResponseHeaders responseHeaders,
             final EntityHeaders entityHeaders,
             final String body
     ) {
-        this.status = status;
+        this.statusLine = statusLine;
         this.generalHeaders = generalHeaders;
         this.responseHeaders = responseHeaders;
         this.entityHeaders = entityHeaders;
@@ -38,11 +38,13 @@ public class Response {
     }
 
     public Response(final Builder builder) {
-        this(builder.status,
+        this(
+                new StatusLine(Protocol.HTTP11, builder.status),
                 builder.generalHeaders,
                 builder.responseHeaders,
                 builder.entityHeaders,
-                builder.body);
+                builder.body
+        );
     }
 
     public static Builder ok() {
@@ -72,7 +74,7 @@ public class Response {
     }
 
     public Status getStatus() {
-        return status;
+        return statusLine.getStatus();
     }
 
     public String getLocation() {
@@ -93,9 +95,15 @@ public class Response {
 
     @Override
     public String toString() {
+        final var headerGroup = String.join(
+                generalHeaders.toString(),
+                responseHeaders.toString(),
+                entityHeaders.toString()
+        );
+
         return String.join(LINE_SEPARATOR,
-                "HTTP/1.1 " + status.getCode() + " " + status.name(),
-                generalHeaders.toString() + responseHeaders.toString() + entityHeaders.toString(),
+                statusLine.toString(),
+                headerGroup,
                 body);
     }
 

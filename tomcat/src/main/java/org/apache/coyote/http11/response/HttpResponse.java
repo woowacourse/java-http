@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 public class HttpResponse {
     public static final String DEFAULT_PROTOCOL_VERSION = "HTTP/1.1";

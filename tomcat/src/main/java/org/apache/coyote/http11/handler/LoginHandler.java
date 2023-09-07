@@ -60,7 +60,7 @@ public class LoginHandler extends UserHandler {
 
             return ResponseEntity.cookie(httpCookie, HttpStatus.FOUND, "/index");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.FOUND, "/401");
+            return ResponseEntity.of(HttpStatus.FOUND, "/401.html");
         }
     }
 

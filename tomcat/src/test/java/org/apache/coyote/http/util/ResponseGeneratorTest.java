@@ -45,4 +45,16 @@ class ResponseGeneratorTest {
 
         assertThat(actual).isNotNull();
     }
+
+    @Test
+    void createRedirectResponse_메서드는_request와_targetPath를_전달하면_302_Found_Response를_반환한다() {
+        final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1");
+        final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
+
+        final Response actual = ResponseGenerator.createRedirectResponse(request, "/404.html");
+
+        assertThat(actual.convertResponseMessage()).contains("/404.html")
+                                                   .contains("302 Found");
+    }
 }

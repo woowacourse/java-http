@@ -2,6 +2,7 @@ package org.apache.coyote.http.util;
 
 import java.util.List;
 import org.apache.coyote.http.HttpCookie;
+import org.apache.coyote.http.request.Request;
 import servlet.request.HttpRequest;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
@@ -28,6 +29,16 @@ public final class ResponseGenerator {
                 body,
                 cookies,
                 headerDtos.toArray(HeaderDto[]::new)
+        );
+    }
+
+    public static Response createRedirectResponse(final Request request, final String targetPath) {
+        return Response.of(
+                request,
+                HttpStatusCode.FOUND,
+                ContentType.JSON,
+                HttpConsts.BLANK,
+                new HeaderDto(HttpHeaderConsts.LOCATION, targetPath)
         );
     }
 

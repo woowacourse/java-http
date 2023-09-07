@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http.util.ResponseGenerator.createRedirectResponse;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,22 +11,19 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.List;
+import mvc.controller.exception.InvalidParameterException;
 import nextstep.jwp.application.exception.AlreadyExistsAccountException;
+import nextstep.jwp.application.exception.LoginFailureException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Context;
 import org.apache.coyote.Processor;
 import org.apache.coyote.context.exception.UnsupportedApiException;
-import mvc.controller.exception.InvalidParameterException;
-import nextstep.jwp.application.exception.LoginFailureException;
 import org.apache.coyote.handler.util.exception.ResourceNotFoundException;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;
 import org.apache.coyote.http.response.exception.UnsupportedAcceptException;
-import org.apache.coyote.http.util.HeaderDto;
-import org.apache.coyote.http.util.HttpConsts;
-import org.apache.coyote.http.util.HttpHeaderConsts;
 import org.apache.coyote.http.util.RequestGenerator;
 import org.apache.coyote.http11.exception.InvalidRequestPathException;
 import org.slf4j.Logger;
@@ -70,21 +69,9 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final InvalidParameterException | AlreadyExistsAccountException e) {
             return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, e.getMessage());
         } catch (final LoginFailureException e) {
-            return Response.of(
-                    request,
-                    HttpStatusCode.FOUND,
-                    ContentType.JSON,
-                    HttpConsts.BLANK,
-                    new HeaderDto(HttpHeaderConsts.LOCATION, "/401.html")
-            );
+            return createRedirectResponse(request, "/401.html");
         } catch (final ResourceNotFoundException e) {
-            return Response.of(
-                    request,
-                    HttpStatusCode.FOUND,
-                    ContentType.JSON,
-                    HttpConsts.BLANK,
-                    new HeaderDto(HttpHeaderConsts.LOCATION, "/404.html")
-            );
+            return createRedirectResponse(request, "/404.html");
         } catch (final UnsupportedApiException e) {
             return Response.of(request, HttpStatusCode.NOT_FOUND, ContentType.JSON, e.getMessage());
         } catch (final UnsupportedAcceptException e) {

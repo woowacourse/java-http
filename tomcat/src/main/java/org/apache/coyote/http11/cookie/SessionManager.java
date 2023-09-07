@@ -13,19 +13,15 @@ public class SessionManager {
         sessions.put(user, httpCookie.getJSessionId());
     }
 
-    public static boolean isValidUser(final User user) {
-        if(sessions.containsKey(user)) {
-            return true;
-        }
-
-        return false;
+    public static boolean isValidUser(final User user, final String jsessionId) {
+        return sessions.entrySet().stream()
+                .anyMatch(userStringEntry ->
+                        userStringEntry.getKey().equals(user)
+                        && userStringEntry.getValue().equals(jsessionId)
+                );
     }
 
     public static boolean isValidHttpCookie(final HttpCookie httpCookie) {
-        if(sessions.containsValue(httpCookie.getJSessionId())) {
-            return true;
-        }
-
-        return false;
+        return sessions.containsValue(httpCookie.getJSessionId());
     }
 }

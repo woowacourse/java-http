@@ -31,4 +31,14 @@ public class Response {
                 "",
                 responseBody);
     }
+
+    public static String ofRedirect(final String contentType, final String responseBody, final String status, final HttpCookie httpCookie) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status + " ",
+                "Set-Cookie: " + "JSESSIONID=" + httpCookie.getJSessionId() + " ",
+                "Content-Type: " + contentType + "charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
 }

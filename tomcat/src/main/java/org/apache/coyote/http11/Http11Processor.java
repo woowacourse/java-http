@@ -26,6 +26,8 @@ import static org.apache.coyote.http11.enums.Path.INDEX_URL;
 import static org.apache.coyote.http11.enums.Path.LOGIN_HTML;
 import static org.apache.coyote.http11.enums.Path.LOGIN_URL;
 import static org.apache.coyote.http11.enums.Path.LOGIN_WITH_PARAM_URL;
+import static org.apache.coyote.http11.enums.Path.REDIRECT;
+import static org.apache.coyote.http11.enums.Path.REDIRECT_INDEX_HTML;
 import static org.apache.coyote.http11.enums.Path.REGISTER_HTML;
 import static org.apache.coyote.http11.enums.Path.REGISTER_URL;
 import static org.apache.coyote.http11.enums.Path.STATIC;
@@ -35,19 +37,22 @@ import static org.apache.coyote.http11.enums.Path.isContainParam;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String EMPTY = "";
-    private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
-    private static final HttpCookie httpCookie = new HttpCookie();
-    private static final String POST_HTTP_METHOD = "POST";
-    private static final String USER_SAVE_SUCCESS_MESSAGE = "유저 저장 성공!";
-    private static final String LOGIN_SUCCESS_MESSAGE = "로그인 성공! 아이디 : ";
-    private static final String INVALID_HTTP_REQUEST_MESSAGE = "Invalid HTTP request";
-    private static final String PARAMETER_DELIM = "&";
-    private static final char EQUALS = '=';
-    private static final char COLON = ':';
+    private static final int NOT_FOUND_BY_INDEX = -1;
+    private final HttpCookie httpCookie = new HttpCookie();
     private static Map<String, String> headers;
     private final Socket connection;
 
+    private static final String EMPTY = "";
+    private static final String POST_HTTP_METHOD = "POST";
+    private static final char EQUALS = '=';
+    private static final char COLON = ':';
+
+    private static final String USER_SAVE_SUCCESS_MESSAGE = "유저 저장 성공!";
+    private static final String LOGIN_SUCCESS_MESSAGE = "로그인 성공! 아이디 : ";
+    private static final String INVALID_HTTP_REQUEST_MESSAGE = "Invalid HTTP request";
+
+    private static final String PARAMETER_DELIM = "&";
+    private static final String JS_ICO_CSS_REGEX = ".*\\.(js|ico|css)$";
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -68,7 +73,6 @@ public class Http11Processor implements Runnable, Processor {
             String requestLine = br.readLine(); // HTTP 요청 라인을 읽음 (예: "GET /index.html HTTP/1.1")
             final String httpMethod = parseHttpMethod(requestLine);// HTTP method를 읽음 (예: GET)
             headers = parseRequestHeaders(br); // header를 읽음
-            storeJsessionId();
 
             if (POST_HTTP_METHOD.equals(httpMethod)) { //post method일 때만 requestBody 읽어오고 user를 등록
                 final String requestBody = readRequestBody(br);
@@ -76,17 +80,27 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final String path = parseHttpRequest(requestLine); // 파싱된 HTTP 요청에서 경로 추출
-            final String parsedPath = parsePath(path, httpMethod); // 경로를 기반으로 정적 파일을 읽고 응답 생성
+            storeJsessionId();
+            final String parsedPathBeforeSubString = parsePath(path, httpMethod); // 경로를 기반으로 정적 파일을 읽고 응답 생성
+            final String parsedPath = subStringIfRedirectPath(parsedPathBeforeSubString);
 
             final String responseBody = readStaticFile(parsedPath);
             final String contentType = getContentType(parsedPath); //content type을 다르게 준다
-            final String response = createResponse(contentType, responseBody, parsedPath);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
+            final String response = createResponse(contentType, responseBody, parsedPathBeforeSubString);  // JSESSIONID가 있는 경우, 없는 경우 다르게 response를 준다
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String subStringIfRedirectPath(final String parsedPathBeforeSubString) {
+        if (parsedPathBeforeSubString.contains(REDIRECT.getValue() + COLON)) {
+            return parsedPathBeforeSubString.substring((REDIRECT.getValue() + COLON).length(), parsedPathBeforeSubString.length());
+
+        }
+        return parsedPathBeforeSubString;
     }
 
     private String parseHttpMethod(final String requestLine) throws IOException {
@@ -118,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
         for (int i = 0; i < getEmptyLineIndex(lines); i++) {
             lineForParse = lines.get(i);
             int colonIndex = lineForParse.indexOf(COLON);
-            if (colonIndex != -1) {
+            if (isExistByIndex(colonIndex)) {
                 String key = lineForParse.substring(0, colonIndex).trim();
                 String value = lineForParse.substring(colonIndex + 1).trim();
                 headers.put(key, value);
@@ -128,9 +142,13 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
+    private boolean isExistByIndex(final int colonIndex) {
+        return colonIndex != NOT_FOUND_BY_INDEX;
+    }
+
     private int getEmptyLineIndex(final List<String> lines) {
         int emptyLineIndex = lines.indexOf(EMPTY);
-        if (emptyLineIndex == -1) {
+        if (emptyLineIndex == NOT_FOUND_BY_INDEX) {
             emptyLineIndex = lines.size();
         }
         return emptyLineIndex;
@@ -140,8 +158,8 @@ public class Http11Processor implements Runnable, Processor {
         if (isContainJsessionId()) {
             return httpCookie.changeJSessionId(parseJsessionId());
         }
-        return httpCookie.createJSession();
 
+        return httpCookie.createJSession();
     }
 
     private String parseJsessionId() {
@@ -186,7 +204,7 @@ public class Http11Processor implements Runnable, Processor {
             String token = st.nextToken();
             int equalsIndex = token.indexOf(EQUALS);
 
-            if (equalsIndex != -1) {
+            if (isExistByIndex(equalsIndex)) {
                 String key = token.substring(0, equalsIndex);
                 String value = token.substring(equalsIndex + 1);
                 userData.put(key, value);
@@ -209,16 +227,16 @@ public class Http11Processor implements Runnable, Processor {
     private String parsePath(final String path, final String httpMethod) {
         String url = INDEX_URL.getValue();
 
+        if (path.matches(JS_ICO_CSS_REGEX)) {
+            url = STATIC.getValue() + path;
+        }
+
         if (path.contains(LOGIN_URL.getValue())) {
             url = getPathForLogin(path);
         }
 
         if (path.equals(REGISTER_URL.getValue())) {
             url = getPathForRegister(httpMethod);
-        }
-
-        if (path.matches(JS_ICO_CSS_REGEX)) {
-            url = STATIC.getValue() + path;
         }
 
         return url;
@@ -242,11 +260,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final String contentType, final String responseBody, final String path) {
-        if(path.equals(UNAUTHORIZED_HTML.getValue())) {
+        if (path.equals(UNAUTHORIZED_HTML.getValue())) {
             return Response.of(contentType, responseBody, "401 Unauthorized");
         }
 
-        if (path.equals(LOGIN_WITH_PARAM_URL.getValue()) && !httpCookie.isJsessionEmpty()) {
+        if (path.contains(REDIRECT.getValue() + COLON)) {
+            return Response.ofRedirect(contentType, responseBody, "302 Redirected", httpCookie);
+        }
+
+        if (!path.matches(JS_ICO_CSS_REGEX)) {
             return Response.of(contentType, responseBody, httpCookie);
         }
 
@@ -268,16 +290,20 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
+    //요청 보낼 때 마다 쿠키 header읽고 쿠키 읽어와서 저장하는 것이 필요. >> 유저는 어떻게 할 것인가??
     private String getPathForLogin(final String path) {
-        if (isContainParam(path) && !isValidUser(path)) {
-            return UNAUTHORIZED_HTML.getValue();
+        if (isContainParam(path)) {
+            if (!isValidUser(path)) {
+                return UNAUTHORIZED_HTML.getValue();
+            }
+            return REDIRECT_INDEX_HTML.getValue();
         }
 
         if (!SessionManager.isValidHttpCookie(httpCookie)) {
             return LOGIN_HTML.getValue();
         }
 
-        return INDEX_URL.getValue();
+        return REDIRECT.getValue() + COLON + INDEX_URL.getValue();
     }
 
     private boolean isValidUser(final String path) {
@@ -287,12 +313,15 @@ public class Http11Processor implements Runnable, Processor {
         String parsedPassword = loginData.get("password");
 
         final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(parsedAccount);
+
         if (maybeUser.isPresent()) {
             final User foundUser = maybeUser.get();
-            if (foundUser.checkPassword(parsedPassword) && !SessionManager.isValidUser(foundUser)) {
-                SessionManager.add(foundUser, httpCookie);
-                log.info(LOGIN_SUCCESS_MESSAGE + parsedAccount);
 
+            if (foundUser.checkPassword(parsedPassword)) {
+                if (!SessionManager.isValidUser(foundUser, httpCookie.getJSessionId())) {
+                    SessionManager.add(foundUser, httpCookie);
+                }
+                log.info(LOGIN_SUCCESS_MESSAGE + parsedAccount);
                 return true;
             }
         }
@@ -308,7 +337,7 @@ public class Http11Processor implements Runnable, Processor {
             String token = st.nextToken();
             int equalsIndex = token.indexOf(EQUALS);
 
-            if (equalsIndex != -1) {
+            if (isExistByIndex(equalsIndex)) {
                 String key = token.substring(0, equalsIndex);
                 String value = token.substring(equalsIndex + 1);
                 loginData.put(key, value);
@@ -320,7 +349,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getPathForRegister(final String httpMethod) {
         if (httpMethod.equals(POST_HTTP_METHOD)) {
-            return INDEX_URL.getValue();
+            return REDIRECT.getValue() + COLON + INDEX_URL.getValue();
         }
         return REGISTER_HTML.getValue();
     }

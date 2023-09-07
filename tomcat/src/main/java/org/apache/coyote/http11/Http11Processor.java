@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,20 +56,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest parseHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final RequestStartLine startLine = extractStartLine(bufferedReader);
+        final HttpRequestStartLine startLine = extractStartLine(bufferedReader);
         if (startLine == null) {
             return null;
         }
-        final RequestHeader requestHeaders = extractHeader(bufferedReader);
-        final RequestBody requestBody = extractBody(requestHeaders.getContentLength(), bufferedReader);
-        return new HttpRequest(startLine, requestHeaders, requestBody);
+        final HttpRequestHeader httpRequestHeaders = extractHeader(bufferedReader);
+        final HttpRequestBody httpRequestBody = extractBody(httpRequestHeaders.getContentLength(), bufferedReader);
+        return new HttpRequest(startLine, httpRequestHeaders, httpRequestBody);
     }
 
-    private RequestStartLine extractStartLine(final BufferedReader bufferedReader) throws IOException {
-        return RequestStartLine.from(bufferedReader.readLine());
+    private HttpRequestStartLine extractStartLine(final BufferedReader bufferedReader) throws IOException {
+        return HttpRequestStartLine.from(bufferedReader.readLine());
     }
 
-    private RequestHeader extractHeader(final BufferedReader bufferedReader)
+    private HttpRequestHeader extractHeader(final BufferedReader bufferedReader)
             throws IOException {
         Map<String, String> parsedHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
@@ -77,10 +78,10 @@ public class Http11Processor implements Runnable, Processor {
             parsedHeaders.put(headerTokens[0], headerTokens[1]);
             line = bufferedReader.readLine();
         }
-        return new RequestHeader(parsedHeaders);
+        return new HttpRequestHeader(parsedHeaders);
     }
 
-    private RequestBody extractBody(String contentLength, BufferedReader bufferedReader)
+    private HttpRequestBody extractBody(String contentLength, BufferedReader bufferedReader)
             throws IOException {
         if (contentLength == null) {
             return null;
@@ -88,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         bufferedReader.read(buffer, 0, length);
-        return new RequestBody(new String(buffer));
+        return new HttpRequestBody(new String(buffer));
     }
 
     private HttpResponse handleRequest(final HttpRequest request)

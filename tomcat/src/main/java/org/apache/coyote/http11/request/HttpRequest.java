@@ -1,15 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class HttpRequest {
 
-    private final RequestStartLine startLine;
+    private final HttpRequestStartLine startLine;
 
-    private final RequestHeader header;
+    private final HttpRequestHeader header;
 
-    private final RequestBody body;
+    private final HttpRequestBody body;
 
-    public HttpRequest(final RequestStartLine startLine, final RequestHeader header,
-                       final RequestBody body) {
+    public HttpRequest(final HttpRequestStartLine startLine, final HttpRequestHeader header,
+                       final HttpRequestBody body) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
@@ -44,7 +44,7 @@ public class HttpRequest {
         return this.startLine.getPath();
     }
 
-    public RequestBody getBody() {
+    public HttpRequestBody getBody() {
         return this.body;
     }
 

@@ -1,23 +1,23 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RequestStartLine {
+public class HttpRequestStartLine {
     private HttpMethod method;
     private String path;
     private Map<String, String> queryProperties;
     private String protocolVersion;
 
-    private RequestStartLine(final HttpMethod method, final String path, final Map<String, String> queryProperties, final String protocolVersion) {
+    private HttpRequestStartLine(final HttpMethod method, final String path, final Map<String, String> queryProperties, final String protocolVersion) {
         this.method = method;
         this.path = path;
         this.queryProperties = queryProperties;
         this.protocolVersion = protocolVersion;
     }
 
-    public static RequestStartLine from(final String startLine) {
+    public static HttpRequestStartLine from(final String startLine) {
         if (startLine == null) {
             return null;
         }
@@ -35,7 +35,7 @@ public class RequestStartLine {
             queryProperties = makeQueryProperties(uri.substring(uriSeparatorIndex + 1));
         }
         String protocolVersion = startLineTokens.get(2);
-        return new RequestStartLine(method, path, queryProperties, protocolVersion);
+        return new HttpRequestStartLine(method, path, queryProperties, protocolVersion);
     }
 
     private static Map<String, String> makeQueryProperties(final String queryString) {

@@ -1,9 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public class RequestBody {
+public class HttpRequestBody {
     private final String body;
 
-    public RequestBody(final String body) {
+    public HttpRequestBody(final String body) {
         this.body = body;
     }
 

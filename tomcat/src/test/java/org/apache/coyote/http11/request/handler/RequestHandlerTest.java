@@ -3,6 +3,9 @@ package org.apache.coyote.http11.request.handler;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.auth.Cookie;
+import org.apache.coyote.http11.auth.Session;
+import org.apache.coyote.http11.auth.SessionRepository;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
@@ -63,12 +66,13 @@ class RequestHandlerTest {
             class HTTP_METHOD_GET {
 
                 @Test
-                @DisplayName("LOGIN Response를 반환한다.")
+                @DisplayName("로그인을 하지 않은 상태일 때 LOGIN Response를 반환한다.")
                 void getLoginResponseEntity() {
                     // given
                     RequestLine requestLine = requestLine_생성(GET, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    SessionRepository.clearSessions();
 
                     // when
                     ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);

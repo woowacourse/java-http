@@ -34,8 +34,6 @@ public class AuthService {
             if (session == null) {
                 return ResponseEntity.getCookieNullResponseEntity(protocol, OK, Location.from(LOGIN_PAGE));
             }
-            // 쿠키가 있으면 인덱스 페이지로 리다이렉트
-            // account 확인 X
             return ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, Location.from(INDEX_PAGE));
         }
 

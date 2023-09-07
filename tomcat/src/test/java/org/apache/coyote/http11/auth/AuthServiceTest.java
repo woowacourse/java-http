@@ -60,29 +60,6 @@ class AuthServiceTest {
         class path가_login이라면 {
 
             @Nested
-            class HTTP_METHOD_GET {
-
-                @Test
-                @DisplayName("LOGIN Response를 반환한다.")
-                void getLoginResponseEntity() {
-                    // given
-                    RequestLine requestLine = requestLine_생성(GET, "/login");
-                    RequestHeader requestHeader = requestHeader_생성();
-                    RequestBody requestBody = requestBody_생성();
-
-                    // when
-                    ResponseEntity response = authService.login(requestLine, requestHeader, requestBody);
-
-                    // then
-                    assertAll(
-                            () -> assertThat(response.getHttpStatus()).isEqualTo(OK),
-                            () -> assertThat(response.getLocation()).isEqualTo("/login.html")
-                    );
-                }
-
-            }
-
-            @Nested
             class HTTP_METHOD_POST {
 
                 @Test

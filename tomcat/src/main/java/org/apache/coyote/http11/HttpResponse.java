@@ -102,6 +102,10 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void setContentType(final ContentType contentType) {
+        this.contentType = contentType;
+    }
+
 }
 
 class HttpResponseBuilder {

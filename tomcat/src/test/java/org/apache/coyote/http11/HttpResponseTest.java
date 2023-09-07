@@ -1,15 +1,12 @@
 package org.apache.coyote.http11;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class HttpResponseTest {
 
@@ -70,6 +67,19 @@ class HttpResponseTest {
 
         //then
         assertThat(response).extracting("body").isEqualTo(body);
+    }
+
+    @Test
+    void setContentType() {
+        //given
+        final var response = new HttpResponse(HTTP_1_1);
+        final var contentType = ContentType.PLAINTEXT_UTF8;
+
+        //when
+        response.setContentType(contentType);
+
+        //then
+        assertThat(response).extracting("contentType").isEqualTo(contentType);
     }
 
 

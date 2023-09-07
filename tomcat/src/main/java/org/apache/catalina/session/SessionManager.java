@@ -2,8 +2,10 @@ package org.apache.catalina.session;
 
 import org.apache.catalina.Manager;
 
+import javax.swing.text.html.Option;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class SessionManager implements Manager {
 
@@ -15,11 +17,8 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(final String id) {
-        if (SESSIONS.containsKey(id)) {
-            return SESSIONS.get(id);
-        }
-        return null;
+    public Optional<Session> findSession(final String id) {
+        return Optional.ofNullable(SESSIONS.get(id));
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -114,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
             final User registeredUser = new User(requestParam.get(ACCOUNT), requestParam.get(PASSWORD), requestParam.get(EMAIL));
 
             InMemoryUserRepository.save(registeredUser);
-            return foundResponse(Map.of(LOCATION, INDEX));
+            return foundResponse(loginResponseHeader(httpRequest));
         }
         final String requestUrl = httpRequest.getRequestURL().getAbsolutePath();
         final String responseBody = ResourceReader.readResource(STATIC_PATH + requestUrl);
@@ -128,17 +129,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(final HttpRequest httpRequest) {
-        final Session session = findSession(httpRequest);
-        return session != null;
+        return findSession(httpRequest).isPresent();
     }
 
-    private Session findSession(final HttpRequest httpRequest) {
+    private Optional<Session> findSession(final HttpRequest httpRequest) {
         final SessionManager sessionManager = new SessionManager();
         final String jSessionId = HttpCookie.parseCookie(httpRequest.getRequestHeaders().getValue(COOKIE)).getValue("JSESSIONID");
-
-        if (jSessionId == null) {
-            return null;
-        }
 
         return sessionManager.findSession(jSessionId);
     }

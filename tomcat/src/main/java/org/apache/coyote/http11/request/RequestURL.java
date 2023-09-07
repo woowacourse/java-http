@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.exception.InvalidRequestLineException;
 
@@ -67,7 +68,7 @@ public class RequestURL {
             absolutePath = absolutePath.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[0];
         }
         if (!absolutePath.contains(EXTENSION_DELIMITER)) {
-            absolutePath += DEFAULT_EXTENSION;
+            absolutePath += EXTENSION_DELIMITER+ HttpContentType.HTML.getExtension();
         }
         return absolutePath;
     }

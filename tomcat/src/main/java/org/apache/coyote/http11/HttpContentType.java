@@ -27,4 +27,8 @@ public enum HttpContentType {
     public String getContentType() {
         return contentType;
     }
+
+    public String getExtension() {
+        return extension;
+    }
 }

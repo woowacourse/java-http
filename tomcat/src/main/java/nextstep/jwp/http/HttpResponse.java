@@ -25,10 +25,10 @@ public class HttpResponse {
     public byte[] getBytes() {
         String httpVersion = httpStatusLine.getHttpVersion().getValue();
         String httpStatusCode = httpStatusLine.getHttpStatus().getCode();
-        String httpStatusText = httpStatusLine.getHttpStatus().getText();
+        String httpStatusMessage = httpStatusLine.getHttpStatus().getMessage();
 
         String response = String.join("\r\n",
-                String.format(REQUEST_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusText),
+                String.format(REQUEST_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusMessage),
                 httpHeaders.getHeaders(),
                 "",
                 httpBody.getMessage());

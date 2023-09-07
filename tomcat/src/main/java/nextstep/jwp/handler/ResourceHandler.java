@@ -14,6 +14,7 @@ import nextstep.jwp.http.HttpVersion;
 
 public class ResourceHandler implements RequestHandler {
 
+    private static final String RESOURCE_BASE_PATH = "static";
     private static final RequestHandler HANDLER = new ResourceHandler();
 
     private ResourceHandler() {
@@ -28,7 +29,7 @@ public class ResourceHandler implements RequestHandler {
         HttpStatus httpStatus = HttpStatus.OK;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
-        URL url = getClass().getClassLoader().getResource("static" + request.getNativePath());
+        URL url = getClass().getClassLoader().getResource(RESOURCE_BASE_PATH + request.getNativePath());
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 

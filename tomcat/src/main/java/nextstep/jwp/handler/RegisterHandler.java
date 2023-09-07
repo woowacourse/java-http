@@ -19,6 +19,12 @@ import nextstep.jwp.model.User;
 
 public class RegisterHandler implements RequestHandler {
 
+    private static final String RESOURCE_PATH = "static/register.html";
+    private static final String INDEX_URI = "/index.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         HttpMethod httpMethod = request.getHttpMethod();
@@ -40,7 +46,7 @@ public class RegisterHandler implements RequestHandler {
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
         HttpBody httpBody = request.getHttpBody();
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
-        httpHeaders.setLocation("/index.html");
+        httpHeaders.setLocation(INDEX_URI);
 
         join(httpBody);
 
@@ -50,9 +56,9 @@ public class RegisterHandler implements RequestHandler {
     private void join(HttpBody httpBody) {
         FormData formData = FormData.from(httpBody);
 
-        String account = formData.get("account");
-        String password = formData.get("password");
-        String email = formData.get("email");
+        String account = formData.get(ACCOUNT);
+        String password = formData.get(PASSWORD);
+        String email = formData.get(EMAIL);
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
@@ -62,7 +68,7 @@ public class RegisterHandler implements RequestHandler {
         HttpStatus httpStatus = HttpStatus.OK;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
-        URL url = getClass().getClassLoader().getResource("static/register.html");
+        URL url = getClass().getClassLoader().getResource(RESOURCE_PATH);
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 

@@ -11,7 +11,7 @@ public class QueryString {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int KET_VALUE_SIZE = 2;
-    
+
     private final Map<String, String> params;
 
     private QueryString(Map<String, String> params) {
@@ -34,7 +34,7 @@ public class QueryString {
     }
 
     public boolean hasValues() {
-        return params.size() != 0;
+        return !params.isEmpty();
     }
 
     public String get(String key) {

@@ -10,6 +10,7 @@ public class FormData {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int KEY_VALUE_SIZE = 2;
 
     private final Map<String, String> params;
 
@@ -27,7 +28,7 @@ public class FormData {
 
         Map<String, String> paramMap = Arrays.stream(params)
                 .map(param -> param.split(KEY_VALUE_DELIMITER))
-                .filter(param -> param.length == 2)
+                .filter(param -> param.length == KEY_VALUE_SIZE)
                 .collect(Collectors.toMap(param -> param[KEY_INDEX], param -> param[VALUE_INDEX]));
 
         return new FormData(paramMap);

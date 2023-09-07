@@ -28,6 +28,12 @@ import org.slf4j.LoggerFactory;
 
 public class LoginHandler implements RequestHandler {
 
+    private static final String RESOURCE_PATH = "static/login.html";
+    private static final String INDEX_URI = "/index.html";
+    private static final String UNAUTHORIZED_URI = "/401.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String JSESSIONID = "JSESSIONID";
     private static final Manager SESSION_MANAGER = SessionManager.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(LoginHandler.class);
 
@@ -47,7 +53,7 @@ public class LoginHandler implements RequestHandler {
     private HttpResponse handleGetMethod(HttpRequest request) throws IOException {
         if (request.hasCookie()) {
             HttpCookie cookie = request.getCookie();
-            String jSessionId = cookie.get("JSESSIONID");
+            String jSessionId = cookie.get(JSESSIONID);
             Session session = SESSION_MANAGER.findSession(jSessionId);
             User user = (User) session.getAttribute("user");
 
@@ -56,7 +62,7 @@ public class LoginHandler implements RequestHandler {
 
         if (request.hasQueryString()) {
             QueryString queryString = request.getQueryString();
-            User user = login(queryString.get("account"), queryString.get("password"));
+            User user = login(queryString.get(ACCOUNT), queryString.get(PASSWORD));
 
             if (user != null) {
                 return createLoginResponse(request, user);
@@ -68,7 +74,7 @@ public class LoginHandler implements RequestHandler {
         HttpStatus httpStatus = HttpStatus.OK;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
-        URL url = getClass().getClassLoader().getResource("static/login.html");
+        URL url = getClass().getClassLoader().getResource(RESOURCE_PATH);
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 
@@ -87,14 +93,14 @@ public class LoginHandler implements RequestHandler {
     }
 
     private HttpResponse createRedirectingIndexResponse(HttpRequest request) {
-        return createRedirectResponse(request, "/index.html");
+        return createRedirectResponse(request, INDEX_URI);
     }
 
     private HttpResponse createRedirectResponse(HttpRequest request, String location) {
         HttpStatus httpStatus = HttpStatus.FOUND;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
-        HttpBody httpBody = HttpBody.from("");
+        HttpBody httpBody = HttpBody.createEmptyBody();
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
         httpHeaders.setLocation(location);
 
@@ -104,12 +110,12 @@ public class LoginHandler implements RequestHandler {
     private void setCookie(HttpRequest request, HttpResponse response, Session session) {
         if (request.hasCookie()) {
             HttpCookie cookie = request.getCookie();
-            if (cookie.containsKey("JSESSIONID")) {
+            if (cookie.containsKey(JSESSIONID)) {
                 return;
             }
         }
 
-        response.setCookie("JSESSIONID=" + session.getId());
+        response.setCookie(JSESSIONID + "=" + session.getId());
     }
 
     private User login(String account, String password) {
@@ -127,12 +133,12 @@ public class LoginHandler implements RequestHandler {
     }
 
     private HttpResponse createLoginFailResponse(HttpRequest request) {
-        return createRedirectResponse(request, "/401.html");
+        return createRedirectResponse(request, UNAUTHORIZED_URI);
     }
 
     private HttpResponse handlePostMethod(HttpRequest request) {
         FormData formData = FormData.from(request.getHttpBody());
-        User user = login(formData.get("account"), formData.get("password"));
+        User user = login(formData.get(ACCOUNT), formData.get(PASSWORD));
 
         if (user != null) {
             return createLoginResponse(request, user);

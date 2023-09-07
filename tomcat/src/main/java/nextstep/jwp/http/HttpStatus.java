@@ -5,18 +5,18 @@ public enum HttpStatus {
     FOUND("302", "FOUND");
 
     private final String code;
-    private final String text;
+    private final String message;
 
-    HttpStatus(String code, String text) {
+    HttpStatus(String code, String message) {
         this.code = code;
-        this.text = text;
+        this.message = message;
     }
 
     public String getCode() {
         return code;
     }
 
-    public String getText() {
-        return text;
+    public String getMessage() {
+        return message;
     }
 }

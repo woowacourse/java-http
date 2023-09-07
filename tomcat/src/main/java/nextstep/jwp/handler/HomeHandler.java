@@ -10,12 +10,14 @@ import nextstep.jwp.http.HttpVersion;
 
 public class HomeHandler implements RequestHandler {
 
+    public static final String DEFAULT_MESSAGE = "Hello world!";
+
     @Override
     public HttpResponse handle(HttpRequest request) {
         HttpStatus httpStatus = HttpStatus.OK;
         HttpVersion httpVersion = request.getHttpVersion();
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
-        HttpBody httpBody = HttpBody.from("Hello world!");
+        HttpBody httpBody = HttpBody.from(DEFAULT_MESSAGE);
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 
         return new HttpResponse(httpStatusLine, httpHeaders, httpBody);

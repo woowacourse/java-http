@@ -15,6 +15,7 @@ public class UserServlet {
         if (!users.contains(user)) {
             users.add(user);
         }
+        System.out.println(user);
     }
 
     public int size() {

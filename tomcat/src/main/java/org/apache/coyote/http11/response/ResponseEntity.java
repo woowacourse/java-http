@@ -9,7 +9,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 
 public class ResponseEntity {
 
@@ -39,7 +38,7 @@ public class ResponseEntity {
             final String content
     ) {
         this.httpStatus = httpStatus;
-        this.httpCookie = new HttpCookie(new HashMap<>());
+        this.httpCookie = null;
         this.contentTypeValue = contentTypeValue;
         this.content = content;
     }

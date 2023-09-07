@@ -29,4 +29,8 @@ public class RequestCookie {
     public String get(final String key) {
         return cookies.get(key);
     }
+
+    public boolean contains(final String key) {
+        return cookies.containsKey(key);
+    }
 }

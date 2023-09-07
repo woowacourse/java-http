@@ -41,4 +41,8 @@ public class RequestHeaders {
     public boolean contains(final String key) {
         return headers.containsKey(key);
     }
+
+    public boolean containsCookie(final String cookieName) {
+        return cookies.contains(cookieName);
+    }
 }

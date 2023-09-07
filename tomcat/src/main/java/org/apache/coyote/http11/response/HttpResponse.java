@@ -25,13 +25,14 @@ public class HttpResponse {
         headers.addHeader(headerName, value);
     }
 
-    public void hostingPage(final String filePath) {
+    public HttpResponse hostingPage(final String filePath) {
         responseBody = readStaticFile(filePath);
 
         headers.setContentType(getContentType(filePath));
         headers.setContentLength(responseBody.getBytes().length);
 
         status = HttpStatus.OK;
+        return this;
     }
 
     private String readStaticFile(final String fileName) {
@@ -65,10 +66,17 @@ public class HttpResponse {
         return null;
     }
 
-    public void redirectTo(final String redirectUrl) {
+    public HttpResponse redirectTo(final String redirectUrl) {
         headers.setLocation(redirectUrl);
         status = HttpStatus.FOUND;
         responseBody = null;
+        return this;
+    }
+
+    public HttpResponse methodNotAllowed() {
+        status = HttpStatus.METHOD_NOT_ALLOWED;
+        responseBody = null;
+        return this;
     }
 
     public void setCookie(final String cookieName, final String value) {

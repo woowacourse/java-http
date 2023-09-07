@@ -91,4 +91,8 @@ public class HttpRequest {
     public String getBody(final String key) {
         return body.get(key);
     }
+
+    public boolean containsCookie(final String cookieName) {
+        return headers.containsCookie(cookieName);
+    }
 }

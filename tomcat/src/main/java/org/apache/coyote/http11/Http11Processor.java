@@ -3,10 +3,11 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String REGISTER_PAGE = "/register.html";
     private static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
+    private static final String USER_SESSION_ATTRIBUTE_NAME = "user";
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -64,42 +67,47 @@ public class Http11Processor implements Runnable, Processor {
 
         final HttpResponse response = new HttpResponse();
 
+        if (!request.containsCookie(JSESSIONID_COOKIE_NAME)) {
+            final UUID sessionId = UUID.randomUUID();
+            final Session session = new Session(sessionId.toString());
+            sessionManager.addSession(session);
+            response.setCookie(JSESSIONID_COOKIE_NAME, session.getId());
+        }
+
         final String uriPath = request.getPath();
 
         if (uriPath.equals("/login")) {
-            if (request.getMethod().equals("GET")) {
-                response.hostingPage(LOGIN_PAGE);
-                return response;
-            }
-            if (request.getMethod().equals("POST")) {
-                final boolean isAuthenticated = processLogin(request);
-                if (isAuthenticated) {
-                    final UUID sessionId = UUID.randomUUID();
-                    response.setCookie(JSESSIONID_COOKIE_NAME, sessionId.toString());
-                    response.redirectTo(INDEX_PAGE);
-                    return response;
-                }
-                response.redirectTo(UNAUTHORIZED_PAGE);
-                return response;
-            }
+            return handleLogin(request, response);
         }
 
         if (uriPath.equals("/register")) {
-            if (request.getMethod().equals("GET")) {
-                response.hostingPage(REGISTER_PAGE);
-                return response;
-            }
-            if (request.getMethod().equals("POST")) {
-                processRegister(request);
-                final UUID sessionId = UUID.randomUUID();
-                response.redirectTo(INDEX_PAGE);
-                response.setCookie(JSESSIONID_COOKIE_NAME, sessionId.toString());
-                return response;
-            }
+            return handleRegister(request, response);
         }
 
         response.hostingPage(uriPath);
         return response;
+    }
+
+    private HttpResponse handleLogin(final HttpRequest request, final HttpResponse response) {
+
+        final Session session = sessionManager.findSession(request.getCookie(JSESSIONID_COOKIE_NAME));
+
+        if (request.getMethod().equals("GET")) {
+            if (session != null && session.getAttribute(USER_SESSION_ATTRIBUTE_NAME) instanceof User) {
+                return response.redirectTo(INDEX_PAGE);
+            }
+            return response.hostingPage(LOGIN_PAGE);
+        }
+
+        if (request.getMethod().equals("POST")) {
+            if (processLogin(request)) {
+                final User user = InMemoryUserRepository.findByAccount(request.getBody(ACCOUNT_KEY)).get();
+                session.setAttribute(USER_SESSION_ATTRIBUTE_NAME, user);
+                return response.redirectTo(INDEX_PAGE);
+            }
+            return response.redirectTo(UNAUTHORIZED_PAGE);
+        }
+        return response.methodNotAllowed();
     }
 
     public boolean processLogin(final HttpRequest request) {
@@ -108,16 +116,28 @@ public class Http11Processor implements Runnable, Processor {
         }
         final String account = request.getBody(ACCOUNT_KEY);
         final String password = request.getBody(PASSWORD_KEY);
-        Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
 
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.checkPassword(password)) {
-                log.info(user.toString());
-                return true;
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
+    }
+
+    private HttpResponse handleRegister(final HttpRequest request, final HttpResponse response) {
+
+        final Session session = sessionManager.findSession(request.getCookie(JSESSIONID_COOKIE_NAME));
+
+        if (request.getMethod().equals("GET")) {
+            if (session != null && session.getAttribute(USER_SESSION_ATTRIBUTE_NAME) instanceof User) {
+                return response.redirectTo(INDEX_PAGE);
             }
+            return response.hostingPage(REGISTER_PAGE);
         }
-        return false;
+        if (request.getMethod().equals("POST")) {
+            final User registeredUser = processRegister(request);
+            session.setAttribute(USER_SESSION_ATTRIBUTE_NAME, registeredUser);
+            return response.redirectTo(INDEX_PAGE);
+        }
+        return response.methodNotAllowed();
     }
 
     public User processRegister(final HttpRequest request) {

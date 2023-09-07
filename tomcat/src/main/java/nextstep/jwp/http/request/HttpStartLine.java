@@ -1,4 +1,7 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
+
+import nextstep.jwp.http.common.HttpUri;
+import nextstep.jwp.http.common.HttpVersion;
 
 public class HttpStartLine {
 

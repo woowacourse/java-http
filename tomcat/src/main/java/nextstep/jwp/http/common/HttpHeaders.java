@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 import java.util.LinkedHashMap;
 import java.util.List;

@@ -1,6 +1,6 @@
 package nextstep.jwp.exception;
 
-import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.common.HttpStatus;
 
 public abstract class HttpGlobalException extends RuntimeException {
 

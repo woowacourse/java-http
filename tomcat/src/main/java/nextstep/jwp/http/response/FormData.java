@@ -1,9 +1,10 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.BadRequestException;
+import nextstep.jwp.http.common.HttpBody;
 
 public class FormData {
 

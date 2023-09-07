@@ -1,4 +1,10 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
+
+import nextstep.jwp.http.common.HeaderType;
+import nextstep.jwp.http.common.HttpBody;
+import nextstep.jwp.http.common.HttpCookie;
+import nextstep.jwp.http.common.HttpHeaders;
+import nextstep.jwp.http.common.HttpVersion;
 
 public class HttpRequest {
 

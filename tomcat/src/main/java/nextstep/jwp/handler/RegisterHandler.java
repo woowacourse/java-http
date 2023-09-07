@@ -6,15 +6,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidRequestMethodException;
-import nextstep.jwp.http.FormData;
-import nextstep.jwp.http.HttpBody;
-import nextstep.jwp.http.HttpHeaders;
-import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.HttpStatusLine;
-import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.common.HttpBody;
+import nextstep.jwp.http.common.HttpHeaders;
+import nextstep.jwp.http.common.HttpStatus;
+import nextstep.jwp.http.common.HttpVersion;
+import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.FormData;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatusLine;
 import nextstep.jwp.model.User;
 
 public class RegisterHandler implements RequestHandler {

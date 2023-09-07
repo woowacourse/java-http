@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 public enum HttpStatus {
     OK("200", "OK"),

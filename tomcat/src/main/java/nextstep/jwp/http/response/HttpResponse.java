@@ -1,4 +1,8 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
+
+import nextstep.jwp.http.common.HeaderType;
+import nextstep.jwp.http.common.HttpBody;
+import nextstep.jwp.http.common.HttpHeaders;
 
 public class HttpResponse {
 

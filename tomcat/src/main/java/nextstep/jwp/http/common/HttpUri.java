@@ -1,6 +1,7 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 import nextstep.jwp.exception.BadRequestException;
+import nextstep.jwp.http.request.QueryString;
 
 public class HttpUri {
 

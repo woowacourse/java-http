@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 public enum HeaderType {
     CONTENT_TYPE("Content-Type"),

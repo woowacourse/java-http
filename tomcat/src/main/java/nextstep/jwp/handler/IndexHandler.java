@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.http.HttpBody;
-import nextstep.jwp.http.HttpHeaders;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.HttpStatusLine;
-import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.common.HttpBody;
+import nextstep.jwp.http.common.HttpHeaders;
+import nextstep.jwp.http.common.HttpStatus;
+import nextstep.jwp.http.common.HttpVersion;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatusLine;
 
 public class IndexHandler implements RequestHandler {
 

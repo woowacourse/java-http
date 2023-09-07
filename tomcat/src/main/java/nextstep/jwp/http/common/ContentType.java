@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 public enum ContentType {
     TEXT_HTML("text/html;charset=utf-8"),

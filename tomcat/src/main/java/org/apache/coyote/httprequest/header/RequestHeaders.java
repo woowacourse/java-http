@@ -17,6 +17,7 @@ public class RequestHeaders {
     private static final int PARSED_HEADER_SIZE = 2;
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
+    private static final int EMPTY_CONTENT_LENGTH = 0;
 
     private final Map<RequestHeaderType, String> headers;
     private final CookieRequestHeader cookieRequestHeader;
@@ -63,7 +64,7 @@ public class RequestHeaders {
         if (headers.containsKey(RequestHeaderType.CONTENT_LENGTH)) {
             return Integer.parseInt(headers.get(RequestHeaderType.CONTENT_LENGTH));
         }
-        return 0;
+        return EMPTY_CONTENT_LENGTH;
     }
 
     public String getJSessionId() {

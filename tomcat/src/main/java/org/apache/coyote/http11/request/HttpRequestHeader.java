@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpRequestHeader {
+    private static final String PAIR_DELIMITER = ": ";
+
     private final Map<String, String> httpRequestHeaders;
 
     private HttpRequestHeader(final Map<String, String> httpRequestHeaders) {
@@ -15,7 +17,7 @@ public class HttpRequestHeader {
         return new HttpRequestHeader(
                 httpRequestHeader
                         .stream()
-                        .map(line -> line.split(": "))
+                        .map(line -> line.split(PAIR_DELIMITER))
                         .collect(Collectors.toMap(
                                 line -> line[0],
                                 line -> line[1])

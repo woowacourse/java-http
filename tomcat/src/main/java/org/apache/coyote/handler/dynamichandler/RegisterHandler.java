@@ -3,25 +3,34 @@ package org.apache.coyote.handler.dynamichandler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.handler.Handler;
-import org.apache.coyote.http11.*;
+import org.apache.coyote.handler.statichandler.ExceptionHandler;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.Query;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class RegisterHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-    private final static String ACCOUNT = "account";
-    private final static String EMAIL = "email";
-    private final static String PASSWORD = "password";
+    private static final String DEFAULT_DIRECTORY_PATH = "static";
+    private static final String ACCOUNT = "account";
+    private static final String EMAIL = "email";
+    private static final String PASSWORD = "password";
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
-        if (HttpMethod.GET == HttpMethod.valueOf(httpRequest.method())) {
+        if (HttpMethod.GET == httpRequest.httpMethod()) {
             return handleGetMapping(httpRequest);
         }
         return handlePostMapping(httpRequest);
@@ -29,66 +38,42 @@ public class RegisterHandler implements Handler {
 
     private HttpResponse handleGetMapping(HttpRequest httpRequest) {
         try {
-            Path path = Paths.get(getClass().getClassLoader().getResource("static" + httpRequest.uri() + ".html").getPath());
-            byte[] bytes = Files.readAllBytes(path);
-            String body = new String(bytes);
-            HttpResponse response = new HttpResponse();
-            response.setHttpVersion(HttpVersion.HTTP11.value());
-            response.setHttpStatus(HttpStatus.OK);
-            response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_HTML.value())
-                    .setHeader(HttpHeader.CONTENT_LENGTH, body.getBytes().length + " ");
-            response.setBody(body);
-            return response;
+            return HttpResponse.createStaticResponseByPath(
+                    httpRequest.httpVersion(),
+                    HttpStatus.OK,
+                    DEFAULT_DIRECTORY_PATH + httpRequest.path() + ContentType.TEXT_HTML.extension());
         } catch (IOException e) {
+            return new ExceptionHandler(HttpStatus.NOT_FOUND).handle(httpRequest);
         }
-        return null;
     }
 
     private HttpResponse handlePostMapping(HttpRequest httpRequest) {
-        String body = httpRequest.body();
-        if (body != null) {
-            String account = parseAccount(body);
-            String email = parseEmail(body);
-            String password = parsePassword(body);
-            if (account != null && email != null && password != null) {
-                InMemoryUserRepository.save(new User(account, password, email));
-                return handleRedirectPage();
-            }
-            //TODO 예외처리 필요(계정 or 이메일 or 패스워드가 잘못되었을 시)
-            return null;
+        Query query = Query.create(httpRequest.body());
+        if (query.isEmpty()) {
+            handleRedirectPage(httpRequest);
         }
-        return null;
+
+        String account = query.get(ACCOUNT);
+        String email = query.get(EMAIL);
+        String password = query.get(PASSWORD);
+        // success
+        if (account != null && email != null && password != null && !isDuplicateAccount(account)) {
+            InMemoryUserRepository.save(new User(account, password, email));
+            return handleRedirectPage(httpRequest);
+        }
+        return handleRedirectPage(httpRequest);
     }
 
-    private String parseAccount(String quiryString) {
-        String[] accountInfo = quiryString.substring(0, quiryString.indexOf('&')).split("=");
-        if (ACCOUNT.equals(accountInfo[0])) {
-            return accountInfo[1];
-        }
-        return null;
+    private boolean isDuplicateAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account).isPresent();
     }
 
-    private String parseEmail(String quiryString) {
-        String[] emailInfo = quiryString.substring(quiryString.indexOf('&') + 1, quiryString.lastIndexOf('&')).split("=");
-        if (EMAIL.equals(emailInfo[0])) {
-            return emailInfo[1];
-        }
-        return null;
-    }
+    private HttpResponse handleRedirectPage(HttpRequest httpRequest) {
+        StatusLine statusLine = new StatusLine(httpRequest.httpVersion(), HttpStatus.FOUND);
 
-    private String parsePassword(String quiryString) {
-        String[] passwordInfo = quiryString.substring(quiryString.lastIndexOf('&') + 1).split("=");
-        if (PASSWORD.equals(passwordInfo[0])) {
-            return passwordInfo[1];
-        }
-        return null;
-    }
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put(HttpHeader.LOCATION.value(), "/index.html");
 
-    private HttpResponse handleRedirectPage() {
-        HttpResponse response = new HttpResponse();
-        response.setHttpVersion(HttpVersion.HTTP11.value());
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.setHeader(HttpHeader.LOCATION, "/index.html");
-        return response;
+        return new HttpResponse(statusLine, new Header(headers));
     }
 }

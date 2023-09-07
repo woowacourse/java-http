@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Map;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -115,5 +116,56 @@ class RequestHeaderTest {
 
         // then
         assertThat(contentLength).isEqualTo(10);
+    }
+
+    @Test
+    void Session_Id을_포함하는지_확인한다() {
+        // given
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 "
+        );
+        RequestHeader header = RequestHeader.from(requestHeader);
+
+        // when
+        boolean actual = header.hasSessionId();
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void Session_Id를_얻는다() {
+        // given
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 "
+        );
+        RequestHeader header = RequestHeader.from(requestHeader);
+
+        // when
+        String sessionId = header.sessionId();
+
+        // then
+        assertThat(sessionId).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+    }
+
+    @Test
+    void Session_Id를_얻을_때_Session_Id가_없는_경우_예외를_던진다() {
+        // given
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 10 ");
+        RequestHeader header = RequestHeader.from(requestHeader);
+
+        // expect
+        assertThatThrownBy(header::sessionId)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("세션 Id가 존재하지 않습니다.");
     }
 }

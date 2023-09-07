@@ -5,10 +5,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import org.apache.coyote.http11.response.HttpContentType;
 
 public class FileManager {
 
     private static final String PATH = "static";
+    private static final String EXTENSION_SIGN = ".";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String PREFIX = "/";
 
     private final File file;
 
@@ -16,31 +20,34 @@ public class FileManager {
         this.file = file;
     }
 
-    public static FileManager from(String url) {
-        if (!url.contains(".")) {
-            url = url + ".html";
+    public static FileManager from(String location) {
+        if (!location.contains(EXTENSION_SIGN)) {
+            location = location + HTML_EXTENSION;
         }
-        if (!url.contains("/")) {
-            url = "/" + url;
+        if (!location.startsWith(PREFIX)) {
+            location = PREFIX + location;
         }
+        URL path = FileManager.class.getClassLoader().getResource(PATH + location);
 
-        URL path = FileManager.class.getClassLoader().getResource(PATH + url);
-        return new FileManager(new File(Objects.requireNonNull(path).getFile()));
+        validatePath(path);
+        return new FileManager(new File(path.getFile()));
     }
 
-    public String mimeType() {
+    private static void validatePath(URL path) {
+        if (path == null) {
+            throw new IllegalArgumentException("존재하지 않는 파일의 경로입니다.");
+        }
+    }
+
+    public HttpContentType decideContentType() {
         String fileName = file.getName();
         String fileExtension = extractFileExtension(fileName);
-        return mapMimeType(fileExtension);
+        return HttpContentType.getByFileExtension(fileExtension);
     }
 
     private String extractFileExtension(String fileName) {
-        int lastDotIndex = fileName.lastIndexOf(".");
-
-        if (lastDotIndex == -1) {
-            return "";
-        }
-        return fileName.substring(lastDotIndex + 1);
+        int extensionSignIndex = fileName.lastIndexOf(EXTENSION_SIGN);
+        return fileName.substring(extensionSignIndex + 1);
     }
 
     private String mapMimeType(String fileExtension) {
@@ -59,8 +66,12 @@ public class FileManager {
         return "text/plain";
     }
 
-    public String fileContent() throws IOException {
-        return new String(Files.readAllBytes(file.toPath()));
+    public String fileContent() {
+        try {
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("파일을 불러올 수 없습니다.");
+        }
     }
 
     public File file() {

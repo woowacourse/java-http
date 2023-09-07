@@ -39,6 +39,14 @@ public class HttpRequest {
         return requestLine.hasQueryString();
     }
 
+    public boolean hasSessionId() {
+        return requestHeader.hasSessionId();
+    }
+
+    public String sessionId() {
+        return requestHeader.sessionId();
+    }
+
     public int contentLength() {
         return requestHeader.contentLength();
     }

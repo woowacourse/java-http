@@ -1,14 +1,15 @@
 package org.apache.coyote.http11.response;
 
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
-
-import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML_UTF8;
+import static org.apache.coyote.http11.response.Charset.UTF_8;
+import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
 import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseStatus.OK;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -32,7 +33,7 @@ class HttpResponseTest {
         // given
         HttpResponse httpResponse = new HttpResponse("HTTP/1.1", OK);
         httpResponse.setResponseBody("Hello world!");
-        httpResponse.putResponseHeader(CONTENT_TYPE, TEXT_HTML_UTF8.contentTypeName());
+        httpResponse.putResponseHeader(CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8));
         httpResponse.putResponseHeader(CONTENT_LENGTH, String.valueOf(httpResponse.measureContentLength()));
 
         // when

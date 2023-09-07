@@ -15,6 +15,7 @@ public enum ContentType {
     ALL("*/*");
 
     public static final String ACCEPT_HEADER = "Accept";
+    private static final ContentType DEFAULT = HTML;
 
     private final String type;
 
@@ -27,6 +28,8 @@ public enum ContentType {
             .map(ContentType::findContentTypeByType)
             .orElse(ALL);
 
+        // 1. content type이 없으면? 경로에서 찾음
+        // 2.
         if (acceptedContentType != ALL) {
             return acceptedContentType;
         }
@@ -43,7 +46,7 @@ public enum ContentType {
     private static ContentType findContentTypeFromRequestPath(final RequestLine requestLine) {
         return requestLine.getFileExtension()
             .flatMap(ContentType::findContentTypeByName)
-            .orElseThrow(UnsupportedContentTypeException::new);
+            .orElse(DEFAULT);
     }
 
     private static Optional<ContentType> findContentTypeByName(final String name) {

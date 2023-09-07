@@ -19,9 +19,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private final HandlerMapper handlerMapper;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final HandlerMapper handlerMapper) {
         this.connection = connection;
-        this.handlerMapper = new HandlerMapper();
+        this.handlerMapper = handlerMapper;
     }
 
     @Override

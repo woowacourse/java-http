@@ -2,12 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.common.FileExtension;
 
 public class RequestUri {
 
-    private static final String HTML_URI = ".html";
-    private static final String CSS_URI = ".css";
-    private static final String JAVASCRIPT_URI = ".js";
     private static final String QUERY_PARAM_START_VALUE = "?";
 
     private final String value;
@@ -17,15 +15,15 @@ public class RequestUri {
     }
 
     public boolean isHtmlUri() {
-        return value.endsWith(HTML_URI);
+        return value.endsWith(FileExtension.HTML.getValue());
     }
 
     public boolean isCssUri() {
-        return value.endsWith(CSS_URI);
+        return value.endsWith(FileExtension.CSS.getValue());
     }
 
     public boolean isJavaScriptUri() {
-        return value.endsWith(JAVASCRIPT_URI);
+        return value.endsWith(FileExtension.JAVASCRIPT.getValue());
     }
 
     public Map<String, Object> parseQueryParams() {

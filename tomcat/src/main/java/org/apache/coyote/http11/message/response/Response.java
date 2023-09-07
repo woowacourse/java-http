@@ -40,9 +40,9 @@ public class Response {
         return new Response("HTTP/1.1", httpStatus, responseHeaders, responseBody);
     }
 
-    private static String getTemplateBody(final String templateName) {
+    private static String getTemplateBody(final String templatePath) {
         final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        final URL templateUrl = classLoader.getResource("static/" + templateName);
+        final URL templateUrl = classLoader.getResource("static/" + templatePath);
         try {
             return new String(Files.readAllBytes(new File(templateUrl.getFile()).toPath()));
         } catch (final NullPointerException e) {
@@ -57,9 +57,10 @@ public class Response {
     }
 
     public static Response createByTemplate(final RequestURI requestURI) {
-        final String responseBody = requestURI.readFile();
+        final String templatePath = requestURI.getPath();
+        final String responseBody = getTemplateBody(templatePath);
         final ResponseHeaders responseHeaders = new ResponseHeaders();
-        final ContentType contentType = ContentType.findByFileName(requestURI.getFileName());
+        final ContentType contentType = ContentType.findByFileName(requestURI.getPath());
         responseHeaders.add("Content-Type", contentType.getHeaderValue() + ";charset=utf-8");
         responseHeaders.add("Content-Length", String.valueOf(responseBody.getBytes().length));
         return new Response("HTTP/1.1", HttpStatus.OK, responseHeaders, responseBody);

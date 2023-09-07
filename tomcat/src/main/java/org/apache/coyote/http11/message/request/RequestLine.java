@@ -25,10 +25,6 @@ public class RequestLine {
         return this.requestURI.isExistFile();
     }
 
-    public String readFile() {
-        return this.requestURI.readFile();
-    }
-
     public String getPath() {
         return this.requestURI.getPath();
     }

@@ -3,43 +3,40 @@ package org.apache.coyote.handlermapping;
 import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.dynamichandler.LoginHandler;
 import org.apache.coyote.handler.dynamichandler.RegisterHandler;
-import org.apache.coyote.handler.statichandler.*;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.handler.statichandler.ExceptionHandler;
+import org.apache.coyote.handler.dynamichandler.HelloHandler;
+import org.apache.coyote.handler.statichandler.StaticHandler;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.response.HttpStatus;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HandlerMapping {
 
-    private static Map<HandlerMatcher, Handler> handlerMap = new ConcurrentHashMap<>(
+    private static final Map<String, Handler> handlers = new ConcurrentHashMap<>(
             Map.ofEntries(
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/"), new HelloHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/index.html"), new HtmlHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/assets/chart-area.js"), new JsHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/assets/chart-bar.js"), new JsHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/assets/chart-pie.js"), new JsHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/js/scripts.js"), new JsHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/css/styles.css"), new CssHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/login"), new LoginHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.POST, "/login"), new LoginHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.GET, "/register"), new RegisterHandler()),
-                    new AbstractMap.SimpleEntry<HandlerMatcher, Handler>(new HandlerMatcher(HttpMethod.POST, "/register"), new RegisterHandler())
-            ));
+                    new AbstractMap.SimpleEntry<String, Handler>("/", new HelloHandler()),
+                    new AbstractMap.SimpleEntry<String, Handler>("/login", new LoginHandler()),
+                    new AbstractMap.SimpleEntry<String, Handler>("/register", new RegisterHandler())
+            )
+    );
 
-    public static boolean canHandle(HandlerMatcher handlerMatcher) {
-        if (handlerMap.containsKey(handlerMatcher)) {
-            return true;
+    public static Handler getHandler(String requestTarget) {
+        if (canHandleByStaticHandler(requestTarget)) {
+            return new StaticHandler();
         }
-        return false;
+        if (handlers.containsKey(requestTarget)) {
+            return handlers.get(requestTarget);
+        }
+        return new ExceptionHandler(HttpStatus.NOT_FOUND);
     }
 
-    public static Handler getHandler(HandlerMatcher handlerMatcher) {
-        return handlerMap.get(handlerMatcher);
-    }
-
-    public static Handler getExceptionHandler(HttpStatus httpStatus) {
-        return new ExceptionHandler(httpStatus);
+    private static boolean canHandleByStaticHandler(String requestTarget) {
+        return Arrays.stream(ContentType.values())
+                .map(ContentType::extension)
+                .anyMatch(requestTarget::endsWith);
     }
 }

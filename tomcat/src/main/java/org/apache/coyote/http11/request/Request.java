@@ -15,7 +15,10 @@ public class Request {
 
     public static Request from(final BufferedReader bufferedReader) throws IOException {
         final StartLine requestStartLine = StartLine.from(bufferedReader.readLine());
-        final Headers requestHeaders = Headers.from(bufferedReader.lines());
+        final Headers requestHeaders = Headers.from(
+                bufferedReader.lines()
+                              .takeWhile(line -> !line.isEmpty())
+        );
 
         return new Request(requestStartLine, requestHeaders);
     }

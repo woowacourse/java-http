@@ -3,9 +3,9 @@ package org.apache.coyote.http11;
 import nextstep.FileResolver;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Controller;
-import org.apache.coyote.ControllerMapper;
+import org.apache.coyote.handler.ControllerMapper;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.HttpRequest;
+import org.apache.coyote.http11.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

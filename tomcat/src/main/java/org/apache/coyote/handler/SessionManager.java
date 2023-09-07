@@ -1,8 +1,8 @@
-package org.apache.catalina.manager;
+package org.apache.coyote.handler;
 
 import nextstep.jwp.model.User;
 import org.apache.catalina.Manager;
-import org.apache.catalina.domain.HttpSession;
+import org.apache.coyote.http11.http.HttpSession;
 
 import java.util.HashMap;
 import java.util.Map;

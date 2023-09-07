@@ -1,6 +1,6 @@
 package org.apache.coyote;
 
-import org.apache.coyote.http11.domain.HttpRequest;
+import org.apache.coyote.http11.http.HttpRequest;
 
 import java.io.IOException;
 

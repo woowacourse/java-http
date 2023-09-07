@@ -3,12 +3,12 @@ package org.apache.coyote.controller;
 import nextstep.FileResolver;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.domain.HttpSession;
-import org.apache.catalina.manager.SessionManager;
+import org.apache.coyote.http11.http.HttpSession;
+import org.apache.coyote.handler.SessionManager;
 import org.apache.coyote.Controller;
 import org.apache.coyote.controller.util.ResponseManager;
-import org.apache.coyote.http11.domain.HttpRequest;
-import org.apache.coyote.http11.util.HttpMethod;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.util.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

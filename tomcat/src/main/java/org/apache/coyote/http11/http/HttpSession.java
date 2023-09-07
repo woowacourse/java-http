@@ -1,4 +1,4 @@
-package org.apache.catalina.domain;
+package org.apache.coyote.http11.http;
 
 import nextstep.jwp.model.User;
 

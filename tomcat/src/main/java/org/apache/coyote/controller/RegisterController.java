@@ -4,7 +4,7 @@ import nextstep.FileResolver;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Controller;
-import org.apache.coyote.http11.domain.HttpRequest;
+import org.apache.coyote.http11.http.HttpRequest;
 
 import java.io.IOException;
 import java.util.Map;

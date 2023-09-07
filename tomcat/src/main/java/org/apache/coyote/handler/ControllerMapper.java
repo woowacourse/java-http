@@ -1,6 +1,6 @@
-package org.apache.coyote;
+package org.apache.coyote.handler;
 
-import org.apache.catalina.manager.SessionManager;
+import org.apache.coyote.Controller;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
 

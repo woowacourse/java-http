@@ -1,6 +1,4 @@
-package org.apache.coyote.domain;
-
-import org.apache.coyote.http11.domain.HttpCookie;
+package org.apache.coyote.http11.http;
 
 import java.util.Map;
 

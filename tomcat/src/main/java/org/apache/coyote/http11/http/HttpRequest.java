@@ -1,6 +1,4 @@
-package org.apache.coyote.http11.domain;
-
-import org.apache.coyote.domain.HttpRequestHeader;
+package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;

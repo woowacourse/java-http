@@ -27,5 +27,5 @@
 
 ## 4단계 - 동시성 확장하기
 
-- [ ] Executors로 Thread Pool 적용
-- [ ] 동시성 컬렉션 사용하기
+- [x] Executors로 Thread Pool 적용
+- [x] 동시성 컬렉션 사용하기

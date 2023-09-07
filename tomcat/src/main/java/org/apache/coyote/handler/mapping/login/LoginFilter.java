@@ -16,8 +16,8 @@ public abstract class LoginFilter {
 
     protected void setSession(final String jSessionId, final Map<String, String> sessionData) {
         final Session session = new Session(jSessionId);
-        for (final String key : sessionData.keySet()) {
-            session.add(key, sessionData.get(key));
+        for (final Map.Entry<String, String> entry : sessionData.entrySet()) {
+            session.add(entry.getKey(), entry.getValue());
         }
         loginManager.add(session);
     }

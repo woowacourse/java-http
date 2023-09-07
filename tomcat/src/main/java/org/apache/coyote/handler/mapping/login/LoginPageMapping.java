@@ -46,7 +46,7 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
 
             final String account = queryString.get("account");
             final String password = queryString.get("password");
-
+            
             try {
                 final User user = InMemoryUserRepository.findByAccount(account)
                         .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));

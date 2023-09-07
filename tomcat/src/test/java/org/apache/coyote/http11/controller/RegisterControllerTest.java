@@ -57,11 +57,9 @@ class RegisterControllerTest {
                 formData
         );
 
-        System.out.println("rawRequest = " + rawRequest);
         StringReader stringReader = new StringReader(rawRequest);
         BufferedReader br = new BufferedReader(stringReader);
         HttpRequest request = HttpRequest.from(br, startLine);
-        System.out.println("request.getMessageBody().getValue() = " + request.getMessageBody().getValue());
 
         RegisterController registerController = new RegisterController();
         final String expectedResponse = "HTTP/1.1 302 Found \r\n" +

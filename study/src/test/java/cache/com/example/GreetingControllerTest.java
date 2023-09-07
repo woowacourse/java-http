@@ -47,7 +47,7 @@ class GreetingControllerTest {
                 .expectStatus().isOk()
 
                 // gzip으로 요청 보내도 어떤 방식으로 압축할지 서버에서 결정한다.
-                // 웹브라우저에서 localhost:8080으로 접근하면 응답 헤더에 "Content-Encoding: gzip"이 있다.
+                // 웹브라우저에서 localhost8080으로 접근하면 응답 헤더에 "Content-Encoding: gzip"이 있다.
                 .expectHeader().valueEquals(HttpHeaders.TRANSFER_ENCODING, "chunked")
                 .expectBody(String.class).returnResult();
 
@@ -76,6 +76,7 @@ class GreetingControllerTest {
     @Test
     void testCacheBustingOfStaticResources() {
         final var uri = String.format("%s/%s/js/index.js", PREFIX_STATIC_RESOURCES, version.getVersion());
+        log.info(uri);
 
         // "/resource-versioning/js/index.js" 경로의 정적 파일에 ETag를 사용한 캐싱이 적용되었는지 확인한다.
         final var response = webTestClient

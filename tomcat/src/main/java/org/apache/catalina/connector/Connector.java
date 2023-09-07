@@ -1,13 +1,12 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -49,7 +48,9 @@ public class Connector implements Runnable {
     @Override
     public void run() {
         // 클라이언트가 연결될때까지 대기한다.
+        int count = 1;
         while (!stopped) {
+            log.info("count {}", count++);
             connect();
         }
     }
@@ -62,11 +63,11 @@ public class Connector implements Runnable {
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws IOException {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        Http11Processor processor = new Http11Processor(connection);
         new Thread(processor).start();
     }
 

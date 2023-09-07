@@ -1,5 +1,6 @@
 package study;
 
+import org.apache.coyote.http11.Constants;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
@@ -183,7 +184,7 @@ class IOStreamTest {
          */
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
-            final String emoji = String.join(System.lineSeparator(),
+            final String emoji = String.join(Constants.CRLF,
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
@@ -193,7 +194,7 @@ class IOStreamTest {
                 StringBuilder actual = new StringBuilder();
                 String line = bufferedReader.readLine();
                 while (line != null) {
-                    actual.append(line).append(System.lineSeparator());
+                    actual.append(line).append(Constants.CRLF);
                     line = bufferedReader.readLine();
                 }
                 assertThat(actual).hasToString(emoji);

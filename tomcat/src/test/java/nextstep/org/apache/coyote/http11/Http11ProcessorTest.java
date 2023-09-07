@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import org.apache.coyote.http11.Constants;
 import org.apache.coyote.http11.Http11Processor;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class Http11ProcessorTest {
     @Test
     void notFound() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join(Constants.CRLF,
                 "GET /anyThing.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -65,7 +66,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join(Constants.CRLF,
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -94,7 +95,7 @@ class Http11ProcessorTest {
     @Test
     void css() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join(Constants.CRLF,
                 "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -123,7 +124,7 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join(Constants.CRLF,
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -149,7 +150,7 @@ class Http11ProcessorTest {
     @Test
     void getLoginPage() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join(Constants.CRLF,
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

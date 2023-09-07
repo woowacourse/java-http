@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.Constants;
 import org.apache.coyote.http11.types.ContentType;
 import org.apache.coyote.http11.types.HeaderType;
 import org.apache.coyote.http11.types.HttpProtocol;
@@ -37,7 +38,7 @@ public class HttpResponse {
     }
 
     private String toHeaderFormat() {
-        StringJoiner joiner = new StringJoiner(System.lineSeparator());
+        StringJoiner joiner = new StringJoiner(Constants.CRLF);
         for (var entry : this.headers.entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue();
@@ -48,7 +49,7 @@ public class HttpResponse {
     }
 
     public String toResponseFormat() {
-        StringJoiner joiner = new StringJoiner(System.lineSeparator());
+        StringJoiner joiner = new StringJoiner(Constants.CRLF);
         joiner.add(String.format("%s %s %s ", httpProtocol.getProtocol(), httpStatus.getCode(), httpStatus.getMessage()));
         joiner.add(toHeaderFormat());
         joiner.add(body);

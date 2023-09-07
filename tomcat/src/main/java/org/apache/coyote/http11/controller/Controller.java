@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
+
+import java.io.IOException;
 
 public interface Controller {
 
-    void service(HttpRequest request, HttpResponse response) throws Exception;
+    ResponseEntity service(HttpRequest request) throws IOException;
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class RequestMapping {
 
-    private final Map<String, Controller> controllers = new HashMap<>();
+    private static final Map<String, Controller> controllers = new HashMap<>();
 
     private RequestMapping() {
     }
@@ -18,10 +18,13 @@ public class RequestMapping {
     }
 
     private static void registerController() {
+        controllers.put("/", new IndexPageController());
+        controllers.put("/login", new LoginController());
+        controllers.put("/register", new RegisterController());
     }
 
     public Controller getController(HttpRequest request) {
         String requestURI = request.getHttpRequestStartLine().getPath();
-        return controllers.get(requestURI);
+        return controllers.getOrDefault(requestURI, new StaticResourceController());
     }
 }

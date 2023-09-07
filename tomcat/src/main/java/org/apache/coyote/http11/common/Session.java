@@ -2,6 +2,7 @@ package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session {
 
@@ -17,8 +18,8 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
+    public Optional<Object> getAttribute(final String name) {
+        return Optional.ofNullable(values.get(name));
     }
 
     public void setAttribute(final String name, final Object value) {

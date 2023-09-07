@@ -56,7 +56,7 @@ public class RegisterController extends AbstractPathController {
                 return;
             }
 
-            response.sendRedirect("/register.html");
         }
+        response.sendRedirect("/register.html");
     }
 }

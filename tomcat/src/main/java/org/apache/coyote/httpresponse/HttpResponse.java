@@ -1,5 +1,6 @@
 package org.apache.coyote.httpresponse;
 
+import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.httpresponse.header.ResourceReader;
 import org.apache.coyote.httpresponse.header.ResponseHeaders;
 import org.slf4j.Logger;
@@ -14,14 +15,14 @@ public class HttpResponse {
     private static final String DELIMITER = " ";
     private static final String LINE_SEPARATOR = "\r\n";
 
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
     private final CookieResponseHeader cookieResponseHeader;
     private final ResponseHeaders responseHeaders;
     private final ContentBody contentBody;
 
     public HttpResponse(
-            final String httpVersion,
+            final HttpVersion httpVersion,
             final HttpStatus httpStatus,
             final CookieResponseHeader cookieResponseHeader,
             final ResponseHeaders responseHeaders,
@@ -34,7 +35,7 @@ public class HttpResponse {
         this.contentBody = contentBody;
     }
 
-    public static HttpResponse init(final String httpVersion) {
+    public static HttpResponse init(final HttpVersion httpVersion) {
         log.debug("======================================================================");
         log.debug("Http Response");
         log.debug("Response Http Version: {}", httpVersion);
@@ -82,6 +83,6 @@ public class HttpResponse {
     }
 
     private String makeResponseLine() {
-        return httpVersion + DELIMITER + httpStatus.getHttpStatus() + DELIMITER;
+        return httpVersion.getValue() + DELIMITER + httpStatus.getHttpStatus() + DELIMITER;
     }
 }

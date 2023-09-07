@@ -1,5 +1,6 @@
 package org.apache.coyote.httprequest;
 
+import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.httprequest.header.RequestHeaders;
@@ -74,7 +75,7 @@ public class HttpRequest {
         return httpRequestLine.getQueryString();
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpRequestLine.getHttpVersion();
     }
 

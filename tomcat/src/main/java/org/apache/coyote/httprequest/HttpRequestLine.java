@@ -1,5 +1,6 @@
 package org.apache.coyote.httprequest;
 
+import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.httprequest.exception.InvalidHttpRequestLineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +19,9 @@ public class HttpRequestLine {
 
     private final RequestMethod requestMethod;
     private final RequestUri requestUri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    private HttpRequestLine(final RequestMethod requestMethod, final RequestUri requestUri, final String httpVersion) {
+    private HttpRequestLine(final RequestMethod requestMethod, final RequestUri requestUri, final HttpVersion httpVersion) {
         this.requestMethod = requestMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -32,7 +33,7 @@ public class HttpRequestLine {
         return new HttpRequestLine(
                 RequestMethod.from(parsedRequestLine.get(REQUEST_METHOD_INDEX)),
                 RequestUri.from(parsedRequestLine.get(REQUEST_URI_INDEX)),
-                parsedRequestLine.get(HTTP_VERSION_INDEX));
+                HttpVersion.from(parsedRequestLine.get(HTTP_VERSION_INDEX)));
     }
 
     private static List<String> parseByDelimiter(final String requestLine) {
@@ -55,7 +56,7 @@ public class HttpRequestLine {
         return requestUri.getQueryString();
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 }

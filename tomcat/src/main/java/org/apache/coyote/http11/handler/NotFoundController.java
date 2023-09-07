@@ -5,7 +5,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
 
-public class NotFoundHandler implements HttpHandler {
+public class NotFoundController implements HttpController {
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {

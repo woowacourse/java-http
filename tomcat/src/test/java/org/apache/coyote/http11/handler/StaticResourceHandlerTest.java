@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class StaticResourceHandlerTest {
 
-	private static final StaticResourceHandler HANDLER = new StaticResourceHandler();
+	private static final StaticResourceController HANDLER = new StaticResourceController();
 
 	@Nested
 	@DisplayName("handle 되는 조건을 확인할 수 있다.")

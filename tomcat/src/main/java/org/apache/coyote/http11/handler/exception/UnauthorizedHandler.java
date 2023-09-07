@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class UnauthorizedHandler implements ExceptionHandler {
+public class UnauthorizedHandler implements ControllerAdvice {
 
 	private static final String REDIRECT_URI = "/401.html";
 

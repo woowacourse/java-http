@@ -6,7 +6,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InternalServerErrorHandler implements ExceptionHandler {
+public class InternalServerErrorHandler implements ControllerAdvice {
 
 	private static final Logger log = LoggerFactory.getLogger(InternalServerErrorHandler.class);
 	private static final String REDIRECT_URI = "/500.html";

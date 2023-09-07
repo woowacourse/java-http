@@ -3,30 +3,34 @@ package org.apache.coyote.http11.handler;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.coyote.http11.handler.exception.ExceptionHandler;
+import org.apache.coyote.http11.handler.exception.ControllerAdvice;
 import org.apache.coyote.http11.handler.exception.InternalServerErrorHandler;
 import org.apache.coyote.http11.handler.exception.UnauthorizedHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class HttpHandlers {
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RootController;
 
-	private static final List<HttpHandler> HTTP_HANDLERS = List.of(
-		new RootHandler(),
-		new StaticResourceHandler(),
-		new LoginHandler(),
-		new RegisterHandler()
+public class HttpControllers {
+
+	private static final List<HttpController> HTTP_CONTROLLERS = List.of(
+		new RootController(),
+		new StaticResourceController(),
+		new LoginController(),
+		new RegisterController()
 	);
-	private static final List<ExceptionHandler> EXCEPTION_HANDLERS = List.of(
+	private static final List<ControllerAdvice> EXCEPTION_HANDLERS = List.of(
 		new UnauthorizedHandler()
 	);
 
 	public HttpResponse handleTo(final HttpRequest request) throws IOException {
 		try {
-			return HTTP_HANDLERS.stream()
+			return HTTP_CONTROLLERS.stream()
 				.filter(handler -> handler.isSupported(request))
 				.findAny()
-				.orElseGet(NotFoundHandler::new)
+				.orElseGet(NotFoundController::new)
 				.handleTo(request);
 		} catch (final Exception e) {
 			return EXCEPTION_HANDLERS.stream()

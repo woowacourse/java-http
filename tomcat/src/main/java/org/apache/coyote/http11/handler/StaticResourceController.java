@@ -12,7 +12,7 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class StaticResourceHandler implements HttpHandler {
+public class StaticResourceController implements HttpController {
 
 	private static final String RESOURCE_PREFIX = "static";
 

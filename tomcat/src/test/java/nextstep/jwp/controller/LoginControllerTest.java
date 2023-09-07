@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import static java.nio.file.Files.*;
 import static org.assertj.core.api.Assertions.*;
@@ -23,9 +23,9 @@ import org.mockito.MockedStatic;
 
 import nextstep.jwp.model.User;
 
-class LoginHandlerTest {
+class LoginControllerTest {
 
-	private static final LoginHandler HANDLER = new LoginHandler();
+	private static final LoginController HANDLER = new LoginController();
 
 	@Test
 	@DisplayName("endpoint가 login이면 true를 반환한다.")

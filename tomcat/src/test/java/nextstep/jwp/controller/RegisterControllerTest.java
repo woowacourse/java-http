@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import static java.nio.file.Files.*;
 import static org.assertj.core.api.Assertions.*;
@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
-	private static final RegisterHandler HANDLER = new RegisterHandler();
+	private static final RegisterController HANDLER = new RegisterController();
 
 	@Nested
 	@DisplayName("endpoint가 register고,")

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
+import org.apache.coyote.http11.handler.HttpController;
+import org.apache.coyote.http11.handler.HttpHandle;
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -25,14 +27,14 @@ import org.slf4j.LoggerFactory;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class LoginHandler implements HttpHandler {
+public class LoginController implements HttpController {
 
 	private static final Map<HttpMethod, HttpHandle> HANDLE_MAP = Map.of(
-		HttpMethod.GET, LoginHandler::servingStaticResource,
-		HttpMethod.POST, LoginHandler::loginProcess
+		HttpMethod.GET, LoginController::servingStaticResource,
+		HttpMethod.POST, LoginController::loginProcess
 	);
 	private static final String END_POINT = "/login";
-	private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 	private static final String ACCOUNT_PARAM_KEY = "account";
 	private static final String PASSWORD_PARAM_KEY = "password";
 	private static final String LOGIN_SUCCESS_LOCATION = "/index.html";
@@ -55,8 +57,8 @@ public class LoginHandler implements HttpHandler {
 
 	private static HttpResponse servingStaticResource(final HttpRequest request) {
 		return request.getJSessionId()
-			.map(LoginHandler::indexHtmlRedirect)
-			.orElseGet(LoginHandler::loginHtmlResponse);
+			.map(LoginController::indexHtmlRedirect)
+			.orElseGet(LoginController::loginHtmlResponse);
 	}
 
 	private static HttpResponse indexHtmlRedirect(final String jSessionId) {
@@ -69,7 +71,7 @@ public class LoginHandler implements HttpHandler {
 
 	private static HttpResponse loginHtmlResponse() {
 		try {
-			final URL url = LoginHandler.class.getClassLoader()
+			final URL url = LoginController.class.getClassLoader()
 				.getResource(LOGIN_STATIC_RESOURCE_FILE_PATH);
 			final String body = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 			return new HttpResponse(

@@ -36,3 +36,5 @@
 - [x] http session
     - [x] 로그인된 상태에서 GET /login 접근 시 index.html로 리다이렉트 처리
     - [x] 로그인 성공하면 session을 저장하기
+- [ ] controller 구현 및 리팩터링
+    - [ ] 기존 선형 탐색이었던 controller 탐색을 login으로 변경

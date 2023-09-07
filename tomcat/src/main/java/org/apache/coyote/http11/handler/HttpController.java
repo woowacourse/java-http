@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public interface HttpHandler {
+public interface HttpController {
 
 	boolean isSupported(final HttpRequest request);
 

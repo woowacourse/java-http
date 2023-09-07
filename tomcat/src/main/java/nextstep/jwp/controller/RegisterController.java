@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.controller;
 
 import static org.apache.coyote.http11.headers.MimeType.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.util.Map;
 
 import org.apache.coyote.http11.exception.EmptyBodyException;
+import org.apache.coyote.http11.handler.HttpController;
+import org.apache.coyote.http11.handler.HttpHandle;
 import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -19,11 +21,11 @@ import org.apache.coyote.http11.util.QueryParser;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class RegisterHandler implements HttpHandler {
+public class RegisterController implements HttpController {
 
 	private static final Map<HttpMethod, HttpHandle> HANDLE_MAP = Map.of(
 		HttpMethod.GET, request -> servingStaticResource(),
-		HttpMethod.POST, RegisterHandler::registerProcess
+		HttpMethod.POST, RegisterController::registerProcess
 	);
 	private static final String END_POINT = "/register";
 	private static final String STATIC_RESOURCE_FILE_PATH = "static/register.html";
@@ -47,7 +49,7 @@ public class RegisterHandler implements HttpHandler {
 
 	private static HttpResponse registerProcess(final HttpRequest request) {
 		return request.getBody()
-			.map(RegisterHandler::register)
+			.map(RegisterController::register)
 			.orElseThrow(EmptyBodyException::new);
 	}
 
@@ -64,7 +66,7 @@ public class RegisterHandler implements HttpHandler {
 
 	private static HttpResponse servingStaticResource() throws RuntimeException {
 		try {
-			final URL url = RegisterHandler.class.getClassLoader()
+			final URL url = RegisterController.class.getClassLoader()
 				.getResource(STATIC_RESOURCE_FILE_PATH);
 			final String body = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 			return new HttpResponse(

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.response.HttpResponse;
 
-public interface ExceptionHandler {
+public interface ControllerAdvice {
 
 	boolean isSupported(final Exception exception);
 

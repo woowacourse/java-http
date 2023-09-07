@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Http11Processor.SESSION_MANAGER;
-
 import java.util.List;
-import java.util.Objects;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
+
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     private final RequestHeader requestHeader;
     private final QueryString queryString;
@@ -30,26 +30,8 @@ public class HttpRequest {
     }
 
     private static Session findSessionId(final RequestHeader requestHeader) {
-        final String jsessionid = requestHeader.getCookie("JSESSIONID");
-        if (Objects.isNull(jsessionid)) {
-            return makeNewSession();
-        }
-        final Session findSession = SESSION_MANAGER.findSession(jsessionid);
-        if (Objects.isNull(findSession)) {
-            return makeNewSession();
-        }
-
-        if (findSession.isExpired()) {
-            return makeNewSession();
-        }
-
-        return findSession;
-    }
-
-    private static Session makeNewSession() {
-        final Session newSession = new Session();
-        SESSION_MANAGER.add(newSession);
-        return newSession;
+        final String sessionId = requestHeader.getCookie("JSESSIONID");
+        return SESSION_MANAGER.getSessionId(sessionId);
     }
 
     public boolean isSameParsedRequestURI(final String uri) {

@@ -12,14 +12,12 @@ import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
 

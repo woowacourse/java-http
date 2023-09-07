@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.util.Parser;
 
 public class Cookies {
@@ -19,7 +20,7 @@ public class Cookies {
         return new Cookies(null);
     }
 
-    public String getCookie(String name) {
-        return values.get(name);
+    public Optional<String> getCookie(String name) {
+        return Optional.ofNullable(values.get(name));
     }
 }

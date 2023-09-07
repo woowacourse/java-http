@@ -4,6 +4,8 @@ import org.apache.coyote.http11.HttpContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.exception.InvalidRequestLineException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,9 +35,9 @@ public class RequestURL {
         this.requestParam = requestParam;
     }
 
-    public static RequestURL from(String line) {
+    public static RequestURL from(final BufferedReader br) throws IOException {
+        final String line = br.readLine();
         validate(line);
-
         final String[] splitLine = line.split(SPACE_DELIMITER);
 
         return new RequestURL(getMethod(splitLine[METHOD_INDEX]), splitLine[URL_INDEX],

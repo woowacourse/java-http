@@ -11,13 +11,13 @@ public class RequestBody {
         this.requestBody = requestBody;
     }
 
-    public static RequestBody of(final String contentLength, final BufferedReader bufferedReader) throws IOException {
+    public static RequestBody of(final String contentLength, final BufferedReader br) throws IOException {
         if (contentLength == null) {
             return null;
         }
 
         char[] tmp = new char[Integer.parseInt(contentLength.trim())];
-        bufferedReader.read(tmp, 0, Integer.parseInt(contentLength.trim()));
+        br.read(tmp, 0, Integer.parseInt(contentLength.trim()));
 
         return new RequestBody(String.copyValueOf(tmp));
     }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
+import java.nio.Buffer;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,8 +14,8 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public static RequestHeaders from(final BufferedReader bufferedReader) {
-        final Map<String, String> headers = bufferedReader.lines().takeWhile(it -> !it.isEmpty())
+    public static RequestHeaders from(final BufferedReader br) {
+        final Map<String, String> headers = br.lines().takeWhile(it -> !it.isEmpty())
                 .distinct()
                 .map(it -> it.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));

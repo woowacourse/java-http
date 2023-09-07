@@ -17,12 +17,10 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        final RequestURL requestURL = RequestURL.from(bufferedReader.readLine());
-        final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
-        final RequestBody requestBody = RequestBody.of(requestHeaders.getValue(CONTENT_LENGTH), bufferedReader);
+    public static HttpRequest from(final BufferedReader br) throws IOException {
+        final RequestURL requestURL = RequestURL.from(br);
+        final RequestHeaders requestHeaders = RequestHeaders.from(br);
+        final RequestBody requestBody = RequestBody.of(requestHeaders.getValue(CONTENT_LENGTH), br);
 
         return new HttpRequest(requestURL, requestHeaders, requestBody);
     }

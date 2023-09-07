@@ -11,7 +11,9 @@ import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,9 +33,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
+        this.sessionManager = new SessionManager();
     }
 
     @Override
@@ -44,8 +48,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
@@ -137,7 +141,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse loginWithSession(String jsessionid) {
-        SessionManager sessionManager = new SessionManager();
         Session session = sessionManager.findSession(jsessionid)
                 .orElseThrow(() -> new HttpException(UNAUTHORIZED, "잘못된 세션 아이디입니다"));
         if (session.getAttribute("user").isEmpty()) {
@@ -159,7 +162,6 @@ public class Http11Processor implements Runnable, Processor {
             log.info(userInfo);
             Session session = new Session(jsessionid);
             session.setAttribute("user", user.get());
-            SessionManager sessionManager = new SessionManager();
             sessionManager.add(session);
             return HttpResponse.status(FOUND)
                     .redirectUri(INDEX_HTML)

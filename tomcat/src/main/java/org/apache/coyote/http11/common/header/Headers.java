@@ -30,15 +30,15 @@ public abstract class Headers {
     public abstract boolean isType(String headerName);
 
     protected String add(final HeaderName headerName, final String headerValue) {
-        return values.put(headerName.getName(), headerValue);
+        return values.put(headerName.getValue(), headerValue);
     }
 
     protected boolean contains(final HeaderName headerName) {
-        return values.containsKey(headerName.getName());
+        return values.containsKey(headerName.getValue());
     }
 
     protected String find(final HeaderName headerName) {
-        return values.get(headerName.getName());
+        return values.get(headerName.getValue());
     }
 
     @Override
@@ -55,7 +55,7 @@ public abstract class Headers {
 
     private String format(final String headerName, final String value) {
 
-        if (CONTENT_TYPE.getName().equals(headerName)) {
+        if (CONTENT_TYPE.getValue().equals(headerName)) {
             return String.join(": ", headerName, ContentType.withCharset(value));
         }
         return String.join(": ", headerName, value);

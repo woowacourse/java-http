@@ -117,30 +117,30 @@ public enum HeaderName {
 
     public static boolean isGeneralHeaders(final String name) {
         return GENERAL_HEADERS.stream()
-                .anyMatch(headerName -> headerName.getName().equals(name));
+                .anyMatch(headerName -> headerName.getValue().equals(name));
     }
 
     public static boolean isRequestHeaders(final String name) {
         return REQUEST_HEADERS.stream()
-                .anyMatch(headerName -> headerName.getName().equals(name));
+                .anyMatch(headerName -> headerName.getValue().equals(name));
     }
 
     public static boolean isResponseHeaders(final String name) {
         return RESPONSE_HEADERS.stream()
-                .anyMatch(headerName -> headerName.getName().equals(name));
+                .anyMatch(headerName -> headerName.getValue().equals(name));
     }
 
     public static boolean isEntityHeaders(final String name) {
         return ENTITY_HEADERS.stream()
-                .anyMatch(headerName -> headerName.getName().equals(name));
+                .anyMatch(headerName -> headerName.getValue().equals(name));
     }
 
     public static boolean isNotDefined(final String name) {
         return Arrays.stream(values())
-                .noneMatch(headerName -> Objects.equals(headerName.getName(), name));
+                .noneMatch(headerName -> Objects.equals(headerName.getValue(), name));
     }
 
-    public String getName() {
+    public String getValue() {
         return value;
     }
 

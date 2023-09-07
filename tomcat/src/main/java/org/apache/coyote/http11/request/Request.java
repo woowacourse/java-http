@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
 
-import java.net.URI;
 import java.util.Map;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.SessionManager.Session;
@@ -15,24 +14,21 @@ import org.apache.coyote.http11.common.header.RequestHeaders;
 public class Request {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private final Method method;
-    private final String uri;
+    private final RequestLine requestLine;
     private final GeneralHeaders generalHeaders;
     private final RequestHeaders requestHeaders;
     private final EntityHeaders entityHeaders;
     private final String body;
 
-    // TODO RequestLine 포장, RequestLine에서 다시 uri의 queryString 가져올 수 있게 하기 (URI -> query -> StringFormatParser)
     private Request(
-            final Method method,
-            final String uri,
+            final RequestLine requestLine,
             final GeneralHeaders generalHeaders,
             final RequestHeaders requestHeaders,
             final EntityHeaders entityHeaders,
             final String body
     ) {
-        this.method = method;
-        this.uri = uri;
+
+        this.requestLine = requestLine;
         this.generalHeaders = generalHeaders;
         this.requestHeaders = requestHeaders;
         this.entityHeaders = entityHeaders;
@@ -42,15 +38,13 @@ public class Request {
     public static Request of(
             final String methodName,
             final String requestURI,
+            final String protocolName,
             final Map<String, String> headers,
             final String body
     ) {
-        final var method = Method.find(methodName)
-                .orElseThrow(() -> new IllegalArgumentException("invalid method"));
 
         return new Request(
-                method,
-                requestURI,
+                RequestLine.of(methodName, requestURI, protocolName),
                 new GeneralHeaders(headers),
                 new RequestHeaders(headers),
                 new EntityHeaders(headers),
@@ -59,15 +53,15 @@ public class Request {
     }
 
     public String getPath() {
-        return URI.create(uri).getPath();
+        return requestLine.getPath();
     }
 
     public Method getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getUri() {
-        return uri;
+        return requestLine.getUri().toString();
     }
 
     public Session getSession() {
@@ -87,8 +81,7 @@ public class Request {
     @Override
     public String toString() {
         return "Request{" +
-                "method=" + method +
-                ", uri='" + uri + '\'' +
+                "requestLine=" + requestLine +
                 ", generalHeaders=" + generalHeaders +
                 ", requestHeaders=" + requestHeaders +
                 ", entityHeaders=" + entityHeaders +

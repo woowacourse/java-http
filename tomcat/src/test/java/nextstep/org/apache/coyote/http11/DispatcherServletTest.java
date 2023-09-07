@@ -2,6 +2,7 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.common.ContentType.CSS;
 import static org.apache.coyote.http11.common.ContentType.HTML;
+import static org.apache.coyote.http11.common.Protocol.HTTP11;
 import static org.apache.coyote.http11.common.header.HeaderName.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,11 +19,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class DispatcherServletTest {
 
+
     @DisplayName("/로 GET 요청을 보내면 Hello world!를 반환한다.")
     @Test
-    void handleRoot() throws Exception {
+    void handleRoot() {
         final Response response = DispatcherServlet.service(
-                Request.of("get", "/", Map.of(ACCEPT.getName(), "text/html"), "")
+                Request.of("get", "/", HTTP11.getValue(), Map.of(ACCEPT.getValue(), "text/html"), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -37,7 +39,7 @@ class DispatcherServletTest {
     })
     void handleHTML(final String URI) {
         final Response response = DispatcherServlet.service(
-                Request.of("get", URI, Map.of(ACCEPT.getName(), HTML.toString()), "")
+                Request.of("get", URI, HTTP11.getValue(), Map.of(ACCEPT.getValue(), HTML.toString()), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -48,7 +50,7 @@ class DispatcherServletTest {
     @Test
     void handleCSS() {
         final Response response = DispatcherServlet.service(
-                Request.of("get", "/css/styles.css", Map.of(ACCEPT.getName(), CSS.toString()), "")
+                Request.of("get", "/css/styles.css", HTTP11.getValue(), Map.of(ACCEPT.getValue(), CSS.toString()), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -59,7 +61,8 @@ class DispatcherServletTest {
     @Test
     void handleNotFound() {
         final Response response = DispatcherServlet.service(
-                Request.of("get", "/neverexist/not.css", Map.of(ACCEPT.getName(), HTML.toString()), "")
+                Request.of("get", "/neverexist/not.css", HTTP11.getValue(), Map.of(ACCEPT.getValue(), HTML.toString()),
+                        "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);

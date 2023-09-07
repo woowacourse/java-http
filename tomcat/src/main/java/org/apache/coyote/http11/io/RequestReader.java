@@ -18,15 +18,16 @@ public class RequestReader {
     }
 
     public Request read() throws IOException {
-        final var requestHead = reader.readLine();
-        final var head = requestHead.split(" ");
-        final var method = head[0];
-        final var uri = head[1];
+        final var requestLine = reader.readLine();
+        final var words = requestLine.split(" ");
+        final var method = words[0];
+        final var uri = words[1];
+        final var protocol = words[2];
 
         final var allHeaders = readHeaders();
         final var body = readBody(new EntityHeaders(allHeaders));
 
-        return Request.of(method, uri, allHeaders, body);
+        return Request.of(method, uri, protocol, allHeaders, body);
     }
 
     private Map<String, String> readHeaders() throws IOException {

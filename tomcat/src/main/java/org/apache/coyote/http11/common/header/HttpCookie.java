@@ -33,6 +33,9 @@ public class HttpCookie {
     }
 
     public boolean isEmpty() {
+        if (cookie == null) {
+            return true;
+        }
         return cookie.isEmpty();
     }
 

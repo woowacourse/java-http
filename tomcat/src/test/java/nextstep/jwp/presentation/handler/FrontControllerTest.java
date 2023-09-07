@@ -4,8 +4,8 @@ import nextstep.jwp.presentation.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.coyote.http11.HttpMethod.GET;
-import static org.apache.coyote.http11.HttpMethod.POST;
+import static org.apache.coyote.http.HttpMethod.GET;
+import static org.apache.coyote.http.HttpMethod.POST;
 
 class FrontControllerTest {
 

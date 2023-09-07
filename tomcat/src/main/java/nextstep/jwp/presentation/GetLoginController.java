@@ -1,17 +1,14 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponseBuilder;
-import org.apache.coyote.http11.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponseBuilder;
+import org.apache.coyote.http.SessionManager;
 
 import java.io.IOException;
 import java.util.Map;
 
 public class GetLoginController implements Controller {
 
-    private static final Logger log = LoggerFactory.getLogger(GetLoginController.class);
     private static final String SESSION_ID = "JSESSIONID";
 
     @Override

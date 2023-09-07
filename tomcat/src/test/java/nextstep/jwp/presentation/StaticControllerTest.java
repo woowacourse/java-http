@@ -1,9 +1,9 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestParser;
-import org.apache.coyote.http11.HttpResponseBuilder;
-import org.apache.coyote.http11.RequestFixture;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponseBuilder;
+import coyote.http.RequestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

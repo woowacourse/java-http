@@ -1,7 +1,11 @@
 package nextstep.jwp.presentation;
 
+import coyote.http.RequestFixture;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.*;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponseBuilder;
+import org.apache.coyote.http.SessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +15,6 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GetLoginControllerTest {

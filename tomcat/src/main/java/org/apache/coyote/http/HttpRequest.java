@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class HttpRequest {
         return startLine.getQueryString();
     }
 
-    public String getProtocol() {
+    public HttpProtocol getProtocol() {
         return startLine.getProtocol();
     }
 

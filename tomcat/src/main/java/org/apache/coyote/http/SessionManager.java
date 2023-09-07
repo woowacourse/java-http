@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http;
 
 import nextstep.jwp.model.User;
 

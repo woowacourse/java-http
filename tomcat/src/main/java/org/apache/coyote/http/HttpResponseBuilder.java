@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class HttpResponseBuilder {
 
     public String buildStaticFileOkResponse(HttpRequest httpRequest, String path) throws IOException {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequest.getProtocol();
+        String protocol = httpRequest.getProtocol().getName();
         String contentType = joinContentType(ContentType.findType(path));
         String content = getContent(path);
         String contentLength = joinContentLength(content);
@@ -40,7 +40,7 @@ public class HttpResponseBuilder {
 
     public String buildStaticFileRedirectResponse(HttpRequest httpRequest, String redirectPath) throws IOException {
         String status = HttpStatus.REDIRECT.getHttpStatusCode() + SPACE + HttpStatus.REDIRECT.getHttpStatusMessage();
-        String protocol = httpRequest.getProtocol();
+        String protocol = httpRequest.getProtocol().getName();
         String contentType = joinContentType(ContentType.HTML.getType());
         String content = getContent(redirectPath);
         String contentLength = joinContentLength(content);
@@ -55,7 +55,7 @@ public class HttpResponseBuilder {
 
     public String buildStaticFileNotFoundResponse(HttpRequest httpRequest) throws IOException {
         String status = HttpStatus.NOT_FOUND.getHttpStatusCode() + SPACE + HttpStatus.NOT_FOUND.getHttpStatusMessage();
-        String protocol = httpRequest.getProtocol();
+        String protocol = httpRequest.getProtocol().getName();
         String contentType = joinContentType(ContentType.HTML.getType());
         String content = getContent("/404.html");
         String contentLength = joinContentLength(content);
@@ -70,7 +70,7 @@ public class HttpResponseBuilder {
 
     public String buildCustomResponse(HttpRequest httpRequest, String content) {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequest.getProtocol();
+        String protocol = httpRequest.getProtocol().getName();
         String contentType = joinContentType(ContentType.HTML.getType());
         String contentLength = joinContentLength(content);
 

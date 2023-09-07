@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package coyote.http;
 
+import org.apache.coyote.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

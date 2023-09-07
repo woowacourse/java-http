@@ -1,17 +1,17 @@
 package nextstep.jwp.presentation.handler;
 
 import nextstep.jwp.presentation.*;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponseBuilder;
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponseBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.coyote.http11.HttpMethod.GET;
-import static org.apache.coyote.http11.HttpMethod.POST;
+import static org.apache.coyote.http.HttpMethod.GET;
+import static org.apache.coyote.http.HttpMethod.POST;
 
 public class FrontController {
 

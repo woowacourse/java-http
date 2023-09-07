@@ -1,5 +1,7 @@
-package org.apache.coyote.http11;
+package coyote.http;
 
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +24,7 @@ class HttpRequestParserTest {
 
         //then
        assertAll(
-                () -> assertEquals("GET /index.html HTTP/1.1", httpRequest.getMethod() + " " + httpRequest.getPath() + " " + httpRequest.getProtocol()),
+                () -> assertEquals("GET /index.html HTTP/1.1", httpRequest.getMethod() + " " + httpRequest.getPath() + " " + httpRequest.getProtocol().getName()),
                 () -> assertEquals("header", httpRequest.getHeader().get("header")),
                 () -> assertEquals("test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46", httpRequest.getHeader().get("Cookie")),
                 () -> assertEquals("message body", httpRequest.getMessageBody())

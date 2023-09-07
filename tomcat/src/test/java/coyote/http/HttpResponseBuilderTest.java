@@ -1,5 +1,8 @@
-package org.apache.coyote.http11;
+package coyote.http;
 
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponseBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

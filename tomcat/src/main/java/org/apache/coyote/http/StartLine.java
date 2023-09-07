@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,14 +17,14 @@ public class StartLine {
     private HttpMethod method;
     private String path;
     private Map<String, String> queryString;
-    private String protocol;
+    private HttpProtocol protocol;
 
     public StartLine(String startLine) {
         this.method = HttpMethod.from(divideMethod(startLine));
         String pathWithQueryString = dividePathWithQueryString(startLine);
         this.path = dividePath(pathWithQueryString);
         this.queryString = divideQueryString(pathWithQueryString);
-        this.protocol = divideProtocol(startLine);
+        this.protocol = HttpProtocol.from(divideProtocol(startLine));
     }
 
     private static String dividePathWithQueryString(String startLine) {
@@ -68,7 +68,7 @@ public class StartLine {
         return queryString;
     }
 
-    public String getProtocol() {
+    public HttpProtocol getProtocol() {
         return protocol;
     }
 }

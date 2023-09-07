@@ -1,5 +1,8 @@
-package org.apache.coyote.http11;
+package coyote.http;
 
+import org.apache.coyote.http.HttpMethod;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -7,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -49,7 +52,7 @@ class HttpRequestTest {
         HttpRequest httpRequest = createHttpRequest(RequestFixture.REQUEST);
 
         //when
-        String protocol = httpRequest.getProtocol();
+        String protocol = httpRequest.getProtocol().getName();
 
         //then
         assertEquals("HTTP/1.1", protocol);

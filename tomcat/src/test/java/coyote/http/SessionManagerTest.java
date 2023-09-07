@@ -1,7 +1,7 @@
-package org.apache.coyote.http11;
+package coyote.http;
 
 import nextstep.jwp.model.User;
-import org.assertj.core.api.Assertions;
+import org.apache.coyote.http.SessionManager;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

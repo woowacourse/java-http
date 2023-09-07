@@ -9,8 +9,9 @@ public abstract class Controller {
 
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (!canHandle(httpRequest)) {
-            // TODO: exception - there is any controller to handle
+            throw new IllegalArgumentException("There is no controller to handle.");
         }
+
         final String method = httpRequest.getMethod();
         if ("GET".equals(method)) {
             doGet(httpRequest, httpResponse);

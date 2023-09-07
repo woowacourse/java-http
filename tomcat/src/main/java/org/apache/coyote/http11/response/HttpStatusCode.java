@@ -13,7 +13,7 @@ public enum HttpStatusCode {
         this.text = text;
     }
 
-    public static String message(HttpStatusCode code) {
-        return String.join(" ", String.valueOf(code.code), code.text, "");
+    public String message() {
+        return String.join(" ", String.valueOf(code), text, "");
     }
 }

@@ -9,7 +9,6 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponseEntity;
-import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.session.HttpSession;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -25,9 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
@@ -37,6 +34,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX_HTML = "/index.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
     private static final String LOGIN_HTML = "/login.html";
+    private static final String BODY_DELIMITER = "&";
+    private static final String PAIR_DELIMITER = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Socket connection;
 
@@ -59,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpCookie httpCookie = makeHttpCookie(httpRequest);
 
             final HttpResponseEntity httpResponseEntity = makeResponseEntity(httpRequest, httpCookie);
-            final String response = makeResponse(httpResponseEntity);
+            final String response = httpResponseEntity.makeResponse();
 
             bufferedWriter.write(response);
             bufferedWriter.flush();
@@ -75,84 +76,61 @@ public class Http11Processor implements Runnable, Processor {
         return HttpCookie.empty();
     }
 
-    private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) {
+    private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) throws IOException {
         final HttpRequestStartLine startLine = httpRequest.getStartLine();
+        final String path = startLine.getPath();
 
         if (startLine.getHttpMethod().equals(HttpMethod.POST)) {
-            if (startLine.getPath().startsWith("/login")) {
+            if (path.startsWith("/login")) {
                 return login(httpRequest);
             }
-            if (startLine.getPath().startsWith("/register")) {
+            if (path.startsWith("/register")) {
                 return register(httpRequest);
             }
         }
-        if (startLine.getPath().startsWith("/login") && cookie.hasJSESSIONID()) {
+        if (path.startsWith("/login") && cookie.hasJSESSIONID()) {
             final String jsessionid = cookie.getJSESSIONID();
             HttpSession httpSession = sessionManager.findSession(jsessionid);
             if (Objects.isNull(httpSession)) {
-                return HttpResponseEntity.ok(LOGIN_HTML);
+                return HttpResponseEntity.ok(LOGIN_HTML, makeResponseBody(LOGIN_HTML));
             }
             return HttpResponseEntity.found(INDEX_HTML);
         }
-        return HttpResponseEntity.ok(startLine.getPath());
+        return HttpResponseEntity.ok(path, makeResponseBody(path));
     }
 
-    private HttpResponseEntity register(final HttpRequest httpRequest) {
-        final String body = httpRequest.getBody();
-        final Map<String, String> registerData = Arrays.stream(body.split("&"))
-                .map(data -> data.split("="))
-                .collect(Collectors.toMap(
-                        data -> data[0],
-                        data -> data[1])
-                );
-        InMemoryUserRepository.save(new User(registerData.get("account"), registerData.get("password"), registerData.get("email")));
-        return HttpResponseEntity.ok(INDEX_HTML);
-    }
-
-    private HttpResponseEntity login(final HttpRequest httpRequest) {
-        final String body = httpRequest.getBody();
-        final Map<String, String> loginData = Arrays.stream(body.split("&"))
-                .map(data -> data.split("="))
-                .collect(Collectors.toMap(
-                        data -> data[0],
-                        data -> data[1])
-                );
+    private HttpResponseEntity login(final HttpRequest httpRequest) throws IOException {
+        final Map<String, String> loginData = parseFormData(httpRequest.getBody());
         final User user = InMemoryUserRepository.findByAccount(loginData.get("account"))
                 .orElseThrow();
-
         if (user.checkPassword(loginData.get("password"))) {
             final HttpCookie newCookie = HttpCookie.create();
-            final HttpSession httpSession = new HttpSession(newCookie.getJSESSIONID());
-            httpSession.setAttribute("user", user);
-            sessionManager.add(httpSession);
-            final HttpResponseEntity httpResponseEntity = HttpResponseEntity.found(INDEX_HTML);
-            httpResponseEntity.addHeader("Set-Cookie: JSESSIONID=", newCookie.getJSESSIONID());
-            return httpResponseEntity;
+            saveSession(newCookie, user);
+            return HttpResponseEntity.found(INDEX_HTML)
+                    .setCookie(newCookie.getJSESSIONID());
         }
-        return HttpResponseEntity.ok(UNAUTHORIZED_HTML);
+        return HttpResponseEntity.ok(UNAUTHORIZED_HTML, makeResponseBody(UNAUTHORIZED_HTML));
     }
 
-    private String makeResponse(final HttpResponseEntity httpResponseEntity) throws IOException {
-        final String path = httpResponseEntity.getPath();
-        final String responseBody = makeResponseBody(path);
-        final String contentType = makeContentType(path);
-        final HttpStatusCode httpStatusCode = httpResponseEntity.getHttpStatusCode();
+    private void saveSession(final HttpCookie newCookie, final User user) {
+        final HttpSession httpSession = new HttpSession(newCookie.getJSESSIONID());
+        httpSession.setAttribute("user", user);
+        sessionManager.add(httpSession);
+    }
 
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add("HTTP/1.1 " + HttpStatusCode.message(httpStatusCode));
+    private HttpResponseEntity register(final HttpRequest httpRequest) throws IOException {
+        final Map<String, String> registerData = parseFormData(httpRequest.getBody());
+        InMemoryUserRepository.save(new User(registerData.get("account"), registerData.get("password"), registerData.get("email")));
+        return HttpResponseEntity.ok(INDEX_HTML, makeResponseBody(INDEX_HTML));
+    }
 
-        for (final Entry<String, String> entry : httpResponseEntity.getAdditionalHeader().entrySet()) {
-            stringJoiner.add(entry.getKey() + entry.getValue());
-        }
-
-        if (httpStatusCode != HttpStatusCode.FOUND) {
-            stringJoiner.add("Content-Type: " + contentType + ";charset=utf-8 ");
-            stringJoiner.add("Content-Length: " + responseBody.getBytes().length + " ");
-            stringJoiner.add("");
-            stringJoiner.add(responseBody);
-        }
-
-        return stringJoiner.toString();
+    private Map<String, String> parseFormData(final String body) {
+        return Arrays.stream(body.split(BODY_DELIMITER))
+                .map(data -> data.split(PAIR_DELIMITER))
+                .collect(Collectors.toMap(
+                        data -> data[KEY_INDEX],
+                        data -> data[VALUE_INDEX])
+                );
     }
 
     private String makeResponseBody(final String path) throws IOException {
@@ -163,12 +141,5 @@ public class Http11Processor implements Runnable, Processor {
         final String filePath = classLoader.getResource(STATIC + path).getPath();
         final String fileContent = new String(Files.readAllBytes(Path.of(filePath)));
         return String.join("\r\n", fileContent);
-    }
-
-    private String makeContentType(final String path) {
-        if (path.endsWith("css")) {
-            return "text/css";
-        }
-        return "text/html";
     }
 }

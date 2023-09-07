@@ -1,10 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -48,10 +46,8 @@ public class Http11Processor implements Runnable, Processor {
         try (
                 InputStream inputStream = connection.getInputStream();
                 OutputStream outputStream = connection.getOutputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            HttpRequest httpRequest = new HttpRequest(inputStream);
             Cookies cookies = httpRequest.getCookies();
 
             String response = null;

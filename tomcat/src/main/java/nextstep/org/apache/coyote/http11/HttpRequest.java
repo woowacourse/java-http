@@ -4,6 +4,8 @@ import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +23,9 @@ public class HttpRequest {
     private final Cookies cookies = new Cookies();
     private Map<String, String> parsedBody = null;
 
-    public HttpRequest(BufferedReader bufferedReader) throws IOException {
+    public HttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
         this.startLine = new StartLine(bufferedReader.readLine());
         extractHeaders(bufferedReader);
 

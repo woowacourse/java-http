@@ -67,21 +67,9 @@ public class HelloWorldContext implements Context {
         try {
             return process(request);
         } catch (final UnsupportedHttpMethodException e) {
-            return Response.of(
-                    request,
-                    HttpStatusCode.METHOD_NOT_ALLOWED,
-                    ContentType.TEXT_HTML,
-                    HttpConsts.BLANK,
-                    new HeaderDto(HttpHeaderConsts.LOCATION, "/406.html")
-            );
+            return ResponseGenerator.createRedirectResponse(request, "/406.html");
         } catch (final UnsupportedApiException e) {
-            return Response.of(
-                    request,
-                    HttpStatusCode.NOT_FOUND,
-                    ContentType.TEXT_HTML,
-                    HttpConsts.BLANK,
-                    new HeaderDto(HttpHeaderConsts.LOCATION, "/404.html")
-            );
+            return ResponseGenerator.createRedirectResponse(request, "/404.html");
         }
     }
 

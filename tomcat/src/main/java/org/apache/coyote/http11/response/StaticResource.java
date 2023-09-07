@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import nextstep.jwp.servlet.exception.NotFoundFileException;
+import org.apache.catalina.servlet.exception.NotFoundFileException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +20,7 @@ public class StaticResource {
             InputStream resourceAsStream = ClassLoader.getSystemResourceAsStream("static" + uri);
             byte[] bytes = resourceAsStream.readAllBytes();
             return new StaticResource(bytes, extractFileExtension(uri));
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             throw new NotFoundFileException();
         }
     }

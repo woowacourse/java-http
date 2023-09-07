@@ -2,16 +2,16 @@ package org.apache.coyote.common;
 
 import org.apache.coyote.httprequest.exception.InvalidHttpVersionException;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HttpVersion {
 
     private static final String PROTOCOL_PREFIX = "HTTP/";
-    private static final String VERSION_DELIMITER = "\\.";
+    private static final char VERSION_DELIMITER = '.';
     private static final int MAIN_VERSION_INDEX = 0;
     private static final int SUB_VERSION_INDEX = 1;
+    private static final int START_INDEX = 0;
+    private static final int NEXT_INDEX = 1;
 
     private final int mainVersion;
     private final int subVersion;
@@ -39,9 +39,10 @@ public class HttpVersion {
     }
 
     private static List<Integer> splitMainAndSubVersion(final String version) {
-        return Arrays.stream(version.split(VERSION_DELIMITER))
-                .map(Integer::parseInt)
-                .collect(Collectors.toUnmodifiableList());
+        final int indexOfDelimiter = version.indexOf(VERSION_DELIMITER);
+        final int mainVersion = Integer.parseInt(version.substring(START_INDEX, indexOfDelimiter));
+        final int subVersion = Integer.parseInt(version.substring(indexOfDelimiter + NEXT_INDEX));
+        return List.of(mainVersion, subVersion);
     }
 
     public String getValue() {

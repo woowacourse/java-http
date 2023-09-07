@@ -11,9 +11,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.List;
-import mvc.controller.exception.InvalidParameterException;
-import nextstep.jwp.application.exception.AlreadyExistsAccountException;
-import nextstep.jwp.application.exception.LoginFailureException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Context;
 import org.apache.coyote.Processor;
@@ -58,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             final Response response = processRequest(request, context);
 
             bufferedWriter.write(response.convertResponseMessage());
-        } catch (final IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException | InvalidRequestPathException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -66,10 +63,6 @@ public class Http11Processor implements Runnable, Processor {
     private Response processRequest(final Request request, final Context context) throws IOException {
         try {
             return context.service(request);
-        } catch (final InvalidParameterException | AlreadyExistsAccountException e) {
-            return Response.of(request, HttpStatusCode.BAD_REQUEST, ContentType.JSON, e.getMessage());
-        } catch (final LoginFailureException e) {
-            return createRedirectResponse(request, "/401.html");
         } catch (final ResourceNotFoundException e) {
             return createRedirectResponse(request, "/404.html");
         } catch (final UnsupportedApiException e) {
@@ -85,6 +78,7 @@ public class Http11Processor implements Runnable, Processor {
                 return context;
             }
         }
+
         throw new InvalidRequestPathException();
     }
 }

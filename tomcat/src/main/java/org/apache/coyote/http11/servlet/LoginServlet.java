@@ -70,7 +70,7 @@ public class LoginServlet implements Servlet {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> loginSuccess(request, user))
-                .orElseGet(() -> loginFail());
+                .orElseGet(this::loginFail);
     }
 
     private boolean isLoggedIn(HttpRequest request) {

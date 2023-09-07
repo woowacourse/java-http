@@ -10,6 +10,9 @@ public class ServletFinder {
     private static final Servlet STATIC_RESOURCE_SERVLET;
     private static final Servlet NOT_FOUND_SERVLET;
 
+    private ServletFinder() {
+    }
+
     static {
         servlets = new HashMap<>();
         servlets.put("/", new HelloWorldServlet());

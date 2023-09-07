@@ -8,7 +8,10 @@ import java.nio.file.Path;
 
 public class StaticFileLoader {
 
-    public static final String STATIC = "static";
+    private static final String STATIC = "static";
+
+    private StaticFileLoader() {
+    }
 
     public static String load(String fileName) throws IOException {
         URL resource = StaticFileLoader.class.getClassLoader().getResource(STATIC + fileName);

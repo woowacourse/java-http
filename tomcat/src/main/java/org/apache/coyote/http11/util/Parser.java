@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.util;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.request.QueryParams;

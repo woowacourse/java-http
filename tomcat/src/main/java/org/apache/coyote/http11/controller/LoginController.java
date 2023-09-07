@@ -3,7 +3,6 @@ package org.apache.coyote.http11.controller;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
@@ -130,9 +129,8 @@ public class LoginController extends AbstractController {
     }
 
     private Session createSession(final ResponseHeaders responseHeaders, final HttpRequest httpRequest, final User user) {
-        UUID sessionId = UUID.randomUUID();
-        responseHeaders.addHeader(HttpHeaderName.SET_COOKIE.getValue(), "JSESSIONID=" + sessionId);
         Session session = httpRequest.getSession(true);
+        responseHeaders.addHeader(HttpHeaderName.SET_COOKIE.getValue(), "JSESSIONID=" + session.getId());
         session.setAttribute("user", user);
         return session;
     }

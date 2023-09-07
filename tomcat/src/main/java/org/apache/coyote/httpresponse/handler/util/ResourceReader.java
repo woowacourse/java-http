@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.header;
+package org.apache.coyote.httpresponse.handler.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

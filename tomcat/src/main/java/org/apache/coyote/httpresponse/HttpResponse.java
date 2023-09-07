@@ -1,7 +1,7 @@
 package org.apache.coyote.httpresponse;
 
 import org.apache.coyote.common.HttpVersion;
-import org.apache.coyote.httpresponse.header.ResourceReader;
+import org.apache.coyote.httpresponse.handler.util.ResourceReader;
 import org.apache.coyote.httpresponse.header.ResponseHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -76,7 +76,7 @@ class AuthServiceTest {
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(OK),
-                            () -> assertThat(response.getUri()).isEqualTo("/login.html")
+                            () -> assertThat(response.getLocation()).isEqualTo("/login.html")
                     );
                 }
 
@@ -101,7 +101,7 @@ class AuthServiceTest {
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
-                            () -> assertThat(response.getUri()).isEqualTo("/index.html")
+                            () -> assertThat(response.getLocation()).isEqualTo("/index.html")
                     );
                 }
 
@@ -121,7 +121,7 @@ class AuthServiceTest {
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(UNAUTHORIZED),
-                            () -> assertThat(response.getUri()).isEqualTo("/401.html")
+                            () -> assertThat(response.getLocation()).isEqualTo("/401.html")
                     );
                 }
 
@@ -148,7 +148,7 @@ class AuthServiceTest {
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(OK),
-                            () -> assertThat(response.getUri()).isEqualTo("/register.html")
+                            () -> assertThat(response.getLocation()).isEqualTo("/register.html")
                     );
                 }
 
@@ -172,7 +172,7 @@ class AuthServiceTest {
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(CONFLICT),
-                            () -> assertThat(response.getUri()).isEqualTo("/409.html")
+                            () -> assertThat(response.getLocation()).isEqualTo("/409.html")
                     );
                 }
 
@@ -189,7 +189,7 @@ class AuthServiceTest {
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
-                            () -> assertThat(response.getUri()).isEqualTo("/index.html")
+                            () -> assertThat(response.getLocation()).isEqualTo("/index.html")
                     );
                 }
 

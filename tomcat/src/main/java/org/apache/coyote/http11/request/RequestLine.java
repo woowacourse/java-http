@@ -9,6 +9,11 @@ public class RequestLine {
     private static final String DELIMITER = " ";
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
+    private static final String QUERY_PARAM_START_SIGN = "?";
+    private static final String QUERY_PARAMETER_DELIMITER = "&";
+    private static final String QUERY_PARAM_KEY_VALUE_SIGN = "=";
+    private static final int QUERY_KEY_INDEX = 0;
+    private static final int QUERY_VALUE_INDEX = 1;
 
     private final String requestMethod;
     private final String path;
@@ -30,18 +35,18 @@ public class RequestLine {
         final String method = lineSplit[METHOD_INDEX];
         final String uri = lineSplit[URI_INDEX];
 
-        final int index = uri.indexOf("?");
+        final int index = uri.indexOf(QUERY_PARAM_START_SIGN);
         if (index == -1) {
             return new RequestLine(method, uri, Map.of());
         }
 
         final String path = uri.substring(0, index);
         final String queryString = uri.substring(index + 1);
-        final Map<String, String> query = Arrays.stream(queryString.split("&"))
-                .map(str -> str.split("="))
+        final Map<String, String> query = Arrays.stream(queryString.split(QUERY_PARAMETER_DELIMITER))
+                .map(str -> str.split(QUERY_PARAM_KEY_VALUE_SIGN))
                 .collect(Collectors.toMap(
-                        e -> e[0],
-                        e -> e[1]
+                        e -> e[QUERY_KEY_INDEX],
+                        e -> e[QUERY_VALUE_INDEX]
                 ));
 
         return new RequestLine(method, path, query);

@@ -7,7 +7,7 @@ import java.nio.file.Files;
 
 public class HttpResponse {
 
-    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
     private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String BLANK = "";
     private static final String SPACE = " ";
@@ -37,7 +37,7 @@ public class HttpResponse {
 
     private String readStaticFile(final String fileName) {
         final String filePath = "static/" + fileName;
-        final URL res = classLoader.getResource(filePath);
+        final URL res = CLASS_LOADER.getResource(filePath);
 
         try {
             return new String(Files.readAllBytes(new File(res.getFile()).toPath()));

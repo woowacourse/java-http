@@ -54,3 +54,10 @@
 - [x] 회원가입을 할 수 있다.
 - [x] 회원가입과 로그인을 POST로 변경한다.
 - [x] 요청에서 Request Body를 파싱할 수 있다.
+
+
+## 3. Cookie에 JSESSIONID 값 저장하기
+- JSESSIONID 쿠키를 추가해 클라이언트에게 전달할 수 있다.
+
+### 요구사항을 만족시키기 위해 필요한 기능
+- [ ] Set-Cookie에 JSESSIONID를 담아 보낸다.

@@ -40,7 +40,6 @@ public class Http11Processor implements Runnable, Processor {
                 final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         ) {
             HttpRequest httpRequest = HttpRequestParser.extract(reader);
-
             HttpResponse httpResponse = HANDLER_MAPPING.extractHttpResponse(httpRequest);
             String response = httpResponse.extractResponse();
 
@@ -52,4 +51,3 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 }
-

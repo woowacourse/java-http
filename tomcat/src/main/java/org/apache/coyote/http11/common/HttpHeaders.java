@@ -3,6 +3,7 @@ package org.apache.coyote.http11.common;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
@@ -36,13 +37,8 @@ public class HttpHeaders {
         headers.put(header.getName(), value);
     }
 
-    public String getHeader(String name) {
-        return headers.get(name);
-    }
-
-    public Cookies getCookies() {
-        String cookieLine = headers.get(COOKIE);
-        return Cookies.create(cookieLine);
+    public Optional<String> getHeader(String name) {
+        return Optional.ofNullable(headers.get(name));
     }
 
     @Override

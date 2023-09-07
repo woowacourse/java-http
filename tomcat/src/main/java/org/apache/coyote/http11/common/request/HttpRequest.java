@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -50,11 +51,11 @@ public class HttpRequest {
     }
 
     private static MessageBody findBody(HttpHeaders headers, BufferedReader br) throws IOException {
-        final String contentLength = headers.getHeader(HttpHeaderName.CONTENT_LENGTH.getName());
-        if (contentLength == null) {
+        Optional<String> contentLength = headers.getHeader(HttpHeaderName.CONTENT_LENGTH.getName());
+        if (contentLength.isEmpty()) {
             return MessageBody.empty();
         }
-        final int length = Integer.parseInt(contentLength);
+        final int length = Integer.parseInt(contentLength.get());
         char[] buffer = new char[length];
         br.read(buffer, 0, length);
         return MessageBody.create(new String(buffer));

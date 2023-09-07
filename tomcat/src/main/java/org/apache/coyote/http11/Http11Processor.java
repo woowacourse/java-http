@@ -15,7 +15,11 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,10 +52,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
-            final HttpRequest httpRequest = HttpRequest.from(inputStream);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpCookie cookie = HttpCookie.empty();
             if (httpRequest.hasCookie()) {
                 cookie = HttpCookie.from(httpRequest.getCookie());
@@ -60,14 +64,14 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponseEntity httpResponseEntity = makeResponseEntity(httpRequest, cookie);
             final String response = makeResponse(httpResponseEntity);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            bufferedWriter.write(response);
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) throws IOException {
+    private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) {
         final HttpRequestStartLine startLine = httpRequest.getStartLine();
 
         if (startLine.getHttpMethod().equals(HttpMethod.POST)) {

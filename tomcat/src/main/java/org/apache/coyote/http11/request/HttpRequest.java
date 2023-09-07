@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +16,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final List<String> request = new ArrayList<>();
 
         String line = bufferedReader.readLine();

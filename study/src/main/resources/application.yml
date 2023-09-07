@@ -3,8 +3,11 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+#    모든 쓰레드가 사용 중 일 때 들어온 요청이 대기하는 최대 큐의 길이
+    accept-count: 2
+    # 서버가 유지할 수 있는 최대 Connection의 수
+    max-connections: 2
+    # 최대 실행 가능 Thread 수
     threads:
       max: 2
   compression:

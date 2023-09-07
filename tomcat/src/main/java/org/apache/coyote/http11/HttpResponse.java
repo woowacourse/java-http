@@ -110,6 +110,10 @@ public class HttpResponse {
         headers.put("Set-Cookie", cookie.toString());
     }
 
+    public void sendRedirect(final String location) {
+        headers.put("Location", location);
+    }
+
 }
 
 class HttpResponseBuilder {

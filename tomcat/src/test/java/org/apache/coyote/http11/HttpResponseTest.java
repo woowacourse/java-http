@@ -97,6 +97,20 @@ class HttpResponseTest {
         assertThat(responseString).contains("Set-Cookie: key=value; key2=value2");
     }
 
+    @Test
+    void sendRedirect() {
+        //given
+        final var response = new HttpResponse(HTTP_1_1);
+        final var location = "/index.html";
+
+        //when
+        response.sendRedirect(location);
+
+        //then
+        String responseString = response.buildResponse();
+        assertThat(responseString).contains("Location: " + location);
+    }
+
 
 
 }

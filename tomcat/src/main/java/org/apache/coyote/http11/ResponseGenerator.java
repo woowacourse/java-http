@@ -28,6 +28,7 @@ public class ResponseGenerator {
     private static final String REGISTER_PATH = "/register";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
+    private static final String EMAIL_KEY = "email";
 
     private ResponseGenerator() {
     }
@@ -105,7 +106,7 @@ public class ResponseGenerator {
             return getRegisterResponseGetMethod();
         }
 
-        return null;
+        return getRegisterResponsePostMethod(request);
     }
 
     private static Response getRegisterResponseGetMethod() throws IOException {
@@ -114,6 +115,15 @@ public class ResponseGenerator {
         final String responseBody = getFileToResponseBody("/register.html");
 
         return Response.of(startLine, contentType, responseBody);
+    }
+
+    private static Response getRegisterResponsePostMethod(final Request request) {
+        final String account = request.getBodyValue(ACCOUNT_KEY);
+        final String password = request.getBodyValue(PASSWORD_KEY);
+        final String email = request.getBodyValue(EMAIL_KEY);
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        return getRedirectResponse("/index.html");
     }
 
     private static Response getFileResponse(final Request request) throws IOException {

@@ -3,6 +3,7 @@ package org.apache.coyote.common;
 import org.apache.coyote.httprequest.exception.InvalidHttpVersionException;
 
 import java.util.List;
+import java.util.Objects;
 
 public class HttpVersion {
 
@@ -47,5 +48,18 @@ public class HttpVersion {
 
     public String getValue() {
         return PROTOCOL_PREFIX + mainVersion + VERSION_DELIMITER + subVersion;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof HttpVersion)) return false;
+        HttpVersion that = (HttpVersion) o;
+        return mainVersion == that.mainVersion && subVersion == that.subVersion;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mainVersion, subVersion);
     }
 }

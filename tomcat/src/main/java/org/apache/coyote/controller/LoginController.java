@@ -4,7 +4,7 @@ import nextstep.FileResolver;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Controller;
-import org.apache.coyote.controller.util.ResponseManager;
+import org.apache.coyote.controller.util.HttpResponse;
 import org.apache.coyote.handler.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpSession;
@@ -25,8 +25,9 @@ public class LoginController extends Controller {
     private static final String PASSWORD = "password";
 
     private final SessionManager sessionManager;
+    private static final LoginController loginController = new LoginController(new SessionManager());
 
-    public LoginController(final SessionManager sessionManager) {
+    private LoginController(final SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
@@ -44,9 +45,18 @@ public class LoginController extends Controller {
         return file.createResponse();
     }
 
+    @Override
+    public String getResponse(final String uri) {
+        return null;
+    }
+
+    public static LoginController getController() {
+        return loginController;
+    }
+
     private String getLoginPage(final HttpRequest request) throws IOException {
         if (request.containsCookie()) {
-            return createRedirectResponse(ResponseManager.HTTP_302_FOUND.getHeader(), FileResolver.INDEX_HTML);
+            return createRedirectResponse(HttpResponse.HTTP_302_FOUND.getValue(), FileResolver.INDEX_HTML);
         }
         return FileResolver.LOGIN.createResponse();
     }
@@ -68,10 +78,10 @@ public class LoginController extends Controller {
 
     private String createResponse(final boolean validUser, final HttpSession session) {
         if (validUser) {
-            final String responseHeader = createJsessionResponseHeader(ResponseManager.HTTP_302_FOUND.getHeader(), session.getId());
+            final String responseHeader = createJsessionResponseHeader(HttpResponse.HTTP_302_FOUND.getValue(), session.getId());
             return createRedirectResponse(responseHeader, FileResolver.INDEX_HTML);
         }
-        return createRedirectResponse(ResponseManager.HTTP_302_FOUND.getHeader(), FileResolver.HTML_401);
+        return createRedirectResponse(HttpResponse.HTTP_302_FOUND.getValue(), FileResolver.HTML_401);
     }
 
     private boolean isValidUser(final User user, final String password) {

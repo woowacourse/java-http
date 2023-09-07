@@ -8,4 +8,5 @@ public abstract class Controller {
 
     public abstract String run(final HttpRequest request) throws IOException;
 
+    public abstract String getResponse(final String uri) throws IOException;
 }

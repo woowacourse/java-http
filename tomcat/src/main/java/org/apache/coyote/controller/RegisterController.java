@@ -14,6 +14,15 @@ public class RegisterController extends Controller {
     private static final String GET = "GET";
     private static final String POST = "POST";
 
+    private static final RegisterController registerController = new RegisterController();
+
+    private RegisterController() {
+    }
+
+    public static RegisterController getController() {
+        return registerController;
+    }
+
     public String run(final HttpRequest request) throws IOException {
         final String parsedUri = request.getUri();
         final String method = request.getMethod();
@@ -27,6 +36,11 @@ public class RegisterController extends Controller {
             InMemoryUserRepository.save(user);
             return createRedirectResponse(FileResolver.INDEX_HTML);
         }
+        return null;
+    }
+
+    @Override
+    public String getResponse(final String uri) {
         return null;
     }
 

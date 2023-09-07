@@ -11,7 +11,7 @@ public class RequestBody {
 
     private final Map<String, String> values;
 
-    public RequestBody() {
+    private RequestBody() {
         this(new HashMap<>());
     }
 

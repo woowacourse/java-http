@@ -9,20 +9,20 @@ public class HttpCookie {
     public static final String JSESSIONID_KEY = "JSESSIONID";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private static final HttpCookie EMPTY = new HttpCookie();
 
-    private final Map<String, String> values = new HashMap<>();
+    private final Map<String, String> values;
 
     private HttpCookie() {
+        this(new HashMap<>());
     }
 
     private HttpCookie(Map<String, String> values) {
-        this.values.putAll(values);
+        this.values = values;
     }
 
     public static HttpCookie from(String cookies) {
         if (cookies.isBlank()) {
-            return EMPTY;
+            return new HttpCookie();
         }
         Map<String, String> values = new HashMap<>();
         for (String cookie : cookies.split(COOKIE_SEPARATOR)) {

@@ -106,6 +106,10 @@ public class HttpResponse {
         this.contentType = contentType;
     }
 
+    public void setCookie(final HttpCookie cookie) {
+        headers.put("Set-Cookie", cookie.toString());
+    }
+
 }
 
 class HttpResponseBuilder {

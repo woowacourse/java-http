@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -80,6 +81,20 @@ class HttpResponseTest {
 
         //then
         assertThat(response).extracting("contentType").isEqualTo(contentType);
+    }
+
+    @Test
+    void setCookie() {
+        //given
+        final var response = new HttpResponse(HTTP_1_1);
+        final var cookie = new HttpCookie(Map.of("key", "value", "key2", "value2"));
+
+        //when
+        response.setCookie(cookie);
+
+        //then
+        String responseString = response.buildResponse();
+        assertThat(responseString).contains("Set-Cookie: key=value; key2=value2");
     }
 
 

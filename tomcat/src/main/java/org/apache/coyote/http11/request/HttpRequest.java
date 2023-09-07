@@ -18,8 +18,6 @@ import static org.apache.coyote.http11.common.header.HeaderProperty.COOKIE;
 
 public class HttpRequest {
 
-    private static final String NEW_LINE = "\r\n";
-
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
@@ -51,7 +49,7 @@ public class HttpRequest {
             nextRequestHeaderLine = bufferedReader.readLine();
         }
 
-        return String.join(NEW_LINE, requestHeaders);
+        return String.join(System.lineSeparator(), requestHeaders);
     }
 
     private static String readRequestBody(final BufferedReader bufferedReader, final RequestHeaders requestHeaders) throws IOException {

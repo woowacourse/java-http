@@ -9,8 +9,6 @@ import java.util.Objects;
 
 public class HttpResponse {
 
-    private static final String NEW_LINE = "\r\n";
-
     private final StatusLine statusLine;
     private final ResponseHeaders responseHeaders;
     private final ResponseBody responseBody;
@@ -30,7 +28,7 @@ public class HttpResponse {
     }
 
     public String convertToString() {
-        return String.join(NEW_LINE,
+        return String.join(System.lineSeparator(),
                 statusLine.convertToString(),
                 responseHeaders.convertToString(),
                 "",

@@ -10,8 +10,6 @@ import java.util.StringTokenizer;
 import static org.apache.coyote.http11.common.header.HeaderProperty.CONTENT_LENGTH;
 
 public class RequestHeaders {
-
-    private static final String NEW_LINE = "\r\n";
     private static final String HEADER_VALUE_SEPARATOR = ": ";
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
@@ -25,7 +23,7 @@ public class RequestHeaders {
     public static RequestHeaders from(final String header) {
         final Map<String, String> requestHeader = new HashMap<>();
 
-        final StringTokenizer stringTokenizer = new StringTokenizer(header, NEW_LINE);
+        final StringTokenizer stringTokenizer = new StringTokenizer(header, System.lineSeparator());
         while (stringTokenizer.hasMoreTokens()) {
             final String headerLine = stringTokenizer.nextToken();
             final String[] split = headerLine.split(HEADER_VALUE_SEPARATOR);

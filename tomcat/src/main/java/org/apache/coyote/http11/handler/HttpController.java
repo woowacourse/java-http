@@ -9,5 +9,5 @@ public interface HttpController {
 
 	boolean isSupported(final HttpRequest request);
 
-	HttpResponse handleTo(final HttpRequest request) throws IOException;
+	void handleTo(final HttpRequest request, final HttpResponse response) throws IOException;
 }

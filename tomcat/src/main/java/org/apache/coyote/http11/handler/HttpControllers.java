@@ -25,19 +25,19 @@ public class HttpControllers {
 		new UnauthorizedHandler()
 	);
 
-	public HttpResponse handleTo(final HttpRequest request) throws IOException {
+	public void handleTo(final HttpRequest request, final HttpResponse response) throws IOException {
 		try {
-			return HTTP_CONTROLLERS.stream()
+			HTTP_CONTROLLERS.stream()
 				.filter(handler -> handler.isSupported(request))
 				.findAny()
 				.orElseGet(NotFoundController::new)
-				.handleTo(request);
+				.handleTo(request, response);
 		} catch (final Exception e) {
-			return EXCEPTION_HANDLERS.stream()
+			EXCEPTION_HANDLERS.stream()
 				.filter(handler -> handler.isSupported(e))
 				.findAny()
 				.orElseGet(InternalServerErrorHandler::new)
-				.handleTo(e);
+				.handleTo(e, response);
 		}
 	}
 }

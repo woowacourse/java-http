@@ -1,8 +1,9 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
-import org.apache.coyote.http11.MimeType;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
+import org.apache.catalina.RequestHandler;
+import org.apache.coyote.MimeType;
+import org.apache.coyote.request.Request;
+import org.apache.coyote.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +12,7 @@ public class StaticContentRequestHandler extends RequestHandler {
 	private static final Logger log = LoggerFactory.getLogger(StaticContentRequestHandler.class);
 	private static final String REQUEST_PATH = "/*";
 
-	protected StaticContentRequestHandler() {
+	public StaticContentRequestHandler() {
 		super(REQUEST_PATH);
 	}
 

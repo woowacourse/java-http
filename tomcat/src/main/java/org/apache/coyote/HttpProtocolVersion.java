@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 public enum HttpProtocolVersion {
 	HTTP11("HTTP/1.1"),

@@ -1,20 +1,14 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.response;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.coyote.http11.Cookies;
-import org.apache.coyote.http11.MimeType;
-import org.apache.coyote.http11.handler.ResourceProvider;
+import org.apache.coyote.Cookie;
+import org.apache.coyote.MimeType;
 
-/***
- * TODO: 빌더 패턴을 사용한 리팩토링
- * HttpServletResponse 참고하여 리팩토링 진행
- */
+import nextstep.jwp.handler.ResourceProvider;
+
 public class Response {
-
-	private static final String CRLF = "\r\n";
-	private static final String HEADER_BODY_SEPARATOR = "";
 
 	private final StatusLine statusLine;
 	private final ResponseHeader header;
@@ -44,9 +38,20 @@ public class Response {
 
 	public static Response redirect(final String location) {
 		final var statusLine = new StatusLine(StatusCode.FOUND);
-		final var header = getHeader();
-		header.add(ResponseHeaderType.LOCATION, location);
+		final var header = makeHeader();
+		header.add(HeaderType.LOCATION, location);
 		return new Response(statusLine, header, null);
+	}
+
+	private static ResponseHeader makeHeader() {
+		return makeHeader("", MimeType.HTML);
+	}
+
+	private static ResponseHeader makeHeader(final String responseBody, final MimeType mimeType) {
+		final Map<HeaderType, String> headers = new HashMap<>();
+		headers.put(HeaderType.CONTENT_TYPE, mimeType.getValue());
+		headers.put(HeaderType.CONTENT_LENGTH, Integer.toString(responseBody.getBytes().length));
+		return new ResponseHeader(headers);
 	}
 
 	private static Response code(final StatusCode code) {
@@ -59,31 +64,24 @@ public class Response {
 
 	private static Response of(final StatusCode code, final String responseBody, final MimeType mimeType) {
 		final var statusLine = new StatusLine(code);
-		final var header = getHeader(responseBody, mimeType);
+		final var header = makeHeader(responseBody, mimeType);
 		return new Response(statusLine, header, responseBody);
 	}
 
-	private static ResponseHeader getHeader() {
-		return getHeader("", MimeType.HTML);
-	}
-
-	private static ResponseHeader getHeader(final String responseBody, final MimeType mimeType) {
-		final Map<ResponseHeaderType, String> headers = new HashMap<>();
-		headers.put(ResponseHeaderType.CONTENT_TYPE, mimeType.formatMimeType());
-		headers.put(ResponseHeaderType.CONTENT_LENGTH, Integer.toString(responseBody.getBytes().length));
-		return new ResponseHeader(headers);
-	}
-
-	public Response addCookie(final Cookies cookies) {
-		header.addCookies(cookies);
+	public Response addCookie(final Cookie cookie) {
+		header.addCookie(cookie);
 		return this;
 	}
 
-	public String format() {
-		return String.join(CRLF,
-			statusLine.formatStatusLine(),
-			header.formatHeader(),
-			HEADER_BODY_SEPARATOR,
-			responseBody);
+	public StatusLine getStatusLine() {
+		return statusLine;
+	}
+
+	public ResponseHeader getHeader() {
+		return header;
+	}
+
+	public String getResponseBody() {
+		return responseBody;
 	}
 }

@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina;
 
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.HttpMethod;
+import org.apache.coyote.request.Request;
+import org.apache.coyote.response.Response;
 
 public abstract class RequestHandler {
 

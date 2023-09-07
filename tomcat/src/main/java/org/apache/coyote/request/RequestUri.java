@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.request;
+
+import static java.util.stream.Collectors.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class RequestUri {
 
@@ -42,7 +43,7 @@ public class RequestUri {
 		return Arrays.stream(queryString.split(QUERY_PARAM_DELIMITER))
 			.map(queryParam -> queryParam.split(KEY_VALUE_SEPARATOR, 2))
 			.filter(parts -> parts.length == 2)
-			.collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+			.collect(toMap(parts -> parts[0], parts -> parts[1]));
 	}
 
 	private static boolean hasNoQuery(final int index) {

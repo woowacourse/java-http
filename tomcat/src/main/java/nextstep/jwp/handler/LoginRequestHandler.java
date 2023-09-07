@@ -1,11 +1,12 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
-import org.apache.coyote.http11.Cookies;
-import org.apache.coyote.http11.MimeType;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.session.Session;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.RequestHandler;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.Cookie;
+import org.apache.coyote.MimeType;
+import org.apache.coyote.request.Request;
+import org.apache.coyote.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,6 @@ public class LoginRequestHandler extends RequestHandler {
 		if (sessionId == null) {
 			return false;
 		}
-
 		return SessionManager.findById(sessionId) != null;
 	}
 
@@ -58,19 +58,18 @@ public class LoginRequestHandler extends RequestHandler {
 			return Response.unauthorized();
 		}
 
-		final var cookies = Cookies.empty();
 		final var session = createSession(user.get());
-		cookies.addSession(session.getId());
+		final var cookie = Cookie.session(session.getId());
 
 		log.info("[LOGIN SUCCESS] account: {}", account);
 		return Response.redirect(REDIRECT_LOCATION)
-			.addCookie(cookies);
+			.addCookie(cookie);
 	}
 
 	private boolean isInvalidInput(final String account, final String password) {
 		return isBlank(account) || isBlank(password);
 	}
-	
+
 	private boolean isBlank(final String value) {
 		return value == null || value.isBlank();
 	}

@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.request;
+
+import static java.util.stream.Collectors.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RequestBody {
 
@@ -27,8 +28,8 @@ public class RequestBody {
 		return Arrays.stream(body.split(DELIMITER))
 			.map(field -> field.split(KEY_VALUE_SEPARATOR, 2))
 			.filter(field -> field.length == 2)
-			.collect(Collectors.collectingAndThen(
-				Collectors.toMap(parts -> parts[0], field -> field[1]),
+			.collect(collectingAndThen(
+				toMap(parts -> parts[0], field -> field[1]),
 				RequestBody::new
 			));
 	}

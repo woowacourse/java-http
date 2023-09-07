@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 public enum MimeType {
 	HTML(".html", "text/html", true),
@@ -8,12 +8,12 @@ public enum MimeType {
 	;
 
 	private final String fileExtension;
-	private final String mimeType;
+	private final String value;
 	private final boolean isText;
 
-	MimeType(final String fileExtension, final String mimeType, final boolean isText) {
+	MimeType(final String fileExtension, final String value, final boolean isText) {
 		this.fileExtension = fileExtension;
-		this.mimeType = mimeType;
+		this.value = value;
 		this.isText = isText;
 	}
 
@@ -36,11 +36,11 @@ public enum MimeType {
 		}
 	}
 
-	public String formatMimeType() {
+	public String getValue() {
 		if (!isText) {
-			return mimeType;
+			return value;
 		}
-		return addCharsetParam(mimeType);
+		return addCharsetParam(value);
 	}
 
 	private String addCharsetParam(String type) {

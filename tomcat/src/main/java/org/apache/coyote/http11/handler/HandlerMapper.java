@@ -7,12 +7,12 @@ import java.util.Set;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.RequestLine;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.RequestLine;
+import org.apache.coyote.http11.message.response.Response;
 
 public class HandlerMapper {
     private static final Map<HandlerStatus, Function<Request, Response>> HANDLERS = new HashMap<>();

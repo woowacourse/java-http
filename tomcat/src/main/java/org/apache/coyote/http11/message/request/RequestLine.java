@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
 public class RequestLine {
     private static final String REQUEST_HEADER_DELIMITER = " ";
@@ -25,12 +25,12 @@ public class RequestLine {
         return this.requestURI.isExistFile();
     }
 
-    public String getPath() {
-        return this.requestURI.getPath();
-    }
-
     public String readFile() {
         return this.requestURI.readFile();
+    }
+
+    public String getPath() {
+        return this.requestURI.getPath();
     }
 
     public RequestURI getRequestURI() {

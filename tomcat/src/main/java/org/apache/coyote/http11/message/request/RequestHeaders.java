@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.util.Map;

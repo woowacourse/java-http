@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.message.response;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.request.RequestURI;
+import org.apache.coyote.http11.message.ContentType;
+import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.request.RequestURI;
 
 public class Response {
     private final String httpVersion;

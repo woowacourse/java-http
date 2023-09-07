@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.message.response;
 
 import java.util.HashMap;
 import java.util.List;

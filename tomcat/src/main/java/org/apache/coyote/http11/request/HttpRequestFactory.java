@@ -17,10 +17,8 @@ public class HttpRequestFactory {
     public static final String CONTENT_LENGTH = "Content-Length";
     private static final Logger log = LoggerFactory.getLogger(HttpRequestFactory.class);
 
-    public static HttpRequest readFrom(final Socket socket) {
-        try (final var inputStream = socket.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
-        ) {
+    public static HttpRequest readFrom(final BufferedReader bufferedReader) {
+        try {
             final String firstLine = bufferedReader.readLine();
 
             final RequestLine requestLine = RequestLine.from(firstLine);

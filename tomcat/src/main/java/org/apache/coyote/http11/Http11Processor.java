@@ -12,7 +12,9 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -45,8 +47,11 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var outputStream = connection.getOutputStream()) {
-            final HttpRequest request = HttpRequestFactory.readFrom(connection);
+        try (final var outputStream = connection.getOutputStream();
+             final var inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+             ) {
+            final HttpRequest request = HttpRequestFactory.readFrom(bufferedReader);
 
             final HttpResponse response = handleRequest(request);
 

@@ -30,6 +30,10 @@ public class HttpRequest {
         return requestLine.containsRequestUri(uri);
     }
 
+    public boolean hasQueryString() {
+        return requestLine.containsRequestUri("?");
+    }
+
     public boolean isRequestUriEndsWith(final String uri) {
         return requestLine.endsWithRequestUri(uri);
     }
@@ -40,6 +44,10 @@ public class HttpRequest {
 
     public String getHeader(final HttpHeader httpHeader) {
         return headers.get(httpHeader);
+    }
+
+    public QueryString getQueryString() {
+        return requestLine.getQueryString();
     }
 
     public Map<String, String> getParsedBody() {

@@ -7,6 +7,7 @@ import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.request.HttpCookie;
 import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.QueryString;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
@@ -14,9 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.apache.coyote.handler.mapping.Path.LOGIN;
 import static org.apache.coyote.handler.mapping.Path.MAIN;
@@ -43,14 +41,11 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
             }
         }
 
-        final String[] parsedRequestUri = httpRequest.getRequestUri().getRequestUri().split("\\?");
-        if (httpRequest.getRequestUri().getRequestUri().contains("?")) {
-            final Map<String, String> queryStrings = Arrays.stream(parsedRequestUri[1].split("&"))
-                    .map(param -> param.split("="))
-                    .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+        if (httpRequest.hasQueryString()) {
+            final QueryString queryString = httpRequest.getQueryString();
 
-            final String account = queryStrings.get("account");
-            final String password = queryStrings.get("password");
+            final String account = queryString.get("account");
+            final String password = queryString.get("password");
 
             try {
                 final User user = InMemoryUserRepository.findByAccount(account)
@@ -74,5 +69,4 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
                 .body(HttpBody.file(LOGIN.getPath()))
                 .build();
     }
-
 }

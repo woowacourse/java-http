@@ -34,6 +34,10 @@ public class RequestLine {
         return requestUri.endsWith(uri);
     }
 
+    public QueryString getQueryString() {
+        return requestUri.getQueryString();
+    }
+
     public RequestUri getRequestUri() {
         return requestUri;
     }

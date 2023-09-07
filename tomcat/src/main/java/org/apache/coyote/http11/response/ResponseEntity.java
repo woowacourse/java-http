@@ -53,7 +53,7 @@ public class ResponseEntity {
 
             return new ResponseEntity(
                     httpStatus,
-                    HttpCookie.from(""),
+                    null,
                     calculateContentType(resourceFileUrl),
                     new String(Files.readAllBytes(Path.of(resourceFileUrl.toURI())))
             );

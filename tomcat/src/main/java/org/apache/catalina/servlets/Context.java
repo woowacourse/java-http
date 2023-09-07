@@ -3,11 +3,12 @@ package org.apache.catalina.servlets;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.servlets.*;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
-public class Servlets {
+public class Context {
 
     private static final Map<String, Servlet> mappings;
 
@@ -19,7 +20,7 @@ public class Servlets {
         mappings.put("/register", new RegisterServlet());
     }
 
-    private Servlets() {
+    private Context() {
     }
 
     public static HttpResponse service(HttpRequest httpRequest) throws IOException {

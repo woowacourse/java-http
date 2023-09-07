@@ -12,7 +12,7 @@ public abstract class Servlet {
 
     private static final String RESOURCE_BASE_PATH = "static/";
 
-    abstract void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
+    public abstract void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
 
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         throw new HttpMethodNotAllowedException();

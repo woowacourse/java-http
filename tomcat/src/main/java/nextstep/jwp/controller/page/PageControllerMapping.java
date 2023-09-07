@@ -1,12 +1,7 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.controller.page;
 
 import java.util.Arrays;
-import nextstep.jwp.controller.page.HelloWorldPageController;
-import nextstep.jwp.controller.page.IndexGetPageController;
-import nextstep.jwp.controller.page.LoginGetPageController;
-import nextstep.jwp.controller.page.LoginPostPageController;
-import nextstep.jwp.controller.page.NotFoundPageController;
-import nextstep.jwp.controller.page.RegisterPostPageController;
+import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public enum PageControllerMapping {

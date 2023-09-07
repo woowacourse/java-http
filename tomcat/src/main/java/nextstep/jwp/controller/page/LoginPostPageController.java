@@ -1,10 +1,9 @@
 package nextstep.jwp.controller.page;
 
-import static org.apache.coyote.http11.common.FileContent.HTML;
-import static org.apache.coyote.http11.common.FileContent.INDEX;
-import static org.apache.coyote.http11.common.FileContent.INDEX_URI;
-import static org.apache.coyote.http11.common.FileContent.STATIC;
-import static org.apache.coyote.http11.common.FileContent.UNAUTHORIZED_URI;
+import static nextstep.jwp.controller.FileContent.HTML;
+import static nextstep.jwp.controller.FileContent.INDEX_URI;
+import static nextstep.jwp.controller.FileContent.STATIC;
+import static nextstep.jwp.controller.FileContent.UNAUTHORIZED_URI;
 import static org.apache.coyote.http11.common.HttpHeaders.COOKIE_NAME;
 import static org.apache.coyote.http11.common.HttpHeaders.LOCATION;
 

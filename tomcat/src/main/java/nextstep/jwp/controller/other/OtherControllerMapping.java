@@ -1,7 +1,7 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.controller.other;
 
 import java.util.Arrays;
-import nextstep.jwp.controller.other.OtherController;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.page.NotFoundPageController;
 import org.apache.coyote.http11.request.HttpRequest;
 

@@ -3,6 +3,8 @@ package nextstep.jwp.controller;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import nextstep.jwp.controller.other.OtherControllerMapping;
+import nextstep.jwp.controller.page.PageControllerMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public enum ControllerMapping {

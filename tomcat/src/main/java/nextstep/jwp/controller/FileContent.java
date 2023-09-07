@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package nextstep.jwp.controller;
 
 import java.util.Arrays;
 

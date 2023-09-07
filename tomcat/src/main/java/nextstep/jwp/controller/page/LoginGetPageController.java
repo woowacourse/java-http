@@ -1,8 +1,8 @@
 package nextstep.jwp.controller.page;
 
 import static org.apache.coyote.http11.common.ContentType.HTML;
-import static org.apache.coyote.http11.common.FileContent.INDEX_URI;
-import static org.apache.coyote.http11.common.FileContent.STATIC;
+import static nextstep.jwp.controller.FileContent.INDEX_URI;
+import static nextstep.jwp.controller.FileContent.STATIC;
 import static org.apache.coyote.http11.common.HttpHeaders.COOKIE_NAME;
 import static org.apache.coyote.http11.common.HttpHeaders.LOCATION;
 
@@ -15,7 +15,7 @@ import java.util.Objects;
 import nextstep.jwp.controller.Controller;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.common.FileContent;
+import nextstep.jwp.controller.FileContent;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;

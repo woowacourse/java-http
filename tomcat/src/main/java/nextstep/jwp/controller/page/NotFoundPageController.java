@@ -1,8 +1,8 @@
 package nextstep.jwp.controller.page;
 
-import static org.apache.coyote.http11.common.FileContent.HTML;
-import static org.apache.coyote.http11.common.FileContent.NOT_FOUND_URI;
-import static org.apache.coyote.http11.common.FileContent.STATIC;
+import static nextstep.jwp.controller.FileContent.HTML;
+import static nextstep.jwp.controller.FileContent.NOT_FOUND_URI;
+import static nextstep.jwp.controller.FileContent.STATIC;
 
 import java.io.File;
 import java.io.IOException;

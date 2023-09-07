@@ -1,6 +1,6 @@
 package nextstep.jwp.controller.page;
 
-import static org.apache.coyote.http11.common.FileContent.STATIC;
+import static nextstep.jwp.controller.FileContent.STATIC;
 
 import java.io.File;
 import java.io.IOException;

@@ -59,6 +59,20 @@ class HttpResponseTest {
         assertThat(response).extracting("httpStatus").isEqualTo(httpStatus);
     }
 
+    @Test
+    void setBody() {
+        //given
+        final var response = new HttpResponse(HTTP_1_1);
+        final var body = ResponseBody.from("body");
+
+        //when
+        response.setBody(body);
+
+        //then
+        assertThat(response).extracting("body").isEqualTo(body);
+    }
+
 
 
 }
+

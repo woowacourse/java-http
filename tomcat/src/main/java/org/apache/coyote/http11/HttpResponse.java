@@ -98,6 +98,10 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
     }
 
+    public void setBody(final ResponseBody body) {
+        this.body = body;
+    }
+
 }
 
 class HttpResponseBuilder {

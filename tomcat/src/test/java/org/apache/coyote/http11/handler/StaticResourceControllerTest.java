@@ -14,9 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class StaticResourceHandlerTest {
+class StaticResourceControllerTest {
 
-	private static final StaticResourceController HANDLER = new StaticResourceController();
+	private static final StaticResourceController CONTROLLER = new StaticResourceController();
 
 	@Nested
 	@DisplayName("handle 되는 조건을 확인할 수 있다.")
@@ -32,7 +32,7 @@ class StaticResourceHandlerTest {
 				))
 				.build();
 
-			final boolean supported = HANDLER.isSupported(request);
+			final boolean supported = CONTROLLER.isSupported(request);
 
 			assertThat(supported)
 				.isTrue();
@@ -48,7 +48,7 @@ class StaticResourceHandlerTest {
 				))
 				.build();
 
-			final boolean supported = HANDLER.isSupported(request);
+			final boolean supported = CONTROLLER.isSupported(request);
 
 			assertThat(supported)
 				.isFalse();
@@ -65,8 +65,9 @@ class StaticResourceHandlerTest {
 			"",
 			"");
 		final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
+		final HttpResponse httpResponse = new HttpResponse();
 
-		final HttpResponse httpResponse = HANDLER.handleTo(request);
+		CONTROLLER.handleTo(request, httpResponse);
 
 		final URL resource = getClass().getClassLoader().getResource("static/index.html");
 		final String expected = "HTTP/1.1 200 OK \r\n" +

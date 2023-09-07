@@ -35,8 +35,8 @@ class ParserTest {
         Cookies cookies = Parser.parseToCookie(line);
 
         // then
-        assertThat(cookies.getCookie("name")).isEqualTo("oing");
-        assertThat(cookies.getCookie("age")).isEqualTo("24");
-        assertThat(cookies.getCookie("gender")).isEqualTo("female");
+        assertThat(cookies.getCookie("name").get()).isEqualTo("oing");
+        assertThat(cookies.getCookie("age").get()).isEqualTo("24");
+        assertThat(cookies.getCookie("gender").get()).isEqualTo("female");
     }
 }

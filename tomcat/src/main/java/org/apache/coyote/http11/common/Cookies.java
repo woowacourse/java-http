@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.common;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.util.Parser;
@@ -17,7 +18,7 @@ public class Cookies {
     }
 
     public static Cookies empty() {
-        return new Cookies(null);
+        return new Cookies(new HashMap<>());
     }
 
     public Optional<String> getCookie(String name) {

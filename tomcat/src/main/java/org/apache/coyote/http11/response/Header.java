@@ -11,7 +11,7 @@ public class Header {
     }
 
     public String toMessage() {
-        return String.join(": ", name, value);
+        return String.format("%s: %s ", name, value);
     }
 
     public String getName() {

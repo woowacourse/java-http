@@ -19,7 +19,7 @@ public class Headers {
     public String toMessage() {
         return headers.stream()
                       .map(Header::toMessage)
-                      .collect(Collectors.joining("\r\n"));
+                      .collect(Collectors.joining(System.lineSeparator()));
     }
 
     public List<Header> getHeaders() {

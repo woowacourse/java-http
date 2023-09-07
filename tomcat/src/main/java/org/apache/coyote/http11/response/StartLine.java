@@ -4,6 +4,9 @@ import org.apache.coyote.http11.HttpVersion;
 
 public class StartLine {
 
+    private static final String DELIMITER = " ";
+    private static final String SPACE = "";
+
     private final HttpVersion version;
     private final StatusCode statusCode;
 
@@ -13,10 +16,12 @@ public class StartLine {
     }
 
     public String toMessage() {
-        return String.join(" ",
+        return String.join(
+                DELIMITER,
                 version.getValue(),
                 statusCode.getCode(),
-                statusCode.name()
+                statusCode.name(),
+                SPACE
         );
     }
 

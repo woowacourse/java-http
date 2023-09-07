@@ -16,10 +16,10 @@ class ResponseTest {
 
         final Response response = Response.of(startLine, contentType, responseBody);
 
-        final String expectMessage = String.join("\r\n",
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8",
-                "Content-Length: " + responseBody.getBytes().length,
+        final String expectMessage = String.join(System.lineSeparator(),
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 "Hello World!"
         );

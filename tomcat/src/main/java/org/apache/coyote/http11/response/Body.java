@@ -9,7 +9,7 @@ public class Body {
     }
 
     public String toMessage() {
-        return "\r\n" + value;
+        return String.format("%n%s", value);
     }
 
     public String getValue() {

@@ -43,7 +43,8 @@ public class Response {
     }
 
     public String toMessage() {
-        return String.join("\r\n",
+        return String.join(
+                System.lineSeparator(),
                 startLine.toMessage(),
                 headers.toMessage(),
                 body.toMessage()

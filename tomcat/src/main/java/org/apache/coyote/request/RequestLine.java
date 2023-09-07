@@ -1,33 +1,27 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
-import java.util.Objects;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 
 public class RequestLine {
 
     private final HttpMethod httpMethod;
-    private final String path;
+    private final RequestUrl requestUrl;
     private final Protocol protocol;
-    private final Map<String, String> queryString;
 
-    public RequestLine(HttpMethod httpMethod, String path, Protocol protocol, Map<String, String> queryString) {
+    public RequestLine(HttpMethod httpMethod, RequestUrl requestUrl, Protocol protocol) {
         this.httpMethod = httpMethod;
-        this.path = path;
+        this.requestUrl = requestUrl;
         this.protocol = protocol;
-        this.queryString = queryString;
     }
 
-    public boolean isSamePath(String urlPath) {
-        return Objects.equals(this.path, urlPath);
+    public boolean isSamePath(String otherPath) {
+        return requestUrl.isSamePath(otherPath);
     }
 
     public String getQueryValue(String key) {
-        if (!queryString.containsKey(key)) {
-            throw new IllegalArgumentException("키가 존재하지 않습니다.");
-        }
-        return queryString.get(key);
+        return requestUrl.getQueryValue(key);
     }
 
     public HttpMethod getHttpMethod() {
@@ -35,7 +29,7 @@ public class RequestLine {
     }
 
     public String getPath() {
-        return path;
+        return requestUrl.getPath();
     }
 
     public Protocol getProtocol() {
@@ -43,6 +37,6 @@ public class RequestLine {
     }
 
     public Map<String, String> getQueryString() {
-        return queryString;
+        return requestUrl.getQueryString();
     }
 }

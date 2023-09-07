@@ -54,6 +54,10 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

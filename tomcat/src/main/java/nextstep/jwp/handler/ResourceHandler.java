@@ -8,7 +8,6 @@ import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.common.HttpBody;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.common.HttpVersion;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatusLine;
@@ -27,9 +26,7 @@ public class ResourceHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        HttpStatus httpStatus = HttpStatus.OK;
-        HttpVersion httpVersion = request.getHttpVersion();
-        HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
+        HttpStatusLine httpStatusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatus.OK);
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE_PATH + request.getNativePath());
         if (url == null) {
             throw new NotFoundException("해당 URL을 찾을 수 없습니다. 요청 URL : " + request.getNativePath());

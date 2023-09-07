@@ -13,7 +13,6 @@ import nextstep.jwp.http.common.HttpBody;
 import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.common.HttpVersion;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryString;
@@ -67,9 +66,7 @@ public class LoginHandler implements RequestHandler {
             return createLoginResponse(request, user);
         }
 
-        HttpStatus httpStatus = HttpStatus.OK;
-        HttpVersion httpVersion = request.getHttpVersion();
-        HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
+        HttpStatusLine httpStatusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatus.OK);
         URL url = getClass().getClassLoader().getResource(RESOURCE_PATH);
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
@@ -89,16 +86,10 @@ public class LoginHandler implements RequestHandler {
     }
 
     private HttpResponse createRedirectingIndexResponse(HttpRequest request) {
-        return createRedirectResponse(request, INDEX_URI);
-    }
-
-    private HttpResponse createRedirectResponse(HttpRequest request, String location) {
-        HttpStatus httpStatus = HttpStatus.FOUND;
-        HttpVersion httpVersion = request.getHttpVersion();
-        HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
+        HttpStatusLine httpStatusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatus.FOUND);
         HttpBody httpBody = HttpBody.createEmptyBody();
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
-        httpHeaders.setLocation(location);
+        httpHeaders.setLocation(INDEX_URI);
 
         return new HttpResponse(httpStatusLine, httpHeaders, httpBody);
     }

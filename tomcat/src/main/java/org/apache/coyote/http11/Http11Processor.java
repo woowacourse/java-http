@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.catalina.container.Container;
+import org.apache.catalina.servlets.Container;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.util.HttpRequestReader;
 import org.apache.coyote.http11.util.HttpResponseWriter;

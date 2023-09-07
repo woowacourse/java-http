@@ -1,16 +1,16 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlets;
 
 import java.util.Map;
 import nextstep.jwp.service.UserService;
 import nextstep.mvc.ResponseWriter;
-import org.apache.catalina.controller.config.RequestMapping;
+import org.apache.catalina.servlets.config.RequestMapping;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.util.HttpParser;
 
 @RequestMapping("/register")
-public class RegisterController extends AbstractController {
+public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {

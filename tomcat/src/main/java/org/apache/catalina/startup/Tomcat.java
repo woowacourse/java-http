@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.controller.config.ControllerMapping;
+import org.apache.catalina.servlets.config.ServletMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ public class Tomcat {
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        ControllerMapping.initialize();
+        ServletMapping.initialize();
         var connector = new Connector(250);
         connector.start();
 

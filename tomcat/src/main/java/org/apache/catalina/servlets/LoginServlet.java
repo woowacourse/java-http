@@ -1,10 +1,10 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlets;
 
 import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.service.UserService;
 import nextstep.mvc.ResponseWriter;
-import org.apache.catalina.controller.config.RequestMapping;
+import org.apache.catalina.servlets.config.RequestMapping;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
@@ -14,7 +14,7 @@ import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.util.HttpParser;
 
 @RequestMapping("/login")
-public class LoginController extends AbstractController {
+public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {

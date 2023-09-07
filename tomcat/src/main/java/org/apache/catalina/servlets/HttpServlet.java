@@ -1,10 +1,10 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.servlets;
 
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public abstract class AbstractController implements Controller {
+public abstract class HttpServlet implements Servlet {
 
     @Override
     public final void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {

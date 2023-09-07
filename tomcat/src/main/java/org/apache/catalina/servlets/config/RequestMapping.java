@@ -1,4 +1,4 @@
-package org.apache.catalina.controller.config;
+package org.apache.catalina.servlets.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

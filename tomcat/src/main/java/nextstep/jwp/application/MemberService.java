@@ -1,9 +1,8 @@
 package nextstep.jwp.application;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-
-import java.util.Optional;
 
 public class MemberService {
 
@@ -15,8 +14,9 @@ public class MemberService {
         InMemoryUserRepository.save(user);
     }
 
-    public static Optional<User> login(String name, String password) {
+    public static User login(String name, String password) {
         return InMemoryUserRepository.findByAccount(name)
-                .filter(it -> it.checkPassword(password));
+                .filter(user -> user.checkPassword(password))
+                .orElseThrow(UserNotFoundException::new);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import java.io.IOException;
+import java.util.Optional;
 import org.apache.coyote.http11.common.Session;
 
 /**
@@ -29,7 +30,8 @@ public interface Manager {
     void add(Session session);
 
     /**
-     * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise return
+     * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise
+     * return
      * <code>null</code>.
      *
      * @param id The session id for the session to be returned
@@ -37,7 +39,7 @@ public interface Manager {
      * @throws IllegalStateException if a new session cannot be instantiated for any reason
      * @throws IOException           if an input/output error occurs while processing this request
      */
-    Session findSession(String id) throws IOException;
+    Optional<Session> findSession(String id) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.

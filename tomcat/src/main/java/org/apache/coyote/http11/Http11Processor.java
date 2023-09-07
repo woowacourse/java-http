@@ -1,21 +1,32 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Optional;
+import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.apache.coyote.http.controller.HttpController;
+import org.apache.coyote.http.controller.HttpControllers;
+import org.apache.coyote.http.controller.ViewRenderer;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.request.HttpRequestDecoder;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final ViewRenderer viewRenderer = new ViewRenderer();
 
     private final Socket connection;
+    private final HttpControllers httpControllers;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.httpControllers = HttpControllers.readControllers();
     }
 
     @Override
@@ -28,17 +39,24 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            HttpRequestDecoder requestDecoder = new HttpRequestDecoder();
+            HttpRequest httpRequest = requestDecoder.decode(inputStream);
 
-            final var responseBody = "Hello world!";
+            Optional<String> sessionId = httpRequest.getSessionId();
+            Session session = SessionManager.findSession(sessionId.orElse(null));
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponse httpResponse = new HttpResponse();
+            Optional<HttpController> controller = httpControllers.get(httpRequest.getPath());
+            controller.ifPresent(
+                httpController -> httpController.service(httpRequest, httpResponse, session)
+            );
 
-            outputStream.write(response.getBytes());
+            if (!httpResponse.isCompleted()) {
+                viewRenderer.render(httpRequest, httpResponse);
+            }
+
+            SessionManager.manageSession(httpResponse, session);
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

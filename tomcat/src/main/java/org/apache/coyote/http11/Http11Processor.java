@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handle(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse handle(final HttpRequest httpRequest) {
         if (PREDEFINED_HANDLERS.containsKey(httpRequest.getTarget().getPath())) {
             return PREDEFINED_HANDLERS.get(httpRequest.getTarget().getPath()).handle(httpRequest);
         }

@@ -1,6 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
-import static nextstep.org.apache.coyote.http11.HttpUtil.*;
+import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.dto.LoginResponseDto;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -35,6 +36,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
     private static final String FORM_VALUES_DELIMITER = "&";
     private static final String FORM_KEY_VALUE_DELIMITER = "=";
+    private static final String NOT_FOUND_DEFALULT_MESSAGE = "404 Not Found";
 
     private final Socket connection;
     private final HandlerMapper handlerMapper;
@@ -127,17 +129,18 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                String responseBody = createResponseBody(requestPath);
-                if (Objects.isNull(responseBody)) {
-                    responseBody = createResponseBody("/404.html");
+                Optional<String> responseBody = createResponseBody(requestPath);
+                if (responseBody.isEmpty()) {
+                    String notFoundPageBody = createResponseBody("/404.html")
+                            .orElse(NOT_FOUND_DEFALULT_MESSAGE);
 
                     response = String.join("\r\n",
                             "HTTP/1.1 404 Not Found ",
                             String.format("Content-Type: %s;charset=utf-8 ", contentType),
                             String.format("Content-Length: %s ",
-                                    responseBody.getBytes(StandardCharsets.UTF_8).length),
+                                    notFoundPageBody.getBytes(StandardCharsets.UTF_8).length),
                             "",
-                            responseBody);
+                            notFoundPageBody);
                     writeResponse(outputStream, response);
                     return;
                 }
@@ -146,9 +149,9 @@ public class Http11Processor implements Runnable, Processor {
                         "HTTP/1.1 200 OK ",
                         String.format("Content-Type: %s;charset=utf-8 ", contentType),
                         String.format("Content-Length: %s ",
-                                responseBody.getBytes(StandardCharsets.UTF_8).length),
+                                responseBody.get().getBytes(StandardCharsets.UTF_8).length),
                         "",
-                        responseBody);
+                        responseBody.get());
             }
 
             writeResponse(outputStream, response);
@@ -190,9 +193,9 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeaders;
     }
 
-    private String createResponseBody(String requestPath) throws IOException {
+    private Optional<String> createResponseBody(String requestPath) throws IOException {
         if (requestPath.equals("/")) {
-            return "Hello world!";
+            return Optional.of("Hello world!");
         }
 
         String resourceName = RESOURCES_PATH_PREFIX + requestPath;
@@ -202,8 +205,8 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource(resourceName);
 
         if (Objects.isNull(resource)) {
-            return null;
+            return Optional.empty();
         }
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return Optional.of(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
     }
 }

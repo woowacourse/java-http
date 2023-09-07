@@ -4,31 +4,40 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 200;
 
     private final ServerSocket serverSocket;
     private final Controller controller;
 
     private boolean stopped;
 
+    private final ExecutorService executorService;
+
 
     public Connector(Controller controller) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controller);
+        this(DEFAULT_PORT, controller, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount, final Controller controller) {
+    public Connector(final int port, Controller controller, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = new ThreadPoolExecutor(maxThreads, maxThreads, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(100));
         this.controller = controller;
     }
 
@@ -71,7 +80,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, controller);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {

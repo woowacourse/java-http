@@ -13,9 +13,12 @@ import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
 public class HomePageMapping implements HandlerMapping {
 
+    private static final String HOME_MESSAGE = "Hello world!";
+    private static final String TARGET_URI = "/";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return httpRequest.isGetRequest() && "/".equals(httpRequest.getRequestUri().getRequestUri());
+        return httpRequest.isGetRequest() && TARGET_URI.equals(httpRequest.getRequestUri().getRequestUri());
     }
 
     @Override
@@ -23,7 +26,7 @@ public class HomePageMapping implements HandlerMapping {
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.OK))
                 .httpHeaders(CONTENT_TYPE, ContentType.HTML.getValue())
-                .body(new HttpBody("Hello world!"))
+                .body(new HttpBody(HOME_MESSAGE))
                 .build();
     }
 }

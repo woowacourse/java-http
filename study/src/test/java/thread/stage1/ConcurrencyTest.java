@@ -1,8 +1,8 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
@@ -36,5 +36,11 @@ class ConcurrencyTest {
         // 이미 gugu로 가입한 사용자가 있어서 UserServlet.join() 메서드의 if절 조건은 false가 되고 크기는 1이다.
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
         assertThat(userServlet.getUsers()).hasSize(1);
+
+        /**
+         * 스레드 1과 스레드 2 중에서 한 스레드가 add하기 직전에 다른 스레드가 if문을 판단하면 둘 다 true, true가 된다.
+         * 둘 다 true인 경우, 두 스레드 모두 add하므로 size는 2가 된다.
+         * @RepeatedTest(10000) 를 해보면 실패하는 테스트가 생긴다.
+         */
     }
 }

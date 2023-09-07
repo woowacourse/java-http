@@ -23,6 +23,10 @@ class ThreadPoolsTest {
 
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolsTest.class);
 
+    /**
+     * newFixedThreadPool은 고정된 수의 스레드를 가지고 병렬 실행하는데 사용한다.
+     * 고정된 수의 스레드가 모두 실행 중이면, 큐에 작업을 대기시킨다.
+     */
     @Test
     void testNewFixedThreadPool() {
         final var executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
@@ -31,13 +35,17 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello fixed thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
-        final int expectedQueueSize = 0;
+        final int expectedPoolSize = 2;
+        final int expectedQueueSize = 1;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());
         assertThat(expectedQueueSize).isEqualTo(executor.getQueue().size());
     }
 
+    /**
+     * newCachedThreadPool 동적으로 스레드를 생성하고, 사용하지 않는(기본 60초 동안 쉬고 있는) 스레드는 제거한다.
+     * 요청이 들어오는 만큼 스레드가 생성된다.
+     */
     @Test
     void testNewCachedThreadPool() {
         final var executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
@@ -46,7 +54,7 @@ class ThreadPoolsTest {
         executor.submit(logWithSleep("hello cached thread pools"));
 
         // 올바른 값으로 바꿔서 테스트를 통과시키자.
-        final int expectedPoolSize = 0;
+        final int expectedPoolSize = 3;
         final int expectedQueueSize = 0;
 
         assertThat(expectedPoolSize).isEqualTo(executor.getPoolSize());

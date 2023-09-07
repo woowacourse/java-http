@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -10,13 +11,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
 
@@ -41,15 +45,32 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.of(requestHeaderStrings, requestBodyString);
             final HttpResponse httpResponse = HttpResponse.of(httpRequest.getParsedRequestURI());
 
-            final RequestHandler handler = new RequestHandler(httpRequest, httpResponse);
-            final HttpResponse response = handler.execute();
-            response.wrapUp(httpRequest.getParsedRequestURI());
-            final String message = ResponseParser.parse(response);
-            outputStream.write(message.getBytes());
-            outputStream.flush();
+            final RequestMapping requestMapping = new RequestMapping();
+
+            if (isStaticPath(httpRequest.getOriginRequestURI())) {
+                httpResponse.updatePage(httpRequest.getOriginRequestURI());
+                httpResponse.wrapUp(httpRequest.getOriginRequestURI());
+                writeMessage(httpResponse, outputStream);
+                return;
+            }
+
+            final Controller controller = requestMapping.findMappedController(httpRequest.getParsedRequestURI());
+            controller.service(httpRequest, httpResponse);
+            httpResponse.wrapUp(httpRequest.getParsedRequestURI());
+            writeMessage(httpResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void writeMessage(final HttpResponse httpResponse, final OutputStream outputStream) throws IOException {
+        final String message = ResponseParser.parse(httpResponse);
+        outputStream.write(message.getBytes());
+        outputStream.flush();
+    }
+
+    private boolean isStaticPath(final String requestUri) {
+        return ContentType.checkFileExtension(requestUri);
     }
 
     private int getContentLength(final List<String> requestHeaderStrings) {

@@ -68,7 +68,11 @@ public class ResponseBody {
         return data;
     }
 
-    public void changeBody(final String page) {
+    public void changePage(final String page) {
         this.data = getNotDefaultPathResponseBody(page);
+    }
+
+    public void changeBody(final String body) {
+        this.data = body.getBytes();
     }
 }

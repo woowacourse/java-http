@@ -62,6 +62,10 @@ public class HttpResponse {
     }
 
     public void updatePage(final String page) {
-        responseBody.changeBody(page);
+        responseBody.changePage(page);
+    }
+
+    public void updateBody(final String body) {
+        responseBody.changeBody(body);
     }
 }

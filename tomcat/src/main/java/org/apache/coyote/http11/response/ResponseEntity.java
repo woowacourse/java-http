@@ -9,34 +9,34 @@ public class ResponseEntity {
 
     private final Protocol protocol;
     private final HttpStatus httpStatus;
-    private final String uri;
     private final Cookie cookie;
+    private final Location location;
 
-    public ResponseEntity(Protocol protocol, HttpStatus httpStatus, String uri, Cookie cookie) {
+    public ResponseEntity(Protocol protocol, HttpStatus httpStatus, Cookie cookie, Location location) {
         this.protocol = protocol;
         this.httpStatus = httpStatus;
-        this.uri = uri;
         this.cookie = cookie;
+        this.location = location;
     }
 
-    public static ResponseEntity getCookieNullResponseEntity(final Protocol protocol, final HttpStatus httpStatus, final String uri) {
-        return new ResponseEntity(protocol, httpStatus, uri, Cookie.from(null));
+    public static ResponseEntity getCookieNullResponseEntity(
+            final Protocol protocol,
+            final HttpStatus httpStatus,
+            final Location location
+    ) {
+        return new ResponseEntity(protocol, httpStatus, Cookie.from(null), location);
     }
 
-    public static ResponseEntity of(final Protocol protocol, final HttpStatus httpStatus, final String uri) {
-        return new ResponseEntity(protocol, httpStatus, uri, createSessionCookie());
+    public String getProtocol() {
+        return protocol.protocol();
     }
 
-    public Protocol protocol() {
-        return protocol;
+    public Location location() {
+        return location;
     }
 
     public HttpStatus getHttpStatus() {
         return httpStatus;
-    }
-
-    public String getUri() {
-        return uri;
     }
 
     public Cookie getHttpCookie() {

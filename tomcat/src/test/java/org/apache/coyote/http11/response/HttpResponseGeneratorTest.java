@@ -22,10 +22,10 @@ class HttpResponseGeneratorTest {
         void generateDefaultResponseEntity() throws IOException {
             // given
             Protocol protocol = Protocol.from("HTTP/1.1");
-            final ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, OK, "/");
+            final ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, OK, Location.from("/"));
 
             // when
-            String response = responseGenerator.generate(responseEntity, protocol);
+            String response = responseGenerator.generate(responseEntity);
 
             // then
             assertThat(response).contains("Hello world!");
@@ -36,10 +36,10 @@ class HttpResponseGeneratorTest {
         void generateFoundResponseEntity() throws IOException {
             // given
             Protocol protocol = Protocol.from("HTTP/1.1");
-            ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, "index.html");
+            ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, Location.from("index.html"));
 
             // when
-            String response = responseGenerator.generate(responseEntity, protocol);
+            String response = responseGenerator.generate(responseEntity);
 
             // then
             assertThat(response).contains("Location: index.html");
@@ -50,10 +50,10 @@ class HttpResponseGeneratorTest {
         void generateCustomResponseEntity() throws IOException {
             // given
             Protocol protocol = Protocol.from("HTTP/1.1");
-            ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, "index.html");
+            ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, Location.from("index.html"));
 
             // when
-            String response = responseGenerator.generate(responseEntity, protocol);
+            String response = responseGenerator.generate(responseEntity);
 
             // then
             assertThat(response).contains("Location: index.html");

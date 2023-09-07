@@ -13,7 +13,7 @@ public class HttpResponseGenerator {
     private final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
     public String generate(final ResponseEntity responseEntity) throws IOException {
-        final Location location = responseEntity.location();
+        final String location = responseEntity.getLocation();
         if (location.equals("/")) {
             return generateResponse(responseEntity, "Hello world!");
         }
@@ -28,7 +28,7 @@ public class HttpResponseGenerator {
         return String.join(
                 CRLF,
                 generateHttpStatusLine(responseEntity.getProtocol(), responseEntity.getHttpStatus()),
-                generateContentTypeLine(responseEntity.location()),
+                generateContentTypeLine(responseEntity.getLocation()),
                 generateContentLengthLine(responseBody),
                 "",
                 responseBody
@@ -39,8 +39,8 @@ public class HttpResponseGenerator {
         return String.join(BLANK, protocol, httpStatus.getCode(), httpStatus.name(), "");
     }
 
-    private String generateContentTypeLine(final Location location) {
-        if (location.location().endsWith(".css")) {
+    private String generateContentTypeLine(final String location) {
+        if (location.endsWith(".css")) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";
@@ -50,8 +50,8 @@ public class HttpResponseGenerator {
         return "Content-Length: " + responseBody.getBytes().length + BLANK;
     }
 
-    private String readStaticFile(final Location location) throws IOException {
-        final URL resource = classLoader.getResource("static" + location.location());
+    private String readStaticFile(final String location) throws IOException {
+        final URL resource = classLoader.getResource("static" + location);
         final File file = new File(resource.getFile());
         return new String(Files.readAllBytes(file.toPath()));
     }
@@ -62,7 +62,7 @@ public class HttpResponseGenerator {
         return String.join(
                 CRLF,
                 firstLine,
-                "Location: " + responseEntity.location().location(),
+                "Location: " + responseEntity.getLocation(),
                 generateSetCookieLine(responseEntity)
         );
     }

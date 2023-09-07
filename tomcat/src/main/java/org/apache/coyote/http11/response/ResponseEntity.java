@@ -3,8 +3,6 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.auth.Cookie;
 import org.apache.coyote.http11.request.line.Protocol;
 
-import static org.apache.coyote.http11.auth.Cookie.createSessionCookie;
-
 public class ResponseEntity {
 
     private final Protocol protocol;

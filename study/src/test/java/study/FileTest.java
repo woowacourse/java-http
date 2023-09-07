@@ -35,7 +35,7 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        final URL res = getClass().getClassLoader().getResource(fileName);
+        final URL res = ClassLoader.getSystemClassLoader().getResource(fileName);
         final String actual = res.getPath();
 
         assertThat(actual).endsWith(fileName);
@@ -51,7 +51,7 @@ class FileTest {
     void 파일의_내용을_읽는다() throws URISyntaxException, FileNotFoundException {
         final String fileName = "nextstep.txt";
 
-        final URL res = getClass().getClassLoader().getResource(fileName);
+        final URL res = ClassLoader.getSystemClassLoader().getResource(fileName);
         final Path path = Path.of(res.toURI());
 
         final File file = path.toFile();

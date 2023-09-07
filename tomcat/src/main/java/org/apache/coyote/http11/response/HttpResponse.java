@@ -7,7 +7,7 @@ import java.nio.file.Files;
 
 public class HttpResponse {
 
-    private static final ClassLoader classLoader = HttpResponse.class.getClassLoader();
+    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String BLANK = "";
     private static final String SPACE = " ";

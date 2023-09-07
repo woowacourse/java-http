@@ -27,7 +27,6 @@ public class StartLine {
             HttpVersion httpVersion = HttpVersion.findByValue(splitStartLine[2]);
             return new StartLine(httpMethod, requestTarget, httpVersion);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Invalid startLine format");
         }
     }

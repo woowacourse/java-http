@@ -19,8 +19,11 @@ class HttpResponseTest {
         StatusCode code = StatusCode.FOUND;
         HttpHeaders headers = HttpHeaders.create(Map.of("Location", "/index.html"));
 
-        // when&then
+        // when
         HttpResponse response = HttpResponse.create(code, headers);
+
+        // then
+        assertThat(response).isNotNull();
     }
 
     @Test

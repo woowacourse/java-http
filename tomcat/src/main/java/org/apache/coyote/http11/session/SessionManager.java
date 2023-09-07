@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;
 
-public class SessionManager implements Manager {
+public enum SessionManager implements Manager {
+
+    INSTANCE;
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 

@@ -6,19 +6,16 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpQueryParser;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.types.HttpMethod;
-import org.apache.coyote.http11.request.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -80,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest readHttpRequest(BufferedReader bufferedReader, String line) throws IOException {
         Map<String, String> headers = readHeader(bufferedReader);
         String requestBody = readBody(bufferedReader, headers);
-        return HttpRequest.of(line, headers, requestBody);
+        return HttpRequest.of(RequestLine.from(line), headers, requestBody);
     }
 
     private Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {

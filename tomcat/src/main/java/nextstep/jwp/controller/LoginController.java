@@ -4,6 +4,7 @@ import static org.apache.coyote.http11.headers.MimeType.*;
 
 import java.net.URL;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.coyote.http11.exception.EmptyBodyException;
@@ -62,10 +63,11 @@ public class LoginController implements HttpController {
 
 	private static void indexHtmlRedirect(final String jSessionId, final HttpResponse response) {
 		final Session session = SessionManager.findSession(jSessionId);
-		final User user = (User)session.getAttributes(SESSION_USER_KEY);
-		//user가 없는 경우 예외처리 고민하기
-		log.info(user.toString());
-		response.redirect(LOGIN_SUCCESS_LOCATION);
+		Optional.ofNullable((User)session.getAttributes(SESSION_USER_KEY))
+			.ifPresentOrElse(
+				user -> response.redirect(LOGIN_SUCCESS_LOCATION),
+				() -> loginHtmlResponse(response)
+			);
 	}
 
 	private static void loginHtmlResponse(final HttpResponse response) {

@@ -19,4 +19,11 @@ public class HttpRequestException extends RuntimeException {
             super("SessionId와 일치하는 세션이 존재하지 않습니다.");
         }
     }
+
+    public static class NotFoundMappingController extends HttpRequestException {
+
+        public NotFoundMappingController() {
+            super("Request URI에 매핑되는 Controller를 찾을 수 없습니다.");
+        }
+    }
 }

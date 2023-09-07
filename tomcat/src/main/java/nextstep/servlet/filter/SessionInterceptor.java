@@ -1,6 +1,6 @@
 package nextstep.servlet.filter;
 
-import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
+import static nextstep.jwp.controller.StaticResourceResolver.HOME_PAGE;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

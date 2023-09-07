@@ -4,49 +4,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceResolver {
 
     private static final int MAX_DEPTH = 3;
     private static final String PATH_DELIMITER = "/";
     private static final String RESOURCE_ROOT_PATH = "static";
 
     public static final String HOME_PAGE = "/index.html";
+    public static final String LOGIN_PAGE = "/login.html";
     public static final String UNAUTHORIZED_PAGE = "/401.html";
-    public static final String REGISTER_PAGE = "register.html";
+    public static final String REGISTER_PAGE = "/register.html";
 
-    private final List<String> staticRequestPaths = List.of(
-            "/login",
-            "/register"
-    );
-
-    @Override
-    public boolean canHandle(HttpRequest request) {
-        final String path = request.getPath();
-        return path.substring(path.lastIndexOf("/") + 1).contains(".") || (staticRequestPaths.contains(path) && request.getMethod() == HttpMethod.GET);
-    }
-
-    @Override
-    public ResponseEntity handle(HttpRequest request) throws IOException {
-        return createStaticResponse(request);
-    }
-
-    private ResponseEntity createStaticResponse(HttpRequest request) throws IOException {
-        var responseBody = "";
-        if (request.getMethod() == HttpMethod.GET) {
-            responseBody = findFileContentByPath(request.getPath());
-        }
-
-        return ResponseEntity.ok(responseBody);
-    }
-
-    private String findFileContentByPath(String requestPath) throws IOException {
-        final var resourcePath = HttpResponse.class.getClassLoader().getResource(RESOURCE_ROOT_PATH).getPath();
+    public String findFileContentByPath(String requestPath) throws IOException {
+        final var resourcePath = getClass().getClassLoader().getResource(RESOURCE_ROOT_PATH).getPath();
         final var fileName = requestPath.substring(requestPath.lastIndexOf(PATH_DELIMITER) + 1);
         final var filePath = findAbsolutePath(resourcePath, fileName);
 

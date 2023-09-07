@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.StaticResourceController;
+import nextstep.jwp.controller.StaticResourceResolver;
+import nextstep.jwp.controller.rest.HomeController;
 import nextstep.jwp.controller.rest.LoginController;
 import nextstep.jwp.controller.rest.RegisterController;
 import nextstep.servlet.filter.Interceptor;
@@ -26,10 +27,12 @@ public class DispatcherServlet implements Servlet {
     );
 
     private final List<Controller> controllers = List.of(
+            new HomeController(),
             new LoginController(),
-            new RegisterController(),
-            new StaticResourceController()
+            new RegisterController()
     );
+
+    private final StaticResourceResolver staticResourceResolver = new StaticResourceResolver();
 
     public DispatcherServlet() {
     }
@@ -42,7 +45,13 @@ public class DispatcherServlet implements Servlet {
 
             response.setStatus(responseEntity.getStatusCode());
             responseEntity.getHeaders().forEach(response::setHeader);
-            response.setBody(responseEntity.getBody());
+
+            if (responseEntity.isRestResponse()) {
+                response.setBody(responseEntity.getBody());
+                return;
+            }
+            final var staticResource = staticResourceResolver.findFileContentByPath(responseEntity.getBody());
+            response.setBody(staticResource);
         }
     }
 

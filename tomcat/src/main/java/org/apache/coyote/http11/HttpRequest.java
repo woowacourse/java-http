@@ -92,11 +92,7 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        var path = requestLine.getPath();
-        if (path.equals("/")) {
-            return INDEX_HTML;
-        }
-        return path;
+        return requestLine.getPath();
     }
 
 }

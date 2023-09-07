@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.session;
+package org.apache.coyote.http11;
 
 import org.apache.catalina.Manager;
 
@@ -20,7 +20,7 @@ public class SessionManager implements Manager {
         if (SESSIONS.containsKey(id)) {
             return SESSIONS.get(id);
         }
-        return null;
+        throw new IOException("Not found Session");
     }
 
     @Override

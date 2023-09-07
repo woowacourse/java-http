@@ -1,15 +1,23 @@
-package org.apache.coyote.handler.session;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Session {
 
+    public static final String JSESSIONID = "JSESSIONID";
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id) {
+    private Session(final String id) {
         this.id = id;
+    }
+
+    public static Session create(String id) {
+        Session session = new Session(id);
+        new SessionManager().add(session);
+        return session;
     }
 
     public String getId() {
@@ -29,5 +37,9 @@ public class Session {
 
     public void removeAttribute(final String name) {
         values.remove(name);
+    }
+
+    public void invalidate() {
+        new SessionManager().remove(this);
     }
 }

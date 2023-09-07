@@ -41,7 +41,7 @@ public class LoginHandler implements Handler {
             }
             Session session = SessionManager.findSession(jsessionId);
             if (session != null) {
-                return HttpResponse.redirectTo("/index");
+                return HttpResponse.redirectTo(MAIN_LOCATION);
             }
         }
         return fileHandler.handle(httpRequest);

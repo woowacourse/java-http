@@ -33,13 +33,13 @@ public class HttpCookie {
         return new HttpCookie(new HashMap<>());
     }
 
-    public void addCookie(String cookieName, String cookieValue) {
-        cookies.put(cookieName, cookieValue);
+    public void addCookie(String name, String value) {
+        cookies.put(name, value);
     }
 
-    public Optional<String> getCookie(String cookieName) {
-        if (cookies.containsKey(cookieName)) {
-            return Optional.of(cookies.get(cookieName));
+    public Optional<String> getCookie(String name) {
+        if (cookies.containsKey(name)) {
+            return Optional.of(cookies.get(name));
         }
         return Optional.empty();
     }

@@ -38,7 +38,14 @@ public class HttpRequest {
         if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue())) {
             return MessageBody.empty();
         }
-        return MessageBody.from(br.readLine());
+        String contentLength = headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue());
+        if (contentLength == null) {
+            contentLength = String.valueOf(0);
+        }
+        char[] buffer = new char[Integer.parseInt(contentLength)];
+        br.read(buffer, 0, Integer.parseInt(contentLength));
+        String requestBody = new String(buffer);
+        return MessageBody.from(requestBody);
     }
 
     public boolean isParamRequest() {

@@ -20,7 +20,11 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.headers.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.responseline.HttpStatus;
+import org.apache.coyote.http11.responseline.ResponseLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +35,10 @@ public class Http11Processor implements Runnable, Processor {
   private static final String PREFIX_STATIC_PATH = "static";
   private static final String INDEX_PAGE = "/index.html";
   private static final String LOGIN_PAGE = "/login.html";
+  private static final String HTTP_1_1 = "HTTP/1.1";
   private static final String JSESSIONID = "JSESSIONID";
+  private static final String LOCATION = "Location";
+  private static final String HTML_401 = "/401.html";
 
   private final Socket connection;
 
@@ -54,55 +61,65 @@ public class Http11Processor implements Runnable, Processor {
     ) {
       final HttpRequest request = HttpRequest.from(bufferedReader);
       final SessionManager sessionManager = new SessionManager();
-      final String response;
+      final HttpResponse response;
 
       final String url = request.getUrl();
-      if (url.equals("/login")) {
-        final String sessionId = request.getCookie(JSESSIONID);
-        final String account = request.getParam("account");
-        final String password = request.getParam("password");
-        response = login(sessionManager, sessionId, account, password);
-      } else if (url.equals("/register")) {
-        final Map<String, String> bodyParams = extractParams(request.getBody());
-        response = register(bodyParams);
-      } else {
-        final String responseBody = readContentsFromFile(url);
-        final String contentType = getContentType(request.getHeader("Accept"));
-        response = response200(contentType, responseBody);
-      }
+      response = handlingResponse(url, request, sessionManager);
 
-      outputStream.write(response.getBytes());
+      outputStream.write(response.build().getBytes());
       outputStream.flush();
     } catch (final IOException | UncheckedServletException e) {
       log.error(e.getMessage(), e);
     }
   }
 
-  private String login(
+  private HttpResponse handlingResponse(final String url, final HttpRequest request,
+      final SessionManager sessionManager) throws IOException {
+    if (url.equals("/login")) {
+      final String sessionId = request.getCookie(JSESSIONID);
+      final String account = request.getParam("account");
+      final String password = request.getParam("password");
+      return login(sessionManager, sessionId, account, password);
+    } else if (url.equals("/register")) {
+      final Map<String, String> bodyParams = extractParams(request.getBody());
+      return register(bodyParams);
+    } else {
+      final String contentType = getContentType(request.getHeader("Accept"));
+      return responseStaticFile(url, contentType);
+    }
+  }
+
+  private HttpResponse responseStaticFile(final String url, final String contentType)
+      throws IOException {
+    final String body = readContentsFromFile(url);
+    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.OK);
+    final HttpHeader header = new HttpHeader();
+    header.setHeader("Content-Type", contentType + ";charset=utf-8");
+    header.setHeader("Content-Length", body.getBytes().length + "");
+    return new HttpResponse(responseLine, header, body);
+  }
+
+  private HttpResponse login(
       final SessionManager sessionManager,
       final String sessionId,
       final String account,
       final String password
   ) {
     if (isAuthorized(sessionId, sessionManager)) {
-      return response302(INDEX_PAGE);
+      final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+      final HttpHeader header = new HttpHeader();
+      header.setHeader(LOCATION, INDEX_PAGE);
+      return new HttpResponse(responseLine, header);
     } else if (account == null || password == null) {
-      return response302(LOGIN_PAGE);
+      final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+      final HttpHeader header = new HttpHeader();
+      header.setHeader(LOCATION, LOGIN_PAGE);
+      return new HttpResponse(responseLine, header);
     }
     return authorize(account, password, sessionManager);
   }
 
-  private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
-    return sessionId != null && sessionManager.findSession(sessionId) != null;
-  }
-
-  private String register(final Map<String, String> body) {
-    final User user = new User(body.get("account"), body.get("password"), body.get("email"));
-    InMemoryUserRepository.save(user);
-    return response302(INDEX_PAGE);
-  }
-
-  private String authorize(
+  private HttpResponse authorize(
       final String account,
       final String password,
       final SessionManager sessionManager
@@ -113,33 +130,33 @@ public class Http11Processor implements Runnable, Processor {
       final String uuid = UUID.randomUUID().toString();
       final Session session = new Session(uuid);
       sessionManager.add(session);
-      return response302(INDEX_PAGE, "JSESSIONID=" + uuid);
+
+      final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+      final HttpHeader header = new HttpHeader();
+      header.setHeader(LOCATION, INDEX_PAGE);
+      return new HttpResponse(responseLine, header);
     }
-    return response302("/401.html");
+    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.UNAUTHORIZED);
+    final HttpHeader header = new HttpHeader();
+    header.setHeader(LOCATION, HTML_401);
+    return new HttpResponse(responseLine, header);
   }
 
-  private String response200(final String contentType, final String responseBody) {
-    return String.join(System.lineSeparator(),
-        "HTTP/1.1 200 OK ",
-        "Content-Type: " + contentType + ";charset=utf-8 ",
-        "Content-Length: " + responseBody.getBytes().length + " ",
-        "",
-        responseBody);
+  private boolean isAuthorized(final String sessionId, final SessionManager sessionManager) {
+    return sessionId != null && sessionManager.findSession(sessionId) != null;
   }
 
-  private String response302(final String location) {
-    return String.join(System.lineSeparator(),
-        "HTTP/1.1 302 FOUND ",
-        "Location: " + location,
-        "");
-  }
+  private HttpResponse register(final Map<String, String> body) {
+    final String account = body.get("account");
+    final String password = body.get("password");
+    final String email = body.get("email");
+    final User user = new User(account, password, email);
+    InMemoryUserRepository.save(user);
 
-  private String response302(final String location, final String cookie) {
-    return String.join(System.lineSeparator(),
-        "HTTP/1.1 302 FOUND ",
-        "Location: " + location,
-        "Set-Cookie: " + cookie,
-        "");
+    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+    final HttpHeader header = new HttpHeader();
+    header.setHeader(LOCATION, INDEX_PAGE);
+    return new HttpResponse(responseLine, header);
   }
 
   private Map<String, String> extractParams(final String queryString) {

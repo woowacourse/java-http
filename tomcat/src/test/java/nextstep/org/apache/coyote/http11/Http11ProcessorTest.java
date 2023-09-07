@@ -23,9 +23,9 @@ class Http11ProcessorTest {
 
     // then
     final var expected = String.join(System.lineSeparator(),
-        "HTTP/1.1 200 OK ",
-        "Content-Type: text/html;charset=utf-8 ",
-        "Content-Length: 12 ",
+        "HTTP/1.1 200 OK",
+        "Content-Length: 12",
+        "Content-Type: text/html;charset=utf-8",
         "",
         "Hello world!");
 
@@ -50,9 +50,9 @@ class Http11ProcessorTest {
 
     // then
     final URL resource = getClass().getClassLoader().getResource("static/index.html");
-    final var expected = "HTTP/1.1 200 OK " + System.lineSeparator() +
-        "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
-        "Content-Length: 4439 " + System.lineSeparator() +
+    final var expected = "HTTP/1.1 200 OK" + System.lineSeparator() +
+        "Content-Length: 4439" + System.lineSeparator() +
+        "Content-Type: text/html;charset=utf-8" + System.lineSeparator() +
         System.lineSeparator() +
         new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

@@ -3,11 +3,17 @@ package org.apache.coyote.http11.headers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpHeader {
 
   private final Map<String, String> headers;
   private final Cookie cookie;
+
+  public HttpHeader() {
+    this.headers = new HashMap<>();
+    this.cookie = new Cookie();
+  }
 
   public HttpHeader(final Map<String, String> headers) {
     this.headers = headers;
@@ -23,11 +29,21 @@ public class HttpHeader {
     return new HttpHeader(headers);
   }
 
+  public void setHeader(final String key, final String value) {
+    this.headers.put(key, value);
+  }
+
   public String getHeader(final String key) {
     return this.headers.get(key);
   }
 
   public String getCookie(final String key) {
     return this.cookie.get(key);
+  }
+
+  public String build() {
+    return this.headers.entrySet().stream()
+        .map(entry -> entry.getKey() + ": " + entry.getValue())
+        .collect(Collectors.joining(System.lineSeparator()));
   }
 }

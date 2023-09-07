@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
-import java.nio.Buffer;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,7 @@ public class RequestHeaders {
         return new RequestHeaders(headers);
     }
 
-    public String getValue(String key) {
+    public String getValue(final String key) {
         return headers.get(key);
     }
 }

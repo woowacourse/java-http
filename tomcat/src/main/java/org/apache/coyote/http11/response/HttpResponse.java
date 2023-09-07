@@ -18,12 +18,12 @@ public class HttpResponse {
     }
 
     public String toResponse(){
-        String headersString = headers.entrySet()
+        final String headersString = headers.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(System.lineSeparator()));
 
-        String responseWithoutBody = String.join(System.lineSeparator(),
+        final String responseWithoutBody = String.join(System.lineSeparator(),
                 HTTP_PROTOCOL + " " + httpStatus.getCode() + " " + httpStatus.getMessage(),
                 headersString,
                 ""

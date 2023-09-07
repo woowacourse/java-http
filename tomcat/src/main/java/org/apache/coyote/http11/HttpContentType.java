@@ -16,8 +16,7 @@ public enum HttpContentType {
         this.contentType = contentType;
     }
 
-    public static HttpContentType valueOfCotentType(String requestExtension) {
-
+    public static HttpContentType valueOfContentType(String requestExtension) {
         return Arrays.stream(values())
                 .filter(value -> value.extension.equals(requestExtension))
                 .findAny()

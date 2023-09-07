@@ -13,7 +13,7 @@ class HttpContentTypeTest {
         String ico = "ico";
 
         //when
-        final HttpContentType httpContentType = HttpContentType.valueOfCotentType(ico);
+        final HttpContentType httpContentType = HttpContentType.valueOfContentType(ico);
 
         //then
         Assertions.assertThat(httpContentType.getContentType()).isEqualTo("image/x-icon");

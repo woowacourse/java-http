@@ -145,14 +145,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse renderLogin(final HttpRequest httpRequest) throws IOException {
         final String requestBody = httpRequest.getRequestBody();
-
-        final Map<String, String> collect = Arrays.stream(requestBody.split("&")).takeWhile(it -> !it.isEmpty())
-                .map(it -> it.split("=")).collect(Collectors.toMap(it -> it[0], it -> it[1]));
+        final Map<String, String> bodys = Arrays.stream(requestBody.split("&"))
+                .takeWhile(it -> !it.isEmpty())
+                .map(it -> it.split("="))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
 
         final String url = httpRequest.getRequestURL().getAbsolutePath();
 
-        if (!collect.isEmpty()) {
-            return login(httpRequest, collect);
+        if (!bodys.isEmpty()) {
+            return login(httpRequest, bodys);
         }
 
         return okResponse(httpRequest, ResourceReader.readResource(STATIC_PATH + url));
@@ -172,9 +173,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> loginResponseHeader(final HttpRequest httpRequest) {
-        Map<String, String> responseHeader = new HashMap<>();
-        setCookie(httpRequest,responseHeader);
-        responseHeader.put(LOCATION,INDEX);
+        final Map<String, String> responseHeader = new HashMap<>();
+        setCookie(httpRequest, responseHeader);
+        responseHeader.put(LOCATION, INDEX);
         return responseHeader;
     }
 
@@ -188,15 +189,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void createSession(final String sessionId) {
-        Session session = new Session(sessionId);
-        SessionManager sessionManager = new SessionManager();
+        final Session session = new Session(sessionId);
+        final SessionManager sessionManager = new SessionManager();
         sessionManager.add(session);
     }
 
     private HttpResponse okResponse(final HttpRequest httpRequest, final String responseBody) {
         final Map<String, String> responseHeaders = new LinkedHashMap<>();
 
-        responseHeaders.put("Content-Type", HttpContentType.valueOfCotentType(httpRequest.getRequestURL().getExtension()).getContentType());
+        responseHeaders.put("Content-Type", HttpContentType.valueOfContentType(httpRequest.getRequestURL().getExtension()).getContentType());
         if (!responseBody.isBlank()) {
             responseHeaders.put("Content-Length", responseBody.getBytes().length + " ");
         }

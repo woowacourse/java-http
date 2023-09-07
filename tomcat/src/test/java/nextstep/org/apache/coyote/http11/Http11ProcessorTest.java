@@ -1,7 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.HttpContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -25,7 +24,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        var expected = String.join(System.lineSeparator(),
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
@@ -38,7 +37,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -53,10 +52,10 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
+        var expected = "HTTP/1.1 200 OK " + System.lineSeparator() +
+                "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
+                "Content-Length: 5564 " + System.lineSeparator() +
+                System.lineSeparator() +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -66,8 +65,8 @@ class Http11ProcessorTest {
     @DisplayName("CSS 파일을 반환한다.")
     void getCss() throws IOException {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
+        String httpRequest = String.join(System.lineSeparator(),
+                        "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1",
                 "Connection: keep-alive ",
@@ -105,10 +104,10 @@ class Http11ProcessorTest {
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
+        String expected = "HTTP/1.1 200 OK " + System.lineSeparator() +
+                "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
+                "Content-Length: 5564 "+ System.lineSeparator() +
+                System.lineSeparator() +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -159,7 +158,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // when, then
-        assertThat(socket.output()).contains(http,location);
+        assertThat(socket.output()).contains(http, location);
     }
 
     @Test
@@ -183,7 +182,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // when, then
-        assertThat(socket.output()).contains(http,location);
+        assertThat(socket.output()).contains(http, location);
     }
 
     @Test
@@ -207,6 +206,6 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // when, then
-        assertThat(socket.output()).contains(http,location);
+        assertThat(socket.output()).contains(http, location);
     }
 }

@@ -15,7 +15,7 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public static HttpCookie parseCookie(String cookie) {
+    public static HttpCookie parseCookie(final String cookie) {
         Map<String,String> parsedCookie = new HashMap<>();
         if(cookie!=null) {
             parsedCookie = Arrays.stream(cookie.split(COOKIES_DELIMITER))
@@ -27,8 +27,7 @@ public class HttpCookie {
         return new HttpCookie(parsedCookie);
     }
 
-    public String makeCookieValue(UUID uuid){
-
+    public String makeCookieValue(final UUID uuid){
         return "JSESSIONID" + COOKIE_DELIMITER + uuid;
     }
 
@@ -36,7 +35,7 @@ public class HttpCookie {
         return cookies.containsKey("JSESSIONID");
     }
 
-    public String getValue(String key){
+    public String getValue(final String key){
         return cookies.get(key);
     }
 }

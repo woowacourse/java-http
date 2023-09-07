@@ -8,6 +8,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,27 +35,29 @@ class RequestURLTest {
     @MethodSource("firstLines")
     void from(final String firstLine) {
         // given
+        BufferedReader br = new BufferedReader(new StringReader(firstLine));
 
         // when & then
-        assertDoesNotThrow(() -> RequestURL.from(firstLine));
+        assertDoesNotThrow(() -> RequestURL.from(br));
     }
 
-    @ParameterizedTest(name = "{index} {0} RequestUrl을 생성 실패 테스트")
-    @EmptySource
-    void from_exception(final String firstLine) {
+    @Test
+    @DisplayName("RequestUrl을 생성 실패 테스트")
+    void from_exception() {
         // given
-
+        BufferedReader br = new BufferedReader(new StringReader(" "));
         // when & then
-        assertThatThrownBy(() -> RequestURL.from(firstLine))
+        assertThatThrownBy(() -> RequestURL.from(br))
                 .isInstanceOf(InvalidRequestLineException.class)
                 .hasMessage("잘못된 RequestURL입니다.");
     }
 
     @ParameterizedTest(name = "{index} {0} 절대 경로 조회 테스트.")
     @MethodSource("firstLines")
-    void getAbsolutePath(final String firstLine) {
+    void getAbsolutePath(final String firstLine) throws IOException {
         // given
-        final RequestURL requestURL = RequestURL.from(firstLine);
+        BufferedReader br = new BufferedReader(new StringReader(firstLine));
+        final RequestURL requestURL = RequestURL.from(br);
 
         // when
         final String absolutePath = requestURL.getAbsolutePath();
@@ -59,10 +68,11 @@ class RequestURLTest {
 
     @Test
     @DisplayName("확장자 조회 테스트")
-    void getExtension() {
+    void getExtension() throws IOException{
         // given
         final String firstLine = "GET /ocean.css HTTP/1.1";
-        final RequestURL requestURL = RequestURL.from(firstLine);
+        BufferedReader br = new BufferedReader(new StringReader(firstLine));
+        final RequestURL requestURL = RequestURL.from(br);
 
         // when
         final String extension = requestURL.getExtension();

@@ -19,7 +19,6 @@ public class RequestURL {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String NON_RESERVED_QUERY_PARAM_DELIMITER = "\\?";
     private static final String NON_RESERVED_EXTENSION_DELIMITER = "\\.";
-    private static final String DEFAULT_EXTENSION = ".html";
     private static final String EXTENSION_DELIMITER = ".";
     private static final String SPACE_DELIMITER = " ";
 
@@ -50,7 +49,7 @@ public class RequestURL {
         }
     }
 
-    private static Map<String, String> parseQueryParam(String url) {
+    private static Map<String, String> parseQueryParam(final String url) {
         if (!url.contains(QUERY_STRING_DELIMITER)) {
             return Collections.emptyMap();
         }
@@ -70,7 +69,7 @@ public class RequestURL {
             absolutePath = absolutePath.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[0];
         }
         if (!absolutePath.contains(EXTENSION_DELIMITER)) {
-            absolutePath += EXTENSION_DELIMITER+ HttpContentType.HTML.getExtension();
+            absolutePath += EXTENSION_DELIMITER + HttpContentType.HTML.getExtension();
         }
         return absolutePath;
     }

@@ -36,8 +36,4 @@ public enum FileContent {
     public String getFileName() {
         return fileName;
     }
-
-    public String getFileNameWithExtension() {
-        return fileNameWithExtension;
-    }
 }

@@ -1,7 +1,5 @@
 package nextstep.jwp.model;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class User {
 
     private final Long id;

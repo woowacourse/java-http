@@ -6,7 +6,7 @@ import java.util.List;
 import mvc.controller.mapping.RequestMapping;
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;

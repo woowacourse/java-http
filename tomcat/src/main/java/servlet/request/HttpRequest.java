@@ -1,7 +1,8 @@
-package org.apache.coyote.http.request;
+package servlet.request;
 
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.util.HttpMethod;
 
 public class HttpRequest {

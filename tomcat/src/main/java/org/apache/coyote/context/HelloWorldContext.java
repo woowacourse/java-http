@@ -9,7 +9,7 @@ import org.apache.coyote.context.exception.InvalidRootContextPathException;
 import org.apache.coyote.context.exception.InvalidStaticResourcePathException;
 import org.apache.coyote.context.exception.UnsupportedApiException;
 import org.apache.coyote.http.SessionManager;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.apache.coyote.http.request.Request;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;

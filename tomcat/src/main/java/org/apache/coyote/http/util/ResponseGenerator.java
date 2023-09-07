@@ -2,7 +2,7 @@ package org.apache.coyote.http.util;
 
 import java.util.List;
 import org.apache.coyote.http.HttpCookie;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpStatusCode;
 import org.apache.coyote.http.response.Response;

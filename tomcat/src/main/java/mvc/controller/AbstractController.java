@@ -1,7 +1,7 @@
 package mvc.controller;
 
 import mvc.controller.exception.UnsupportedHttpMethodException;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.apache.coyote.http.util.HttpMethod;
 import servlet.Controller;
 import servlet.response.HttpResponse;

@@ -1,10 +1,15 @@
-package org.apache.coyote.http.request;
+package servlet.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpSession;
 import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.request.HttpRequestBody;
+import org.apache.coyote.http.request.HttpRequestHeaders;
+import org.apache.coyote.http.request.Parameters;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

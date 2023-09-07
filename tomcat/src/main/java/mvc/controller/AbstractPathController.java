@@ -1,6 +1,6 @@
 package mvc.controller;
 
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 
 public class AbstractPathController extends AbstractController {
 

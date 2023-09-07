@@ -3,7 +3,7 @@ package mvc.controller;
 import mvc.controller.exception.InvalidParameterException;
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.HttpSession;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import servlet.response.HttpResponse;
 
 public class RegisterController extends AbstractPathController {

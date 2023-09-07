@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;

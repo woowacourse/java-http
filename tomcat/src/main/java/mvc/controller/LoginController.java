@@ -5,7 +5,7 @@ import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.HttpSession;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import servlet.response.HttpResponse;
 
 public class LoginController extends AbstractPathController {

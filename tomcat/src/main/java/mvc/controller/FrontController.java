@@ -5,7 +5,7 @@ import mvc.controller.mapping.RequestMapping;
 import mvc.controller.mapping.exception.UnsupportedHttpRequestException;
 import nextstep.jwp.application.exception.AlreadyExistsAccountException;
 import nextstep.jwp.application.exception.LoginFailureException;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import servlet.Controller;

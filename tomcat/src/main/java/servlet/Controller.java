@@ -1,6 +1,6 @@
 package servlet;
 
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import servlet.response.HttpResponse;
 
 public interface Controller {

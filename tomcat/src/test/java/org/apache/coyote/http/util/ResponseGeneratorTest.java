@@ -3,7 +3,7 @@ package org.apache.coyote.http.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http.SessionManager;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
 import org.apache.coyote.http.request.Parameters;

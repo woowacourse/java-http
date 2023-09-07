@@ -4,7 +4,7 @@ import java.util.List;
 import mvc.controller.AbstractPathController;
 import mvc.controller.mapping.exception.EmptyControllerException;
 import mvc.controller.mapping.exception.UnsupportedHttpRequestException;
-import org.apache.coyote.http.request.HttpRequest;
+import servlet.request.HttpRequest;
 import servlet.Controller;
 
 public class RequestMapping {

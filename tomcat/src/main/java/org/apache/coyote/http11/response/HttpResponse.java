@@ -1,12 +1,15 @@
 package org.apache.coyote.http11.response;
 
+import lombok.Builder;
 import lombok.Getter;
-import org.apache.coyote.http11.session.HttpCookie;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
+
+import static org.apache.coyote.http11.response.HttpProtocolVersion.HTTP11;
 
 @Getter
 public class HttpResponse {
@@ -15,16 +18,11 @@ public class HttpResponse {
     private static final String BLANK_LINE = "";
     private static final String BLANK_SPACE = " ";
 
-    private String response;
+    private final HttpResponseStatusLine httpResponseStatusLine;
+    private final HttpResponseHeaders httpResponseHeaders;
+    private final HttpResponseBody httpResponseBody;
 
-    private HttpResponseStatusLine httpResponseStatusLine;
-    private HttpResponseHeaders httpResponseHeaders;
-    private HttpResponseBody httpResponseBody;
-
-    public HttpResponse(String response) {
-        this.response = response;
-    }
-
+    @Builder
     public HttpResponse(HttpResponseStatusLine httpResponseStatusLine, HttpResponseHeaders httpResponseHeaders, HttpResponseBody httpResponseBody) {
         this.httpResponseStatusLine = httpResponseStatusLine;
         this.httpResponseHeaders = httpResponseHeaders;
@@ -41,24 +39,46 @@ public class HttpResponse {
         }
 
         if (httpStatus == HttpStatus.FOUND) {
-            String formatResponse = String.join(
-                    DELIMITER,
-                    generateHttpStatus(httpStatus),
-                    generateLocation(responseEntity.getLocation()),
-                    generateCookie(responseEntity.getHttpCookie())
-            );
-            return new HttpResponse(formatResponse);
+            HttpResponseHeaders headers = new HttpResponseHeaders()
+                    .location(location)
+                    .setCookie(responseEntity.getHttpCookie());
+
+            return HttpResponse.builder()
+                    .httpResponseStatusLine(HttpResponseStatusLine.of(HTTP11, httpStatus))
+                    .httpResponseHeaders(headers)
+                    .httpResponseBody(responseBody)
+                    .build();
         }
 
-        String formatResponse = String.join(
-                DELIMITER,
-                generateHttpStatus(responseEntity.getHttpStatus()),
-                generateContentType(responseEntity.getContentType().getName()),
-                generateContentLength(responseBody),
-                BLANK_LINE,
-                responseBody.getBody()
+        HttpResponseHeaders headers = new HttpResponseHeaders()
+                .contentType(responseEntity.getContentType())
+                .contentLength(responseBody);
+
+        return HttpResponse.builder()
+                .httpResponseStatusLine(HttpResponseStatusLine.of(HTTP11, httpStatus))
+                .httpResponseHeaders(headers)
+                .httpResponseBody(responseBody)
+                .build();
+    }
+
+    public String getResponse() throws IOException {
+        String responseStatusLine = String.format("%s %s %s ",
+                httpResponseStatusLine.getHttpProtocolVersion().getName(),
+                httpResponseStatusLine.getHttpStatus().getStatusCode(),
+                httpResponseStatusLine.getHttpStatus().name()
         );
-        return new HttpResponse(formatResponse);
+
+        String responseHeaders = generateHeaders(httpResponseHeaders);
+
+        String responseBody = httpResponseBody.getBody();
+
+        return String.join(
+                DELIMITER,
+                responseStatusLine,
+                responseHeaders,
+                BLANK_LINE,
+                responseBody
+        );
     }
 
     private static HttpResponseBody generateResponseBody(String location) throws IOException {
@@ -67,37 +87,10 @@ public class HttpResponse {
         return HttpResponseBody.from(new String(Files.readAllBytes(file.toPath())));
     }
 
-    private static String generateHttpStatus(HttpStatus status) {
-        return String.format("HTTP/1.1 %s %s ", status.getStatusCode(), status.name());
-    }
-
-    private static String generateLocation(String location) {
-        if (location == null) {
-            return "";
-        }
-        return String.format("Location: %s ", location);
-    }
-
-    private static String generateContentType(String requestURI) {
-        if (requestURI.endsWith(".css")) {
-            return "Content-Type: text/css;charset=utf-8 ";
-        }
-        return "Content-Type: text/html;charset=utf-8 ";
-    }
-
-    private static String generateContentLength(HttpResponseBody responseBody) {
-        String body = responseBody.getBody();
-        return String.format("Content-Length: %s ", body.getBytes().length);
-    }
-
-    private static String generateCookie(HttpCookie httpCookie) {
-        if (httpCookie == null) {
-            return "";
-        }
-        String jSessionId = httpCookie.findJSessionId();
-        if (jSessionId == null) {
-            return "";
-        }
-        return String.format("Set-Cookie: JSESSIONID=%s ", jSessionId);
+    private String generateHeaders(HttpResponseHeaders headers) {
+        return headers.getHeaders().keySet()
+                .stream()
+                .map(it -> String.format("%s: %s ", it, headers.find(it)))
+                .collect(Collectors.joining(DELIMITER));
     }
 }

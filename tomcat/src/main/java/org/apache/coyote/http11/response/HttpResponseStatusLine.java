@@ -9,4 +9,8 @@ public class HttpResponseStatusLine {
 
     private final HttpProtocolVersion httpProtocolVersion;
     private final HttpStatus httpStatus;
+
+    public static HttpResponseStatusLine of(HttpProtocolVersion httpProtocolVersion, HttpStatus httpStatus) {
+        return new HttpResponseStatusLine(httpProtocolVersion, httpStatus);
+    }
 }

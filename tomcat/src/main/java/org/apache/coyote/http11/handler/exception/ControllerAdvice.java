@@ -8,5 +8,5 @@ public interface ControllerAdvice {
 
 	boolean isSupported(final Exception exception);
 
-	HttpResponse handleTo(final Exception exception) throws IOException;
+	void handleTo(final Exception exception, final HttpResponse response) throws IOException;
 }

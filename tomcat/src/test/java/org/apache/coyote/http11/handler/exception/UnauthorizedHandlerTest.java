@@ -44,7 +44,8 @@ class UnauthorizedHandlerTest {
 	@Test
 	@DisplayName("302 상태코드와 401.html Location을 반환한다.")
 	void handleTo() throws IOException {
-		final HttpResponse actual = UNAUTHORIZED_HANDLER.handleTo(new UnauthorizedException());
+		final HttpResponse actual = new HttpResponse();
+		UNAUTHORIZED_HANDLER.handleTo(new UnauthorizedException(), actual);
 
 		final String expected = "HTTP/1.1 302 Found \r\n" +
 			"Content-Type: text/html;charset=utf-8 \r\n" +

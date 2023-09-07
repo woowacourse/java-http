@@ -15,7 +15,7 @@ public class UnauthorizedHandler implements ControllerAdvice {
 	}
 
 	@Override
-	public HttpResponse handleTo(final Exception e) throws IOException {
-		return HttpResponse.redirect(REDIRECT_URI);
+	public void handleTo(final Exception e, final HttpResponse response) throws IOException {
+		response.redirect(REDIRECT_URI);
 	}
 }

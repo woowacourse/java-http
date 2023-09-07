@@ -17,8 +17,8 @@ public class InternalServerErrorHandler implements ControllerAdvice {
 	}
 
 	@Override
-	public HttpResponse handleTo(final Exception e) throws IOException {
+	public void handleTo(final Exception e, final HttpResponse response) throws IOException {
 		log.error(e.getMessage(), e);
-		return HttpResponse.redirect(REDIRECT_URI);
+		response.redirect(REDIRECT_URI);
 	}
 }

@@ -19,6 +19,7 @@ public class RequestHeaders {
                 .map(line -> line.split(": "))
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
         final String cookieValue = (String) headers.get("Cookie");
+        headers.remove("Cookie");
         return new RequestHeaders(headers, Cookie.from(cookieValue));
     }
 

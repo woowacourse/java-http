@@ -7,17 +7,14 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
@@ -48,11 +45,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-        ) {
-            final HttpRequest request = HttpRequest.from(bufferedReader);
+        try (final var outputStream = connection.getOutputStream()) {
+            final HttpRequest request = HttpRequestFactory.readFrom(connection);
 
             final HttpResponse response = handleRequest(request);
 

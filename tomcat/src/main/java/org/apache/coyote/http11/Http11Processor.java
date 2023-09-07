@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.*;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -94,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.OK)
-                .requestURI(requestURI)
+                .contentType(generateContentType(requestURI))
                 .responseBody(responseBody)
                 .build();
     }
@@ -108,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.OK)
-                .requestURI(requestURI)
+                .contentType(generateContentType(requestURI))
                 .responseBody(responseBody)
                 .build();
     }
@@ -124,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
         if (httpMethod == HttpMethod.GET && account == null) {
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
-                    .requestURI(requestURI)
+                    .contentType(generateContentType(requestURI))
                     .location(LOGIN_PAGE_URI)
                     .build();
         }
@@ -141,12 +142,19 @@ public class Http11Processor implements Runnable, Processor {
         return handleLoginSuccess(requestURI, findAccount);
     }
 
+    private ContentType generateContentType(String requestURI) {
+        if (requestURI.endsWith(".css")) {
+            return ContentType.CSS;
+        }
+        return ContentType.HTML;
+    }
+
     private ResponseEntity handleLoginFail(String requestURI, User findAccount) {
         log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.UNAUTHORIZED)
-                .requestURI(requestURI)
+                .contentType(generateContentType(requestURI))
                 .location(UNAUTHORIZED_PAGE_URI)
                 .build();
     }
@@ -156,7 +164,7 @@ public class Http11Processor implements Runnable, Processor {
         ResponseEntity responseEntity = ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
-                .requestURI(requestURI)
+                .contentType(generateContentType(requestURI))
                 .location(INDEX_PAGE_URI)
                 .build();
         String jSessionId = JSessionIdGenerator.generateRandomSessionId();
@@ -186,7 +194,7 @@ public class Http11Processor implements Runnable, Processor {
         if (httpMethod == HttpMethod.GET) {
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
-                    .requestURI(requestURI)
+                    .contentType(generateContentType(requestURI))
                     .location(REGISTER_PAGE_URI)
                     .build();
         }
@@ -202,7 +210,7 @@ public class Http11Processor implements Runnable, Processor {
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
-                .requestURI(requestURI)
+                .contentType(generateContentType(requestURI))
                 .location(INDEX_PAGE_URI)
                 .build();
     }

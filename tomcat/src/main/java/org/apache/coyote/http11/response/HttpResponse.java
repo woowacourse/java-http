@@ -41,7 +41,7 @@ public class HttpResponse {
         String formatResponse = String.join(
                 DELIMITER,
                 generateHttpStatus(responseEntity.getHttpStatus()),
-                generateContentType(responseEntity.getRequestURI()),
+                generateContentType(responseEntity.getContentType().getName()),
                 generateContentLength(responseBody),
                 BLANK_LINE,
                 responseBody

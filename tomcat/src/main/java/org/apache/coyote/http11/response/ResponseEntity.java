@@ -11,7 +11,7 @@ import org.apache.coyote.http11.session.HttpCookie;
 public class ResponseEntity {
 
     private final HttpStatus httpStatus;
-    private final String requestURI;
+    private final ContentType contentType;
     private final String location;
     private final String responseBody;
     private final HttpCookie httpCookie = HttpCookie.empty();

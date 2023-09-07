@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,9 +48,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = HttpRequest.from(inputStream);
+
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = handle(httpRequest);
 
             String headerLines = httpResponse.getHeaders().stream()

@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import org.apache.coyote.http11.header.Cookies;
 import org.apache.coyote.http11.header.Headers;
@@ -29,9 +27,8 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(InputStream inputStream) {
+    public static HttpRequest from(BufferedReader reader) {
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String[] requestLineElements = reader.readLine().split(WHITE_SPACE);
 
             Headers headers = new Headers();

@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -65,7 +67,7 @@ class HttpRequestTest {
         }
     }
 
-    private ByteArrayInputStream toInputStream(String message) {
-        return new ByteArrayInputStream(message.getBytes());
+    private BufferedReader toInputStream(String message) {
+        return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(message.getBytes())));
     }
 }

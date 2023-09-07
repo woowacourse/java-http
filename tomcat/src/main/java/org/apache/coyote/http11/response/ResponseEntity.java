@@ -31,8 +31,8 @@ public class ResponseEntity {
         return protocol.protocol();
     }
 
-    public Location location() {
-        return location;
+    public String getLocation() {
+        return location.location();
     }
 
     public HttpStatus getHttpStatus() {

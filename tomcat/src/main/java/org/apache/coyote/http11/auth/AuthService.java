@@ -6,6 +6,7 @@ import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
+import org.apache.coyote.http11.response.Location;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 import static org.apache.coyote.http11.request.line.HttpMethod.GET;
@@ -31,13 +32,11 @@ public class AuthService {
             final Cookie cookie = requestHeader.getCookie();
             final Session session = sessionRepository.getSession(cookie.get(COOKIE_NAME));
             if (session == null) {
-                return ResponseEntity.getCookieNullResponseEntity(protocol, OK, LOGIN_PAGE);
+                return ResponseEntity.getCookieNullResponseEntity(protocol, OK, Location.from(LOGIN_PAGE));
             }
-            String account = requestBody.getBy("account");
-            if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-                return ResponseEntity.getCookieNullResponseEntity(protocol,FOUND, INDEX_PAGE);
-            }
-            throw new IllegalArgumentException("쿠키 또는 세션에 문제가 있습니다. 쿠키와 세션을 제거하고 다시 접근해주세요.");
+            // 쿠키가 있으면 인덱스 페이지로 리다이렉트
+            // account 확인 X
+            return ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, Location.from(INDEX_PAGE));
         }
 
         final String account = requestBody.getBy("account");
@@ -45,11 +44,13 @@ public class AuthService {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> getSuccessLoginResponse(user, protocol))
-                .orElseGet(() -> ResponseEntity.getCookieNullResponseEntity(protocol, UNAUTHORIZED, UNAUTHORIZED_PAGE));
+                .orElseGet(() -> ResponseEntity.getCookieNullResponseEntity(protocol, UNAUTHORIZED,
+                        Location.from(UNAUTHORIZED_PAGE)));
     }
 
     private ResponseEntity getSuccessLoginResponse(final User user, final Protocol protocol) {
-        ResponseEntity response = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, INDEX_PAGE);
+        ResponseEntity response = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND,
+                Location.from(INDEX_PAGE));
         String jsessionid = response.getHttpCookie().get("JSESSIONID");
         final Session session = Session.from(jsessionid);
         session.setAttribute("user", user);
@@ -60,18 +61,18 @@ public class AuthService {
     public ResponseEntity register(final RequestLine requestLine, final RequestBody requestBody) {
         Protocol protocol = requestLine.protocol();
         if (requestLine.method() == GET) {
-            return ResponseEntity.getCookieNullResponseEntity(protocol, OK, REGISTER_PAGE);
+            return ResponseEntity.getCookieNullResponseEntity(protocol, OK, Location.from(REGISTER_PAGE));
         }
 
         final String account = requestBody.getBy("account");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return ResponseEntity.getCookieNullResponseEntity(protocol, CONFLICT, CONFLICT_PAGE);
+            return ResponseEntity.getCookieNullResponseEntity(protocol, CONFLICT, Location.from(CONFLICT_PAGE));
         }
 
         final String email = requestBody.getBy("email");
         final String password = requestBody.getBy("password");
         InMemoryUserRepository.save(new User(account, password, email));
-        return ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, INDEX_PAGE);
+        return ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, Location.from(INDEX_PAGE));
     }
 
 }

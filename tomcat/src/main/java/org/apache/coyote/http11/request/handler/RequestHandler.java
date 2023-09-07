@@ -5,6 +5,7 @@ import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
+import org.apache.coyote.http11.response.Location;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 import static org.apache.coyote.http11.response.HttpStatus.OK;
@@ -26,7 +27,7 @@ public class RequestHandler {
         if (path.equals("/register")) {
             return authService.register(requestLine, requestBody);
         }
-        return ResponseEntity.getCookieNullResponseEntity(protocol, OK, path);
+        return ResponseEntity.getCookieNullResponseEntity(protocol, OK, Location.from(path));
     }
 
 }

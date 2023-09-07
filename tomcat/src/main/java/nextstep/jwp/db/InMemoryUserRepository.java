@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static final int INCREMENT_BY_ONE = 1;
 
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
@@ -16,16 +17,21 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        final int id = database.size() + INCREMENT_BY_ONE;
+        final User savedUser = new User(
+                Integer.toUnsignedLong(id),
+                user.getAccount(),
+                user.getPassword(),
+                user.getEmail()
+        );
+
+        database.put(savedUser.getAccount(), savedUser);
     }
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
 
-    public static boolean isExistAccount(String account) {
-        return database.containsKey(account);
+    private InMemoryUserRepository() {
     }
-
-    private InMemoryUserRepository() {}
 }

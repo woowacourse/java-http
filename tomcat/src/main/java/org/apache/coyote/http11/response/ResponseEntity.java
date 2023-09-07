@@ -13,7 +13,7 @@ public class ResponseEntity {
     private final HttpStatus httpStatus;
     private final ContentType contentType;
     private final String location;
-    private final String responseBody;
+    private final HttpResponseBody responseBody;
     private final HttpCookie httpCookie = HttpCookie.empty();
 
     public void setCookie(String key, String value) {

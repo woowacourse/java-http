@@ -21,11 +21,11 @@ public class HttpResponse {
 
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {
         String location = responseEntity.getLocation();
-        String responseBody = responseEntity.getResponseBody();
+        HttpResponseBody responseBody = responseEntity.getResponseBody();
         HttpStatus httpStatus = responseEntity.getHttpStatus();
 
         if (responseBody == null) {
-            responseBody = findResourceFromLocation(location);
+            responseBody = generateResponseBody(location);
         }
 
         if (httpStatus == HttpStatus.FOUND) {
@@ -44,15 +44,15 @@ public class HttpResponse {
                 generateContentType(responseEntity.getContentType().getName()),
                 generateContentLength(responseBody),
                 BLANK_LINE,
-                responseBody
+                responseBody.getBody()
         );
         return new HttpResponse(formatResponse);
     }
 
-    private static String findResourceFromLocation(String location) throws IOException {
+    private static HttpResponseBody generateResponseBody(String location) throws IOException {
         URL resource = ClassLoader.getSystemClassLoader().getResource("static" + location);
         File file = new File(resource.getFile());
-        return new String(Files.readAllBytes(file.toPath()));
+        return HttpResponseBody.from(new String(Files.readAllBytes(file.toPath())));
     }
 
     private static String generateHttpStatus(HttpStatus status) {
@@ -74,8 +74,9 @@ public class HttpResponse {
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
-    private static String generateContentLength(String responseBody) {
-        return String.format("Content-Length: %s ", responseBody.getBytes().length);
+    private static String generateContentLength(HttpResponseBody responseBody) {
+        String body = responseBody.getBody();
+        return String.format("Content-Length: %s ", body.getBytes().length);
     }
 
     private static String generateCookie(ResponseEntity responseEntity) {

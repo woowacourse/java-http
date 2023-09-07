@@ -79,4 +79,13 @@ public class HttpHeaders {
 	public Optional<String> findJSessionId() {
 		return cookie.getJSessionId();
 	}
+
+	public void addType(final MimeType type) {
+		headers.put(CONTENT_TYPE.getValue(), type.getValue());
+	}
+
+	public void addContentLength(final String body) {
+		final int length = body.getBytes().length;
+		headers.put(CONTENT_LENGTH.getValue(), String.valueOf(length));
+	}
 }

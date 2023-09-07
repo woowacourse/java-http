@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.headers;
 
 import static org.apache.coyote.http11.headers.HttpHeaderType.*;
 import static org.apache.coyote.http11.headers.MimeType.*;
@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
-import org.apache.coyote.http11.headers.HttpCookie;
-import org.apache.coyote.http11.headers.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -109,4 +107,28 @@ class HttpHeadersTest {
 		assertThat(headers.get(SET_COOKIE.getValue()))
 			.contains(setCookieValue);
 	}
+
+	@Test
+	@DisplayName("http 헤더에 content-length를 추가할 수 있다.")
+	void addContentLength() {
+		final HttpHeaders headers = new HttpHeaders();
+		final String body = "Hello";
+
+		headers.addContentLength(body);
+
+		assertThat(headers.get(CONTENT_LENGTH.getValue()))
+			.contains("5");
+	}
+
+	@Test
+	@DisplayName("http 헤더에 content-type을 추가할 수 있다.")
+	void addContentType() {
+		final HttpHeaders headers = new HttpHeaders();
+
+		headers.addType(HTML);
+
+		assertThat(headers.get(CONTENT_TYPE.getValue()))
+			.contains(HTML.getValue());
+	}
+
 }

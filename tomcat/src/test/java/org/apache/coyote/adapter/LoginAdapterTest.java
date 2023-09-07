@@ -14,7 +14,8 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestLine;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.response.HttpStatus;
+import org.apache.coyote.view.Resource;
 import org.apache.coyote.view.ViewResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,14 +33,14 @@ class LoginAdapterTest {
                 new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString),
                 ContentType.ALL);
         Path path = Path.of(ViewResource.class.getResource("/static/index.html").toURI());
-        byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
-        byte[] expectedLine = "HTTP/1.1 302 SUCCESS".getBytes();
+        String expectedBody = new String(Files.readAllBytes(path));
+        HttpStatus expectedStatus = HttpStatus.SUCCESS;
 
-        Response actual = new LoginAdapter().doHandle(request);
+        Resource actual = new LoginAdapter().doHandle(request);
 
         assertAll(
-                () -> assertThat(actual.getResponseBytes()).startsWith(expectedLine),
-                () -> assertThat(actual.getResponseBytes()).contains(expectedBody)
+                () -> assertThat(actual.getHttpStatus()).isEqualTo(expectedStatus),
+                () -> assertThat(actual.getValue()).isEqualTo(expectedBody)
         );
     }
 
@@ -54,14 +55,14 @@ class LoginAdapterTest {
                 new RequestLine(HttpMethod.GET, "/login", Protocol.HTTP1_1, queryString),
                 ContentType.ALL);
         Path path = Path.of(ViewResource.class.getResource("/static/401.html").toURI());
-        byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
-        byte[] expectedLine = "HTTP/1.1 401 UNAUTHOIRZED".getBytes();
+        String expectedBody = new String(Files.readAllBytes(path));
+        HttpStatus expectedStatus = HttpStatus.UNAUTHORIZED;
 
-        Response actual = new LoginAdapter().doHandle(request);
+        Resource actual = new LoginAdapter().doHandle(request);
 
         assertAll(
-                () -> assertThat(actual.getResponseBytes()).startsWith(expectedLine),
-                () -> assertThat(actual.getResponseBytes()).contains(expectedBody)
+                () -> assertThat(actual.getHttpStatus()).isEqualTo(expectedStatus),
+                () -> assertThat(actual.getValue()).isEqualTo(expectedBody)
         );
     }
 }

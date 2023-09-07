@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestLine;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.view.Resource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +19,10 @@ class StringAdapterTest {
     void doHandle() {
         Request request = new Request(
                 new RequestLine(HttpMethod.GET, "/", Protocol.HTTP1_1, new HashMap<>()), ContentType.ALL);
-        byte[] expected = "hello world!".getBytes();
+        String expected = "Hello world!";
 
-        Response actual = new StringAdapter().doHandle(request);
+        Resource actual = new StringAdapter().doHandle(request);
 
-        assertThat(actual.getResponseBytes()).contains(expected);
+        assertThat(actual.getValue()).contains(expected);
     }
 }

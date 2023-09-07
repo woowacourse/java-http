@@ -15,8 +15,6 @@ import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestLine;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
-import org.apache.coyote.view.ViewResolver;
-import org.apache.coyote.view.ViewResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,9 +1,9 @@
 package org.apache.coyote.adapter;
 
 import org.apache.coyote.request.Request;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.view.Resource;
 
 public interface Adapter {
 
-    Response doHandle(Request request);
+    Resource doHandle(Request request);
 }

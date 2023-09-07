@@ -9,6 +9,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.adapter.StringAdapter;
 import org.apache.coyote.adapter.LoginAdapter;
 import org.apache.coyote.response.HttpStatus;
+import org.apache.coyote.view.Resource;
 import org.apache.coyote.view.ViewResolver;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
@@ -22,9 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ViewResolver viewResolver;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.viewResolver = new ViewResolver();
     }
 
     @Override
@@ -51,11 +54,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response doHandler(Request request) {
         if (request.isSamePath("/")) {
-            return new StringAdapter().doHandle(request);
+            Resource resource = new StringAdapter().doHandle(request);
+            return viewResolver.resolve(request, resource);
         }
         if (request.isSamePath("/login")) {
-            return new LoginAdapter().doHandle(request);
+            Resource resource = new LoginAdapter().doHandle(request);
+            return viewResolver.resolve(request, resource);
         }
-        return new ViewResolver().resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
+        return viewResolver.resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
     }
 }

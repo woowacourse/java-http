@@ -30,10 +30,10 @@ class ThreadTest {
         Thread thread = new ExtendedThread("hello thread");
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        thread.start();
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        thread.join();
     }
 
     /**
@@ -43,13 +43,13 @@ class ThreadTest {
     @Test
     void testRunnableThread() throws InterruptedException {
         // 하단의 RunnableThread 클래스를 Runnable 인터페이스의 구현체로 만들고 Thread 클래스를 활용하여 스레드 객체를 생성한다.
-        Thread thread = new Thread(new RunnableThread("hello thread"));
+        Thread thread = new Thread(new RunnableThread("hello thread!"));
 
         // 생성한 thread 객체를 시작한다.
-         thread.start();
+        thread.start();
 
         // thread의 작업이 완료될 때까지 기다린다.
-         thread.join();
+        thread.join();
     }
 
     private static final class ExtendedThread extends Thread {

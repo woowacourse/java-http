@@ -1,5 +1,6 @@
 package thread.stage1;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConcurrencyTest {
 
     @Test
+//    @RepeatedTest(10000)
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();
 
@@ -37,4 +39,13 @@ class ConcurrencyTest {
         // 하지만 디버거로 개별 스레드를 일시 중지하면 if절 조건이 true가 되고 크기가 2가 된다. 왜 그럴까?
         assertThat(userServlet.getUsers()).hasSize(1);
     }
+    /**
+     * 스레드는 구구가 남겨준 것과 같이 실행 순서가 보장되지 않는다.
+     * break point를 if문 내부로 찍고, 두 개의 스레드에 대해 디버그를 돌려보면 테스트는 항상 실패한다.
+     * 두 스레드가 break point 에서 멈춘 상태이기 때문에, List의 크기는 항상 0이기 때문이다.
+     * 또한 디버깅 모드로 실행하지 않으면 테스트는 잘 통과하는 것 같아 보이지만, RepeatedTest를 통해 여러 번 수행하면
+     * 낮은 확률로 실패하는 테스트가 존재한다.
+     * 두 스레드가 동시에 if문 분기를 체크할 수도 있기 때문이다.
+     * 이런 경우 테스트는 디버깅 모드로 하지 않아도 실패한다.
+     */
 }

@@ -89,7 +89,7 @@ public class HttpRequest {
         return body;
     }
 
-    public static class Builder {
+    public static class HttpRequestBuilder {
 
         private String protocol;
         private HttpHeaders headers;
@@ -99,41 +99,41 @@ public class HttpRequest {
         private Map<String, String> parameters;
         private String body;
 
-        public static Builder builder() {
-            return new Builder();
+        public static HttpRequestBuilder builder() {
+            return new HttpRequestBuilder();
         }
 
-        public Builder protocol(final String protocol) {
+        public HttpRequestBuilder protocol(final String protocol) {
             this.protocol = protocol;
             return this;
         }
 
-        public Builder httpMethod(final HttpMethod httpMethod) {
+        public HttpRequestBuilder httpMethod(final HttpMethod httpMethod) {
             this.httpMethod = httpMethod;
             return this;
         }
 
-        public Builder headers(final HttpHeaders headers) {
+        public HttpRequestBuilder headers(final HttpHeaders headers) {
             this.headers = headers;
             return this;
         }
 
-        public Builder uri(final String uri) {
+        public HttpRequestBuilder uri(final String uri) {
             this.uri = uri;
             return this;
         }
 
-        public Builder path(final String path) {
+        public HttpRequestBuilder path(final String path) {
             this.path = path;
             return this;
         }
 
-        public Builder parameters(final Map<String, String> parameters) {
+        public HttpRequestBuilder parameters(final Map<String, String> parameters) {
             this.parameters = parameters;
             return this;
         }
 
-        public Builder body(final String body) {
+        public HttpRequestBuilder body(final String body) {
             this.body = body;
             return this;
         }

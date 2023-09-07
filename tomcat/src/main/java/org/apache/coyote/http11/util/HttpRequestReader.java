@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpRequest.HttpRequestBuilder;
 import org.apache.coyote.http11.exception.InvalidHttpFormException;
 
 public class HttpRequestReader {
@@ -25,7 +26,7 @@ public class HttpRequestReader {
         final var requestLineAttributes = requestLine.split(REQUEST_LINE_DELIMITER);
         Map<String, String> headers = readRequestHeaders(bufferedReader);
         String body = readRequestBody(headers, bufferedReader);
-        return HttpRequest.Builder.builder()
+        return HttpRequestBuilder.builder()
                 .httpMethod(HttpMethod.valueOf(requestLineAttributes[0]))
                 .uri(requestLineAttributes[1])
                 .path(HttpParser.parsePath(requestLineAttributes[1]))

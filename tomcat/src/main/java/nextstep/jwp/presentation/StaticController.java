@@ -6,10 +6,19 @@ import org.apache.coyote.http.HttpResponseBuilder;
 
 import java.io.IOException;
 
+import static org.apache.coyote.http.HttpMethod.GET;
+
 public class StaticController implements Controller {
 
     @Override
     public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        if (httpRequest.getMethod() == GET) {
+            return doGet(httpRequest, httpResponse);
+        }
+        throw new IllegalArgumentException("지원하지 않는 HTTP Method 입니다.");
+    }
+
+    private String doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         return HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath());
     }
 }

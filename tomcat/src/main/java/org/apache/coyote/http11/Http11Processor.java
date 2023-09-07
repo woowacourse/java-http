@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.handler.FrontController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpRequest;
@@ -39,7 +40,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse();
 
-            String response = frontController.process(httpRequest, httpResponse);
+            Controller controller = frontController.handle(httpRequest);
+            String response = controller.process(httpRequest, httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

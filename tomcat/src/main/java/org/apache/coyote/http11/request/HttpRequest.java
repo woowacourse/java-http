@@ -9,7 +9,7 @@ import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
 
-    public static final Manager SESSION_MANAGER = new SessionManager();
+    private static final Manager SESSION_MANAGER = SessionManager.INSTANCE;
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;

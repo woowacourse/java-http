@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
+import static org.apache.catalina.SessionManager.SESSION_ID_COOKIE_NAME;
 
 import java.util.Map;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.SessionManager.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.catalina.SessionManager.Session;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Method;
 import org.apache.coyote.http11.common.header.EntityHeaders;

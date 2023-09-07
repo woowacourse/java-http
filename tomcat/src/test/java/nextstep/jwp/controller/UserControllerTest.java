@@ -6,8 +6,8 @@ import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.SessionManager.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.catalina.SessionManager.Session;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;

@@ -1,11 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SessionManager {
+public class SessionManager implements Manager {
 
     public static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
     private static final Map<String, Session> SESSIONS = new HashMap<>();
@@ -17,13 +17,24 @@ public class SessionManager {
 
     private Session create() {
         final Session session = new Session();
-        SESSIONS.put(session.getId(), session);
+        add(session);
 
         return session;
     }
 
+    @Override
+    public void add(final Session session) {
+        SESSIONS.put(session.getId(), session);
+    }
+
+    @Override
     public Optional<Session> findSession(final String id) {
         return Optional.ofNullable(SESSIONS.get(id));
+    }
+
+    @Override
+    public void remove(final Session session) {
+        SESSIONS.remove(session.getId());
     }
 
     public static class Session {

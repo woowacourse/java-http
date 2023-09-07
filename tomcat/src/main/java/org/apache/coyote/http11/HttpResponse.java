@@ -1,18 +1,21 @@
 package org.apache.coyote.http11;
 
 public class HttpResponse {
+    public static final String DEFAULT_PROTOCOL_VERSION = "HTTP/1.1";
+    private final String protocolVersion;
 
-    private HttpResponseStatus responseStatus;
-    private HttpResponseHeader responseHeader;
-    private String responseBody;
- 
+    private final HttpResponseStatus responseStatus;
+    private final HttpResponseHeader responseHeader;
+    private final String responseBody;
+
     public static HttpResponse of(final HttpResponseStatus responseStatus,
                                   final HttpResponseHeader responseHeader, final String responseBody) {
-        return new HttpResponse(responseStatus, responseHeader, responseBody);
+        return new HttpResponse(DEFAULT_PROTOCOL_VERSION, responseStatus, responseHeader, responseBody);
     }
 
-    private HttpResponse(final HttpResponseStatus responseStatus,
+    private HttpResponse(final String protocolVersion, final HttpResponseStatus responseStatus,
                          final HttpResponseHeader responseHeader, final String responseBody) {
+        this.protocolVersion = protocolVersion;
         this.responseStatus = responseStatus;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;

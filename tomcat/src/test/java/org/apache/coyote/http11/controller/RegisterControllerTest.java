@@ -18,7 +18,7 @@ class RegisterControllerTest {
     @DisplayName("GET 메소드에 해당하는 로직을 처리해서 HttpResponse를 반환한다.")
     void getService() throws Exception {
         // given
-        String startLine = "GET /register.html HTTP/1.1 ";
+        String startLine = "GET /register HTTP/1.1 ";
         String rawRequest = String.join("\r\n",
                 "Content-Type: text/html",
                 "",

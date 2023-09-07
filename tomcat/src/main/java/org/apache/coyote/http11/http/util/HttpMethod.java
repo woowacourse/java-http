@@ -1,27 +1,15 @@
 package org.apache.coyote.http11.http.util;
 
-import java.util.Arrays;
-
 public enum HttpMethod {
 
-    GET("GET", false),
-    POST("POST", true),
+    GET("GET"),
+    POST("POST"),
     ;
 
     private final String name;
-    private final boolean hasBody;
 
-    HttpMethod(final String name, final boolean hasBody) {
+    HttpMethod(final String name) {
         this.name = name;
-        this.hasBody = hasBody;
-    }
-
-    public static boolean hasBody(final String name) {
-        return Arrays.stream(HttpMethod.values())
-                     .filter(method -> method.name.equals(name))
-                     .map(httpMethod -> httpMethod.hasBody)
-                     .findAny()
-                     .orElseThrow(() -> new IllegalArgumentException("잘못된 Http Mehod명입니다. " + name));
     }
 
     public boolean isSameMethod(final String method) {

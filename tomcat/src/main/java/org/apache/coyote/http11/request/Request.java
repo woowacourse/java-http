@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.request.exception.NotFoundQueryStringException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -29,6 +31,14 @@ public class Request {
 
     public StartLine getStartLine() {
         return startLine;
+    }
+
+    public String getQueryValue(final String key) {
+        final QueryString queryString = startLine.getQueryString()
+                                                 .orElseThrow(() ->
+                                                         new NotFoundQueryStringException("쿼리 스트링이 들어오지 않았습니다.")
+                                                 );
+        return queryString.getQueryValue(key);
     }
 
     public Headers getHeaders() {

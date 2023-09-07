@@ -25,6 +25,10 @@ public class QueryString {
         return new QueryString(queries);
     }
 
+    public String getQueryValue(final String key) {
+        return queries.get(key);
+    }
+
     public Map<String, String> getQueries() {
         return queries;
     }

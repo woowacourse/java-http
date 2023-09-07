@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.common.Cookie;
+import org.apache.common.HttpBody;
 import org.apache.common.HttpMethod;
 
 public class HttpRequest {
@@ -57,8 +58,8 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public String getTarget() {
-        return httpStartLine.getRequestTarget();
+    public String getPath() {
+        return httpStartLine.getPath();
     }
 
     public String getBody() {
@@ -73,10 +74,10 @@ public class HttpRequest {
     }
 
     public boolean isPost() {
-        return httpStartLine.getHttpMethod().equals(HttpMethod.POST);
+        return httpStartLine.getMethod().equals(HttpMethod.POST);
     }
 
     public boolean isGet() {
-        return httpStartLine.getHttpMethod().equals(HttpMethod.GET);
+        return httpStartLine.getMethod().equals(HttpMethod.GET);
     }
 }

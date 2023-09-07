@@ -1,4 +1,4 @@
-package org.apache.common;
+package org.apache.response;
 
 public enum HttpStatus {
 

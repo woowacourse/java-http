@@ -1,4 +1,4 @@
-package org.apache.common;
+package org.apache.response;
 
 import java.util.Arrays;
 

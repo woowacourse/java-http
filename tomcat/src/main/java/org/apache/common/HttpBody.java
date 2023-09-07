@@ -1,4 +1,4 @@
-package org.apache.request;
+package org.apache.common;
 
 public class HttpBody {
 

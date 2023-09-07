@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.common.ContentType;
-import org.apache.common.HttpStatus;
 
 public class HttpResponse {
 

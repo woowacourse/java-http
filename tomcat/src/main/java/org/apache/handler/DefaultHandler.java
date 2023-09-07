@@ -1,9 +1,9 @@
 package org.apache.handler;
 
 import java.io.IOException;
-import org.apache.common.ContentType;
+import org.apache.response.ContentType;
 import org.apache.common.FileReader;
-import org.apache.common.HttpStatus;
+import org.apache.response.HttpStatus;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
 

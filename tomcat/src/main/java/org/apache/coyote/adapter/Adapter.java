@@ -5,5 +5,5 @@ import org.apache.coyote.view.Resource;
 
 public interface Adapter {
 
-    Resource doHandle(Request request);
+    Resource adapt(Request request);
 }

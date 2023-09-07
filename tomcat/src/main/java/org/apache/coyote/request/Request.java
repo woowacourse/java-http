@@ -50,7 +50,7 @@ public class Request {
         return requestHeader;
     }
 
-    public RequestBody getRequestBody() {
-        return requestBody;
+    public Map<String, String> getBody() {
+        return requestBody.getBody();
     }
 }

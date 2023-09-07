@@ -8,7 +8,7 @@ import org.apache.coyote.view.Resource;
 public class StringAdapter implements Adapter {
 
     @Override
-    public Resource doHandle(Request request) {
+    public Resource adapt(Request request) {
         DefaultHandler defaultHandler = new DefaultHandler();
         String resource = defaultHandler.response();
 

@@ -1,6 +1,7 @@
-package org.apache.handler;
+package nextstep.jwp.controller;
 
 import org.apache.common.FileReader;
+import org.apache.handler.AbstractController;
 import org.apache.request.HttpRequest;
 import org.apache.response.ContentType;
 import org.apache.response.HttpResponse;

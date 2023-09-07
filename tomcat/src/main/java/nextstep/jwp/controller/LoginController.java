@@ -1,4 +1,4 @@
-package org.apache.handler;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.handler.AbstractController;
 import org.apache.response.ContentType;
 import org.apache.common.Cookie;
 import org.apache.common.FileReader;

@@ -2,6 +2,10 @@ package org.apache.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.controller.FileController;
+import nextstep.jwp.controller.HomeController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.ResisterController;
 import org.apache.request.HttpRequest;
 
 public class RequestMapping {

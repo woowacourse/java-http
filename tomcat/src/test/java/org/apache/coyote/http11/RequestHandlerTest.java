@@ -19,7 +19,7 @@ class RequestHandlerTest {
         //given
         final var request = new HttpRequest(
                 HttpMethod.GET,
-                new HttpUri("/"),
+                new HttpPath("/"),
                 Map.of(),
                 Map.of(),
                 "",
@@ -45,7 +45,7 @@ class RequestHandlerTest {
         //given
         final var request = new HttpRequest(
                 HttpMethod.GET,
-                new HttpUri(uri),
+                new HttpPath(uri),
                 Map.of(),
                 Map.of(),
                 "",

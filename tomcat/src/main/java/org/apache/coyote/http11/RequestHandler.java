@@ -24,7 +24,7 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public HttpResponse handle(final HttpRequest request) throws IOException {
-        final var uri = request.getUri().getValue();
+        final var uri = request.getPath().getValue();
         if (uri.equals("/login")) {
             return handleLogin(request);
         }

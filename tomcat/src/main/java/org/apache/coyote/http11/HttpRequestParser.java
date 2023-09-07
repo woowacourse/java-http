@@ -30,7 +30,7 @@ public class HttpRequestParser {
         final var body = readMessageBody(bufferedReader, headers);
         final var cookies = findCookies(headers);
 
-        return new HttpRequest(method, new HttpUri(path), queryParameters, headers, body, cookies);
+        return new HttpRequest(method, new HttpPath(path), queryParameters, headers, body, cookies);
     }
 
     private Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {

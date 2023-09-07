@@ -3,7 +3,7 @@ package org.apache.coyote.response;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    SUCCESS(302, "SUCCESS"),
+    FOUND(302, "FOUND"),
     UNAUTHORIZED(401, "UNAUTHOIRZED"),
     NOT_FOUND(404, "NOT_FOUND");
 

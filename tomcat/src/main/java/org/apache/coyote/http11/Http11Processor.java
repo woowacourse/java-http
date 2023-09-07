@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.adapter.LoginAdapter;
 import org.apache.coyote.adapter.RegisterAdapter;
 import org.apache.coyote.adapter.StringAdapter;
-import org.apache.coyote.adapter.LoginAdapter;
-import org.apache.coyote.response.HttpStatus;
-import org.apache.coyote.view.Resource;
-import org.apache.coyote.view.ResponseResolver;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
+import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.view.Resource;
+import org.apache.coyote.view.ResponseResolver;
 import org.apache.coyote.view.ViewResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +66,7 @@ public class Http11Processor implements Runnable, Processor {
             Resource resource = new RegisterAdapter().adapt(request);
             return responseResolver.resolve(request, resource);
         }
-        return responseResolver.resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
+        return responseResolver.resolve(request,
+                ViewResource.of(request.getPath(), HttpStatus.OK, HttpCookie.from("")));
     }
 }

@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.FixtureFactory;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.response.HttpStatus;
@@ -28,11 +27,11 @@ class LoginAdapterTest {
         Map<String, String> body = new HashMap<>();
         body.put("account", "gugu");
         body.put("password", "password");
-        Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS,new RequestBody(body));
+        Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
 
         Path path = Path.of(ViewResource.class.getResource("/static/index.html").toURI());
         String expectedBody = new String(Files.readAllBytes(path));
-        HttpStatus expectedStatus = HttpStatus.SUCCESS;
+        HttpStatus expectedStatus = HttpStatus.FOUND;
 
         Resource actual = new LoginAdapter().adapt(request);
 
@@ -48,7 +47,7 @@ class LoginAdapterTest {
         Map<String, String> body = new HashMap<>();
         body.put("account", "gugu12");
         body.put("password", "password123");
-        Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS,new RequestBody(body));
+        Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
 
         Path path = Path.of(ViewResource.class.getResource("/static/401.html").toURI());
         String expectedBody = new String(Files.readAllBytes(path));
@@ -61,7 +60,6 @@ class LoginAdapterTest {
                 () -> assertThat(actual.getValue()).isEqualTo(expectedBody)
         );
     }
-
 
     @Test
     @DisplayName("로그인 페이지에 접속할 수 있다")

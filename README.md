@@ -60,4 +60,4 @@
 - JSESSIONID 쿠키를 추가해 클라이언트에게 전달할 수 있다.
 
 ### 요구사항을 만족시키기 위해 필요한 기능
-- [ ] Set-Cookie에 JSESSIONID를 담아 보낸다.
+- [x] Set-Cookie에 JSESSIONID를 담아 보낸다.

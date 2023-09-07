@@ -7,6 +7,7 @@ import nextstep.jwp.model.User;
 public class LoginHandler {
 
     public boolean login(String account, String password) {
+
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             return false;

@@ -39,7 +39,7 @@ class Http11ProcessorTest {
     @DisplayName("index.html 파일을 요청하면 index.html 파일이 전달된다.")
     void index() throws IOException, URISyntaxException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -58,7 +58,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK\r\n" +
                 "Content-Length: 5564\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(Path.of(resource.toURI())));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -68,7 +68,7 @@ class Http11ProcessorTest {
     @DisplayName("css 파일을 요청하면 content-type은 text/css로 해서 css 파일을 전달한다. ")
     void css() {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
@@ -86,5 +86,27 @@ class Http11ProcessorTest {
         var expectedContentType = "text/css";
 
         assertThat(socket.output()).contains(expectedContentType);
+    }
+
+    @Test
+    @DisplayName("로그인 요청을 보내면 JSESSIONID가 담긴 응답이 온다.")
+    void cookie_JSESSIONID() {
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: text/css",
+                "Content-Length: " + "account=gugu&password=password".length(),
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        Http11Processor http11Processor = new Http11Processor(socket);
+
+        http11Processor.process(socket);
+
+        var expectedCookie = "Set-Cookie: ";
+
+        assertThat(socket.output()).contains(expectedCookie);
     }
 }

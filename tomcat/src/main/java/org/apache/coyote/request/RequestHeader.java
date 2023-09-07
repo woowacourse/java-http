@@ -1,6 +1,7 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 
@@ -28,20 +29,15 @@ public class RequestHeader {
         return 0;
     }
 
-    public boolean hasQueryString() {
-        return requestLine.hasQueryString();
-    }
-
     public boolean has(String key) {
         return headers.containsKey(key);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
+    public HttpCookie getCookie() {
+        if (has("Cookie")) {
+            return HttpCookie.from(headers.get("Cookie"));
+        }
+        return HttpCookie.from("");
     }
 
     public String getPath() {
@@ -50,14 +46,6 @@ public class RequestHeader {
 
     public Protocol getProtocol() {
         return requestLine.getProtocol();
-    }
-
-    public HttpMethod getHttpMethod() {
-        return requestLine.getHttpMethod();
-    }
-
-    public String getQueryValue(String key) {
-        return requestLine.getQueryValue(key);
     }
 
     public boolean isSamePath(String otherPath) {

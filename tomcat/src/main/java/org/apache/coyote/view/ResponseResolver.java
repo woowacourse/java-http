@@ -9,13 +9,16 @@ import org.apache.coyote.response.ResponseHeader;
 
 public class ResponseResolver {
 
-    public Response resolve(Request request, Resource viewResource) {
-        ResponseBody responseBody = new ResponseBody(viewResource.getValue());
+    public Response resolve(Request request, Resource resource) {
+        ResponseBody responseBody = new ResponseBody(resource.getValue());
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", request.getResourceTypes() + ";charset=utf-8");
         headers.put("Content-Length", responseBody.getLength());
-        ResponseHeader responseHeader = new ResponseHeader(request.getProtocol(), viewResource.getHttpStatus(), headers);
+        if (resource.hasCookie()) {
+            headers.put("Set-Cookie", resource.getHttpCookie());
+        }
+        ResponseHeader responseHeader = new ResponseHeader(request.getProtocol(), resource.getHttpStatus(), headers);
         return new Response(responseHeader, responseBody);
     }
 }

@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.FixtureFactory;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
@@ -27,7 +28,8 @@ class ResponseResolverTest {
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
         byte[] expectedLine = "HTTP/1.1 200 OK".getBytes();
 
-        Response actual = new ResponseResolver().resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
+        Response actual = new ResponseResolver().resolve(request,
+                ViewResource.of(request.getPath(), HttpStatus.OK, HttpCookie.from("")));
 
         assertAll(
                 () -> assertThat(actual.getResponseBytes()).startsWith(expectedLine),
@@ -44,7 +46,8 @@ class ResponseResolverTest {
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
         byte[] expectedLine = "HTTP/1.1 404 NOT_FOUND".getBytes();
 
-        Response actual = new ResponseResolver().resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
+        Response actual = new ResponseResolver().resolve(request,
+                ViewResource.of(request.getPath(), HttpStatus.OK, HttpCookie.from("")));
 
         assertAll(
                 () -> assertThat(actual.getResponseBytes()).startsWith(expectedLine),
@@ -61,7 +64,8 @@ class ResponseResolverTest {
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
         byte[] expectedLine = "HTTP/1.1 200 OK".getBytes();
 
-        Response actual = new ResponseResolver().resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
+        Response actual = new ResponseResolver().resolve(request,
+                ViewResource.of(request.getPath(), HttpStatus.OK, HttpCookie.from("")));
 
         assertAll(
                 () -> assertThat(actual.getResponseBytes()).startsWith(expectedLine),

@@ -1,6 +1,7 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 
@@ -12,10 +13,6 @@ public class Request {
     public Request(RequestHeader requestHeader, RequestBody requestBody) {
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
-    }
-
-    public boolean hasQueryString() {
-        return requestHeader.hasQueryString();
     }
 
     public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
@@ -30,16 +27,12 @@ public class Request {
         return requestHeader.getProtocol();
     }
 
-    public HttpMethod getHttpMethod() {
-        return requestHeader.getHttpMethod();
-    }
-
     public String getResourceTypes() {
         return requestHeader.getHeaderBy("Accept");
     }
 
-    public String getQueryStringValue(String key) {
-        return requestHeader.getQueryValue(key);
+    public HttpCookie getCookie() {
+        return requestHeader.getCookie();
     }
 
     public boolean isSamePath(String urlPath) {
@@ -48,10 +41,6 @@ public class Request {
 
     public Map<String, String> getQueryString() {
         return requestHeader.getQueryString();
-    }
-
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
     }
 
     public Map<String, String> getBody() {

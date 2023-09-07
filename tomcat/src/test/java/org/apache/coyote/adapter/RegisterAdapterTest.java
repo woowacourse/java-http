@@ -31,7 +31,7 @@ class RegisterAdapterTest {
         Request request = FixtureFactory.getPostRequest("/register", DEFAULT_HEADERS, new RequestBody(body));
         Path path = Path.of(ViewResource.class.getResource("/static/index.html").toURI());
         String expectedBody = new String(Files.readAllBytes(path));
-        HttpStatus expectedStatus = HttpStatus.SUCCESS;
+        HttpStatus expectedStatus = HttpStatus.FOUND;
 
         RegisterAdapter registerAdapter = new RegisterAdapter();
         Resource actual = registerAdapter.adapt(request);

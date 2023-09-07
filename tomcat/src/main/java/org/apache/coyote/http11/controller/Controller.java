@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.common.header.ContentTypeValue;
 import org.apache.coyote.http11.response.ResponseEntity;

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.MessageBody;
@@ -15,6 +16,7 @@ import org.apache.coyote.http11.common.SessionManager;
 public class HttpRequest {
 
     public static final String SESSIONID = "JSESSIONID";
+    public static final String COOKIE = "Cookie";
 
     private final StartLine startLine;
     private final HttpHeaders headers;
@@ -67,6 +69,14 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return this.startLine.getMethod();
+    }
+
+    public Cookies getCookies() {
+        Optional<String> cookieLine = headers.getHeader(COOKIE);
+        if (cookieLine.isEmpty()) {
+            return Cookies.empty();
+        }
+        return Cookies.create(cookieLine.get());
     }
 
     public MessageBody getBody() {

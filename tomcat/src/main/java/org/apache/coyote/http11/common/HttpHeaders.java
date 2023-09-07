@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
     public static final String DELIMITER = ": ";
-    public static final String COOKIE = "Cookie";
+
     private Map<String, String> headers;
 
     public HttpHeaders() {

@@ -6,29 +6,20 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ResourceResponseHandlerTest {
 
     private final ResourceResponseHandler resourceResponseHandler = new ResourceResponseHandler();
 
     @Test
-    void notFoundResource() throws IOException {
+    void notFoundResource() {
         //given
         final var noResourceUri = "/hi";
 
-        //when
-        HttpResponse httpResponse = resourceResponseHandler.handleStaticResponse(noResourceUri);
-
-        //then
-        final var resource = getClass().getClassLoader().getResource("static/404.html");
-        final var body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        final var expected = new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.NOT_FOUND, new ContentType("text/html"),
-                ResponseBody.from(body), new Headers());
-
-        assertThat(httpResponse).usingRecursiveComparison()
-                .isEqualTo(expected);
-
+        //expect
+        assertThatThrownBy(() -> resourceResponseHandler.buildBodyFrom(noResourceUri))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
 }

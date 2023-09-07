@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
-import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 
 public class HttpResponse {
@@ -13,7 +11,6 @@ public class HttpResponse {
 
     private final HttpVersion httpVersion;
     private HttpStatus httpStatus;
-    private ContentType contentType;
     private ResponseBody body;
     private final Headers headers;
 
@@ -26,12 +23,11 @@ public class HttpResponse {
         this.headers = new Headers();
     }
 
-    public HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus, final ContentType contentType,
+    public HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus,
                         final ResponseBody body,
                         final Headers headers) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
-        this.contentType = contentType;
         this.body = body;
         this.headers = headers;
     }
@@ -43,7 +39,6 @@ public class HttpResponse {
 
     public String buildResponse() {
         httpStatus = ofNullable(httpStatus).orElse(HttpStatus.OK); // todo: httpStatus가 없을 땐 어떻게 해야할까?
-        contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
         body = ofNullable(body).orElse(ResponseBody.EMPTY);
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -75,7 +70,7 @@ public class HttpResponse {
             return EMPTY;
         }
         StringBuilder builder = new StringBuilder();
-        return builder.append(contentType)
+        return builder.append(body.getContentType())
                 .append(CRLF)
                 .append(body.getContentLength())
                 .append(BLANK)
@@ -102,10 +97,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void setContentType(final ContentType contentType) {
-        this.contentType = contentType;
-    }
-
     public void setCookie(final HttpCookie cookie) {
         headers.put("Set-Cookie", cookie.toString());
     }
@@ -120,7 +111,6 @@ class HttpResponseBuilder {
 
     private HttpVersion httpVersion;
     private HttpStatus httpStatus;
-    private ContentType contentType;
     private ResponseBody body;
     private Headers headers = new Headers();
 
@@ -131,11 +121,6 @@ class HttpResponseBuilder {
 
     public HttpResponseBuilder setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-        return this;
-    }
-
-    public HttpResponseBuilder setContentType(ContentType contentType) {
-        this.contentType = contentType;
         return this;
     }
 
@@ -155,7 +140,7 @@ class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
-        return new HttpResponse(httpVersion, httpStatus, contentType, body, headers);
+        return new HttpResponse(httpVersion, httpStatus, body, headers);
     }
 
 }

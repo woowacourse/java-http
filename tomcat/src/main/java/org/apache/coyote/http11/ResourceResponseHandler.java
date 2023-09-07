@@ -8,47 +8,32 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
-import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
-import static org.apache.coyote.http11.HttpStatus.OK;
-
 public class ResourceResponseHandler {
 
-    public HttpResponse handleStaticResponse(String uri) {
-        try {
-            return handleStaticResponse(OK, uri);
-        } catch (Exception e) {
-            return handleStaticResponse(NOT_FOUND, "/404.html");
-        }
-    }
-
-    public HttpResponse handleStaticResponse(HttpStatus status, String uri) {
+    public ResponseBody buildBodyFrom(String uri) {
         File page = getFile(uri);
-        String contentType = getMimeType(page);
+        String mimeType = getMimeType(page);
         String body = buildResponseBody(page);
-        return new HttpResponse(HttpVersion.HTTP_1_1, status, new ContentType(contentType),
-                ResponseBody.from(body), new Headers());
+
+        return ResponseBody.of(new ContentType(mimeType), body);
     }
 
     private File getFile(final String uri) {
-        if (uri.equals("/")) {
-            return null;
-        }
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return ofNullable(resource.getFile()).map(File::new).orElse(null);
+        if (resource == null) {
+            throw new IllegalArgumentException("해당 리소스가 존재하지 않습니다.");
+        }
+        return new File(resource.getFile());
     }
 
     private String getMimeType(final File file) {
-        return ofNullable(file)
-                .map(File::toURI)
-                .map(this::getContentType)
-                .orElse("text/plain");
+        final var uri = file.toURI();
+        return getContentType(uri);
     }
 
     private String getContentType(final URI uri) {
         try {
-            final URLConnection urlConnection = requireNonNull(uri).toURL().openConnection();
+            final URLConnection urlConnection = uri.toURL().openConnection();
             return urlConnection.getContentType();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -56,18 +41,12 @@ public class ResourceResponseHandler {
     }
 
     private String buildResponseBody(final File file) {
-        return ofNullable(file)
-                .map(this::readString)
-                .orElse("Hello world!");
-    }
-
-    private String readString(final File file) {
         try {
             final Path path = file.toPath();
             final byte[] bytes = Files.readAllBytes(path);
             return new String(bytes);
         } catch (IOException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 

@@ -71,19 +71,6 @@ class HttpResponseTest {
     }
 
     @Test
-    void setContentType() {
-        //given
-        final var response = new HttpResponse(HTTP_1_1);
-        final var contentType = ContentType.PLAINTEXT_UTF8;
-
-        //when
-        response.setContentType(contentType);
-
-        //then
-        assertThat(response).extracting("contentType").isEqualTo(contentType);
-    }
-
-    @Test
     void setCookie() {
         //given
         final var response = new HttpResponse(HTTP_1_1);
@@ -94,7 +81,8 @@ class HttpResponseTest {
 
         //then
         String responseString = response.buildResponse();
-        assertThat(responseString).contains("Set-Cookie: key=value; key2=value2");
+        assertThat(responseString)
+                .containsAnyOf("Set-Cookie: key=value; key2=value2", "Set-Cookie: key2=value2; key=value");
     }
 
     @Test

@@ -15,8 +15,9 @@ class HttpResponseTest {
 	@DisplayName("Location을 넘기면 redirect 하는 응답을 반환해준다.")
 	void redirect() {
 		final String location = "/401.html";
+		final HttpResponse actual = new HttpResponse();
 
-		final HttpResponse actual = HttpResponse.redirect(location);
+		actual.redirect(location);
 
 		final HttpHeaders httpHeaders = HttpHeaders.of("", MimeType.HTML);
 		httpHeaders.addLocation(location);
@@ -34,8 +35,7 @@ class HttpResponseTest {
 	@DisplayName("set-cookie를 추가할 수 있다.")
 	void addSetCookie() {
 		final String setCookieValue = "set-cookie Value";
-		final String location = "/index.html";
-		final HttpResponse actual = HttpResponse.redirect(location);
+		final HttpResponse actual = new HttpResponse();
 
 		actual.addSetCookie(setCookieValue);
 

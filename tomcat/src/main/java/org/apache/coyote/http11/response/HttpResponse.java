@@ -22,11 +22,10 @@ public class HttpResponse {
 		this.headers = headers;
 	}
 
-	public static HttpResponse redirect(final String location) {
+	public void redirect(final String location) {
 		final String body = "";
-		final HttpHeaders httpHeaders = HttpHeaders.of(body, HTML);
-		httpHeaders.addLocation(location);
-		return new HttpResponse(TEMPORARILY_MOVED_302, body, httpHeaders);
+		setResponse(TEMPORARILY_MOVED_302, body, HTML);
+		headers.addLocation(location);
 	}
 
 	public void addSetCookie(final String setCookieValue) {

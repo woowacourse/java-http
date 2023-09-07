@@ -26,13 +26,17 @@ public class User {
         return account;
     }
 
+    public User addId(Long id) {
+        return new User(id, account, password, email);
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

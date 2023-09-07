@@ -29,15 +29,7 @@ public class HttpRequestHeaders {
         return headers.containsKey("Cookie");
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public String getContentLength() {
-        return headers.get("Content-Length");
-    }
-
-    public String getCookie() {
-        return headers.get("Cookie");
+    public String get(final String key) {
+        return headers.get(key);
     }
 }

@@ -41,10 +41,6 @@ public class HttpCookie {
         return this.cookie.containsKey(JSESSIONID);
     }
 
-    public Map<String, String> getCookie() {
-        return cookie;
-    }
-
     public String getJSESSIONID() {
         return this.cookie.get(JSESSIONID);
     }

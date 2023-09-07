@@ -36,7 +36,7 @@ public class HttpRequestStartLine {
     }
 
     private static boolean isExistQuery(final String path) {
-        return path.indexOf(QUERY_DELIMITER) != -PATH_INDEX;
+        return path.contains(QUERY_DELIMITER);
     }
 
     public HttpMethod getHttpMethod() {
@@ -45,13 +45,5 @@ public class HttpRequestStartLine {
 
     public String getPath() {
         return path;
-    }
-
-    public Query getQuery() {
-        return query;
-    }
-
-    public String getVersion() {
-        return version;
     }
 }

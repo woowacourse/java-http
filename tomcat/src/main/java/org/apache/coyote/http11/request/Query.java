@@ -29,8 +29,4 @@ public class Query {
     public static Query empty() {
         return new Query(Collections.emptyMap());
     }
-
-    public String getQueryValue(String key) {
-        return query.get(key);
-    }
 }

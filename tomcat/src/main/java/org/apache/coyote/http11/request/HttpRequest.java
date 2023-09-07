@@ -35,7 +35,7 @@ public class HttpRequest {
     }
 
     private static HttpRequestBody extractRequestBody(final BufferedReader bufferedReader, final HttpRequestHeaders requestHeader) throws IOException {
-        final String contentLength = requestHeader.getContentLength();
+        final String contentLength = requestHeader.get("Content-Length");
         if (contentLength == null) {
             return HttpRequestBody.empty();
         }
@@ -53,15 +53,11 @@ public class HttpRequest {
         return startLine;
     }
 
-    public HttpRequestHeaders getHeaders() {
-        return headers;
-    }
-
     public String getBody() {
         return body.getBody();
     }
 
     public String getCookie() {
-        return headers.getCookie();
+        return headers.get("Cookie");
     }
 }

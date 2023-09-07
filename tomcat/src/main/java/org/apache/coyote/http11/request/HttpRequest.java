@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.headers.HttpHeader;
+import org.apache.coyote.http11.requestline.HttpMethod;
 import org.apache.coyote.http11.requestline.RequestLine;
 
 public class HttpRequest {
@@ -72,7 +73,7 @@ public class HttpRequest {
     return this.body;
   }
 
-  public String getMethod() {
+  public HttpMethod getMethod() {
     return this.requestLine.getMethod();
   }
 }

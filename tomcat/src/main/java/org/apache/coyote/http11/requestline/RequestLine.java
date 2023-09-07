@@ -2,12 +2,12 @@ package org.apache.coyote.http11.requestline;
 
 public class RequestLine {
 
-  private final String method;
+  private final HttpMethod method;
   private final String url;
   private final String version;
   private final HttpParam params;
 
-  public RequestLine(final String method, final String url, final String version,
+  public RequestLine(final HttpMethod method, final String url, final String version,
       final HttpParam params) {
     this.method = method;
     this.url = url;
@@ -17,7 +17,7 @@ public class RequestLine {
 
   public static RequestLine from(final String requestLine) {
     final String[] tokens = requestLine.split(" ");
-    final String method = tokens[0];
+    final HttpMethod method = HttpMethod.from(tokens[0]);
     final String uri = tokens[1];
     final String url = parseUrl(uri);
     final HttpParam params = HttpParam.from(parseQueryString(uri));
@@ -41,7 +41,7 @@ public class RequestLine {
     return uri.substring(0, index);
   }
 
-  public String getMethod() {
+  public HttpMethod getMethod() {
     return this.method;
   }
 

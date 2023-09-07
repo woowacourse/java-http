@@ -1,4 +1,4 @@
-package nextstep.jwp.db;
+package nextstep.jwp.database;
 
 import java.util.Map;
 import java.util.UUID;

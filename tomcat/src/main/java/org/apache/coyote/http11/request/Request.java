@@ -10,7 +10,6 @@ import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Method;
 import org.apache.coyote.http11.common.header.EntityHeaders;
 import org.apache.coyote.http11.common.header.GeneralHeaders;
-import org.apache.coyote.http11.common.header.HeaderName;
 import org.apache.coyote.http11.common.header.RequestHeaders;
 
 public class Request {
@@ -43,7 +42,7 @@ public class Request {
     public static Request of(
             final String methodName,
             final String requestURI,
-            final Map<HeaderName, String> headers,
+            final Map<String, String> headers,
             final String body
     ) {
         final var method = Method.find(methodName)

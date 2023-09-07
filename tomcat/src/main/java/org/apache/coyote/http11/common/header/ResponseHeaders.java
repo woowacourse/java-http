@@ -10,12 +10,12 @@ public class ResponseHeaders extends Headers {
     public ResponseHeaders() {
     }
 
-    public ResponseHeaders(final Map<HeaderName, String> headers) {
+    public ResponseHeaders(final Map<String, String> headers) {
         super(headers);
     }
 
     @Override
-    public boolean isType(final HeaderName headerName) {
+    public boolean isType(final String headerName) {
         return HeaderName.isResponseHeaders(headerName);
     }
 

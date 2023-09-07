@@ -22,7 +22,7 @@ class DispatcherServletTest {
     @Test
     void handleRoot() throws Exception {
         final Response response = DispatcherServlet.service(
-                Request.of("get", "/", Map.of(ACCEPT, "text/html"), "")
+                Request.of("get", "/", Map.of(ACCEPT.getName(), "text/html"), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -35,9 +35,9 @@ class DispatcherServletTest {
     @ValueSource(strings = {
             "/index.html", "/login.html", "/register.html", "/401.html"
     })
-    void handleHTML(final String URI) throws Exception {
+    void handleHTML(final String URI) {
         final Response response = DispatcherServlet.service(
-                Request.of("get", URI, Map.of(ACCEPT, HTML.toString()), "")
+                Request.of("get", URI, Map.of(ACCEPT.getName(), HTML.toString()), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -46,9 +46,9 @@ class DispatcherServletTest {
 
     @DisplayName("css 파일명을 자원으로 GET 요청을 보내면 resources/static 디렉토리 내의 동일한 파일을 찾아 반환한다.")
     @Test
-    void handleCSS() throws Exception {
+    void handleCSS() {
         final Response response = DispatcherServlet.service(
-                Request.of("get", "/css/styles.css", Map.of(ACCEPT, CSS.toString()), "")
+                Request.of("get", "/css/styles.css", Map.of(ACCEPT.getName(), CSS.toString()), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -57,9 +57,9 @@ class DispatcherServletTest {
 
     @DisplayName("resources/static 디렉토리 내에 존재하지 않는 파일명을 자원으로 GET 요청을 보내면 404 응답코드로 반환한다.")
     @Test
-    void handleNotFound() throws Exception {
+    void handleNotFound() {
         final Response response = DispatcherServlet.service(
-                Request.of("get", "/neverexist/not.css", Map.of(ACCEPT, HTML.toString()), "")
+                Request.of("get", "/neverexist/not.css", Map.of(ACCEPT.getName(), HTML.toString()), "")
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);

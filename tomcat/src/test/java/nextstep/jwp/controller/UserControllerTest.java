@@ -25,7 +25,7 @@ class UserControllerTest {
 
         final Response response = UserController.login(
                 Request.of("post", "/login",
-                        Map.of(COOKIE, Cookies.ofJSessionId(session.getId())),
+                        Map.of(COOKIE.getName(), Cookies.ofJSessionId(session.getId())),
                         "account=gugu&password=password"));
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);
@@ -39,7 +39,7 @@ class UserControllerTest {
 
         final Response response = UserController.login(
                 Request.of("post", "/login",
-                        Map.of(COOKIE, Cookies.ofJSessionId(session.getId())),
+                        Map.of(COOKIE.getName(), Cookies.ofJSessionId(session.getId())),
                         "account=dodo&password=password"));
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);

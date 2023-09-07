@@ -9,12 +9,12 @@ public class RequestHeaders extends Headers {
     public RequestHeaders() {
     }
 
-    public RequestHeaders(final Map<HeaderName, String> headers) {
+    public RequestHeaders(final Map<String, String> headers) {
         super(headers);
     }
 
     @Override
-    public boolean isType(final HeaderName headerName) {
+    public boolean isType(final String headerName) {
         return HeaderName.isRequestHeaders(headerName);
     }
 

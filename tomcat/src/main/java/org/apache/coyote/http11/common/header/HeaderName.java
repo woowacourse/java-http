@@ -115,32 +115,29 @@ public enum HeaderName {
         this.value = value;
     }
 
-    public static boolean isGeneralHeaders(final HeaderName headerName) {
-        return GENERAL_HEADERS.contains(headerName);
+    public static boolean isGeneralHeaders(final String name) {
+        return GENERAL_HEADERS.stream()
+                .anyMatch(headerName -> headerName.getName().equals(name));
     }
 
-    public static boolean isRequestHeaders(final HeaderName headerName) {
-        return REQUEST_HEADERS.contains(headerName);
+    public static boolean isRequestHeaders(final String name) {
+        return REQUEST_HEADERS.stream()
+                .anyMatch(headerName -> headerName.getName().equals(name));
     }
 
-    public static boolean isResponseHeaders(final HeaderName headerName) {
-        return RESPONSE_HEADERS.contains(headerName);
+    public static boolean isResponseHeaders(final String name) {
+        return RESPONSE_HEADERS.stream()
+                .anyMatch(headerName -> headerName.getName().equals(name));
     }
 
-    public static boolean isEntityHeaders(final HeaderName headerName) {
-        return ENTITY_HEADERS.contains(headerName);
+    public static boolean isEntityHeaders(final String name) {
+        return ENTITY_HEADERS.stream()
+                .anyMatch(headerName -> headerName.getName().equals(name));
     }
 
-    public static boolean isNotDefined(final HeaderName headerName) {
+    public static boolean isNotDefined(final String name) {
         return Arrays.stream(values())
-                .noneMatch(value -> Objects.equals(value, headerName));
-    }
-
-    public static HeaderName find(final String headerName) {
-        return Arrays.stream(values())
-                .filter(value -> Objects.equals(value.getName(), headerName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("invalid header name"));
+                .noneMatch(headerName -> Objects.equals(headerName.getName(), name));
     }
 
     public String getName() {

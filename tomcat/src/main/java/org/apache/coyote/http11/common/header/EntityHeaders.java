@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class EntityHeaders extends Headers {
 
-    public EntityHeaders(final Map<HeaderName, String> headers) {
+    public EntityHeaders(final Map<String, String> headers) {
         super(headers);
     }
 
@@ -15,7 +15,7 @@ public class EntityHeaders extends Headers {
     }
 
     @Override
-    public boolean isType(final HeaderName headerName) {
+    public boolean isType(final String headerName) {
         return HeaderName.isEntityHeaders(headerName) || HeaderName.isNotDefined(headerName);
     }
 

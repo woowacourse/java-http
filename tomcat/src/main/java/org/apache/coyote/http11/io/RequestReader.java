@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.common.header.EntityHeaders;
-import org.apache.coyote.http11.common.header.HeaderName;
 import org.apache.coyote.http11.request.Request;
 
 public class RequestReader {
@@ -30,15 +29,15 @@ public class RequestReader {
         return Request.of(method, uri, allHeaders, body);
     }
 
-    private Map<HeaderName, String> readHeaders() throws IOException {
-        final Map<HeaderName, String> headers = new HashMap<>();
+    private Map<String, String> readHeaders() throws IOException {
+        final Map<String, String> headers = new HashMap<>();
         String line;
         while (!"".equals((line = reader.readLine()))) {
             final var headerPair = line.split(": ");
             final var key = headerPair[0];
             final var value = headerPair[1].trim();
 
-            headers.put(HeaderName.find(key), value);
+            headers.put(key, value);
         }
 
         return headers;

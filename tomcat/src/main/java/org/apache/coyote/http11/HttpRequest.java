@@ -65,7 +65,7 @@ public class HttpRequest {
         final var localSession = sessionManager.findSession(sessionId.orElse(""));
 
         if (localSession == null) {
-            return sessionManager.createSession(UUID.randomUUID().toString());
+            return sessionManager.createSession();
         }
         return localSession;
     }

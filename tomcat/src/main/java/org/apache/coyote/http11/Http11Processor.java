@@ -67,12 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final HttpResponse response = new HttpResponse();
 
-        if (!request.containsCookie(JSESSIONID_COOKIE_NAME)) {
-            final UUID sessionId = UUID.randomUUID();
-            final Session session = new Session(sessionId.toString());
-            sessionManager.addSession(session);
-            response.setCookie(JSESSIONID_COOKIE_NAME, session.getId());
-        }
+        makeSessionIfNotExist(request, response);
 
         final String uriPath = request.getPath();
 
@@ -86,6 +81,16 @@ public class Http11Processor implements Runnable, Processor {
 
         response.hostingPage(uriPath);
         return response;
+    }
+
+    private void makeSessionIfNotExist(final HttpRequest request, final HttpResponse response) {
+        final String sessionId = request.getCookie(JSESSIONID_COOKIE_NAME);
+        if (sessionManager.findSession(sessionId) == null) {
+            final UUID generatedSessionId = UUID.randomUUID();
+            final Session session = new Session(generatedSessionId.toString());
+            sessionManager.addSession(session);
+            response.setCookie(JSESSIONID_COOKIE_NAME, session.getId());
+        }
     }
 
     private HttpResponse handleLogin(final HttpRequest request, final HttpResponse response) {

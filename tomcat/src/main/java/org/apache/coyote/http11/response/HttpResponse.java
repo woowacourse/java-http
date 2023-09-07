@@ -67,7 +67,7 @@ public class HttpResponse {
         return HttpResponseBody.from(new String(Files.readAllBytes(file.toPath())));
     }
 
-    public String getResponse() throws IOException {
+    public String getResponse() {
         String responseStatusLine = formatResponseStatusLine(httpResponseStatusLine);
         String responseHeaders = formatResponseHeaders(httpResponseHeaders);
         String responseBody = formatResponseBody();

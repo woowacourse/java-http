@@ -7,7 +7,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.ContentType;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.session.JSessionIdGenerator;

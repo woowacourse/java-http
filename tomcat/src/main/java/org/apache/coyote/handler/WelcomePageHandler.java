@@ -1,6 +1,12 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.Charset;
+import org.apache.coyote.response.ContentType;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponseHeader;
+import org.apache.coyote.response.HttpResponseStatusLine;
+import org.apache.coyote.response.ResponseBody;
 
 public class WelcomePageHandler implements StaticHandler {
 
@@ -10,14 +16,16 @@ public class WelcomePageHandler implements StaticHandler {
   }
 
   @Override
-  public String handle(final HttpRequest httpRequest) {
-    final String responseBody = "Hello world!";
+  public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    final String bodyData = "Hello world!";
 
-    return String.join("\r\n",
-        "HTTP/1.1 200 OK ",
-        "Content-Type: text/html;charset=utf-8 ",
-        "Content-Length: " + responseBody.getBytes().length + " ",
-        "",
-        responseBody);
+    final HttpResponseHeader header = new HttpResponseHeader()
+        .addContentType(ContentType.TEXT_HTML, Charset.UTF_8);
+    final HttpResponseStatusLine statusLine = HttpResponseStatusLine.ok();
+    final ResponseBody responseBody = new ResponseBody(bodyData);
+
+    httpResponse.setResponseBody(responseBody);
+    httpResponse.setHttpResponseHeader(header);
+    httpResponse.setHttpResponseStatusLine(statusLine);
   }
 }

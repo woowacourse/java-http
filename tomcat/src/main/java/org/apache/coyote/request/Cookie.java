@@ -37,6 +37,10 @@ public class Cookie {
     return !value.isEmpty();
   }
 
+  public Map<String, String> getValue() {
+    return value;
+  }
+
   @Override
   public String toString() {
     return value.entrySet()

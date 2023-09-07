@@ -18,8 +18,7 @@ import org.apache.coyote.request.HttpRequestLine;
 import org.apache.coyote.request.QueryString;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.Session;
-import org.apache.coyote.request.SessionManager;
+import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,9 +66,11 @@ public class Http11Processor implements Runnable, Processor {
           cookie
       );
 
-      final String response = handlerComposite.safeHandle(httpRequest);
+      final HttpResponse httpResponse = new HttpResponse();
 
-      outputStream.write(response.getBytes());
+      handlerComposite.safeHandle(httpRequest, httpResponse);
+
+      outputStream.write(httpResponse.read().getBytes());
       outputStream.flush();
     } catch (IOException | UncheckedServletException e) {
       log.error(e.getMessage(), e);

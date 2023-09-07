@@ -47,10 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             if (isStaticPath(httpRequest.getOriginRequestURI())) {
                 httpResponse.updatePage(httpRequest.getOriginRequestURI());
                 httpResponse.wrapUp(httpRequest.getOriginRequestURI());
-
-                if (httpRequest.isNotSameSessionId()) {
-                    httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + httpRequest.getSessionId());
-                }
+                setCookie(httpRequest, httpResponse);
                 writeMessage(httpResponse, outputStream);
                 return;
             }
@@ -61,6 +58,15 @@ public class Http11Processor implements Runnable, Processor {
             writeMessage(httpResponse, outputStream);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void setCookie(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        if (ContentType.checkFileExtension(httpRequest.getOriginRequestURI())) {
+            return;
+        }
+        if (httpRequest.isNotSameSessionId()) {
+            httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + httpRequest.getSessionId());
         }
     }
 

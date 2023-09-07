@@ -22,7 +22,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         response.updatePage(request.getParsedRequestURI());
-        response.addHeader("Set-Cookie", request.getSessionId());
+        response.addHeader("Set-Cookie", "JSESSIONID=" + request.getSessionId());
     }
 
     @Override

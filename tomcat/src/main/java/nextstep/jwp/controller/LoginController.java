@@ -24,10 +24,10 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (notAlreadyLoginStatus(request)) {
             response.updateRedirect(request.getHttpVersion(), "/index.html");
-            response.addHeader("Set-Cookie", request.getSessionId());
+            response.addHeader("Set-Cookie", "JSESSIONID=" + request.getSessionId());
             return;
         }
-        response.addHeader("Set-Cookie", request.getSessionId());
+        response.addHeader("Set-Cookie", "JSESSIONID=" + request.getSessionId());
         response.updatePage("/login");
     }
 

@@ -4,26 +4,27 @@ import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class DefaultController extends AbstractController {
+public class NotFoundController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final String body = "Hello world!";
-        response.updateBody(body);
+        response.updatePage(request.getParsedRequestURI());
+        response.addHeader("Set-Cookie", "JSESSIONID=" + request.getSessionId());
     }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+
     }
 
-    private DefaultController() {
+    private NotFoundController() {
     }
 
-    public static DefaultController getInstance() {
+    public static NotFoundController getInstance() {
         return Holder.instance;
     }
 
     private static class Holder {
-        public static final DefaultController instance = new DefaultController();
+        public static final NotFoundController instance = new NotFoundController();
     }
 }

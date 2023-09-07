@@ -19,7 +19,7 @@ public class HttpHeader {
     }
 
     public static HttpHeader of(final List<String> requestHeader) {
-        Map<String, String> headers = new LinkedHashMap<>();
+        final Map<String, String> headers = new LinkedHashMap<>();
         for (int i = 1; i < requestHeader.size(); i++) {
             final String[] splitHeader = requestHeader.get(i).split(HEADER_DELIMITER);
             headers.put(splitHeader[0], splitHeader[1]);

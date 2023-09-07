@@ -1,5 +1,6 @@
 package nextstep.jwp.db;
 
+import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.model.User;
 
 import java.util.Map;
@@ -9,14 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
-
+    private static final AtomicLong autoIncrementId = new AtomicLong(1L);
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(autoIncrementId.get(), "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        database.put(user.getAccount(), user.putId(autoIncrementId.addAndGet(1L)));
     }
 
     public static Optional<User> findByAccount(String account) {

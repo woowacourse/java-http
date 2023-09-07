@@ -38,7 +38,7 @@ public class HttpResponse {
     public static HttpResponse init(final HttpVersion httpVersion) {
         log.debug("======================================================================");
         log.debug("Http Response");
-        log.debug("Response Http Version: {}", httpVersion);
+        log.debug("Response Http Version: {}", httpVersion.getValue());
         return new HttpResponse(
                 httpVersion,
                 HttpStatus.INTERNAL_SERVER_ERROR,

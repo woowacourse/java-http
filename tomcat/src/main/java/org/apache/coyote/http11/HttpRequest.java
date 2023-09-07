@@ -14,7 +14,6 @@ public class HttpRequest {
     private static final String INDEX_HTML = "/index.html";
     private static final int URI_INDEX = 0;
 
-
     private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final String body;
@@ -66,7 +65,7 @@ public class HttpRequest {
         final var localSession = sessionManager.findSession(sessionId.orElse(""));
 
         if (localSession == null) {
-            return new Session(UUID.randomUUID().toString(), sessionManager);
+            return sessionManager.createSession(UUID.randomUUID().toString());
         }
         return localSession;
     }

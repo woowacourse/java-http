@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.catalina.servlet.ServletManger;
@@ -20,7 +20,8 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_THREAD_MAX_NUMBER = 250;
     private static final int CORE_POOL_SIZE = 10;
-    private static final long THREAD_ALIVE_TIME = 60L;
+    private static final long IDLE_THREAD_ALIVE_TIME = 60L;
+    private static final int SOCKET_BUFFER_SIZE = 10;
 
     private final ServerSocket serverSocket;
     private final ServletManger servletManger;
@@ -43,14 +44,14 @@ public class Connector implements Runnable {
             final int threadMaxNumber
     ) {
         this.servletManger = servletManger;
-        this.serverSocket = createServerSocket(port, acceptCount);
+        this.serverSocket = createServerSocket(port, SOCKET_BUFFER_SIZE);
         this.stopped = false;
         this.threadPool = new ThreadPoolExecutor(
                 CORE_POOL_SIZE,
                 threadMaxNumber,
-                THREAD_ALIVE_TIME,
+                IDLE_THREAD_ALIVE_TIME,
                 TimeUnit.SECONDS,
-                new SynchronousQueue<>()
+                new ArrayBlockingQueue<>(acceptCount)
         );
     }
 
@@ -82,9 +83,7 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            while (threadPool.getActiveCount() < threadPool.getMaximumPoolSize()) {
-                process(serverSocket.accept());
-            }
+            process(serverSocket.accept());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

@@ -19,6 +19,12 @@ public class SessionManager implements Manager {
         return SessionManagerHolder.INSTANCE;
     }
 
+    public Session createSession(String id) {
+        final var session = new Session(id);
+        add(session);
+        return session;
+    }
+
     @Override
     public void add(Session session) {
         sessions.put(session.getId(), session);

@@ -1,17 +1,13 @@
 package nextstep.jwp;
 
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Handler;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpDispatcher;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Objects;
 
 public class JwpHttpDispatcher implements HttpDispatcher {
 
@@ -24,16 +20,25 @@ public class JwpHttpDispatcher implements HttpDispatcher {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) throws IOException {
-        final Handler handler = handlerResolver.resolve(request.getHttpMethod(), request.getPath());
-        if (handler != null) {
-            return handler.resolve(request);
+    public void handle(final HttpRequest request, final HttpResponse response) throws IOException {
+        final Controller controller = handlerResolver.resolve(request.getHttpMethod(), request.getPath());
+        if (controller != null) {
+            controller.service(request, response);
+            return;
         }
         final var resource = getClass().getClassLoader().getResource(STATIC + request.getPath());
-        if (resource == null) {
+        if (controller == null && resource == null) {
             final var notFoundResource = getClass().getClassLoader().getResource(STATIC + "/404.html");
-            return HttpResponse.createBy(request.getVersion(), Objects.requireNonNull(notFoundResource), StatusCode.NOT_FOUND);
+            setResponse(response, StatusCode.NOT_FOUND, notFoundResource);
+            return;
         }
-        return HttpResponse.createBy(request.getVersion(), resource, StatusCode.OK);
+        setResponse(response, StatusCode.OK, resource);
     }
+
+    private void setResponse(final HttpResponse response, final StatusCode statusCode, final URL resource) throws IOException {
+        response.setStatusCode(statusCode);
+        response.setContentType(ContentType.HTML);
+        response.setResponseBodyByUrl(resource);
+    }
+
 }

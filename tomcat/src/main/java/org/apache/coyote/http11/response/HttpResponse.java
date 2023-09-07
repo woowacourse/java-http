@@ -14,25 +14,22 @@ import java.util.Map;
 public class HttpResponse {
 
     private final String version;
-    private final StatusCode statusCode;
-    private final ContentType contentType;
-    private final String responseBody;
+    private StatusCode statusCode;
+    private ContentType contentType;
+    private String responseBody;
     private final Map<String, String> otherHeader = new HashMap<>();
 
     private Cookie cookie;
+
+    public HttpResponse(final String version) {
+        this(version, null, null, null);
+    }
 
     public HttpResponse(final String version, final StatusCode statusCode, final ContentType contentType, final String responseBody) {
         this.version = version;
         this.statusCode = statusCode;
         this.contentType = contentType;
         this.responseBody = responseBody;
-    }
-
-    public static HttpResponse createBy(final String version, final URL resource, final StatusCode statusCode) throws IOException {
-        final var actualFilePath = new File(resource.getPath()).toPath();
-        final var fileBytes = Files.readAllBytes(actualFilePath);
-        final String responseBody = new String(fileBytes, StandardCharsets.UTF_8);
-        return new HttpResponse(version, statusCode, ContentType.findByPath(resource.getPath()), responseBody);
     }
 
     public void addCookie(final String cookie) {
@@ -63,4 +60,25 @@ public class HttpResponse {
         return cookie;
     }
 
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setContentType(final ContentType contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setResponseBodyByUrl(final URL url) throws IOException {
+        this.responseBody = makeResponseBody(url);
+    }
+
+    private String makeResponseBody(final URL resource) throws IOException {
+        final var actualFilePath = new File(resource.getPath()).toPath();
+        final var fileBytes = Files.readAllBytes(actualFilePath);
+        return new String(fileBytes, StandardCharsets.UTF_8);
+    }
+
+    public void setResponseBody(final String responseBody) {
+        this.responseBody = responseBody;
+    }
 }

@@ -40,7 +40,8 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final var request = httpRequestParser.parse(reader);
-            final var response = httpDispatcher.handle(request);
+            final var response = new HttpResponse(request.getVersion());
+            httpDispatcher.handle(request, response);
 
             sendResponse(outputStream, response);
         } catch (final IOException | UncheckedServletException exception) {

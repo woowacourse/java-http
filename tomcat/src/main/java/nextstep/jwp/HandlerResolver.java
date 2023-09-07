@@ -1,20 +1,20 @@
 package nextstep.jwp;
 
-import org.apache.coyote.http11.Handler;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpMethod;
 import java.util.Map;
 
 public class HandlerResolver {
 
-    private final Map<String, Handler> httpGetHandlers;
-    private final Map<String, Handler> httpPostHandlers;
+    private final Map<String, Controller> httpGetHandlers;
+    private final Map<String, Controller> httpPostHandlers;
 
-    public HandlerResolver(final Map<String, Handler> httpGetHandlers, final Map<String, Handler> httpPostHandlers) {
+    public HandlerResolver(final Map<String, Controller> httpGetHandlers, final Map<String, Controller> httpPostHandlers) {
         this.httpGetHandlers = httpGetHandlers;
         this.httpPostHandlers = httpPostHandlers;
     }
 
-    public Handler resolve(final HttpMethod httpMethod, final String path) {
+    public Controller resolve(final HttpMethod httpMethod, final String path) {
         if (httpMethod.equals(HttpMethod.GET)) {
             return httpGetHandlers.get(path);
         }

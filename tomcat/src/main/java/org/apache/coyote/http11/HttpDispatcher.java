@@ -5,5 +5,5 @@ import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 
 public interface HttpDispatcher {
-    HttpResponse handle(final HttpRequest request) throws IOException;
+    void handle(HttpRequest request, HttpResponse response) throws IOException;
 }

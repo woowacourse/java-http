@@ -1,13 +1,15 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -15,15 +17,18 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_CONNECTION = 10;
 
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_CONNECTION);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    private Connector(final int port, final int acceptCount, final int maxConnection) {
+        this.executorService = Executors.newFixedThreadPool(maxConnection);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -67,12 +72,13 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
+            executorService.shutdown();
             serverSocket.close();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

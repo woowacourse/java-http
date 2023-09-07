@@ -31,6 +31,10 @@ public class RequestLine {
         return requestUri.contains(uri);
     }
 
+    public boolean endsWithRequestUri(final String uri) {
+        return requestUri.endsWith(uri);
+    }
+
     public RequestUri getRequestUri() {
         return requestUri;
     }

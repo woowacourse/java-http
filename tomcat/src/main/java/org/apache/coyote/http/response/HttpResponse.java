@@ -4,8 +4,6 @@ import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.common.HttpHeader;
 import org.apache.coyote.http.common.HttpHeaders;
 
-import java.util.Map;
-
 public class HttpResponse {
 
     public static final String SPACE = " ";
@@ -26,7 +24,7 @@ public class HttpResponse {
     public static HttpResponse redirect(final String redirectUri) {
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.FOUND))
-                .httpHeaders(new HttpHeaders(Map.of(HttpHeader.LOCATION, redirectUri)))
+                .httpHeaders(HttpHeader.LOCATION, redirectUri)
                 .body(HttpBody.empty())
                 .build();
     }

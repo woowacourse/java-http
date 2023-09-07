@@ -1,65 +1,65 @@
 package org.apache.coyote.handler.mapping;
 
+import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
 
 import java.io.IOException;
 
+import static org.apache.coyote.http.common.ContentType.CSS;
+import static org.apache.coyote.http.common.ContentType.HTML;
+import static org.apache.coyote.http.common.ContentType.ICO;
+import static org.apache.coyote.http.common.ContentType.JS;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
 public class StaticFileMapping implements HandlerMapping {
 
+    private static final String DEFAULT_FILE_PATH = "static";
+
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return httpRequest.isGetRequest() &&
-                (httpRequest.getRequestUri().getRequestUri().endsWith(".html") ||
-                        httpRequest.getRequestUri().getRequestUri().endsWith(".js") ||
-                        httpRequest.getRequestUri().getRequestUri().endsWith(".css") ||
-                        httpRequest.getRequestUri().getRequestUri().endsWith(".ico")
-                );
+        return httpRequest.isGetRequest() && isStaticFile(httpRequest);
+    }
+
+    private static boolean isStaticFile(final HttpRequest httpRequest) {
+        return httpRequest.isRequestUriEndsWith(HTML.getFileExtension()) ||
+                httpRequest.isRequestUriEndsWith(JS.getFileExtension()) ||
+                httpRequest.isRequestUriEndsWith(CSS.getFileExtension()) ||
+                httpRequest.isRequestUriEndsWith(ICO.getFileExtension());
     }
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         final String requestUri = httpRequest.getRequestUri().getRequestUri();
-        final String filePath = "static" + requestUri;
+        final String filePath = DEFAULT_FILE_PATH + requestUri;
 
-        if (requestUri.endsWith(".html")) {
-            return HttpResponse.builder()
-                    .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(CONTENT_TYPE, ContentType.HTML.getValue())
-                    .body(HttpBody.file(filePath))
-                    .build();
+        if (httpRequest.isRequestUriEndsWith(HTML.getFileExtension())) {
+            return createHttpResponseByContentTypeAndPath(HTML, filePath);
         }
 
-        if (requestUri.endsWith(".js")) {
-            return HttpResponse.builder()
-                    .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(CONTENT_TYPE, ContentType.JS.getValue())
-                    .body(HttpBody.file(filePath))
-                    .build();
+        if (httpRequest.isRequestUriEndsWith(JS.getFileExtension())) {
+            return createHttpResponseByContentTypeAndPath(JS, filePath);
         }
 
-        if (requestUri.endsWith(".css")) {
-            return HttpResponse.builder()
-                    .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(CONTENT_TYPE, ContentType.CSS.getValue())
-                    .body(HttpBody.file(filePath))
-                    .build();
+        if (httpRequest.isRequestUriEndsWith(CSS.getFileExtension())) {
+            return createHttpResponseByContentTypeAndPath(CSS, filePath);
         }
 
-        if (requestUri.endsWith(".ico")) {
-            return HttpResponse.builder()
-                    .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(CONTENT_TYPE, ContentType.ICO.getValue())
-                    .body(HttpBody.file(filePath))
-                    .build();
+        if (httpRequest.isRequestUriEndsWith(ICO.getFileExtension())) {
+            return createHttpResponseByContentTypeAndPath(ICO, filePath);
         }
 
         return HttpResponse.redirect("/404.html");
+    }
+
+    private static HttpResponse createHttpResponseByContentTypeAndPath(final ContentType contentType, final String filePath) throws IOException {
+        return HttpResponse.builder()
+                .statusLine(StatusLine.from(StatusCode.OK))
+                .httpHeaders(CONTENT_TYPE, contentType.getValue())
+                .body(HttpBody.file(filePath))
+                .build();
     }
 }

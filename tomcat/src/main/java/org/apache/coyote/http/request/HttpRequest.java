@@ -30,6 +30,10 @@ public class HttpRequest {
         return requestLine.containsRequestUri(uri);
     }
 
+    public boolean isRequestUriEndsWith(final String uri) {
+        return requestLine.endsWithRequestUri(uri);
+    }
+
     public boolean containsHeader(final HttpHeader headerName) {
         return headers.containsKey(headerName);
     }

@@ -12,6 +12,10 @@ public class RequestUri {
         return requestUri.contains(uri);
     }
 
+    public boolean endsWith(final String uri) {
+        return requestUri.endsWith(uri);
+    }
+
     public String getRequestUri() {
         return requestUri;
     }

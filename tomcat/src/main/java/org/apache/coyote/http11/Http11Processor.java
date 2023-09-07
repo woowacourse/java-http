@@ -56,12 +56,9 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            HttpCookie cookie = HttpCookie.empty();
-            if (httpRequest.hasCookie()) {
-                cookie = HttpCookie.from(httpRequest.getCookie());
-            }
+            final HttpCookie httpCookie = makeHttpCookie(httpRequest);
 
-            final HttpResponseEntity httpResponseEntity = makeResponseEntity(httpRequest, cookie);
+            final HttpResponseEntity httpResponseEntity = makeResponseEntity(httpRequest, httpCookie);
             final String response = makeResponse(httpResponseEntity);
 
             bufferedWriter.write(response);
@@ -69,6 +66,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpCookie makeHttpCookie(final HttpRequest httpRequest) {
+        if (httpRequest.hasCookie()) {
+            return HttpCookie.from(httpRequest.getCookie());
+        }
+        return HttpCookie.empty();
     }
 
     private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) {

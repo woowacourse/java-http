@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.request.exception.HttpMethodNotAllowedException;
+import org.apache.coyote.http11.request.exception.HttpRequestException.MethodNotAllowed;
 
 public enum HttpMethod {
     GET,
@@ -14,6 +14,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.name().equals(httpMethodName))
                 .findAny()
-                .orElseThrow(HttpMethodNotAllowedException::new);
+                .orElseThrow(MethodNotAllowed::new);
     }
 }

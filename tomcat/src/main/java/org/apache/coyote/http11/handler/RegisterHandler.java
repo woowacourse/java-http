@@ -9,7 +9,7 @@ import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.exception.HttpMethodNotAllowedException;
+import org.apache.coyote.http11.request.exception.HttpRequestException;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
@@ -47,7 +47,7 @@ public class RegisterHandler implements RequestHandler {
 
             return new HttpResponse(statusLine, responseHeaders, messageBody);
         }
-        throw new HttpMethodNotAllowedException();
+        throw new HttpRequestException.MethodNotAllowed();
     }
 
     private User generateUser(final HttpRequest httpRequest) {

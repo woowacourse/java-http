@@ -11,7 +11,7 @@ import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.exception.HttpMethodNotAllowedException;
+import org.apache.coyote.http11.request.exception.HttpRequestException;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.Status;
@@ -48,7 +48,7 @@ public class LoginHandler implements RequestHandler {
         if (httpMethod == HttpMethod.POST) {
             return getLoginRedirectResponse(httpRequest);
         }
-        throw new HttpMethodNotAllowedException();
+        throw new HttpRequestException.MethodNotAllowed();
     }
 
     private HttpResponse getIndexPageRedirectResponse(final HttpRequest httpRequest) {

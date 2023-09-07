@@ -34,6 +34,15 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse redirect(final HttpStatus httpStatus,
+                                        final String redirectPath) {
+        return new HttpResponse(
+                StatusLine.from(httpStatus),
+                ResponseHeaders.redirect(redirectPath),
+                ResponseBody.noContent(ContentType.HTML)
+        );
+    }
+
     public void addSession(final String sessionId) {
         responseHeaders.addCookie(new Cookie("JSESSIONID", sessionId));
     }

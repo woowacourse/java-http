@@ -1,5 +1,6 @@
 package org.apache.coyote;
 
+import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
 
@@ -17,7 +18,7 @@ public enum ControllerMapper {
 
     public static Controller getController(final String parsedUri) {
         if (parsedUri.contains(LOGIN.uri)) {
-            return new LoginController();
+            return new LoginController(new SessionManager());
         }
         if (parsedUri.contains(REGISTER.uri)) {
             return new RegisterController();

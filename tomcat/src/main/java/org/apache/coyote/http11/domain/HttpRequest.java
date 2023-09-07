@@ -12,6 +12,7 @@ import java.util.Map;
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
+    private static final String HTTP_COOKIE = "Cookie";
 
     private final HttpRequestHeader requestHeader;
     private final Map<String, String> requestBody;
@@ -22,9 +23,8 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        final List<String> httpRequestHeaders = parseHttpRequestHeaders(bufferedReader);
-        final HttpRequestHeader httpRequestHeader = parseHttpRequestHeader(httpRequestHeaders);
-        final String contentLength = httpRequestHeader.getHeaders().get("Content-Length");
+        final HttpRequestHeader httpRequestHeader = createHttpRequestHeader(bufferedReader);
+        final String contentLength = httpRequestHeader.getHeaderValues().get("Content-Length");
         if (contentLength == null) {
             return new HttpRequest(httpRequestHeader, null);
         }
@@ -42,7 +42,8 @@ public class HttpRequest {
         return lines;
     }
 
-    private static HttpRequestHeader parseHttpRequestHeader(final List<String> httpRequestHeader) {
+    private static HttpRequestHeader createHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final List<String> httpRequestHeader = parseHttpRequestHeaders(bufferedReader);
         final String[] firstHeader = httpRequestHeader.remove(0).split(" ");
         final String method = firstHeader[0];
         final String uri = firstHeader[1];
@@ -52,7 +53,11 @@ public class HttpRequest {
             final String[] splitHeader = header.split(HEADER_DELIMITER);
             requestHeaders.put(splitHeader[0], splitHeader[1]);
         }
-        return new HttpRequestHeader(method, uri, version, requestHeaders);
+        if (requestHeaders.containsKey(HTTP_COOKIE)) {
+            final HttpCookie cookie = HttpCookie.from(requestHeaders.get(HTTP_COOKIE));
+            return new HttpRequestHeader(method, uri, version, cookie, requestHeaders);
+        }
+        return new HttpRequestHeader(method, uri, version, null, requestHeaders);
     }
 
     private static Map<String, String> parseHttpRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
@@ -73,6 +78,10 @@ public class HttpRequest {
         return requestBody;
     }
 
+    public boolean containsCookie() {
+        return requestHeader.getCookie() != null;
+    }
+
     public String getUri() {
         return requestHeader.getUri();
     }
@@ -83,5 +92,9 @@ public class HttpRequest {
 
     public String getMethod() {
         return requestHeader.getMethod();
+    }
+
+    public HttpCookie getCookie() {
+        return requestHeader.getCookie();
     }
 }

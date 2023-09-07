@@ -1,5 +1,7 @@
 package org.apache.coyote.domain;
 
+import org.apache.coyote.http11.domain.HttpCookie;
+
 import java.util.Map;
 
 public class HttpRequestHeader {
@@ -7,14 +9,15 @@ public class HttpRequestHeader {
     private final String method;
     private final String uri;
     private final String version;
-    private final Map<String, String> headers;
+    private final HttpCookie cookie;
+    private final Map<String, String> headerValues;
 
-    public HttpRequestHeader(final String method, final String uri, final String version, final Map<String, String> headers) {
+    public HttpRequestHeader(final String method, final String uri, final String version, final HttpCookie cookie, final Map<String, String> headerValues) {
         this.method = method;
         this.uri = uri;
         this.version = version;
-        this.headers = headers;
-
+        this.cookie = cookie;
+        this.headerValues = headerValues;
     }
 
     public String getMethod() {
@@ -29,7 +32,11 @@ public class HttpRequestHeader {
         return version;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public Map<String, String> getHeaderValues() {
+        return headerValues;
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
     }
 }

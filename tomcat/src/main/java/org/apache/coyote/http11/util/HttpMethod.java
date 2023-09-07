@@ -23,4 +23,8 @@ public enum HttpMethod {
                      .findAny()
                      .orElseThrow(() -> new IllegalArgumentException("잘못된 Http Mehod명입니다. " + name));
     }
+
+    public boolean isSameMethod(final String method) {
+        return this.name.equals(method);
+    }
 }

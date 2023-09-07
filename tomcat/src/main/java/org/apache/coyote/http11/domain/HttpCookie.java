@@ -16,22 +16,26 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public HttpCookie from(final String cookie) {
+    public static HttpCookie from(final String cookie) {
         final String[] splitCookies = splitCookies(cookie);
         final Map<String, String> cookies = splitValues(splitCookies);
         return new HttpCookie(cookies);
     }
 
-    private String[] splitCookies(final String cookie) {
+    private static String[] splitCookies(final String cookie) {
         return cookie.split(COOKIE_DELIMITER);
     }
 
-    private Map<String, String> splitValues(final String[] splitCookies) {
+    private static Map<String, String> splitValues(final String[] splitCookies) {
         final HashMap<String, String> cookies = new HashMap<>();
         for (final String cookie : splitCookies) {
             final String[] keyAndValue = cookie.split(COOKIE_VALUE_DELIMITER);
             cookies.put(keyAndValue[COOKIE_KEY_INDEX], keyAndValue[COOKIE_VALUE_INDEX]);
         }
         return cookies;
+    }
+
+    public String getValue(final String key) {
+        return cookies.get(key);
     }
 }

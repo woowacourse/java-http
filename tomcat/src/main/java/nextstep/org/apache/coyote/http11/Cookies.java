@@ -41,4 +41,10 @@ public class Cookies {
                 .map(value -> String.format(SET_COOKIE_HEADER, value))
                 .collect(Collectors.joining());
     }
+
+    public Cookies defensiveCopy() {
+        Cookies newCookies = new Cookies();
+        cookie.forEach((key, value) -> newCookies.set(key, value));
+        return newCookies;
+    }
 }

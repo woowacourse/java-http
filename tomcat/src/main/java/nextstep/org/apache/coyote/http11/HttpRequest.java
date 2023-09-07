@@ -19,7 +19,7 @@ public class HttpRequest {
 
     private StartLine startLine;
     private Map<String, String> queryParams = new HashMap<>();
-    private Map<String, String> requestHeaders = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
     private final Cookies cookies = new Cookies();
     private Map<String, String> parsedBody = null;
 
@@ -33,10 +33,10 @@ public class HttpRequest {
             parseMultipleValues(queryParams,
                     startLine.getQueryString(), "&", "=");
         }
-        if (requestHeaders.containsKey("Cookie")) {
-            cookies.parseCookieHeaders(requestHeaders.get("Cookie"));
+        if (headers.containsKey("Cookie")) {
+            cookies.parseCookieHeaders(headers.get("Cookie"));
         }
-        if (requestHeaders.containsKey("Content-Length")) {
+        if (headers.containsKey("Content-Length")) {
             parseBody(bufferedReader);
         }
     }
@@ -45,7 +45,7 @@ public class HttpRequest {
         String line;
         while (!EMPTY_LINE.equals(line = bufferedReader.readLine())) {
             String[] splited = line.split(": ");
-            requestHeaders.put(splited[KEY_INDEX], splited[VALUE_INDEX].strip());
+            headers.put(splited[KEY_INDEX], splited[VALUE_INDEX].strip());
         }
     }
 
@@ -57,7 +57,7 @@ public class HttpRequest {
     }
 
     private String extractRequestBody(BufferedReader bufferedReader) throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
@@ -72,11 +72,11 @@ public class HttpRequest {
     }
 
     public String getHeader(String name) {
-        return requestHeaders.get(name);
+        return headers.get(name);
     }
 
     public Cookies getCookies() {
-        return cookies;
+        return cookies.defensiveCopy();
     }
 
     public String getParsedBodyValue(String name) {

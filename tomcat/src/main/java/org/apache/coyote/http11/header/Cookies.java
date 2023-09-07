@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.header;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,10 @@ public class Cookies {
     private static final String VALUE_SEPARATOR = "=";
 
     private final Map<String, String> cookies;
+
+    public Cookies() {
+        this(Collections.emptyMap());
+    }
 
     private Cookies(Map<String, String> cookies) {
         this.cookies = cookies;

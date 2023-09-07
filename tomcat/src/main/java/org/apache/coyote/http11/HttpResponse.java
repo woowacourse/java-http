@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.Cookies;
 import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpResponse {
@@ -58,5 +59,10 @@ public class HttpResponse {
 
     public List<HttpHeader> getHeaders() {
         return new ArrayList<>(headers.values());
+    }
+
+    public HttpResponse with(Cookies cookies) {
+        putHeader(cookies.toHeader("Set-Cookie"));
+        return this;
     }
 }

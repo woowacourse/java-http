@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpCookie {
-
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
+    public static final String JSESSIONID_KEY = "JSESSIONID";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final HttpCookie EMPTY = new HttpCookie();
@@ -34,7 +34,7 @@ public class HttpCookie {
 
     public static HttpCookie jSessionId(String id) {
         Map<String, String> values = new HashMap<>();
-        values.put("JSESSIONID", id);
+        values.put(JSESSIONID_KEY, id);
         return new HttpCookie(values);
     }
 

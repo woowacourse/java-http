@@ -24,10 +24,7 @@ public class RequestBody {
     }
 
     public String getBody(String key) {
-        if (body.containsKey(key)) {
-            return body.get(key);
-        }
-        return "";
+        return body.getOrDefault(key, "");
     }
 
     @Override

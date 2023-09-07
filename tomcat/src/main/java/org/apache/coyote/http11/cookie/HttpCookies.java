@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.toList;
 public class HttpCookies {
 
     public static final HttpCookies EMPTY = new HttpCookies(List.of());
-    
+
     private final List<HttpCookie> cookies;
 
     private HttpCookies(List<HttpCookie> cookies) {
@@ -19,6 +19,9 @@ public class HttpCookies {
     }
 
     public static HttpCookies parse(String cookieHeader) {
+        if (cookieHeader.isEmpty()) {
+            return EMPTY;
+        }
         return Arrays.stream(cookieHeader.split(";"))
                 .map(String::trim)
                 .map(it -> it.split("="))
@@ -28,7 +31,7 @@ public class HttpCookies {
 
     public String getCookieValue(String key) {
         return cookies.stream()
-                .filter(it -> it.getKey().equalsIgnoreCase(key))
+                .filter(cookie -> cookie.getKey().equalsIgnoreCase(key))
                 .map(HttpCookie::getValue)
                 .findFirst()
                 .orElseThrow(NotFoundCookieException::new);
@@ -36,6 +39,6 @@ public class HttpCookies {
 
     public boolean existsSession() {
         return cookies.stream()
-                .anyMatch(it -> it.getKey().equalsIgnoreCase("JSESSIONID"));
+                .anyMatch(cookie -> cookie.getKey().equalsIgnoreCase("JSESSIONID"));
     }
 }

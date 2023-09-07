@@ -46,10 +46,7 @@ public class RequestHeaders {
     }
 
     public HttpCookies getCookies() {
-        if (headers.containsKey("cookie")) {
-            return HttpCookies.parse(headers.get("cookie"));
-        }
-        return HttpCookies.EMPTY;
+        return HttpCookies.parse(headers.getOrDefault("cookie", ""));
     }
 
     @Override

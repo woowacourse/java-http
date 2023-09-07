@@ -25,9 +25,6 @@ public class RequestParams {
     }
 
     public String getParam(String key) {
-        if (params.containsKey(key)) {
-            return params.get(key);
-        }
-        return "";
+        return params.getOrDefault(key, "");
     }
 }

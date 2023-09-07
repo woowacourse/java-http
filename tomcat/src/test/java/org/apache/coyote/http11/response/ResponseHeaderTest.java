@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.response.Charset.UTF_8;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
 import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;

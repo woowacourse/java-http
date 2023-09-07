@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -12,6 +13,7 @@ public enum HttpContentType {
     ;
 
     private static final String DELIMITER = ";";
+    private static final String CHARSET_FIELD = "charset=";
 
     private final String mimeType;
     private final String fileExtension;
@@ -29,7 +31,8 @@ public enum HttpContentType {
     }
 
     public String mimeTypeWithCharset(Charset charset) {
-        return String.join(DELIMITER, mimeType, charset.charsetWithFiled());
+        String charsetMessage = CHARSET_FIELD + charset.name().toLowerCase();
+        return String.join(DELIMITER, mimeType, charsetMessage);
     }
 
     public String mimeType() {

@@ -35,7 +35,7 @@ public class HttpRequest {
     }
 
     private static MessageBody createRequestBody(BufferedReader br, RequestHeaders headers) throws IOException {
-        if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue())) {
+        if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue()) || br.readLine() == null) {
             return MessageBody.from("");
         }
         int contentLength = Integer.parseInt(headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue()));

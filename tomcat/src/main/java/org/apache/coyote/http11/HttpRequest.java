@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.List;
+import java.util.Objects;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
@@ -13,8 +14,8 @@ public class HttpRequest {
     private final RequestBody requestBody;
     private final Session session;
 
-    private HttpRequest(final RequestHeader requestHeader, final RequestBody requestBody,
-                        final QueryString queryString, final Session session) {
+    private HttpRequest(final RequestHeader requestHeader, final RequestBody requestBody, final QueryString queryString,
+                        final Session session) {
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
         this.queryString = queryString;
@@ -34,20 +35,8 @@ public class HttpRequest {
         return SESSION_MANAGER.getSessionId(sessionId);
     }
 
-    public boolean isSameParsedRequestURI(final String uri) {
-        return requestHeader.isSameParsedRequestURI(uri);
-    }
-
     public boolean isSameHttpMethod(final HttpMethod httpMethod) {
         return this.requestHeader.isSameHttpMethod(httpMethod);
-    }
-
-    public boolean hasCookie(final String cookie) {
-        return requestHeader.hasCookie(cookie);
-    }
-
-    public String getCookieValue(final String key) {
-        return requestHeader.getCookie(key);
     }
 
     public String getParsedRequestURI() {
@@ -62,19 +51,26 @@ public class HttpRequest {
         return requestBody;
     }
 
-    public HttpMethod getHttpMethod() {
-        return requestHeader.getHttpMethod();
-    }
-
     public HttpVersion getHttpVersion() {
         return requestHeader.getHttpVersion();
     }
 
-    public QueryString getQueryString() {
-        return queryString;
-    }
-
     public Session getSession() {
         return session;
+    }
+
+    public String getSessionId() {
+        return session.getId();
+    }
+
+    public String getCookie(final String key) {
+        return requestHeader.getCookie(key);
+    }
+
+    public boolean isNotSameSessionId() {
+        final String cookieSessionId = requestHeader.getCookie("JSESSIONID");
+        final String requestSessionId = session.getId();
+
+        return Objects.isNull(cookieSessionId) || !cookieSessionId.equals(requestSessionId);
     }
 }

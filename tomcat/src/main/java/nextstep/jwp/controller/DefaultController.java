@@ -10,6 +10,7 @@ public class DefaultController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final String body = "Hello world!";
         response.updateBody(body);
+        response.addHeader("Set-Cookie", request.getSessionId());
     }
 
     @Override

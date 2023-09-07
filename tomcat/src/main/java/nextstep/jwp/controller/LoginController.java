@@ -21,12 +21,14 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
-        if (notAlreadyLoginStatus(httpRequest)) {
-            httpResponse.updateRedirect(httpRequest.getHttpVersion(), "/index.html");
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        if (notAlreadyLoginStatus(request)) {
+            response.updateRedirect(request.getHttpVersion(), "/index.html");
+            response.addHeader("Set-Cookie", request.getSessionId());
             return;
         }
-        httpResponse.updatePage("/login");
+        response.addHeader("Set-Cookie", request.getSessionId());
+        response.updatePage("/login");
     }
 
     @Override
@@ -36,16 +38,14 @@ public class LoginController extends AbstractController {
             log.info("로그인 성공 user = {}", loginUser);
             final Session session = request.getSession();
             session.setAttribute("user", loginUser);
-            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-
             response.updateRedirect(request.getHttpVersion(), "/index.html");
         } catch (IllegalArgumentException e) {
             response.updateRedirect(request.getHttpVersion(), "/401.html");
         }
     }
 
-    private boolean notAlreadyLoginStatus(final HttpRequest httpRequest) {
-        final Session session = httpRequest.getSession();
+    private boolean notAlreadyLoginStatus(final HttpRequest request) {
+        final Session session = request.getSession();
         return Objects.nonNull(session.getAttribute("user"));
     }
 

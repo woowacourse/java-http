@@ -38,10 +38,6 @@ public class RequestHeader {
         return requestInfo.isSameParsedRequestURI(uri);
     }
 
-    public String getHeader(final String header) {
-        return httpHeader.get(header);
-    }
-
     public boolean hasHeader(final String header) {
         return httpHeader.hasHeader(header);
     }

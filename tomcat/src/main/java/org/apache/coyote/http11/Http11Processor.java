@@ -47,6 +47,10 @@ public class Http11Processor implements Runnable, Processor {
             if (isStaticPath(httpRequest.getOriginRequestURI())) {
                 httpResponse.updatePage(httpRequest.getOriginRequestURI());
                 httpResponse.wrapUp(httpRequest.getOriginRequestURI());
+
+                if (httpRequest.isNotSameSessionId()) {
+                    httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + httpRequest.getSessionId());
+                }
                 writeMessage(httpResponse, outputStream);
                 return;
             }

@@ -22,6 +22,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         response.updatePage(request.getParsedRequestURI());
+        response.addHeader("Set-Cookie", request.getSessionId());
     }
 
     @Override
@@ -37,6 +38,8 @@ public class RegisterController extends AbstractController {
             response.updateRedirect(request.getHttpVersion(), "/index.html");
         } catch (IllegalArgumentException e) {
             response.updateRedirect(request.getHttpVersion(), "/register");
+        } finally {
+            response.addHeader("Set-Cookie", request.getSessionId());
         }
     }
 

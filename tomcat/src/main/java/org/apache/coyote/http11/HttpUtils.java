@@ -6,12 +6,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpUtils {
 
   private static final String PREFIX_STATIC_PATH = "static";
   private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
+
+  private HttpUtils() {
+  }
 
   public static String readContentsFromFile(final String url) throws IOException {
     final URL resource = CLASS_LOADER.getResource(PREFIX_STATIC_PATH + url);
@@ -37,5 +44,14 @@ public class HttpUtils {
       return "text/html";
     }
     return accept.split(",")[0];
+  }
+
+  public static Map<String, String> parseParam(final String queryString) {
+    final Map<String, String> params = new HashMap<>();
+    for (final String query : URLDecoder.decode(queryString, StandardCharsets.UTF_8).split("&")) {
+      final String[] tokens = query.split("=", 2);
+      params.put(tokens[0], tokens[1]);
+    }
+    return params;
   }
 }

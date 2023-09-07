@@ -6,6 +6,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.headers.HttpHeader;
 import org.apache.coyote.http11.requestline.HttpMethod;
 import org.apache.coyote.http11.requestline.RequestLine;
@@ -14,6 +16,7 @@ public class HttpRequest {
 
   private static final String CONTENT_LENGTH = "Content-Length";
 
+  private final SessionManager sessionManager = new SessionManager();
   private final RequestLine requestLine;
   private final HttpHeader header;
   private final String body;
@@ -75,5 +78,13 @@ public class HttpRequest {
 
   public HttpMethod getMethod() {
     return this.requestLine.getMethod();
+  }
+
+  public void addSession(final Session session) {
+    this.sessionManager.add(session);
+  }
+
+  public Session getSession(final String id) {
+    return this.sessionManager.findSession(id);
   }
 }

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.responseline;
 
 public enum HttpStatus {
   OK(200, "OK"),
-  FOUND(302, "FOUNT"),
+  FOUND(302, "FOUND"),
   UNAUTHORIZED(401, "UNAUTHORIZED");
 
   private final int statusCode;

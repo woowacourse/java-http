@@ -7,6 +7,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 public enum PageControllerMapping {
 
     HELLO_WORLD("/", "GET", HelloWorldPageController.create()),
+    REGISTER_GET("/register", "GET", RegisterGetPageController.create()),
     REGISTER_POST("/register", "POST", RegisterPostPageController.create()),
     LOGIN_GET("/login", "GET", LoginGetPageController.create()),
     LOGIN_POST("/login", "POST", LoginPostPageController.create()),

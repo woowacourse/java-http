@@ -1,8 +1,8 @@
 package nextstep.jwp.controller.page;
 
+import static nextstep.jwp.controller.FileContent.HTML;
 import static nextstep.jwp.controller.FileContent.INDEX_URI;
 import static nextstep.jwp.controller.FileContent.STATIC;
-import static org.apache.coyote.http11.common.ContentType.HTML;
 import static org.apache.coyote.http11.common.HttpHeaders.COOKIE_NAME;
 import static org.apache.coyote.http11.common.HttpHeaders.LOCATION;
 
@@ -38,6 +38,7 @@ public class LoginGetPageController implements Controller {
     public HttpResponse process(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
         final String splitUri = uri.split(COMMA_REGEX)[FILENAME_INDEX];
+        final String s = STATIC + FileContent.findPage(splitUri) + HTML;
         final URL url = HttpResponse.class.getClassLoader()
                 .getResource(STATIC + FileContent.findPage(splitUri) + HTML);
 

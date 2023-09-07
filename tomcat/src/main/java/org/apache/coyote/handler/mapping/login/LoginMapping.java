@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class LoginMapping extends LoginFilter implements HandlerMapping {
 
-    public static final String TARGET_URI = "login";
+    private static final String TARGET_URI = "login";
     private static final Logger log = LoggerFactory.getLogger(LoginMapping.class);
 
     @Override

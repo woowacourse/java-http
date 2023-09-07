@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class RegisterMapping implements HandlerMapping {
 
-    public static final String TARGET_URI = "register";
+    private static final String TARGET_URI = "register";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {

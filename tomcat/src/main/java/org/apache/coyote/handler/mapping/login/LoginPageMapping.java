@@ -23,7 +23,7 @@ import static org.apache.coyote.http.common.HttpHeader.COOKIE;
 
 public class LoginPageMapping extends LoginFilter implements HandlerMapping {
 
-    public static final String TARGET_URI = "login";
+    private static final String TARGET_URI = "login";
     private static final Logger log = LoggerFactory.getLogger(LoginPageMapping.class);
 
     @Override

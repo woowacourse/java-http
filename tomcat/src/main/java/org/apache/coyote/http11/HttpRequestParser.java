@@ -18,7 +18,7 @@ import static org.apache.coyote.http.request.HttpMethod.POST;
 
 public class HttpRequestParser {
 
-    public static final String SPACE = " ";
+    private static final String SPACE = " ";
 
     public HttpRequestParser() {
     }

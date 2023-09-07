@@ -6,10 +6,10 @@ import org.apache.coyote.http.common.HttpHeaders;
 
 public class HttpResponse {
 
-    public static final String SPACE = " ";
-    public static final String HEADER_DELIMETER = ": ";
-    public static final String CRLF = "\r\n";
-    public static final String BLANK_LINE = "";
+    private static final String SPACE = " ";
+    private static final String HEADER_DELIMETER = ": ";
+    private static final String CRLF = "\r\n";
+    private static final String BLANK_LINE = "";
 
     private final StatusLine statusLine;
     private final HttpHeaders httpHeaders;

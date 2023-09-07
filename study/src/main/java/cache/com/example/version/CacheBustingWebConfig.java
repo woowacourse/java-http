@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CacheBustingWebConfig implements WebMvcConfigurer {
 
-    public static final String PREFIX_STATIC_RESOURCES = "/resources";
-    public static final Long MAX_AGE = 365L;
+    private static final String PREFIX_STATIC_RESOURCES = "/resources";
+    private static final Long MAX_AGE = 365L;
 
     private final ResourceVersion version;
 

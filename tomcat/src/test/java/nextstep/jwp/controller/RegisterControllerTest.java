@@ -113,8 +113,9 @@ class RegisterControllerTest {
 				"");
 			final String file = "/register.html";
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
+			final HttpResponse actual = new HttpResponse();
 
-			final HttpResponse actual = HANDLER.handleTo(request);
+			HANDLER.handleTo(request, actual);
 
 			final URL resource = getClass().getClassLoader().getResource("static" + file);
 			final String expected = "HTTP/1.1 200 OK \r\n" +
@@ -141,12 +142,14 @@ class RegisterControllerTest {
 				.body(requestBody)
 				.build();
 
-			final HttpResponse actual = HANDLER.handleTo(request);
+			final HttpResponse actual = new HttpResponse();
+
+			HANDLER.handleTo(request, actual);
 
 			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
 				"Content-Length: 0 \r\n" +
-				"Location: http://localhost:8080/index.html \r\n" +
+				"Location: /index.html \r\n" +
 				"\r\n";
 
 			assertAll(

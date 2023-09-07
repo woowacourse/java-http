@@ -22,7 +22,9 @@ class RootControllerTest {
 			"");
 		final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
 
-		final HttpResponse httpResponse = new RootController().handleTo(request);
+		final HttpResponse actual = new HttpResponse();
+
+		new RootController().handleTo(request, actual);
 
 		final String expected = String.join("\r\n",
 			"HTTP/1.1 200 OK ",
@@ -30,7 +32,7 @@ class RootControllerTest {
 			"Content-Length: 12 ",
 			"",
 			"Hello world!");
-		assertThat(httpResponse.buildResponse())
+		assertThat(actual.buildResponse())
 			.isEqualTo(expected);
 	}
 

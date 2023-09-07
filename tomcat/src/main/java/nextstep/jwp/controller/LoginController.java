@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.headers.MimeType.*;
+
 import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
@@ -11,6 +13,7 @@ import org.apache.coyote.http11.handler.HttpHandle;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.QueryParser;
@@ -43,57 +46,59 @@ public class LoginController implements HttpController {
 	}
 
 	@Override
-	public HttpResponse handleTo(final HttpRequest request) {
+	public void handleTo(final HttpRequest request, final HttpResponse response) {
 		final HttpMethod httpMethod = request.getHttpMethod();
-		return HANDLE_MAP.get(httpMethod)
-			.handle(request);
+		HANDLE_MAP.get(httpMethod)
+			.handle(request, response);
 	}
 
-	private static HttpResponse servingStaticResource(final HttpRequest request) {
-		return request.getJSessionId()
-			.map(LoginController::indexHtmlRedirect)
-			.orElseGet(LoginController::loginHtmlResponse);
+	private static void servingStaticResource(final HttpRequest request, final HttpResponse response) {
+		request.getJSessionId()
+			.ifPresentOrElse(
+				id -> indexHtmlRedirect(id, response),
+				() -> loginHtmlResponse(response)
+			);
 	}
 
-	private static HttpResponse indexHtmlRedirect(final String jSessionId) {
+	private static void indexHtmlRedirect(final String jSessionId, final HttpResponse response) {
 		final Session session = SessionManager.findSession(jSessionId);
 		final User user = (User)session.getAttributes(SESSION_USER_KEY);
 		//user가 없는 경우 예외처리 고민하기
 		log.info(user.toString());
-		return HttpResponse.redirect(LOGIN_SUCCESS_LOCATION);
+		response.redirect(LOGIN_SUCCESS_LOCATION);
 	}
 
-	private static HttpResponse loginHtmlResponse() {
+	private static void loginHtmlResponse(final HttpResponse response) {
 		final URL url = LoginController.class.getClassLoader()
 			.getResource(LOGIN_STATIC_RESOURCE_FILE_PATH);
-		return StaticResourceResolver.resolve(url);
+		final String body = StaticResourceResolver.resolve(url);
+		response.setResponse(HttpStatusCode.OK_200, body, HTML);
 	}
 
-	private static HttpResponse loginProcess(final HttpRequest request) {
+	private static void loginProcess(final HttpRequest request, final HttpResponse response) {
 		final Map<String, String> parsedQuery = request.getBody()
 			.map(QueryParser::parse)
 			.orElseThrow(EmptyBodyException::new);
 		final String account = parsedQuery.get(ACCOUNT_PARAM_KEY);
-		return InMemoryUserRepository.findByAccount(account)
-			.map(user -> checkPasswordProcess(parsedQuery.get(PASSWORD_PARAM_KEY), user, request))
+		final User user = InMemoryUserRepository.findByAccount(account)
 			.orElseThrow(UnauthorizedException::new);
+		checkPasswordProcess(parsedQuery.get(PASSWORD_PARAM_KEY), user, request, response);
 	}
 
-	private static HttpResponse checkPasswordProcess(final String password, final User user,
-		final HttpRequest request) {
-		if (user.checkPassword(password)) {
-			log.info(user.toString());
-			return loginSuccessResponse(user, request);
+	private static void checkPasswordProcess(final String password, final User user,
+		final HttpRequest request, final HttpResponse response) {
+		if (!user.checkPassword(password)) {
+			throw new UnauthorizedException();
 		}
-		throw new UnauthorizedException();
+		log.info(user.toString());
+		loginSuccessResponse(user, request, response);
 	}
 
-	private static HttpResponse loginSuccessResponse(final User user, final HttpRequest request) {
-		final HttpResponse response = HttpResponse.redirect(LOGIN_SUCCESS_LOCATION);
+	private static void loginSuccessResponse(final User user, final HttpRequest request, final HttpResponse response) {
+		response.redirect(LOGIN_SUCCESS_LOCATION);
 		if (!request.isExistJSessionId()) {
 			issueJSessionId(user, response);
 		}
-		return response;
 	}
 
 	private static void issueJSessionId(final User user, final HttpResponse response) {

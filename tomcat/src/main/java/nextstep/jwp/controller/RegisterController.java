@@ -1,11 +1,14 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.response.HttpStatusCode.*;
+
 import java.net.URL;
 import java.util.Map;
 
 import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.handler.HttpController;
 import org.apache.coyote.http11.handler.HttpHandle;
+import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,7 +21,7 @@ import nextstep.jwp.model.User;
 public class RegisterController implements HttpController {
 
 	private static final Map<HttpMethod, HttpHandle> HANDLE_MAP = Map.of(
-		HttpMethod.GET, request -> servingStaticResource(),
+		HttpMethod.GET, (request, response) -> servingStaticResource(response),
 		HttpMethod.POST, RegisterController::registerProcess
 	);
 	private static final String END_POINT = "/register";
@@ -26,7 +29,7 @@ public class RegisterController implements HttpController {
 	private static final String QUERY_ACCOUNT_KEY = "account";
 	private static final String QUERY_PASSWORD_KEY = "password";
 	private static final String QUERY_EMAIL_KEY = "email";
-	private static final String REGISTER_SUCCESS_LOCATION = "http://localhost:8080/index.html";
+	private static final String REGISTER_SUCCESS_LOCATION = "/index.html";
 
 	@Override
 	public boolean isSupported(final HttpRequest request) {
@@ -35,19 +38,19 @@ public class RegisterController implements HttpController {
 	}
 
 	@Override
-	public HttpResponse handleTo(final HttpRequest request) {
+	public void handleTo(final HttpRequest request, final HttpResponse response) {
 		final HttpMethod httpMethod = request.getHttpMethod();
-		return HANDLE_MAP.get(httpMethod)
-			.handle(request);
+		HANDLE_MAP.get(httpMethod)
+			.handle(request, response);
 	}
 
-	private static HttpResponse registerProcess(final HttpRequest request) {
-		return request.getBody()
-			.map(RegisterController::register)
+	private static void registerProcess(final HttpRequest request, final HttpResponse response) {
+		final String body = request.getBody()
 			.orElseThrow(EmptyBodyException::new);
+		register(body, response);
 	}
 
-	private static HttpResponse register(final String body) {
+	private static void register(final String body, final HttpResponse response) {
 		final Map<String, String> parseQuery = QueryParser.parse(body);
 		final User user = new User(
 			parseQuery.get(QUERY_ACCOUNT_KEY),
@@ -55,12 +58,13 @@ public class RegisterController implements HttpController {
 			parseQuery.get(QUERY_EMAIL_KEY)
 		);
 		InMemoryUserRepository.save(user);
-		return HttpResponse.redirect(REGISTER_SUCCESS_LOCATION);
+		response.redirect(REGISTER_SUCCESS_LOCATION);
 	}
 
-	private static HttpResponse servingStaticResource() {
+	private static void servingStaticResource(final HttpResponse response) {
 		final URL url = RegisterController.class.getClassLoader()
 			.getResource(STATIC_RESOURCE_FILE_PATH);
-		return StaticResourceResolver.resolve(url);
+		final String body = StaticResourceResolver.resolve(url);
+		response.setResponse(OK_200, body, MimeType.HTML);
 	}
 }

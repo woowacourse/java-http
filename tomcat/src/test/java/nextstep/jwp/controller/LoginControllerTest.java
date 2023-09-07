@@ -59,8 +59,9 @@ class LoginControllerTest {
 				"");
 			final String file = "/login.html";
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
+			final HttpResponse actual = new HttpResponse();
 
-			final HttpResponse actual = HANDLER.handleTo(request);
+			HANDLER.handleTo(request, actual);
 
 			final URL resource = getClass().getClassLoader().getResource("static" + file);
 			final String expected = "HTTP/1.1 200 OK \r\n" +
@@ -88,8 +89,9 @@ class LoginControllerTest {
 				"",
 				"");
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest).build();
+			final HttpResponse actual = new HttpResponse();
 
-			final HttpResponse actual = HANDLER.handleTo(request);
+			HANDLER.handleTo(request, actual);
 
 			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
@@ -113,11 +115,12 @@ class LoginControllerTest {
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
 				.body(requestBody)
 				.build();
-			final MockedStatic<UUID> mockUUID = mockStatic(UUID.class);
 			final UUID uuidValue = new UUID(517873L, 2190581L);
+			final MockedStatic<UUID> mockUUID = mockStatic(UUID.class);
 			when(UUID.randomUUID()).thenReturn(uuidValue);
+			final HttpResponse actual = new HttpResponse();
 
-			final HttpResponse actual = HANDLER.handleTo(request);
+			HANDLER.handleTo(request, actual);
 
 			final String expected = "HTTP/1.1 302 Found \r\n" +
 				"Content-Type: text/html;charset=utf-8 \r\n" +
@@ -148,8 +151,9 @@ class LoginControllerTest {
 			final HttpRequest request = HttpRequestBuilder.from(plainRequest)
 				.body(requestBody)
 				.build();
+			final HttpResponse actual = new HttpResponse();
 
-			assertThatThrownBy(() -> HANDLER.handleTo(request))
+			assertThatThrownBy(() -> HANDLER.handleTo(request, actual))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}

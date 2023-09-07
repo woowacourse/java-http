@@ -76,6 +76,14 @@ public class HttpRequest {
         return requestLine.getQueryParameter(queryKey);
     }
 
+    public String getHeader(final String headerName) {
+        return headers.get(headerName);
+    }
+
+    public String getCookie(final String cookieName) {
+        return headers.getCookie(cookieName);
+    }
+
     public boolean containsBody(final String key) {
         return body.contains(key);
     }

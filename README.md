@@ -30,6 +30,6 @@
 
 ## 🎯 3단계 - 리팩토링 & 4단계 - 동시성 확장하기
 
-- [ ] 분기별 처리 - Controller 구현하기
-  - [ ] HTTP Method에 따라 Controller 분리
-  - [ ] 허용하지 않는 HTTP Method 시 405 Status Code 응답
+- [x] 분기별 처리 - Controller 구현하기
+  - [x] HTTP Method에 따라 Controller 분리
+  - [x] 허용하지 않는 HTTP Method 시 405 Status Code 응답

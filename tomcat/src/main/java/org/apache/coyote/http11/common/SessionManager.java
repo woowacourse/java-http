@@ -20,6 +20,14 @@ public class SessionManager {
         SESSIONS.remove(id);
     }
 
+    public static int size() {
+        return SESSIONS.size();
+    }
+
+    public static void clear() {
+        SESSIONS.clear();
+    }
+
     private SessionManager() {
     }
 }

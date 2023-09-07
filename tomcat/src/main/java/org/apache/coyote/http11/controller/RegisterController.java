@@ -8,7 +8,6 @@ import org.apache.coyote.http11.response.statusLine.HttpStatus;
 
 public class RegisterController {
 
-
     private static final String DIRECTORY_SEPARATOR = "/";
     private static final String INDEX_FILE = "index.html";
     private static final String REGISTER_FILE = "register.html";

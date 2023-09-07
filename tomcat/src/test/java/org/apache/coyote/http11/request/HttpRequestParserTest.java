@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpVersion;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -41,13 +42,13 @@ class HttpRequestParserTest {
 
         // then
         final RequestLine requestLine = httpRequest.getRequestLine();
-        final RequestHeader requestHeader = httpRequest.getRequestHeader();
+        final Headers headers = httpRequest.getHeaders();
         final RequestBody requestBody = httpRequest.getRequestBody();
         assertAll(
                 () -> assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(requestLine.parseUri()).isEqualTo("/register"),
                 () -> assertThat(requestLine.getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1),
-                () -> assertThat(requestHeader.getItems()).contains(
+                () -> assertThat(headers.getItems()).contains(
                         entry("Host", "localhost:8080"),
                         entry("Content-Length", String.valueOf(content.getBytes().length))
                 ),

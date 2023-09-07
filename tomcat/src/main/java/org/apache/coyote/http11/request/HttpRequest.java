@@ -1,18 +1,20 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.Headers;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeader requestHeader;
+    private final Headers headers;
     private final RequestBody requestBody;
 
     public HttpRequest(
             final RequestLine requestLine,
-            final RequestHeader requestHeader,
+            final Headers requestHeader,
             final RequestBody requestBody
     ) {
         this.requestLine = requestLine;
-        this.requestHeader = requestHeader;
+        this.headers = requestHeader;
         this.requestBody = requestBody;
     }
 
@@ -20,8 +22,8 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
+    public Headers getHeaders() {
+        return headers;
     }
 
     public RequestBody getRequestBody() {

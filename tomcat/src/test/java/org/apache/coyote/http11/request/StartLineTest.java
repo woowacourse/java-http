@@ -18,7 +18,7 @@ class StartLineTest {
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual.getMethod()).isEqualTo(HttpMethod.GET);
             softAssertions.assertThat(actual.getPath()).isEqualTo("/index.html");
-            softAssertions.assertThat(actual.getQueryString()).isNull();
+            softAssertions.assertThat(actual.getQueryString()).isNotPresent();
             softAssertions.assertThat(actual.getVersion()).isEqualTo(HttpVersion.HTTP_1_1);
         });
     }

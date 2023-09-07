@@ -6,7 +6,8 @@ import java.util.Arrays;
 
 public enum HttpMethod {
 
-    GET;
+    GET,
+    POST;
 
     public static HttpMethod findBy(final String method) {
         return Arrays.stream(values())

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.Response;
@@ -25,6 +26,7 @@ public class ResponseGenerator {
     private static final String STATIC_PATH = "static";
     private static final String LOGIN_PATH = "/login";
     private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
 
     private ResponseGenerator() {
     }
@@ -52,9 +54,17 @@ public class ResponseGenerator {
     }
 
     private static Response getLoginResponse(final Request request) throws IOException {
+        if (HttpMethod.GET.equals(request.getMethod())) {
+            return getLoginResponseGetMethod(request);
+        }
+
+        return getLoginResponsePostMethod(request);
+    }
+
+    private static Response getLoginResponseGetMethod(final Request request) throws IOException {
         if (request.hasQueryString()) {
             return InMemoryUserRepository.findByAccount(request.getQueryValue(ACCOUNT_KEY))
-                                         .filter(user -> user.checkPassword(request.getQueryValue("password")))
+                                         .filter(user -> user.checkPassword(request.getQueryValue(PASSWORD_KEY)))
                                          .map(ResponseGenerator::loginSuccess)
                                          .orElseGet(() -> getRedirectResponse("/401.html"));
         }
@@ -64,6 +74,13 @@ public class ResponseGenerator {
         final String responseBody = getFileToResponseBody("/login.html");
 
         return Response.of(startLine, contentType, responseBody);
+    }
+
+    private static Response getLoginResponsePostMethod(final Request request) {
+        return InMemoryUserRepository.findByAccount(request.getBodyValue(ACCOUNT_KEY))
+                                     .filter(user -> user.checkPassword(request.getBodyValue(PASSWORD_KEY)))
+                                     .map(ResponseGenerator::loginSuccess)
+                                     .orElseGet(() -> getRedirectResponse("/401.html"));
     }
 
     private static Response loginSuccess(final User user) {

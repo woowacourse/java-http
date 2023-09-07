@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.response.HttpStatusCode;
+import org.assertj.core.api.SoftAssertions;
 import servlet.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
@@ -72,6 +74,11 @@ class LoginControllerTest {
         final HttpResponse httpResponse = new HttpResponse();
 
         controller.service(httpRequest, httpResponse);
+
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(httpResponse.statusCode()).isEqualTo(HttpStatusCode.FOUND);
+            softAssertions.assertThat(httpResponse.headerDtos()).hasSize(1);
+        });
     }
 
     @Test
@@ -84,5 +91,10 @@ class LoginControllerTest {
         final HttpResponse httpResponse = new HttpResponse();
 
         controller.service(httpRequest, httpResponse);
+
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(httpResponse.statusCode()).isEqualTo(HttpStatusCode.FOUND);
+            softAssertions.assertThat(httpResponse.headerDtos()).hasSize(1);
+        });
     }
 }

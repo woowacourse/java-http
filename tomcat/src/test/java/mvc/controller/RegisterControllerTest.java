@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.application.UserService;
 import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.response.HttpStatusCode;
+import org.assertj.core.api.SoftAssertions;
 import servlet.request.HttpRequest;
 import org.apache.coyote.http.request.HttpRequestBody;
 import org.apache.coyote.http.request.HttpRequestHeaders;
@@ -72,17 +74,27 @@ class RegisterControllerTest {
         final HttpResponse httpResponse = new HttpResponse();
 
         controller.service(httpRequest, httpResponse);
+
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(httpResponse.statusCode()).isEqualTo(HttpStatusCode.FOUND);
+            softAssertions.assertThat(httpResponse.headerDtos()).hasSize(1);
+        });
     }
 
     @Test
     void service_메서드는_GET_요청을_처리하고_Response를_반환한다() throws Exception {
-        final RegisterController controller = new RegisterController("/login",new UserService());
+        final RegisterController controller = new RegisterController("/register",new UserService());
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
-        final RequestLine requestLine = RequestLine.from("GET /hello HTTP/1.1");
+        final RequestLine requestLine = RequestLine.from("GET /register HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
         final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
         final HttpResponse httpResponse = new HttpResponse();
 
         controller.service(httpRequest, httpResponse);
+
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(httpResponse.statusCode()).isEqualTo(HttpStatusCode.FOUND);
+            softAssertions.assertThat(httpResponse.headerDtos()).hasSize(1);
+        });
     }
 }

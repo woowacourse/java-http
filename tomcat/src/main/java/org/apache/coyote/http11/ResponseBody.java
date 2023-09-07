@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class ResponseBody {
 
+    public static final ResponseBody EMPTY = new ResponseBody("", ContentLength.EMPTY);
+
     private final String body;
     private final ContentLength contentLength;
 

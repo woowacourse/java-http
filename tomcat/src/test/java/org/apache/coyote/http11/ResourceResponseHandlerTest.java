@@ -22,11 +22,9 @@ class ResourceResponseHandlerTest {
         //then
         final var resource = getClass().getClassLoader().getResource("static/404.html");
         final var body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final var expected = HttpResponse.builder()
-                .setHttpStatus(HttpStatus.NOT_FOUND)
-                .setContentType(new ContentType("text/html"))
-                .setBody(body)
-                .build();
+
+        final var expected = new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.NOT_FOUND, new ContentType("text/html"),
+                ResponseBody.from(body), new Headers());
 
         assertThat(httpResponse).usingRecursiveComparison()
                 .isEqualTo(expected);

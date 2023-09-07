@@ -25,7 +25,7 @@ class RequestHandlerTest {
                 HTTP_1_1,
                 Map.of(),
                 Map.of(),
-                "",
+                HttpRequest.EMPTY,
                 Map.of()
         );
 
@@ -34,9 +34,10 @@ class RequestHandlerTest {
 
         //then
         final var expected = HttpResponse.builder()
+                .setHttpVersion(HTTP_1_1)
                 .setHttpStatus(HttpStatus.OK)
                 .setContentType(new ContentType("text/plain"))
-                .setBody("Hello world!")
+                .setBody(ResponseBody.from("Hello world!"))
                 .build();
         assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
@@ -63,9 +64,10 @@ class RequestHandlerTest {
         final var resource = getClass().getClassLoader().getResource("static" + uri);
         final var body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         final var expected = HttpResponse.builder()
+                .setHttpVersion(HTTP_1_1)
                 .setHttpStatus(HttpStatus.OK)
                 .setContentType(new ContentType("text/html"))
-                .setBody(body)
+                .setBody(ResponseBody.from(body))
                 .build();
         assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);

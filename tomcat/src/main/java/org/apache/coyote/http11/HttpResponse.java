@@ -12,30 +12,44 @@ public class HttpResponse {
     public static final String BLANK = " ";
 
     private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
-    private final ContentType contentType;
-    private final ResponseBody body;
+    private HttpStatus httpStatus;
+    private ContentType contentType;
+    private ResponseBody body;
     private final Headers headers;
 
     public static HttpResponseBuilder builder() {
         return new HttpResponseBuilder();
     }
 
-    public HttpResponse(final HttpVersion httpVersion,  HttpStatus httpStatus, final ContentType contentType, final String body,
-                        final Headers headers) {
+    public HttpResponse(final HttpVersion httpVersion) {
         this.httpVersion = ofNullable(httpVersion).orElse(HTTP_1_1);
-        this.httpStatus = requireNonNull(httpStatus);
-        this.contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
-        this.body = ResponseBody.from(ofNullable(body).orElse(EMPTY));
-        this.headers = ofNullable(headers).orElse(new Headers());
+        this.headers = new Headers();
     }
 
+    public HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus, final ContentType contentType,
+                        final ResponseBody body,
+                        final Headers headers) {
+        this.httpVersion = httpVersion;
+        this.httpStatus = httpStatus;
+        this.contentType = contentType;
+        this.body = body;
+        this.headers = headers;
+    }
+
+    public static HttpResponse prepareFrom(final HttpRequest request) {
+        return new HttpResponse(request.getVersion());
+    }
+
+
     public String buildResponse() {
+        httpStatus = ofNullable(httpStatus).orElse(HttpStatus.OK); // todo: httpStatus가 없을 땐 어떻게 해야할까?
+        contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
+        body = ofNullable(body).orElse(ResponseBody.EMPTY);
         StringBuilder stringBuilder = new StringBuilder();
 
-        String startLine = getStartLine();
-        String joinedHeader = getHeaders();
-        String messageBody = getBody();
+        String startLine = buildStartLine();
+        String joinedHeader = buildHeaders();
+        String messageBody = buildMessageBody();
 
         return stringBuilder.append(startLine).append(CRLF)
                 .append(joinedHeader).append(CRLF)
@@ -43,20 +57,20 @@ public class HttpResponse {
                 .toString();
     }
 
-    private String getStartLine() {
+    private String buildStartLine() {
         return httpVersion.getVersion() + BLANK + httpStatus + BLANK;
     }
 
-    private String getHeaders() {
+    private String buildHeaders() {
         String joinedHeaders = headers.join();
-        String bodyHeaders = getBodyHeaders();
+        String bodyHeaders = buildBodyHeaders();
         if (!joinedHeaders.isEmpty() && !bodyHeaders.isEmpty()) {
             return joinedHeaders + CRLF + bodyHeaders;
         }
         return joinedHeaders + bodyHeaders;
     }
 
-    private String getBodyHeaders() {
+    private String buildBodyHeaders() {
         if (body.isEmpty()) {
             return EMPTY;
         }
@@ -68,13 +82,17 @@ public class HttpResponse {
                 .toString();
     }
 
-    private String getBody() {
+    private String buildMessageBody() {
         if (body.isEmpty()) {
             return EMPTY;
         }
         return CRLF + body.getBody();
     }
 
+
+    public void addHeader(final String key, final String value) {
+        headers.put(key, value);
+    }
 
 }
 
@@ -83,8 +101,13 @@ class HttpResponseBuilder {
     private HttpVersion httpVersion;
     private HttpStatus httpStatus;
     private ContentType contentType;
-    private String body;
+    private ResponseBody body;
     private Headers headers = new Headers();
+
+    public HttpResponseBuilder setHttpVersion(HttpVersion httpVersion) {
+        this.httpVersion = httpVersion;
+        return this;
+    }
 
     public HttpResponseBuilder setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
@@ -96,7 +119,7 @@ class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder setBody(String body) {
+    public HttpResponseBuilder setBody(ResponseBody body) {
         this.body = body;
         return this;
     }

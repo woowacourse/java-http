@@ -27,11 +27,8 @@ public class ResourceResponseHandler {
         File page = getFile(uri);
         String contentType = getMimeType(page);
         String body = buildResponseBody(page);
-        return HttpResponse.builder()
-                .setHttpStatus(status)
-                .setContentType(new ContentType(contentType))
-                .setBody(body)
-                .build();
+        return new HttpResponse(HttpVersion.HTTP_1_1, status, new ContentType(contentType),
+                ResponseBody.from(body), new Headers());
     }
 
     private File getFile(final String uri) {

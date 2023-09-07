@@ -40,6 +40,7 @@ public class RequestHandler {
         }
         if (isAlreadyLoggedIn(request)) {
             return HttpResponse.builder()
+                    .setHttpVersion(request.getVersion())
                     .setHttpStatus(FOUND)
                     .sendRedirect("/index.html")
                     .build();
@@ -72,6 +73,7 @@ public class RequestHandler {
 
         SessionManager.add(session);
         return HttpResponse.builder()
+                .setHttpVersion(request.getVersion())
                 .setHttpStatus(FOUND)
                 .sendRedirect("/index.html")
                 .addCookie(HttpCookie.from(session))
@@ -97,6 +99,7 @@ public class RequestHandler {
         final var user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return HttpResponse.builder()
+                .setHttpVersion(request.getVersion())
                 .setHttpStatus(FOUND)
                 .sendRedirect("/index.html")
                 .build();

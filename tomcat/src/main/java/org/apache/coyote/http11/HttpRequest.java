@@ -7,6 +7,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.coyote.http11.HttpMethod.POST;
+import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 
 public class HttpRequest {
 
@@ -29,7 +30,7 @@ public class HttpRequest {
                        final Map<String, String> headers, final String messageBody, final Map<String, String> cookie) {
         this.method = method;
         this.path = path;
-        this.version = httpVersion;
+        this.version = ofNullable(httpVersion).orElse(HTTP_1_1);
         this.queryParameters = ofNullable(queryParameters).orElse(Map.of());
         this.headers = ofNullable(headers).map(Headers::new).orElse(new Headers());
         this.messageBody = Optional.ofNullable(messageBody).orElse(EMPTY);
@@ -38,6 +39,10 @@ public class HttpRequest {
 
     public boolean isPost() {
         return method == POST;
+    }
+
+    public HttpVersion getVersion() {
+        return version;
     }
 
     public HttpPath getPath() {

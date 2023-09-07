@@ -29,5 +29,12 @@ public class Headers {
         keyValues.put(key, value);
     }
 
+    public String get(String key) {
+        if (keyValues.isEmpty()) {
+            return null;
+        }
+        return keyValues.get(key);
+    }
+
 
 }

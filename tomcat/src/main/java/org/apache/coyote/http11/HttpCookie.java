@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+    private static final String COOKIES_DELIMITER = "; ";
+    private static final String COOKIE_DELIMITER = "=";
     private final Map<String, String> cookies;
 
     private HttpCookie(final Map<String, String> cookies) {
@@ -16,9 +18,9 @@ public class HttpCookie {
     public static HttpCookie parseCookie(String cookie) {
         Map<String,String> parsedCookie = new HashMap<>();
         if(cookie!=null) {
-            parsedCookie = Arrays.stream(cookie.split(";= "))
+            parsedCookie = Arrays.stream(cookie.split(COOKIES_DELIMITER))
                     .takeWhile(it -> !it.isEmpty())
-                    .map(it -> it.split("="))
+                    .map(it -> it.split(COOKIE_DELIMITER))
                     .collect(Collectors.toMap(it -> it[0], it -> it[1]));
         }
 
@@ -27,7 +29,7 @@ public class HttpCookie {
 
     public String makeCookieValue(UUID uuid){
 
-        return "JSESSIONID" + "=" + uuid;
+        return "JSESSIONID" + COOKIE_DELIMITER + uuid;
     }
 
     public boolean checkIdInCookie(){

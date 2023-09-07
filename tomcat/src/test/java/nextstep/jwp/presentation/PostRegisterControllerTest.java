@@ -1,5 +1,6 @@
 package nextstep.jwp.presentation;
 
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponseBuilder;
 import org.apache.coyote.http11.RequestFixture;
@@ -19,13 +20,13 @@ class PostRegisterControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.POST_REGISTER_LOGIN_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         PostRegisterController postRegisterController = new PostRegisterController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = postRegisterController.process(httpRequestParser, httpResponseBuilder);
+        String response = postRegisterController.process(httpRequest, httpResponseBuilder);
 
         //then
         Assertions.assertAll(

@@ -1,10 +1,6 @@
 package nextstep.jwp.presentation;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UserNotFoundException;
-import nextstep.jwp.model.User;
-import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.HttpRequestParser;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponseBuilder;
 import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
@@ -19,11 +15,11 @@ public class GetLoginController implements Controller {
     private static final String SESSION_ID = "JSESSIONID";
 
     @Override
-    public String process(HttpRequestParser httpRequestParser, HttpResponseBuilder httpResponseBuilder) throws IOException {
-        Map<String, String> cookies = httpRequestParser.findCookies();
+    public String process(HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException {
+        Map<String, String> cookies = httpRequest.findCookies();
         if (cookies.containsKey(SESSION_ID) && SessionManager.isAlreadyLogin(cookies.get(SESSION_ID))) {
-            return httpResponseBuilder.buildStaticFileRedirectResponse(httpRequestParser, "/index.html");
+            return httpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, "/index.html");
         }
-        return httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, "/login.html");
+        return httpResponseBuilder.buildStaticFileOkResponse(httpRequest, "/login.html");
     }
 }

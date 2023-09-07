@@ -8,6 +8,7 @@ import nextstep.jwp.presentation.PostLoginController;
 import nextstep.jwp.presentation.PostRegisterController;
 import nextstep.jwp.presentation.RootController;
 import nextstep.jwp.presentation.StaticController;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponseBuilder;
 
@@ -33,12 +34,12 @@ public class FrontController {
         postMappingControllers.put("/register", new PostRegisterController());
     }
 
-    public String process(HttpRequestParser httpRequestParser, HttpResponseBuilder httpResponseBuilder) throws IOException {
-        String method = httpRequestParser.getMethod();
-        String path = httpRequestParser.getPath();
+    public String process(HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException {
+        String method = httpRequest.getMethod();
+        String path = httpRequest.getPath();
         Controller controller = findController(method, path);
 
-        return controller.process(httpRequestParser, httpResponseBuilder);
+        return controller.process(httpRequest, httpResponseBuilder);
     }
 
     public Controller findController(String method, String path) {

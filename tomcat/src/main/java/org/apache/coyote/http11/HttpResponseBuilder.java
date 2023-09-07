@@ -15,15 +15,15 @@ public class HttpResponseBuilder {
     private static final String SPACE = " ";
     private static final List<String> STATIC_PATH = List.of(".css", ".js", ".ico", ".html", ".svg");
 
-    public String buildStaticFileOkResponse(HttpRequestParser httpRequestParser, String path) throws IOException {
+    public String buildStaticFileOkResponse(HttpRequest httpRequest, String path) throws IOException {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequestParser.getProtocol();
+        String protocol = httpRequest.getProtocol();
         String contentType = joinContentType(ContentType.findType(path));
         String content = getContent(path);
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequestParser) +
+                findCookie(httpRequest) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 LINE_FEED +
@@ -38,44 +38,44 @@ public class HttpResponseBuilder {
         return "Content-Type: " + path + ";charset=utf-8";
     }
 
-    public String buildStaticFileRedirectResponse(HttpRequestParser httpRequestParser, String redirectPath) throws IOException {
+    public String buildStaticFileRedirectResponse(HttpRequest httpRequest, String redirectPath) throws IOException {
         String status = HttpStatus.REDIRECT.getHttpStatusCode() + SPACE + HttpStatus.REDIRECT.getHttpStatusMessage();
-        String protocol = httpRequestParser.getProtocol();
+        String protocol = httpRequest.getProtocol();
         String contentType = joinContentType(ContentType.HTML.getType());
         String content = getContent(redirectPath);
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequestParser) +
+                findCookie(httpRequest) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 "Location: " + redirectPath + SPACE + LINE_FEED +
                 content;
     }
 
-    public String buildStaticFileNotFoundResponse(HttpRequestParser httpRequestParser) throws IOException {
+    public String buildStaticFileNotFoundResponse(HttpRequest httpRequest) throws IOException {
         String status = HttpStatus.NOT_FOUND.getHttpStatusCode() + SPACE + HttpStatus.NOT_FOUND.getHttpStatusMessage();
-        String protocol = httpRequestParser.getProtocol();
+        String protocol = httpRequest.getProtocol();
         String contentType = joinContentType(ContentType.HTML.getType());
         String content = getContent("/404.html");
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequestParser) +
+                findCookie(httpRequest) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 LINE_FEED +
                 content;
     }
 
-    public String buildCustomResponse(HttpRequestParser httpRequestParser, String content) {
+    public String buildCustomResponse(HttpRequest httpRequest, String content) {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequestParser.getProtocol();
+        String protocol = httpRequest.getProtocol();
         String contentType = joinContentType(ContentType.HTML.getType());
         String contentLength = joinContentLength(content);
 
         return protocol + SPACE + status + SPACE + LINE_FEED +
-                findCookie(httpRequestParser) +
+                findCookie(httpRequest) +
                 contentType + SPACE + LINE_FEED +
                 contentLength + SPACE + LINE_FEED +
                 LINE_FEED +
@@ -87,9 +87,9 @@ public class HttpResponseBuilder {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String findCookie(HttpRequestParser httpRequestParser) {
-        Map<String, String> cookies = httpRequestParser.findCookies();
-        if (!isStaticPath(httpRequestParser.getPath()) && !cookies.isEmpty()) {
+    private String findCookie(HttpRequest httpRequest) {
+        Map<String, String> cookies = httpRequest.findCookies();
+        if (!isStaticPath(httpRequest.getPath()) && !cookies.isEmpty()) {
 
             StringBuilder cookieHeader = new StringBuilder();
             Set<Map.Entry<String, String>> entries = cookies.entrySet();

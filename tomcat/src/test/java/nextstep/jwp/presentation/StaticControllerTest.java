@@ -1,5 +1,6 @@
 package nextstep.jwp.presentation;
 
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponseBuilder;
 import org.apache.coyote.http11.RequestFixture;
@@ -19,13 +20,13 @@ class StaticControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.CSS_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         StaticController staticController = new StaticController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = staticController.process(httpRequestParser, httpResponseBuilder);
+        String response = staticController.process(httpRequest, httpResponseBuilder);
 
         //then
         assertAll(
@@ -40,13 +41,13 @@ class StaticControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.HTML_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         StaticController staticController = new StaticController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = staticController.process(httpRequestParser, httpResponseBuilder);
+        String response = staticController.process(httpRequest, httpResponseBuilder);
 
         //then
         assertAll(

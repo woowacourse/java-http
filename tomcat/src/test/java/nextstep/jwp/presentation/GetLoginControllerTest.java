@@ -1,10 +1,7 @@
 package nextstep.jwp.presentation;
 
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpRequestParser;
-import org.apache.coyote.http11.HttpResponseBuilder;
-import org.apache.coyote.http11.RequestFixture;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +11,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GetLoginControllerTest {
@@ -23,13 +21,13 @@ class GetLoginControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.GET_LOGIN_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         GetLoginController getLoginController = new GetLoginController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = getLoginController.process(httpRequestParser, httpResponseBuilder);
+        String response = getLoginController.process(httpRequest, httpResponseBuilder);
 
         //then
         assertAll(
@@ -44,17 +42,17 @@ class GetLoginControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.GET_LOGIN_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         GetLoginController getLoginController = new GetLoginController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         String sessionId = UUID.randomUUID().toString();
-        httpRequestParser.addHeader("Cookie", "JSESSIONID=" + sessionId);
+        httpRequest.addHeader("Cookie", "JSESSIONID=" + sessionId);
         SessionManager.add(sessionId, new User("test", "test", "test"));
 
         //when
-        String response = getLoginController.process(httpRequestParser, httpResponseBuilder);
+        String response = getLoginController.process(httpRequest, httpResponseBuilder);
 
         //then
         Assertions.assertAll(

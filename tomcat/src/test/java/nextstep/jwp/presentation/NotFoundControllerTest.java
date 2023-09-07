@@ -1,5 +1,6 @@
 package nextstep.jwp.presentation;
 
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponseBuilder;
 import org.apache.coyote.http11.RequestFixture;
@@ -19,13 +20,13 @@ class NotFoundControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.NOT_FOUND_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         NotFoundController notFoundController = new NotFoundController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = notFoundController.process(httpRequestParser, httpResponseBuilder);
+        String response = notFoundController.process(httpRequest, httpResponseBuilder);
 
         //then
         assertAll(

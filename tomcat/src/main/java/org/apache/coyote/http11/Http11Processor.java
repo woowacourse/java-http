@@ -14,6 +14,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
     private static final FrontController frontController = new FrontController();
+    private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
 
     private final Socket connection;
 
@@ -31,10 +32,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequestParser httpRequestParser = new HttpRequestParser();
-            httpRequestParser.accept(inputStream);
+            HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
-            String response = frontController.process(httpRequestParser, httpResponseBuilder);
+            String response = frontController.process(httpRequest, httpResponseBuilder);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

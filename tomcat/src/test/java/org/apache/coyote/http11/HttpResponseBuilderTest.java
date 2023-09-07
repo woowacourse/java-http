@@ -14,17 +14,18 @@ class HttpResponseBuilderTest {
 
     private final HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
     private final HttpRequestParser httpRequestParser = new HttpRequestParser();
+    private HttpRequest httpRequest;
 
     @BeforeEach
     void setUp() throws IOException {
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.REQUEST.getBytes());
-        httpRequestParser.accept(inputStream);
+        httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
     }
 
     @Test
     void buildStaticFileOkResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, httpRequestParser.getPath());
+        String response = httpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpRequest.getPath());
 
         //then
         assertAll(
@@ -37,7 +38,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileRedirectResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileRedirectResponse(httpRequestParser, httpRequestParser.getPath());
+        String response = httpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpRequest.getPath());
 
         //then
         assertAll(
@@ -51,7 +52,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileNotFoundResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileNotFoundResponse(httpRequestParser);
+        String response = httpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest);
 
         //then
         assertAll(
@@ -64,7 +65,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildCustomResponse() {
         //when
-        String response = httpResponseBuilder.buildCustomResponse(httpRequestParser, "test");
+        String response = httpResponseBuilder.buildCustomResponse(httpRequest, "test");
 
         //then
         assertAll(

@@ -1,9 +1,9 @@
 package nextstep.jwp.presentation;
 
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponseBuilder;
 import org.apache.coyote.http11.RequestFixture;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -20,13 +20,13 @@ class RootControllerTest {
         //given
         InputStream inputStream = new ByteArrayInputStream(RequestFixture.ROOT_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
-        httpRequestParser.accept(inputStream);
+        HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         RootController rootController = new RootController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = rootController.process(httpRequestParser, httpResponseBuilder);
+        String response = rootController.process(httpRequest, httpResponseBuilder);
 
         //then
         assertAll(

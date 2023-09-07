@@ -16,7 +16,9 @@ public class RegisterHandler extends UserHandler {
     }
 
     @Override
-    protected ResponseEntity doGet(RequestLine requestLine) {
+    protected ResponseEntity doGet(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.getRequestLine();
+
         if (requestLine.isQueryStringExisted()) {
             String account = requestLine.findQueryStringValue("account");
             String password = requestLine.findQueryStringValue("password");
@@ -24,11 +26,13 @@ public class RegisterHandler extends UserHandler {
 
             return userController.signUp(account, password, email);
         }
-        return new ResponseEntity(HttpStatus.OK, requestLine.getPath());
+        return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
 
     @Override
-    protected ResponseEntity doPost(RequestBody requestBody) {
+    protected ResponseEntity doPost(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getRequestBody();
+
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         String email = requestBody.get("email");

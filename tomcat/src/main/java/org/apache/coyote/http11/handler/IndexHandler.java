@@ -5,11 +5,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-public class ResourceHandler implements HttpHandler {
-
+public class IndexHandler implements HttpHandler {
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.isStaticResource();
+        RequestLine requestLine = httpRequest.getRequestLine();
+
+        return "/index".equals(requestLine.getPath());
     }
 
     @Override
@@ -18,5 +19,4 @@ public class ResourceHandler implements HttpHandler {
 
         return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
-
 }

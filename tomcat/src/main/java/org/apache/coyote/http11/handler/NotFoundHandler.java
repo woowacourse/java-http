@@ -13,7 +13,7 @@ public class NotFoundHandler implements HttpHandler {
 
     @Override
     public ResponseEntity handle(HttpRequest httpRequest) {
-        return new ResponseEntity(HttpStatus.NOT_FOUND, "/404");
+        return ResponseEntity.of(HttpStatus.NOT_FOUND, "/404");
     }
 
 }

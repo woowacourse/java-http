@@ -16,21 +16,33 @@ public class LoginHandler extends UserHandler {
     }
 
     @Override
-    protected ResponseEntity doGet(RequestLine requestLine) {
+    protected ResponseEntity doGet(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.getRequestLine();
         if (requestLine.isQueryStringExisted()) {
             String account = requestLine.findQueryStringValue("account");
             String password = requestLine.findQueryStringValue("password");
 
-            return userController.login(account, password);
+            return login(account, password);
         }
-        return new ResponseEntity(HttpStatus.OK, requestLine.getPath());
+
+        return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
 
     @Override
-    protected ResponseEntity doPost(RequestBody requestBody) {
+    protected ResponseEntity doPost(HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
 
-        return userController.login(account, password);
+        return login(account, password);
+    }
+
+    private ResponseEntity login(String account, String password) {
+        try {
+
+            return userController.login(account, password);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.of(HttpStatus.FOUND, "/401");
+        }
     }
 }

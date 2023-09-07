@@ -5,18 +5,18 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-public class ResourceHandler implements HttpHandler {
-
+public class DefaultHandler implements HttpHandler {
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.isStaticResource();
+        RequestLine requestLine = httpRequest.getRequestLine();
+        String path = requestLine.getPath();
+
+        return "/".equals(path);
     }
 
     @Override
     public ResponseEntity handle(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
-
-        return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
+        return ResponseEntity.of(HttpStatus.OK, "/default");
     }
 
 }

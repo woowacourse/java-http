@@ -27,16 +27,12 @@ public class RequestHeaders {
         return headers.getOrDefault("Content-Length", "0");
     }
 
-    public void putCookie(String key, String value) {
-        httpCookie.put(key, value);
-    }
-
-    public void findCookie(String key) {
-        httpCookie.get(key);
+    public String findCookie(String key) {
+        return httpCookie.find(key);
     }
 
     public String findJSessionId() {
-        return httpCookie.get("JSESSIONID");
+        return httpCookie.findJSessionId();
     }
 
 }

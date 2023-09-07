@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Objects;
 
 public class ViewResolver {
 
@@ -14,7 +13,10 @@ public class ViewResolver {
         URL resource = ViewResolver.class.getClassLoader()
                 .getResource(String.format("static/%s", resourcePath));
 
-        return new File(Objects.requireNonNull(resource).getFile());
+        if (resource != null) {
+            return new File(resource.getFile());
+        }
+        return null;
     }
 
     private static String findResourcePath(String path) {

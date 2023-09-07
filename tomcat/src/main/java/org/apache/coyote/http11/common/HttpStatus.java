@@ -14,8 +14,8 @@ public enum HttpStatus {
         this.statusCode = statusCode;
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    public String getHttpStatus() {
+        return String.format("%d %s", statusCode, name());
     }
 
 }

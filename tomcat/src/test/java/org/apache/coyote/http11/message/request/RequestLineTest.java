@@ -43,7 +43,7 @@ class RequestLineTest {
         final RequestLine requestLine = RequestLine.from("GET /chart-pie.js HTTP/1.1");
 
         // when
-        final Optional<String> extension = requestLine.parseFileExtensionFromPath();
+        final Optional<String> extension = requestLine.getFileExtension();
 
         // then
         assertThat(extension).isPresent()
@@ -57,7 +57,7 @@ class RequestLineTest {
         final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
 
         // when
-        final Optional<String> extension = requestLine.parseFileExtensionFromPath();
+        final Optional<String> extension = requestLine.getFileExtension();
 
         // then
         assertThat(extension).isEmpty();

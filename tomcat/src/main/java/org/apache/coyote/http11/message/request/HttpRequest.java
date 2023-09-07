@@ -59,7 +59,7 @@ public class HttpRequest {
         }
         final int contentLength = Integer.parseInt(contentLengthValue.get());
 
-        char[] buffer = new char[contentLength];
+        final char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return RequestBody.from(new String(buffer));
     }
@@ -72,16 +72,16 @@ public class HttpRequest {
         return headers.findFirstValueOfField(field);
     }
 
-    public Session getSession(boolean createIfNotExist) {
-        Optional<Cookie> foundCookie = getCookie();
-        String sessionId = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
+    public Session getSession(final boolean createIfNotExist) {
+        final Optional<Cookie> foundCookie = getCookie();
+        final String sessionId = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
             .orElse(null);
 
         if (sessionId != null) {
             return SessionManager.findSession(sessionId);
         }
         if (createIfNotExist) {
-            Session session = new Session(UUID.randomUUID().toString());
+            final Session session = new Session(UUID.randomUUID().toString());
             SessionManager.add(session);
             return session;
         }

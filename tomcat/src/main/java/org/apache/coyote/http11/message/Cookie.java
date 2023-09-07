@@ -24,9 +24,7 @@ public class Cookie {
     public static Cookie fromHeaderCookie(final String headerCookieLine) {
         final Map<String, String> namesWithValue = Arrays.stream(headerCookieLine.split(COOKIE_DELIMITER))
             .map(cookieWithValue -> cookieWithValue.split(COOKIE_NAME_VALUE_DELIMITER))
-            .collect(
-                Collectors.toMap(cookieValue -> cookieValue[0], cookieValue -> cookieValue[1])
-            );
+            .collect(Collectors.toMap(cookiePair -> cookiePair[0], cookieValue -> cookieValue[1]));
         return new Cookie(namesWithValue);
     }
 

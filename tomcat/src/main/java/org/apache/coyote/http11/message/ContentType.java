@@ -30,7 +30,6 @@ public enum ContentType {
         if (acceptedContentType != ALL) {
             return acceptedContentType;
         }
-
         return findContentTypeFromRequestPath(httpRequest.getRequestLine());
     }
 
@@ -42,7 +41,7 @@ public enum ContentType {
     }
 
     private static ContentType findContentTypeFromRequestPath(final RequestLine requestLine) {
-        return requestLine.parseFileExtensionFromPath()
+        return requestLine.getFileExtension()
             .flatMap(ContentType::findContentTypeByName)
             .orElseThrow(UnsupportedContentTypeException::new);
     }

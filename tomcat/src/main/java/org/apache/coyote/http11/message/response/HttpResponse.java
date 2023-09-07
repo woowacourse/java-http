@@ -18,7 +18,7 @@ import org.apache.coyote.http11.session.Session;
 public class HttpResponse {
 
     private static final String DEFAULT_CHARSET = ";charset=utf-8";
-    private static final String COOKIE_HEADER = "Set-Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
     private static final String EMPTY_STRING = "";
     private static final String BLANK = " ";
 
@@ -67,9 +67,9 @@ public class HttpResponse {
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
 
-    public void setCookie(final Session session) {
+    public void setJSessionCookieBySession(final Session session) {
         final Cookie cookie = new Cookie("JSESSIONID", session.getId());
-        headers.setHeaderWithValue(COOKIE_HEADER, cookie.getAllNamesWithValue());
+        headers.setHeaderWithValue(SET_COOKIE, cookie.getAllNamesWithValue());
     }
 
     public void setHeader(final String field, final String value) {

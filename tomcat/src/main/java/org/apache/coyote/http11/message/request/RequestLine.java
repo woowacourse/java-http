@@ -50,13 +50,13 @@ public class RequestLine {
 
     public Optional<String> parseQueryString() {
         if (uri.contains(QUERY_STRING_DELIMITER)) {
-            int index = uri.indexOf(QUERY_STRING_DELIMITER);
+            final int index = uri.indexOf(QUERY_STRING_DELIMITER);
             return Optional.of(uri.substring(index + 1));
         }
         return Optional.empty();
     }
 
-    public Optional<String> parseFileExtensionFromPath() {
+    public Optional<String> getFileExtension() {
         final String path = getPath();
         if (!path.contains(PATH_EXTENSION_DELIMITER)) {
             return Optional.empty();

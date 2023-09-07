@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private final ClassLoader classLoader = getClass().getClassLoader();
 
+    private final ClassLoader classLoader = getClass().getClassLoader();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -100,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
             final User user = login(httpRequest);
             final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND);
             httpResponse.setHeader("Location", "/index.html");
-            httpResponse.setCookie(setUserSession(httpRequest, user));
+            httpResponse.setJSessionCookieBySession(setUserSession(httpRequest, user));
             return httpResponse;
         } catch (IllegalArgumentException e) {
             return HttpResponse.ofFile(HttpStatus.UNAUTHORIZED, getFilePath("/401.html"), httpRequest);
@@ -136,9 +136,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private URL getFilePath(final String path){
-        URL url = classLoader.getResource("static" + path);
+        final URL url = classLoader.getResource("static" + path);
         if (url == null) {
-            url = classLoader.getResource("static/404.html");
+            return classLoader.getResource("static/404.html");
         }
         return url;
     }

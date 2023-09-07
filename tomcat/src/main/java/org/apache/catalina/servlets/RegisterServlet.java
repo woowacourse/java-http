@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.servlet;
+package org.apache.catalina.servlets;
 
 import static org.apache.coyote.http11.PagePathMapper.INDEX_PAGE;
 import static org.apache.coyote.http11.PagePathMapper.REGISTER_PAGE;

@@ -1,30 +1,23 @@
-package org.apache.coyote.http11.servlet;
+package org.apache.catalina.servlets;
 
-import static org.apache.coyote.http11.PagePathMapper.INDEX_PAGE;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_TYPE;
 
 import java.io.IOException;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class IndexServlet extends Servlet {
+public class StaticResourceServlet extends Servlet {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        HttpMethod httpMethod = httpRequest.getMethod();
-        if (httpMethod.isEqualTo(HttpMethod.GET)) {
-            doGet(httpRequest, httpResponse);
-        }
-    }
+        RequestURI requestURI = httpRequest.getRequestURI();
+        String absolutePath = requestURI.absolutePath();
 
-    @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        String absolutePath = INDEX_PAGE.path();
         String content = findResourceWithPath(absolutePath);
         ResponseBody responseBody = new ResponseBody(content);
 

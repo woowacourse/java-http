@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.servlet;
+package org.apache.catalina.servlets;
 
 import java.io.File;
 import java.io.IOException;

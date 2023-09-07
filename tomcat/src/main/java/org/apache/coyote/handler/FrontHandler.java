@@ -4,7 +4,6 @@ import org.apache.coyote.handler.controller.HomePageController;
 import org.apache.coyote.handler.controller.StaticFileController;
 import org.apache.coyote.handler.controller.login.LoginController;
 import org.apache.coyote.handler.controller.register.RegisterController;
-import org.apache.coyote.handler.controller.register.RegisterPageController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
@@ -22,7 +21,6 @@ public class FrontHandler {
         requestControllers.add(new StaticFileController());
         requestControllers.add(new LoginController());
         requestControllers.add(new RegisterController());
-        requestControllers.add(new RegisterPageController());
     }
 
     public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {

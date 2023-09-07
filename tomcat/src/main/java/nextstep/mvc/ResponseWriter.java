@@ -23,7 +23,8 @@ public class ResponseWriter {
         view.render(modelAndView.getModel(), httpResponse);
     }
 
-    public static void writeWithData(HttpResponse httpResponse, HttpStatus httpStatus, String data) {
+    public static void writeWithData(HttpResponse httpResponse, HttpStatus httpStatus,
+            String data) {
         httpResponse.setHttpStatus(httpStatus);
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setAttribute("data", data);

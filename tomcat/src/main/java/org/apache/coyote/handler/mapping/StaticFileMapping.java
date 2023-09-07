@@ -1,7 +1,6 @@
 package org.apache.coyote.handler.mapping;
 
 import org.apache.coyote.http.common.HttpBody;
-import org.apache.coyote.http.common.HttpHeaders;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.ContentType;
 import org.apache.coyote.http.response.HttpResponse;
@@ -9,7 +8,6 @@ import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
@@ -33,7 +31,7 @@ public class StaticFileMapping implements HandlerMapping {
         if (requestUri.endsWith(".html")) {
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.HTML.getValue())))
+                    .httpHeaders(CONTENT_TYPE, ContentType.HTML.getValue())
                     .body(HttpBody.file(filePath))
                     .build();
         }
@@ -41,7 +39,7 @@ public class StaticFileMapping implements HandlerMapping {
         if (requestUri.endsWith(".js")) {
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.JS.getValue())))
+                    .httpHeaders(CONTENT_TYPE, ContentType.JS.getValue())
                     .body(HttpBody.file(filePath))
                     .build();
         }
@@ -49,7 +47,7 @@ public class StaticFileMapping implements HandlerMapping {
         if (requestUri.endsWith(".css")) {
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.CSS.getValue())))
+                    .httpHeaders(CONTENT_TYPE, ContentType.CSS.getValue())
                     .body(HttpBody.file(filePath))
                     .build();
         }
@@ -57,11 +55,11 @@ public class StaticFileMapping implements HandlerMapping {
         if (requestUri.endsWith(".ico")) {
             return HttpResponse.builder()
                     .statusLine(StatusLine.from(StatusCode.OK))
-                    .httpHeaders(new HttpHeaders(Map.of(CONTENT_TYPE, ContentType.ICO.getValue())))
+                    .httpHeaders(CONTENT_TYPE, ContentType.ICO.getValue())
                     .body(HttpBody.file(filePath))
                     .build();
         }
 
-        return null;
+        return HttpResponse.redirect("/404.html");
     }
 }

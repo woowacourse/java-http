@@ -5,7 +5,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.handler.mapping.HandlerMapping;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.common.HttpHeader;
-import org.apache.coyote.http.common.HttpHeaders;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
@@ -52,9 +51,8 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
 
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.FOUND))
-                .httpHeaders(new HttpHeaders(
-                        Map.of(HttpHeader.LOCATION, "/index.html",
-                                HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid)))
+                .httpHeaders(HttpHeader.LOCATION, "/index.html")
+                .httpHeaders(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid)
                 .body(HttpBody.empty())
                 .build();
     }

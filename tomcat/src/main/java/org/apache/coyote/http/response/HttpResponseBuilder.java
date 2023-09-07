@@ -1,7 +1,10 @@
 package org.apache.coyote.http.response;
 
 import org.apache.coyote.http.common.HttpBody;
+import org.apache.coyote.http.common.HttpHeader;
 import org.apache.coyote.http.common.HttpHeaders;
+
+import java.util.EnumMap;
 
 public class HttpResponseBuilder {
 
@@ -17,8 +20,12 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder httpHeaders(final HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
+    public HttpResponseBuilder httpHeaders(final HttpHeader key, final String value) {
+        if (httpHeaders == null) {
+            this.httpHeaders = new HttpHeaders(new EnumMap<>(HttpHeader.class));
+        }
+
+        httpHeaders.add(key, value);
         return this;
     }
 

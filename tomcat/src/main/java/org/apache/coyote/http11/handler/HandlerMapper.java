@@ -3,13 +3,12 @@ package org.apache.coyote.http11.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.request.RequestLine;
 import org.apache.coyote.http11.message.response.Response;
@@ -84,11 +83,7 @@ public class HandlerMapper {
 
     public Response handle(final Request request) {
         final RequestLine requestLine = request.getRequestLine();
-        final String path = requestLine.getPath();
-        final String httpMethod = requestLine.getHttpMethod();
-        final Map<String, String> queryParameter = requestLine.getRequestURI().getQueryParameter();
-        final Set<String> queryParameterKeys = queryParameter.keySet();
-        final HandlerStatus handlerStatus = new HandlerStatus(httpMethod, path, queryParameterKeys);
+        final HandlerStatus handlerStatus = HandlerStatus.from(requestLine);
 
         final Function<Request, Response> handler = handlers.get(handlerStatus);
         if (handler != null) {

@@ -27,7 +27,7 @@ public class HttpRequest {
     public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
         HttpStartLine httpStartLine = HttpStartLine.of(extractFirstLine(bufferedReader));
         HttpHeaders httpHeaders = HttpHeaders.of(extractHeaderLines(bufferedReader));
-        HttpBody httpBody = new HttpBody(extractBody(bufferedReader, httpHeaders));
+        HttpBody httpBody = HttpBody.of(extractBody(bufferedReader, httpHeaders));
         return new HttpRequest(httpStartLine, httpHeaders, httpBody);
     }
 
@@ -62,8 +62,8 @@ public class HttpRequest {
         return httpStartLine.getPath();
     }
 
-    public String getBody() {
-        return httpBody.getContent();
+    public String getParam(String param) {
+        return httpBody.getParams().get(param);
     }
 
     public Cookie getCookie() {

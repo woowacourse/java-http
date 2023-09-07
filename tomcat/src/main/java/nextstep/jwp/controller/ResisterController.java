@@ -17,16 +17,17 @@ public class ResisterController extends AbstractController {
     private static final Logger LOG = LoggerFactory.getLogger(ResisterController.class);
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
+    private static final String ACCOUNT = "account";
+    private static final String EMAIL = "email";
+    private static final String PASSWORD = "password";
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        String query = httpRequest.getBody();
-        String[] queries = query.split("&");
-        String account = queries[0].split("=")[1];
-        String email = queries[1].split("=")[1];
-        String password = queries[2].split("=")[1];
+        String account = httpRequest.getParam(ACCOUNT);
+        String email = httpRequest.getParam(EMAIL);
+        String password = httpRequest.getParam(PASSWORD);
 
-        User user = new User(account, email, password);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         LOG.info("회원가입 성공한 회원 : {}", user);
         String content = FileReader.read(INDEX_PAGE);

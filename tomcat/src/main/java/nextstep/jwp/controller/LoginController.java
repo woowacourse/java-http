@@ -1,20 +1,19 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.handler.AbstractController;
-import org.apache.response.ContentType;
 import org.apache.common.Cookie;
 import org.apache.common.FileReader;
-import org.apache.response.HttpStatus;
 import org.apache.common.Session;
 import org.apache.common.SessionManager;
+import org.apache.handler.AbstractController;
 import org.apache.request.HttpRequest;
+import org.apache.response.ContentType;
 import org.apache.response.HttpResponse;
+import org.apache.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,28 +24,15 @@ public class LoginController extends AbstractController {
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        String query = httpRequest.getBody();
-        String[] queries = query.split("&");
-        String[] accountQuery = queries[0].split("=");
-        String[] passwordQuery = queries[1].split("=");
-
-        if (isInvalidParameter(accountQuery[0], passwordQuery[0])) {
-            String content = FileReader.read(LOGIN_PAGE);
-            httpResponse.setHttpStatus(HttpStatus.FOUND);
-            httpResponse.setContentType(ContentType.TEXT_HTML);
-            httpResponse.setBody(content);
-            httpResponse.setLocation(LOGIN_PAGE);
-            return;
-        }
-
-        String account = accountQuery[1];
-        String password = passwordQuery[1];
+        String account = httpRequest.getParam(ACCOUNT);
+        String password = httpRequest.getParam(PASSWORD);
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
         if (user.isPresent() && user.get().checkPassword(password)) {
             LOG.info("user : {}", user);
             String content = FileReader.read(INDEX_PAGE);
@@ -66,10 +52,6 @@ public class LoginController extends AbstractController {
         httpResponse.setContentType(ContentType.TEXT_HTML);
         httpResponse.setBody(content);
         httpResponse.setLocation(UNAUTHORIZED_PAGE);
-    }
-
-    private boolean isInvalidParameter(String account, String password) {
-        return !Objects.equals(account, "account") || !Objects.equals(password, "password");
     }
 
     @Override

@@ -11,9 +11,10 @@ public class HttpResponse {
 
 	private HttpStatusCode statusCode;
 	private String body;
-	private HttpHeaders headers = new HttpHeaders();
+	private final HttpHeaders headers;
 
 	public HttpResponse() {
+		this(null, "", new HttpHeaders());
 	}
 
 	public HttpResponse(final HttpStatusCode statusCode, final String body, final HttpHeaders headers) {
@@ -40,6 +41,9 @@ public class HttpResponse {
 	}
 
 	public String buildResponse() {
+		if (statusCode == null) {
+			throw new IllegalStateException();
+		}
 		return String.join("\r\n",
 			HTTP_1_1.getContent() + " " + statusCode.buildResponse(),
 			headers.build(),

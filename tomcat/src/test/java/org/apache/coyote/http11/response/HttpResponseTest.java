@@ -36,6 +36,7 @@ class HttpResponseTest {
 	void addSetCookie() {
 		final String setCookieValue = "set-cookie Value";
 		final HttpResponse actual = new HttpResponse();
+		actual.setResponse(OK_200,"", MimeType.HTML);
 
 		actual.addSetCookie(setCookieValue);
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.mapping;
+package org.apache.coyote.handler.controller;
 
 public enum Path {
 

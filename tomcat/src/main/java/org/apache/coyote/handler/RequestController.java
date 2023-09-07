@@ -4,7 +4,7 @@ import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
-public abstract class AbstractController implements Controller {
+public abstract class RequestController implements Controller {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -22,6 +22,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected abstract boolean supports(final HttpRequest httpRequest);
+
     protected abstract void doPost(final HttpRequest request, final HttpResponse response) throws Exception;
 
     protected abstract void doGet(final HttpRequest request, final HttpResponse response) throws Exception;

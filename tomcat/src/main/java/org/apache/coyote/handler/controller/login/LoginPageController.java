@@ -1,8 +1,8 @@
-package org.apache.coyote.handler.mapping.login;
+package org.apache.coyote.handler.controller.login;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.AbstractController;
+import org.apache.coyote.handler.RequestController;
 import org.apache.coyote.http.LoginManager;
 import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
@@ -16,19 +16,19 @@ import org.apache.coyote.http.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.coyote.handler.mapping.Path.LOGIN;
-import static org.apache.coyote.handler.mapping.Path.MAIN;
-import static org.apache.coyote.handler.mapping.Path.UNAUTHORIZED;
+import static org.apache.coyote.handler.controller.Path.LOGIN;
+import static org.apache.coyote.handler.controller.Path.MAIN;
+import static org.apache.coyote.handler.controller.Path.UNAUTHORIZED;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http.common.HttpHeader.COOKIE;
 
-public class LoginPageMapping extends AbstractController {
+public class LoginPageController extends RequestController {
 
     private static final LoginManager loginManager = new SessionManager();
 
     private static final String TARGET_URI = "login";
 
-    private static final Logger log = LoggerFactory.getLogger(LoginPageMapping.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginPageController.class);
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {

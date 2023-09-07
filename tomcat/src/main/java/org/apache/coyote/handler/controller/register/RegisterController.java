@@ -1,16 +1,16 @@
-package org.apache.coyote.handler.mapping.register;
+package org.apache.coyote.handler.controller.register;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.AbstractController;
+import org.apache.coyote.handler.RequestController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
 import java.util.Map;
 
-import static org.apache.coyote.handler.mapping.Path.MAIN;
+import static org.apache.coyote.handler.controller.Path.MAIN;
 
-public class RegisterMapping extends AbstractController {
+public class RegisterController extends RequestController {
     private static final String TARGET_URI = "register";
 
     @Override

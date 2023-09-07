@@ -1,6 +1,6 @@
-package org.apache.coyote.handler.mapping;
+package org.apache.coyote.handler.controller;
 
-import org.apache.coyote.handler.AbstractController;
+import org.apache.coyote.handler.RequestController;
 import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.request.HttpRequest;
@@ -16,7 +16,7 @@ import static org.apache.coyote.http.common.ContentType.ICO;
 import static org.apache.coyote.http.common.ContentType.JS;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
-public class StaticFileMapping extends AbstractController {
+public class StaticFileController extends RequestController {
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {

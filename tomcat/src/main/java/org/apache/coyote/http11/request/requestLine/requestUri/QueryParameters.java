@@ -66,12 +66,4 @@ public class QueryParameters {
                 "queryParameters=" + queryParameters +
                 '}';
     }
-
-    public String search(final String key) {
-        if (!queryParameters.containsKey(key)) {
-            return null;
-        }
-
-        return queryParameters.get(key);
-    }
 }

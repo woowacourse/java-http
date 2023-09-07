@@ -48,6 +48,10 @@ public class RequestBody {
         return requestBody.get(key);
     }
 
+    public Map<String, String> getRequestBody() {
+        return requestBody;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;

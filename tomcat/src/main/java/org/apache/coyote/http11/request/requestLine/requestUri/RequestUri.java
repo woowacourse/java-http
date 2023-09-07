@@ -30,10 +30,6 @@ public class RequestUri {
         );
     }
 
-    public boolean isQueryParameterEmpty() {
-        return queryParameters.isEmpty();
-    }
-
     public ResourcePath getResourcePath() {
         return resourcePath;
     }

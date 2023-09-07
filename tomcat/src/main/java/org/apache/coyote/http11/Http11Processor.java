@@ -62,40 +62,44 @@ public class Http11Processor implements Runnable, Processor {
 
     public HttpResponse handleRequest(final HttpRequest request) throws URISyntaxException {
 
+        final HttpResponse response = new HttpResponse();
+
         final String uriPath = request.getPath();
 
         if (uriPath.equals("/login")) {
-            final String path = LOGIN_PAGE;
             if (request.getMethod().equals("GET")) {
-                return HttpResponse.of(HttpStatus.OK, path);
+                response.hostingPage(LOGIN_PAGE);
+                return response;
             }
             if (request.getMethod().equals("POST")) {
                 final boolean isAuthenticated = processLogin(request);
                 if (isAuthenticated) {
                     final UUID sessionId = UUID.randomUUID();
-                    final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
                     response.setCookie(JSESSIONID_COOKIE_NAME, sessionId.toString());
+                    response.redirectTo(INDEX_PAGE);
                     return response;
                 }
-                return HttpResponse.of(HttpStatus.FOUND, UNAUTHORIZED_PAGE);
+                response.redirectTo(UNAUTHORIZED_PAGE);
+                return response;
             }
         }
 
         if (uriPath.equals("/register")) {
-            final String path = REGISTER_PAGE;
             if (request.getMethod().equals("GET")) {
-                return HttpResponse.of(HttpStatus.OK, path);
+                response.hostingPage(REGISTER_PAGE);
+                return response;
             }
             if (request.getMethod().equals("POST")) {
                 processRegister(request);
                 final UUID sessionId = UUID.randomUUID();
-                final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
+                response.redirectTo(INDEX_PAGE);
                 response.setCookie(JSESSIONID_COOKIE_NAME, sessionId.toString());
-                return HttpResponse.of(HttpStatus.FOUND, INDEX_PAGE);
+                return response;
             }
         }
 
-        return HttpResponse.of(HttpStatus.OK, uriPath);
+        response.hostingPage(uriPath);
+        return response;
     }
 
     public boolean processLogin(final HttpRequest request) {

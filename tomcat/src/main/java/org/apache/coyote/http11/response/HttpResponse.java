@@ -13,36 +13,39 @@ public class HttpResponse {
     private static final String SPACE = " ";
     private static final String CRLF = "\r\n";
 
-    private final String responseStatus;
+    private HttpStatus status;
     private final ResponseHeaders headers;
-    private final String responseBody;
+    private String responseBody;
 
-    public HttpResponse(
-            final String responseStatus,
-            final ResponseHeaders headers,
-            final String responseBody
-    ) {
-        this.responseStatus = responseStatus;
-        this.headers = headers;
-        this.responseBody = responseBody;
+    public HttpResponse() {
+        headers = new ResponseHeaders();
     }
 
-    public static HttpResponse of(final HttpStatus status, final String filePath) {
-        final ResponseHeaders headers = new ResponseHeaders();
+    public void addHeader(final String headerName, final String value) {
+        headers.addHeader(headerName, value);
+    }
 
-        if (status == HttpStatus.FOUND) {
-            headers.setLocation(filePath);
-            return new HttpResponse(status.getCode(), headers, null);
-        }
+    public void hostingPage(final String filePath) {
+        responseBody = readStaticFile(filePath);
 
-        final String body = readStaticFile(filePath);
         headers.setContentType(getContentType(filePath));
-        headers.setContentLength(body.getBytes().length);
+        headers.setContentLength(responseBody.getBytes().length);
 
-        return new HttpResponse(status.getCode(), headers, body);
+        status = HttpStatus.OK;
     }
 
-    private static String getContentType(final String filePath) {
+    private String readStaticFile(final String fileName) {
+        final String filePath = "static/" + fileName;
+        final URL res = classLoader.getResource(filePath);
+
+        try {
+            return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
+        } catch (IOException e) {
+            return "Hello world!";
+        }
+    }
+
+    private String getContentType(final String filePath) {
         final String[] fileNameSplit = filePath.split("\\.");
         final String fileType = fileNameSplit[fileNameSplit.length - 1];
 
@@ -62,15 +65,10 @@ public class HttpResponse {
         return null;
     }
 
-    private static String readStaticFile(final String fileName) {
-        final String filePath = "static/" + fileName;
-        final URL res = classLoader.getResource(filePath);
-
-        try {
-            return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
-        } catch (IOException e) {
-            return "Hello world!";
-        }
+    public void redirectTo(final String redirectUrl) {
+        headers.setLocation(redirectUrl);
+        status = HttpStatus.FOUND;
+        responseBody = null;
     }
 
     public void setCookie(final String cookieName, final String value) {
@@ -80,7 +78,7 @@ public class HttpResponse {
     @Override
     public String toString() {
         return String.join(CRLF,
-                HTTP_VERSION + responseStatus + SPACE,
+                HTTP_VERSION + status.getCode() + SPACE,
                 headers.toString(),
                 (responseBody != null) ? responseBody : BLANK
         );

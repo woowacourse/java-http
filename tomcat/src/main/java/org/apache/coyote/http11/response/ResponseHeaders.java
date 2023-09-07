@@ -33,6 +33,10 @@ public class ResponseHeaders {
         headers.put(LOCATION, location);
     }
 
+    public void addHeader(final String key, final String value) {
+        headers.put(key, value);
+    }
+
     public void setCookie(final String cookieName, final String value) {
         cookie.setAttribute(cookieName, value);
     }

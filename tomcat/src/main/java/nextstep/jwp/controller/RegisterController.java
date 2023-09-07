@@ -1,22 +1,16 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.headers.MimeType.*;
-import static org.apache.coyote.http11.response.HttpStatusCode.*;
-
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Map;
 
 import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.handler.HttpController;
 import org.apache.coyote.http11.handler.HttpHandle;
-import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.util.QueryParser;
+import org.apache.coyote.http11.util.StaticResourceResolver;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -41,7 +35,7 @@ public class RegisterController implements HttpController {
 	}
 
 	@Override
-	public HttpResponse handleTo(final HttpRequest request) throws IOException {
+	public HttpResponse handleTo(final HttpRequest request) {
 		final HttpMethod httpMethod = request.getHttpMethod();
 		return HANDLE_MAP.get(httpMethod)
 			.handle(request);
@@ -64,18 +58,9 @@ public class RegisterController implements HttpController {
 		return HttpResponse.redirect(REGISTER_SUCCESS_LOCATION);
 	}
 
-	private static HttpResponse servingStaticResource() throws RuntimeException {
-		try {
-			final URL url = RegisterController.class.getClassLoader()
-				.getResource(STATIC_RESOURCE_FILE_PATH);
-			final String body = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-			return new HttpResponse(
-				OK_200,
-				body,
-				HttpHeaders.of(body, HTML)
-			);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
+	private static HttpResponse servingStaticResource() {
+		final URL url = RegisterController.class.getClassLoader()
+			.getResource(STATIC_RESOURCE_FILE_PATH);
+		return StaticResourceResolver.resolve(url);
 	}
 }

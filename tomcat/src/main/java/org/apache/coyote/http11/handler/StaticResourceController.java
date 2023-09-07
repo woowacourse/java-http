@@ -1,16 +1,11 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.headers.MimeType.*;
-import static org.apache.coyote.http11.response.HttpStatusCode.*;
-
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 
-import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.util.StaticResourceResolver;
 
 public class StaticResourceController implements HttpController {
 
@@ -24,17 +19,8 @@ public class StaticResourceController implements HttpController {
 
 	@Override
 	public HttpResponse handleTo(final HttpRequest request) throws IOException {
-		final String body = resolveBody(request);
-		return new HttpResponse(
-			OK_200,
-			body,
-			HttpHeaders.of(body, HTML)
-		);
-	}
-
-	private String resolveBody(final HttpRequest request) throws IOException {
 		final URL url = extractURL(request);
-		return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+		return StaticResourceResolver.resolve(url);
 	}
 
 	private URL extractURL(final HttpRequest request) {

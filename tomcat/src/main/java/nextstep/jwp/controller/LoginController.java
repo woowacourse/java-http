@@ -1,12 +1,6 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.headers.MimeType.*;
-import static org.apache.coyote.http11.response.HttpStatusCode.*;
-
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,13 +8,13 @@ import org.apache.coyote.http11.exception.EmptyBodyException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.handler.HttpController;
 import org.apache.coyote.http11.handler.HttpHandle;
-import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.QueryParser;
+import org.apache.coyote.http11.util.StaticResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,18 +64,9 @@ public class LoginController implements HttpController {
 	}
 
 	private static HttpResponse loginHtmlResponse() {
-		try {
-			final URL url = LoginController.class.getClassLoader()
-				.getResource(LOGIN_STATIC_RESOURCE_FILE_PATH);
-			final String body = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-			return new HttpResponse(
-				OK_200,
-				body,
-				HttpHeaders.of(body, HTML)
-			);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		final URL url = LoginController.class.getClassLoader()
+			.getResource(LOGIN_STATIC_RESOURCE_FILE_PATH);
+		return StaticResourceResolver.resolve(url);
 	}
 
 	private static HttpResponse loginProcess(final HttpRequest request) {

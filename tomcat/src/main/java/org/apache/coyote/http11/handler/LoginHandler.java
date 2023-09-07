@@ -48,7 +48,7 @@ public class LoginHandler implements RequestHandler {
         if (httpMethod == HttpMethod.POST) {
             return getLoginRedirectResponse(httpRequest);
         }
-        throw new HttpMethodNotAllowedException("허용되지 않는 HTTP Method입니다.");
+        throw new HttpMethodNotAllowedException();
     }
 
     private HttpResponse getIndexPageRedirectResponse(final HttpRequest httpRequest) {

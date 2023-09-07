@@ -14,6 +14,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.name().equals(httpMethodName))
                 .findAny()
-                .orElseThrow(() -> new HttpMethodNotAllowedException("허용되지 않는 HTTP Method입니다."));
+                .orElseThrow(HttpMethodNotAllowedException::new);
     }
 }

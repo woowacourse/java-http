@@ -47,7 +47,7 @@ public class RegisterHandler implements RequestHandler {
 
             return new HttpResponse(statusLine, responseHeaders, messageBody);
         }
-        throw new HttpMethodNotAllowedException("허용되지 않는 HTTP Method입니다.");
+        throw new HttpMethodNotAllowedException();
     }
 
     private User generateUser(final HttpRequest httpRequest) {

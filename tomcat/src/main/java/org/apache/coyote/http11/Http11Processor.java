@@ -59,13 +59,40 @@ public class Http11Processor implements Runnable, Processor {
         if (startLine == null) {
             return null;
         }
+        final List<String> startLineTokens = List.of(startLine.split(" "));
+        final HttpMethod method = HttpMethod.valueOf(startLineTokens.get(0));
+        String path;
+        Map<String, String> queryProperties;
+        final String uri = startLineTokens.get(1);
+        int uriSeparatorIndex = uri.indexOf("?");
+        if (uriSeparatorIndex == -1) {
+            path = uri;
+            queryProperties = new HashMap<>();
+        } else {// TODO: 2023/09/07 else 없애기
+            path = uri.substring(0, uriSeparatorIndex);
+            queryProperties = makeQueryProperties(uri.substring(uriSeparatorIndex + 1));
+        }
+        final String protocolVersion = startLineTokens.get(2);
         final Map<String, String> requestHeaders = extractHeader(bufferedReader);
         final String requestBody = extractBody(requestHeaders.get("Content-Length"), bufferedReader);
-        return new HttpRequest(startLine, requestHeaders, requestBody);
+        return new HttpRequest(method, path, queryProperties, protocolVersion, requestHeaders, requestBody);
     }
 
     private String extractStartLine(final BufferedReader bufferedReader) throws IOException {
         return bufferedReader.readLine();
+    }
+
+    private Map<String, String> makeQueryProperties(final String queryString) {
+        Map<String, String> result = new HashMap<>();
+        String[] queryTokens = queryString.split("&");
+        for (String queryToken : queryTokens) {
+            int equalSeparatorIndex = queryToken.indexOf("=");
+            if (equalSeparatorIndex != -1) {
+                result.put(queryToken.substring(0, equalSeparatorIndex),
+                        queryToken.substring(equalSeparatorIndex + 1));
+            }
+        }
+        return result;
     }
 
     private Map<String, String> extractHeader(final BufferedReader bufferedReader)

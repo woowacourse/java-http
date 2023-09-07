@@ -14,14 +14,14 @@ public class StartLine {
 
     private String httpMethod;
     private String path;
-    private String httpVersion;
     private String queryString = null;
+    private String httpVersion;
 
     public StartLine(String startLine) {
-        List<String> parsed = Arrays.asList(startLine.split(START_LINE_DELIMITER));
-        httpMethod = parsed.get(HTTP_METHOD_INDEX);
-        parsePath(parsed);
-        httpVersion = parsed.get(HTTP_VERSION_INDEX);
+        List<String> parsedStartLine = Arrays.asList(startLine.split(START_LINE_DELIMITER));
+        httpMethod = parsedStartLine.get(HTTP_METHOD_INDEX);
+        parsePath(parsedStartLine);
+        httpVersion = parsedStartLine.get(HTTP_VERSION_INDEX);
     }
 
     private void parsePath(List<String> parsed) {
@@ -47,9 +47,5 @@ public class StartLine {
 
     public String getQueryString() {
         return queryString;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
     }
 }

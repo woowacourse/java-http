@@ -1,7 +1,5 @@
 package nextstep.org.apache.coyote.http11;
 
-import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.controller.LoginController;
@@ -29,14 +25,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
-    private static final String EMPTY_LINE = "";
     private static final String RESOURCES_PATH_PREFIX = "static";
     private static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
-    private static final String FORM_VALUES_DELIMITER = "&";
-    private static final String FORM_KEY_VALUE_DELIMITER = "=";
-    private static final String NOT_FOUND_DEFALULT_MESSAGE = "404 Not Found";
+    private static final String NOT_FOUND_DEFAULT_MESSAGE = "404 Not Found";
 
     private final Socket connection;
     private final HandlerMapper handlerMapper;
@@ -60,53 +51,39 @@ public class Http11Processor implements Runnable, Processor {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-            StartLine startLine = new StartLine(bufferedReader.readLine());
-            Map<String, String> requestHeaders = extractHeaders(bufferedReader);
-
-            Map<String, String> parsedBody = new HashMap<>();
-            if (requestHeaders.containsKey("Content-Length")) {
-                String requestBody = extractRequestBody(bufferedReader, requestHeaders);
-                parseMultipleValues(parsedBody,
-                        requestBody, FORM_VALUES_DELIMITER, FORM_KEY_VALUE_DELIMITER);
-            }
-
-            HttpCookie httpCookie = new HttpCookie();
-            if (requestHeaders.containsKey("Cookie")) {
-                httpCookie.parseCookieHeaders(requestHeaders.get("Cookie"));
-            }
-
-            Map<String, String> queryParams = new HashMap<>();
-            if (startLine.hasQueryString()) {
-                parseMultipleValues(queryParams,
-                        startLine.getQueryString(), "&", "=");
-            }
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            Cookies cookies = httpRequest.getCookies();
 
             String response = null;
-            String requestPath = startLine.getPath();
+            String requestPathInfo = httpRequest.getPathInfo();
 
-            Object handler = handlerMapper.mapHandler(requestPath);
-            if (Objects.nonNull(handler) && startLine.getHttpMethod().equals("POST")
-                    && requestPath.equals("/login")) {
+            Object handler = handlerMapper.mapHandler(requestPathInfo);
+            if (Objects.nonNull(handler) && httpRequest.getMethod().equals("POST")
+                    && requestPathInfo.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
-                LoginResponseDto loginDto = loginController.login(httpCookie,
-                        parsedBody.get("account"),
-                        parsedBody.get("password"));
+                LoginResponseDto loginDto = loginController.login(
+                        httpRequest.getCookies(),
+                        httpRequest.getParsedBodyValue("account"),
+                        httpRequest.getParsedBodyValue("password"));
 
                 response = String.join("\r\n",
                         "HTTP/1.1 302 Found ",
                         String.format("Location: %s \r\n", loginDto.getRedirectUrl()));
-
-                if (!httpCookie.isEmpty()) {
-                    response += httpCookie.createSetCookieHeader();
+                if (!cookies.isEmpty()) {
+                    response += cookies.createSetCookieHeader();
                 }
                 response += "";
             }
 
-            if (Objects.nonNull(handler) && startLine.getHttpMethod().equals("POST")
-                    && requestPath.equals("/register")) {
+            if (Objects.nonNull(handler)
+                    && httpRequest.getMethod().equals("POST")
+                    && requestPathInfo.equals("/register")) {
                 LoginController loginController = (LoginController) handler;
-                LoginResponseDto loginDto = loginController.register(parsedBody.get("account"),
-                        parsedBody.get("password"), parsedBody.get("email"));
+                LoginResponseDto loginDto = loginController.register(
+                        httpRequest.getParsedBodyValue("account"),
+                        httpRequest.getParsedBodyValue("password"),
+                        httpRequest.getParsedBodyValue("email")
+                );
 
                 response = String.join("\r\n",
                         "HTTP/1.1 302 Found ",
@@ -114,12 +91,13 @@ public class Http11Processor implements Runnable, Processor {
                         "");
             }
 
-            if (startLine.getHttpMethod().equals("GET") && Objects.isNull(response)) {
-                String contentType = selectFirstContentTypeOrDefault(requestHeaders.get("Accept"));
+            if (httpRequest.getMethod().equals("GET") && Objects.isNull(response)) {
+                String contentType = selectFirstContentTypeOrDefault(
+                        httpRequest.getHeader("Accept"));
 
                 // Todo: createResponseBody() pageController로 위임해보기
                 // Todo: 헤더에 담긴 sessionId 유효성 검증
-                if (requestPath.contains("/login") && httpCookie.hasCookie("JSESSIONID")) {
+                if (requestPathInfo.contains("/login") && cookies.hasCookie("JSESSIONID")) {
                     response = String.join("\r\n",
                             "HTTP/1.1 302 Found ",
                             "Location: /index.html ",
@@ -129,10 +107,10 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                Optional<String> responseBody = createResponseBody(requestPath);
+                Optional<String> responseBody = createResponseBody(requestPathInfo);
                 if (responseBody.isEmpty()) {
                     String notFoundPageBody = createResponseBody("/404.html")
-                            .orElse(NOT_FOUND_DEFALULT_MESSAGE);
+                            .orElse(NOT_FOUND_DEFAULT_MESSAGE);
 
                     response = String.join("\r\n",
                             "HTTP/1.1 404 Not Found ",
@@ -160,16 +138,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractRequestBody(
-            BufferedReader bufferedReader,
-            Map<String, String> requestHeaders
-    ) throws IOException {
-        int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
-    }
-
     private void writeResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -181,16 +149,6 @@ public class Http11Processor implements Runnable, Processor {
         }
         List<String> acceptHeaderValues = Arrays.asList(acceptHeader.split(","));
         return acceptHeaderValues.get(ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX);
-    }
-
-    private Map<String, String> extractHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> requestHeaders = new HashMap<>();
-        String line;
-        while (!EMPTY_LINE.equals(line = bufferedReader.readLine())) {
-            String[] splited = line.split(": ");
-            requestHeaders.put(splited[KEY_INDEX], splited[VALUE_INDEX].strip());
-        }
-        return requestHeaders;
     }
 
     private Optional<String> createResponseBody(String requestPath) throws IOException {

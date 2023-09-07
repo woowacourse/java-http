@@ -173,6 +173,8 @@ class Http11ProcessorTest {
                 "Location: /index.html \r\n" +
                 "Set-Cookie: ";
 
+        System.out.println(socket.output());
+
         assertThat(socket.output()).contains(expected);
     }
 
@@ -261,9 +263,9 @@ class Http11ProcessorTest {
             requestHeaders.put(splitedLine[0], splitedLine[1].strip());
         }
 
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
-        String jSessionId = httpCookie.get("JSESSIONID");
+        Cookies cookies = new Cookies();
+        cookies.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
+        String jSessionId = cookies.get("JSESSIONID");
         User user = (User) sessionManager.findSession(jSessionId).getAttribute("gugu");
 
         assertThat(user).isNotNull();
@@ -349,8 +351,8 @@ class Http11ProcessorTest {
             requestHeaders.put(splitedLine[0], splitedLine[1].strip());
         }
 
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
-        return httpCookie.get("JSESSIONID");
+        Cookies cookies = new Cookies();
+        cookies.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
+        return cookies.get("JSESSIONID");
     }
 }

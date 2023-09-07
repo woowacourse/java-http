@@ -3,14 +3,15 @@ package org.apache.coyote.http11;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
+import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 
 public class HttpResponse {
 
     public static final String CRLF = "\r\n";
     public static final String EMPTY = "";
     public static final String BLANK = " ";
-    public static final String HTTP_1_1 = "HTTP/1.1";
 
+    private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
     private final ContentType contentType;
     private final ResponseBody body;
@@ -20,8 +21,9 @@ public class HttpResponse {
         return new HttpResponseBuilder();
     }
 
-    public HttpResponse(final HttpStatus httpStatus, final ContentType contentType, final String body,
+    public HttpResponse(final HttpVersion httpVersion,  HttpStatus httpStatus, final ContentType contentType, final String body,
                         final Headers headers) {
+        this.httpVersion = ofNullable(httpVersion).orElse(HTTP_1_1);
         this.httpStatus = requireNonNull(httpStatus);
         this.contentType = ofNullable(contentType).orElse(PLAINTEXT_UTF8);
         this.body = ResponseBody.from(ofNullable(body).orElse(EMPTY));
@@ -42,7 +44,7 @@ public class HttpResponse {
     }
 
     private String getStartLine() {
-        return HTTP_1_1 + BLANK + httpStatus + BLANK;
+        return httpVersion.getVersion() + BLANK + httpStatus + BLANK;
     }
 
     private String getHeaders() {
@@ -78,6 +80,7 @@ public class HttpResponse {
 
 class HttpResponseBuilder {
 
+    private HttpVersion httpVersion;
     private HttpStatus httpStatus;
     private ContentType contentType;
     private String body;
@@ -109,7 +112,7 @@ class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
-        return new HttpResponse(httpStatus, contentType, body, headers);
+        return new HttpResponse(httpVersion, httpStatus, contentType, body, headers);
     }
 
 }

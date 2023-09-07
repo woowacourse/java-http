@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
@@ -18,8 +20,9 @@ class RequestHandlerTest {
     void responseHelloWorld() throws IOException {
         //given
         final var request = new HttpRequest(
-                HttpMethod.GET,
+                GET,
                 new HttpPath("/"),
+                HTTP_1_1,
                 Map.of(),
                 Map.of(),
                 "",
@@ -44,8 +47,9 @@ class RequestHandlerTest {
     void responseIndex(String uri) throws IOException {
         //given
         final var request = new HttpRequest(
-                HttpMethod.GET,
+                GET,
                 new HttpPath(uri),
+                HTTP_1_1,
                 Map.of(),
                 Map.of(),
                 "",

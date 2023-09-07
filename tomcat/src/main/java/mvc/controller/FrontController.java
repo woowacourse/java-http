@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import servlet.Controller;
 import servlet.response.HttpResponse;
 
-public class FrontController extends AbstractController {
+public class FrontController extends AbstractPathController {
 
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
 

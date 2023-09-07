@@ -23,7 +23,7 @@ class HelloWorldContextTest {
 
     @Test
     void 생성자는_유효한_rootContextPath를_전달하면_HelloWorldContext를_초기화한다() {
-        final HelloWorldContext actual = new HelloWorldContext("/");
+        final HelloWorldContext actual = new HelloWorldContext("/", null);
 
         assertThat(actual).isNotNull();
     }
@@ -32,7 +32,7 @@ class HelloWorldContextTest {
     void 생성자는_유효하지_않은_rootContextPath를_전달하면_예외가_발생한다() {
         final String invalidRootContextPath = null;
 
-        assertThatThrownBy(() -> new HelloWorldContext(invalidRootContextPath))
+        assertThatThrownBy(() -> new HelloWorldContext(invalidRootContextPath, null))
                 .isInstanceOf(InvalidRootContextPathException.class)
                 .hasMessageContaining("Root Context Path가 유효하지 않습니다.");
     }
@@ -42,7 +42,7 @@ class HelloWorldContextTest {
         final String validRootContextPath = "/";
         final String invalidStaticResourcePath= null;
 
-        assertThatThrownBy(() -> new HelloWorldContext(validRootContextPath, invalidStaticResourcePath))
+        assertThatThrownBy(() -> new HelloWorldContext(validRootContextPath, invalidStaticResourcePath, null))
                 .isInstanceOf(InvalidStaticResourcePathException.class)
                 .hasMessageContaining("Static Resource Path가 유효하지 않습니다.");
     }
@@ -52,7 +52,7 @@ class HelloWorldContextTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        final HelloWorldContext context = new HelloWorldContext("/");
+        final HelloWorldContext context = new HelloWorldContext("/", null);
 
         final boolean actual = context.supports(request);
 
@@ -64,7 +64,7 @@ class HelloWorldContextTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        final HelloWorldContext context = new HelloWorldContext("/hello");
+        final HelloWorldContext context = new HelloWorldContext("/hello", null);
 
         final boolean actual = context.supports(request);
 
@@ -76,7 +76,7 @@ class HelloWorldContextTest {
         final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
         final RequestLine requestLine = RequestLine.from("GET / HTTP/1.1");
         final Request request = new Request(headers, requestLine, HttpRequestBody.EMPTY, Parameters.EMPTY);
-        final HelloWorldContext context = new HelloWorldContext("/");
+        final HelloWorldContext context = new HelloWorldContext("/", null);
         context.addHandler(new WelcomeHandler());
 
         final Response actual = context.service(request);

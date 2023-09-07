@@ -8,6 +8,7 @@ import org.apache.coyote.Context;
 import org.apache.coyote.context.HelloWorldContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import servlet.Controller;
 
 public class Tomcat {
 
@@ -31,12 +32,12 @@ public class Tomcat {
         }
     }
 
-    public Context addContainer(final String contextPath) {
-        return addContainer(contextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX);
+    public Context addContainer(final String contextPath, final Controller controller) {
+        return addContainer(contextPath, DEFAULT_STATIC_RESOURCE_PATH_PREFIX, controller);
     }
 
-    public Context addContainer(final String contextPath, final String staticResourcePath) {
-        final HelloWorldContext context = new HelloWorldContext(contextPath, staticResourcePath);
+    public Context addContainer(final String contextPath, final String staticResourcePath, final Controller controller) {
+        final HelloWorldContext context = new HelloWorldContext(contextPath, staticResourcePath, controller);
 
         this.contexts.add(context);
 

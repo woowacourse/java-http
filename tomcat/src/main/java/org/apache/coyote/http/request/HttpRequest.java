@@ -26,6 +26,14 @@ public class HttpRequest {
         return request.matchesByPathExcludingContextPath(path, contextPath);
     }
 
+    public boolean isBusinessLogic(final String contextPath) {
+        return !(request.isStaticResource() || request.isWelcomePageRequest(contextPath));
+    }
+
+    public Request request() {
+        return request;
+    }
+
     public String getHeader(final String name) {
         return request.findHeaderValue(name);
     }
@@ -40,9 +48,5 @@ public class HttpRequest {
 
     public String getParameter(final String name) {
         return request.findParameterValue(name);
-    }
-
-    public Request request() {
-        return request;
     }
 }

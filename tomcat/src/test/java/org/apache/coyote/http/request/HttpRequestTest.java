@@ -114,4 +114,21 @@ class HttpRequestTest {
 
         assertThat(actual).isEqualTo("gugu");
     }
+
+    @Test
+    void isBusinessLogic_메서드는_전달한_요청이_정적_리소스가_아닌_비즈니스_로직인지_여부를_반환한다() {
+        final HttpRequestHeaders headers = HttpRequestHeaders.from("Content-Type: text/html;charset=utf-8");
+        final RequestLine requestLine = RequestLine.from("GET /login?user=gugu HTTP/1.1");
+        final Request request = new Request(
+                headers,
+                requestLine,
+                HttpRequestBody.EMPTY,
+                Parameters.fromUrlContent("?user=gugu")
+        );
+        final HttpRequest httpRequest = new HttpRequest(request, "/", new SessionManager());
+
+        final boolean actual = httpRequest.isBusinessLogic("/");
+
+        assertThat(actual).isTrue();
+    }
 }

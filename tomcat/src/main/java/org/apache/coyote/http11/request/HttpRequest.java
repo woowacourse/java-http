@@ -42,6 +42,10 @@ public class HttpRequest {
         return MessageBody.from(body);
     }
 
+    public boolean isParamRequest() {
+        return requestLine.getRequestUri().isContainsQueryParam();
+    }
+
     public String getHeader(final String headerKey) {
         return requestHeaders.getHeaderValue(headerKey);
     }

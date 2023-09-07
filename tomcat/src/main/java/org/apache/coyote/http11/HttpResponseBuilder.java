@@ -91,11 +91,12 @@ public class HttpResponseBuilder {
     private String findCookie(HttpRequestParser httpRequestParser) {
         Map<String, String> cookies = httpRequestParser.findCookies();
         if (!isStaticPath(httpRequestParser.findPath()) && !cookies.isEmpty()) {
-            StringBuilder cookieHeader = new StringBuilder("Set-Cookie: ");
+
+            StringBuilder cookieHeader = new StringBuilder();
             Set<Map.Entry<String, String>> entries = cookies.entrySet();
             String collect = entries.stream()
-                    .map(entry -> entry.getKey() + "=" + entry.getValue())
-                    .reduce((cookie1, cookie2) -> cookie1 + "; " + cookie2)
+                    .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue())
+                    .reduce((cookie1, cookie2) -> cookie1 + "; " + SPACE + LINE_FEED + cookie2)
                     .orElse("");
             cookieHeader.append(collect);
 

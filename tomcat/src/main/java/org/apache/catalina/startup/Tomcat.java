@@ -1,7 +1,9 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.Controller;
+import org.apache.catalina.servlet.RequestAdapter;
+import org.apache.coyote.Adapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,14 +12,15 @@ import java.io.IOException;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
-    private final Servlet servlet;
 
-    public Tomcat(Servlet servlet) {
-        this.servlet = servlet;
+    private final Adapter adapter;
+
+    public Tomcat() {
+        this.adapter = new RequestAdapter();
     }
 
     public void start() {
-        var connector = new Connector(servlet);
+        var connector = new Connector(adapter);
         connector.start();
 
         try {
@@ -29,5 +32,9 @@ public class Tomcat {
             log.info("web server stop.");
             connector.stop();
         }
+    }
+
+    public void addController(String path, Controller controller) {
+        adapter.addController(path, controller);
     }
 }

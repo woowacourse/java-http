@@ -18,14 +18,20 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getBody("account");
         String password = request.getBody("password");
-        User findUser = MemberService.login(account, password)
-                .orElseThrow(UserNotFoundException::new);
+        try {
+            User findUser = MemberService.login(account, password);
 
-        Session session = request.getSession(true);
-        session.setAttribute("user", findUser);
-        response.location("index.html");
-        response.setStatusCode(HttpStatusCode.FOUND);
-        response.addCookie(HttpCookie.jSessionId(session.getId()));
+            Session session = request.getSession(true);
+            session.setAttribute("user", findUser);
+            response.location("index.html");
+            response.setStatusCode(HttpStatusCode.FOUND);
+            response.addCookie(HttpCookie.jSessionId(session.getId()));
+        } catch (UserNotFoundException e) {
+            StaticResource staticResource = StaticResource.of("/401.html");
+            ResponseBody responseBody = ResponseBody.of(staticResource.fileToString(), staticResource.getFileExtension());
+            response.setStatusCode(HttpStatusCode.UNAUTHORIZED);
+            response.setResponseBody(responseBody);
+        }
     }
 
     @Override

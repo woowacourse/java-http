@@ -1,7 +1,8 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.exception.UncheckedServletException;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -16,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Servlet servlet;
+    private final Adapter adapter;
 
-    public Http11Processor(final Socket connection, Servlet servlet) {
+    public Http11Processor(final Socket connection, Adapter adapter) {
         this.connection = connection;
-        this.servlet = servlet;
+        this.adapter = adapter;
     }
 
     @Override
@@ -35,7 +36,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             var httpRequest = HttpRequest.parse(inputStream);
             var httpResponse = HttpResponse.create();
-            servlet.service(httpRequest, httpResponse);
+            Controller controller = adapter.getController(httpRequest);
+            controller.service(httpRequest, httpResponse);
             outputStream.write(httpResponse.parse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

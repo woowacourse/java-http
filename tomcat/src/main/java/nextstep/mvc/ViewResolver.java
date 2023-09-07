@@ -9,7 +9,12 @@ public class ViewResolver {
     private ViewResolver() {
     }
 
-    public static View resolve(final String viewName) throws IOException {
-        return new View(FileReader.readFile(viewName), SupportContentType.getContentType(viewName));
+    public static View resolve(final String viewName) {
+        try {
+            return new View(FileReader.readFile(viewName),
+                    SupportContentType.getContentType(viewName));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

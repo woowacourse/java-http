@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 public class HttpRequestHeaders {
     private static final String PAIR_DELIMITER = ": ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -14,14 +16,12 @@ public class HttpRequestHeaders {
     }
 
     public static HttpRequestHeaders from(final List<String> httpRequestHeader) {
-        return new HttpRequestHeaders(
-                httpRequestHeader
-                        .stream()
-                        .map(line -> line.split(PAIR_DELIMITER))
-                        .collect(Collectors.toMap(
-                                line -> line[0],
-                                line -> line[1])
-                        )
+        return new HttpRequestHeaders(httpRequestHeader.stream()
+                .map(data -> data.split(PAIR_DELIMITER))
+                .collect(Collectors.toMap(
+                        data -> data[KEY_INDEX],
+                        data -> data[VALUE_INDEX])
+                )
         );
     }
 

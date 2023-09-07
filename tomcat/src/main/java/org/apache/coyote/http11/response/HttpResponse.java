@@ -68,15 +68,9 @@ public class HttpResponse {
     }
 
     public String getResponse() throws IOException {
-        String responseStatusLine = String.format("%s %s %s ",
-                httpResponseStatusLine.getHttpProtocolVersion().getName(),
-                httpResponseStatusLine.getHttpStatus().getStatusCode(),
-                httpResponseStatusLine.getHttpStatus().name()
-        );
-
-        String responseHeaders = generateHeaders(httpResponseHeaders);
-
-        String responseBody = httpResponseBody.getBody();
+        String responseStatusLine = formatResponseStatusLine(httpResponseStatusLine);
+        String responseHeaders = formatResponseHeaders(httpResponseHeaders);
+        String responseBody = formatResponseBody();
 
         return String.join(
                 DELIMITER,
@@ -87,10 +81,22 @@ public class HttpResponse {
         );
     }
 
-    private String generateHeaders(HttpResponseHeaders headers) {
+    private String formatResponseStatusLine(HttpResponseStatusLine httpResponseStatusLine) {
+        return String.format("%s %s %s ",
+                httpResponseStatusLine.getHttpProtocolVersion().getName(),
+                httpResponseStatusLine.getHttpStatus().getStatusCode(),
+                httpResponseStatusLine.getHttpStatus().name()
+        );
+    }
+
+    private String formatResponseHeaders(HttpResponseHeaders headers) {
         return headers.getHeaders().keySet()
                 .stream()
                 .map(it -> String.format("%s: %s ", it, headers.find(it)))
                 .collect(Collectors.joining(DELIMITER));
+    }
+
+    private String formatResponseBody() {
+        return httpResponseBody.getBody();
     }
 }

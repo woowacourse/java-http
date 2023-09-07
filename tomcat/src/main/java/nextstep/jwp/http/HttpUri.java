@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.exception.BadRequestException;
+
 public class HttpUri {
 
     private static final String QUERY_STRING_DELIMITER = "?";
@@ -18,7 +20,7 @@ public class HttpUri {
 
     public static HttpUri from(String fullPath) {
         if (fullPath == null) {
-            throw new IllegalArgumentException("HttpUri fullPath is Null");
+            throw new BadRequestException("HttpUri fullPath is Null");
         }
 
         int index = fullPath.indexOf(QUERY_STRING_DELIMITER);

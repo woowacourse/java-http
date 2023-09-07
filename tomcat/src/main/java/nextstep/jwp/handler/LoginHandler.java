@@ -7,7 +7,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.InvalidRequestMethod;
+import nextstep.jwp.exception.InvalidRequestMethodException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.FormData;
 import nextstep.jwp.http.HttpBody;
 import nextstep.jwp.http.HttpCookie;
@@ -30,7 +31,6 @@ public class LoginHandler implements RequestHandler {
 
     private static final String RESOURCE_PATH = "static/login.html";
     private static final String INDEX_URI = "/index.html";
-    private static final String UNAUTHORIZED_URI = "/401.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String JSESSIONID = "JSESSIONID";
@@ -47,7 +47,7 @@ public class LoginHandler implements RequestHandler {
             return handlePostMethod(request);
         }
 
-        throw new InvalidRequestMethod();
+        throw new InvalidRequestMethodException("지원하지 않는 메서드입니다.");
     }
 
     private HttpResponse handleGetMethod(HttpRequest request) throws IOException {
@@ -64,11 +64,7 @@ public class LoginHandler implements RequestHandler {
             QueryString queryString = request.getQueryString();
             User user = login(queryString.get(ACCOUNT), queryString.get(PASSWORD));
 
-            if (user != null) {
-                return createLoginResponse(request, user);
-            }
-
-            return createLoginFailResponse(request);
+            return createLoginResponse(request, user);
         }
 
         HttpStatus httpStatus = HttpStatus.OK;
@@ -129,22 +125,14 @@ public class LoginHandler implements RequestHandler {
             }
         }
 
-        return null;
-    }
-
-    private HttpResponse createLoginFailResponse(HttpRequest request) {
-        return createRedirectResponse(request, UNAUTHORIZED_URI);
+        throw new UnauthorizedException("로그인에 실패했습니다. account : " + account + " password : " + password);
     }
 
     private HttpResponse handlePostMethod(HttpRequest request) {
         FormData formData = FormData.from(request.getHttpBody());
         User user = login(formData.get(ACCOUNT), formData.get(PASSWORD));
 
-        if (user != null) {
-            return createLoginResponse(request, user);
-        }
-
-        return createLoginFailResponse(request);
+        return createLoginResponse(request, user);
     }
 
 }

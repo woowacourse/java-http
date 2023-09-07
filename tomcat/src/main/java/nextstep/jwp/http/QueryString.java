@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.exception.BadRequestException;
 
 public class QueryString {
 
@@ -20,7 +21,7 @@ public class QueryString {
 
     public static QueryString from(String line) {
         if (line == null) {
-            throw new IllegalArgumentException("line is Null");
+            throw new BadRequestException("line is Null");
         }
 
         String[] params = line.split(QUERY_STRING_DELIMITER);
@@ -39,7 +40,7 @@ public class QueryString {
 
     public String get(String key) {
         if (key == null) {
-            throw new IllegalArgumentException("QueryString key is Null");
+            throw new BadRequestException("QueryString key is Null");
         }
 
         return params.get(key);

@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.exception.BadRequestException;
 
 public class HttpHeaders {
 
@@ -11,10 +12,10 @@ public class HttpHeaders {
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
-    private final Map<String, String> httpHeaders;
+    private final Map<String, String> headers;
 
-    private HttpHeaders(Map<String, String> httpHeaders) {
-        this.httpHeaders = httpHeaders;
+    private HttpHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     public static HttpHeaders from(List<String> lines) {
@@ -38,18 +39,18 @@ public class HttpHeaders {
         validateKey(key);
         validateValue(value);
 
-        httpHeaders.put(key, value);
+        headers.put(key, value);
     }
 
     private void validateKey(String key) {
         if (key == null) {
-            throw new IllegalArgumentException("Header Key is Null");
+            throw new BadRequestException("Header Key is Null");
         }
     }
 
     private void validateValue(String value) {
         if (value == null) {
-            throw new IllegalArgumentException("Header Value is Null");
+            throw new BadRequestException("Header Value is Null");
         }
     }
 
@@ -60,20 +61,20 @@ public class HttpHeaders {
     public boolean containsKey(String key) {
         validateKey(key);
 
-        return httpHeaders.containsKey(key);
+        return headers.containsKey(key);
     }
 
     public String getHeaders() {
-        return httpHeaders.keySet()
+        return headers.keySet()
                 .stream()
-                .map(key -> String.format(HEADER_FORMAT, key, httpHeaders.get(key)))
+                .map(key -> String.format(HEADER_FORMAT, key, headers.get(key)))
                 .collect(Collectors.joining("\r\n"));
     }
 
     public String get(String key) {
         validateKey(key);
 
-        return httpHeaders.get(key);
+        return headers.get(key);
     }
 
 }

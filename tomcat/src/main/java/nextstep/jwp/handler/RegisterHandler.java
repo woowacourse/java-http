@@ -5,7 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.InvalidRequestMethod;
+import nextstep.jwp.exception.InvalidRequestMethodException;
 import nextstep.jwp.http.FormData;
 import nextstep.jwp.http.HttpBody;
 import nextstep.jwp.http.HttpHeaders;
@@ -37,7 +37,7 @@ public class RegisterHandler implements RequestHandler {
             return handlePostMethod(request);
         }
 
-        throw new InvalidRequestMethod();
+        throw new InvalidRequestMethodException("지원하지 않는 메서드입니다.");
     }
 
     private HttpResponse handlePostMethod(HttpRequest request) {

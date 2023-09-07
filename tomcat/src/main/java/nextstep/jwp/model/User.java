@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.exception.BadRequestException;
+
 public class User {
 
     private final Long id;
@@ -8,6 +10,11 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        if (account == null || password == null || email == null) {
+            throw new BadRequestException("잘못된 입력이 존재합니다. "
+                    + "account : " + account + " password : " + password + " email : " + email);
+        }
+
         this.id = id;
         this.account = account;
         this.password = password;

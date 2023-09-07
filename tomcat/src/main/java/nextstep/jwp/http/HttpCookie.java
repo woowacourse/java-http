@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.exception.BadRequestException;
 
 public class HttpCookie {
 
@@ -20,7 +21,7 @@ public class HttpCookie {
 
     public static HttpCookie from(String line) {
         if (line == null) {
-            throw new IllegalArgumentException("Cookie Line is Null");
+            throw new BadRequestException("Cookie Line is Null");
         }
 
         Map<String, String> cookies = Arrays.stream(line.split(ATTRIBUTE_DELIMITER))
@@ -39,7 +40,7 @@ public class HttpCookie {
 
     private void validateKey(String key) {
         if (key == null) {
-            throw new IllegalArgumentException("Cookie key is Null");
+            throw new BadRequestException("Cookie key is Null");
         }
     }
 

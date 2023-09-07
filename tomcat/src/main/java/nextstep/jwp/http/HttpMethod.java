@@ -1,7 +1,7 @@
 package nextstep.jwp.http;
 
 import java.util.Arrays;
-import nextstep.jwp.exception.InvalidRequestMethod;
+import nextstep.jwp.exception.InvalidRequestMethodException;
 
 public enum HttpMethod {
     GET("GET"),
@@ -18,7 +18,7 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(value -> value.name().equals(input))
                 .findAny()
-                .orElseThrow(InvalidRequestMethod::new);
+                .orElseThrow(() -> new InvalidRequestMethodException("지원하지 않는 메서드입니다."));
     }
 
     public String getValue() {

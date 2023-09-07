@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.exception.BadRequestException;
 
 public class FormData {
 
@@ -20,7 +21,7 @@ public class FormData {
 
     public static FormData from(HttpBody httpBody) {
         if (httpBody == null) {
-            throw new IllegalArgumentException("httpBody is Null");
+            throw new BadRequestException("httpBody is Null");
         }
 
         String formData = httpBody.getMessage();
@@ -36,7 +37,7 @@ public class FormData {
 
     public String get(String key) {
         if (key == null) {
-            throw new IllegalArgumentException("FormData key is Null");
+            throw new BadRequestException("FormData key is Null");
         }
 
         return params.get(key);

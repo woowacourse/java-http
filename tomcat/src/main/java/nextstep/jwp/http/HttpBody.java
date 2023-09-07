@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.exception.BadRequestException;
+
 public class HttpBody {
 
     private final String message;
@@ -10,7 +12,7 @@ public class HttpBody {
 
     public static HttpBody from(String httpBody) {
         if (httpBody == null) {
-            throw new IllegalArgumentException("HttpBody is Null");
+            throw new BadRequestException("HttpBody is Null");
         }
 
         return new HttpBody(httpBody);

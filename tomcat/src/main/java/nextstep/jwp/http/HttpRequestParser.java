@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.exception.BadRequestException;
 
 public class HttpRequestParser {
 
@@ -27,7 +28,7 @@ public class HttpRequestParser {
         String startLine = br.readLine();
 
         if (startLine == null) {
-            throw new IllegalArgumentException("잘못된 http 요청 입니다.");
+            throw new BadRequestException("잘못된 http 요청 입니다.");
         }
 
         String[] elements = startLine.split(START_LINE_DELIMITER);

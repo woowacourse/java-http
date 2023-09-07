@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpBody;
 import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpRequest;
@@ -30,6 +31,9 @@ public class ResourceHandler implements RequestHandler {
         HttpVersion httpVersion = request.getHttpVersion();
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpVersion, httpStatus);
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE_PATH + request.getNativePath());
+        if (url == null) {
+            throw new NotFoundException("해당 URL을 찾을 수 없습니다. 요청 URL : " + request.getNativePath());
+        }
         HttpBody httpBody = HttpBody.from(new String(Files.readAllBytes(Path.of(url.getPath()))));
         HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
 

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.HandlerAdaptor;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestParser;
@@ -32,6 +31,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+
         try (InputStream inputStream = connection.getInputStream();
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }

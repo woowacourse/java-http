@@ -12,10 +12,6 @@ public abstract class RequestHandler {
 		this.requestPath = requestPath;
 	}
 
-	public boolean canHandle(Request request) {
-		return request.hasPath(requestPath);
-	}
-
 	public Response handle(final Request request) {
 		if (request.hasMethod(HttpMethod.GET)) {
 			return doGet(request);
@@ -31,5 +27,9 @@ public abstract class RequestHandler {
 
 	protected Response doPost(final Request request) {
 		return Response.notFound();
+	}
+
+	public String getRequestPath() {
+		return requestPath;
 	}
 }

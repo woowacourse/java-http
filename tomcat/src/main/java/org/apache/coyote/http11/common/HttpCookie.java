@@ -3,7 +3,6 @@ package org.apache.coyote.http11.common;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -38,8 +37,8 @@ public class HttpCookie {
                 .collect(Collectors.toMap(cookie -> cookie[0], cookie -> cookie[1]));
     }
 
-    public void putJSessionId() {
-        cookies.put(JSESSIONID, UUID.randomUUID().toString());
+    public void putJSessionId(String sessionId) {
+        cookies.put(JSESSIONID, sessionId);
     }
 
     public String findJSessionId() {

@@ -1,8 +1,15 @@
 package org.apache.coyote.http11.request;
 
+import java.io.IOException;
+import java.util.UUID;
+import org.apache.catalina.Manager;
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.session.HttpSession;
+import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpRequest {
+
+    public static final Manager SESSION_MANAGER = new SessionManager();
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -37,4 +44,29 @@ public class HttpRequest {
     public RequestBody getRequestBody() {
         return requestBody;
     }
+
+    public HttpSession getSession(boolean create) {
+        if (findSession() != null) {
+            return findSession();
+        }
+        if (create) {
+            return new HttpSession(UUID.randomUUID().toString());
+        }
+        return null;
+    }
+
+    public void addSession(HttpSession httpSession) {
+        SESSION_MANAGER.add(httpSession);
+    }
+
+    private HttpSession findSession() {
+        try {
+            String jSessionId = requestHeaders.findJSessionId();
+
+            return SESSION_MANAGER.findSession(jSessionId);
+        } catch (IOException | NullPointerException e) {
+            return null;
+        }
+    }
+
 }

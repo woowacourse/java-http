@@ -90,19 +90,34 @@ public class HttpRequest {
     public Session getSession(final boolean create) {
         final SessionManager sessionManager = SessionManager.getInstance();
         final String jSessionId = requestHeaders.getJSessionId();
-        if (jSessionId == null) {
-            return createSession(sessionManager);
+        if (create) {
+            return createSession(jSessionId, sessionManager);
         }
-        final Session session = sessionManager.findSession(jSessionId);
-        if (session == null && create) {
-            return createSession(sessionManager);
+        if (!isSessionValid(jSessionId, sessionManager)) {
+            return null;
         }
-        return session;
+        return saveById(jSessionId, sessionManager);
     }
 
-    private Session createSession(final SessionManager sessionManager) {
+    private Session createSession(final String jSessionId, final SessionManager sessionManager) {
+        if (isSessionValid(jSessionId, sessionManager)) {
+            sessionManager.remove(jSessionId);
+        }
         final Session newSession = new Session(UUID.randomUUID().toString());
         sessionManager.add(newSession);
         return newSession;
+    }
+
+    private boolean isSessionValid(final String jSessionId, final SessionManager sessionManager) {
+        if (jSessionId == null) {
+            return false;
+        }
+        return sessionManager.findSession(jSessionId) != null;
+    }
+
+    private Session saveById(final String jSessionId, final SessionManager sessionManager) {
+        final Session session = new Session(jSessionId);
+        sessionManager.add(session);
+        return session;
     }
 }

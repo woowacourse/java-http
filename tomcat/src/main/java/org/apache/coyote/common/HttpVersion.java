@@ -10,7 +10,6 @@ public class HttpVersion {
 
     private static final String PROTOCOL_PREFIX = "HTTP/";
     private static final String VERSION_DELIMITER = "\\.";
-    private static final int NEXT_INDEX = 1;
     private static final int MAIN_VERSION_INDEX = 0;
     private static final int SUB_VERSION_INDEX = 1;
 
@@ -36,7 +35,7 @@ public class HttpVersion {
         if (!input.contains(PROTOCOL_PREFIX)) {
             throw new InvalidHttpVersionException();
         }
-        return input.substring(PROTOCOL_PREFIX.length() + NEXT_INDEX);
+        return input.substring(PROTOCOL_PREFIX.length());
     }
 
     private static List<Integer> splitMainAndSubVersion(final String version) {

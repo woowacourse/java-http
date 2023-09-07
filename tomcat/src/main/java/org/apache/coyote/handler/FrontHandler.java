@@ -2,11 +2,11 @@ package org.apache.coyote.handler;
 
 import org.apache.coyote.handler.mapping.HandlerMapping;
 import org.apache.coyote.handler.mapping.HomePageMapping;
-import org.apache.coyote.handler.mapping.LoginMapping;
-import org.apache.coyote.handler.mapping.LoginPageMapping;
-import org.apache.coyote.handler.mapping.RegisterMapping;
-import org.apache.coyote.handler.mapping.RegisterPageMapping;
 import org.apache.coyote.handler.mapping.StaticFileMapping;
+import org.apache.coyote.handler.mapping.login.LoginMapping;
+import org.apache.coyote.handler.mapping.login.LoginPageMapping;
+import org.apache.coyote.handler.mapping.register.RegisterMapping;
+import org.apache.coyote.handler.mapping.register.RegisterPageMapping;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 

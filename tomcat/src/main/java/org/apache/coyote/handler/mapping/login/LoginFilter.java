@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.mapping;
+package org.apache.coyote.handler.mapping.login;
 
 import org.apache.coyote.http.LoginManager;
 import org.apache.coyote.http.session.Session;

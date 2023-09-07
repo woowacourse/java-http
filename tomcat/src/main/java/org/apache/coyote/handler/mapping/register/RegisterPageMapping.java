@@ -1,5 +1,6 @@
-package org.apache.coyote.handler.mapping;
+package org.apache.coyote.handler.mapping.register;
 
+import org.apache.coyote.handler.mapping.HandlerMapping;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.common.HttpHeaders;
 import org.apache.coyote.http.request.HttpRequest;

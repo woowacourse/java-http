@@ -3,7 +3,6 @@ package org.apache.coyote.handler;
 import org.apache.coyote.handler.controller.HomePageController;
 import org.apache.coyote.handler.controller.StaticFileController;
 import org.apache.coyote.handler.controller.login.LoginController;
-import org.apache.coyote.handler.controller.login.LoginPageController;
 import org.apache.coyote.handler.controller.register.RegisterController;
 import org.apache.coyote.handler.controller.register.RegisterPageController;
 import org.apache.coyote.http.request.HttpRequest;
@@ -22,7 +21,6 @@ public class FrontHandler {
         requestControllers.add(new HomePageController());
         requestControllers.add(new StaticFileController());
         requestControllers.add(new LoginController());
-        requestControllers.add(new LoginPageController());
         requestControllers.add(new RegisterController());
         requestControllers.add(new RegisterPageController());
     }

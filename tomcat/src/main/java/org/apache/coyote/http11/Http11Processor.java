@@ -38,8 +38,9 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream()) {
 			final HttpRequest request = readRequest(inputStream);
+			final HttpResponse response = new HttpResponse();
 
-			final HttpResponse response = HTTP_HANDLERS.handleTo(request);
+			HTTP_HANDLERS.handleTo(request, response);
 
 			outputStream.write(response.buildResponse().getBytes());
 			outputStream.flush();
@@ -64,8 +65,7 @@ public class Http11Processor implements Runnable, Processor {
 		final Integer contentLength = builder.bodyLength();
 		final char[] buffer = new char[contentLength];
 		reader.read(buffer, 0, contentLength);
-		final String requestBody = new String(buffer);
-		return requestBody;
+		return new String(buffer);
 	}
 
 	private static String readRequestHeader(final BufferedReader reader) throws IOException {

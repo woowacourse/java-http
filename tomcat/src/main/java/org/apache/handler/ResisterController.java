@@ -11,30 +11,14 @@ import org.apache.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResisterHandler implements RequestHandler {
+public class ResisterController extends AbstractController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ResisterHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResisterController.class);
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
-    private static final String METHOD_NOT_ALLOWED_PAGE = "/405.html";
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isPost()) {
-            return doPost(httpRequest);
-        }
-
-        if (httpRequest.isGet()) {
-            return doGet();
-        }
-
-        String content = FileReader.read(METHOD_NOT_ALLOWED_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, content);
-        httpResponse.setContentType(ContentType.TEXT_HTML);
-        return httpResponse;
-    }
-
-    public HttpResponse doPost(HttpRequest httpRequest) throws IOException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String query = httpRequest.getBody();
         String[] queries = query.split("&");
         String account = queries[0].split("=")[1];
@@ -45,16 +29,18 @@ public class ResisterHandler implements RequestHandler {
         InMemoryUserRepository.save(user);
         LOG.info("회원가입 성공한 회원 : {}", user);
         String content = FileReader.read(INDEX_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
+
+        httpResponse.setHttpStatus(HttpStatus.FOUND);
         httpResponse.setContentType(ContentType.TEXT_HTML);
+        httpResponse.setBody(content);
         httpResponse.setLocation(INDEX_PAGE);
-        return httpResponse;
     }
 
-    public HttpResponse doGet() throws IOException {
+    @Override
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String content = FileReader.read(REGISTER_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setContentType(ContentType.TEXT_HTML);
-        return httpResponse;
+        httpResponse.setBody(content);
     }
 }

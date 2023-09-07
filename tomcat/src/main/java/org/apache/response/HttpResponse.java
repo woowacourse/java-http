@@ -17,15 +17,11 @@ public class HttpResponse {
     private static final String LINE_SEPARATOR = "";
     private static final String HEADER_JOINER = ": ";
 
-    private final HttpStatus httpStatus;
-    private final String body;
-    private final HashMap<String, String> headers;
+    private final HashMap<String, String> headers = new LinkedHashMap<>();
+    private HttpStatus httpStatus;
+    private String body;
 
-    public HttpResponse(HttpStatus httpStatus, String body) {
-        this.httpStatus = httpStatus;
-        this.body = body;
-        this.headers = new LinkedHashMap<>();
-        headers.put(CONTENT_LENGTH, body.getBytes().length + SPACE);
+    public HttpResponse() {
     }
 
     public String getResponse() {
@@ -36,7 +32,7 @@ public class HttpResponse {
                 body);
     }
 
-    public String parseHeaders() {
+    private String parseHeaders() {
         List<String> headerLines = headers.entrySet().stream()
                 .map(entrySet -> entrySet.getKey() + HEADER_JOINER + entrySet.getValue())
                 .collect(Collectors.toList());
@@ -49,6 +45,15 @@ public class HttpResponse {
 
     public void setLocation(String location) {
         headers.put(LOCATION, location);
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        headers.put(CONTENT_LENGTH, body.getBytes().length + SPACE);
     }
 
     public void setContentType(ContentType contentType) {

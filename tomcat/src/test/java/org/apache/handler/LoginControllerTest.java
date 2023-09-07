@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import org.apache.common.Session;
@@ -20,13 +19,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class LoginHandlerTest {
+class LoginControllerTest {
 
     @Nested
     class 로그인_요청_시 {
 
         @Test
-        void GET_요청이면_200_상태코드를_반환한다() throws IOException {
+        void GET_요청이면_200_상태코드를_반환한다() throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     "GET /login HTTP/1.1",
                     "Host: localhost:8080"
@@ -34,9 +33,11 @@ class LoginHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new LoginHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            RequestMapping requestMapping = new RequestMapping();
+            AbstractController controller = requestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
                     "HTTP/1.1 200 OK "
@@ -45,7 +46,7 @@ class LoginHandlerTest {
         }
 
         @Test
-        void GET_요청에_쿠키와_세션이_존재하면_302_상태코드를_반환한다() throws IOException {
+        void GET_요청에_쿠키와_세션이_존재하면_302_상태코드를_반환한다() throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     "GET /login HTTP/1.1",
                     "Host: localhost:8080",
@@ -54,12 +55,14 @@ class LoginHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new LoginHandler();
+            HttpResponse httpResponse = new HttpResponse();
             Session session = new Session("f47ac10b-58cc-4372-a567-0e02b2c3d479");
             session.setAttribute("user", "user");
             SessionManager.add(session);
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            RequestMapping requestMapping = new RequestMapping();
+            AbstractController controller = requestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
                     "HTTP/1.1 302 FOUND "
@@ -68,7 +71,7 @@ class LoginHandlerTest {
         }
 
         @Test
-        void POST_요청이_발생하면_302_상태코드와_세션을_반환한다() throws IOException {
+        void POST_요청이_발생하면_302_상태코드와_세션을_반환한다() throws Exception {
             String body = "account=gugu&password=password";
             String httpRequestMessage = String.join("\r\n",
                     "POST /login HTTP/1.1",
@@ -80,16 +83,18 @@ class LoginHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new LoginHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            RequestMapping requestMapping = new RequestMapping();
+            AbstractController controller = requestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             assertThat(httpResponse.getResponse()).contains("HTTP/1.1 302 FOUND ", "Set-Cookie: JSESSIONID=");
         }
 
         @ParameterizedTest
         @ValueSource(strings = {"DELETE", "PUT", "PATCH"})
-        void GET_POST_요청이_아니면_405_상태코드를_반환한다(String method) throws IOException {
+        void GET_POST_요청이_아니면_405_상태코드를_반환한다(String method) throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     ""+ method + " /login HTTP/1.1",
                     "Host: localhost:8080"
@@ -97,8 +102,11 @@ class LoginHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new LoginHandler();
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            HttpResponse httpResponse = new HttpResponse();
+
+            RequestMapping requestMapping = new RequestMapping();
+            AbstractController controller = requestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             List<String> responses = List.of(
                     "HTTP/1.1 405 METHOD_NOT_ALLOWED ",

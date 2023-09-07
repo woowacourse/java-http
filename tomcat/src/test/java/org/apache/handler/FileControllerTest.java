@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -17,48 +17,54 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class DefaultHandlerTest {
+class FileControllerTest {
 
     @Nested
-    class 기본_페이지_요청_시 {
+    class HTML_파일을_처리할_때 {
 
         @Test
-        void GET_요청이면_200_상태코드를_반환한다() throws IOException {
+        void 정상적으로_응답_후_200_상태코드를_반환한다() throws Exception {
             String httpRequestMessage = String.join("\r\n",
-                    "GET / HTTP/1.1",
+                    "GET /index.html HTTP/1.1",
                     "Host: localhost:8080"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new DefaultHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            RequestMapping requestMapping = new RequestMapping();
+            AbstractController controller = requestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
-            String expected = String.join("\r\n",
-                    "HTTP/1.1 200 OK "
+            List<String> responses = List.of(
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 "
             );
-            assertThat(httpResponse.getResponse()).contains(expected);
+            assertThat(httpResponse.getResponse()).contains(responses.get(0), responses.get(1));
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"POST", "DELETE", "PUT", "PATCH"})
-        void GET_이외의_요청이면_405_상태코드를_반환한다(String method) throws IOException {
+        @ValueSource(strings = {"DELETE", "PUT", "PATCH"})
+        void GET_또는_POST_요청이_아니면_405_상태코드를_발생한다(String method) throws Exception {
             String httpRequestMessage = String.join("\r\n",
-                    ""+ method + " / HTTP/1.1",
+                    "" + method + " /index.html HTTP/1.1",
                     "Host: localhost:8080"
             );
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new DefaultHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            RequestMapping requestMapping = new RequestMapping();
+            AbstractController controller = requestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
-            String expected = String.join("\r\n",
-                    "HTTP/1.1 405 METHOD_NOT_ALLOWED "
+            List<String> responses = List.of(
+                    "HTTP/1.1 405 METHOD_NOT_ALLOWED ",
+                    "Content-Type: text/html;charset=utf-8 "
             );
-            assertThat(httpResponse.getResponse()).contains(expected);
+            assertThat(httpResponse.getResponse()).contains(responses.get(0), responses.get(1));
         }
     }
 }

@@ -18,15 +18,19 @@ public class FixtureFactory {
         put("Connection", "keep-alive");
     }};
 
-    public static RequestLine getRequestLine(String url) {
-        return new RequestLine(HttpMethod.GET, RequestUrl.from(url), Protocol.HTTP1_1);
+    public static RequestLine getRequestLine(HttpMethod httpMethod, String url) {
+        return new RequestLine(httpMethod, RequestUrl.from(url), Protocol.HTTP1_1);
     }
 
-    public static RequestHeader getRequestHeader(String url, Map<String, String> headers) {
-        return new RequestHeader(getRequestLine(url), headers);
+    public static RequestHeader getRequestHeader(HttpMethod httpMethod, String url, Map<String, String> headers) {
+        return new RequestHeader(getRequestLine(httpMethod, url), headers);
     }
 
-    public static Request getRequest(String url, Map<String, String> headers) {
-        return new Request(getRequestHeader(url, headers), new RequestBody(new HashMap<>()));
+    public static Request getGetRequest(String url, Map<String, String> headers) {
+        return new Request(getRequestHeader(HttpMethod.GET, url, headers), new RequestBody(new HashMap<>()));
+    }
+
+    public static Request getPostRequest(String url, Map<String, String> headers, RequestBody requestBody) {
+        return new Request(getRequestHeader(HttpMethod.POST, url, headers), requestBody);
     }
 }

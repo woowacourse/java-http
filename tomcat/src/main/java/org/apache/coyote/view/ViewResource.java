@@ -36,6 +36,6 @@ public class ViewResource extends Resource {
     }
 
     private static URL getResourceUrl(String path) {
-        return ViewResolver.class.getResource(DEFAULT_RESOURCE_PATH + path);
+        return ResponseResolver.class.getResource(DEFAULT_RESOURCE_PATH + path);
     }
 }

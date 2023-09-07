@@ -40,10 +40,10 @@ class Http11ProcessorTest {
     void index() throws IOException, URISyntaxException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: text/html",
                 "");
 
         final var socket = new StubSocket(httpRequest);

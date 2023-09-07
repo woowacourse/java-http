@@ -20,10 +20,10 @@ public class LoginAdapter implements Adapter {
     @Override
     public Resource adapt(Request request) {
         LoginHandler loginHandler = new LoginHandler();
-        if (request.getHttpMethod() == HttpMethod.GET) {
+        if (request.isSameHttpMethod(HttpMethod.GET)) {
             return ViewResource.of(LOGIN_PATH, HttpStatus.OK);
         }
-        if (request.getHttpMethod() == HttpMethod.POST) {
+        if (request.isSameHttpMethod(HttpMethod.POST)) {
             Map<String, String> body = request.getBody();
             String account = body.get(ACCOUNT);
             String password = body.get(PASSWORD);

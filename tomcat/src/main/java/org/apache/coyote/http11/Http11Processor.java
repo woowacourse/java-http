@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.adapter.RegisterAdapter;
 import org.apache.coyote.adapter.StringAdapter;
 import org.apache.coyote.adapter.LoginAdapter;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.view.Resource;
-import org.apache.coyote.view.ViewResolver;
+import org.apache.coyote.view.ResponseResolver;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
 import org.apache.coyote.response.Response;
@@ -23,11 +24,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ViewResolver viewResolver;
+    private final ResponseResolver responseResolver;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.viewResolver = new ViewResolver();
+        this.responseResolver = new ResponseResolver();
     }
 
     @Override
@@ -54,13 +55,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response doHandler(Request request) {
         if (request.isSamePath("/")) {
-            Resource resource = new StringAdapter().doHandle(request);
-            return viewResolver.resolve(request, resource);
+            Resource resource = new StringAdapter().adapt(request);
+            return responseResolver.resolve(request, resource);
         }
         if (request.isSamePath("/login")) {
-            Resource resource = new LoginAdapter().doHandle(request);
-            return viewResolver.resolve(request, resource);
+            Resource resource = new LoginAdapter().adapt(request);
+            return responseResolver.resolve(request, resource);
         }
-        return viewResolver.resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
+        if (request.isSamePath("/register")) {
+            Resource resource = new RegisterAdapter().adapt(request);
+            return responseResolver.resolve(request, resource);
+        }
+        return responseResolver.resolve(request, ViewResource.of(request.getPath(), HttpStatus.OK));
     }
 }

@@ -4,6 +4,7 @@ import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.FixtureFactory;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.view.Resource;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +15,7 @@ class StringAdapterTest {
     @Test
     @DisplayName("hello world라는 정보가 담긴 response가 생성된다.")
     void doHandle() {
-        Request request = FixtureFactory.getRequest("/", DEFAULT_HEADERS);
+        Request request = FixtureFactory.getGetRequest("/", DEFAULT_HEADERS);
 
         String expected = "Hello world!";
 

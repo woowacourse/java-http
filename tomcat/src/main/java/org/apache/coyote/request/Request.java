@@ -18,6 +18,10 @@ public class Request {
         return requestHeader.hasQueryString();
     }
 
+    public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
+        return requestHeader.isSameHttpMethod(otherHttpMethod);
+    }
+
     public String getPath() {
         return requestHeader.getPath();
     }

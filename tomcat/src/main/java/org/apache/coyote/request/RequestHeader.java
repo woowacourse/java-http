@@ -67,4 +67,8 @@ public class RequestHeader {
     public Map<String, String> getQueryString() {
         return requestLine.getQueryString();
     }
+
+    public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
+        return requestLine.isSameHttpMethod(otherHttpMethod);
+    }
 }

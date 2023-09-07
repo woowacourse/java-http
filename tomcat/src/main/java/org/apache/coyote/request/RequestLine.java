@@ -43,4 +43,8 @@ public class RequestLine {
     public boolean hasQueryString() {
         return requestUrl.hasQueryString();
     }
+
+    public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
+        return httpMethod == otherHttpMethod;
+    }
 }

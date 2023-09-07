@@ -7,7 +7,7 @@ import org.apache.coyote.response.Response;
 import org.apache.coyote.response.ResponseBody;
 import org.apache.coyote.response.ResponseHeader;
 
-public class ViewResolver {
+public class ResponseResolver {
 
     public Response resolve(Request request, Resource viewResource) {
         ResponseBody responseBody = new ResponseBody(viewResource.getValue());

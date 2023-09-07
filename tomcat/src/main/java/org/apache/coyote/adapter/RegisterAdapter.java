@@ -10,18 +10,22 @@ import org.apache.coyote.view.ViewResource;
 
 public class RegisterAdapter implements Adapter {
 
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+
     @Override
     public Resource adapt(Request request) {
-        if (request.getHttpMethod() == HttpMethod.POST) {
+        if (request.isSameHttpMethod(HttpMethod.POST)) {
             RegisterHandler registerHandler = new RegisterHandler();
             Map<String, String> requestBody = request.getBody();
-            String account = requestBody.get("account");
-            String password = requestBody.get("password");
-            String email = requestBody.get("email");
+            String account = requestBody.get(ACCOUNT);
+            String password = requestBody.get(PASSWORD);
+            String email = requestBody.get(EMAIL);
             registerHandler.register(account, password, email);
-            return ViewResource.of("/index.html", HttpStatus.OK);
+            return ViewResource.of("/index.html", HttpStatus.SUCCESS);
         }
-        if (request.getHttpMethod() == HttpMethod.GET) {
+        if (request.isSameHttpMethod(HttpMethod.GET)) {
             return ViewResource.of("/register.html", HttpStatus.OK);
         }
         throw new IllegalArgumentException("잘못된 HTTP METHOD 요청입니다.");

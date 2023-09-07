@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
@@ -73,19 +74,32 @@ public class LoginServlet implements Servlet {
     }
 
     private boolean isLoggedIn(HttpRequest request) {
-        Object value = request.getSession().getAttribute(USER); // TODO : 세션 새로만들었을 경우..?
-        if (value == null) {
+        Optional<Session> session = request.getSession(false);
+        if (session.isEmpty()) {
             return false;
         }
-        User userInSession = (User) value;
+        Optional<Object> attribute = session.get().getAttribute(USER);
+        if (attribute.isEmpty()) {
+            return false;
+        }
+
+        User userInSession = (User) attribute.get();
+        if (isValidUser(userInSession)) {
+            return true;
+        }
+        session.get().removeAttribute(USER);
+        return false;
+    }
+
+    private boolean isValidUser(final User userInSession) {
         return InMemoryUserRepository.findByAccount(userInSession.getAccount())
-                .filter(user -> user.checkPassword(userInSession.getPassword()))
+                .filter(userInDb -> userInDb.checkPassword(userInSession.getPassword()))
                 .isPresent();
     }
 
     private HttpResponse loginSuccess(HttpRequest request, User user) {
         log.info("로그인 성공 : {}", user);
-        Session session = request.getSession();
+        Session session = request.getSession(true).get();
         session.setAttribute(USER, user);
 
         HttpHeaders headers = new HttpHeaders();

@@ -33,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequestParser httpRequestParser = new HttpRequestParser();
             httpRequestParser.accept(inputStream);
+
             String response = frontController.process(httpRequestParser, httpResponseBuilder);
 
             outputStream.write(response.getBytes());

@@ -9,6 +9,6 @@ public class StaticController implements Controller {
 
     @Override
     public String process(HttpRequestParser httpRequestParser, HttpResponseBuilder httpResponseBuilder) throws IOException {
-        return httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, httpRequestParser.findPathWithoutQueryString());
+        return httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, httpRequestParser.getPath());
     }
 }

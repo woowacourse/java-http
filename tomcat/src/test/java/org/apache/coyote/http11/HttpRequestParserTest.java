@@ -23,7 +23,7 @@ class HttpRequestParserTest {
 
         //then
         assertAll(
-                () -> assertEquals("GET /index.html HTTP/1.1", httpRequestParser.getStartLine()),
+                () -> assertEquals("GET /index.html HTTP/1.1", httpRequestParser.getMethod() + " " + httpRequestParser.getPath() + " " + httpRequestParser.getProtocol()),
                 () -> assertEquals("header", httpRequestParser.getHeader().get("header")),
                 () -> assertEquals("test=test; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46", httpRequestParser.getHeader().get("Cookie")),
                 () -> assertEquals("message body", httpRequestParser.getMessageBody())
@@ -36,7 +36,7 @@ class HttpRequestParserTest {
         HttpRequestParser httpRequestParser = createHttpRequestParser(RequestFixture.REQUEST);
 
         //when
-        String method = httpRequestParser.findMethod();
+        String method = httpRequestParser.getMethod();
 
         //then
         assertEquals("GET", method);
@@ -55,7 +55,7 @@ class HttpRequestParserTest {
         HttpRequestParser httpRequestParser = createHttpRequestParser(RequestFixture.REQUEST);
 
         //when
-        String path = httpRequestParser.findPath();
+        String path = httpRequestParser.getPath();
 
         //then
         assertEquals("/index.html", path);
@@ -67,7 +67,7 @@ class HttpRequestParserTest {
         HttpRequestParser httpRequestParser = createHttpRequestParser(RequestFixture.REQUEST);
 
         //when
-        String protocol = httpRequestParser.findProtocol();
+        String protocol = httpRequestParser.getProtocol();
 
         //then
         assertEquals("HTTP/1.1", protocol);
@@ -94,7 +94,7 @@ class HttpRequestParserTest {
         HttpRequestParser httpRequestParser = createHttpRequestParser(RequestFixture.REQUEST_WITH_QUERY_STRING);
 
         //when
-        Map<String, String> queryStrings = httpRequestParser.findQueryStrings();
+        Map<String, String> queryStrings = httpRequestParser.getQueryStrings();
 
         //then
         assertAll(
@@ -109,7 +109,7 @@ class HttpRequestParserTest {
         HttpRequestParser httpRequestParser = createHttpRequestParser(RequestFixture.REQUEST_WITH_QUERY_STRING);
 
         //when
-        String path = httpRequestParser.findPathWithoutQueryString();
+        String path = httpRequestParser.getPath();
 
         //then
         assertEquals("/login", path);

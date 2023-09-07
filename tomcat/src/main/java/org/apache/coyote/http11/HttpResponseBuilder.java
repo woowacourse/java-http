@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class HttpResponseBuilder {
 
@@ -18,7 +17,7 @@ public class HttpResponseBuilder {
 
     public String buildStaticFileOkResponse(HttpRequestParser httpRequestParser, String path) throws IOException {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequestParser.findProtocol();
+        String protocol = httpRequestParser.getProtocol();
         String contentType = joinContentType(ContentType.findType(path));
         String content = getContent(path);
         String contentLength = joinContentLength(content);
@@ -41,7 +40,7 @@ public class HttpResponseBuilder {
 
     public String buildStaticFileRedirectResponse(HttpRequestParser httpRequestParser, String redirectPath) throws IOException {
         String status = HttpStatus.REDIRECT.getHttpStatusCode() + SPACE + HttpStatus.REDIRECT.getHttpStatusMessage();
-        String protocol = httpRequestParser.findProtocol();
+        String protocol = httpRequestParser.getProtocol();
         String contentType = joinContentType(ContentType.HTML.getType());
         String content = getContent(redirectPath);
         String contentLength = joinContentLength(content);
@@ -56,7 +55,7 @@ public class HttpResponseBuilder {
 
     public String buildStaticFileNotFoundResponse(HttpRequestParser httpRequestParser) throws IOException {
         String status = HttpStatus.NOT_FOUND.getHttpStatusCode() + SPACE + HttpStatus.NOT_FOUND.getHttpStatusMessage();
-        String protocol = httpRequestParser.findProtocol();
+        String protocol = httpRequestParser.getProtocol();
         String contentType = joinContentType(ContentType.HTML.getType());
         String content = getContent("/404.html");
         String contentLength = joinContentLength(content);
@@ -71,7 +70,7 @@ public class HttpResponseBuilder {
 
     public String buildCustomResponse(HttpRequestParser httpRequestParser, String content) {
         String status = HttpStatus.OK.getHttpStatusCode() + SPACE + HttpStatus.OK.getHttpStatusMessage();
-        String protocol = httpRequestParser.findProtocol();
+        String protocol = httpRequestParser.getProtocol();
         String contentType = joinContentType(ContentType.HTML.getType());
         String contentLength = joinContentLength(content);
 
@@ -90,7 +89,7 @@ public class HttpResponseBuilder {
 
     private String findCookie(HttpRequestParser httpRequestParser) {
         Map<String, String> cookies = httpRequestParser.findCookies();
-        if (!isStaticPath(httpRequestParser.findPath()) && !cookies.isEmpty()) {
+        if (!isStaticPath(httpRequestParser.getPath()) && !cookies.isEmpty()) {
 
             StringBuilder cookieHeader = new StringBuilder();
             Set<Map.Entry<String, String>> entries = cookies.entrySet();

@@ -10,6 +10,6 @@ public class GetRegisterController implements Controller {
     @Override
     public String process(HttpRequestParser httpRequestParser, HttpResponseBuilder httpResponseBuilder) throws IOException {
         return httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser,
-                httpRequestParser.findPathWithoutQueryString() + ".html");
+                httpRequestParser.getPath() + ".html");
     }
 }

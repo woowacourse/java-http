@@ -34,8 +34,8 @@ public class FrontController {
     }
 
     public String process(HttpRequestParser httpRequestParser, HttpResponseBuilder httpResponseBuilder) throws IOException {
-        String method = httpRequestParser.findMethod();
-        String path = httpRequestParser.findPathWithoutQueryString();
+        String method = httpRequestParser.getMethod();
+        String path = httpRequestParser.getPath();
         Controller controller = findController(method, path);
 
         return controller.process(httpRequestParser, httpResponseBuilder);

@@ -24,7 +24,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileOkResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, httpRequestParser.findPath());
+        String response = httpResponseBuilder.buildStaticFileOkResponse(httpRequestParser, httpRequestParser.getPath());
 
         //then
         assertAll(
@@ -37,7 +37,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileRedirectResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileRedirectResponse(httpRequestParser, httpRequestParser.findPath());
+        String response = httpResponseBuilder.buildStaticFileRedirectResponse(httpRequestParser, httpRequestParser.getPath());
 
         //then
         assertAll(

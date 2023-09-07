@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,13 +12,10 @@ import java.util.stream.Collectors;
 public class HttpRequestParser {
 
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String START_LINE_DELIMITER = " ";
-    private static final String QUERY_PARAMETER_DELIMITER_REGEX = "\\?";
-    private static final String QUERY_PARAMETER_DELIMITER = "?";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private String startLine;
+    private StartLine startLine;
     private Map<String, String> header = new HashMap<>();
     private String messageBody;
 
@@ -27,7 +23,9 @@ public class HttpRequestParser {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        startLine = bufferedReader.readLine();
+        String firstLine = bufferedReader.readLine();
+
+        startLine = new StartLine(firstLine);
         readHeader(bufferedReader);
         readMessageBody(bufferedReader);
     }
@@ -51,18 +49,6 @@ public class HttpRequestParser {
         }
     }
 
-    public String findMethod() {
-        return startLine.split(START_LINE_DELIMITER)[0];
-    }
-
-    public String findPath() {
-        return startLine.split(START_LINE_DELIMITER)[1];
-    }
-
-    public String findProtocol() {
-        return startLine.split(START_LINE_DELIMITER)[2];
-    }
-
     public Map<String, String> findCookies() {
         return header.entrySet().stream()
                 .filter(entry -> entry.getKey().equals("Cookie"))
@@ -72,27 +58,24 @@ public class HttpRequestParser {
                 .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
     }
 
-    public Map<String, String> findQueryStrings() {
-        String path = findPath();
-        if (!path.contains(QUERY_PARAMETER_DELIMITER)) {
-            return Collections.emptyMap();
-        }
-        String queryString = path.split(QUERY_PARAMETER_DELIMITER_REGEX)[1];
-        return Arrays.stream(queryString.split("&"))
-                .map(line -> line.split(KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
+    public void addHeader(String key, String value) {
+        header.put(key, value);
     }
 
-    public String findPathWithoutQueryString() {
-        String path = findPath();
-        if (!path.contains(QUERY_PARAMETER_DELIMITER)) {
-            return path;
-        }
-        return path.split(QUERY_PARAMETER_DELIMITER_REGEX)[0];
+    public String getMethod() {
+        return startLine.getMethod();
     }
 
-    public String getStartLine() {
-        return startLine;
+    public String getPath() {
+        return startLine.getPath();
+    }
+
+    public Map<String, String> getQueryStrings() {
+        return startLine.getQueryString();
+    }
+
+    public String getProtocol() {
+        return startLine.getProtocol();
     }
 
     public Map<String, String> getHeader() {
@@ -102,9 +85,4 @@ public class HttpRequestParser {
     public String getMessageBody() {
         return messageBody;
     }
-
-    public void addHeader(String key, String value) {
-        header.put(key, value);
-    }
-
 }

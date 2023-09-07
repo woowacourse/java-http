@@ -12,7 +12,6 @@ public class ResponseHeaders {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
 
-
     private final Map<String, String> headers;
     private final ResponseCookie cookie;
 
@@ -40,7 +39,6 @@ public class ResponseHeaders {
     public void setCookie(final String cookieName, final String value) {
         cookie.setAttribute(cookieName, value);
     }
-
 
     public String getResponseString() {
         final StringBuilder sb = new StringBuilder();

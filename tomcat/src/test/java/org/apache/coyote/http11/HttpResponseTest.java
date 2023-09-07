@@ -2,6 +2,9 @@ package org.apache.coyote.http11;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
@@ -42,5 +45,20 @@ class HttpResponseTest {
         String responseString = response.buildResponse();
         assertThat(responseString).contains("key: value");
     }
+
+    @ParameterizedTest
+    @EnumSource(HttpStatus.class)
+    void setStatus(HttpStatus httpStatus) {
+        //given
+        final var response = new HttpResponse(HTTP_1_1);
+
+        //when
+        response.setStatus(httpStatus);
+
+        //then
+        assertThat(response).extracting("httpStatus").isEqualTo(httpStatus);
+    }
+
+
 
 }

@@ -94,6 +94,10 @@ public class HttpResponse {
         headers.put(key, value);
     }
 
+    public void setStatus(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
 }
 
 class HttpResponseBuilder {

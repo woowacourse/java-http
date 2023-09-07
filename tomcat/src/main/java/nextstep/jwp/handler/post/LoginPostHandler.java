@@ -4,19 +4,14 @@ import nextstep.jwp.SessionManager;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BusinessException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.response.Http11Response;
-import java.io.File;
+import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,15 +27,15 @@ public class LoginPostHandler implements Handler {
     }
 
     @Override
-    public Http11Response resolve(final Http11Request request) throws IOException {
+    public HttpResponse resolve(final HttpRequest request) throws IOException {
         final RequestBody requestBody = request.getRequestBody();
         final User user = findUser(requestBody);
         if (user == null) {
             final var resource = getClass().getClassLoader().getResource(STATIC + "/401.html");
-            return makeHttp11Response(resource, StatusCode.UNAUTHORIZED);
+            return HttpResponse.createBy(request.getVersion(), resource, StatusCode.UNAUTHORIZED);
         }
         final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
-        final Http11Response response = makeHttp11Response(resource, StatusCode.FOUND);
+        final HttpResponse response = HttpResponse.createBy(request.getVersion(), resource, StatusCode.FOUND);
         if (request.notContainJsessionId()) {
             final Session session = new Session(String.valueOf(UUID.randomUUID()));
             session.addAttribute("user", user);
@@ -79,13 +74,6 @@ public class LoginPostHandler implements Handler {
                 .map(it -> it.split("=")[1])
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(key + "에 대한 정보가 존재하지 않습니다."));
-    }
-
-    private Http11Response makeHttp11Response(final URL resource, final StatusCode statusCode) throws IOException {
-        final var actualFilePath = new File(resource.getPath()).toPath();
-        final var fileBytes = Files.readAllBytes(actualFilePath);
-        final String responseBody = new String(fileBytes, StandardCharsets.UTF_8);
-        return new Http11Response(statusCode, ContentType.findByPath(resource.getPath()), responseBody);
     }
 
     private void validateSession(final User user, final Session session) {

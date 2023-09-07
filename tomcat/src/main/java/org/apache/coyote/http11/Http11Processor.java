@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.request.HttpRequestParser;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
@@ -48,13 +48,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void sendResponse(final OutputStream outputStream, final Http11Response response) throws IOException {
+    private void sendResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
         final String httpResponse = makeHttpResponse(response);
         outputStream.write(httpResponse.getBytes());
         outputStream.flush();
     }
 
-    private String makeHttpResponse(final Http11Response response) {
+    private String makeHttpResponse(final HttpResponse response) {
         final StringBuilder httpResponse = new StringBuilder();
 
         httpResponse.append("HTTP/1.1 ").append(response.getStatusCode().getResponse()).append("\r\n");

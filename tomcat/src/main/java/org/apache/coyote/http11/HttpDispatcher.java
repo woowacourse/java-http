@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 
 public interface HttpDispatcher {
-    Http11Response handle(final Http11Request request) throws IOException;
+    HttpResponse handle(final HttpRequest request) throws IOException;
 }

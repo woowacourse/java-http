@@ -6,8 +6,8 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,23 +25,16 @@ public class LoginGetHandler implements Handler {
     }
 
     @Override
-    public Http11Response resolve(final Http11Request request) throws IOException {
+    public HttpResponse resolve(final HttpRequest request) throws IOException {
         if (request.notContainJsessionId()) {
             final var resource = getClass().getClassLoader().getResource(STATIC + "/login.html");
-            return makeHttp11Response(resource, StatusCode.OK);
+            return HttpResponse.createBy(request.getVersion(), resource, StatusCode.OK);
         }
         final String jsessionId = request.findJsessionId();
         final Session session = sessionManager.findSession(jsessionId);
         validateSession(session);
         final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
-        return makeHttp11Response(resource, StatusCode.FOUND);
-    }
-
-    private Http11Response makeHttp11Response(final URL resource, final StatusCode statusCode) throws IOException {
-        final var actualFilePath = new File(resource.getPath()).toPath();
-        final var fileBytes = Files.readAllBytes(actualFilePath);
-        final String responseBody = new String(fileBytes, StandardCharsets.UTF_8);
-        return new Http11Response(statusCode, ContentType.findByPath(resource.getPath()), responseBody);
+        return HttpResponse.createBy(request.getVersion(), resource, StatusCode.FOUND);
     }
 
     private void validateSession(final Session session) {

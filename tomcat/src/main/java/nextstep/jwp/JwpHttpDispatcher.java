@@ -4,8 +4,8 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Handler;
 import org.apache.coyote.http11.HttpDispatcher;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -24,7 +24,7 @@ public class JwpHttpDispatcher implements HttpDispatcher {
     }
 
     @Override
-    public Http11Response handle(final Http11Request request) throws IOException {
+    public HttpResponse handle(final HttpRequest request) throws IOException {
         final Handler handler = handlerResolver.resolve(request.getHttpMethod(), request.getPath());
         if (handler != null) {
             return handler.resolve(request);
@@ -32,15 +32,8 @@ public class JwpHttpDispatcher implements HttpDispatcher {
         final var resource = getClass().getClassLoader().getResource(STATIC + request.getPath());
         if (resource == null) {
             final var notFoundResource = getClass().getClassLoader().getResource(STATIC + "/404.html");
-            return makeHttp11Response(Objects.requireNonNull(notFoundResource), StatusCode.NOT_FOUND);
+            return HttpResponse.createBy(request.getVersion(), Objects.requireNonNull(notFoundResource), StatusCode.NOT_FOUND);
         }
-        return makeHttp11Response(resource, StatusCode.OK);
-    }
-
-    private Http11Response makeHttp11Response(final URL resource, final StatusCode statusCode) throws IOException {
-        final var actualFilePath = new File(resource.getPath()).toPath();
-        final var fileBytes = Files.readAllBytes(actualFilePath);
-        final String responseBody = new String(fileBytes, StandardCharsets.UTF_8);
-        return new Http11Response(statusCode, ContentType.findByPath(resource.getPath()), responseBody);
+        return HttpResponse.createBy(request.getVersion(), resource, StatusCode.OK);
     }
 }

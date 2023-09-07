@@ -15,11 +15,11 @@ public class ResponseHeaders {
 
     public static ResponseHeaders of(ResponseBody responseBody) {
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", responseBody.getContentType().getName());
+        headers.put("Content-Type", responseBody.getContentTypeName());
         headers.put("Content-Length", String.valueOf(responseBody.getLength()));
         return new ResponseHeaders(headers);
     }
-
+    
     public void addCookie(HttpCookie cookie) {
         headers.put("Set-Cookie", cookie.toString());
     }
@@ -37,7 +37,7 @@ public class ResponseHeaders {
     }
 
     public void addContent(ResponseBody responseBody) {
-        headers.put("Content-Type", responseBody.getContentType().getName());
+        headers.put("Content-Type", responseBody.getContentTypeName());
         headers.put("Content-Length", String.valueOf(responseBody.getLength()));
     }
 }

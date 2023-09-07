@@ -28,6 +28,6 @@ class ResponseBodyTest {
         // when & then
         assertThat(responseBody.getContent()).isEqualTo(html);
         assertThat(responseBody.getLength()).isEqualTo(html.getBytes().length);
-        assertThat(responseBody.getContentType()).isEqualTo(ContentType.HTML);
+        assertThat(responseBody.getContentTypeName()).isEqualTo(ContentType.HTML.getName());
     }
 }

@@ -31,7 +31,7 @@ public class ResponseBody {
         return content.getBytes().length;
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public String getContentTypeName() {
+        return contentType.getName();
     }
 }

@@ -14,18 +14,18 @@ import java.util.stream.Collectors;
 public class HttpRequestStartLine {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequestStartLine.class);
-    private static final int INDEX_REQUEST_URI = 1;
+    private static final int INDEX_PATH = 1;
     private static final int INDEX_HTTP_METHOD = 0;
     private static final int INDEX_HTTP_VERSION = 2;
     private static final int REQUEST_START_LINE_SIZE = 3;
 
     private final HttpMethod httpMethod;
-    private final String requestURI;
+    private final String path;
     private final String httpVersion;
 
-    public HttpRequestStartLine(HttpMethod httpMethod, String requestURI, String httpVersion) {
+    public HttpRequestStartLine(HttpMethod httpMethod, String path, String httpVersion) {
         this.httpMethod = httpMethod;
-        this.requestURI = requestURI;
+        this.path = path;
         this.httpVersion = httpVersion;
     }
 
@@ -35,7 +35,7 @@ public class HttpRequestStartLine {
 
         return new HttpRequestStartLine(
                 HttpMethod.of(requests.get(INDEX_HTTP_METHOD)),
-                requests.get(INDEX_REQUEST_URI),
+                requests.get(INDEX_PATH),
                 requests.get(INDEX_HTTP_VERSION)
         );
     }

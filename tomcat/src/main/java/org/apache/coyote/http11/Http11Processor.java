@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestStartLine httpRequestStartLine,
             HttpRequestBody httpRequestBody
     ) throws IOException {
-        String requestURI = httpRequestStartLine.getRequestURI();
+        String requestURI = httpRequestStartLine.getPath();
         log.info("REQUEST URI: {}", requestURI);
 
         if (requestURI.equals("/")) {
@@ -118,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestBody httpRequestBody
     ) {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
-        String requestURI = httpRequestStartLine.getRequestURI();
+        String requestURI = httpRequestStartLine.getPath();
         String account = httpRequestBody.find("account");
 
         if (httpMethod == HttpMethod.GET && account == null) {
@@ -181,7 +181,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestBody httpRequestBody
     ) {
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
-        String requestURI = httpRequestStartLine.getRequestURI();
+        String requestURI = httpRequestStartLine.getPath();
 
         if (httpMethod == HttpMethod.GET) {
             return ResponseEntity.builder()

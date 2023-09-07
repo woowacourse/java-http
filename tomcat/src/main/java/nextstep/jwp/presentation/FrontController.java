@@ -12,9 +12,7 @@ public class FrontController {
     static {
         controllers.put("/", MainPageController.getInstance());
         controllers.put("/login", LoginController.getInstance());
-        controllers.put("/register", LoginController.getInstance());
-        controllers.put("/index", IndexController.getInstance());
-        controllers.put("/index.html", IndexController.getInstance());
+        controllers.put("/register", RegisterController.getInstance());
     }
 
     private FrontController() {

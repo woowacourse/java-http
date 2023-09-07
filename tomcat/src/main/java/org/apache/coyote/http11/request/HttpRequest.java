@@ -98,4 +98,8 @@ public class HttpRequest {
         this.session = session == null ? Session.create() : session;
         return session;
     }
+
+    public boolean methodEquals(String method) {
+        return requestLine.getMethod().equals(method);
+    }
 }

@@ -83,16 +83,15 @@ public class HttpResponse {
         headers.setCookie(cookieName, value);
     }
 
-    @Override
-    public String toString() {
+    public String getResponseString() {
         return String.join(CRLF,
                 HTTP_VERSION + status.getCode() + SPACE,
-                headers.toString(),
+                headers.getResponseString(),
                 (responseBody != null) ? responseBody : BLANK
         );
     }
 
     public byte[] getBytes() {
-        return toString().getBytes();
+        return getResponseString().getBytes();
     }
 }

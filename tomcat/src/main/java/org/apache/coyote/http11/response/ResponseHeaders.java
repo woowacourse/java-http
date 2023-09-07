@@ -42,8 +42,7 @@ public class ResponseHeaders {
     }
 
 
-    @Override
-    public String toString() {
+    public String getResponseString() {
         final StringBuilder sb = new StringBuilder();
         if (cookie.isPresent()) {
             sb.append(cookie.getHeaderString());

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
@@ -19,7 +18,7 @@ public class HttpRequest {
     private final String body;
     private final JsonProperties jsonProperties;
 
-    private HttpRequest(RequestLine requestLine, HttpHeaders headers,String body, JsonProperties jsonProperties) {
+    private HttpRequest(RequestLine requestLine, HttpHeaders headers, String body, JsonProperties jsonProperties) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;

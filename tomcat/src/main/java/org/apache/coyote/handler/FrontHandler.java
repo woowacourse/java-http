@@ -1,9 +1,9 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.handler.controller.HomePageController;
+import org.apache.coyote.handler.controller.LoginController;
+import org.apache.coyote.handler.controller.RegisterController;
 import org.apache.coyote.handler.controller.StaticFileController;
-import org.apache.coyote.handler.controller.login.LoginController;
-import org.apache.coyote.handler.controller.register.RegisterController;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 

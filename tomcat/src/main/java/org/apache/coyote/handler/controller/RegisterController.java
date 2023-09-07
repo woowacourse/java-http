@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.controller.register;
+package org.apache.coyote.handler.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;

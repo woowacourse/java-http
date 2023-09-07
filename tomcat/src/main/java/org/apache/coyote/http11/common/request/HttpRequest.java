@@ -83,13 +83,20 @@ public class HttpRequest {
         return body;
     }
 
-    public Session getSession() {
-        Session session = null;
-        try {
-            String sessionId = headers.getCookies().getCookie(SESSIONID);
-            session = sessionManager.findSession(sessionId);
-        } catch (Exception e) {
-            return makeNewSession();
+    public Optional<Session> getSession(boolean create) {
+        Optional<String> sessionId = getCookies().getCookie(SESSIONID);
+        if (sessionId.isEmpty()) {
+            if (create) {
+                return Optional.of(makeNewSession());
+            }
+            return Optional.empty();
+        }
+        Optional<Session> session = sessionManager.findSession(sessionId.get());
+        if (session.isEmpty()) {
+            if (create) {
+                return Optional.of(makeNewSession());
+            }
+            return Optional.empty();
         }
         return session;
     }

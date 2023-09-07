@@ -24,7 +24,8 @@ public class StaticResourceController implements HttpController {
 	public void handleTo(final HttpRequest request, final HttpResponse response) throws IOException {
 		final URL url = extractURL(request);
 		final String body = StaticResourceResolver.resolve(url);
-		response.setResponse(OK_200, body, MimeType.HTML);
+		final MimeType mimeType = MimeType.parseEndpoint(request.getPath());
+		response.setResponse(OK_200, body, mimeType);
 	}
 
 	private URL extractURL(final HttpRequest request) {

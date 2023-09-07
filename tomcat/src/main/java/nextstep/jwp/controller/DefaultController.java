@@ -7,13 +7,13 @@ import org.apache.coyote.http11.HttpResponse;
 public class DefaultController extends AbstractController {
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final String body = "Hello world!";
         response.updateBody(body);
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
     }
 
     private DefaultController() {

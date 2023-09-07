@@ -17,7 +17,7 @@ public class ResponseBody {
         this.data = data;
     }
 
-    public static <T> ResponseBody from(final T info) {
+    public static <T> ResponseBody from(final T info) throws IOException {
         if (info instanceof String) {
             final String uri = (String) info;
             if (uri.equals("/")) {
@@ -33,19 +33,14 @@ public class ResponseBody {
         return new ResponseBody("Hello world!".getBytes());
     }
 
-    private static byte[] getNotDefaultPathResponseBody(final String requestURI) {
+    private static byte[] getNotDefaultPathResponseBody(final String requestURI) throws IOException {
         String makeRequestURI = "static" + requestURI;
         if (isNonStaticFile(requestURI)) {
             makeRequestURI += ".html";
         }
         final URL url = getUrl(makeRequestURI);
         final Path path = new File(url.getPath()).toPath();
-
-        try {
-            return Files.readAllBytes(path);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("알 수 없는 에러 입니다.");
-        }
+        return Files.readAllBytes(path);
     }
 
     private static URL getUrl(final String requestURI) {
@@ -68,7 +63,7 @@ public class ResponseBody {
         return data;
     }
 
-    public void changePage(final String page) {
+    public void changePage(final String page) throws IOException {
         this.data = getNotDefaultPathResponseBody(page);
     }
 

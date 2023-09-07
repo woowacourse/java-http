@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
         if (notAlreadyLoginStatus(httpRequest)) {
             httpResponse.updateRedirect(httpRequest.getHttpVersion(), "/index.html");
             return;
@@ -30,7 +30,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         try {
             final User loginUser = loginService.login(request);
             log.info("로그인 성공 user = {}", loginUser);

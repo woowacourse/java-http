@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
 import org.apache.coyote.http11.session.Cookie;
 
 public class HttpResponse {
@@ -17,7 +18,7 @@ public class HttpResponse {
         this.cookie = cookie;
     }
 
-    public static HttpResponse of(final String requestUri) {
+    public static HttpResponse of(final String requestUri) throws IOException {
         final ResponseInfo responseInfo = ResponseInfo.defaultResponse();
         final HttpHeader httpHeader = HttpHeader.emptyHeader();
         final ResponseBody responseBody = ResponseBody.from(requestUri);
@@ -61,7 +62,7 @@ public class HttpResponse {
         httpHeader.addHeader("Content-Length", String.valueOf(body.length));
     }
 
-    public void updatePage(final String page) {
+    public void updatePage(final String page) throws IOException {
         responseBody.changePage(page);
     }
 

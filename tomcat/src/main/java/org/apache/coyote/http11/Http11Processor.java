@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.session.SessionManager;
@@ -58,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(httpRequest, httpResponse);
             httpResponse.wrapUp(httpRequest.getParsedRequestURI());
             writeMessage(httpResponse, outputStream);
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

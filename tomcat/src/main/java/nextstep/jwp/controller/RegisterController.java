@@ -20,12 +20,12 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         response.updatePage(request.getParsedRequestURI());
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final RequestBody requestBody = request.getRequestBody();
         final String account = requestBody.get("account");
         final String email = requestBody.get("email");

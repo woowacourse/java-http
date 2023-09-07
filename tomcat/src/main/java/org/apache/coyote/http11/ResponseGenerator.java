@@ -92,7 +92,10 @@ public class ResponseGenerator {
     private static Response loginSuccess(final User user) {
         log.info(user.toString());
 
-        return getRedirectResponse("/index.html");
+        final Response response = getRedirectResponse("/index.html");
+        response.setCookie();
+
+        return response;
     }
 
     private static Response getRedirectResponse(final String location) {

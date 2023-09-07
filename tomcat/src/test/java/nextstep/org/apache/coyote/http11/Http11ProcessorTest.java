@@ -115,10 +115,11 @@ class Http11ProcessorTest {
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
+                "Set-Cookie: JSESSIONID=.*",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsPattern(expected);
     }
 
     @Test
@@ -173,10 +174,11 @@ class Http11ProcessorTest {
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 0 ",
+                "Set-Cookie: JSESSIONID=.*",
                 "",
                 "");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsPattern(expected);
     }
 
     @Test

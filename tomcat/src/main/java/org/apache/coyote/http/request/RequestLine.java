@@ -6,7 +6,6 @@ public class RequestLine {
 
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
-
     private final Protocol protocol;
 
     public RequestLine(final HttpMethod httpMethod, final RequestUri requestUri, final Protocol protocol) {

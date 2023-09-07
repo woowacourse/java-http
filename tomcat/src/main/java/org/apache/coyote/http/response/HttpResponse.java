@@ -4,6 +4,8 @@ import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.common.HttpHeader;
 import org.apache.coyote.http.common.HttpHeaders;
 
+import java.util.EnumMap;
+
 public class HttpResponse {
 
     private static final String SPACE = " ";
@@ -11,9 +13,12 @@ public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String BLANK_LINE = "";
 
-    private final StatusLine statusLine;
-    private final HttpHeaders httpHeaders;
-    private final HttpBody body;
+    private StatusLine statusLine;
+    private HttpHeaders httpHeaders;
+    private HttpBody body;
+
+    public HttpResponse() {
+    }
 
     HttpResponse(final StatusLine statusLine, final HttpHeaders httpHeaders, final HttpBody body) {
         this.statusLine = statusLine;
@@ -21,12 +26,26 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse redirect(final String redirectUri) {
-        return HttpResponse.builder()
-                .statusLine(StatusLine.from(StatusCode.FOUND))
-                .httpHeaders(HttpHeader.LOCATION, redirectUri)
-                .body(HttpBody.empty())
-                .build();
+    public void mapToRedirect(final String redirectUri) {
+        changeStatusLine(StatusLine.from(StatusCode.FOUND));
+        addHeader(HttpHeader.LOCATION, redirectUri);
+        changeBody(HttpBody.empty());
+    }
+
+    public void changeStatusLine(final StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void addHeader(final HttpHeader httpHeader, final String value) {
+        if (httpHeaders == null) {
+            this.httpHeaders = new HttpHeaders(new EnumMap<>(HttpHeader.class));
+        }
+
+        this.httpHeaders.add(httpHeader, value);
+    }
+
+    public void changeBody(final HttpBody body) {
+        this.body = body;
     }
 
     public static HttpResponseBuilder builder() {
@@ -43,10 +62,7 @@ public class HttpResponse {
             return response.toString();
         }
 
-        response.append(HttpHeader.CONTENT_LENGTH.getValue())
-                .append(HEADER_DELIMETER)
-                .append(body.getValue().getBytes().length)
-                .append(SPACE).append(CRLF);
+        response.append(HttpHeader.CONTENT_LENGTH.getValue()).append(HEADER_DELIMETER).append(body.getValue().getBytes().length).append(SPACE).append(CRLF);
 
         serializeBody(response);
         return response.toString();
@@ -59,12 +75,7 @@ public class HttpResponse {
     }
 
     private void serializeHeaders(final StringBuilder response) {
-        httpHeaders.getHeaders().forEach((key, value) -> response.append(key.getValue())
-                .append(HEADER_DELIMETER)
-                .append(value)
-                .append(SPACE)
-                .append(CRLF)
-        );
+        httpHeaders.getHeaders().forEach((key, value) -> response.append(key.getValue()).append(HEADER_DELIMETER).append(value).append(SPACE).append(CRLF));
     }
 
     private void serializeBody(final StringBuilder response) {

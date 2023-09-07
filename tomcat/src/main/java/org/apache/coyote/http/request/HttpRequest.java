@@ -18,6 +18,10 @@ public class HttpRequest {
         this.httpBody = httpBody;
     }
 
+    public boolean isSameRequestMethod(final HttpMethod httpMethod) {
+        return requestLine.isSameRequestMethod(httpMethod);
+    }
+
     public boolean isPostRequest() {
         return requestLine.isPostMethod();
     }

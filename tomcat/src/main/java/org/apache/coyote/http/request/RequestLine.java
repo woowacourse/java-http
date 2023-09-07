@@ -18,6 +18,10 @@ public class RequestLine {
         return httpMethod;
     }
 
+    public boolean isSameRequestMethod(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
+
     public boolean isPostMethod() {
         return httpMethod == HttpMethod.POST;
     }

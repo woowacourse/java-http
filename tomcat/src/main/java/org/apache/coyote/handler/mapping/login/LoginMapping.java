@@ -2,24 +2,28 @@ package org.apache.coyote.handler.mapping.login;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.mapping.HandlerMapping;
+import org.apache.coyote.handler.AbstractController;
+import org.apache.coyote.http.LoginManager;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.common.HttpHeader;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.coyote.handler.mapping.Path.MAIN;
 import static org.apache.coyote.handler.mapping.Path.UNAUTHORIZED;
 
-public class LoginMapping extends LoginFilter implements HandlerMapping {
+public class LoginMapping extends AbstractController {
+
+    private static final LoginManager loginManager = new SessionManager();
 
     private static final String TARGET_URI = "login";
     private static final Logger log = LoggerFactory.getLogger(LoginMapping.class);
@@ -30,8 +34,8 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        final Map<String, String> bodyParams = httpRequest.getParsedBody();
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        final Map<String, String> bodyParams = request.getParsedBody();
         final String account = bodyParams.get("account");
         final String password = bodyParams.get("password");
 
@@ -46,17 +50,29 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
             log.info("로그인 성공! user = {}", user);
         } catch (final IllegalArgumentException e) {
             log.warn("login error = {}", e);
-            return HttpResponse.redirect(UNAUTHORIZED.getPath());
+            response.mapToRedirect(UNAUTHORIZED.getPath());
+            return;
         }
 
         final UUID uuid = UUID.randomUUID();
         setSession(uuid.toString(), Map.of("account", user.getAccount()));
 
-        return HttpResponse.builder()
-                .statusLine(StatusLine.from(StatusCode.FOUND))
-                .httpHeaders(HttpHeader.LOCATION, MAIN.getPath())
-                .httpHeaders(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid)
-                .body(HttpBody.empty())
-                .build();
+        response.changeStatusLine(StatusLine.from(StatusCode.FOUND));
+        response.addHeader(HttpHeader.LOCATION, MAIN.getPath());
+        response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid);
+        response.changeBody(HttpBody.empty());
+    }
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    protected void setSession(final String jSessionId, final Map<String, String> sessionData) {
+        final Session session = new Session(jSessionId);
+        for (final Map.Entry<String, String> entry : sessionData.entrySet()) {
+            session.add(entry.getKey(), entry.getValue());
+        }
+        loginManager.add(session);
     }
 }

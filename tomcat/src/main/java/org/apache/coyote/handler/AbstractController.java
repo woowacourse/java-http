@@ -7,20 +7,21 @@ import org.apache.coyote.http.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse httpResponse) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.isSameRequestMethod(HttpMethod.GET)) {
-            doGet(request, httpResponse);
+            doGet(request, response);
             return;
         }
 
         if (request.isSameRequestMethod(HttpMethod.POST)) {
-            doPost(request, httpResponse);
+            doPost(request, response);
             return;
         }
 
         throw new UnsupportedOperationException("지원하지 않는 HTTP Method 입니다.");
     }
 
+    protected abstract boolean supports(final HttpRequest httpRequest);
     protected abstract void doPost(final HttpRequest request, final HttpResponse response) throws Exception;
 
     protected abstract void doGet(final HttpRequest request, final HttpResponse response) throws Exception;

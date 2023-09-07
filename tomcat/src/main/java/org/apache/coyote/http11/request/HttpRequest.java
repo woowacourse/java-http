@@ -71,4 +71,8 @@ public class HttpRequest {
   public String getBody() {
     return this.body;
   }
+
+  public String getMethod() {
+    return this.requestLine.getMethod();
+  }
 }

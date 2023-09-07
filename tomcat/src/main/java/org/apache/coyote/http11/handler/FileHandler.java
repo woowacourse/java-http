@@ -29,10 +29,7 @@ public class FileHandler implements Handler {
 
             File resource = getResourceFileFrom(targetPath);
             String body = Files.readString(resource.toPath());
-            String contentType = getContentTypeOrElse(
-                    targetPath,
-                    httpRequest.getHeader("Accept").getValue()
-            );
+            String contentType = getContentTypeFrom(targetPath);
             return new HttpResponse(body, contentType);
         } catch (IOException exception) {
             throw new IllegalArgumentException("파일 읽기에 실패했습니다");
@@ -46,12 +43,12 @@ public class FileHandler implements Handler {
         return target;
     }
 
-    private String getContentTypeOrElse(final String target, final String acceptType) {
+    private String getContentTypeFrom(final String target) {
         String extension = getExtensionOf(target);
         if (CONTENT_TYPES_BY_EXTENSION.containsKey(extension)) {
             return CONTENT_TYPES_BY_EXTENSION.get(extension);
         }
-        return acceptType;
+        return CONTENT_TYPES_BY_EXTENSION.get(DEFAULT_EXTENSION);
     }
 
     private File getResourceFileFrom(final String target) {

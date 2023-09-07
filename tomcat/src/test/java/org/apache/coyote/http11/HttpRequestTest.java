@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,10 +19,10 @@ class HttpRequestTest {
         HttpRequest httpRequest = createHttpRequest(RequestFixture.REQUEST);
 
         //when
-        String method = httpRequest.getMethod();
+        HttpMethod method = httpRequest.getMethod();
 
         //then
-        assertEquals("GET", method);
+        assertEquals(GET, method);
     }
 
     private HttpRequest createHttpRequest(String request) throws IOException {

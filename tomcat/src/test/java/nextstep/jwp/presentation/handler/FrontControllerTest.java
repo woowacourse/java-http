@@ -1,14 +1,11 @@
 package nextstep.jwp.presentation.handler;
 
-import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.presentation.GetLoginController;
-import nextstep.jwp.presentation.GetRegisterController;
-import nextstep.jwp.presentation.PostLoginController;
-import nextstep.jwp.presentation.PostRegisterController;
-import nextstep.jwp.presentation.RootController;
-import nextstep.jwp.presentation.StaticController;
+import nextstep.jwp.presentation.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
 
 class FrontControllerTest {
 
@@ -18,7 +15,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("GET", "/");
+        Controller controller = frontController.findController(GET, "/");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(RootController.class);
@@ -30,7 +27,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("GET", "/login");
+        Controller controller = frontController.findController(GET, "/login");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(GetLoginController.class);
@@ -42,7 +39,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("GET", "/register");
+        Controller controller = frontController.findController(GET, "/register");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(GetRegisterController.class);
@@ -54,7 +51,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("GET", "/css/styles.css");
+        Controller controller = frontController.findController(GET, "/css/styles.css");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(StaticController.class);
@@ -66,7 +63,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("GET", "/index.html");
+        Controller controller = frontController.findController(GET, "/index.html");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(StaticController.class);
@@ -78,7 +75,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("POST", "/login");
+        Controller controller = frontController.findController(POST, "/login");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(PostLoginController.class);
@@ -90,7 +87,7 @@ class FrontControllerTest {
         FrontController frontController = new FrontController();
 
         //when
-        Controller controller = frontController.findController("POST", "/register");
+        Controller controller = frontController.findController(POST, "/register");
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(PostRegisterController.class);

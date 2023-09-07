@@ -14,13 +14,13 @@ public class StartLine {
     private static final int VALUE_INDEX = 1;
     private static final String KEY_VALUE_DELIMITER = "=";
 
-    private String method;
+    private HttpMethod method;
     private String path;
     private Map<String, String> queryString;
     private String protocol;
 
     public StartLine(String startLine) {
-        this.method = divideMethod(startLine);
+        this.method = HttpMethod.from(divideMethod(startLine));
         String pathWithQueryString = dividePathWithQueryString(startLine);
         this.path = dividePath(pathWithQueryString);
         this.queryString = divideQueryString(pathWithQueryString);
@@ -56,7 +56,7 @@ public class StartLine {
         return startLine.split(START_LINE_DELIMITER)[2];
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

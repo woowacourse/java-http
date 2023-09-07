@@ -1,21 +1,17 @@
 package nextstep.jwp.presentation.handler;
 
-import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.presentation.GetLoginController;
-import nextstep.jwp.presentation.GetRegisterController;
-import nextstep.jwp.presentation.NotFoundController;
-import nextstep.jwp.presentation.PostLoginController;
-import nextstep.jwp.presentation.PostRegisterController;
-import nextstep.jwp.presentation.RootController;
-import nextstep.jwp.presentation.StaticController;
+import nextstep.jwp.presentation.*;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestParser;
 import org.apache.coyote.http11.HttpResponseBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
 
 public class FrontController {
 
@@ -35,21 +31,21 @@ public class FrontController {
     }
 
     public String process(HttpRequest httpRequest, HttpResponseBuilder httpResponseBuilder) throws IOException {
-        String method = httpRequest.getMethod();
+        HttpMethod method = httpRequest.getMethod();
         String path = httpRequest.getPath();
         Controller controller = findController(method, path);
 
         return controller.process(httpRequest, httpResponseBuilder);
     }
 
-    public Controller findController(String method, String path) {
+    public Controller findController(HttpMethod method, String path) {
         if (isStaticPath(path)) {
             return STATIC_CONTROLLER;
         }
-        if (method.equals("GET") && getMappingControllers.containsKey(path)) {
+        if (method == GET && getMappingControllers.containsKey(path)) {
             return getMappingControllers.get(path);
         }
-        if (method.equals("POST") && postMappingControllers.containsKey(path)) {
+        if (method == POST && postMappingControllers.containsKey(path)) {
             return postMappingControllers.get(path);
         }
         return NOT_FOUND_CONTROLLER;

@@ -34,7 +34,7 @@ public class HttpRequest {
         header.put(key, value);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return startLine.getMethod();
     }
 

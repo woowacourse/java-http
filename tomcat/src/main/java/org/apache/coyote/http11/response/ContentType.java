@@ -22,4 +22,8 @@ public enum ContentType {
                      .findFirst()
                      .orElse(HTML);
     }
+
+    public String getValue() {
+        return value;
+    }
 }

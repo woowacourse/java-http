@@ -12,6 +12,14 @@ public class StartLine {
         this.statusCode = statusCode;
     }
 
+    public String toMessage() {
+        return String.join(" ",
+                version.getValue(),
+                statusCode.getCode(),
+                statusCode.name()
+        );
+    }
+
     public HttpVersion getVersion() {
         return version;
     }

@@ -10,6 +10,10 @@ public class Header {
         this.value = value;
     }
 
+    public String toMessage() {
+        return String.join(": ", name, value);
+    }
+
     public String getName() {
         return name;
     }

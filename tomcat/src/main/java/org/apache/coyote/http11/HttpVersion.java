@@ -19,4 +19,8 @@ public enum HttpVersion {
                      .filter(value -> value.value.equals(version))
                      .findFirst().orElseThrow(() -> new NotFoundHttpVersionException("해당 HTTP 버전을 찾을 수 없습니다."));
     }
+
+    public String getValue() {
+        return value;
+    }
 }

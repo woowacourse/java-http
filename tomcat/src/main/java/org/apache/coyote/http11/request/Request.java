@@ -20,6 +20,10 @@ public class Request {
         return new Request(requestStartLine, requestHeaders);
     }
 
+    public String getUri() {
+        return startLine.getUri();
+    }
+
     public StartLine getStartLine() {
         return startLine;
     }

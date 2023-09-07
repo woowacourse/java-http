@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HttpResponseStatusLine {
 
-    private HttpProtocolVersion httpProtocolVersion;
-    private HttpResponseHeaders httpResponseHeaders;
+    private final HttpProtocolVersion httpProtocolVersion;
+    private final HttpStatus httpStatus;
 }

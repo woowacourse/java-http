@@ -9,6 +9,8 @@ import org.apache.coyote.http.response.HttpResponse;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.apache.coyote.handler.mapping.Path.MAIN;
+
 public class RegisterMapping implements HandlerMapping {
 
     private static final String TARGET_URI = "register";
@@ -29,6 +31,6 @@ public class RegisterMapping implements HandlerMapping {
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.redirect("/index.html");
+        return HttpResponse.redirect(MAIN.getPath());
     }
 }

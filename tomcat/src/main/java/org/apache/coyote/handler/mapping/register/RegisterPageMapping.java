@@ -10,6 +10,7 @@ import org.apache.coyote.http.response.StatusLine;
 
 import java.io.IOException;
 
+import static org.apache.coyote.handler.mapping.Path.REGISTER;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
 public class RegisterPageMapping implements HandlerMapping {
@@ -26,7 +27,7 @@ public class RegisterPageMapping implements HandlerMapping {
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.OK))
                 .httpHeaders(CONTENT_TYPE, ContentType.HTML.getValue())
-                .body(HttpBody.file("static/register.html"))
+                .body(HttpBody.file(REGISTER.getPath()))
                 .build();
     }
 }

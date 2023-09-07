@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.handler.mapping.Path.LOGIN;
+import static org.apache.coyote.handler.mapping.Path.MAIN;
+import static org.apache.coyote.handler.mapping.Path.UNAUTHORIZED;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http.common.HttpHeader.COOKIE;
 
@@ -36,7 +39,7 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
         if (httpRequest.containsHeader(COOKIE)) {
             final HttpCookie cookies = HttpCookie.from(httpRequest.getHeader(COOKIE));
             if (isAlreadyLogined(cookies.get("JSESSIONID"))) {
-                return HttpResponse.redirect("/index.html");
+                return HttpResponse.redirect(MAIN.getPath());
             }
         }
 
@@ -59,16 +62,16 @@ public class LoginPageMapping extends LoginFilter implements HandlerMapping {
                 log.info("로그인 성공! user = {}", user);
             } catch (final IllegalArgumentException e) {
                 log.warn("login error = {}", e);
-                return HttpResponse.redirect("/401.html");
+                return HttpResponse.redirect(UNAUTHORIZED.getPath());
             }
 
-            return HttpResponse.redirect("/index.html");
+            return HttpResponse.redirect(MAIN.getPath());
         }
 
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.OK))
                 .httpHeaders(CONTENT_TYPE, ContentType.HTML.getValue())
-                .body(HttpBody.file("static/login.html"))
+                .body(HttpBody.file(LOGIN.getPath()))
                 .build();
     }
 

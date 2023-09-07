@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.apache.coyote.handler.mapping.Path.NOT_FOUND;
+
 public class FrontHandler {
 
     private static final Set<HandlerMapping> handlerMapping = new HashSet<>();
@@ -34,6 +36,6 @@ public class FrontHandler {
             }
         }
 
-        return HttpResponse.redirect("/404.html");
+        return HttpResponse.redirect(NOT_FOUND.getPath());
     }
 }

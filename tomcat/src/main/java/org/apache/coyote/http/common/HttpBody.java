@@ -20,7 +20,8 @@ public class HttpBody {
     }
 
     public static HttpBody file(final String filePath) throws IOException {
-        final URL fileUrl = HttpBody.class.getClassLoader().getResource(filePath);
+        final String defaultFilePath = "static";
+        final URL fileUrl = HttpBody.class.getClassLoader().getResource(defaultFilePath + filePath);
         final Path path = new File(fileUrl.getPath()).toPath();
         return new HttpBody(new String(Files.readAllBytes(path)));
     }

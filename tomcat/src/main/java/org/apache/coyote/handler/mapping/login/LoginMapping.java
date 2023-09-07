@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.coyote.handler.mapping.Path.MAIN;
+import static org.apache.coyote.handler.mapping.Path.UNAUTHORIZED;
+
 public class LoginMapping extends LoginFilter implements HandlerMapping {
 
     private static final String TARGET_URI = "login";
@@ -43,7 +46,7 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
             log.info("로그인 성공! user = {}", user);
         } catch (final IllegalArgumentException e) {
             log.warn("login error = {}", e);
-            return HttpResponse.redirect("/401.html");
+            return HttpResponse.redirect(UNAUTHORIZED.getPath());
         }
 
         final UUID uuid = UUID.randomUUID();
@@ -51,7 +54,7 @@ public class LoginMapping extends LoginFilter implements HandlerMapping {
 
         return HttpResponse.builder()
                 .statusLine(StatusLine.from(StatusCode.FOUND))
-                .httpHeaders(HttpHeader.LOCATION, "/index.html")
+                .httpHeaders(HttpHeader.LOCATION, MAIN.getPath())
                 .httpHeaders(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid)
                 .body(HttpBody.empty())
                 .build();

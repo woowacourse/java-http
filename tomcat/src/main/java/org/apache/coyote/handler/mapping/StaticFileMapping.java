@@ -17,7 +17,6 @@ import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
 public class StaticFileMapping implements HandlerMapping {
 
-    private static final String DEFAULT_FILE_PATH = "static";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
@@ -33,8 +32,7 @@ public class StaticFileMapping implements HandlerMapping {
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        final String requestUri = httpRequest.getRequestUri().getRequestUri();
-        final String filePath = DEFAULT_FILE_PATH + requestUri;
+        final String filePath = httpRequest.getRequestUri().getRequestUri();
 
         if (httpRequest.isRequestUriEndsWith(HTML.getFileExtension())) {
             return createHttpResponseByContentTypeAndPath(HTML, filePath);

@@ -9,6 +9,11 @@ import static java.util.stream.Collectors.toMap;
 public class RequestBody {
 
     public static final RequestBody EMPTY = new RequestBody(Map.of());
+    private static final int KEY_VALUE_SIZE = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int BODY_INDEX = 1;
+    private static final String BODY_KEY_VALUE_SEPARATOR = "=";
+    private static final String BODY_SEPARATOR = "&";
 
     private final Map<String, String> body;
 
@@ -17,10 +22,10 @@ public class RequestBody {
     }
 
     public static RequestBody parse(String requestBody) {
-        return Arrays.stream(requestBody.split("&"))
-                .map(query -> query.split("="))
-                .filter(it -> it.length == 2)
-                .collect(collectingAndThen(toMap(query -> query[0], query -> query[1]), RequestBody::new));
+        return Arrays.stream(requestBody.split(BODY_SEPARATOR))
+                .map(query -> query.split(BODY_KEY_VALUE_SEPARATOR))
+                .filter(body -> body.length == KEY_VALUE_SIZE)
+                .collect(collectingAndThen(toMap(body -> body[KEY_INDEX], body -> body[BODY_INDEX]), RequestBody::new));
     }
 
     public String getBody(String key) {

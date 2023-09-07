@@ -5,6 +5,11 @@ import org.apache.coyote.http11.common.HttpVersion;
 
 public class RequestLine {
 
+    private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+
     private final HttpMethod method;
     private final RequestUri requestUri;
     private final HttpVersion httpVersion;
@@ -16,11 +21,11 @@ public class RequestLine {
     }
 
     public static RequestLine parse(String requestLine) {
-        String[] splitRequest = requestLine.split(" ");
+        String[] splitRequest = requestLine.split(REQUEST_LINE_DELIMITER);
 
-        HttpMethod method = HttpMethod.of(splitRequest[0]);
-        RequestUri requestURI = RequestUri.of(splitRequest[1]);
-        HttpVersion httpVersion = HttpVersion.of(splitRequest[2]);
+        HttpMethod method = HttpMethod.of(splitRequest[METHOD_INDEX]);
+        RequestUri requestURI = RequestUri.of(splitRequest[URI_INDEX]);
+        HttpVersion httpVersion = HttpVersion.of(splitRequest[HTTP_VERSION_INDEX]);
 
         return new RequestLine(method, requestURI, httpVersion);
     }

@@ -11,7 +11,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie jSessionId(String id) {
-        return new HttpCookie("JSESSIONID", id);
+        return new HttpCookie(Constant.JSESSIONID, id);
     }
 
     public String getKey() {

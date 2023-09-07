@@ -7,6 +7,9 @@ import java.io.InputStream;
 
 public class StaticResource {
 
+    private static final String FILE_PATH = "static";
+    private static final String FILE_DELIMITER = "\\.";
+
     private final byte[] bytes;
     private final String fileExtension;
 
@@ -17,7 +20,7 @@ public class StaticResource {
 
     public static StaticResource of(String uri) {
         try {
-            InputStream resourceAsStream = ClassLoader.getSystemResourceAsStream("static" + uri);
+            InputStream resourceAsStream = ClassLoader.getSystemResourceAsStream(FILE_PATH + uri);
             byte[] bytes = resourceAsStream.readAllBytes();
             return new StaticResource(bytes, extractFileExtension(uri));
         } catch (IOException | NullPointerException e) {
@@ -26,7 +29,7 @@ public class StaticResource {
     }
 
     private static String extractFileExtension(String uri) {
-        return uri.split("\\.")[1].toLowerCase();
+        return uri.split(FILE_DELIMITER)[1].toLowerCase();
     }
 
     public String fileToString() {

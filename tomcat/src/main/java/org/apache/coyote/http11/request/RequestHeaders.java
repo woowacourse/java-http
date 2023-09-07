@@ -10,6 +10,8 @@ import java.util.Map;
 public class RequestHeaders {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int HEADER_KEY_VALUE_SIZE = 2;
+    private static final String HEADER_SEPARATOR = ":";
 
     private final Map<String, String> headers;
 
@@ -22,7 +24,7 @@ public class RequestHeaders {
         String line = bufferedReader.readLine();
 
         while (isNotEmpty(line)) {
-            String[] splitedLine = line.split(":", 2);
+            String[] splitedLine = line.split(HEADER_SEPARATOR, HEADER_KEY_VALUE_SIZE);
 
             String key = splitedLine[KEY_INDEX].toLowerCase();
             String value = splitedLine[VALUE_INDEX].trim().toLowerCase();

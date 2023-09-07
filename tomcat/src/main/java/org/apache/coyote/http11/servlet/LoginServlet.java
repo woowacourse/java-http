@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -33,9 +34,7 @@ public class LoginServlet implements Servlet {
         if (request.getMethod() == HttpMethod.POST) {
             return doPost(request);
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET + ", " + HttpMethod.POST);
-        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
+        return HttpResponse.createMethodNotAllowed(List.of(HttpMethod.GET, HttpMethod.POST));
     }
 
     private HttpResponse doGet(final HttpRequest request) throws IOException {
@@ -55,13 +54,7 @@ public class LoginServlet implements Servlet {
         QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
 
         if (params.getParam(ACCOUNT).isEmpty() || params.getParam(PASSWORD).isEmpty()) {
-            String content = StaticFileLoader.load(Page.BAD_REQUEST.getUri());
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
-            headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
-
-            return HttpResponse.create(StatusCode.BAD_REQUEST, headers, content);
+            return HttpResponse.createBadRequest();
         }
 
         String account = params.getParam(ACCOUNT).get();

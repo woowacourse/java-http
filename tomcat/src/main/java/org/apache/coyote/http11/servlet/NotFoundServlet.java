@@ -19,6 +19,6 @@ public class NotFoundServlet implements Servlet {
         headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
         headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
 
-        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers, content);
+        return HttpResponse.create(StatusCode.NOT_FOUND, headers, content);
     }
 }

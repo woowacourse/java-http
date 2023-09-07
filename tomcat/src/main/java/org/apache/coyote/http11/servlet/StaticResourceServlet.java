@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
+import java.util.List;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -17,9 +18,7 @@ public class StaticResourceServlet implements Servlet {
         if (request.getMethod() == HttpMethod.GET) {
             return doGet(request);
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET.toString());
-        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
+        return HttpResponse.createMethodNotAllowed(List.of(HttpMethod.GET));
     }
 
     private static HttpResponse doGet(final HttpRequest request) throws IOException {

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.servlet;
 
+import java.util.List;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -23,9 +24,6 @@ public class HelloWorldServlet implements Servlet {
 
             return HttpResponse.create(StatusCode.OK, headers, body);
         }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.addHeader(HttpHeaderName.ALLOW, HttpMethod.GET.toString());
-        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
+        return HttpResponse.createMethodNotAllowed(List.of(HttpMethod.GET));
     }
 }

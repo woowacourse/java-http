@@ -27,7 +27,7 @@ class InMemoryUserRepositoryTest {
     @Test
     void account로_유저를_검색했을때_유저가_존재하지_않으면_빈_Optional을_반환한다() {
         // given, when
-        final String notExistAccount = "ditoo";
+        final String notExistAccount = "pobi";
         final Optional<User> actual = InMemoryUserRepository.findByAccount(notExistAccount);
 
         // then

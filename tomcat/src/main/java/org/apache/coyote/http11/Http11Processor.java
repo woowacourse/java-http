@@ -4,7 +4,10 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handlermapping.HandlerMapping;
-import org.apache.coyote.handlermapping.HandlerMatcher;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestReader;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,48 +37,24 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String startLine = bufferedReader.readLine();
-            if (startLine == null) {
-                return;
-            }
 
-            HttpRequest request = createRequest(startLine, bufferedReader);
-            HandlerMatcher handlerMatcher = new HandlerMatcher(HttpMethod.valueOf(request.method()), request.uri());
+            HttpRequestReader httpRequestReader = HttpRequestReader.create(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.create(
+                    httpRequestReader.startLine(),
+                    httpRequestReader.header(),
+                    httpRequestReader.body()
+            );
 
-            if (!HandlerMapping.canHandle(handlerMatcher)) {
-                Handler exceptionHandler = HandlerMapping.getExceptionHandler(HttpStatus.NOT_FOUND);
-                outputStream.write(exceptionHandler.handle(request).getResponse().getBytes());
-                outputStream.flush();
-                return;
-            }
-            Handler handler = HandlerMapping.getHandler(handlerMatcher);
-            HttpResponse response = handler.handle(request);
-            outputStream.write(response.getResponse().getBytes());
+            Handler handler = HandlerMapping.getHandler(httpRequest.path());
+            HttpResponse httpResponse = handler.handle(httpRequest);
+
+            HttpResponseWriter httpResponseWriter = HttpResponseWriter.create(httpResponse);
+            String response = httpResponseWriter.response();
+
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest createRequest(String startLine, BufferedReader bufferedReader) throws IOException {
-        HttpRequest request = new HttpRequest(startLine);
-        String header = "";
-        boolean haveToReadBody = false;
-        int contentLength = 0;
-        while (!(header = bufferedReader.readLine()).isBlank()) {
-            String[] splitHeader = header.split(": ");
-            request.setHeader(splitHeader[0], splitHeader[1]);
-            if (HttpHeader.CONTENT_LENGTH.value().equals(splitHeader[0])) {
-                haveToReadBody = true;
-                contentLength = Integer.valueOf(splitHeader[1]);
-            }
-        }
-        if (haveToReadBody) {
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            String body = new String(buffer);
-            request.setBody(body);
-        }
-        return request;
     }
 }

@@ -15,6 +15,7 @@ import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,16 +74,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpRequest.isRequestOf(HttpMethod.POST, "/login")) {
-            Session session;
-            try {
-                session = login(httpRequest);
-            } catch (IllegalArgumentException e) {
-                return HttpResponse.ofFile(HttpStatus.UNAUTHORIZED, getFilePath("/401.html"), httpRequest);
-            }
-            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND);
-            httpResponse.setHeader("Location", "/index.html");
-            httpResponse.setCookie(session);
-            return httpResponse;
+            return createLoginResponse(httpRequest);
         }
 
         if (httpRequest.isRequestOf(HttpMethod.GET, "/register")) {
@@ -103,14 +95,31 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.ofFile(HttpStatus.OK, getFilePath(httpRequest.getPath()), httpRequest);
     }
 
-    private Session login(final HttpRequest httpRequest) throws IllegalArgumentException {
+    private HttpResponse createLoginResponse(final HttpRequest httpRequest) throws IOException {
+        try {
+            final User user = login(httpRequest);
+            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND);
+            httpResponse.setHeader("Location", "/index.html");
+            httpResponse.setCookie(setUserSession(httpRequest, user));
+            return httpResponse;
+        } catch (IllegalArgumentException e) {
+            return HttpResponse.ofFile(HttpStatus.UNAUTHORIZED, getFilePath("/401.html"), httpRequest);
+        }
+    }
+
+    private User login(final HttpRequest httpRequest) throws IllegalArgumentException {
         final User user = InMemoryUserRepository.findByAccount(httpRequest.getBodyOf("account"))
             .filter(foundUser -> foundUser.checkPassword(httpRequest.getBodyOf("password")))
             .orElseThrow(() -> new IllegalArgumentException("잘못된 로그인 정보입니다."));
 
         log.info(user.toString());
+        return user;
+    }
+
+    private Session setUserSession(final HttpRequest httpRequest, final User user) {
         final Session session = httpRequest.getSession(true);
         session.setAttribute("user", user);
+        SessionManager.add(session);
         return session;
     }
 

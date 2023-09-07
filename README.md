@@ -37,3 +37,6 @@
     - [x] 로그인된 상태에서 GET /login 접근 시 index.html로 리다이렉트 처리
     - [x] 로그인 성공하면 session을 저장하기
 - [x] 정적파일을 읽어서 HttpResponse로 바꾸는 역할을 지닌 클래스 추가
+- [x] 동시성 확장하기
+    - [x] ThreadPool을 생성하여 동시성 관리하기
+    - [x] 동시성 컬렉션 사용하기

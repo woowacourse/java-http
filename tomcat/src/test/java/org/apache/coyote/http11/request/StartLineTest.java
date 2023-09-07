@@ -17,7 +17,7 @@ class StartLineTest {
         // then
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual.getMethod()).isEqualTo(HttpMethod.GET);
-            softAssertions.assertThat(actual.getUri()).isEqualTo("/index.html");
+            softAssertions.assertThat(actual.getPath()).isEqualTo("/index.html");
             softAssertions.assertThat(actual.getQueryString()).isNull();
             softAssertions.assertThat(actual.getVersion()).isEqualTo(HttpVersion.HTTP_1_1);
         });
@@ -34,7 +34,7 @@ class StartLineTest {
         // then
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(actual.getMethod()).isEqualTo(HttpMethod.GET);
-            softAssertions.assertThat(actual.getUri()).isEqualTo("/login");
+            softAssertions.assertThat(actual.getPath()).isEqualTo("/login");
             softAssertions.assertThat(actual.getQueryString().getQueries().get("account")).isEqualTo("gugu");
             softAssertions.assertThat(actual.getQueryString().getQueries().get("password")).isEqualTo("password");
             softAssertions.assertThat(actual.getVersion()).isEqualTo(HttpVersion.HTTP_1_1);

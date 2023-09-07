@@ -6,21 +6,21 @@ public class StartLine {
 
     private static final String SEPARATOR = " ";
     private static final int METHOD_INDEX = 0;
-    private static final int URL_INDEX = 1;
-    private static final int URI_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int PATH_INDEX = 0;
     private static final int QUERY_STRING_INDEX = 1;
     private static final int VERSION_INDEX = 2;
     private static final String QUERY_STRING_SEPARATOR = "?";
-    private static final String URL_SEPARATOR = "\\?";
+    private static final String URI_SEPARATOR = "\\?";
 
     private final HttpMethod method;
-    private final String uri;
+    private final String path;
     private final QueryString queryString;
     private final HttpVersion version;
 
-    private StartLine(final HttpMethod method, final String uri, final QueryString queryString, final HttpVersion version) {
+    private StartLine(final HttpMethod method, final String path, final QueryString queryString, final HttpVersion version) {
         this.method = method;
-        this.uri = uri;
+        this.path = path;
         this.version = version;
         this.queryString = queryString;
     }
@@ -28,19 +28,19 @@ public class StartLine {
     public static StartLine from(final String request) {
         final String[] startLine = request.split(SEPARATOR);
         final HttpMethod httpMethod = HttpMethod.findBy(startLine[METHOD_INDEX]);
-        final String[] urls = parseUrl(startLine[URL_INDEX]);
-        final QueryString queryString = convertFrom(urls[QUERY_STRING_INDEX]);
+        final String[] uri = parseUri(startLine[URI_INDEX]);
+        final QueryString queryString = convertFrom(uri[QUERY_STRING_INDEX]);
         final HttpVersion httpVersion = HttpVersion.findBy(startLine[VERSION_INDEX]);
 
-        return new StartLine(httpMethod, urls[URI_INDEX], queryString, httpVersion);
+        return new StartLine(httpMethod, uri[PATH_INDEX], queryString, httpVersion);
     }
 
-    private static String[] parseUrl(final String url) {
-        if (url.contains(QUERY_STRING_SEPARATOR)) {
-            return url.split(URL_SEPARATOR);
+    private static String[] parseUri(final String uri) {
+        if (uri.contains(QUERY_STRING_SEPARATOR)) {
+            return uri.split(URI_SEPARATOR);
         }
 
-        return new String[]{url, null};
+        return new String[]{uri, null};
     }
 
     private static QueryString convertFrom(String queryString) {
@@ -55,8 +55,8 @@ public class StartLine {
         return method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
     public QueryString getQueryString() {

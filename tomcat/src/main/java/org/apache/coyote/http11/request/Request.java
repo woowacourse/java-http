@@ -23,8 +23,8 @@ public class Request {
         return new Request(requestStartLine, requestHeaders);
     }
 
-    public String getUri() {
-        return startLine.getUri();
+    public String getPath() {
+        return startLine.getPath();
     }
 
     public StartLine getStartLine() {

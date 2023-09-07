@@ -28,7 +28,7 @@ class RequestTest {
             final Headers headers = actual.getHeaders();
 
             softAssertions.assertThat(startLine.getMethod()).isEqualTo(HttpMethod.GET);
-            softAssertions.assertThat(startLine.getUri()).isEqualTo("/login");
+            softAssertions.assertThat(startLine.getPath()).isEqualTo("/login");
             softAssertions.assertThat(startLine.getVersion()).isEqualTo(HttpVersion.HTTP_1_1);
             softAssertions.assertThat(headers.getHeaders().get(0).getName()).isEqualTo("Host");
             softAssertions.assertThat(headers.getHeaders().get(0).getValue()).isEqualTo("localhost:8080");

@@ -16,14 +16,14 @@ import java.util.Objects;
 
 public class ResponseGenerator {
 
-    public static final String ROOT_URI = "/";
+    public static final String ROOT_PATH = "/";
     private static final String STATIC_PATH = "static";
 
     private ResponseGenerator() {
     }
 
     public static String generate(final Request request) throws IOException {
-        if (ROOT_URI.equals(request.getUri())) {
+        if (ROOT_PATH.equals(request.getPath())) {
             final Response response = getDefaultResponse();
             return response.toMessage();
         }
@@ -42,8 +42,8 @@ public class ResponseGenerator {
 
     private static Response getFileResponse(final Request request) throws IOException {
         final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
-        final ContentType contentType = ContentType.findBy(request.getUri());
-        final String responseBody = getFileToResponseBody(request.getUri());
+        final ContentType contentType = ContentType.findBy(request.getPath());
+        final String responseBody = getFileToResponseBody(request.getPath());
 
         return Response.of(startLine, contentType, responseBody);
     }

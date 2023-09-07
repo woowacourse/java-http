@@ -22,18 +22,14 @@ public class ResponseGenerator {
     private ResponseGenerator() {
     }
 
-    public static String generate(final Request request) {
-        try {
-            if (ROOT_URI.equals(request.getUri())) {
-                final Response response = getDefaultResponse();
-                return response.toMessage();
-            }
-
-            final Response response = getFileResponse(request);
+    public static String generate(final Request request) throws IOException {
+        if (ROOT_URI.equals(request.getUri())) {
+            final Response response = getDefaultResponse();
             return response.toMessage();
-        } catch (final Exception e) {
-            return null;
         }
+
+        final Response response = getFileResponse(request);
+        return response.toMessage();
     }
 
     private static Response getDefaultResponse() {

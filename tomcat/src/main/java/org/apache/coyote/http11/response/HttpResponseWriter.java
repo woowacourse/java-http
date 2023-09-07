@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.Body;
+import org.apache.coyote.http11.Header;
 
 import java.util.StringJoiner;
 
@@ -50,7 +50,10 @@ public class HttpResponseWriter {
         Header header = httpResponse.header();
 
         for (String headerName : header.getHeaderNames()) {
-            String headerValue = header.findHeaderValueByKey(headerName).get();
+            String headerValue = header.findHeaderValueByKey(headerName).orElse("");
+            if (headerValue.trim().isBlank()) {
+                continue;
+            }
             headerMaker.add(String.join(headerDelimiter, headerName, headerValue) + LINE_DELIMITER);
         }
         return headerMaker.toString();

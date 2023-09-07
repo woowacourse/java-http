@@ -26,12 +26,4 @@ public enum ContentType {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 확장자명입니다."));
     }
-
-    public String getFileExtension() {
-        return fileExtension;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
 }

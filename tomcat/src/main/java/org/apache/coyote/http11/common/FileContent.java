@@ -11,6 +11,12 @@ public enum FileContent {
     ERROR_404("/404", "/404.html"),
     ERROR_500("/500", "/500.html");
 
+    public static final String INDEX_URI = "/index";
+    public static final String UNAUTHORIZED_URI = "/401";
+    public static final String NOT_FOUND_URI = "/404";
+    public static final String STATIC = "static";
+    public static final String HTML = ".html";
+
     private final String fileName;
     private final String fileNameWithExtension;
 

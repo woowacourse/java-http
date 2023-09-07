@@ -1,5 +1,11 @@
 package nextstep.jwp.controller.page;
 
+import static org.apache.coyote.http11.common.ContentType.HTML;
+import static org.apache.coyote.http11.common.FileContent.INDEX_URI;
+import static org.apache.coyote.http11.common.FileContent.STATIC;
+import static org.apache.coyote.http11.common.HttpHeaders.COOKIE_NAME;
+import static org.apache.coyote.http11.common.HttpHeaders.LOCATION;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +24,8 @@ import org.apache.coyote.http11.response.ResponseLine;
 
 public class LoginGetPageController implements Controller {
 
-    private static final String STATIC = "/static";
+    private static final String COMMA_REGEX = "\\.";
+    private static final int FILENAME_INDEX = 0;
 
     private LoginGetPageController() {
     }
@@ -30,45 +37,31 @@ public class LoginGetPageController implements Controller {
     @Override
     public HttpResponse process(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
-        final String[] splitUri = uri.split("\\.");
-        URL url;
-        if (splitUri.length == 1) {
-            url = HttpResponse.class.getClassLoader()
-                    .getResource(STATIC + FileContent.findPage(uri) + ".html");
+        final String splitUri = uri.split(COMMA_REGEX)[FILENAME_INDEX];
+        final URL url = HttpResponse.class.getClassLoader()
+                .getResource(STATIC + FileContent.findPage(splitUri) + HTML);
 
-            final Path path = new File(url.getPath()).toPath();
+        final Path path = new File(url.getPath()).toPath();
 
-            final byte[] content = Files.readAllBytes(path);
+        final byte[] content = Files.readAllBytes(path);
 
-            final HttpHeaders headers = HttpHeaders.createResponse(path);
-            final String responseBody = new String(content);
+        final HttpHeaders headers = HttpHeaders.createResponse(path);
+        final String responseBody = new String(content);
 
-            final Session session = SessionManager.findSession(request.getHeaders().getCookie("JSESSIONID"));
-            if (uri.equals("/login") && Objects.nonNull(session)) {
-                url = HttpResponse.class.getClassLoader()
-                        .getResource(STATIC + "/index" + ".html");
-                final Path loginPath = new File(url.getPath()).toPath();
-
-                final byte[] loginContent = Files.readAllBytes(loginPath);
-                final String loginResponseBody = new String(loginContent);
-
-                headers.setHeader("Location", "/index.html");
-
-                return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, loginResponseBody);
-            }
-            return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
-        } else {
-            url = HttpResponse.class.getClassLoader()
-                    .getResource(STATIC + uri);
-
-            final Path path = new File(url.getPath()).toPath();
-
-            final byte[] content = Files.readAllBytes(path);
-
-            final HttpHeaders headers = HttpHeaders.createResponse(path);
-            final String responseBody = new String(content);
-
+        final Session session = SessionManager.findSession(request.getHeaders().getCookie(COOKIE_NAME));
+        if (Objects.isNull(session)) {
             return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
         }
+
+        final URL indexUrl = HttpResponse.class.getClassLoader()
+                .getResource(STATIC + INDEX_URI + HTML);
+        final Path loginPath = new File(indexUrl.getPath()).toPath();
+
+        final byte[] loginContent = Files.readAllBytes(loginPath);
+        final String loginResponseBody = new String(loginContent);
+
+        headers.setHeader(LOCATION, INDEX_URI + HTML);
+
+        return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, loginResponseBody);
     }
 }

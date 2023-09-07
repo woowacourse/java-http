@@ -12,12 +12,26 @@ import java.util.StringJoiner;
 
 public class HttpHeaders {
 
+    public static final String COOKIE_NAME = "JSESSIONID";
+    public static final String LOCATION = "LOCATION";
+
     private static final String DELIMITER = ": ";
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String EMPTY_LINE = "";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String COOKIE_VALUE_DELIMITER = "=";
+    private static final int COOKIE_NAME_INDEX = 0;
+    private static final int COOKIE_VALUE_INDEX = 1;
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE = "Cookie";
+    private static final String EMPTY = "";
+    private static final String NEXT_LINE = " \r\n";
+    private static final String COMMA_REGEX = "\\.";
+    private static final String SIMPLE_CONTENT_TYPE = "text/html;charset=utf-8";
+    private static final String SIMPLE_CONTENT_LENGTH = "12";
 
     private final Map<String, String> headers;
 
@@ -28,8 +42,8 @@ public class HttpHeaders {
     public static HttpHeaders createSimpleText() {
         final Map<String, String> headers = new LinkedHashMap<>();
 
-        headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
-        headers.put(CONTENT_LENGTH, "12");
+        headers.put(CONTENT_TYPE, SIMPLE_CONTENT_TYPE);
+        headers.put(CONTENT_LENGTH, SIMPLE_CONTENT_LENGTH);
 
         return new HttpHeaders(headers);
     }
@@ -62,7 +76,7 @@ public class HttpHeaders {
     private static String findContentType(final Path path) {
         final String fileName = path.getFileName()
                 .toString();
-        final String[] splitFileName = fileName.split("\\.");
+        final String[] splitFileName = fileName.split(COMMA_REGEX);
 
         return ContentType.findMimeType(splitFileName[1]);
     }
@@ -80,31 +94,31 @@ public class HttpHeaders {
     }
 
     public String getCookie(final String key) {
-        final String cookies = headers.get("Cookie");
+        final String cookies = headers.get(COOKIE);
         if (Objects.isNull(cookies)) {
-            return "";
+            return EMPTY;
         }
 
-        final String[] splitCookies = cookies.split("; ");
+        final String[] splitCookies = cookies.split(HttpHeaders.COOKIE_DELIMITER);
         for (String cookie : splitCookies) {
-            final String cookieName = cookie.split("=")[0];
-            final String cookieValue = cookie.split("=")[1];
+            final String cookieName = cookie.split(COOKIE_VALUE_DELIMITER)[COOKIE_NAME_INDEX];
+            final String cookieValue = cookie.split(COOKIE_VALUE_DELIMITER)[COOKIE_VALUE_INDEX];
 
             if (cookieName.equals(key)) {
                 return cookieValue;
             }
         }
 
-        return "";
+        return EMPTY;
     }
 
     public void setCookie(final String key, final String value) {
-        headers.put("Set-Cookie", key + "=" + value);
+        headers.put(SET_COOKIE, key + COOKIE_VALUE_DELIMITER + value);
     }
 
     @Override
     public String toString() {
-        final StringJoiner joiner = new StringJoiner(" \r\n");
+        final StringJoiner joiner = new StringJoiner(NEXT_LINE);
         final Set<String> keys = headers.keySet();
         for (String key : keys) {
             joiner.add(key + DELIMITER + headers.get(key));

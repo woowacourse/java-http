@@ -1,5 +1,9 @@
 package nextstep.jwp.controller.page;
 
+import static org.apache.coyote.http11.common.FileContent.HTML;
+import static org.apache.coyote.http11.common.FileContent.NOT_FOUND_URI;
+import static org.apache.coyote.http11.common.FileContent.STATIC;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,8 +17,6 @@ import org.apache.coyote.http11.response.ResponseLine;
 
 public class NotFoundPageController implements Controller {
 
-    private static final String STATIC = "static";
-
     private NotFoundPageController() {
     }
 
@@ -25,7 +27,7 @@ public class NotFoundPageController implements Controller {
     @Override
     public HttpResponse process(final HttpRequest request) throws IOException {
         final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + "/404" + ".html");
+                .getResource(STATIC + NOT_FOUND_URI + HTML);
 
         final Path path = new File(url.getPath()).toPath();
 

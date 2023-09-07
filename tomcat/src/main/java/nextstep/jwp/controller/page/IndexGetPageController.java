@@ -1,5 +1,7 @@
 package nextstep.jwp.controller.page;
 
+import static org.apache.coyote.http11.common.FileContent.STATIC;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,8 +15,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseLine;
 
 public class IndexGetPageController implements Controller {
-
-    private static final String STATIC = "static";
 
     private IndexGetPageController() {
     }

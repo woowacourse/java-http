@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.coyote.http11.session.HttpCookie;
 
 import java.io.File;
@@ -10,14 +9,27 @@ import java.net.URL;
 import java.nio.file.Files;
 
 @Getter
-@RequiredArgsConstructor
 public class HttpResponse {
 
     private static final String DELIMITER = "\r\n";
     private static final String BLANK_LINE = "";
     private static final String BLANK_SPACE = " ";
 
-    private final String response;
+    private String response;
+
+    private HttpResponseStatusLine httpResponseStatusLine;
+    private HttpResponseHeaders httpResponseHeaders;
+    private HttpResponseBody httpResponseBody;
+
+    public HttpResponse(String response) {
+        this.response = response;
+    }
+
+    public HttpResponse(HttpResponseStatusLine httpResponseStatusLine, HttpResponseHeaders httpResponseHeaders, HttpResponseBody httpResponseBody) {
+        this.httpResponseStatusLine = httpResponseStatusLine;
+        this.httpResponseHeaders = httpResponseHeaders;
+        this.httpResponseBody = httpResponseBody;
+    }
 
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {
         String location = responseEntity.getLocation();

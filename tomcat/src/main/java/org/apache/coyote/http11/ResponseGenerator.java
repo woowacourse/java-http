@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.exception.NotFoundUserException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.Response;
@@ -53,15 +52,30 @@ public class ResponseGenerator {
     }
 
     private static Response getLoginResponse(final Request request) throws IOException {
-        final User user = InMemoryUserRepository.findByAccount(request.getQueryValue(ACCOUNT_KEY))
-                                                .orElseThrow(() -> new NotFoundUserException("해당 사용자를 찾을 수 없습니다."));
-        log.info(user.toString());
+        if (request.hasQueryString()) {
+            return InMemoryUserRepository.findByAccount(request.getQueryValue(ACCOUNT_KEY))
+                                         .filter(user -> user.checkPassword(request.getQueryValue("password")))
+                                         .map(ResponseGenerator::loginSuccess)
+                                         .orElseGet(() -> getRedirectResponse("/401.html"));
+        }
 
         final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
         final ContentType contentType = ContentType.HTML;
         final String responseBody = getFileToResponseBody("/login.html");
 
         return Response.of(startLine, contentType, responseBody);
+    }
+
+    private static Response loginSuccess(final User user) {
+        log.info(user.toString());
+
+        return getRedirectResponse("/index.html");
+    }
+
+    private static Response getRedirectResponse(final String location) {
+        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
+
+        return Response.ofRedirect(startLine, location);
     }
 
     private static Response getFileResponse(final Request request) throws IOException {

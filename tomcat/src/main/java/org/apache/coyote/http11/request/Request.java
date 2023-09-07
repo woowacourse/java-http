@@ -25,6 +25,10 @@ public class Request {
         return new Request(requestStartLine, requestHeaders);
     }
 
+    public boolean hasQueryString() {
+        return startLine.getQueryString().isPresent();
+    }
+
     public String getPath() {
         return startLine.getPath();
     }

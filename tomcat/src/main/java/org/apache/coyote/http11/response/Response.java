@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.response.Body.EMPTY_BODY;
+
 public class Response {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private final StartLine startLine;
     private final Headers headers;
@@ -30,6 +33,24 @@ public class Response {
         return headers;
     }
 
+    public static Response ofRedirect(final StartLine startLine, final String location) {
+        final Headers headers = new Headers();
+        headers.add(LOCATION, location);
+        headers.add(CONTENT_TYPE, ContentType.HTML.getValue());
+        headers.add(CONTENT_LENGTH, "0");
+
+        return new Response(startLine, headers, EMPTY_BODY);
+    }
+
+    public String toMessage() {
+        return String.join(
+                System.lineSeparator(),
+                startLine.toMessage(),
+                headers.toMessage(),
+                body.toMessage()
+        );
+    }
+
     public StartLine getStartLine() {
         return startLine;
     }
@@ -40,14 +61,5 @@ public class Response {
 
     public Body getBody() {
         return body;
-    }
-
-    public String toMessage() {
-        return String.join(
-                System.lineSeparator(),
-                startLine.toMessage(),
-                headers.toMessage(),
-                body.toMessage()
-        );
     }
 }

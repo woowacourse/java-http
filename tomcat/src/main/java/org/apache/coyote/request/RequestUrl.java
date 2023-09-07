@@ -64,4 +64,8 @@ public class RequestUrl {
     public Map<String, String> getQueryString() {
         return queryString;
     }
+
+    public boolean hasQueryString() {
+        return !queryString.isEmpty();
+    }
 }

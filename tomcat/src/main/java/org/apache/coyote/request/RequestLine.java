@@ -39,4 +39,8 @@ public class RequestLine {
     public Map<String, String> getQueryString() {
         return requestUrl.getQueryString();
     }
+
+    public boolean hasQueryString() {
+        return requestUrl.hasQueryString();
+    }
 }

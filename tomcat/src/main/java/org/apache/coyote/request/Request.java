@@ -1,49 +1,56 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 
 public class Request {
 
-    private final RequestLine requestLine;
-    private final ContentType contentType;
+    private final RequestHeader requestHeader;
+    private final RequestBody requestBody;
 
-    public Request(RequestLine requestLine, ContentType contentType) {
-        this.requestLine = requestLine;
-        this.contentType = contentType;
+    public Request(RequestHeader requestHeader, RequestBody requestBody) {
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
     }
 
     public boolean hasQueryString() {
-        return !requestLine.getQueryString().isEmpty();
+        return requestHeader.hasQueryString();
     }
 
     public String getPath() {
-        return requestLine.getPath();
+        return requestHeader.getPath();
     }
 
     public Protocol getProtocol() {
-        return requestLine.getProtocol();
+        return requestHeader.getProtocol();
     }
 
     public HttpMethod getHttpMethod() {
-        return requestLine.getHttpMethod();
+        return requestHeader.getHttpMethod();
     }
 
     public String getResourceTypes() {
-        return contentType.getValue();
+        return requestHeader.getHeaderBy("Accept");
     }
 
     public String getQueryStringValue(String key) {
-        return requestLine.getQueryValue(key);
+        return requestHeader.getQueryValue(key);
     }
 
     public boolean isSamePath(String urlPath) {
-        return requestLine.isSamePath(urlPath);
+        return requestHeader.isSamePath(urlPath);
     }
 
     public Map<String, String> getQueryString() {
-        return requestLine.getQueryString();
+        return requestHeader.getQueryString();
+    }
+
+    public RequestHeader getRequestHeader() {
+        return requestHeader;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

@@ -6,7 +6,9 @@ server:
     enabled: true
     min-response-size: 10
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 4 # 작업큐의 사이즈
+    max-connections: 2  # 수립가능한 connection의 총 개수
     threads:
-      max: 2
+      max: 4 # 생성할 수 있는 thread의 총 개수
+#      min-spare: 10 # 항상 활성화 되어있는(idle) thread의 개수 (코어 스레드)
+

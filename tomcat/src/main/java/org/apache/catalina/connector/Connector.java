@@ -14,22 +14,16 @@ public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
-    // TODO: 설정파일 분리?
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_MAX_THREADS = 5;
 
     private final ExecutorService executorService;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
-    }
-
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.serverSocket = createServerSocket(port, acceptCount);
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+    public Connector(ConnectorConfiguration configuration) {
+        this.serverSocket = createServerSocket(configuration.getPort(), configuration.getAcceptCount());
+        this.executorService = Executors.newFixedThreadPool(configuration.getMaxThreads());
         this.stopped = false;
     }
 

@@ -9,6 +9,7 @@ import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpResponse {
 
+    public static final String HTTP_VERSION = "HTTP/1.1";
     private static final String EMPTY_BODY = "";
 
     private final HttpStatus status;

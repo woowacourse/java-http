@@ -20,7 +20,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String CRLF = "\r\n";
 
     private static final Handler DEFAULT_HANDLER = new FileHandler();
@@ -58,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
                     .map(HttpHeader::toLine)
                     .collect(Collectors.joining(CRLF));
             final var response = String.join(CRLF,
-                    HTTP_VERSION + httpResponse.getStatus().toLine(),
+                    HttpResponse.HTTP_VERSION + httpResponse.getStatus().toLine(),
                     headerLines,
                     "",
                     httpResponse.getBody()

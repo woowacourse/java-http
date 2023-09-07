@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
 import java.util.Optional;
+import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 
 public enum ContentType {
 
@@ -12,7 +13,6 @@ public enum ContentType {
     ALL("*/*");
 
     public static final String ACCEPT_HEADER = "Accept";
-    private static final ContentType DEFAULT = HTML;
 
     private final String type;
 
@@ -22,31 +22,33 @@ public enum ContentType {
 
     public static ContentType findResponseContentTypeFromRequest(final HttpRequest httpRequest) {
         final ContentType acceptedContentType = httpRequest.findFirstHeaderValue(ACCEPT_HEADER)
-            .flatMap(ContentType::findContentTypeByType)
+            .map(ContentType::findContentTypeByType)
             .orElse(ALL);
 
         if (acceptedContentType != ALL) {
             return acceptedContentType;
         }
+
         return findContentTypeFromRequestPath(httpRequest.getRequestLine());
     }
 
-    private static Optional<ContentType> findContentTypeByType(final String type) {
+    private static ContentType findContentTypeByType(final String type) {
         return Arrays.stream(values())
             .filter(contentType -> contentType.type.equals(type))
-            .findFirst();
+            .findAny()
+            .orElseThrow(UnsupportedContentTypeException::new);
     }
 
     private static ContentType findContentTypeFromRequestPath(final RequestLine requestLine) {
         return requestLine.parseFileExtensionFromPath()
             .flatMap(ContentType::findContentTypeByName)
-            .orElse(DEFAULT);
+            .orElseThrow(UnsupportedContentTypeException::new);
     }
 
     private static Optional<ContentType> findContentTypeByName(final String name) {
         return Arrays.stream(values())
             .filter(contentType -> contentType.name().equalsIgnoreCase(name))
-            .findFirst();
+            .findAny();
     }
 
     public String getType() {

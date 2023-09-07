@@ -9,6 +9,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpRequest;
 import org.apache.coyote.http11.message.HttpResponse;
@@ -42,11 +43,9 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest httpRequest = HttpRequest.from(reader);
-
             final HttpResponse httpResponse = createResponse(httpRequest);
-            final String message = httpResponse.convertToMessage();
 
-            outputStream.write(message.getBytes());
+            outputStream.write(httpResponse.convertToMessage().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -54,6 +53,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(final HttpRequest httpRequest) throws IOException {
+        try {
+            return mapRequestToResponse(httpRequest);
+        } catch(UnsupportedContentTypeException exception) {
+            return HttpResponse.of(HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
+    private HttpResponse mapRequestToResponse(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRequestOf(HttpMethod.GET, "/")) {
             return HttpResponse.ofText(HttpStatus.OK, "Hello world!", httpRequest);
         }
@@ -72,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             } catch (IllegalArgumentException e) {
                 return HttpResponse.ofFile(HttpStatus.UNAUTHORIZED, getFilePath("/401.html"), httpRequest);
             }
-            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, httpRequest);
+            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND);
             httpResponse.setHeader("Location", "/index.html");
             httpResponse.setCookie(session);
             return httpResponse;
@@ -88,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
             } catch (IllegalArgumentException e) {
                 return HttpResponse.ofFile(HttpStatus.CONFLICT, getFilePath("/login.html"), httpRequest);
             }
-            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND, httpRequest);
+            final HttpResponse httpResponse = HttpResponse.of(HttpStatus.FOUND);
             httpResponse.setHeader("Location", "/index.html");
             return httpResponse;
         }

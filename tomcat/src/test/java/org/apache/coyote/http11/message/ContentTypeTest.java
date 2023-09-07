@@ -1,12 +1,14 @@
 package org.apache.coyote.http11.message;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -52,29 +54,25 @@ class ContentTypeTest {
     }
 
     @Test
-    @DisplayName("Accept Type이 */* 이고, 정적 파일 요청이 아니라면 HTML 타입을 반환한다.")
+    @DisplayName("Accept Type이 */* 이고, 정적 파일 요청이 아니라면 예외가 발생한다.")
     void findResponseContentType_notFileRequest() throws IOException {
         // given
         final HttpRequest httpRequest = createHttpRequest("/", "*/*");
 
-        // when
-        final ContentType contentType = ContentType.findResponseContentTypeFromRequest(httpRequest);
-
-        // then
-        assertThat(contentType).isEqualTo(ContentType.HTML);
+        // when, then
+        assertThatThrownBy(() -> ContentType.findResponseContentTypeFromRequest(httpRequest))
+            .isInstanceOf(UnsupportedContentTypeException.class);
     }
 
     @Test
-    @DisplayName("일치하는 ContentType이 없다면 HTML 타입을 반환한다.")
+    @DisplayName("일치하는 ContentType이 없다면 예외가 발생한다.")
     void findResponseContentType_nonMatchAcceptType() throws IOException {
         // given
-        final HttpRequest httpRequest = createHttpRequest("/favicon.ico", null);
+        final HttpRequest httpRequest = createHttpRequest("/favicon.ico", "image/jpg");
 
-        // when
-        final ContentType contentType = ContentType.findResponseContentTypeFromRequest(httpRequest);
-
-        // then
-        assertThat(contentType).isEqualTo(ContentType.HTML);
+        // when, then
+        assertThatThrownBy(() -> ContentType.findResponseContentTypeFromRequest(httpRequest))
+            .isInstanceOf(UnsupportedContentTypeException.class);
     }
     
     private HttpRequest createHttpRequest(final String path, final String acceptType) throws IOException {

@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -56,5 +57,33 @@ class Http11ProcessorTest {
         final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).contains(expectedHeader, expectedBody);
+    }
+
+    @Test
+    @DisplayName("응답할 수 없는 Content Type을 요구하는 요청을 받았을 때 406 응답이 반환된다.")
+    void not_acceptable() {
+        // given
+        final String httpRequest= String.join("\r\n",
+            "GET /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Accept: image/jpg",
+            "",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expectedHeader = String.join("\r\n",
+            "HTTP/1.1 406 NOT ACCEPTABLE ",
+            "",
+            "",
+            "");
+
+        assertThat(socket.output()).isEqualTo(expectedHeader);
     }
 }

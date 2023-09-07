@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,10 @@ public class HttpHeaders {
 
     public HttpHeaders(final Map<String, String> headersWithValue) {
         this.headersWithValue = headersWithValue;
+    }
+
+    public static HttpHeaders empty() {
+        return new HttpHeaders(Collections.emptyMap());
     }
 
     public static HttpHeaders from(final List<String> headerLines) {

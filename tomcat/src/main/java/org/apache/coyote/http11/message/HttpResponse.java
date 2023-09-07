@@ -27,9 +27,8 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(final HttpStatus httpStatus, final HttpRequest httpRequest) {
-        final HttpHeaders responseHeader = createDefaultHeader(httpRequest);
-        return new HttpResponse(httpStatus, responseHeader, EMPTY_STRING);
+    public static HttpResponse of(final HttpStatus httpStatus) {
+        return new HttpResponse(httpStatus,HttpHeaders.empty(), EMPTY_STRING);
     }
 
     public static HttpResponse ofText(final HttpStatus httpStatus, final String body, final HttpRequest httpRequest) {
@@ -83,7 +82,7 @@ public class HttpResponse {
     private String createStatusLine() {
         return String.join(BLANK,
             HttpProtocol.HTTP_ONE.getVersion(), String.valueOf(httpStatus.getStatusCode()),
-            httpStatus.name(), EMPTY_STRING);
+            httpStatus.getDescription(), EMPTY_STRING);
     }
 
     private String createHeaderLines() {

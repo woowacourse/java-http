@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.io.RequestReader;
 import org.slf4j.Logger;
@@ -32,11 +30,11 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestReader = new RequestReader(inputStream);
             final var request = requestReader.read();
-            final var response = FrontController.handle(request);
+            final var response = DispatcherServlet.service(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (final IOException | UncheckedServletException e) {
+        } catch (final Exception e) {
             log.error(e.getMessage(), e);
         }
     }

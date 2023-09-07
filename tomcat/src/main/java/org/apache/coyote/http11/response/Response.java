@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.http11.common.ContentType.HTML;
-import static org.apache.coyote.http11.common.Status.BAD_REQUEST;
 import static org.apache.coyote.http11.common.Status.FOUND;
+import static org.apache.coyote.http11.common.Status.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
 
@@ -21,6 +22,7 @@ public class Response {
     private final EntityHeaders entityHeaders;
     private final String body;
 
+    // TODO StatusLine 포장
     private Response(
             final Status status,
             final GeneralHeaders generalHeaders,
@@ -51,18 +53,22 @@ public class Response {
         return new Builder(NOT_FOUND);
     }
 
-    public static Builder badRequest() {
-        return new Builder(BAD_REQUEST);
-    }
-
     public static Builder redirect(final String location) {
         return Response.builder(FOUND)
                 .addContentType(HTML.toString())
                 .addLocation(location);
     }
 
+    public static Builder methodNotAllowed() {
+        return Response.builder(METHOD_NOT_ALLOWED);
+    }
+
     public static Builder builder(final Status status) {
         return new Builder(status);
+    }
+
+    public static Builder internalSeverError() {
+        return Response.builder(INTERNAL_SERVER_ERROR);
     }
 
     public Status getStatus() {

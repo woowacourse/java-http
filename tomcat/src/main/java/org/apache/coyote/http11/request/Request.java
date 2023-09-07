@@ -23,6 +23,7 @@ public class Request {
     private final EntityHeaders entityHeaders;
     private final String body;
 
+    // TODO RequestLine 포장, RequestLine에서 다시 uri의 queryString 가져올 수 있게 하기 (URI -> query -> StringFormatParser)
     private Request(
             final Method method,
             final String uri,
@@ -37,20 +38,6 @@ public class Request {
         this.requestHeaders = requestHeaders;
         this.entityHeaders = entityHeaders;
         this.body = body;
-    }
-
-    public static Request of(
-            final String methodName,
-            final String requestURI,
-            final GeneralHeaders generalHeaders,
-            final RequestHeaders requestHeaders,
-            final EntityHeaders entityHeaders,
-            final String body
-    ) {
-        final var method = Method.find(methodName)
-                .orElseThrow(() -> new IllegalArgumentException("invalid method"));
-
-        return new Request(method, requestURI, generalHeaders, requestHeaders, entityHeaders, body);
     }
 
     public static Request of(

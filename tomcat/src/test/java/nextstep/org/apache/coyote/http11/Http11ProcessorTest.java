@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import javassist.NotFoundException;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.util.ResourceReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -60,9 +62,9 @@ class Http11ProcessorTest {
         );
     }
 
-    @DisplayName("로그인 성공 시 응답 헤더에 JSESSIONID 값을 반환한다.")
+    @DisplayName("로그인 성공 시 응답 헤더에 JSESSIONID 값을 반환하고 index.html로 리다이렉트한다.")
     @Test
-    void login() {
+    void loginPost() {
         // given
         final String httpRequest = String.join(System.lineSeparator(),
                 "POST /login HTTP/1.1 ",
@@ -84,6 +86,57 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8",
                 "Location: /index.html",
                 "Set-Cookie:"
+        );
+    }
+
+    @DisplayName("/login GET 요청 시 login.html을 반환한다.")
+    @Test
+    void loginGet() throws IOException, NotFoundException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "" + System.lineSeparator()
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                ResourceReader.read("/login.html").getContentBytes()
+        );
+
+    }
+
+    @DisplayName("/register GET 요청 시 login.html을 반환한다.")
+    @Test
+    void registerGet() throws IOException, NotFoundException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "" + System.lineSeparator()
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                ResourceReader.read("/register.html").getContentBytes()
         );
     }
 

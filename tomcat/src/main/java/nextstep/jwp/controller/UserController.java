@@ -9,7 +9,7 @@ import org.apache.coyote.http11.common.QueryParameters;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
-public class UserController {
+public class UserController implements HandlerAdaptor {
 
     private UserController() {
     }
@@ -49,4 +49,5 @@ public class UserController {
         return redirect("/index.html")
                 .build();
     }
+
 }

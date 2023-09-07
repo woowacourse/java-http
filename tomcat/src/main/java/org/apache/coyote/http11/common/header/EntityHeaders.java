@@ -30,7 +30,7 @@ public class EntityHeaders extends Headers {
 
     public void addContentLength(final String body) {
         final var bytes = body.getBytes();
-        
+
         add(CONTENT_LENGTH, String.valueOf(bytes.length));
     }
 

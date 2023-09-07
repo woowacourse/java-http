@@ -2,12 +2,12 @@ package org.apache.coyote.http11.common.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.http11.util.Parser;
 
 public class QueryParams {
 
     public static final String START_MARK_OF_QUERY_PARAMS = "?";
+    public static final String EMPTY_STRING = "";
     public static final int HAS_NO_QUERY_PARAMS = -1;
 
     private final Map<String, String> params;
@@ -29,7 +29,7 @@ public class QueryParams {
         return new QueryParams(new HashMap<>());
     }
 
-    public Optional<String> getParam(String name) {
-        return Optional.ofNullable(params.get(name));
+    public String getParam(String name) {
+        return params.getOrDefault(name, EMPTY_STRING);
     }
 }

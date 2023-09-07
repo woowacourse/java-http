@@ -43,11 +43,14 @@ public class RegisterServlet implements Servlet {
 
     private static HttpResponse doPost(final HttpRequest request) throws IOException {
         QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
+        String account = params.getParam(ACCOUNT);
+        String password = params.getParam(PASSWORD);
+        String email = params.getParam(EMAIL);
 
-        if (params.getParam(ACCOUNT).isEmpty() || params.getParam(PASSWORD).isEmpty() || params.getParam(EMAIL).isEmpty()) {
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
             return HttpResponse.createBadRequest();
         }
-        User user = new User(params.getParam(ACCOUNT).get(), params.getParam(PASSWORD).get(), params.getParam(EMAIL).get());
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         HttpHeaders headers = new HttpHeaders();

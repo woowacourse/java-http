@@ -2,10 +2,11 @@ package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.http11.util.Parser;
 
 public class Cookies {
+
+    private static final String EMPTY_STRING = "";
 
     private Map<String, String> values;
 
@@ -21,7 +22,7 @@ public class Cookies {
         return new Cookies(new HashMap<>());
     }
 
-    public Optional<String> getCookie(String name) {
-        return Optional.ofNullable(values.get(name));
+    public String getCookie(String name) {
+        return values.getOrDefault(name, EMPTY_STRING);
     }
 }

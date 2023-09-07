@@ -3,11 +3,12 @@ package org.apache.coyote.http11.common;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
-    public static final String DELIMITER = ": ";
+
+    private static final String DELIMITER = ": ";
+    private static final String EMPTY_STRING = "";
 
     private Map<String, String> headers;
 
@@ -37,8 +38,8 @@ public class HttpHeaders {
         headers.put(header.getName(), value);
     }
 
-    public Optional<String> getHeader(String name) {
-        return Optional.ofNullable(headers.get(name));
+    public String getHeader(String name) {
+        return headers.getOrDefault(name, EMPTY_STRING);
     }
 
     @Override

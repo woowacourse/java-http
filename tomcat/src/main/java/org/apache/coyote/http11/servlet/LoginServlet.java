@@ -52,14 +52,12 @@ public class LoginServlet implements Servlet {
 
     private HttpResponse doPost(final HttpRequest request) throws IOException {
         QueryParams params = Parser.parseToQueryParams(request.getBody().getContent());
+        String account = params.getParam(ACCOUNT);
+        String password = params.getParam(PASSWORD);
 
-        if (params.getParam(ACCOUNT).isEmpty() || params.getParam(PASSWORD).isEmpty()) {
+        if (account.isEmpty() || password.isEmpty()) {
             return HttpResponse.createBadRequest();
         }
-
-        String account = params.getParam(ACCOUNT).get();
-        String password = params.getParam(PASSWORD).get();
-
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> loginSuccess(request, user))

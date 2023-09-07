@@ -53,11 +53,11 @@ public class HttpRequest {
     }
 
     private static MessageBody findBody(HttpHeaders headers, BufferedReader br) throws IOException {
-        Optional<String> contentLength = headers.getHeader(HttpHeaderName.CONTENT_LENGTH.getName());
+        String contentLength = headers.getHeader(HttpHeaderName.CONTENT_LENGTH.getName());
         if (contentLength.isEmpty()) {
             return MessageBody.empty();
         }
-        final int length = Integer.parseInt(contentLength.get());
+        final int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         br.read(buffer, 0, length);
         return MessageBody.create(new String(buffer));
@@ -72,11 +72,11 @@ public class HttpRequest {
     }
 
     public Cookies getCookies() {
-        Optional<String> cookieLine = headers.getHeader(COOKIE);
+        String cookieLine = headers.getHeader(COOKIE);
         if (cookieLine.isEmpty()) {
             return Cookies.empty();
         }
-        return Cookies.create(cookieLine.get());
+        return Cookies.create(cookieLine);
     }
 
     public MessageBody getBody() {
@@ -84,14 +84,14 @@ public class HttpRequest {
     }
 
     public Optional<Session> getSession(boolean create) {
-        Optional<String> sessionId = getCookies().getCookie(SESSIONID);
+        String sessionId = getCookies().getCookie(SESSIONID);
         if (sessionId.isEmpty()) {
             if (create) {
                 return Optional.of(makeNewSession());
             }
             return Optional.empty();
         }
-        Optional<Session> session = sessionManager.findSession(sessionId.get());
+        Optional<Session> session = sessionManager.findSession(sessionId);
         if (session.isEmpty()) {
             if (create) {
                 return Optional.of(makeNewSession());

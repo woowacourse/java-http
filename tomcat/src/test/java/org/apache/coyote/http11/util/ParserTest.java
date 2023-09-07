@@ -21,9 +21,9 @@ class ParserTest {
         QueryParams queryParams = Parser.parseToQueryParams(line);
 
         // then
-        assertThat(queryParams.getParam("name").get()).isEqualTo("oing");
-        assertThat(queryParams.getParam("age").get()).isEqualTo("24");
-        assertThat(queryParams.getParam("gender").get()).isEqualTo("female");
+        assertThat(queryParams.getParam("name")).isEqualTo("oing");
+        assertThat(queryParams.getParam("age")).isEqualTo("24");
+        assertThat(queryParams.getParam("gender")).isEqualTo("female");
     }
 
     @Test
@@ -35,8 +35,8 @@ class ParserTest {
         Cookies cookies = Parser.parseToCookie(line);
 
         // then
-        assertThat(cookies.getCookie("name").get()).isEqualTo("oing");
-        assertThat(cookies.getCookie("age").get()).isEqualTo("24");
-        assertThat(cookies.getCookie("gender").get()).isEqualTo("female");
+        assertThat(cookies.getCookie("name")).isEqualTo("oing");
+        assertThat(cookies.getCookie("age")).isEqualTo("24");
+        assertThat(cookies.getCookie("gender")).isEqualTo("female");
     }
 }

@@ -25,6 +25,7 @@ public class ResponseGenerator {
     public static final String ROOT_PATH = "/";
     private static final String STATIC_PATH = "static";
     private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
@@ -38,6 +39,10 @@ public class ResponseGenerator {
         }
         if (LOGIN_PATH.equals(request.getPath())) {
             final Response response = getLoginResponse(request);
+            return response.toMessage();
+        }
+        if (REGISTER_PATH.equals(request.getPath())) {
+            final Response response = getRegisterResponse(request);
             return response.toMessage();
         }
 
@@ -93,6 +98,22 @@ public class ResponseGenerator {
         final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
 
         return Response.ofRedirect(startLine, location);
+    }
+
+    private static Response getRegisterResponse(final Request request) throws IOException {
+        if (HttpMethod.GET.equals(request.getMethod())) {
+            return getRegisterResponseGetMethod();
+        }
+
+        return null;
+    }
+
+    private static Response getRegisterResponseGetMethod() throws IOException {
+        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+        final ContentType contentType = ContentType.HTML;
+        final String responseBody = getFileToResponseBody("/register.html");
+
+        return Response.of(startLine, contentType, responseBody);
     }
 
     private static Response getFileResponse(final Request request) throws IOException {

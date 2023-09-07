@@ -208,4 +208,33 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void register() throws IOException {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final File file = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8));
+        var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 4319 ",
+                "",
+                new String(Files.readAllBytes(file.toPath())));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

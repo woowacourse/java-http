@@ -3,7 +3,8 @@ package org.apache.coyote.httprequest.header;
 import org.apache.coyote.httprequest.exception.InvalidHeaderException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SuppressWarnings("NonAsciiCharacters")
 class RequestHeadersTest {

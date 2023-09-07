@@ -3,7 +3,7 @@ package org.apache.coyote.common;
 import org.apache.coyote.httprequest.exception.InvalidHttpVersionException;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SuppressWarnings("NonAsciiCharacters")
 class HttpVersionTest {

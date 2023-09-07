@@ -9,16 +9,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class RequestHeader {
+public class RequestHeaders {
     private final Map<String, String> header;
     private final Cookies cookies;
 
-    private RequestHeader(final Map<String, String> header, final Cookies cookies) {
+    private RequestHeaders(final Map<String, String> header, final Cookies cookies) {
         this.header = header;
         this.cookies = cookies;
     }
 
-    public static RequestHeader from(final BufferedReader bufferedReader) throws IOException {
+    public static RequestHeaders from(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> result = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
@@ -26,7 +26,7 @@ public class RequestHeader {
             result.put(split[0], split[1]);
             line = bufferedReader.readLine();
         }
-        return new RequestHeader(result, Cookies.from(result.get("Cookie")));
+        return new RequestHeaders(result, Cookies.from(result.get("Cookie")));
     }
 
     public String getHeaderValue(final String key) {

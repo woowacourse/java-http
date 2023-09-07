@@ -27,7 +27,7 @@ public class StaticResource {
 
     private static String extractContent(final String fileName) throws IOException {
         try {
-            final URL resource = Response.class.getClassLoader().getResource("static" + fileName);
+            final URL resource = HttpResponse.class.getClassLoader().getResource("static" + fileName);
             final Path path = Paths.get(resource.getPath());
             return Files.readString(path);
         } catch (final NullPointerException e) {

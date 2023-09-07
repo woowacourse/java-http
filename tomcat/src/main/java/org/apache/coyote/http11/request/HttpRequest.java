@@ -8,26 +8,26 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 
-public class Request {
+public class HttpRequest {
     private static final String JSESSIONID = "JSESSIONID";
 
     private final RequestLine requestLine;
-    private final RequestHeader requestHeader;
+    private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
 
-    private Request(final RequestLine requestLine,
-                    final RequestHeader requestHeader,
-                    final RequestBody requestBody) {
+    private HttpRequest(final RequestLine requestLine,
+                        final RequestHeaders requestHeaders,
+                        final RequestBody requestBody) {
         this.requestLine = requestLine;
-        this.requestHeader = requestHeader;
+        this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
     }
 
-    public static Request from(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
-        final RequestHeader requestHeader = RequestHeader.from(bufferedReader);
-        final RequestBody requestBody = RequestBody.of(requestHeader, bufferedReader);
-        return new Request(requestLine, requestHeader, requestBody);
+        final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
+        final RequestBody requestBody = RequestBody.of(requestHeaders, bufferedReader);
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
     public RequestLine getRequestLine() {
@@ -40,7 +40,7 @@ public class Request {
 
     public Session getSession(final boolean create) {
         if (!create) {
-            final Optional<Cookie> cookieOptional = requestHeader.findCookie(JSESSIONID);
+            final Optional<Cookie> cookieOptional = requestHeaders.findCookie(JSESSIONID);
             if (cookieOptional.isPresent()) {
                 return SessionManager.findSession(cookieOptional.get().getValue());
             }
@@ -51,6 +51,6 @@ public class Request {
     }
 
     public Optional<Cookie> getCookieValue(final String cookieKey) {
-        return requestHeader.findCookie(cookieKey);
+        return requestHeaders.findCookie(cookieKey);
     }
 }

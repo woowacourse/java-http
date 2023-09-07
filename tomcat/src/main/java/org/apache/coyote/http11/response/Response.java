@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import java.util.UUID;
-
 import static org.apache.coyote.http11.response.Body.EMPTY_BODY;
 
 public class Response {
@@ -45,10 +43,8 @@ public class Response {
         return new Response(startLine, headers, EMPTY_BODY);
     }
 
-    public void setCookie() {
-        final var uuid = UUID.randomUUID().toString();
-        final String value = "JSESSIONID=" + uuid;
-
+    public void setCookie(final String jsessionId) {
+        final String value = "JSESSIONID=" + jsessionId;
         headers.add(SET_COOKIE, value);
     }
 

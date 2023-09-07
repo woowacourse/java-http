@@ -1,6 +1,9 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -192,6 +195,41 @@ class Http11ProcessorTest {
                 "Connection: keep-alive ",
                 "",
                 "account=invalid&password=invalid");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join(System.lineSeparator(),
+                "HTTP/1.1 302 FOUND ",
+                "Location: /401.html ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 0 ",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void autoLoginWithCookie() {
+        // given
+        final String httpRequest = String.join(System.lineSeparator(),
+                "POST /login HTTP/1.1 ",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=a00c9f25-2c1e-499e-861c-82c8c8ce24c3",
+                "",
+                "account=invalid&password=invalid");
+
+        final Session session = new Session("a00c9f25-2c1e-499e-861c-82c8c8ce24c3");
+        session.addAttribute("user", new User("gugu", "password", "test@email.com"));
+        SessionManager.add(session);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

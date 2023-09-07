@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.io.IOException;
+import org.apache.coyote.http11.request.line.Protocol;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,10 +21,11 @@ class HttpResponseGeneratorTest {
         @DisplayName("URI가 /(슬래쉬)라면 body에 Hello world를 담아서 반환한다.")
         void generateDefaultResponseEntity() throws IOException {
             // given
-            final ResponseEntity responseEntity = new ResponseEntity(OK, "/");
+            Protocol protocol = Protocol.from("HTTP/1.1");
+            final ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, OK, "/");
 
             // when
-            String response = responseGenerator.generate(responseEntity);
+            String response = responseGenerator.generate(responseEntity, protocol);
 
             // then
             assertThat(response).contains("Hello world!");
@@ -33,10 +35,11 @@ class HttpResponseGeneratorTest {
         @Test
         void generateFoundResponseEntity() throws IOException {
             // given
-            ResponseEntity responseEntity = new ResponseEntity(FOUND, "index.html");
+            Protocol protocol = Protocol.from("HTTP/1.1");
+            ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, "index.html");
 
             // when
-            String response = responseGenerator.generate(responseEntity);
+            String response = responseGenerator.generate(responseEntity, protocol);
 
             // then
             assertThat(response).contains("Location: index.html");
@@ -46,10 +49,11 @@ class HttpResponseGeneratorTest {
         @Test
         void generateCustomResponseEntity() throws IOException {
             // given
-            ResponseEntity responseEntity = new ResponseEntity(FOUND, "index.html");
+            Protocol protocol = Protocol.from("HTTP/1.1");
+            ResponseEntity responseEntity = ResponseEntity.getCookieNullResponseEntity(protocol, FOUND, "index.html");
 
             // when
-            String response = responseGenerator.generate(responseEntity);
+            String response = responseGenerator.generate(responseEntity, protocol);
 
             // then
             assertThat(response).contains("Location: index.html");

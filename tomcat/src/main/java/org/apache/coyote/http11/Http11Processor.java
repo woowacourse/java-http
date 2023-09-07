@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
         final RequestHeader requestHeader = getHeader(bufferedReader);
         final RequestBody requestBody = getBody(bufferedReader, requestHeader);
         final ResponseEntity responseEntity = requestHandler.getResponse(requestLine, requestHeader, requestBody);
-        return httpResponseGenerator.generate(responseEntity);
+        return httpResponseGenerator.generate(responseEntity, requestLine.protocol());
     }
 
     private RequestHeader getHeader(final BufferedReader bufferedReader) throws IOException {

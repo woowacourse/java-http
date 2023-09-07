@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request.handler;
 import org.apache.coyote.http11.auth.AuthService;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
+import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
@@ -17,6 +18,7 @@ public class RequestHandler {
             RequestHeader requestHeader,
             RequestBody requestBody
     ) {
+        Protocol protocol = requestLine.protocol();
         final String path = requestLine.path().defaultPath();
         if (path.equals("/login")) {
             return authService.login(requestLine, requestHeader, requestBody);
@@ -24,7 +26,7 @@ public class RequestHandler {
         if (path.equals("/register")) {
             return authService.register(requestLine, requestBody);
         }
-        return new ResponseEntity(OK, path);
+        return ResponseEntity.getCookieNullResponseEntity(protocol, OK, path);
     }
 
 }

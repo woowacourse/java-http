@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.request.line.Protocol;
 
 public class HttpResponseGenerator {
 
@@ -12,22 +13,22 @@ public class HttpResponseGenerator {
 
     private final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
-    public String generate(final ResponseEntity responseEntity) throws IOException {
+    public String generate(final ResponseEntity responseEntity, final Protocol protocol) throws IOException {
         final String uri = responseEntity.getUri();
         if (uri.equals("/")) {
-            return generateResponse(responseEntity, "Hello world!");
+            return generateResponse(responseEntity, protocol, "Hello world!");
         }
         if (responseEntity.getHttpStatus() == HttpStatus.FOUND) {
             return generateRedirectResponse(responseEntity);
         }
         final String responseBody = readStaticFile(uri);
-        return generateResponse(responseEntity, responseBody);
+        return generateResponse(responseEntity, protocol, responseBody);
     }
 
-    private String generateResponse(final ResponseEntity responseEntity, final String responseBody) {
+    private String generateResponse(final ResponseEntity responseEntity, final Protocol protocol, final String responseBody) {
         return String.join(
                 CRLF,
-                generateHttpStatusLine(responseEntity.getHttpStatus()),
+                generateHttpStatusLine(protocol, responseEntity.getHttpStatus()),
                 generateContentTypeLine(responseEntity.getUri()),
                 generateContentLengthLine(responseBody),
                 "",
@@ -35,8 +36,8 @@ public class HttpResponseGenerator {
         );
     }
 
-    private String generateHttpStatusLine(final HttpStatus httpStatus) {
-        return String.join(BLANK, "HTTP/1.1", httpStatus.getCode(), httpStatus.name(), "");
+    private String generateHttpStatusLine(final Protocol protocol, final HttpStatus httpStatus) {
+        return String.join(BLANK, protocol.protocol(), httpStatus.getCode(), httpStatus.name(), "");
     }
 
     private String generateContentTypeLine(final String url) {

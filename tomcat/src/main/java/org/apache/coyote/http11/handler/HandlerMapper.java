@@ -15,18 +15,18 @@ import org.apache.coyote.http11.message.request.RequestLine;
 import org.apache.coyote.http11.message.response.Response;
 
 public class HandlerMapper {
-    private static final Map<HandlerStatus, Function<Request, Response>> HANDLERS = new HashMap<>();
+    private final Map<HandlerStatus, Function<Request, Response>> handlers = new HashMap<>();
 
     public HandlerMapper() {
         init();
     }
 
-    public void init() {
-        HANDLERS.put(new HandlerStatus("GET", "/"), this::rootHandler);
-        HANDLERS.put(new HandlerStatus("GET", "/login"), this::loginHandler);
-        HANDLERS.put(new HandlerStatus("POST", "/login"), this::loginFormHandler);
-        HANDLERS.put(new HandlerStatus("GET", "/register"), this::registerHandler);
-        HANDLERS.put(new HandlerStatus("POST", "/register"), this::registerFormHandler);
+    private void init() {
+        handlers.put(new HandlerStatus("GET", "/"), this::rootHandler);
+        handlers.put(new HandlerStatus("GET", "/login"), this::loginHandler);
+        handlers.put(new HandlerStatus("POST", "/login"), this::loginFormHandler);
+        handlers.put(new HandlerStatus("GET", "/register"), this::registerHandler);
+        handlers.put(new HandlerStatus("POST", "/register"), this::registerFormHandler);
     }
 
     public Response rootHandler(final Request request) {
@@ -90,7 +90,7 @@ public class HandlerMapper {
         final Set<String> queryParameterKeys = queryParameter.keySet();
         final HandlerStatus handlerStatus = new HandlerStatus(httpMethod, path, queryParameterKeys);
 
-        final Function<Request, Response> handler = HANDLERS.get(handlerStatus);
+        final Function<Request, Response> handler = handlers.get(handlerStatus);
         if (handler != null) {
             return handler.apply(request);
         }

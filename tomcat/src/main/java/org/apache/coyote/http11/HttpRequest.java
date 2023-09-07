@@ -1,35 +1,27 @@
 package org.apache.coyote.http11;
 
-import java.util.Map;
-
 public class HttpRequest {
 
-    private HttpMethod method;
-    private String path;
-    private Map<String, String> queryProperties;
-    private String protocolVersion;
+    private final RequestStartLine startLine;
 
-    private Map<String, String> headers;
+    private final RequestHeader header;
 
-    private String body;
+    private final RequestBody body;
 
-    public HttpRequest(final HttpMethod method, final String path, final Map<String, String> queryProperties, final String protocolVersion, final Map<String, String> headers,
-                       final String body) {
-        this.method = method;
-        this.path = path;
-        this.queryProperties = queryProperties;
-        this.protocolVersion = protocolVersion;
-        this.headers = headers;
+    public HttpRequest(final RequestStartLine startLine, final RequestHeader header,
+                       final RequestBody body) {
+        this.startLine = startLine;
+        this.header = header;
         this.body = body;
 
     }
 
     public boolean isPOST() {
-        return this.method.equals(HttpMethod.POST);
+        return this.startLine.isPOST();
     }
 
     public boolean isGET() {
-        return this.method.equals(HttpMethod.GET);
+        return this.startLine.isGET();
     }
 
     public boolean isNotExistBody() {
@@ -37,22 +29,22 @@ public class HttpRequest {
     }
 
     public boolean isSamePath(String path) {
-        return this.path.equals(path);
+        return this.startLine.isSamePath(path);
     }
 
     public String getAccept() {
-        return this.headers.get("Accept");
+        return this.header.getAccept();
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(this.headers.get("Cookie"));
+        return this.header.getCookie();
     }
 
     public String getPath() {
-        return this.path;
+        return this.startLine.getPath();
     }
 
-    public String getBody() {
+    public RequestBody getBody() {
         return this.body;
     }
 

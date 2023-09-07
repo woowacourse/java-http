@@ -54,60 +54,33 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
-        final String startLine = extractStartLine(bufferedReader);
+    private HttpRequest parseHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final RequestStartLine startLine = extractStartLine(bufferedReader);
         if (startLine == null) {
             return null;
         }
-        final List<String> startLineTokens = List.of(startLine.split(" "));
-        final HttpMethod method = HttpMethod.valueOf(startLineTokens.get(0));
-        String path;
-        Map<String, String> queryProperties;
-        final String uri = startLineTokens.get(1);
-        int uriSeparatorIndex = uri.indexOf("?");
-        if (uriSeparatorIndex == -1) {
-            path = uri;
-            queryProperties = new HashMap<>();
-        } else {// TODO: 2023/09/07 else 없애기
-            path = uri.substring(0, uriSeparatorIndex);
-            queryProperties = makeQueryProperties(uri.substring(uriSeparatorIndex + 1));
-        }
-        final String protocolVersion = startLineTokens.get(2);
-        final Map<String, String> requestHeaders = extractHeader(bufferedReader);
-        final String requestBody = extractBody(requestHeaders.get("Content-Length"), bufferedReader);
-        return new HttpRequest(method, path, queryProperties, protocolVersion, requestHeaders, requestBody);
+        final RequestHeader requestHeaders = extractHeader(bufferedReader);
+        final RequestBody requestBody = extractBody(requestHeaders.getContentLength(), bufferedReader);
+        return new HttpRequest(startLine, requestHeaders, requestBody);
     }
 
-    private String extractStartLine(final BufferedReader bufferedReader) throws IOException {
-        return bufferedReader.readLine();
+    private RequestStartLine extractStartLine(final BufferedReader bufferedReader) throws IOException {
+        return RequestStartLine.from(bufferedReader.readLine());
     }
 
-    private Map<String, String> makeQueryProperties(final String queryString) {
-        Map<String, String> result = new HashMap<>();
-        String[] queryTokens = queryString.split("&");
-        for (String queryToken : queryTokens) {
-            int equalSeparatorIndex = queryToken.indexOf("=");
-            if (equalSeparatorIndex != -1) {
-                result.put(queryToken.substring(0, equalSeparatorIndex),
-                        queryToken.substring(equalSeparatorIndex + 1));
-            }
-        }
-        return result;
-    }
-
-    private Map<String, String> extractHeader(final BufferedReader bufferedReader)
+    private RequestHeader extractHeader(final BufferedReader bufferedReader)
             throws IOException {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> parsedHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
-            String[] tokens = line.split(": ");
-            headers.put(tokens[0], tokens[1]);
+            String[] headerTokens = line.split(": ");
+            parsedHeaders.put(headerTokens[0], headerTokens[1]);
             line = bufferedReader.readLine();
         }
-        return headers;
+        return new RequestHeader(parsedHeaders);
     }
 
-    private String extractBody(String contentLength, BufferedReader bufferedReader)
+    private RequestBody extractBody(String contentLength, BufferedReader bufferedReader)
             throws IOException {
         if (contentLength == null) {
             return null;
@@ -115,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         bufferedReader.read(buffer, 0, length);
-        return new String(buffer);
+        return new RequestBody(new String(buffer));
     }
 
     private HttpResponse handleRequest(final HttpRequest request)

@@ -3,10 +3,7 @@ package nextstep.jwp.presentation;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpResponseBuilder;
-import org.apache.coyote.http.SessionManager;
+import org.apache.coyote.http.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -16,6 +13,7 @@ public class PostLoginController implements Controller {
 
     private static final String SESSION_ID = "JSESSIONID";
     private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final String COOKIE_SEPARATOR = "; ";
 
     @Override
     public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
@@ -44,17 +42,17 @@ public class PostLoginController implements Controller {
 
     private void addCookie(HttpRequest httpRequest, Map<String, String> cookies, String uuid) {
         if (cookies.isEmpty()) {
-            httpRequest.addHeader("Cookie", SESSION_ID + "=" + uuid);
+            httpRequest.addHeader(HttpHeader.COOKIE.getName(), SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
             return;
         }
         String existedCookie = joinExistedCookie(cookies);
-        httpRequest.addHeader("Cookie", existedCookie + "; " + SESSION_ID + "=" + uuid);
+        httpRequest.addHeader(HttpHeader.COOKIE.getName(), existedCookie + COOKIE_SEPARATOR + SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
     }
 
     private String joinExistedCookie(Map<String, String> cookies) {
         return cookies.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .reduce((cookie1, cookie2) -> cookie1 + "; " + cookie2)
+                .map(entry -> entry.getKey() + KEY_VALUE_SEPARATOR + entry.getValue())
+                .reduce((cookie1, cookie2) -> cookie1 + COOKIE_SEPARATOR + cookie2)
                 .orElse("");
     }
 

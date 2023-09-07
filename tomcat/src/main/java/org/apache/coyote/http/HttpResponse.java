@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public class HttpResponse {
 
     private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String COOKIE_DELIMITER = "; ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String LINE_FEED = "\r\n";
@@ -40,17 +41,17 @@ public class HttpResponse {
     }
 
     public void addCookie(String key, String value) {
-        if (!header.containsKey("Cookie")) {
-            addHeader("Cookie", key + "=" + value);
+        if (!header.containsKey(HttpHeader.COOKIE.getName())) {
+            addHeader(HttpHeader.COOKIE.getName(), key + KEY_VALUE_DELIMITER + value);
             return;
         }
-        addHeader("Cookie", joinExistedCookie() + "; " + key + "=" + value);
+        addHeader(HttpHeader.COOKIE.getName(), joinExistedCookie() + COOKIE_DELIMITER + key + KEY_VALUE_DELIMITER + value);
     }
 
     private String joinExistedCookie() {
         return header.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .reduce((cookie1, cookie2) -> cookie1 + "; " + cookie2)
+                .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
+                .reduce((cookie1, cookie2) -> cookie1 + COOKIE_DELIMITER + cookie2)
                 .orElse("");
     }
 
@@ -64,7 +65,7 @@ public class HttpResponse {
 
     private String joinHeaderWithoutCookie() {
         String headers = header.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("Cookie"))
+                .filter(entry -> !entry.getKey().equals(HttpHeader.COOKIE.getName()))
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .reduce((header1, header2) -> header1 + SPACE + LINE_FEED + header2)
                 .orElse("");
@@ -72,25 +73,25 @@ public class HttpResponse {
     }
 
     private String joinCookie() {
-        if (isStaticPath() || !header.containsKey("Cookie")) {
+        if (isStaticPath() || !header.containsKey(HttpHeader.COOKIE.getName())) {
             return "";
         }
         String cookieHeader = mapCookies().entrySet().stream()
-                .map(entry -> "Set-Cookie: " + entry.getKey() + "=" + entry.getValue())
+                .map(entry -> "Set-Cookie: " + entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
                 .reduce((cookie1, cookie2) -> cookie1 + SPACE + LINE_FEED + cookie2)
                 .orElse("");
         return cookieHeader + SPACE + LINE_FEED;
     }
 
     private boolean isStaticPath() {
-        String contentType = header.get("Content-Type");
+        String contentType = header.get(HttpHeader.CONTENT_TYPE.getName());
         return ContentType.isStaticFile(contentType);
     }
 
     private Map<String, String> mapCookies() {
         Map<String, String> cookies = header.entrySet().stream()
-                .filter(entry -> entry.getKey().equals("Cookie"))
-                .map(entry -> entry.getValue().split("; "))
+                .filter(entry -> entry.getKey().equals(HttpHeader.COOKIE.getName()))
+                .map(entry -> entry.getValue().split(COOKIE_DELIMITER))
                 .flatMap(Arrays::stream)
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));

@@ -18,8 +18,8 @@ public class HttpResponseBuilder {
         httpResponse.updateFileMessageBody(path);
 
         appendCookie(httpRequest, httpResponse);
-        httpResponse.addHeader("Content-Type", ContentType.findType(path));
-        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.findType(path));
+        httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();
     }
@@ -37,9 +37,9 @@ public class HttpResponseBuilder {
         httpResponse.updateFileMessageBody(redirectPath);
 
         appendCookie(httpRequest, httpResponse);
-        httpResponse.addHeader("Location", redirectPath);
-        httpResponse.addHeader("Content-Type", joinContentType(ContentType.HTML.getType()));
-        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+        httpResponse.addHeader(HttpHeader.LOCATION.getName(), redirectPath);
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();
     }
@@ -68,8 +68,8 @@ public class HttpResponseBuilder {
         httpResponse.updateFileMessageBody("/404.html");
 
         appendCookie(httpRequest, httpResponse);
-        httpResponse.addHeader("Content-Type", joinContentType(ContentType.HTML.getType()));
-        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();
     }
@@ -83,8 +83,8 @@ public class HttpResponseBuilder {
         httpResponse.updateMessageBody(content);
 
         appendCookie(httpRequest, httpResponse);
-        httpResponse.addHeader("Content-Type", joinContentType(ContentType.HTML.getType()));
-        httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getMessageBody().getBytes().length));
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();
     }

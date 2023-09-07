@@ -4,17 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpRequestHeader {
+public class HttpRequestHeaders {
     private static final String PAIR_DELIMITER = ": ";
 
-    private final Map<String, String> httpRequestHeaders;
+    private final Map<String, String> headers;
 
-    private HttpRequestHeader(final Map<String, String> httpRequestHeaders) {
-        this.httpRequestHeaders = httpRequestHeaders;
+    private HttpRequestHeaders(final Map<String, String> headers) {
+        this.headers = headers;
     }
 
-    public static HttpRequestHeader from(final List<String> httpRequestHeader) {
-        return new HttpRequestHeader(
+    public static HttpRequestHeaders from(final List<String> httpRequestHeader) {
+        return new HttpRequestHeaders(
                 httpRequestHeader
                         .stream()
                         .map(line -> line.split(PAIR_DELIMITER))
@@ -26,18 +26,18 @@ public class HttpRequestHeader {
     }
 
     public boolean hasCookie() {
-        return httpRequestHeaders.containsKey("Cookie");
+        return headers.containsKey("Cookie");
     }
 
-    public Map<String, String> getHttpRequestHeaders() {
-        return httpRequestHeaders;
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
     public String getContentLength() {
-        return httpRequestHeaders.get("Content-Length");
+        return headers.get("Content-Length");
     }
 
     public String getCookie() {
-        return httpRequestHeaders.get("Cookie");
+        return headers.get("Cookie");
     }
 }

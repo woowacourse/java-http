@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.request;
 
-public class HttpRequestBody {
-    private final String httpRequestBodys;
+import org.apache.commons.lang3.StringUtils;
 
-    private HttpRequestBody(final String httpRequestBodys) {
-        this.httpRequestBodys = httpRequestBodys;
+public class HttpRequestBody {
+    private final String body;
+
+    private HttpRequestBody(final String body) {
+        this.body = body;
     }
 
     public static HttpRequestBody from(final String httpRequestBody) {
@@ -12,10 +14,10 @@ public class HttpRequestBody {
     }
 
     public static HttpRequestBody empty() {
-        return new HttpRequestBody(null);
+        return new HttpRequestBody(StringUtils.EMPTY);
     }
 
-    public String getHttpRequestBodys() {
-        return httpRequestBodys;
+    public String getBody() {
+        return body;
     }
 }

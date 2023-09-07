@@ -7,58 +7,61 @@ import java.util.List;
 
 public class HttpRequest {
     private final HttpRequestStartLine startLine;
-    private final HttpRequestHeader header;
+    private final HttpRequestHeaders headers;
     private final HttpRequestBody body;
 
-    private HttpRequest(final HttpRequestStartLine startLine, final HttpRequestHeader header, final HttpRequestBody body) {
+    private HttpRequest(final HttpRequestStartLine startLine, final HttpRequestHeaders headers, final HttpRequestBody body) {
         this.startLine = startLine;
-        this.header = header;
+        this.headers = headers;
         this.body = body;
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        final List<String> request = new ArrayList<>();
+        final List<String> requestHeader = extractRequestHeader(bufferedReader);
+        final HttpRequestStartLine startLine = HttpRequestStartLine.from(requestHeader.get(0));
+        final HttpRequestHeaders headers = HttpRequestHeaders.from(requestHeader.subList(1, requestHeader.size()));
+        final HttpRequestBody requestBody = extractRequestBody(bufferedReader, headers);
+        return new HttpRequest(startLine, headers, requestBody);
+    }
 
+    private static List<String> extractRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final List<String> requestHeader = new ArrayList<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line) && line != null) {
-            request.add(line);
+            requestHeader.add(line);
             line = bufferedReader.readLine();
         }
+        return requestHeader;
+    }
 
-        final HttpRequestStartLine startLine = HttpRequestStartLine.from(request.get(0));
-        final HttpRequestHeader requestHeader = HttpRequestHeader.from(request.subList(1, request.size()));
-        HttpRequestBody requestBody;
+    private static HttpRequestBody extractRequestBody(final BufferedReader bufferedReader, final HttpRequestHeaders requestHeader) throws IOException {
         final String contentLength = requestHeader.getContentLength();
-
         if (contentLength == null) {
-            requestBody = HttpRequestBody.empty();
-            return new HttpRequest(startLine, requestHeader, requestBody);
+            return HttpRequestBody.empty();
         }
-
         final int length = Integer.parseInt(contentLength);
         final char[] buffer = new char[length];
         bufferedReader.read(buffer, 0, length);
-        requestBody = HttpRequestBody.from(new String(buffer));
-        return new HttpRequest(startLine, requestHeader, requestBody);
+        return HttpRequestBody.from(new String(buffer));
     }
 
     public boolean hasCookie() {
-        return header.hasCookie();
+        return headers.hasCookie();
     }
 
     public HttpRequestStartLine getStartLine() {
         return startLine;
     }
 
-    public HttpRequestHeader getHeader() {
-        return header;
+    public HttpRequestHeaders getHeaders() {
+        return headers;
     }
 
     public String getBody() {
-        return body.getHttpRequestBodys();
+        return body.getBody();
     }
 
     public String getCookie() {
-        return header.getCookie();
+        return headers.getCookie();
     }
 }

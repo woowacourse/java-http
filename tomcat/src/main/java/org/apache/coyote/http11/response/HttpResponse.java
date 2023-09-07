@@ -21,9 +21,9 @@ public class HttpResponse {
         String headersString = headers.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(System.lineSeparator()));
 
-        String responseWithoutBody = String.join("\r\n",
+        String responseWithoutBody = String.join(System.lineSeparator(),
                 HTTP_PROTOCOL + " " + httpStatus.getCode() + " " + httpStatus.getMessage(),
                 headersString,
                 ""
@@ -33,6 +33,6 @@ public class HttpResponse {
             return responseWithoutBody;
         }
 
-        return responseWithoutBody + "\r\n" + body;
+        return responseWithoutBody + System.lineSeparator() + body;
     }
 }

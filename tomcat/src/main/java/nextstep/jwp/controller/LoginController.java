@@ -8,15 +8,12 @@ import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.*;
 
 import static org.apache.coyote.http11.Http11Processor.sessionManager;
 import static org.apache.coyote.http11.HttpHeaderType.*;
-import static org.apache.coyote.http11.response.HttpStatusCode.*;
+import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 
 public class LoginController extends Controller {
 
@@ -43,26 +40,7 @@ public class LoginController extends Controller {
             httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
             httpResponse.addHeader(LOCATION, "/index.html");
         } else { // not login user
-            final String resourceUrl = "login.html";
-            String contentType = "text/html;charset=utf-8";
-
-            final String acceptHeader = httpRequest.getHeaders().getHeaderValue(ACCEPT);
-            if (acceptHeader != null) {
-                contentType = acceptHeader.split(",")[0];
-            }
-
-            URL resource = getClass().getClassLoader().getResource("static/" + resourceUrl);
-            if (resource != null) {
-                httpResponse.setStatusCode(OK);
-            } else {
-                resource = getClass().getClassLoader().getResource("static/" + "404.html");
-                httpResponse.setStatusCode(NOT_FOUND);
-                contentType = "text/html;charset=utf-8";
-            }
-
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            httpResponse.addHeader(CONTENT_TYPE, contentType);
-            httpResponse.setBody(responseBody);
+            handleResource("/login.html", httpRequest, httpResponse);
         }
     }
 
@@ -71,7 +49,7 @@ public class LoginController extends Controller {
         final HttpCookie httpCookie = httpRequest.getHeaders().getCookie();
         String sessionId = httpCookie.getCookie("JSESSIONID");
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getBody().get("account"));
+        final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getBody().get("account"));
         if (user.isEmpty() || !user.get().checkPassword(httpRequest.getBody().get("password"))) {
             // invalid user
             httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
@@ -79,9 +57,6 @@ public class LoginController extends Controller {
             httpResponse.setStatusCode(FOUND);
             return;
         }
-
-        // valid user
-//        log.info("user: {}", user.get());
 
         if (sessionId != null) { // if already have session
             httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
@@ -91,7 +66,7 @@ public class LoginController extends Controller {
         }
 
         // if no session
-        Session session = new Session(String.valueOf(UUID.randomUUID()));
+        final Session session = new Session(String.valueOf(UUID.randomUUID()));
         session.setAttribute("user", user);
         sessionManager.add(session);
         sessionId = session.getId();

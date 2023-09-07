@@ -9,8 +9,8 @@ public class ResourceReader {
 
     private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
-    public static URL getResourceUrl(final String fileName) {
-        return CLASS_LOADER.getResource("static" + fileName);
+    public static URL getResourceUrl(final String resourceName) {
+        return CLASS_LOADER.getResource("static" + resourceName);
     }
 
     public static String read(final URL resource) throws IOException {

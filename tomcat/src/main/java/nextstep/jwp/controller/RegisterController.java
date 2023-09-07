@@ -6,17 +6,15 @@ import org.apache.coyote.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.coyote.http11.HttpHeaderType.*;
-import static org.apache.coyote.http11.response.HttpStatusCode.*;
+import static org.apache.coyote.http11.HttpHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.HttpHeaderType.LOCATION;
+import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 
 public class RegisterController extends Controller {
 
@@ -35,26 +33,7 @@ public class RegisterController extends Controller {
 
     @Override
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final String resourceUrl = "register.html";
-        String contentType = "text/html;charset=utf-8";
-
-        final String acceptHeader = httpRequest.getHeaders().getHeaderValue(ACCEPT);
-        if (acceptHeader != null) {
-            contentType = acceptHeader.split(",")[0];
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static/" + resourceUrl);
-        if (resource != null) {
-            httpResponse.setStatusCode(OK);
-        } else {
-            resource = getClass().getClassLoader().getResource("static/" + "404.html");
-            httpResponse.setStatusCode(NOT_FOUND);
-            contentType = "text/html;charset=utf-8";
-        }
-
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        httpResponse.addHeader(CONTENT_TYPE, contentType);
-        httpResponse.setBody(responseBody);
+        handleResource("/register.html", httpRequest, httpResponse);
     }
 
     @Override

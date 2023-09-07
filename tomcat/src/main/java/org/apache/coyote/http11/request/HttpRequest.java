@@ -86,6 +86,10 @@ public class HttpRequest {
         return ContentType.TEXT_HTML.getValue() + CHARSET_UTF_8;
     }
 
+    public String getMappingUri() {
+        return requestLine.getMappingUri();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

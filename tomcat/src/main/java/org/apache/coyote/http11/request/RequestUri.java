@@ -8,6 +8,7 @@ public class RequestUri {
     private static final String HTML_URI = ".html";
     private static final String CSS_URI = ".css";
     private static final String JAVASCRIPT_URI = ".js";
+    private static final String QUERY_PARAM_START_VALUE = "?";
 
     private final String value;
 
@@ -38,6 +39,15 @@ public class RequestUri {
             paramMap.put(paramPair[0], paramPair[1]);
         }
         return paramMap;
+    }
+
+    public boolean isContainsQueryParam() {
+        return value.contains(QUERY_PARAM_START_VALUE);
+    }
+
+    public String getRemovedQueryParamUri() {
+        int queryParamIndex = value.indexOf("?");
+        return value.substring(0, queryParamIndex);
     }
 
     public String getValue() {

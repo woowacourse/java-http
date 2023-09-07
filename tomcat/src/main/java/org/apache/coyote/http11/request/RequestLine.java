@@ -27,6 +27,13 @@ public class RequestLine {
         return requestUri.parseQueryParams();
     }
 
+    public String getMappingUri() {
+        if (requestUri.isContainsQueryParam()) {
+            return requestUri.getRemovedQueryParamUri();
+        }
+        return requestUri.getValue();
+    }
+
     public RequestUri getRequestUri() {
         return requestUri;
     }

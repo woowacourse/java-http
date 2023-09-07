@@ -68,6 +68,10 @@ public class ResponseGenerator {
     }
 
     private static Response getLoginResponseGetMethod(final Request request) throws IOException {
+        if (request.hasHeaderBy("Cookie") && request.hasCookieKey("JSESSIONID")) {
+            log.info("login success");
+        }
+
         if (request.hasQueryString()) {
             return InMemoryUserRepository.findByAccount(request.getQueryValue(ACCOUNT_KEY))
                                          .filter(user -> user.checkPassword(request.getQueryValue(PASSWORD_KEY)))

@@ -40,6 +40,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String INDEX = "/index.html";
     private static final String REGISTER_PATH = "/register";
     private static final String EMAIL = "email";
+    private static final String LOCATION = "Location";
+    private static final String COOKIE = "Cookie";
 
     private final Socket connection;
 
@@ -73,12 +75,11 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return getRespondByMethod(httpRequest);
         } catch (NotFoundAccountException | NotCorrectPasswordException e) {
-            return foundResponse(httpRequest, UNAUTHORIZED_PATH);
-        } catch (ResourceNotFoundException e){
-            return foundResponse(httpRequest, NOT_FOUND_PATH);
-        }
-        catch (Exception e) {
-            return foundResponse(httpRequest, INTERNAL_SERVER_PATH);
+            return foundResponse(Map.of(LOCATION, UNAUTHORIZED_PATH));
+        } catch (ResourceNotFoundException e) {
+            return foundResponse(Map.of(LOCATION, NOT_FOUND_PATH));
+        } catch (Exception e) {
+            return foundResponse(Map.of(LOCATION, INTERNAL_SERVER_PATH));
         }
     }
 
@@ -90,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
         if (method == HttpMethod.POST) {
             return postResponse(httpRequest);
         }
-        return foundResponse(httpRequest, NOT_FOUND_PATH);
+        return foundResponse(Map.of(LOCATION, NOT_FOUND_PATH));
     }
 
     public HttpResponse getResponse(final HttpRequest httpRequest) throws IOException {
@@ -100,12 +101,12 @@ public class Http11Processor implements Runnable, Processor {
         final String requestUrl = httpRequest.getRequestURL().getAbsolutePath();
         final String responseBody = ResourceReader.readResource(STATIC_PATH + requestUrl);
         if (requestUrl.equals(LOGIN_PATH) && isLoggedIn(httpRequest)) {
-            return foundResponse(httpRequest, INDEX);
+            return foundResponse(Map.of(LOCATION, INDEX));
         }
         return okResponse(httpRequest, responseBody);
     }
 
-    private HttpResponse postResponse(final HttpRequest httpRequest) throws IOException{
+    private HttpResponse postResponse(final HttpRequest httpRequest) throws IOException {
         final String url = httpRequest.getRequestURL().getUrl();
         if (url.equals(REGISTER_PATH)) {
             final Map<String, String> requestParam = Arrays.stream(httpRequest.getRequestBody().split("&")).takeWhile(it -> !it.isEmpty())
@@ -113,13 +114,13 @@ public class Http11Processor implements Runnable, Processor {
             final User registeredUser = new User(requestParam.get(ACCOUNT), requestParam.get(PASSWORD), requestParam.get(EMAIL));
 
             InMemoryUserRepository.save(registeredUser);
-            return foundResponse(httpRequest, INDEX);
+            return foundResponse(Map.of(LOCATION, INDEX));
         }
         final String requestUrl = httpRequest.getRequestURL().getAbsolutePath();
         final String responseBody = ResourceReader.readResource(STATIC_PATH + requestUrl);
         if (requestUrl.equals(LOGIN_PATH)) {
-            if(isLoggedIn(httpRequest)){
-                return foundResponse(httpRequest, INDEX);
+            if (isLoggedIn(httpRequest)) {
+                return foundResponse(Map.of(LOCATION, INDEX));
             }
             return renderLogin(httpRequest);
         }
@@ -127,17 +128,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoggedIn(final HttpRequest httpRequest) {
-        Session session = findSession(httpRequest);
+        final Session session = findSession(httpRequest);
         return session != null;
     }
 
     private Session findSession(final HttpRequest httpRequest) {
-        SessionManager sessionManager = new SessionManager();
-        String jSessionId = HttpCookie.parseCookie(httpRequest.getRequestHeaders().getValue("Cookie")).getValue("JSESSIONID");
+        final SessionManager sessionManager = new SessionManager();
+        final String jSessionId = HttpCookie.parseCookie(httpRequest.getRequestHeaders().getValue(COOKIE)).getValue("JSESSIONID");
 
         if (jSessionId == null) {
             return null;
         }
+
         return sessionManager.findSession(jSessionId);
     }
 
@@ -146,7 +148,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final Map<String, String> collect = Arrays.stream(requestBody.split("&")).takeWhile(it -> !it.isEmpty())
                 .map(it -> it.split("=")).collect(Collectors.toMap(it -> it[0], it -> it[1]));
-        //로그인 유저 검증
+
         final String url = httpRequest.getRequestURL().getAbsolutePath();
 
         if (!collect.isEmpty()) {
@@ -166,7 +168,29 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info(user.toString());
 
-        return foundResponse(httpRequest, INDEX);
+        return foundResponse(loginResponseHeader(httpRequest));
+    }
+
+    private Map<String, String> loginResponseHeader(final HttpRequest httpRequest) {
+        Map<String, String> responseHeader = new HashMap<>();
+        setCookie(httpRequest,responseHeader);
+        responseHeader.put(LOCATION,INDEX);
+        return responseHeader;
+    }
+
+    private void setCookie(final HttpRequest httpRequest, final Map<String, String> responseHeaders) {
+        final HttpCookie cookie = HttpCookie.parseCookie(httpRequest.getRequestHeaders().getValue(COOKIE));
+        if (!cookie.checkIdInCookie()) {
+            final UUID sessionId = UUID.randomUUID();
+            createSession(sessionId.toString());
+            responseHeaders.put("Set-Cookie", cookie.makeCookieValue(sessionId));
+        }
+    }
+
+    private void createSession(final String sessionId) {
+        Session session = new Session(sessionId);
+        SessionManager sessionManager = new SessionManager();
+        sessionManager.add(session);
     }
 
     private HttpResponse okResponse(final HttpRequest httpRequest, final String responseBody) {
@@ -180,25 +204,7 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpResponse(HttpStatus.OK, responseHeaders, responseBody);
     }
 
-    private HttpResponse foundResponse(final HttpRequest httpRequest, final String location) {
-        final Map<String, String> responseHeaders = new HashMap<>();
-        setCookie(httpRequest,responseHeaders);
-        responseHeaders.put("Location", location);
+    private HttpResponse foundResponse(final Map<String, String> responseHeaders) {
         return new HttpResponse(HttpStatus.FOUND, responseHeaders, "");
-    }
-
-    private void setCookie(final HttpRequest httpRequest, final Map<String, String> responseHeaders) {
-        final HttpCookie cookie = HttpCookie.parseCookie(httpRequest.getRequestHeaders().getValue("Cookie"));
-        if (!cookie.checkIdInCookie()) {
-            final UUID sessionId = UUID.randomUUID();
-            createSession(sessionId.toString());
-            responseHeaders.put("Set-Cookie", cookie.makeCookieValue(sessionId));
-        }
-    }
-
-    private void createSession(final String sessionId) {
-        Session session = new Session(sessionId);
-        SessionManager sessionManager = new SessionManager();
-        sessionManager.add(session);
     }
 }

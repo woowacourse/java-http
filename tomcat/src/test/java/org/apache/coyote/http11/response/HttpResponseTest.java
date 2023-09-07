@@ -42,4 +42,16 @@ class HttpResponseTest {
 		assertThat(actual.buildResponse())
 			.contains(String.format("%s: %s", SET_COOKIE.getValue(), setCookieValue));
 	}
+
+	@Test
+	@DisplayName("HTTP response에서 응답에 대한 값들을 추가할 수 있다.")
+	void setBody() {
+		final String body = "Hello world!";
+		final HttpResponse httpResponse = new HttpResponse();
+
+		httpResponse.setResponse(HttpStatusCode.OK_200, body, MimeType.HTML);
+
+		assertThat(httpResponse.buildResponse())
+			.contains(body, String.format("%s: %d", CONTENT_LENGTH.getValue(), 12), OK_200.buildResponse());
+	}
 }

@@ -59,4 +59,73 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("Content-Type: text/css");
+    }
+
+    @Test
+    void parseQueryParameter() {
+        // given
+        String requestBody = "account=gugu&password=password";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND", "Location: /index.html");
+    }
+
+    @Test
+    void loginWithInvalidValue() {
+        // given
+        String requestBody = "account=abc&password=abc";
+        int contentLength = requestBody.getBytes().length;
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
+                "",
+                requestBody);
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("HTTP/1.1 401 UNAUTHORIZED");
+    }
 }

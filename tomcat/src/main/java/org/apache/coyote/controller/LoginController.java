@@ -3,11 +3,11 @@ package org.apache.coyote.controller;
 import nextstep.FileResolver;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.http.HttpSession;
-import org.apache.coyote.handler.SessionManager;
 import org.apache.coyote.Controller;
 import org.apache.coyote.controller.util.ResponseManager;
+import org.apache.coyote.handler.SessionManager;
 import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpSession;
 import org.apache.coyote.http11.http.util.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,6 @@ public class LoginController extends Controller {
 
     private String createResponse(final boolean validUser, final HttpSession session) {
         if (validUser) {
-            log.info("queryStrings = ", session.getAttribute(USER_KEY));
             final String responseHeader = createJsessionResponseHeader(ResponseManager.HTTP_302_FOUND.getHeader(), session.getId());
             return createRedirectResponse(responseHeader, FileResolver.INDEX_HTML);
         }
@@ -76,7 +75,11 @@ public class LoginController extends Controller {
     }
 
     private boolean isValidUser(final User user, final String password) {
-        return user.checkPassword(password);
+        if (user.checkPassword(password)) {
+            log.info("로그인 성공!\n회원 아이디: {} ", user.getAccount());
+            return true;
+        }
+        return false;
     }
 
     private String createJsessionResponseHeader(final String responseHeader, final String session) {

@@ -25,9 +25,13 @@ public class Cookie {
     private static Map<String, String> parseCookie(final HttpHeader httpHeader) {
         final Map<String, String> cookies = new HashMap<>();
         final String cookieString = httpHeader.get(COOKIE_HEADER);
+
         final String[] splitCookies = cookieString.split("; ");
         for (final String splitCookie : splitCookies) {
             final String[] cookieKeyValue = splitCookie.split("=");
+            if (cookieKeyValue.length < 2) {
+                continue;
+            }
             cookies.put(cookieKeyValue[0], cookieKeyValue[1]);
         }
         return cookies;

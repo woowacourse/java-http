@@ -18,10 +18,18 @@ public class ResponseBody {
     }
 
     public static <T> ResponseBody from(final T info) {
-        return new ResponseBody(getNotDefaultPathResponseBody((String) info));
+        if (info instanceof String) {
+            final String uri = (String) info;
+            if (uri.equals("/")) {
+                return defaultBody();
+            }
+            return new ResponseBody(getNotDefaultPathResponseBody(uri));
+        }
+
+        throw new IllegalArgumentException("uri를 확인해주세요.");
     }
 
-    public static ResponseBody defaultBody() {
+    private static ResponseBody defaultBody() {
         return new ResponseBody("Hello world!".getBytes());
     }
 

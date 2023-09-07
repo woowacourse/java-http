@@ -39,11 +39,11 @@ public class Http11Processor implements Runnable, Processor {
             final String requestBodyString = parseRequestBodyString(requestHeaderStrings, br);
 
             final HttpRequest httpRequest = HttpRequest.of(requestHeaderStrings, requestBodyString);
-            final HttpResponse httpResponse = HttpResponse.defaultResponse();
+            final HttpResponse httpResponse = HttpResponse.of(httpRequest.getParsedRequestURI());
 
             final RequestHandler handler = new RequestHandler(httpRequest, httpResponse);
             final HttpResponse response = handler.execute();
-            response.wrapUp();
+            response.wrapUp(httpRequest.getParsedRequestURI());
             final String message = ResponseParser.parse(response);
             outputStream.write(message.getBytes());
             outputStream.flush();

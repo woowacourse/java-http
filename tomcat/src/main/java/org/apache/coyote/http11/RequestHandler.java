@@ -59,7 +59,7 @@ public class RequestHandler {
         if (alreadyLoginStatus()) {
             return httpResponse;
         }
-        httpResponse.updateRedirect(httpRequest.getHttpVersion(), httpRequest.getParsedRequestURI());
+        httpResponse.updatePage("/login");
         return httpResponse;
     }
 
@@ -71,8 +71,8 @@ public class RequestHandler {
         // 새로운 세션을 생성해서 넣어준다.
         final Session newSession = new Session();
         if (LoginValidator.check(httpRequest, newSession)) {
-            httpResponse.updateRedirect(httpRequest.getHttpVersion(), httpRequest.getParsedRequestURI());
-            httpResponse.addCookie(SESSION_ID, newSession.getId());
+            httpResponse.updateRedirect(httpRequest.getHttpVersion(), HOME_PAGE);
+            httpResponse.addHeader("Set-Cookie", SESSION_ID + "=" + newSession.getId());
             return httpResponse;
         }
 

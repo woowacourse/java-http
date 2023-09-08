@@ -3,13 +3,14 @@ package org.apache.coyote.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.request.Cookie;
 
 public class HttpResponseHeader {
 
   private final Map<String, Object> values = new HashMap<>();
 
-  public HttpResponseHeader addCookie(final ResponseCookie responseCookie) {
-    values.put("Set-Cookie", responseCookie.read());
+  public HttpResponseHeader addCookie(final Cookie cookie) {
+    values.put("Set-Cookie", cookie.read());
     return this;
   }
 

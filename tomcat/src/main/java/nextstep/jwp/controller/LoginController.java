@@ -16,9 +16,9 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
-    private static final String INDEX_PAGE = "index.html";
-    private static final String LOGIN_PAGE = "login.html";
-    private static final String UNAUTHORIZED_PAGE = "401.html";
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String LOGIN_PAGE = "/login.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
 
     private final SessionManager sessionManager = new SessionManager();
 

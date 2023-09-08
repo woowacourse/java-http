@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +18,16 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final Mapper mapper;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final Mapper mapper) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, mapper);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final Mapper mapper) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.mapper = mapper;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

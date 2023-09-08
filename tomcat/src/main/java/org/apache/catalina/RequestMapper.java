@@ -17,6 +17,7 @@ public class RequestMapper implements Mapper {
         this.defaultController = defaultController;
     }
 
+    @Override
     public void addController(final String path, final Controller controller) {
         controllers.put(path, controller);
     }

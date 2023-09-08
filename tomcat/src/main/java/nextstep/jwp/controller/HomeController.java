@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class HomeController extends AbstractController {
 
-    private static final String HOME_PAGE = "home.html";
+    private static final String HOME_PAGE = "/home.html";
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {

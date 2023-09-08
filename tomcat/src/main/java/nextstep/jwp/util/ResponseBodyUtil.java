@@ -6,6 +6,9 @@ import java.nio.file.Path;
 
 public class ResponseBodyUtil {
 
+    private ResponseBodyUtil() {
+    }
+
     public static String alter(final Path path) throws IOException {
         final byte[] content = Files.readAllBytes(path);
         return new String(content);

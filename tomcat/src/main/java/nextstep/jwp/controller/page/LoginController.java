@@ -1,10 +1,8 @@
 package nextstep.jwp.controller.page;
 
 import static org.apache.coyote.http11.common.HttpHeaders.COOKIE_NAME;
-import static org.apache.coyote.http11.common.HttpHeaders.LOCATION;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
@@ -19,7 +17,6 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,6 +9,9 @@ public class PathUtil {
 
     private static final String STATIC = "static";
 
+    private PathUtil() {
+    }
+
     public static Path findPath(final String uri) {
         final URL url = HttpResponse.class.getClassLoader()
                 .getResource(STATIC + uri);

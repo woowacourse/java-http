@@ -12,6 +12,7 @@ public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JAVASCRIPT("js", "text/javascript"),
+    SVG("svg", "image/svg+xml")
     ;
 
     private final String extension;

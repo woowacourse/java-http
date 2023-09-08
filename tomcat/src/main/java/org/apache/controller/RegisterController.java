@@ -2,9 +2,9 @@ package org.apache.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.common.HttpHeader;
-import org.apache.common.HttpRequest;
-import org.apache.common.HttpResponse;
+import nextstep.jwp.common.HttpHeader;
+import nextstep.jwp.common.HttpRequest;
+import nextstep.jwp.common.HttpResponse;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.common.StatusCode.FOUND;
-import static org.apache.common.StatusCode.OK;
+import static nextstep.jwp.common.StatusCode.FOUND;
+import static nextstep.jwp.common.StatusCode.OK;
 import static org.reflections.Reflections.log;
 
 public class RegisterController extends AbstractController {

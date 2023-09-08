@@ -1,7 +1,7 @@
 package org.apache.controller;
 
-import org.apache.common.HttpRequest;
-import org.apache.common.HttpResponse;
+import nextstep.jwp.common.HttpRequest;
+import nextstep.jwp.common.HttpResponse;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -1,4 +1,4 @@
-package org.apache.common;
+package nextstep.jwp.common;
 
 public enum StatusCode {
     OK("200", "OK"),

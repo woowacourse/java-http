@@ -1,4 +1,4 @@
-package org.apache.common;
+package nextstep.jwp.common;
 
 import java.util.List;
 

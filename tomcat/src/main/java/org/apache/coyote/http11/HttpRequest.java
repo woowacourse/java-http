@@ -5,41 +5,41 @@ import java.io.IOException;
 
 public class HttpRequest {
 
-    private final HttpRequestFirstLine firstLine;
+    private final HttpRequestLine requestLine;
     private final HttpRequestHeader headers;
     private final HttpRequestBody body;
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
-        final HttpRequestFirstLine httpRequestFirstLine = HttpRequestFirstLine.from(firstLine);
+        final HttpRequestLine httpRequestLine = HttpRequestLine.from(firstLine);
         final HttpRequestHeader headers = HttpRequestHeader.from(bufferedReader);
         final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, headers);
 
-        return new HttpRequest(httpRequestFirstLine, headers, httpRequestBody);
+        return new HttpRequest(httpRequestLine, headers, httpRequestBody);
     }
 
     private HttpRequest(
-            final HttpRequestFirstLine firstLine,
+            final HttpRequestLine requestLine,
             final HttpRequestHeader headers,
             final HttpRequestBody body
     ) {
-        this.firstLine = firstLine;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
 
     public boolean isLogin() {
-        final HttpPath httpPath = firstLine.getHttpPath();
-        return httpPath.isLogin();
+        final Uri uri = requestLine.getUri();
+        return uri.isLogin();
     }
 
     public boolean isRegister() {
-        final HttpPath httpPath = firstLine.getHttpPath();
-        return httpPath.isRegister();
+        final Uri uri = requestLine.getUri();
+        return uri.isRegister();
     }
 
     public boolean isCorrectMethod(final HttpMethod method) {
-        return firstLine.getHttpMethod() == method;
+        return requestLine.getHttpMethod() == method;
     }
 
     public boolean hasJSessionId() {
@@ -50,12 +50,12 @@ public class HttpRequest {
         return headers.getJSessionId();
     }
 
-    public HttpRequestFirstLine getFirstLine() {
-        return firstLine;
+    public HttpRequestLine getRequestLine() {
+        return requestLine;
     }
 
-    public HttpPath getPath() {
-        return firstLine.getHttpPath();
+    public Uri getPath() {
+        return requestLine.getUri();
     }
 
     public HttpRequestBody getBody() {

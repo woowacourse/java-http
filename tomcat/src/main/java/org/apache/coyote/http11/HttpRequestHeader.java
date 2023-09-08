@@ -8,6 +8,12 @@ import java.util.Map;
 
 public class HttpRequestHeader {
 
+    private static final String HEADER_SEPARATOR = ": ";
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_SEPARATOR = "=";
+    private static final String COOKIE = "Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> headers;
 
     public static HttpRequestHeader from(final BufferedReader bufferedReader) throws IOException {
@@ -15,7 +21,7 @@ public class HttpRequestHeader {
 
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
-            final String[] header = line.split(": ");
+            final String[] header = line.split(HEADER_SEPARATOR);
             headers.put(header[0], header[1]);
 
             line = bufferedReader.readLine();
@@ -29,26 +35,23 @@ public class HttpRequestHeader {
     }
 
     public boolean hasJSessionId() {
-        final String cookie = headers.get("Cookie");
+        final String cookie = headers.get(COOKIE);
         if (cookie != null) {
-            return Arrays.stream(cookie.split("; "))
-                    .map(it -> it.split("="))
-                    .anyMatch(it -> it[0].equals("JSESSIONID"));
+            return Arrays.stream(cookie.split(COOKIE_DELIMITER))
+                    .map(it -> it.split(COOKIE_SEPARATOR))
+                    .anyMatch(it -> it[0].equals(JSESSIONID));
         }
         return false;
     }
 
     public String getJSessionId() {
-        final String cookie = headers.get("Cookie");
-        if (cookie != null) {
-            return Arrays.stream(cookie.split("; "))
-                    .map(s -> s.split("="))
-                    .filter(word -> word[0].equals("JSESSIONID"))
-                    .findAny()
-                    .map(word -> word[1])
-                    .orElse(null);
-        }
-        return null;
+        final String cookie = headers.get(COOKIE);
+        return Arrays.stream(cookie.split(COOKIE_DELIMITER))
+                .map(s -> s.split(COOKIE_SEPARATOR))
+                .filter(word -> word[0].equals(JSESSIONID))
+                .findAny()
+                .map(word -> word[1])
+                .orElse(null);
     }
 
     public String get(final String key) {

@@ -43,12 +43,8 @@ public class Uri {
         return path.contains(RESOURCE_LETTER);
     }
 
-    public boolean isGetMethod() {
-        return httpMethod.equals(HttpMethod.GET);
-    }
-
-    public boolean isPostMethod() {
-        return this.httpMethod.equals(HttpMethod.POST);
+    public boolean isSameMethod(final HttpMethod method) {
+        return httpMethod.equals(method);
     }
 
     public HttpMethod getHttpMethod() {

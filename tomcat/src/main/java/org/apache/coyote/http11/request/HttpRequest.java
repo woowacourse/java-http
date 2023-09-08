@@ -101,12 +101,8 @@ public class HttpRequest {
         return jSessionId.map(SESSION_MANAGER::findSession);
     }
 
-    public boolean isGetMethod() {
-        return uri.isGetMethod();
-    }
-
-    public boolean isPostMethod() {
-        return uri.isPostMethod();
+    public boolean isSameMethod(final HttpMethod httpMethod) {
+        return uri.isSameMethod(httpMethod);
     }
 
     public HttpMethod getHttpMethod() {

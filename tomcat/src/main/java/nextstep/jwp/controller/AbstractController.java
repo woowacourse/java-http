@@ -20,7 +20,7 @@ public abstract class AbstractController implements Controller {
         final String requestMethod = request.getMethod();
 
         if (POST.equals(requestMethod)) {
-            doPost(request);
+            return doPost(request);
         }
         return doGet(request);
     }

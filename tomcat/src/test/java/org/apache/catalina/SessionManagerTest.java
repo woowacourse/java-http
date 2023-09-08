@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.catalina;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

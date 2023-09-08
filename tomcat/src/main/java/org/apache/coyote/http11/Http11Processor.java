@@ -10,13 +10,13 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.request.RequestBody;
@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseEntity handleRequest(final HttpRequest httpRequest) {
+    private ResponseEntity handleRequest(final HttpRequest httpRequest) throws IOException {
         final RequestLine requestLine = httpRequest.getRequestLine();
         final Headers requestHeader = httpRequest.getHeaders();
         final RequestBody requestBody = httpRequest.getRequestBody();
@@ -84,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
             final RequestLine requestLine,
             final Headers requestHeader,
             final RequestBody requestBody
-    ) {
+    ) throws IOException {
         if (requestLine.getHttpMethod() == HttpMethod.GET) {
             final HttpCookie httpCookie = requestHeader.parseCookie();
             final Session session = sessionManager.findSession(httpCookie.getJSessionId());

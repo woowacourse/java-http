@@ -17,7 +17,7 @@ public class ResponseBody {
     }
 
     public static ResponseBody noContent(final ContentType contentType) {
-        return new ResponseBody("Hello world!", contentType);
+        return new ResponseBody("", contentType);
     }
 
     public String getContent() {

@@ -29,6 +29,10 @@ public class ResponseHeaders {
         header.put("Set-Cookie", cookie.toString());
     }
 
+    public String getCookieValues() {
+        return header.get("Set-Cookie");
+    }
+
     @Override
     public String toString() {
         final StringBuilder result = new StringBuilder();

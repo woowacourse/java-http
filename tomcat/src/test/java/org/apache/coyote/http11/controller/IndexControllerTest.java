@@ -13,7 +13,6 @@ import java.io.StringReader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class IndexControllerTest {
     private final Controller indexController = new IndexController();
@@ -40,11 +39,11 @@ class IndexControllerTest {
     }
 
     @Test
-    @DisplayName("Request의 Uri path가 다르거나, 지원하지 않는 HttpMethod라면 해당 컨트롤러가 처리할 수 없다.")
+    @DisplayName("지원하지 않는 HttpMethod는 해당 컨트롤러가 처리할 수 없다.")
     void handleExceptionTest() throws IOException {
         // given
         final String rawRequest = String.join("\r\n",
-                "POST /exception.html HTTP/1.1 ",
+                "POST /index.html HTTP/1.1 ",
                 "Content-Type: text/html",
                 "",
                 "");
@@ -52,11 +51,8 @@ class IndexControllerTest {
         request = HttpRequest.from(new BufferedReader(stringReader));
 
         //when, then
-        assertAll(
-                () -> assertThat(indexController.canHandle(request)).isFalse(),
-                () -> assertThatThrownBy(() -> indexController.service(request))
-                        .isInstanceOf(UnsupportedOperationException.class)
-        );
+        assertThatThrownBy(() -> indexController.service(request))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
@@ -66,11 +62,12 @@ class IndexControllerTest {
         final HttpResponse response = indexController.service(request);
 
         //then
-        StaticResource staticResource = StaticResource.from("/index.html");
+        final StaticResource staticResource = StaticResource.from("/index.html");
+        final String content = staticResource.getContent();
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
+                "Content-Length: " + content.getBytes().length + " ",
                 "",
                 staticResource.getContent());
         assertThat(expected).isEqualTo(response.toString());

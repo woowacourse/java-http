@@ -47,6 +47,10 @@ public class HttpResponse {
         responseHeaders.addCookie(new Cookie("JSESSIONID", sessionId));
     }
 
+    public String getCookieValue() {
+        return responseHeaders.getCookieValues();
+    }
+
     @Override
     public String toString() {
         return statusLine.getStatusLine() + "\r\n" +

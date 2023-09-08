@@ -15,7 +15,7 @@ public abstract class AbstractController implements Controller {
         if (httpMethod == HttpMethod.POST) {
             return doPost(request);
         }
-        throw new IllegalStateException();
+        throw new UnsupportedOperationException();
     }
 
     public abstract boolean canHandle(final HttpRequest request);

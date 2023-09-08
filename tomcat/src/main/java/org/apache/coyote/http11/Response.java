@@ -65,10 +65,8 @@ public class Response {
         return this;
     }
 
-    public Response addCookieBySession(boolean isSessionExists, String session) {
-        if (!isSessionExists) {
-            headers.put(Header.SET_COOKIE.getName(), "JSESSIONID=" + session);
-        }
+    public Response setCookie(String sessionId) {
+        headers.put(SET_COOKIE, "JSESSIONID=" + sessionId);
         return this;
     }
 }

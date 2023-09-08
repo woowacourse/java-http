@@ -7,7 +7,6 @@ import org.apache.coyote.http11.Response;
 import org.apache.coyote.http11.SessionManager;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import static org.apache.coyote.http11.Header.LOCATION;
 import static org.apache.coyote.http11.StatusCode.FOUND;
@@ -40,7 +39,7 @@ public class LoginController implements Controller {
     }
 
     private Response loginPage(RequestReader requestReader) throws IOException {
-        if (requestReader.isSessionExits()) {
+        if (requestReader.hasSessionId()) {
             return new Response(FOUND)
                     .addHeader(LOCATION.getName(), INDEX)
                     .addBaseHeader(requestReader.getContentType());
@@ -48,7 +47,6 @@ public class LoginController implements Controller {
         return new Response(OK)
                 .addBaseHeader(requestReader.getContentType())
                 .createBodyByFile(requestReader.getUri());
-
     }
 
     private Response tryLogin(RequestReader requestReader) throws IOException {
@@ -56,8 +54,8 @@ public class LoginController implements Controller {
             String sessionId = login(requestReader);
             return new Response(FOUND)
                     .addBaseHeader(requestReader.getContentType())
-                    .addHeader(LOCATION.getName(), INDEX)
-                    .addCookieBySession(requestReader.isSessionExits(), sessionId);
+                    .addHeader(LOCATION, INDEX)
+                    .setCookie(sessionId);
         } catch (IllegalArgumentException e) {
             return new Response(UNAUTHORIZED)
                     .addBaseHeader(requestReader.getContentType())
@@ -73,10 +71,7 @@ public class LoginController implements Controller {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
         }
 
-        String sessionId = UUID.randomUUID().toString();
-        SessionManager.addSession(sessionId, user);
-
-        return sessionId;
+        return SessionManager.getSessionId(user);
     }
 
     private Response registerPage(RequestReader requestReader) throws IOException {

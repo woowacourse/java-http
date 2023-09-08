@@ -4,23 +4,31 @@ import nextstep.jwp.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
+
+    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final String USER = "user";
 
     private SessionManager() {
     }
 
-    private static final Map<String, User> sessions = new HashMap<>();
+    public static String getSessionId(User user) {
+        String sessionId = sessions.keySet().stream()
+                .filter(key -> sessions.get(key).getAttribute(USER).equals(user))
+                .findAny()
+                .orElse(UUID.randomUUID().toString());
 
-    public static void addSession(String sessionId, User user) {
-        sessions.put(sessionId, user);
+        Session session = new Session(sessionId);
+        session.setAttribute(USER, user);
+        add(session);
+
+        return sessionId;
     }
 
-    public static User getUser(String sessionId) {
-        return sessions.get(sessionId);
-    }
 
-    public static boolean containsKey(String sessionId) {
-        return sessions.containsKey(sessionId);
+    private static void add(Session session) {
+        sessions.put(session.getId(), session);
     }
 }

@@ -25,6 +25,7 @@ public class RequestReader {
     private RequestLine requestLine;
     private final Map<String, String> headers = new HashMap<>();
     private final Map<String, String> bodies = new HashMap<>();
+    private Cookie cookie;
 
     public RequestReader(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
@@ -50,6 +51,9 @@ public class RequestReader {
         String key = split[0].substring(0, split[0].length() - 1);
         String value = split[1];
         headers.put(key, value);
+        if (headers.containsKey(COOKIE.getName())) {
+            cookie = new Cookie(headers.get(COOKIE.getName()));
+        }
     }
 
     private void readBody() throws IOException {
@@ -87,19 +91,12 @@ public class RequestReader {
         return bodies.get(key);
     }
 
-    public boolean isSessionExits() {
-        if (headers.containsKey(COOKIE.getName())) {
-            return true;
-        }
-        Cookie cookie = new Cookie(headers.get(COOKIE.getName()));
-        try {
-            cookie.getSession();
-        } catch (NullPointerException e) {
+    public boolean hasSessionId() {
+        if (cookie == null) {
             return false;
         }
-        return true;
+        return cookie.hasSessionId();
     }
-
 
     public String getProtocol() {
         return requestLine.getProtocol();

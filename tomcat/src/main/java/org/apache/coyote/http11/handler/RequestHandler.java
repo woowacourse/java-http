@@ -5,6 +5,7 @@ import java.util.Set;
 import org.apache.coyote.http11.handler.mapper.HandlerMapper;
 import org.apache.coyote.http11.handler.mapper.LoginHandlerMapper;
 import org.apache.coyote.http11.handler.mapper.RegisterHandlerMapper;
+import org.apache.coyote.http11.handler.mapper.StaticFileHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -15,6 +16,7 @@ public class RequestHandler {
   static {
     mappers.add(new LoginHandlerMapper());
     mappers.add(new RegisterHandlerMapper());
+    mappers.add(new StaticFileHandlerMapper());
   }
 
   public HttpResponse handle(final HttpRequest request) throws Exception {

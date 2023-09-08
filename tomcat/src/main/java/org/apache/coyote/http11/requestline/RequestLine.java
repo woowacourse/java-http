@@ -68,4 +68,8 @@ public class RequestLine {
   public boolean isSameUrl(final String url) {
     return this.url.equals(url);
   }
+
+  public boolean isEndWith(final String filenameExtension) {
+    return this.url.endsWith(filenameExtension);
+  }
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -98,5 +99,10 @@ public class HttpRequest {
 
   public boolean isSameUrl(final String url) {
     return this.requestLine.isSameUrl(url);
+  }
+
+  public boolean isEndWith(final String... filenameExtensions) {
+    return Arrays.stream(filenameExtensions)
+        .anyMatch(this.requestLine::isEndWith);
   }
 }

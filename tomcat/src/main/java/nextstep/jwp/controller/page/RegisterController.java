@@ -19,17 +19,17 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseStatusLine;
 
-public class RegisterGetPageController extends AbstractController {
+public class RegisterController extends AbstractController {
 
     private static final String BODY_DELIMITER = "&";
     private static final String PARAM_DELIMITER = "=";
     private static final int VALUE_INDEX = 1;
 
-    private RegisterGetPageController() {
+    private RegisterController() {
     }
 
     public static Controller create() {
-        return new RegisterGetPageController();
+        return new RegisterController();
     }
 
     @Override

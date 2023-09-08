@@ -4,11 +4,11 @@ import java.util.Arrays;
 import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public enum PageControllerMapping {
+public enum RequestMapping {
 
     HELLO_WORLD("/", HelloWorldController.create()),
-    REGISTER_GET("/register", RegisterGetPageController.create()),
-    LOGIN_GET("/login", LoginGetPageController.create()),
+    REGISTER_GET("/register", RegisterController.create()),
+    LOGIN_GET("/login", LoginController.create()),
     INDEX_GET("/index", IndexController.create());
 
     private static final String COMMA_REGEX = "\\.";
@@ -17,7 +17,7 @@ public enum PageControllerMapping {
     private final String uri;
     private final Controller controller;
 
-    PageControllerMapping(final String uri, final Controller controller) {
+    RequestMapping(final String uri, final Controller controller) {
         this.uri = uri;
         this.controller = controller;
     }
@@ -26,10 +26,10 @@ public enum PageControllerMapping {
         final String requestUri = httpRequest.getUri();
         final String requestUriWithoutExtension = requestUri.split(COMMA_REGEX)[URI_INDEX];
 
-        return Arrays.stream(PageControllerMapping.values())
+        return Arrays.stream(RequestMapping.values())
                 .filter(value -> value.uri.equals(requestUriWithoutExtension))
                 .map(value -> value.controller)
                 .findFirst()
-                .orElse(NotFoundPageController.create());
+                .orElse(NotFoundController.create());
     }
 }

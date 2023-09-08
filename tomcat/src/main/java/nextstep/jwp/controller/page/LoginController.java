@@ -29,9 +29,9 @@ import org.apache.coyote.http11.response.ResponseStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginGetPageController extends AbstractController {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginGetPageController.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String COMMA_REGEX = "\\.";
     private static final int FILENAME_INDEX = 0;
     private static final String QUERY_DELIMITER = "&";
@@ -41,11 +41,11 @@ public class LoginGetPageController extends AbstractController {
     private static final int SECOND = 1;
     private static final String USER = "user";
 
-    private LoginGetPageController() {
+    private LoginController() {
     }
 
     public static Controller create() {
-        return new LoginGetPageController();
+        return new LoginController();
     }
 
     @Override

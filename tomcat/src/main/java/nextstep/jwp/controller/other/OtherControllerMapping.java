@@ -2,7 +2,7 @@ package nextstep.jwp.controller.other;
 
 import java.util.Arrays;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.page.NotFoundPageController;
+import nextstep.jwp.controller.page.NotFoundController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public enum OtherControllerMapping {
@@ -19,6 +19,6 @@ public enum OtherControllerMapping {
         return Arrays.stream(OtherControllerMapping.values())
                 .map(value -> value.controller)
                 .findFirst()
-                .orElse(NotFoundPageController.create());
+                .orElse(NotFoundController.create());
     }
 }

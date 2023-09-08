@@ -16,13 +16,13 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseStatusLine;
 
-public class NotFoundPageController extends AbstractController {
+public class NotFoundController extends AbstractController {
 
-    private NotFoundPageController() {
+    private NotFoundController() {
     }
 
     public static Controller create() {
-        return new NotFoundPageController();
+        return new NotFoundController();
     }
 
     @Override

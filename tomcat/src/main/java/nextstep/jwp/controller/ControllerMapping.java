@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import nextstep.jwp.controller.other.OtherControllerMapping;
-import nextstep.jwp.controller.page.PageControllerMapping;
+import nextstep.jwp.controller.page.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public enum ControllerMapping {
 
-    HTML(uri -> uri.endsWith(".html") || !uri.contains("."), PageControllerMapping::find),
+    HTML(uri -> uri.endsWith(".html") || !uri.contains("."), RequestMapping::find),
     OTHER(uri -> uri.contains("."), OtherControllerMapping::find);
 
     private final Predicate<String> hasUriInFile;

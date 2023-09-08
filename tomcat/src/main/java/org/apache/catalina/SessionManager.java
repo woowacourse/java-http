@@ -21,4 +21,8 @@ public class SessionManager implements Manager {
     public void remove(final String id) {
         SESSIONS.remove(id);
     }
+
+    public void clear() {
+        SESSIONS.clear();
+    }
 }

@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,11 @@ import org.junit.jupiter.api.Test;
 class SessionManagerTest {
 
     private final SessionManager sessionManager = new SessionManager();
+
+    @BeforeEach
+    void setUp() {
+        sessionManager.clear();
+    }
 
     @Test
     void 세션을_추가한다() {
@@ -48,5 +54,18 @@ class SessionManagerTest {
 
         // then
         assertThat(sessionManager.findSession("helloworld")).isNull();
+    }
+
+    @Test
+    void 세션을_초기화한다() {
+        // given
+        final Session session = new Session("helloworld");
+        sessionManager.add(session);
+
+        // when
+        sessionManager.clear();
+
+        // then
+        assertThat(session.getItems()).isEmpty();
     }
 }

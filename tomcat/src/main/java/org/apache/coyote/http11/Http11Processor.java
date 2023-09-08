@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 //            System.out.println("request = " + request);
             final ResponseEntity responseEntity = proxy.process(request);
 //            System.out.println("responseEntity = " + responseEntity);
-            writeResponse2(outputStream, responseEntity);
+            writeResponse(outputStream, responseEntity);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -64,9 +64,7 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private void writeResponse2(final OutputStream outputStream, final ResponseEntity responseEntity) throws IOException {
-//        final String resource = FileUtil.getResource(response.getResourceUrl());
-//        final ResponseEntity responseEntity = ResponseEntity.from(response, resource);
+    private void writeResponse(final OutputStream outputStream, final ResponseEntity responseEntity) throws IOException {
         outputStream.write(responseEntity.toString().getBytes());
         outputStream.flush();
     }

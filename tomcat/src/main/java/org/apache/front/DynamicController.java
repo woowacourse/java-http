@@ -28,7 +28,7 @@ public class DynamicController implements FrontController {
             return null;
         }
         Controller controller = urlMapper.get(request.getPath());
-//        return controller.handle(request);
-        return null;
+        return controller.handle(request);
+//        return null;
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.response;
 
+import org.apache.coyote.common.FileType;
 import org.apache.coyote.http11.FileUtil;
 import org.apache.coyote.request.Request;
 
@@ -24,6 +25,13 @@ public class ResponseEntity {
         final ResponseContentType contentType = new ResponseContentType(request.getContentType());
         final ResponseContentLength contentLength = new ResponseContentLength(responseBody.getBytes().length);
         final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, contentLength));
+        return new ResponseEntity(responseStartLine, responseHeader, responseBody);
+    }
+
+    public static ResponseEntity fromString(final Request request, final String responseBody, final ResponseStatus responseStatus) {
+        final ResponseStartLine responseStartLine = ResponseStartLine.from(request.httpVersion(), responseStatus);
+        final ResponseContentType contentType = new ResponseContentType(FileType.TEXT.getContentType());
+        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, responseBody.length()));
         return new ResponseEntity(responseStartLine, responseHeader, responseBody);
     }
 

@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.common.PathUrl;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
@@ -28,8 +26,7 @@ class FileUtilTest {
                 "    </head>\n" +
                 "    <body>\n" +
                 "    </body>\n" +
-                "</html>\n" +
-                "";
+                "</html>\n";
 
         assertThat(resource).isEqualTo(expect);
     }

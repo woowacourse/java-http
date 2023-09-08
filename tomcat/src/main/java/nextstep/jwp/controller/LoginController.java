@@ -3,12 +3,10 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.request.Request;
-import org.apache.coyote.response.PathResponse;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
 import java.util.Map;
 
 public class LoginController implements Controller{
@@ -18,7 +16,7 @@ public class LoginController implements Controller{
     public static final String QUERY_PASSWORD_KEY = "password";
 
     @Override
-    public Response handle(final Request request){
+    public ResponseEntity handle(final Request request){
         if(request.isPost()){
             return login(request);
         }
@@ -26,11 +24,12 @@ public class LoginController implements Controller{
         return null;
     }
 
-    private static PathResponse login(Request request) {
+    private static ResponseEntity login(Request request) {
         Map<String, String> requestBody = request.getRequestBody();
 
         if(!requestBody.containsKey(QUERY_ACCOUNT_KEY) || !requestBody.containsKey(QUERY_PASSWORD_KEY)){
-            return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
+//            return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
+            return null;
         }
 
         final String account = requestBody.get(QUERY_ACCOUNT_KEY);
@@ -39,9 +38,11 @@ public class LoginController implements Controller{
         User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
         if(user.checkPassword(password)){
             log.info("user : {}", user);
-            return new PathResponse("/index", HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
+//            return new PathResponse("/index", HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
+            return null;
         }
 
-        return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
+//        return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
+        return null;
     }
 }

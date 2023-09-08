@@ -3,10 +3,8 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.request.Request;
-import org.apache.coyote.response.PathResponse;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.response.ResponseEntity;
 
-import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,14 +15,15 @@ public class RegisterController implements Controller {
     public static final String QUERY_EMAIL_KEY = "email";
 
     @Override
-    public Response handle(Request request) {
+    public ResponseEntity handle(Request request) {
         if (request.isPost()) {
             return join(request);
         }
-        return new PathResponse(request.getPath(), HttpURLConnection.HTTP_OK, "OK");
+//        return new PathResponse(request.getPath(), HttpURLConnection.HTTP_OK, "OK");
+        return null;
     }
 
-    private Response join(Request request) {
+    private ResponseEntity join(Request request) {
         Map<String, String> requestBody = request.getRequestBody();
 
         if (!requestBody.containsKey(QUERY_ACCOUNT_KEY) || !requestBody.containsKey(QUERY_PASSWORD_KEY) || !requestBody.containsKey(QUERY_EMAIL_KEY)) {
@@ -43,6 +42,7 @@ public class RegisterController implements Controller {
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
 
-        return new PathResponse("/index", HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
+//        return new PathResponse("/index", HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
+        return null;
     }
 }

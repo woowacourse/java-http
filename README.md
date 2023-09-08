@@ -33,3 +33,8 @@
 - [x] 분기별 처리 - Controller 구현하기
   - [x] HTTP Method에 따라 Controller 분리
   - [x] 허용하지 않는 HTTP Method 시 405 Status Code 응답
+
+- [x] 동시성 확장하기
+  - [x] Executors로 Thread Pool 적용
+    - 기본 Max Thread 수 250으로 설정
+  - [x] SessionManager 동시성 컬렉션 사용

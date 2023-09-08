@@ -12,7 +12,7 @@ public class HttpHeader {
     private static final String RESPONSE_FORMAT = "%s: %s ";
     private static final String HEADER_DELIMITER = ": ";
 
-    final private Map<String, String> header;
+    private final Map<String, String> header;
 
     public HttpHeader(final Map<String, String> header) {
         this.header = header;

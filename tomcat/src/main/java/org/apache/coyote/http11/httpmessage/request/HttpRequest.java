@@ -12,7 +12,6 @@ public class HttpRequest {
     private final QueryString queryString;
     private final RequestBody requestBody;
 
-
     private HttpRequest(
         final HttpMethod httpMethod,
         final String path,

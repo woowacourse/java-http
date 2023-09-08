@@ -25,6 +25,9 @@ public class Handler {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
     private static final String FILE_DELIMITER = "\\.";
     private static final int FILE_EXTENSION_INDEX = 1;
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private final HandlerMapping handlerMapping;
     private final QueryString queryString;
@@ -41,75 +44,72 @@ public class Handler {
     }
 
     public HttpResponse makeResponse() throws IOException {
+        Map<String, String> headers = new LinkedHashMap<>();
         if (handlerMapping == null) {
             return makeNotFoundResponse();
         }
         final String[] split = handlerMapping.getResponse().split(FILE_DELIMITER);
         if (split.length == 1) {
-            return makeStringResponse();
+            return makeStringResponse(headers);
         }
         if (handlerMapping == HandlerMapping.LOGIN || handlerMapping == HandlerMapping.LOGIN_POST) {
-            return makeLoginResponse(split[FILE_EXTENSION_INDEX]);
+            return makeLoginResponse(headers, split[FILE_EXTENSION_INDEX]);
         }
         if (handlerMapping == HandlerMapping.REGISTER_POST) {
-            return makeRegisterResponse(split[FILE_EXTENSION_INDEX]);
+            return makeRegisterResponse(headers, split[FILE_EXTENSION_INDEX]);
         }
-        return makeFileResponse(split[FILE_EXTENSION_INDEX]);
+        return makeFileResponse(headers, split[FILE_EXTENSION_INDEX]);
     }
 
     private HttpResponse makeNotFoundResponse() throws IOException {
         Map<String, String> headers = new LinkedHashMap<>();
         final String body = findFile("404.html");
-        headers.put("Content-Type", ContentType.HTML.getValue());
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        headers.put(CONTENT_TYPE, ContentType.HTML.getValue());
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(StatusCode.NOT_FOUND, new HttpHeader(headers), body);
     }
 
-    private HttpResponse makeStringResponse() {
+    private HttpResponse makeStringResponse(final Map<String, String> headers) {
         final String body = handlerMapping.getResponse();
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", ContentType.HTML.getValue() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        headers.put(CONTENT_TYPE, ContentType.HTML.getValue() + ";charset=utf-8");
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
     }
 
-    private HttpResponse makeFileResponse(final String fileType) throws IOException {
-        Map<String, String> headers = new LinkedHashMap<>();
+    private HttpResponse makeFileResponse(final Map<String, String> headers, final String fileType)
+        throws IOException {
         final String body = findFile(handlerMapping.getResponse());
-        headers.put("Content-Type",
-            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        headers.put(CONTENT_TYPE, ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
     }
 
-    private HttpResponse makeLoginResponse(final String fileType) throws IOException {
-        Map<String, String> headers = new LinkedHashMap<>();
+    private HttpResponse makeLoginResponse(final Map<String, String> headers, final String fileType)
+        throws IOException {
         final String body = findFile(handlerMapping.getResponse());
-        headers.put("Content-Type",
-            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        headers.put(CONTENT_TYPE, ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 
         if (queryString == null && requestBody == null) {
             return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
         }
 
-        final Optional<User> user = getMemberByAccount();
+        getMemberByAccount().ifPresentOrElse((member) -> {
+            headers.put(LOCATION, "/401.html");
+            if (isExistMember(member)) {
+                log.info("user : " + member);
+                headers.put(LOCATION, "/index.html");
+            }
+        }, () -> headers.put(LOCATION, "/401.html"));
 
-        if (isExistMember(user)) {
-            log.info("user : " + user);
-            headers.put("Location", "/index.html");
-            return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
-
-        }
-        headers.put("Location", "/401.html");
         return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
     }
 
-    private boolean isExistMember(final Optional<User> user) {
+    private boolean isExistMember(final User user) {
         if (requestBody == null) {
-            return user.isPresent() && user.get().checkPassword(queryString.getPassword());
+            return user.checkPassword(queryString.getPassword());
         }
-        return user.isPresent() && user.get().checkPassword(requestBody.getPassword());
+        return user.checkPassword(requestBody.getPassword());
     }
 
     private Optional<User> getMemberByAccount() {
@@ -119,13 +119,15 @@ public class Handler {
         return InMemoryUserRepository.findByAccount(requestBody.getAccount());
     }
 
-    private HttpResponse makeRegisterResponse(final String fileType) throws IOException {
-        Map<String, String> headers = new LinkedHashMap<>();
+    private HttpResponse makeRegisterResponse(
+        final Map<String, String> headers,
+        final String fileType
+    ) throws IOException {
         final String body = findFile(handlerMapping.getResponse());
-        headers.put("Content-Type",
+        headers.put(CONTENT_TYPE,
             ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
-        headers.put("Location", "/index.html");
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        headers.put(LOCATION, "/index.html");
         final User registerUser = new User(requestBody.getAccount(), requestBody.getPassword(),
             requestBody.getEmail());
         InMemoryUserRepository.save(registerUser);

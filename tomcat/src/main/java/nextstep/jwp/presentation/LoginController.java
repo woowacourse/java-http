@@ -24,16 +24,16 @@ public class LoginController implements Controller {
         String method = requestReader.getMethod();
         String uri = requestReader.getUri();
 
-        if (method.equalsIgnoreCase("GET") && uri.equals("/login")) {
+        if (method.equalsIgnoreCase("GET") && uri.equals("/login.html")) {
             return loginPage(requestReader);
         }
-        if (method.equalsIgnoreCase("POST") && uri.equals("/login")) {
+        if (method.equalsIgnoreCase("POST") && uri.equals("/login.html")) {
             return tryLogin(requestReader);
         }
-        if (method.equalsIgnoreCase("GET") && uri.equals("/register")) {
+        if (method.equalsIgnoreCase("GET") && uri.equals("/register.html")) {
             return registerPage(requestReader);
         }
-        if (method.equalsIgnoreCase("POST") && uri.equals("/register")) {
+        if (method.equalsIgnoreCase("POST") && uri.equals("/register.html")) {
             return register(requestReader);
         }
         return null;
@@ -41,27 +41,26 @@ public class LoginController implements Controller {
 
     private Response loginPage(RequestReader requestReader) throws IOException {
         if (requestReader.isSessionExits()) {
-            return new Response(requestReader, OK)
-                    .addBaseHeader()
-                    .createBodyByFile(requestReader.getUri());
+            return new Response(FOUND)
+                    .addHeader(LOCATION.getName(), INDEX)
+                    .addBaseHeader(requestReader.getContentType());
         }
-        return new Response(requestReader, FOUND)
-                .createBodyByFile(INDEX)
-                .addHeader(LOCATION.getName(), INDEX)
-                .addBaseHeader();
+        return new Response(OK)
+                .addBaseHeader(requestReader.getContentType())
+                .createBodyByFile(requestReader.getUri());
+
     }
 
     private Response tryLogin(RequestReader requestReader) throws IOException {
         try {
             String sessionId = login(requestReader);
-            return new Response(requestReader, FOUND)
-                    .createBodyByFile(INDEX)
+            return new Response(FOUND)
+                    .addBaseHeader(requestReader.getContentType())
                     .addHeader(LOCATION.getName(), INDEX)
-                    .addCookieBySession(sessionId)
-                    .addBaseHeader();
+                    .addCookieBySession(requestReader.isSessionExits(), sessionId);
         } catch (IllegalArgumentException e) {
-            return new Response(requestReader, UNAUTHORIZED)
-                    .addBaseHeader()
+            return new Response(UNAUTHORIZED)
+                    .addBaseHeader(requestReader.getContentType())
                     .createBodyByFile(UNAUTHORIZED_HTML);
         }
     }
@@ -78,20 +77,20 @@ public class LoginController implements Controller {
     }
 
     private Response registerPage(RequestReader requestReader) throws IOException {
-        return new Response(requestReader, OK)
-                .addBaseHeader()
+        return new Response(OK)
+                .addBaseHeader(requestReader.getContentType())
                 .createBodyByFile(requestReader.getUri());
     }
 
     private Response register(RequestReader requestReader) throws IOException {
         InMemoryUserRepository.save(new User(
                 requestReader.getBodyValue("account"),
-                requestReader.getBodyValue("password"),
-                requestReader.getBodyValue("email")
+                requestReader.getBodyValue("email"),
+                requestReader.getBodyValue("password")
         ));
-        return new Response(requestReader, FOUND)
+        return new Response(FOUND)
                 .createBodyByFile(INDEX)
                 .addHeader(LOCATION.getName(), INDEX)
-                .addBaseHeader();
+                .addBaseHeader(requestReader.getContentType());
     }
 }

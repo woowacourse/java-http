@@ -10,8 +10,8 @@ public class OtherController implements Controller {
 
     @Override
     public Response service(RequestReader requestReader) throws IOException {
-        return new Response(requestReader, StatusCode.OK)
-                .addBaseHeader()
+        return new Response(StatusCode.OK)
+                .addBaseHeader(requestReader.getContentType())
                 .createBodyByFile(requestReader.getUri());
     }
 }

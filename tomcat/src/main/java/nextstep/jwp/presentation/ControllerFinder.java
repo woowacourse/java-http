@@ -23,10 +23,10 @@ public class ControllerFinder {
         if (uri.equals("/")) {
             return mainController;
         }
-        if (uri.equals("/login") || uri.equals("/register")) {
+        if (uri.equals("/login.html") || uri.equals("/register.html")) {
             return loginController;
         }
-        if (uri.equals("/index") || uri.equals("/index.html")) {
+        if (uri.equals("/index.html")) {
             return indexController;
         }
         return otherController;

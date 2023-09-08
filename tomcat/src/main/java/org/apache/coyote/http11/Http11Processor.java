@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             Controller controller = controllerFinder.findController(requestReader.getRequestUri());
             Response response = controller.service(requestReader);
 
-            outputStream.write(response.format().getBytes());
+            outputStream.write(response.format(requestReader.getProtocol()).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

@@ -11,8 +11,8 @@ public class IndexController implements Controller {
 
     @Override
     public Response service(RequestReader requestReader) throws IOException {
-        return new Response(requestReader, OK)
-                .addBaseHeader()
+        return new Response(OK)
+                .addBaseHeader(requestReader.getContentType())
                 .createBodyByFile(requestReader.getUri());
     }
 }

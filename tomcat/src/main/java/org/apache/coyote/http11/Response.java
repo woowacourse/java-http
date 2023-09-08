@@ -12,26 +12,22 @@ public class Response {
 
     private static final String STATIC = "static";
     private static final String SPACE_CRLF = " \r\n";
-    private static final String HTML_EXTENSION = ".html";
-    private static final String PERIOD = ".";
     private static final String SPACE = " ";
     private static final String CRLF = "\r\n";
     private static final String COLON = ": ";
 
-    private final RequestReader requestReader;
     private final StatusCode statusCode;
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     private String body;
 
-    public Response(RequestReader requestReader, StatusCode statusCode) {
-        this.requestReader = requestReader;
+    public Response(StatusCode statusCode) {
         this.statusCode = statusCode;
     }
 
-    public String format() {
+    public String format(String protocol) {
         StringBuilder sb = new StringBuilder();
-        sb.append(requestReader.getProtocol()).append(SPACE).append(statusCode.format()).append(SPACE_CRLF);
+        sb.append(protocol).append(SPACE).append(statusCode.format()).append(SPACE_CRLF);
         headers.forEach((key, value) -> sb.append(key).append(COLON).append(value).append(SPACE_CRLF));
         sb.append(CRLF).append(body);
 
@@ -45,7 +41,6 @@ public class Response {
     }
 
     public Response createBodyByFile(String url) throws IOException {
-        url = resolveExtension(url);
         String path = Objects.requireNonNull(getClass().getClassLoader().getResource(STATIC + url)).getPath();
         File file = new File(path);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
@@ -60,15 +55,8 @@ public class Response {
         return this;
     }
 
-    private String resolveExtension(String url) {
-        if (url.contains(PERIOD)) {
-            return url;
-        }
-        return url + HTML_EXTENSION;
-    }
-
-    public Response addBaseHeader() {
-        headers.put(Header.CONTENT_TYPE.getName(), requestReader.getContentType());
+    public Response addBaseHeader(String contentType) {
+        headers.put(Header.CONTENT_TYPE.getName(), contentType);
         return this;
     }
 
@@ -77,8 +65,8 @@ public class Response {
         return this;
     }
 
-    public Response addCookieBySession(String session) {
-        if (!requestReader.isSessionExits()) {
+    public Response addCookieBySession(boolean isSessionExists, String session) {
+        if (!isSessionExists) {
             headers.put(Header.SET_COOKIE.getName(), "JSESSIONID=" + session);
         }
         return this;

@@ -8,8 +8,8 @@ public class MainController implements Controller{
 
     @Override
     public Response service(RequestReader requestReader) {
-        return new Response(requestReader, StatusCode.OK)
-                .addBaseHeader()
+        return new Response(StatusCode.OK)
+                .addBaseHeader(requestReader.getContentType())
                 .createBodyByText("Hello world!");
     }
 }

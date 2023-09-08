@@ -39,7 +39,7 @@ public class HttpRequest {
         this.queryParameters = ofNullable(queryParameters).orElse(Map.of());
         this.headers = ofNullable(headers).map(Headers::new).orElse(new Headers());
         this.messageBody = Optional.ofNullable(messageBody).orElse(EMPTY);
-        this.httpCookie = new HttpCookie(cookie);
+        this.httpCookie = ofNullable(cookie).map(HttpCookie::new).orElse(new HttpCookie(Map.of()));
     }
 
     public boolean isPost() {

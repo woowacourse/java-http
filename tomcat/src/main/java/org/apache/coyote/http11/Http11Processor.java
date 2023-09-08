@@ -82,6 +82,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = extractRequestUriFromRequest(requestLine);
 
+            // requestUri 에서 path 와 queryString 분리
             int index = uri.indexOf("?");
             String path;
             String queryString = "";
@@ -98,6 +99,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String setCookie = "";
 
+            // path 가 login 일때 분기
             if (path.equals("login") && httpRequestLine.isGetMethod()) {
                 statusCode = 302;
                 statusMessage = "Found";
@@ -147,15 +149,20 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (path.equals("register") && requestHeader.indexOf("POST") != -1) {
+            // pass 가 register 일때 분기
+            if (path.equals("register") && httpRequestLine.isPostMethod()) {
                 String account = httpRequestBody.getValue("account");
                 String password = httpRequestBody.getValue("password");
                 String email = httpRequestBody.getValue("email");
 
                 InMemoryUserRepository.save(new User(account, password, email));
+
+                statusCode = 302;
+                statusMessage = "Found";
                 path = "/index.html";
             }
 
+            // content-Type 처리
             String contentType = "html";
             if (path.length() != 0) {
                 String[] splitedFileName = path.split("\\.");
@@ -169,6 +176,7 @@ public class Http11Processor implements Runnable, Processor {
 
             var responseBody = "";
 
+            // / 일때 분기
             if (uri.length() == 0) {
                 responseBody = "Hello world!";
             } else {

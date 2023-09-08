@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.Session;
 
 public class HttpUtils {
 
@@ -53,5 +55,10 @@ public class HttpUtils {
       params.put(tokens[0], tokens[1]);
     }
     return params;
+  }
+
+  public static Session generateSession() {
+    final String uuid = UUID.randomUUID().toString();
+    return new Session(uuid);
   }
 }

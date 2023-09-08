@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.controller;
 
+import static org.apache.coyote.http11.HttpUtils.generateSession;
 import static org.apache.coyote.http11.HttpUtils.parseParam;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
@@ -30,23 +30,20 @@ public class LoginController extends AbstractController {
     final String password = params.get("password");
 
     if (account == null || password == null) {
-      final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
       final HttpHeader header = new HttpHeader();
       header.setHeaderLocation(INDEX_PAGE);
-      return new HttpResponse(responseLine, header);
+      return responseFoundRedirect(header);
     }
 
     final Optional<User> user = InMemoryUserRepository.findByAccount(account);
     if (user.isPresent() && user.get().checkPassword(password)) {
-      final String uuid = UUID.randomUUID().toString();
-      final Session session = new Session(uuid);
+      final Session session = generateSession();
       request.addSession(session);
 
-      final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
       final HttpHeader header = new HttpHeader();
       header.setHeaderLocation(INDEX_PAGE);
-      header.setCookie(JSESSIONID + "=" + uuid);
-      return new HttpResponse(responseLine, header);
+      header.setCookie(JSESSIONID + "=" + session.getId());
+      return responseFoundRedirect(header);
     }
 
     final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
@@ -61,9 +58,8 @@ public class LoginController extends AbstractController {
     if (request.getSession(sessionId) == null) {
       return responseStaticFile(request, LOGIN_PAGE);
     }
-    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
     final HttpHeader header = new HttpHeader();
     header.setHeaderLocation(INDEX_PAGE);
-    return new HttpResponse(responseLine, header);
+    return responseFoundRedirect(header);
   }
 }

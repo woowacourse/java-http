@@ -9,8 +9,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.responseline.HttpStatus;
-import org.apache.coyote.http11.responseline.ResponseLine;
 
 public class RegisterController extends AbstractController {
 
@@ -26,10 +24,9 @@ public class RegisterController extends AbstractController {
     final User user = new User(account, password, email);
     InMemoryUserRepository.save(user);
 
-    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
     final HttpHeader header = new HttpHeader();
     header.setHeaderLocation(INDEX_PAGE);
-    return new HttpResponse(responseLine, header);
+    return responseFoundRedirect(header);
   }
 
   @Override

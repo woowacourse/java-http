@@ -32,7 +32,8 @@ public abstract class AbstractController implements Controller {
     throw new UnsupportedOperationException();
   }
 
-  protected HttpResponse responseStaticFile(final HttpRequest request, final String path) throws IOException {
+  protected HttpResponse responseStaticFile(final HttpRequest request, final String path)
+      throws IOException {
     final String body = readContentsFromFile(path);
     final String contentType = getContentType(request.getHeader("Accept"));
     final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
@@ -40,5 +41,10 @@ public abstract class AbstractController implements Controller {
     header.setHeader("Content-Type", contentType + ";charset=utf-8");
     header.setHeader("Content-Length", body.getBytes().length + "");
     return new HttpResponse(responseLine, header, body);
+  }
+
+  protected HttpResponse responseFoundRedirect(final HttpHeader header) {
+    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
+    return new HttpResponse(responseLine, header);
   }
 }

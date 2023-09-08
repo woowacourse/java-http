@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -20,7 +19,9 @@ public class ResourceController implements Controller {
     public ResponseEntity service(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
+        return ResponseEntity.ok()
+                .path(requestLine.getPath())
+                .build();
     }
 
 }

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.controller;
 
 import nextstep.jwp.controller.UserController;
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
@@ -23,7 +22,9 @@ public class RegisterController extends AbstractController<UserController> {
     protected ResponseEntity doGet(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
+        return ResponseEntity.ok()
+                .path(requestLine.getPath())
+                .build();
     }
 
     @Override

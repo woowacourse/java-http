@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class UserController {
@@ -26,7 +25,9 @@ public class UserController {
     public ResponseEntity signUp(String account, String password, String email) {
         userService.save(account, password, email);
 
-        return ResponseEntity.of(HttpStatus.FOUND, "/index");
+        return ResponseEntity.found()
+                .path("/index")
+                .build();
     }
 
 }

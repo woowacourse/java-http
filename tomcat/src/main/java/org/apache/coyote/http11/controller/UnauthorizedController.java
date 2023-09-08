@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
 
@@ -17,6 +16,8 @@ public class UnauthorizedController implements Controller {
 
     @Override
     public ResponseEntity service(HttpRequest httpRequest) {
-        return ResponseEntity.of(HttpStatus.UNAUTHORIZED, "/401");
+        return ResponseEntity.unauthorized()
+                .path("/401")
+                .build();
     }
 }

@@ -46,7 +46,9 @@ public enum RequestMapping {
 
             return controller.service(request);
         } catch (RuntimeException e) {
-            return ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR, "/500");
+            return ResponseEntity.internalServerError()
+                    .path("/500")
+                    .build();
         }
     }
 

@@ -3,7 +3,6 @@ package org.apache.coyote.http11.controller;
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.HttpCookie;
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
@@ -28,10 +27,14 @@ public class LoginController extends AbstractController<UserController> {
         HttpSession session = httpRequest.getSession(false);
 
         if (session != null && session.getAttribute("user") != null) {
-            return ResponseEntity.of(HttpStatus.FOUND, "/index");
+            return ResponseEntity.found()
+                    .path("/index")
+                    .build();
         }
 
-        return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
+        return ResponseEntity.ok()
+                .path(requestLine.getPath())
+                .build();
     }
 
     @Override
@@ -55,9 +58,14 @@ public class LoginController extends AbstractController<UserController> {
             HttpCookie httpCookie = HttpCookie.create();
             httpCookie.putJSessionId(httpSession.getId());
 
-            return ResponseEntity.cookie(httpCookie, HttpStatus.FOUND, "/index");
+            return ResponseEntity.found()
+                    .path("/index")
+                    .httpCookie(httpCookie)
+                    .build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.FOUND, "/401");
+            return ResponseEntity.found()
+                    .path("/401")
+                    .build();
         }
     }
 

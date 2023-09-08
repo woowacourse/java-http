@@ -19,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
+    private final RequestMapping controllers = RequestMapping.init();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -37,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-            Controller controller = RequestMapping.init().getController(httpRequest);
+            Controller controller = controllers.getController(httpRequest);
             ResponseEntity responseEntity = controller.service(httpRequest);
             String response = HttpResponse.from(responseEntity).getResponse();
 

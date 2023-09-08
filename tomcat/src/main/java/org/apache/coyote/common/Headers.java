@@ -18,49 +18,56 @@ public class Headers {
 
     private final Map<String, String> mapping = new HashMap<>();
 
-    public Headers() {
+    private Headers() {
     }
 
-    public Headers(final Map<String, String> headers) {
-        mapping.putAll(headers);
+    public static Headers empty() {
+        return new Headers();
     }
 
-    public String getHeaderValue(final String name) {
-        return mapping.getOrDefault(name, null);
+    public String getHeaderValue(final String headerName) {
+        return mapping.getOrDefault(headerName, null);
     }
 
-    public void addHeader(final String headerName, final String value) {
-        mapping.put(headerName, value);
+    public void addHeader(final String headerName, final String headerValue) {
+        mapping.put(headerName, headerValue);
     }
 
-    public void setContentType(final String contentType) {
+    public Headers setContentType(final String contentType) {
         mapping.put(CONTENT_TYPE.value(), contentType);
+        return this;
     }
 
-    public void setContentLength(final int contentLength) {
+    public Headers setContentLength(final int contentLength) {
         mapping.put(CONTENT_LENGTH.value(), String.valueOf(contentLength));
+        return this;
     }
 
-    public void setLocation(final String location) {
+    public Headers setLocation(final String location) {
         mapping.put(LOCATION.value(), location);
+        return this;
     }
 
-    public void setCookies(final Cookies cookies) {
+    public Headers setCookies(final Cookies cookies) {
         final String cookieValues = cookies.cookieNames()
                 .stream()
                 .map(cookieName -> cookieName + "=" + cookies.getCookieValue(cookieName))
                 .collect(Collectors.joining(";"));
 
         mapping.put(SET_COOKIE.value(), cookieValues);
+
+        return this;
     }
 
-    public void addCookie(final String cookieName, final String cookieValue) {
+    public Headers addCookie(final String cookieName, final String cookieValue) {
         final String oldSetCookies = mapping.getOrDefault(SET_COOKIE.value(), null);
         if (Objects.isNull(oldSetCookies)) {
             mapping.put(SET_COOKIE.value(), cookieName + "=" + cookieValue);
+            return this;
         }
 
         mapping.put(SET_COOKIE.value(), oldSetCookies + ";" + cookieName + "=" + cookieValue);
+        return this;
     }
 
     public List<String> headerNames() {

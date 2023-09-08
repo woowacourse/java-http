@@ -28,7 +28,7 @@ public class Request {
     }
 
     public String getResourceTypes() {
-        return requestHeader.getHeaderBy("Accept") + ";charset=utf-8";
+        return requestHeader.getHeader("Accept") + ";charset=utf-8";
     }
 
     public Session getSession(boolean isCreate) {

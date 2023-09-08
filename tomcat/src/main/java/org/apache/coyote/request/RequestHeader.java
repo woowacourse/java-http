@@ -1,12 +1,17 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 
 public class RequestHeader {
+
+    private static final SessionManager sessionManager = SessionManager.getInstance();
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
@@ -16,11 +21,8 @@ public class RequestHeader {
         this.headers = headers;
     }
 
-    public String getHeaderBy(String key) {
-        if (has(key)) {
-            return headers.get(key);
-        }
-        throw new IllegalArgumentException("헤더 정보를 읽을 수 없습니다.");
+    public String getHeader(String key) {
+        return headers.getOrDefault(key, null);
     }
 
     public int getContentLength() {
@@ -35,7 +37,16 @@ public class RequestHeader {
     }
 
     public Session getSession(boolean isCreate) {
-        return getCookie().getSession(isCreate);
+        String sessionId = getCookie().getValue(JSESSIONID);
+        if (sessionId == null && isCreate) {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
+        }
+        if (sessionId == null) {
+            return null;
+        }
+        return sessionManager.findSession(sessionId);
     }
 
     public HttpCookie getCookie() {

@@ -25,15 +25,8 @@ public class StaticResourceController implements Controller {
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.OK)
-                .contentType(generateContentType(requestURI))
+                .contentType(ContentType.from(requestURI))
                 .responseBody(HttpResponseBody.from(responseBody))
                 .build();
-    }
-
-    private ContentType generateContentType(String requestURI) {
-        if (requestURI.endsWith(".css")) {
-            return ContentType.CSS;
-        }
-        return ContentType.HTML;
     }
 }

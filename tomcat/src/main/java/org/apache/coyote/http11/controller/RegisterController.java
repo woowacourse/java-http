@@ -23,12 +23,11 @@ public class RegisterController implements Controller {
         HttpRequestStartLine httpRequestStartLine = request.getHttpRequestStartLine();
         HttpRequestBody httpRequestBody = request.getHttpRequestBody();
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
-        String requestURI = httpRequestStartLine.getPath();
 
         if (httpMethod == HttpMethod.GET) {
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
-                    .contentType(generateContentType(requestURI))
+                    .contentType(ContentType.HTML)
                     .location(REGISTER_PAGE_URI)
                     .build();
         }
@@ -44,15 +43,8 @@ public class RegisterController implements Controller {
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
-                .contentType(generateContentType(requestURI))
+                .contentType(ContentType.HTML)
                 .location(INDEX_PAGE_URI)
                 .build();
-    }
-
-    private ContentType generateContentType(String requestURI) {
-        if (requestURI.endsWith(".css")) {
-            return ContentType.CSS;
-        }
-        return ContentType.HTML;
     }
 }

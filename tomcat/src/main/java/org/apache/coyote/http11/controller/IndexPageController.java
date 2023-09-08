@@ -10,21 +10,12 @@ public class IndexPageController implements Controller {
 
     @Override
     public ResponseEntity service(HttpRequest request) {
-        String requestURI = request.getHttpRequestStartLine().getPath();
-
         final var responseBody = "Hello world!";
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.OK)
-                .contentType(generateContentType(requestURI))
+                .contentType(ContentType.HTML)
                 .responseBody(HttpResponseBody.from(responseBody))
                 .build();
-    }
-
-    private ContentType generateContentType(String requestURI) {
-        if (requestURI.endsWith(".css")) {
-            return ContentType.CSS;
-        }
-        return ContentType.HTML;
     }
 }

@@ -32,7 +32,7 @@ public class LoginController implements Controller {
         HttpRequestBody httpRequestBody = request.getHttpRequestBody();
 
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
-        String requestURI = httpRequestStartLine.getPath();
+
         String account = httpRequestBody.find("account");
 
         if (httpMethod == HttpMethod.GET && account == null) {
@@ -41,14 +41,14 @@ public class LoginController implements Controller {
             if (session != null) {
                 return ResponseEntity.builder()
                         .httpStatus(HttpStatus.FOUND)
-                        .contentType(generateContentType(requestURI))
+                        .contentType(ContentType.HTML)
                         .location(INDEX_PAGE_URI)
                         .build();
             }
 
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
-                    .contentType(generateContentType(requestURI))
+                    .contentType(ContentType.HTML)
                     .location(LOGIN_PAGE_URI)
                     .build();
         }
@@ -59,35 +59,28 @@ public class LoginController implements Controller {
         boolean isCorrectPassword = findAccount.checkPassword(password);
 
         if (!isCorrectPassword) {
-            return handleLoginFail(requestURI, findAccount);
+            return handleLoginFail(findAccount);
         }
 
-        return handleLoginSuccess(requestURI, findAccount);
+        return handleLoginSuccess(findAccount);
     }
 
-    private ContentType generateContentType(String requestURI) {
-        if (requestURI.endsWith(".css")) {
-            return ContentType.CSS;
-        }
-        return ContentType.HTML;
-    }
-
-    private ResponseEntity handleLoginFail(String requestURI, User findAccount) {
+    private ResponseEntity handleLoginFail(User findAccount) {
         log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
         return ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
-                .contentType(generateContentType(requestURI))
+                .contentType(ContentType.HTML)
                 .location(UNAUTHORIZED_PAGE_URI)
                 .build();
     }
 
-    private ResponseEntity handleLoginSuccess(String requestURI, User findAccount) {
+    private ResponseEntity handleLoginSuccess(User findAccount) {
         log.info("account {} 로그인 성공", findAccount.getAccount());
         ResponseEntity responseEntity = ResponseEntity
                 .builder()
                 .httpStatus(HttpStatus.FOUND)
-                .contentType(generateContentType(requestURI))
+                .contentType(ContentType.HTML)
                 .location(INDEX_PAGE_URI)
                 .build();
         String jSessionId = JSessionIdGenerator.generateRandomSessionId();

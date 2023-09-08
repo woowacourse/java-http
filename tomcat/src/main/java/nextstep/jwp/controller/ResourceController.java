@@ -21,7 +21,7 @@ public class ResourceController extends AbstractController {
         Path path = FileIOUtils.getPath(PREFIX + request.getPath());
 
         if (path == null || !path.toFile().isFile()) {
-            response.sendRedirect("/401.html");
+            response.sendRedirect("/404.html");
             return;
         }
 

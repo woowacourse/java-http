@@ -1,7 +1,7 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Protocol;
 
@@ -31,8 +31,8 @@ public class Request {
         return requestHeader.getHeaderBy("Accept");
     }
 
-    public HttpCookie getCookie() {
-        return requestHeader.getCookie();
+    public Session getSession(boolean isCreate) {
+        return requestHeader.getSession(isCreate);
     }
 
     public boolean isSamePath(String urlPath) {

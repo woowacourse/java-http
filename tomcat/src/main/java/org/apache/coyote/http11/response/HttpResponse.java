@@ -4,24 +4,23 @@ import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.ContentType;
 
 public class HttpResponse {
-
     private static final String ENTER = "\r\n";
     private static final String KEY_VALUE_DELIMITER = "=";
 
-    private final HttpStatus httpStatus;
+    private final StatusLine statusLine;
     private final String responseBody;
     private final ContentType contentType;
     private final String redirectPage;
     private final HttpCookie httpCookie;
 
     private HttpResponse(
-            HttpStatus httpStatus,
+            StatusLine statusLine,
             String responseBody,
             ContentType contentType,
             String redirectPage,
             HttpCookie httpCookie
     ) {
-        this.httpStatus = httpStatus;
+        this.statusLine = statusLine;
         this.responseBody = responseBody;
         this.contentType = contentType;
         this.redirectPage = redirectPage;
@@ -29,12 +28,14 @@ public class HttpResponse {
     }
 
     public String getResponse() {
-        String statusLine = "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.name() + " ";
+        HttpStatus httpStatus = statusLine.getHttpStatus();
+        String statusLineResponse = String.format("&s &d &s", statusLine, httpStatus.getStatusCode(), httpStatus.getMessage());
+
         String contentTypeHeader = "Content-Type: " + contentType.getValue() + ";charset=utf-8 ";
         String contentLengthHeader = "Content-Length: " + responseBody.getBytes().length + " ";
 
         StringBuilder response = new StringBuilder();
-        response.append(statusLine).append(ENTER)
+        response.append(statusLineResponse).append(ENTER)
                 .append(contentTypeHeader).append(ENTER)
                 .append(contentLengthHeader).append(ENTER);
 
@@ -53,14 +54,14 @@ public class HttpResponse {
 
     public static class Builder {
 
-        private HttpStatus httpStatus;
+        private StatusLine statusLine;
         private String responseBody;
         private ContentType contentType;
         private String redirectPage;
         private HttpCookie httpCookie;
 
-        public Builder httpStatus(HttpStatus httpStatus) {
-            this.httpStatus = httpStatus;
+        public Builder statusLine(StatusLine statusLine) {
+            this.statusLine = statusLine;
             return this;
         }
 
@@ -85,7 +86,7 @@ public class HttpResponse {
         }
 
         public HttpResponse build() {
-            return new HttpResponse(httpStatus, responseBody, contentType, redirectPage, httpCookie);
+            return new HttpResponse(statusLine, responseBody, contentType, redirectPage, httpCookie);
         }
 
     }

@@ -2,6 +2,7 @@ package org.apache.coyote.adapter;
 
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.Session;
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
@@ -24,7 +25,11 @@ public class LoginAdapter implements Adapter {
     public Resource adapt(Request request) {
         LoginHandler loginHandler = new LoginHandler();
         if (request.isSameHttpMethod(HttpMethod.GET)) {
-            return ViewResource.of(LOGIN_PATH, HttpStatus.OK, HttpCookie.from(""));
+            Session session = request.getSession(false);
+            if (session == null || session.getAttribute("user") == null) {
+                return ViewResource.of(LOGIN_PATH, HttpStatus.OK, HttpCookie.from(""));
+            }
+            return ViewResource.of(INDEX_PATH, HttpStatus.OK, HttpCookie.from(""));
         }
         if (request.isSameHttpMethod(HttpMethod.POST)) {
             Map<String, String> body = request.getBody();

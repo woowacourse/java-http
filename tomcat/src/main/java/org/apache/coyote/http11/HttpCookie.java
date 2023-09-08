@@ -11,7 +11,6 @@ public class HttpCookie {
     private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final String JSESSIONID = "JSESSIONID";
 
-
     private final Map<String, String> values;
 
     private HttpCookie(Map<String, String> values) {

@@ -20,7 +20,7 @@ public class Session {
         if (values.containsKey(key)) {
             return values.get(key);
         }
-        throw new IllegalArgumentException("세션이 존재하지 않습니다.");
+        return null;
     }
 
     public void setAttribute(String key, Object value) {

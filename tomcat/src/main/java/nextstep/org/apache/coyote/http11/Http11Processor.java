@@ -45,30 +45,27 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (
                 InputStream inputStream = connection.getInputStream();
-                OutputStream outputStream = connection.getOutputStream();
+                OutputStream outputStream = connection.getOutputStream()
         ) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             Cookies cookies = httpRequest.getCookies();
 
-            String response = null;
+            Http11Response response = null;
             String requestPathInfo = httpRequest.getPathInfo();
 
             Object handler = handlerMapper.mapHandler(requestPathInfo);
-            if (Objects.nonNull(handler) && httpRequest.getMethod().equals("POST")
+            if (Objects.nonNull(handler)
+                    && httpRequest.getMethod().equals("POST")
                     && requestPathInfo.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.login(
-                        httpRequest.getCookies(),
+                        cookies,
                         httpRequest.getParsedBodyValue("account"),
                         httpRequest.getParsedBodyValue("password"));
 
-                response = String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        String.format("Location: %s \r\n", loginDto.getRedirectUrl()));
-                if (!cookies.isEmpty()) {
-                    response += cookies.createSetCookieHeader();
-                }
-                response += "";
+                response = new Http11Response(Status.FOUND)
+                        .setHeader("Location", loginDto.getRedirectUrl())
+                        .setCookies(cookies);
             }
 
             if (Objects.nonNull(handler)
@@ -81,10 +78,8 @@ public class Http11Processor implements Runnable, Processor {
                         httpRequest.getParsedBodyValue("email")
                 );
 
-                response = String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        String.format("Location: %s ", loginDto.getRedirectUrl()),
-                        "");
+                response = new Http11Response(Status.FOUND)
+                        .setHeader("Location", loginDto.getRedirectUrl());
             }
 
             if (httpRequest.getMethod().equals("GET") && Objects.isNull(response)) {
@@ -94,11 +89,8 @@ public class Http11Processor implements Runnable, Processor {
                 // Todo: createResponseBody() pageController로 위임해보기
                 // Todo: 헤더에 담긴 sessionId 유효성 검증
                 if (requestPathInfo.contains("/login") && cookies.hasCookie("JSESSIONID")) {
-                    response = String.join("\r\n",
-                            "HTTP/1.1 302 Found ",
-                            "Location: /index.html ",
-                            "");
-
+                    response = new Http11Response(Status.FOUND)
+                            .setHeader("Location", "/index.html");
                     writeResponse(outputStream, response);
                     return;
                 }
@@ -108,24 +100,20 @@ public class Http11Processor implements Runnable, Processor {
                     String notFoundPageBody = createResponseBody("/404.html")
                             .orElse(NOT_FOUND_DEFAULT_MESSAGE);
 
-                    response = String.join("\r\n",
-                            "HTTP/1.1 404 Not Found ",
-                            String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                            String.format("Content-Length: %s ",
-                                    notFoundPageBody.getBytes(StandardCharsets.UTF_8).length),
-                            "",
-                            notFoundPageBody);
+                    response = new Http11Response(Status.NOT_FOUND)
+                            .setHeader("Content-Type", contentType + ";charset=utf-8")
+                            .setHeader("Content-Length", String.valueOf(
+                                    notFoundPageBody.getBytes(StandardCharsets.UTF_8).length))
+                            .setBody(notFoundPageBody);
                     writeResponse(outputStream, response);
                     return;
                 }
 
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                        String.format("Content-Length: %s ",
-                                responseBody.get().getBytes(StandardCharsets.UTF_8).length),
-                        "",
-                        responseBody.get());
+                response = new Http11Response(Status.OK)
+                        .setHeader("Content-Type", contentType + ";charset=utf-8")
+                        .setHeader("Content-Length", String.valueOf(
+                                responseBody.get().getBytes(StandardCharsets.UTF_8).length))
+                        .setBody(responseBody.get());
             }
 
             writeResponse(outputStream, response);
@@ -134,8 +122,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
+    private void writeResponse(OutputStream outputStream, Http11Response response)
+            throws IOException {
+        outputStream.write(response.createResponseAsByteArray());
         outputStream.flush();
     }
 

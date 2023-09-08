@@ -29,10 +29,6 @@ public class HttpRequest {
         return requestLine.isSameHttpMethod(httpMethod);
     }
 
-    public boolean isStaticResource() {
-        return requestLine.isStaticResource();
-    }
-
     public RequestLine getRequestLine() {
         return requestLine;
     }

@@ -3,10 +3,10 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 0 # 모든 가용 스레드가 일하고 있을 때 작업 큐에서 기다릴 수 있는 최대 작업 수. 0이면 가용 스레드가 없으면 더이상 못 받아야 하는데 어떻게 받지
+    max-connections: 1 # 톰캣이 동시에 만들 수 있는 최대 Connection 수
     threads:
-      max: 2
+      max: 3 # core thread의 갯수는 default 0개. Worker가 더 필요할 때 만들 수 있는 최대 thread 수
 
   compression:
     enabled: true

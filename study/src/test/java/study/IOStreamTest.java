@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.*;
 
+import static org.apache.coyote.http11.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -184,7 +185,7 @@ class IOStreamTest {
          */
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
-            final String emoji = String.join(Constants.CRLF,
+            final String emoji = String.join(CRLF,
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
@@ -194,7 +195,7 @@ class IOStreamTest {
                 StringBuilder actual = new StringBuilder();
                 String line = bufferedReader.readLine();
                 while (line != null) {
-                    actual.append(line).append(Constants.CRLF);
+                    actual.append(line).append(CRLF);
                     line = bufferedReader.readLine();
                 }
                 assertThat(actual).hasToString(emoji);

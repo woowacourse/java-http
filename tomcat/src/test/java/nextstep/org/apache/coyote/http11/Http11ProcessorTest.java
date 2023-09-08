@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static org.apache.coyote.http11.Constants.*;
+
 class Http11ProcessorTest {
 
     @Test
@@ -37,7 +39,7 @@ class Http11ProcessorTest {
     @Test
     void notFound() throws IOException {
         // given
-        final String httpRequest = String.join(Constants.CRLF,
+        final String httpRequest = String.join(CRLF,
                 "GET /anyThing.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -65,7 +67,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join(Constants.CRLF,
+        final String httpRequest = String.join(CRLF,
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -94,7 +96,7 @@ class Http11ProcessorTest {
     @Test
     void css() throws IOException {
         // given
-        final String httpRequest = String.join(Constants.CRLF,
+        final String httpRequest = String.join(CRLF,
                 "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -123,7 +125,7 @@ class Http11ProcessorTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest = String.join(Constants.CRLF,
+        final String httpRequest = String.join(CRLF,
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -151,7 +153,7 @@ class Http11ProcessorTest {
     @Test
     void getLoginPage() throws IOException {
         // given
-        final String httpRequest = String.join(Constants.CRLF,
+        final String httpRequest = String.join(CRLF,
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

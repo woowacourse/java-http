@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.Constants;
 import org.apache.coyote.http11.types.ContentType;
 import org.apache.coyote.http11.types.HeaderType;
 import org.apache.coyote.http11.types.HttpProtocol;
@@ -10,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import static org.apache.coyote.http11.Constants.CRLF;
 import static org.apache.coyote.http11.types.HeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.types.HeaderType.CONTENT_TYPE;
 
@@ -17,7 +17,7 @@ public class HttpResponse {
 
     private HttpProtocol httpProtocol;
     private HttpStatus httpStatus;
-    private Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
     private String body;
 
     private HttpResponse(HttpProtocol httpProtocol, HttpStatus httpStatus, String body) {
@@ -31,7 +31,7 @@ public class HttpResponse {
     }
 
     public String toResponseFormat() {
-        StringJoiner joiner = new StringJoiner(Constants.CRLF);
+        StringJoiner joiner = new StringJoiner(CRLF);
         joiner.add(getStatusLine());
         joiner.add(getHeaderLines());
         if (body != null) {
@@ -45,7 +45,7 @@ public class HttpResponse {
     }
 
     private String getHeaderLines() {
-        StringJoiner joiner = new StringJoiner(Constants.CRLF);
+        StringJoiner joiner = new StringJoiner(CRLF);
         for (var entry : this.headers.entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue();

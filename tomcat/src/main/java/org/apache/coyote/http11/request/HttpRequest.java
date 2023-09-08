@@ -8,23 +8,23 @@ public class HttpRequest {
     private final HttpMethod httpMethod;
     private final String path;
     private final Map<String, String> queryStrings;
-    private final String httpVersion;
+    private final String protocolVersion;
     private final Map<String, String> headers;
     private final String body;
 
     private HttpRequest(final HttpMethod httpMethod, final String path, final Map<String, String> queryStrings,
-                        final String httpVersion,
+                        final String protocolVersion,
                         final Map<String, String> headers, final String body) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryStrings = queryStrings;
-        this.httpVersion = httpVersion;
+        this.protocolVersion = protocolVersion;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpRequest of(final String startLine, final Map<String, String> headers, final String body) {
-        final String[] split = startLine.split(" ");
+    public static HttpRequest of(final String requestLine, final Map<String, String> headers, final String body) {
+        final String[] split = requestLine.split(" ");
         final String uri = split[1];
         String path = uri;
         String queryString = null;
@@ -68,8 +68,8 @@ public class HttpRequest {
         return queryStrings;
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 
     public Map<String, String> getHeaders() {

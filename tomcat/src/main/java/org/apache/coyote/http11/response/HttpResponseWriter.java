@@ -23,9 +23,9 @@ public class HttpResponseWriter {
     }
 
     private static String extractStartLine(final HttpResponse httpResponse) {
-        final String httpVersion = httpResponse.getHttpVersion();
+        final String httpVersion = httpResponse.getProtocolVersion();
         final int statusCode = httpResponse.getStatusCode().getCode();
-        final String statusText = httpResponse.getStatusCode().getText();
+        final String statusText = httpResponse.getStatusCode().getMessage();
         return String.join(" ", httpVersion, String.valueOf(statusCode), statusText) + " ";
     }
 

@@ -17,7 +17,7 @@ public enum StatusCode {
         return code;
     }
 
-    public String getText() {
+    public String getMessage() {
         return this.name().replace("_", " ");
     }
 }

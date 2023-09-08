@@ -5,22 +5,22 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
-    private final String httpVersion;
+    private final String protocolVersion;
     private final StatusCode statusCode;
     private final Map<HttpResponseHeader, String> headers;
     private final String body;
 
     public HttpResponse(final StatusCode statusCode) {
-        this.httpVersion = HTTP_VERSION;
+        this.protocolVersion = PROTOCOL_VERSION;
         this.statusCode = statusCode;
         this.headers = new LinkedHashMap<>();
         this.body = "";
     }
 
     public HttpResponse(final StatusCode statusCode, final String body) {
-        this.httpVersion = HTTP_VERSION;
+        this.protocolVersion = PROTOCOL_VERSION;
         this.statusCode = statusCode;
         this.headers = new LinkedHashMap<>();
         this.body = body;
@@ -30,8 +30,8 @@ public class HttpResponse {
         headers.put(header, value);
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
+    public String getProtocolVersion() {
+        return protocolVersion;
     }
 
     public StatusCode getStatusCode() {

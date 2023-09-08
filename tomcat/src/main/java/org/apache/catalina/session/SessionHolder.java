@@ -2,12 +2,12 @@ package org.apache.catalina.session;
 
 import jakarta.servlet.http.HttpSession;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionHolder implements Manager {
 
-    private static final Map<String, Session> HOLDER = new LinkedHashMap<>();
+    private static final Map<String, Session> HOLDER = new ConcurrentHashMap<>();
 
     @Override
     public void add(final Session session) {

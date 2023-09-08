@@ -22,14 +22,6 @@ public class HttpRequest {
         return requestLine.isSameRequestMethod(httpMethod);
     }
 
-    public boolean isPostRequest() {
-        return requestLine.isPostMethod();
-    }
-
-    public boolean isGetRequest() {
-        return requestLine.isGetMethod();
-    }
-
     public boolean containsRequestUri(final String uri) {
         return requestLine.containsRequestUri(uri);
     }

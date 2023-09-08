@@ -19,7 +19,7 @@ public class StaticFileController extends RequestController {
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return httpRequest.isGetRequest() && isStaticFile(httpRequest);
+        return isStaticFile(httpRequest);
     }
 
     private static boolean isStaticFile(final HttpRequest httpRequest) {

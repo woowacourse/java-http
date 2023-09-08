@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.response.HttpProtocolVersion.HTTP11;
+import static org.apache.coyote.http11.common.HttpProtocolVersion.HTTP11;
 
 @Getter
 public class HttpResponse {

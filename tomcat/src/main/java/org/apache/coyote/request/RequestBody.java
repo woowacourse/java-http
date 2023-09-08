@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import org.apache.exception.RequestBodyNotFoundException;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -28,6 +30,13 @@ public class RequestBody {
         Arrays.stream(line.split("&"))
                 .forEach(string -> body.put(string.split("=")[0], string.split("=")[1]));
         return body;
+    }
+
+    public String getBodyValue(final String key) {
+        if (!body.containsKey(key)) {
+            throw new RequestBodyNotFoundException();
+        }
+        return body.get(key);
     }
 
     @Override

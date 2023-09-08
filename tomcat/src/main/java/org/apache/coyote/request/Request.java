@@ -44,8 +44,8 @@ public class Request {
         return true;
     }
 
-    public Map<String, String> getQueryParaMap() {
-        return Collections.emptyMap();
+    public String getQueryValueBy(final String key) {
+        return requestStartLine.getQueryValueBy(key);
     }
 
     public String getFileType() {
@@ -60,22 +60,15 @@ public class Request {
     }
 
     public boolean isPost() {
-        return true;
+        return requestStartLine.isPost();
     }
 
     public boolean isGet() {
-        return true;
+        return requestStartLine.isGet();
     }
 
     public Map<String, String> getRequestBody() {
         return Collections.emptyMap();
-    }
-
-    @Override
-    public String toString() {
-        return requestStartLine + System.lineSeparator() +
-                requestHeader + System.lineSeparator() + System.lineSeparator() +
-                requestBody;
     }
 
     public PathUrl getRequestUrl() {
@@ -88,5 +81,16 @@ public class Request {
 
     public String getContentType() {
         return requestStartLine.getContentType();
+    }
+
+    public String getBodyValue(final String key) {
+        return requestBody.getBodyValue(key);
+    }
+
+    @Override
+    public String toString() {
+        return requestStartLine + System.lineSeparator() +
+                requestHeader + System.lineSeparator() + System.lineSeparator() +
+                requestBody;
     }
 }

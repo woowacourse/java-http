@@ -34,7 +34,7 @@ public class QueryString {
         return queryMap;
     }
 
-    public String getQuery(final String key){
+    public String getQueryValueBy(final String key){
         if(!queryStrings.containsKey(key)) {
             throw new QueryParamsNotFoundException();
         }

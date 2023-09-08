@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.common.FileType;
 import org.apache.coyote.common.PathUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,15 @@ public class FileUtil {
     public static String getResource(final PathUrl resourceUrl){
         final URL resource = FileUtil.class.getClassLoader().getResource("static" + resourceUrl);
 
+        if(Objects.isNull(resource)){
+            assert NOT_FOUND_RESOURCE != null;
+            return readResource(NOT_FOUND_RESOURCE);
+        }
+        return readResource(resource);
+    }
+
+    public static String getResourceFromViewPath(final String viewPath){
+        final URL resource = FileUtil.class.getClassLoader().getResource("static" + viewPath + FileType.HTML.getExtension());
         if(Objects.isNull(resource)){
             assert NOT_FOUND_RESOURCE != null;
             return readResource(NOT_FOUND_RESOURCE);

@@ -48,6 +48,10 @@ public class PathUrl {
         return path;
     }
 
+    public String getQueryValueBy(final String key) {
+        return queryString.getQueryValueBy(key);
+    }
+
     @Override
     public String toString() {
         return path + fileType + queryString;

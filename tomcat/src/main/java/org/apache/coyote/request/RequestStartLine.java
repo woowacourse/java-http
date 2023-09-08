@@ -39,11 +39,6 @@ public class RequestStartLine {
         return pathUrl.getFileType();
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s %s %s ", requestMethod, pathUrl, httpVersion);
-    }
-
     public String getPath() {
         return pathUrl.getPath();
     }
@@ -58,5 +53,22 @@ public class RequestStartLine {
 
     public String getContentType() {
         return pathUrl.getContentType();
+    }
+
+    public String getQueryValueBy(final String key) {
+        return pathUrl.getQueryValueBy(key);
+    }
+
+    public boolean isPost() {
+        return requestMethod.isPost();
+    }
+
+    public boolean isGet() {
+        return requestMethod.isGet();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s ", requestMethod, pathUrl, httpVersion);
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.response;
 
 import org.apache.coyote.common.FileType;
+import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.http11.FileUtil;
 import org.apache.coyote.request.Request;
 
@@ -32,6 +33,25 @@ public class ResponseEntity {
         final ResponseStartLine responseStartLine = ResponseStartLine.from(request.httpVersion(), responseStatus);
         final ResponseContentType contentType = new ResponseContentType(FileType.TEXT.getContentType());
         final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, responseBody.length()));
+        return new ResponseEntity(responseStartLine, responseHeader, responseBody);
+    }
+
+    public static ResponseEntity fromViewPath(final HttpVersion httpVersion, final String viewPath, final ResponseStatus responseStatus) {
+        final ResponseStartLine responseStartLine = ResponseStartLine.from(httpVersion, responseStatus);
+        final String responseBody = FileUtil.getResourceFromViewPath(viewPath);
+        final ResponseContentType contentType = new ResponseContentType(FileType.HTML.getContentType());
+        final ResponseContentLength contentLength = new ResponseContentLength(responseBody.getBytes().length);
+        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, contentLength));
+        return new ResponseEntity(responseStartLine, responseHeader, responseBody);
+    }
+
+    public static ResponseEntity fromViewPathWithRedirect(final HttpVersion httpVersion, final String viewPath, final ResponseStatus responseStatus, final String redirectPath) {
+        final ResponseStartLine responseStartLine = ResponseStartLine.from(httpVersion, responseStatus);
+        final String responseBody = FileUtil.getResourceFromViewPath(viewPath);
+        final ResponseLocation responseLocation = new ResponseLocation(redirectPath);
+        final ResponseContentType contentType = new ResponseContentType(FileType.HTML.getContentType());
+        final ResponseContentLength contentLength = new ResponseContentLength(responseBody.getBytes().length);
+        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, contentLength, responseLocation));
         return new ResponseEntity(responseStartLine, responseHeader, responseBody);
     }
 

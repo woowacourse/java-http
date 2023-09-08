@@ -24,16 +24,23 @@ public class AuthService {
     public ResponseEntity login(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
         Protocol protocol = requestLine.protocol();
         if (requestLine.method().isGet()) {
-            final Cookie cookie = requestHeader.getCookie();
-            final Session session = sessionRepository.getSession(cookie.get(SESSION_KEY));
-            if (session == null) {
-                return ResponseEntity.getCookieNullResponseEntity(protocol, LOGIN_PAGE);
-            }
-            return ResponseEntity.getCookieNullResponseEntity(protocol, INDEX_PAGE);
+            return getLoginOrIndexResponse(requestHeader, protocol);
         }
-
         final String account = requestBody.getBy("account");
         final String password = requestBody.getBy("password");
+        return getLoginOrElseUnAuthorizedResponse(protocol, account, password);
+    }
+
+    private ResponseEntity getLoginOrIndexResponse(RequestHeader requestHeader, Protocol protocol) {
+        final Cookie cookie = requestHeader.getCookie();
+        final Session session = sessionRepository.getSession(cookie.get(SESSION_KEY));
+        if (session == null) {
+            return ResponseEntity.getCookieNullResponseEntity(protocol, LOGIN_PAGE);
+        }
+        return ResponseEntity.getCookieNullResponseEntity(protocol, INDEX_PAGE);
+    }
+
+    private ResponseEntity getLoginOrElseUnAuthorizedResponse(Protocol protocol, String account, String password) {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> getSuccessLoginResponse(user, protocol))
@@ -54,7 +61,12 @@ public class AuthService {
         if (requestLine.method() == GET) {
             return ResponseEntity.getCookieNullResponseEntity(protocol, REGISTER_PAGE);
         }
+        return getIndexOrConflictResponse(requestBody, protocol);
 
+    }
+
+    private static ResponseEntity getIndexOrConflictResponse(RequestBody requestBody,
+                                                             Protocol protocol) {
         final String account = requestBody.getBy("account");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return ResponseEntity.getCookieNullResponseEntity(protocol, CONFLICT_PAGE);

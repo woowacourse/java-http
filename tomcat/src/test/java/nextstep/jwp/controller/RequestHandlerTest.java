@@ -1,9 +1,12 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Map;
-import nextstep.jwp.controller.RequestHandler;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpPath;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.ResponseBody;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.junit.jupiter.api.Test;
@@ -38,9 +41,9 @@ class RequestHandlerTest {
 
         //then
         final var expected = HttpResponse.builder()
-                .setHttpVersion(HTTP_1_1)
-                .setHttpStatus(HttpStatus.OK)
-                .setBody(ResponseBody.from("Hello world!"))
+                .httpVersion(HTTP_1_1)
+                .httpStatus(HttpStatus.OK)
+                .body(ResponseBody.from("Hello world!"))
                 .build();
 
         assertThat(response).usingRecursiveComparison()
@@ -69,12 +72,42 @@ class RequestHandlerTest {
         final var resource = getClass().getClassLoader().getResource("static" + uri);
         final var body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         final var expected = HttpResponse.builder()
-                .setHttpVersion(HTTP_1_1)
-                .setHttpStatus(HttpStatus.OK)
-                .setBody(ResponseBody.of(new ContentType("text/html"), body))
+                .httpVersion(HTTP_1_1)
+                .httpStatus(HttpStatus.OK)
+                .body(ResponseBody.of(new ContentType("text/html"), body))
                 .build();
         assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 
+    @Test
+    void index() throws Exception {
+        //given
+        final var request = HttpRequest.builder()
+                .method(GET)
+                .path(new HttpPath("/index.html"))
+                .version(HTTP_1_1)
+                .headers(Map.of("Host", "localhost:8080", "Connection", "keep-alive"))
+                .build();
+        final var response = HttpResponse.prepareFrom(request);
+
+        //when
+        requestHandler.service(request, response);
+
+        //then
+        final var body = ResponseBody.of(new ContentType("text/html"), buildMessageBody("/index.html"));
+        final var expect = HttpResponse.builder()
+                .httpVersion(HTTP_1_1)
+                .httpStatus(HttpStatus.OK)
+                .body(body)
+                .build();
+
+        assertThat(response).usingRecursiveComparison()
+                .isEqualTo(expect);
+    }
+
+    private String buildMessageBody(String staticFileUri) throws Exception {
+        final var resource = getClass().getClassLoader().getResource("static" + staticFileUri);
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
 }

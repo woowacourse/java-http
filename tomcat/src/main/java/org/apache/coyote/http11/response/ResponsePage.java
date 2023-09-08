@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.response.HttpStatus.FOUND;
 import static org.apache.coyote.http11.response.HttpStatus.OK;
 import static org.apache.coyote.http11.response.HttpStatus.UNAUTHORIZED;
 
-public enum Page {
+public enum ResponsePage {
 
     INDEX_PAGE("/index.html", FOUND),
     REGISTER_PAGE("/register.html", OK),
@@ -18,7 +18,7 @@ public enum Page {
     private final String redirectUrl;
     private final HttpStatus statusCode;
 
-    Page(String redirectUrl, HttpStatus statusCode) {
+    ResponsePage(String redirectUrl, HttpStatus statusCode) {
         this.redirectUrl = redirectUrl;
         this.statusCode = statusCode;
     }

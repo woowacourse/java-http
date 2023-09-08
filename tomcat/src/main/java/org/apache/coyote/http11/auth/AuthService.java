@@ -8,11 +8,11 @@ import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-import static org.apache.coyote.http11.request.Page.CONFLICT_PAGE;
-import static org.apache.coyote.http11.request.Page.INDEX_PAGE;
-import static org.apache.coyote.http11.request.Page.LOGIN_PAGE;
-import static org.apache.coyote.http11.request.Page.REGISTER_PAGE;
-import static org.apache.coyote.http11.request.Page.UNAUTHORIZED_PAGE;
+import static org.apache.coyote.http11.response.ResponsePage.CONFLICT_PAGE;
+import static org.apache.coyote.http11.response.ResponsePage.INDEX_PAGE;
+import static org.apache.coyote.http11.response.ResponsePage.LOGIN_PAGE;
+import static org.apache.coyote.http11.response.ResponsePage.REGISTER_PAGE;
+import static org.apache.coyote.http11.response.ResponsePage.UNAUTHORIZED_PAGE;
 import static org.apache.coyote.http11.request.line.HttpMethod.GET;
 
 public class AuthService {
@@ -65,8 +65,7 @@ public class AuthService {
 
     }
 
-    private static ResponseEntity getIndexOrConflictResponse(RequestBody requestBody,
-                                                             Protocol protocol) {
+    private static ResponseEntity getIndexOrConflictResponse(RequestBody requestBody, Protocol protocol) {
         final String account = requestBody.getBy("account");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return ResponseEntity.getCookieNullResponseEntity(protocol, CONFLICT_PAGE);

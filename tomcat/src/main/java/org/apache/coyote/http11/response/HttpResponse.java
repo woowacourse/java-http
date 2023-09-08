@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.coyote.http11.response.HttpProtocolVersion.HTTP11;
@@ -90,10 +91,13 @@ public class HttpResponse {
     }
 
     private String formatResponseHeaders(HttpResponseHeaders headers) {
-        return headers.getHeaders().keySet()
-                .stream()
-                .map(it -> String.format("%s: %s ", it, headers.find(it)))
+        return headers.getHeaders().entrySet().stream()
+                .map(this::convertHeader)
                 .collect(Collectors.joining(CRLF));
+    }
+
+    private String convertHeader(Map.Entry<String, String> entry) {
+        return String.format("%s: %s ", entry.getKey(), entry.getValue());
     }
 
     private String formatResponseBody() {

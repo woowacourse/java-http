@@ -1,10 +1,8 @@
 package org.apache.coyote.request;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
@@ -13,13 +11,16 @@ public class SessionManager implements Manager {
 
   @Override
   public void add(final Session session) {
-    final UUID uuid = UUID.randomUUID();
-    SESSIONS.put(uuid.toString(), session);
+    SESSIONS.put(session.getId(), session);
   }
 
   @Override
   public Session findSession(final String id) throws IOException {
-    return SESSIONS.get(id);
+    try {
+      return SESSIONS.get(id);
+    } catch (NullPointerException e) {
+      throw new IllegalArgumentException("세션이 존재하지 않습니다.");
+    }
   }
 
   @Override

@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session {
 
@@ -12,20 +13,12 @@ public class Session {
     this.id = id;
   }
 
-  public Object getAttribute(final String name) {
-    return values.get(name);
+  public Optional<Object> getAttribute(final String name) {
+    return Optional.ofNullable(values.get(name));
   }
 
   public void setAttribute(final String name, final Object value) {
     values.put(name, value);
-  }
-
-  public void removeAttribute(final String name) {
-    values.remove(name);
-  }
-
-  public void invalidate() {
-    values.clear();
   }
 
   public String getId() {

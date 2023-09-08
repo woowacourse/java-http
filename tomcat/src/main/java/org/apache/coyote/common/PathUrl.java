@@ -52,6 +52,10 @@ public class PathUrl {
         return queryString.getQueryValueBy(key);
     }
 
+    public boolean hasQueryString() {
+        return queryString.isNotEmpty();
+    }
+
     @Override
     public String toString() {
         return path + fileType + queryString;

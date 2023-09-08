@@ -20,7 +20,10 @@ public class LoginController implements Controller {
         if (request.isPost()) {
             return login(request);
         }
-        return loginInConsole(request);
+        if(request.isGet() && request.hasQueryString()){
+            return loginInConsole(request);
+        }
+        return loginPage(request);
     }
 
     private ResponseEntity loginInConsole(final Request request) {
@@ -35,7 +38,7 @@ public class LoginController implements Controller {
         return ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.OK);
     }
 
-    private static ResponseEntity login(Request request) {
+    private ResponseEntity login(Request request) {
         final String account = request.getBodyValue(ACCOUNT_KEY);
         final String password = request.getBodyValue(PASSWORD_KEY);
 
@@ -48,5 +51,9 @@ public class LoginController implements Controller {
 
 //        return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
         return null;
+    }
+
+    private ResponseEntity loginPage(final Request request) {
+        return ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.OK);
     }
 }

@@ -41,6 +41,10 @@ public class QueryString {
         return queryStrings.get(key);
     }
 
+    public boolean isNotEmpty() {
+        return ! queryStrings.isEmpty();
+    }
+
     @Override
     public String toString() {
         if (queryStrings.isEmpty()) {

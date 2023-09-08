@@ -67,6 +67,10 @@ public class RequestStartLine {
         return requestMethod.isGet();
     }
 
+    public boolean hasQueryString() {
+        return pathUrl.hasQueryString();
+    }
+
     @Override
     public String toString() {
         return String.format("%s %s %s ", requestMethod, pathUrl, httpVersion);

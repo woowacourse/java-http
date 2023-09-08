@@ -41,7 +41,7 @@ public class Request {
     }
 
     public boolean hasQueryString() {
-        return true;
+        return requestStartLine.hasQueryString();
     }
 
     public String getQueryValueBy(final String key) {

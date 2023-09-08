@@ -56,14 +56,13 @@ public class RequestReader {
         }
     }
 
-    private void readBody() throws IOException {
+    private void readBody() {
         int contentLength = getContentLength();
         char[] chars = new char[contentLength];
-        bufferedReader.read(chars, 0, contentLength);
         putBody(new String(chars));
     }
 
-    public int getContentLength() {
+    private int getContentLength() {
         return Integer.parseInt(headers.get(CONTENT_LENGTH.getName()));
     }
 
@@ -112,9 +111,5 @@ public class RequestReader {
 
     public String getMethod() {
         return requestLine.getMethod();
-    }
-
-    public Map<String, String> getParams() {
-        return requestLine.getParams();
     }
 }

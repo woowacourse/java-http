@@ -15,10 +15,10 @@ import static org.apache.coyote.http11.types.HeaderType.CONTENT_TYPE;
 
 public class HttpResponse {
 
-    private final HttpProtocol httpProtocol;
-    private final HttpStatus httpStatus;
-    private final Map<String, String> headers = new HashMap<>();
-    private final String body;
+    private HttpProtocol httpProtocol;
+    private HttpStatus httpStatus;
+    private Map<String, String> headers = new HashMap<>();
+    private String body;
 
     private HttpResponse(HttpProtocol httpProtocol, HttpStatus httpStatus, String body) {
         this.httpProtocol = httpProtocol;
@@ -26,22 +26,17 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(HttpProtocol httpProtocol, HttpStatus httpStatus, String body, ContentType contentType) {
-        HttpResponse response = new HttpResponse(httpProtocol, httpStatus, body);
-        response.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        response.addHeader(CONTENT_TYPE, contentType.getType());
-        return response;
-    }
-
-    public static HttpResponse of(HttpProtocol httpProtocol, HttpStatus httpStatus) {
-        return new HttpResponse(httpProtocol, httpStatus, null);
+    public static HttpResponse create() {
+        return new HttpResponse(null, null, null);
     }
 
     public String toResponseFormat() {
         StringJoiner joiner = new StringJoiner(Constants.CRLF);
         joiner.add(getStatusLine());
         joiner.add(getHeaderLines());
-        joiner.add(body);
+        if (body != null) {
+            joiner.add(body);
+        }
         return joiner.toString();
     }
 
@@ -62,5 +57,19 @@ public class HttpResponse {
 
     public void addHeader(HeaderType headerType, String value) {
         headers.put(headerType.getType(), value);
+    }
+
+    public void setHttpProtocol(HttpProtocol httpProtocol) {
+        this.httpProtocol = httpProtocol;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void setBody(String body, ContentType contentType) {
+        this.body = body;
+        addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        addHeader(CONTENT_TYPE, contentType.getType());
     }
 }

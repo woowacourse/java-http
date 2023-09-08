@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class Http11ProcessorTest {
 
     @Test
@@ -26,6 +24,7 @@ class Http11ProcessorTest {
 
         // then
         String output = socket.output();
+        System.out.println(output);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(output).contains("HTTP/1.1 200 OK ");
             softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8 ");
@@ -128,8 +127,11 @@ class Http11ProcessorTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -138,12 +140,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String output = socket.output();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(output).contains("HTTP/1.1 302 Found ");
-            softly.assertThat(output).contains("Location: /login ");
+            softly.assertThat(output).contains("Location: /index ");
         });
     }
 

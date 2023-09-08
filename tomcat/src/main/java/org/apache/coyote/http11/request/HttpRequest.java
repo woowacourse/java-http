@@ -43,4 +43,8 @@ public class HttpRequest {
     public String getBody() {
         return body;
     }
+
+    public HttpProtocol getProtocol() {
+        return protocol;
+    }
 }

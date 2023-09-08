@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.types.ContentType;
 
@@ -9,7 +10,6 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.apache.coyote.http11.types.ContentType.TEXT_HTML;
-import static org.apache.coyote.http11.types.HttpProtocol.HTTP_1_1;
 import static org.apache.coyote.http11.types.HttpStatus.NOT_FOUND;
 import static org.apache.coyote.http11.types.HttpStatus.OK;
 
@@ -19,8 +19,8 @@ public class ViewResolver {
     private ViewResolver() {
     }
 
-    public static HttpResponse resolveView(String path) throws IOException {
-        String filePath = path;
+    public static void resolveView(HttpRequest request, HttpResponse response) throws IOException {
+        String filePath = request.getPath();
         if (!filePath.contains(".")) {
             filePath += ".html";
         }
@@ -32,11 +32,14 @@ public class ViewResolver {
             final URL notFoundUrl = systemClassLoader.getResource(String.format("%s/%s", DEFAULT_FILE_ROUTE, "404.html"));
             File notFound = new File(notFoundUrl.getPath());
             String body = new String(Files.readAllBytes(notFound.toPath()));
-            return HttpResponse.of(HTTP_1_1, NOT_FOUND, body, TEXT_HTML);
+            response.setBody(body, TEXT_HTML);
+            response.setHttpStatus(NOT_FOUND);
+            return;
         }
 
         File file = new File(resource.getPath());
         String body = new String(Files.readAllBytes(file.toPath()));
-        return HttpResponse.of(HTTP_1_1, OK, body, ContentType.from(file.getName()));
+        response.setBody(body, ContentType.from(file.getName()));
+        response.setHttpStatus(OK);
     }
 }

@@ -3,14 +3,13 @@ package nextstep.jwp;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import nextstep.jwp.handler.RequestHandler;
 
 public class FileFinder {
 
     public static File getFile(String uri) {
         String fileUrl = "static" + uri;
         return new File(
-            RequestHandler.class
+            FileFinder.class
                 .getClassLoader()
                 .getResource(fileUrl)
                 .getFile()

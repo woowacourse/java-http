@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.HttpHeaders.LOCATION;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
@@ -12,6 +12,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestLine;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.MyException;
 import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -46,31 +47,25 @@ class LoginControllerTest {
         }
 
         @Test
-        void 존재하지않는_회원이면_unauthorized_페이지로_redirect() {
+        void 존재하지않는_회원이면_예외() {
             // given
             HttpRequest request = createRequest(HttpMethod.POST, "account=hi&password=password");
             HttpResponse response = new HttpResponse();
 
-            // when
-            loginController.doPost(request, response);
-
-            // then
-            assertThat(response.getHttpStatus()).isEqualTo(FOUND);
-            assertThat(response.getHeaders().get(LOCATION)).isEqualTo("/401.html");
+            // when & then
+            assertThatThrownBy(() -> loginController.doPost(request, response))
+                .isInstanceOf(MyException.class);
         }
 
         @Test
-        void 비밀번호가_틀리면_unauthorized_페이지로_redirect() throws Exception {
+        void 비밀번호가_틀리면_예외() throws Exception {
             // given
             HttpRequest request = createRequest(HttpMethod.POST, "account=hi&password=fail");
             HttpResponse response = new HttpResponse();
 
-            // when
-            loginController.doPost(request, response);
-
-            // then
-            assertThat(response.getHttpStatus()).isEqualTo(FOUND);
-            assertThat(response.getHeaders().get(LOCATION)).isEqualTo("/401.html");
+            // when & then
+            assertThatThrownBy(() -> loginController.doPost(request, response))
+                .isInstanceOf(MyException.class);
         }
     }
 

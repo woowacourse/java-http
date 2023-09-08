@@ -4,15 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.request.body.RequestBody;
-import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.RequestLine;
 
 public class HttpRequestGenerator {
 
     private Request request;
 
-    public Request generate(BufferedReader bufferedReader) throws IOException {
+    private HttpRequestGenerator(Request request) {
+        this.request = request;
+    }
+
+    public static Request generate(BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
         if (firstLine == null) {
             return null;
@@ -27,7 +29,7 @@ public class HttpRequestGenerator {
         return request;
     }
 
-    private RequestHeader getHeader(final BufferedReader bufferedReader) throws IOException {
+    private static RequestHeader getHeader(final BufferedReader bufferedReader) throws IOException {
         List<String> requestHeaders = new ArrayList<>();
         for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
             requestHeaders.add(line);
@@ -35,7 +37,7 @@ public class HttpRequestGenerator {
         return RequestHeader.from(requestHeaders);
     }
 
-    private RequestBody getBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
+    private static RequestBody getBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
             throws IOException {
         List<String> contentLengths = requestHeader.headers().get("Content-Length");
         if (contentLengths == null) {

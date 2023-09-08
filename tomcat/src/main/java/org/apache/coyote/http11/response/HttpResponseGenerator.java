@@ -9,13 +9,15 @@ public class HttpResponseGenerator {
 
     public static final String CRLF = "\r\n";
     public static final String BLANK = " ";
+    public static final String CSS_FILE_SUFFIX = ".css";
+    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
     public String generate(final ResponseEntity responseEntity) throws IOException {
         final String location = responseEntity.getLocation();
         if (location.equals("/")) {
-            return generateResponse(responseEntity, "Hello world!");
+            return generateResponse(responseEntity, DEFAULT_RESPONSE_BODY);
         }
         if (responseEntity.getHttpStatus() == HttpStatus.FOUND) {
             return generateRedirectResponse(responseEntity);
@@ -40,7 +42,7 @@ public class HttpResponseGenerator {
     }
 
     private String generateContentTypeLine(final String location) {
-        if (location.endsWith(".css")) {
+        if (location.endsWith(CSS_FILE_SUFFIX)) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";

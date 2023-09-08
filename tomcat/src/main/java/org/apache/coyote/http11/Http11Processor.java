@@ -10,7 +10,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequestGenerator;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.handler.RequestHandler;
+import org.apache.coyote.http11.request.RequestHandler;
 import org.apache.coyote.http11.response.HttpResponseGenerator;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
@@ -21,7 +21,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpRequestGenerator requestGenerator = new HttpRequestGenerator();
     private final HttpResponseGenerator responseGenerator = new HttpResponseGenerator();
     private final RequestHandler requestHandler = new RequestHandler();
 
@@ -41,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final Request request = requestGenerator.generate(bufferedReader);
+            final Request request = HttpRequestGenerator.generate(bufferedReader);
             final ResponseEntity responseEntity = requestHandler.getResponse(request);
             final String response = responseGenerator.generate(responseEntity);
 

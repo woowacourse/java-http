@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.request.uri;
+package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.handler.exception.HttpMethodInvalidException;
+import org.apache.coyote.http11.exception.HttpMethodInvalidException;
 
 import java.util.Arrays;
 

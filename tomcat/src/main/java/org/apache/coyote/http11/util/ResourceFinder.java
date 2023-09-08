@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response.util;
+package org.apache.coyote.http11.util;
 
 import javassist.NotFoundException;
 
@@ -12,9 +12,6 @@ import java.util.Objects;
 public class ResourceFinder {
 
     private static final String DEFAULT_PATH = "static";
-
-    private ResourceFinder() {
-    }
 
     public static String getStaticResource(String path) throws IOException, URISyntaxException, NotFoundException {
         try {

@@ -5,8 +5,12 @@ import nextstep.jwp.exception.DuplicatedAccountException;
 import nextstep.jwp.exception.InvalidEmailFormException;
 import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public User login(final String account, final String password) {
         User user = findUser(account);
@@ -26,13 +30,13 @@ public class UserService {
     }
 
     public void register(final String account, final String password, final String email) {
-        validateRegister(account, password, email);
-
+        validateRegister(account, email);
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+        log.info("가입 성공! " + account + " " + password + " " + email);
     }
 
-    private void validateRegister(final String account, final String password, final String email) {
+    private void validateRegister(final String account, final String email) {
         validateDuplicatedAccount(account);
         validateEmail(email);
     }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler.exception;
+package org.apache.coyote.http11.exception;
 
 public class HttpMethodInvalidException extends RuntimeException {
 

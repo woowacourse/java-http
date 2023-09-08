@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.util;
 
 import javassist.NotFoundException;
-import org.apache.coyote.http11.response.util.ResourceFinder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

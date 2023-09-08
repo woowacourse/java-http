@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Objects;
-import org.apache.coyote.http11.response.HttpContentType;
 
 public class FileManager {
 
@@ -39,31 +37,10 @@ public class FileManager {
         }
     }
 
-    public HttpContentType decideContentType() {
+    public String extractFileExtension() {
         String fileName = file.getName();
-        String fileExtension = extractFileExtension(fileName);
-        return HttpContentType.getByFileExtension(fileExtension);
-    }
-
-    private String extractFileExtension(String fileName) {
         int extensionSignIndex = fileName.lastIndexOf(EXTENSION_SIGN);
         return fileName.substring(extensionSignIndex + 1);
-    }
-
-    private String mapMimeType(String fileExtension) {
-        if (Objects.equals(fileExtension, "html")) {
-            return "text/html";
-        }
-        if (Objects.equals(fileExtension, "css")) {
-            return "text/css";
-        }
-        if (Objects.equals(fileExtension, "svg")) {
-            return "image/svg+xml";
-        }
-        if (Objects.equals(fileExtension, "js")) {
-            return "text/javascript";
-        }
-        return "text/plain";
     }
 
     public String fileContent() {

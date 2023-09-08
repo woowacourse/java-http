@@ -23,16 +23,23 @@ public enum HttpContentType {
         this.fileExtension = fileExtension;
     }
 
-    public static HttpContentType getByFileExtension(String fileExtension) {
-        return Arrays.stream(values())
-                .filter(httpContentType -> Objects.equals(httpContentType.fileExtension, fileExtension))
-                .findAny()
-                .orElse(TEXT_PLAIN);
+    public static String mimeTypeWithCharset(String fileExtension, Charset charset) {
+        HttpContentType httpContentType = getByFileExtension(fileExtension);
+
+        String charsetMessage = CHARSET_FIELD + charset.name().toLowerCase();
+        return String.join(DELIMITER, httpContentType.mimeType, charsetMessage);
     }
 
     public String mimeTypeWithCharset(Charset charset) {
         String charsetMessage = CHARSET_FIELD + charset.name().toLowerCase();
         return String.join(DELIMITER, mimeType, charsetMessage);
+    }
+
+    private static HttpContentType getByFileExtension(String fileExtension) {
+        return Arrays.stream(values())
+                .filter(httpContentType -> Objects.equals(httpContentType.fileExtension, fileExtension))
+                .findAny()
+                .orElse(TEXT_PLAIN);
     }
 
     public String mimeType() {

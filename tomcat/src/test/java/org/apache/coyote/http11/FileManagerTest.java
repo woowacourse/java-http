@@ -1,12 +1,10 @@
 package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.FileManager.from;
-import static org.apache.coyote.http11.response.HttpContentType.TEXT_CSS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
-import org.apache.coyote.http11.response.HttpContentType;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -40,16 +38,16 @@ class FileManagerTest {
     }
 
     @Test
-    void Content_Type을_반환한다() {
+    void 파일_확장자를_반환한다() {
         // given
         String location = "css/styles.css";
         FileManager fileManager = from(location);
 
         // when
-        HttpContentType mimeType = fileManager.decideContentType();
+        String fileExtension = fileManager.extractFileExtension();
 
         // then
-        assertThat(mimeType).isEqualTo(TEXT_CSS);
+        assertThat(fileExtension).isEqualTo("css");
     }
 
     @Test

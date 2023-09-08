@@ -33,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_BODY = "Hello world!";
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
     private final SessionManager sessionManager;
@@ -57,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
                 final OutputStream outputStream = connection.getOutputStream()
         ) {
             HttpRequest httpRequest = readHttpRequest(reader);
-            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
 
             String response = process(httpRequest, httpResponse);
 
@@ -109,11 +110,11 @@ public class Http11Processor implements Runnable, Processor {
 
             FileManager fileManager = FileManager.from("/401.html");
             String fileContent = fileManager.fileContent();
-            HttpContentType contentType = fileManager.decideContentType();
+            String fileExtension = fileManager.extractFileExtension();
 
             response.setResponseStatus(UNAUTHORIZED);
             response.setResponseBody(fileContent);
-            response.setResponseHeader(CONTENT_TYPE, contentType.mimeTypeWithCharset(UTF_8));
+            response.setResponseHeader(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
             response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
             return response.responseMessage();
         }
@@ -138,11 +139,11 @@ public class Http11Processor implements Runnable, Processor {
 
             FileManager fileManager = FileManager.from("/401.html");
             String fileContent = fileManager.fileContent();
-            HttpContentType contentType = fileManager.decideContentType();
+            String fileExtension = fileManager.extractFileExtension();
 
             response.setResponseStatus(UNAUTHORIZED);
             response.setResponseBody(fileContent);
-            response.setResponseHeader(CONTENT_TYPE, contentType.mimeTypeWithCharset(UTF_8));
+            response.setResponseHeader(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
             response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
             return response.responseMessage();
         }
@@ -181,11 +182,11 @@ public class Http11Processor implements Runnable, Processor {
 
         FileManager fileManager = FileManager.from(uri);
         String fileContent = fileManager.fileContent();
-        HttpContentType contentType = fileManager.decideContentType();
+        String fileExtension = fileManager.extractFileExtension();
 
         response.setResponseStatus(OK);
         response.setResponseBody(fileContent);
-        response.setResponseHeader(CONTENT_TYPE, contentType.mimeTypeWithCharset(UTF_8));
+        response.setResponseHeader(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
         response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
         return response.responseMessage();
     }

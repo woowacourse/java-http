@@ -12,19 +12,19 @@ import org.junit.jupiter.api.Test;
 class HttpContentTypeTest {
 
     @Test
-    void 파일_확장자로_Http_Content를_얻는다() {
+    void 파일_확장자와_charset으로_mimeType_메시지를_얻는다() {
         // given
         String fileExtension = "html";
 
         // when
-        HttpContentType httpContentType = HttpContentType.getByFileExtension(fileExtension);
+        String mimeTypeWithCharset = HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8);
 
         // then
-        assertThat(httpContentType).isEqualTo(HttpContentType.TEXT_HTML);
+        assertThat(mimeTypeWithCharset).isEqualTo("text/html;charset=utf-8");
     }
 
     @Test
-    void mimeType을_charset과_함께_반환한다() {
+    void content_Type과_charset으로_mimeType_메시지를_얻는다() {
         // given
         HttpContentType httpContentType = HttpContentType.TEXT_HTML;
 

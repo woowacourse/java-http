@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.EnumMap;
 import java.util.Objects;
+
+import static org.apache.coyote.http11.Header.CONTENT_LENGTH;
+import static org.apache.coyote.http11.Header.CONTENT_TYPE;
+import static org.apache.coyote.http11.Header.SET_COOKIE;
 
 public class Response {
 
@@ -17,7 +20,7 @@ public class Response {
     private static final String COLON = ": ";
 
     private final StatusCode statusCode;
-    private final Map<String, String> headers = new LinkedHashMap<>();
+    private final EnumMap<Header, String> headers = new EnumMap<>(Header.class);
 
     private String body;
 
@@ -28,7 +31,7 @@ public class Response {
     public String format(String protocol) {
         StringBuilder sb = new StringBuilder();
         sb.append(protocol).append(SPACE).append(statusCode.format()).append(SPACE_CRLF);
-        headers.forEach((key, value) -> sb.append(key).append(COLON).append(value).append(SPACE_CRLF));
+        headers.forEach((header, value) -> sb.append(header.getName()).append(COLON).append(value).append(SPACE_CRLF));
         sb.append(CRLF).append(body);
 
         return sb.toString();
@@ -36,7 +39,7 @@ public class Response {
 
     public Response createBodyByText(String text) {
         this.body = text;
-        headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(body.length()));
+        headers.put(CONTENT_LENGTH, String.valueOf(body.length()));
         return this;
     }
 
@@ -51,17 +54,17 @@ public class Response {
             }
             this.body = sb.toString();
         }
-        headers.put(Header.CONTENT_LENGTH.getName(), String.valueOf(file.length()));
+        headers.put(CONTENT_LENGTH, String.valueOf(file.length()));
         return this;
     }
 
     public Response addBaseHeader(String contentType) {
-        headers.put(Header.CONTENT_TYPE.getName(), contentType);
+        headers.put(CONTENT_TYPE, contentType);
         return this;
     }
 
-    public Response addHeader(String key, String value) {
-        headers.put(key, value);
+    public Response addHeader(Header header, String value) {
+        headers.put(header, value);
         return this;
     }
 

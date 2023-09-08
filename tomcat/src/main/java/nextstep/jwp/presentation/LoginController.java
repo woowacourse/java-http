@@ -41,7 +41,7 @@ public class LoginController implements Controller {
     private Response loginPage(RequestReader requestReader) throws IOException {
         if (requestReader.hasSessionId()) {
             return new Response(FOUND)
-                    .addHeader(LOCATION.getName(), INDEX)
+                    .addHeader(LOCATION, INDEX)
                     .addBaseHeader(requestReader.getContentType());
         }
         return new Response(OK)
@@ -88,7 +88,7 @@ public class LoginController implements Controller {
         ));
         return new Response(FOUND)
                 .createBodyByFile(INDEX)
-                .addHeader(LOCATION.getName(), INDEX)
+                .addHeader(LOCATION, INDEX)
                 .addBaseHeader(requestReader.getContentType());
     }
 }

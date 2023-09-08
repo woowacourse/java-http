@@ -19,14 +19,10 @@ import org.apache.coyote.http11.responseline.ResponseLine;
 
 public class LoginController extends AbstractController {
 
-  private static final String HTTP_1_1 = "HTTP/1.1";
-  private static final String LOCATION = "Location";
   private static final String INDEX_PAGE = "/index.html";
   private static final String LOGIN_PAGE = "/login.html";
   private static final String UNAUTHORIZED_PAGE = "/401.html";
   private static final String JSESSIONID = "JSESSIONID";
-  private static final String SET_COOKIE = "Set-Cookie";
-
 
   @Override
   protected HttpResponse doPost(final HttpRequest request) {
@@ -36,9 +32,9 @@ public class LoginController extends AbstractController {
     final String password = params.get("password");
 
     if (account == null || password == null) {
-      final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+      final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
       final HttpHeader header = new HttpHeader();
-      header.setHeader(LOCATION, INDEX_PAGE);
+      header.setHeaderLocation(INDEX_PAGE);
       return new HttpResponse(responseLine, header);
     }
 
@@ -48,16 +44,16 @@ public class LoginController extends AbstractController {
       final Session session = new Session(uuid);
       request.addSession(session);
 
-      final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+      final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
       final HttpHeader header = new HttpHeader();
-      header.setHeader(LOCATION, INDEX_PAGE);
-      header.setHeader(SET_COOKIE, JSESSIONID + "=" + uuid);
+      header.setHeaderLocation(INDEX_PAGE);
+      header.setCookie(JSESSIONID + "=" + uuid);
       return new HttpResponse(responseLine, header);
     }
 
-    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
     final HttpHeader header = new HttpHeader();
-    header.setHeader(LOCATION, UNAUTHORIZED_PAGE);
+    header.setHeaderLocation(UNAUTHORIZED_PAGE);
     return new HttpResponse(responseLine, header);
   }
 
@@ -67,15 +63,15 @@ public class LoginController extends AbstractController {
     if (request.getSession(sessionId) == null) {
       final String body = readContentsFromFile(LOGIN_PAGE);
       final String contentType = getContentType(request.getHeader("Accept"));
-      final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.OK);
+      final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
       final HttpHeader header = new HttpHeader();
       header.setHeader("Content-Type", contentType + ";charset=utf-8");
       header.setHeader("Content-Length", body.getBytes().length + "");
       return new HttpResponse(responseLine, header, body);
     }
-    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
     final HttpHeader header = new HttpHeader();
-    header.setHeader(LOCATION, INDEX_PAGE);
+    header.setHeaderLocation(INDEX_PAGE);
     return new HttpResponse(responseLine, header);
   }
 }

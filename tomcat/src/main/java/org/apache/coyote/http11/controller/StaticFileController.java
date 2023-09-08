@@ -12,12 +12,11 @@ import org.apache.coyote.http11.responseline.ResponseLine;
 
 public class StaticFileController extends AbstractController {
 
-  private static final String HTTP_1_1 = "HTTP/1.1";
 
   @Override
   protected HttpResponse doGet(final HttpRequest request) throws IOException {
     final String body = readContentsFromFile(request.getUrl());
-    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.OK);
+    final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
     final HttpHeader header = new HttpHeader();
     final String contentType = HttpUtils.getContentType(request.getHeader("Accept"));
     header.setHeader("Content-Type", contentType + ";charset=utf-8");

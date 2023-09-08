@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 public class HttpHeader {
 
+  private static final String LOCATION = "Location";
+  private static final String SET_COOKIE = "Set-Cookie";
+
   private final Map<String, String> headers;
   private final Cookie cookie;
 
@@ -45,5 +48,13 @@ public class HttpHeader {
     return this.headers.entrySet().stream()
         .map(entry -> entry.getKey() + ": " + entry.getValue())
         .collect(Collectors.joining(System.lineSeparator()));
+  }
+
+  public void setHeaderLocation(final String path) {
+    this.headers.put(LOCATION, path);
+  }
+
+  public void setCookie(final String cookie) {
+    this.headers.put(SET_COOKIE, cookie);
   }
 }

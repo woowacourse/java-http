@@ -16,8 +16,6 @@ import org.apache.coyote.http11.responseline.ResponseLine;
 
 public class RegisterController extends AbstractController {
 
-  private static final String HTTP_1_1 = "HTTP/1.1";
-  private static final String LOCATION = "Location";
   private static final String INDEX_PAGE = "/index.html";
   private static final String REGISTER_PAGE = "/register.html";
 
@@ -30,9 +28,9 @@ public class RegisterController extends AbstractController {
     final User user = new User(account, password, email);
     InMemoryUserRepository.save(user);
 
-    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.FOUND);
+    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
     final HttpHeader header = new HttpHeader();
-    header.setHeader(LOCATION, INDEX_PAGE);
+    header.setHeaderLocation(INDEX_PAGE);
     return new HttpResponse(responseLine, header);
   }
 
@@ -40,7 +38,7 @@ public class RegisterController extends AbstractController {
   protected HttpResponse doGet(final HttpRequest request) throws IOException {
     final String body = readContentsFromFile(REGISTER_PAGE);
     final String contentType = getContentType(request.getHeader("Accept"));
-    final ResponseLine responseLine = new ResponseLine(HTTP_1_1, HttpStatus.OK);
+    final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
     final HttpHeader header = new HttpHeader();
     header.setHeader("Content-Type", contentType + ";charset=utf-8");
     header.setHeader("Content-Length", body.getBytes().length + "");

@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 
 public class StubSocket extends Socket {
-   
+
     private static final String SPACE = " ";
     private static final String HEADER_DELIMETER = ": ";
     private static final String CRLF = "\r\n";
@@ -92,7 +92,7 @@ public class StubSocket extends Socket {
         builder.append(HttpHeader.CONTENT_LENGTH.getValue())
                 .append(HEADER_DELIMETER)
                 .append(request.getHttpBody().getValue().getBytes().length)
-                .append(SPACE).append(CRLF);
+                .append(CRLF);
 
         serializeBody(request, builder);
         return builder.toString();

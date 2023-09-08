@@ -22,9 +22,9 @@ import static org.apache.coyote.http11.response.HttpStatus.UNAUTHORIZED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class AuthServiceTest {
+class LoginServiceTest {
 
-    private final AuthService authService = new AuthService();
+    private final LoginService loginService = new LoginService();
 
     @BeforeEach
     void setUp() {
@@ -73,7 +73,7 @@ class AuthServiceTest {
                     RequestBody requestBody = requestBody_생성();
 
                     // when
-                    ResponseEntity response = authService.login(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = loginService.login(requestLine, requestHeader, requestBody);
 
                     // then
                     assertAll(
@@ -93,80 +93,12 @@ class AuthServiceTest {
                     RequestBody requestBody = requestBody_생성();
 
                     // when
-                    ResponseEntity response = authService.login(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = loginService.login(requestLine, requestHeader, requestBody);
 
                     // then
                     assertAll(
                             () -> assertThat(response.getHttpStatus()).isEqualTo(UNAUTHORIZED),
                             () -> assertThat(response.getLocation()).isEqualTo("/401.html")
-                    );
-                }
-
-            }
-
-        }
-
-        @Nested
-        class path가_register면 {
-
-            @Nested
-            class HTTP_METHOD_GET {
-
-                @Test
-                @DisplayName("REGISTER Response를 반환한다.")
-                void getRegisterResponseEntity() {
-                    // given
-                    RequestLine requestLine = requestLine_생성(GET, "/register");
-                    RequestBody requestBody = requestBody_생성();
-
-                    // when
-                    ResponseEntity response = authService.register(requestLine, requestBody);
-
-                    // then
-                    assertAll(
-                            () -> assertThat(response.getHttpStatus()).isEqualTo(OK),
-                            () -> assertThat(response.getLocation()).isEqualTo("/register.html")
-                    );
-                }
-
-            }
-
-            @Nested
-            class HTTP_METHOD_POST {
-
-                @Test
-                @DisplayName("CONFLICT Response를 반환한다.")
-                void getConflictResponseEntity() {
-                    // given
-                    InMemoryUserRepository.save(new User(1L, "베베", "password", "rltgjqmduftlagl@gmail.com"));
-
-                    RequestLine requestLine = requestLine_생성(POST, "/register");
-                    RequestBody requestBody = requestBody_생성();
-
-                    // when
-                    ResponseEntity response = authService.register(requestLine, requestBody);
-
-                    // then
-                    assertAll(
-                            () -> assertThat(response.getHttpStatus()).isEqualTo(CONFLICT),
-                            () -> assertThat(response.getLocation()).isEqualTo("/409.html")
-                    );
-                }
-
-                @Test
-                @DisplayName("FOUND Response를 반환한다.")
-                void getFoundResponseEntity() {
-                    // given
-                    RequestLine requestLine = requestLine_생성(POST, "/register");
-                    RequestBody requestBody = requestBody_생성();
-
-                    // when
-                    ResponseEntity response = authService.register(requestLine, requestBody);
-
-                    // then
-                    assertAll(
-                            () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
-                            () -> assertThat(response.getLocation()).isEqualTo("/index.html")
                     );
                 }
 

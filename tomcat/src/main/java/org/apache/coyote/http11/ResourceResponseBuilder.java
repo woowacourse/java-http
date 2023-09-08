@@ -7,31 +7,31 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.exception.ResourceNotFoundException;
 
-public class ResourceResponseHandler {
+public class ResourceResponseBuilder {
 
-    public ResponseBody buildBodyFrom(String uri) {
-        File page = getFile(uri);
+    public static ResponseBody build(URL resourceUrl) {
+        File page = getFile(resourceUrl);
         String mimeType = getMimeType(page);
         String body = buildResponseBody(page);
 
         return ResponseBody.of(new ContentType(mimeType), body);
     }
 
-    private File getFile(final String uri) {
-        final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        if (resource == null) {
-            throw new IllegalArgumentException("해당 리소스가 존재하지 않습니다.");
+    private static File getFile(final URL url) {
+        if (url == null) {
+            throw new ResourceNotFoundException();
         }
-        return new File(resource.getFile());
+        return new File(url.getFile());
     }
 
-    private String getMimeType(final File file) {
+    private static String getMimeType(final File file) {
         final var uri = file.toURI();
         return getContentType(uri);
     }
 
-    private String getContentType(final URI uri) {
+    private static String getContentType(final URI uri) {
         try {
             final URLConnection urlConnection = uri.toURL().openConnection();
             return urlConnection.getContentType();
@@ -40,7 +40,7 @@ public class ResourceResponseHandler {
         }
     }
 
-    private String buildResponseBody(final File file) {
+    private static String buildResponseBody(final File file) {
         try {
             final Path path = file.toPath();
             final byte[] bytes = Files.readAllBytes(path);

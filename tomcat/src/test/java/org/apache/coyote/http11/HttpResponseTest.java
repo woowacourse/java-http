@@ -37,6 +37,7 @@ class HttpResponseTest {
     void addHeader() {
         //given
         final var response = new HttpResponse(HTTP_1_1);
+        response.setStatus(HttpStatus.OK);
 
         //when
         response.addHeader("key", "value");
@@ -63,6 +64,7 @@ class HttpResponseTest {
     void setBody() {
         //given
         final var response = new HttpResponse(HTTP_1_1);
+        response.setStatus(HttpStatus.OK);
         final var body = ResponseBody.from("body");
 
         //when
@@ -77,6 +79,7 @@ class HttpResponseTest {
         //given
         final var response = new HttpResponse(HTTP_1_1);
         final var cookie = new HttpCookie(Map.of("key", "value", "key2", "value2"));
+        response.setStatus(HttpStatus.OK);
 
         //when
         response.setCookie(cookie);
@@ -92,6 +95,7 @@ class HttpResponseTest {
         //given
         final var response = new HttpResponse(HTTP_1_1);
         final var location = "/index.html";
+        response.setStatus(HttpStatus.OK);
 
         //when
         response.sendRedirect(location);

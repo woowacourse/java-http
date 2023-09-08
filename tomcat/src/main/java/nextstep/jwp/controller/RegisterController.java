@@ -6,16 +6,13 @@ import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.ResourceResponseHandler;
+import org.apache.coyote.http11.ResourceResponseBuilder;
 
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 
 public class RegisterController extends AbstractController {
-
-    private final ResourceResponseHandler resourceResponseHandler = new ResourceResponseHandler(); // todo: 지우기
-
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) {
         if (request.isPost()) {
             doPost(request, response);
             return;
@@ -25,7 +22,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final var form = request.getForm();
         final var account = form.get("account");
         final var password = form.get("password");
@@ -37,10 +34,9 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final var responseBody = resourceResponseHandler.buildBodyFrom("/register.html");
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setStatus(HttpStatus.OK);
-        response.setBody(responseBody);
+        response.setBody("/register.html");
     }
 
 }

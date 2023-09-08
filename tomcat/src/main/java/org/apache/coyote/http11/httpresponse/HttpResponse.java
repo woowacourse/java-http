@@ -4,9 +4,11 @@ import org.apache.coyote.http11.Headers;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.HttpVersion;
+import org.apache.coyote.http11.ResourceResponseBuilder;
 import org.apache.coyote.http11.ResponseBody;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 
@@ -45,7 +47,7 @@ public class HttpResponse {
 
 
     public String buildResponse() {
-        httpStatus = ofNullable(httpStatus).orElse(HttpStatus.OK); // todo: httpStatus가 없을 땐 어떻게 해야할까?
+        httpStatus = requireNonNull(httpStatus);
         body = ofNullable(body).orElse(ResponseBody.EMPTY);
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -101,6 +103,12 @@ public class HttpResponse {
     }
 
     public void setBody(final ResponseBody body) {
+        this.body = body;
+    }
+
+    public void setBody(final String resourcePath) {
+        final var resourceUrl = getClass().getClassLoader().getResource("static" + resourcePath);
+        final var body = ResourceResponseBuilder.build(resourceUrl);
         this.body = body;
     }
 

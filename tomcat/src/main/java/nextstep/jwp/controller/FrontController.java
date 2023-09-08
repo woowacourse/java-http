@@ -6,8 +6,10 @@ import org.apache.coyote.Controller;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.ResourceResponseHandler;
+import org.apache.coyote.http11.ResourceResponseBuilder;
 import org.apache.coyote.http11.ResponseBody;
+
+import static org.apache.coyote.http11.HttpStatus.INTERNAL_SERVER_ERROR;
 
 public class FrontController implements Controller {
 
@@ -22,29 +24,20 @@ public class FrontController implements Controller {
         uriToController.put("/register", new RegisterController());
     }
 
-    private final ResourceResponseHandler resourceResponseHandler;
-
-    public FrontController() {
-        this.resourceResponseHandler = new ResourceResponseHandler();
-    }
-
-
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) {
         final var uri = request.getPath().getValue();
         final var controller = uriToController.get(uri);
-        if (controller != null) {
-            controller.service(request, response);
-            return;
-        }
         try {
-            final var body = resourceResponseHandler.buildBodyFrom(uri);
+            if (controller != null) {
+                controller.service(request, response);
+                return;
+            }
             response.setStatus(HttpStatus.OK);
-            response.setBody(body);
+            response.setBody(uri);
         } catch (Exception e) {
-            final var notFoundResponse = resourceResponseHandler.buildBodyFrom("/404.html");
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setBody(notFoundResponse);
+            response.setStatus(INTERNAL_SERVER_ERROR);
+            response.setBody("/500.html");
         }
     }
 

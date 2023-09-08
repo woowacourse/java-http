@@ -11,7 +11,6 @@ import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.ResourceResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +20,8 @@ import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private ResourceResponseHandler resourceResponseHandler = new ResourceResponseHandler(); // todo: 지우기
-
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) {
         if (request.isPost()) {
             doPost(request, response);
             return;
@@ -34,29 +31,31 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final var form = request.getForm();
-        final var account = form.get("account");
-        final var password = form.get("password");
-        final var optionalUser = findUser(account, password);
+        final Optional<User> optionalUser = extractUser(request);
 
         if (optionalUser.isEmpty()) {
             response.setStatus(UNAUTHORIZED);
-            final var responseBody = resourceResponseHandler.buildBodyFrom("/401.html");
-            response.setBody(responseBody);
+            response.setBody("/401.html");
             return;
         }
 
         User user = optionalUser.get();
         log.info("user: {}", user);
-
         Session session = new Session(UUID.randomUUID().toString());
         session.addUser(user);
-
         SessionManager.add(session);
 
         response.setStatus(FOUND);
         response.sendRedirect("/index.html");
         response.setCookie(HttpCookie.from(session));
+    }
+
+    private Optional<User> extractUser(final HttpRequest request) {
+        final var form = request.getForm();
+        final var account = form.get("account");
+        final var password = form.get("password");
+        final var optionalUser = findUser(account, password);
+        return optionalUser;
     }
 
     private Optional<User> findUser(String account, String password) {
@@ -66,15 +65,14 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (isAlreadyLoggedIn(request)) {
             response.setStatus(FOUND);
             response.sendRedirect("/index.html");
             return;
         }
-        final var responseBody = resourceResponseHandler.buildBodyFrom("/login.html");
         response.setStatus(HttpStatus.OK);
-        response.setBody(responseBody);
+        response.setBody("/login.html");
     }
 
     private boolean isAlreadyLoggedIn(final HttpRequest request) {

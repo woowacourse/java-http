@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
@@ -80,7 +81,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void postUnauthorized() throws Exception {
+    void postUnauthorized() throws IOException {
         //given
         final var request = HttpRequest.builder()
                 .method(HttpMethod.POST)

@@ -13,7 +13,7 @@ import static nextstep.jwp.controller.Path.NOT_FOUND;
 
 public class FrontHandler implements RequestHandler {
 
-    private static final Set<Controller> requestControllers = new HashSet<>();
+    private final Set<Controller> requestControllers = new HashSet<>();
 
     public FrontHandler(final LoginManager loginManager) {
         requestControllers.add(new HomePageController());

@@ -2,6 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Objects;
+import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.header.RequestHeader;
+import org.apache.coyote.http11.request.line.HttpMethod;
+import org.apache.coyote.http11.request.line.RequestLine;
 
 public class HttpRequest {
 

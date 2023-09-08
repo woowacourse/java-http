@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.response.line;
 
 import java.util.Objects;
 
 public class ResponseLine {
 
     private static final String DELIMITER = " ";
+
     private final String httpVersion;
     private ResponseStatus responseStatus;
 

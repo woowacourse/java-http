@@ -1,17 +1,23 @@
 package org.apache.coyote.http11.response;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
-import static org.apache.coyote.http11.response.HttpContentType.mimeTypeWithCharset;
-import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;
-import static org.apache.coyote.http11.response.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.response.header.HttpContentType.TEXT_HTML;
+import static org.apache.coyote.http11.response.header.HttpContentType.mimeTypeWithCharset;
+import static org.apache.coyote.http11.response.header.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.header.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.header.HttpHeader.LOCATION;
 
 import java.util.LinkedHashMap;
+import org.apache.coyote.http11.response.body.ResponseBody;
+import org.apache.coyote.http11.response.header.HttpHeader;
+import org.apache.coyote.http11.response.header.ResponseHeader;
+import org.apache.coyote.http11.response.line.ResponseLine;
+import org.apache.coyote.http11.response.line.ResponseStatus;
 
 public class HttpResponse {
 
     private static final String DELIMITER = " " + System.lineSeparator();
+
     private final ResponseLine responseLine;
     private final ResponseHeader responseHeader;
     private ResponseBody responseBody;

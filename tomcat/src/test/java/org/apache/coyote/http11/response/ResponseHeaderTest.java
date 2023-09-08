@@ -1,13 +1,14 @@
 package org.apache.coyote.http11.response;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
-import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.header.HttpContentType.TEXT_HTML;
+import static org.apache.coyote.http11.response.header.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.header.HttpHeader.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.response.header.ResponseHeader;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

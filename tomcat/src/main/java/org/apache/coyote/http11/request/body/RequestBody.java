@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.body;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,7 +24,8 @@ public class RequestBody {
                 .map(parameter -> parameter.split(FIELD_AND_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         fieldAndValue -> fieldAndValue[BODY_FIELD_INDEX].trim(),
-                        fieldAndValue -> fieldAndValue[BODY_VALUE_INDEX].trim()
+                        fieldAndValue -> fieldAndValue[BODY_VALUE_INDEX].trim(),
+                        (prev, update) -> update
                 ));
         return new RequestBody(parametersMap);
     }

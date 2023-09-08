@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.response.header;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;

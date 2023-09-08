@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.header;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +14,8 @@ public class RequestHeader {
     private static final int LIMIT = 2;
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
+    private static final String MINIMUM_LENGTH = "0";
 
     private final Map<String, String> headersMap;
     private final HttpCookie httpCookie;
@@ -32,22 +34,22 @@ public class RequestHeader {
                 .map(headerLine -> headerLine.split(DELIMITER, LIMIT))
                 .collect(Collectors.toMap(
                         fieldAndValue -> fieldAndValue[HEADER_FIELD_INDEX].trim(),
-                        fieldAndValue -> fieldAndValue[HEADER_VALUE_INDEX].trim()
+                        fieldAndValue -> fieldAndValue[HEADER_VALUE_INDEX].trim(),
+                        (prev, update) -> update
                 ));
 
-        if (headersMap.containsKey("Cookie")) {
-            return new RequestHeader(headersMap, HttpCookie.from(headersMap.get("Cookie")));
+        if (headersMap.containsKey(COOKIE)) {
+            return new RequestHeader(headersMap, HttpCookie.from(headersMap.get(COOKIE)));
         }
         return new RequestHeader(headersMap);
     }
 
     public boolean hasContent() {
-        int contentLength = contentLength();
-        return contentLength > 0;
+        return contentLength() > 0;
     }
 
     public int contentLength() {
-        String contentLength = Objects.requireNonNullElse(headersMap.get(CONTENT_LENGTH), "0");
+        String contentLength = Objects.requireNonNullElse(headersMap.get(CONTENT_LENGTH), MINIMUM_LENGTH);
         return Integer.parseInt(contentLength);
     }
 

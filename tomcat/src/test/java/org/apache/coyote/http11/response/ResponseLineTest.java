@@ -1,11 +1,12 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.apache.coyote.http11.response.line.ResponseLine;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
-
-import static org.apache.coyote.http11.response.ResponseStatus.OK;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)

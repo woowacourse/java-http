@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.coyote.http11.request.HttpMethod.GET;
-import static org.apache.coyote.http11.request.HttpMethod.POST;
-import static org.apache.coyote.http11.response.HttpHeader.SET_COOKIE;
-import static org.apache.coyote.http11.response.ResponseStatus.FOUND;
-import static org.apache.coyote.http11.response.ResponseStatus.OK;
-import static org.apache.coyote.http11.response.ResponseStatus.UNAUTHORIZED;
+import static org.apache.coyote.http11.request.line.HttpMethod.GET;
+import static org.apache.coyote.http11.request.line.HttpMethod.POST;
+import static org.apache.coyote.http11.response.header.HttpHeader.SET_COOKIE;
+import static org.apache.coyote.http11.response.line.ResponseStatus.FOUND;
+import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
+import static org.apache.coyote.http11.response.line.ResponseStatus.UNAUTHORIZED;
 
 import java.io.BufferedReader;
 import java.io.IOException;

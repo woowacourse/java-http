@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.response.ResponseStatus.OK;
+import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayNameGeneration;

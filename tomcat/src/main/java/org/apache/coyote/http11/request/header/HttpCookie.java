@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.header;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,7 +24,8 @@ public class HttpCookie {
                 .map(parameter -> parameter.split(FIELD_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         fieldAndValue -> fieldAndValue[FIELD_INDEX].trim(),
-                        fieldAndValue -> fieldAndValue[VALUE_INDEX].trim()
+                        fieldAndValue -> fieldAndValue[VALUE_INDEX].trim(),
+                        (prev, update) -> update
                 ));
         return new HttpCookie(parametersMap);
     }

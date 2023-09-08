@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.response.body;
 
 public class ResponseBody {
 
-    private String bodyMessage;
+    private final String bodyMessage;
 
     public ResponseBody(String bodyMessage) {
         this.bodyMessage = bodyMessage;

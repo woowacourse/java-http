@@ -36,7 +36,7 @@ public class RequestProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(RequestProcessor.class);
 
-    public ResponseEntity from(final HttpRequest httpRequest) throws URISyntaxException, IOException {
+    public ResponseEntity processRequest(final HttpRequest httpRequest) throws URISyntaxException, IOException {
 
         final HttpVersion version = httpRequest.getHttpVersion();
         final HttpMethod method = httpRequest.getHttpMethod();
@@ -52,7 +52,7 @@ public class RequestProcessor {
             }
 
             if (requestUri.equals("login")) {
-                final String sessionId = cookies.ofJSessionId("JSESSIONID");
+                final String sessionId = cookies.ofSessionId("JSESSIONID");
                 final Session session = SessionManager.findSession(sessionId);
                 if (session != null) {
                     return ResponseEntity.of(version, HttpStatus.FOUND, null,

@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import nextstep.jwp.RequestProcessor;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.response.ResponseEntity;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +32,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = HttpRequest.of(inputStream);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final RequestProcessor requestProcessor = new RequestProcessor();
-            final HttpResponse httpResponse = HttpResponse.from(requestProcessor.from(httpRequest));
+            final ResponseEntity responseEntity = requestProcessor.processRequest(httpRequest);
+            final HttpResponse httpResponse = HttpResponse.from(responseEntity);
 
             outputStream.write(httpResponse.toResponse().getBytes());
             outputStream.flush();

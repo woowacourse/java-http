@@ -2,8 +2,6 @@ package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 import nextstep.jwp.common.HttpMethod;
 import nextstep.jwp.common.HttpVersion;
@@ -24,22 +22,20 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(final InputStream inputStream) throws IOException {
-        final InputStreamReader reader = new InputStreamReader(inputStream);
-        final BufferedReader bufferedReader = new BufferedReader(reader);
-        final RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
-        final RequestHeaders requestHeader = RequestHeaders.of(bufferedReader);
+    public static HttpRequest from(final BufferedReader reader) throws IOException {
+        final RequestLine requestLine = RequestLine.from(reader.readLine());
+        final RequestHeaders requestHeader = RequestHeaders.from(reader);
         final HttpCookie cookies = HttpCookie.from(requestHeader.getHeaderValue("Cookie"));
-        final RequestBody requestBody = readRequestBody(bufferedReader, requestHeader);
+        final RequestBody requestBody = readRequestBody(reader, requestHeader);
 
         return new HttpRequest(requestLine, requestHeader, cookies, requestBody);
     }
 
-    private static RequestBody readRequestBody(final BufferedReader bufferedReader, final RequestHeaders requestHeader)
+    private static RequestBody readRequestBody(final BufferedReader reader, final RequestHeaders headers)
             throws IOException {
-        if (requestHeader.getHeaderValue("Content-Length") != null) {
-            return RequestBody.of(bufferedReader,
-                    requestHeader.getHeaderValue("Content-Length"));
+        final String contentLength = headers.getHeaderValue("Content-Length");
+        if (contentLength != null) {
+            return RequestBody.of(reader, contentLength);
         }
         return null;
     }
@@ -52,16 +48,12 @@ public class HttpRequest {
         return requestLine.getRequestUri();
     }
 
-    public Map<String, String> getQueryParams() {
-        return requestLine.getQueryParams();
-    }
-
     public HttpVersion getHttpVersion() {
         return requestLine.getHttpVersion();
     }
 
-    public RequestHeaders getHeaders() {
-        return requestHeaders;
+    public String getHeaderValue(final String header) {
+        return requestHeaders.getHeaderValue(header);
     }
 
     public HttpCookie getCookies() {

@@ -16,11 +16,11 @@ public class RequestLine {
         this.httpVersion = httpVersion;
     }
 
-    public static RequestLine of(final String line) {
+    public static RequestLine from(final String line) {
         final String[] inputs = line.split(" ");
-        final HttpMethod httpMethod = HttpMethod.of(inputs[0]);
-        final RequestUri requestURI = RequestUri.of(inputs[1].substring(1));
-        final HttpVersion httpVersion = HttpVersion.of(inputs[2]);
+        final HttpMethod httpMethod = HttpMethod.from(inputs[0]);
+        final RequestUri requestURI = RequestUri.from(inputs[1].substring(1));
+        final HttpVersion httpVersion = HttpVersion.from(inputs[2]);
         return new RequestLine(httpMethod, requestURI, httpVersion);
     }
 

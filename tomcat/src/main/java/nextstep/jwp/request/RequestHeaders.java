@@ -13,13 +13,13 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public static RequestHeaders of(final BufferedReader bufferedReader) throws IOException {
+    public static RequestHeaders from(final BufferedReader reader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
-        String line = bufferedReader.readLine();
+        String line = reader.readLine();
         while (!"".equals(line)) {
             final String[] headerParams = line.split(":");
             headers.put(headerParams[0], headerParams[1].trim());
-            line = bufferedReader.readLine();
+            line = reader.readLine();
         }
         return new RequestHeaders(headers);
     }

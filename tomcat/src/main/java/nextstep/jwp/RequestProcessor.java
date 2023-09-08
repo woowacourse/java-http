@@ -19,7 +19,7 @@ import nextstep.jwp.model.HttpCookie;
 import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.ResponseEntity;
+import nextstep.jwp.response.HttpResponse;
 import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class RequestProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(RequestProcessor.class);
 
-    public ResponseEntity process(final HttpRequest httpRequest) throws URISyntaxException, IOException {
+    public HttpResponse process(final HttpRequest httpRequest) throws URISyntaxException, IOException {
 
         final HttpVersion version = httpRequest.getHttpVersion();
         final HttpMethod method = httpRequest.getHttpMethod();
@@ -47,7 +47,7 @@ public class RequestProcessor {
 
         if (method.equals(HttpMethod.GET)) {
             if (requestUri.isEmpty()) {
-                return ResponseEntity.of(version, HttpStatus.OK, content,
+                return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
@@ -56,37 +56,37 @@ public class RequestProcessor {
                 final String sessionId = cookies.ofSessionId(JAVA_SESSION_NAME);
                 final Session session = SessionManager.findSession(sessionId);
                 if (session != null) {
-                    return ResponseEntity.of(version, HttpStatus.FOUND, null,
+                    return HttpResponse.of(version, HttpStatus.FOUND, null,
                             Map.of(LOCATION_HEADER, INDEX_PAGE));
                 }
                 content = makeResponseBody(requestUri);
-                return ResponseEntity.of(version, HttpStatus.OK, content,
+                return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
             content = makeResponseBody(requestUri);
 
-            if (requestUri.endsWith(".html") || requestUri.equals("login") || requestUri.equals("register")) {
-                return ResponseEntity.of(version, HttpStatus.OK, content,
+            if (requestUri.endsWith(".html") || requestUri.equals("register")) {
+                return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
             if (requestUri.endsWith(".css")) {
-                return ResponseEntity.of(version, HttpStatus.OK, content,
+                return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.CSS.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
             if (requestUri.endsWith(".js")) {
-                return ResponseEntity.of(version, HttpStatus.OK, content,
+                return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.JS.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
             if (requestUri.endsWith(".svg")) {
-                return ResponseEntity.of(version, HttpStatus.OK, content,
+                return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.SVG.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
@@ -101,13 +101,13 @@ public class RequestProcessor {
                         .collect(Collectors.toMap(info -> info[0], info -> info[1]));
 
                 if (InMemoryUserRepository.findByAccount(registerInfo.get("account")).isPresent()) {
-                    return ResponseEntity.of(version, HttpStatus.FOUND, null,
+                    return HttpResponse.of(version, HttpStatus.FOUND, null,
                             Map.of(LOCATION_HEADER, REGISTER_PAGE));
                 }
                 final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"),
                         registerInfo.get("email"));
                 InMemoryUserRepository.save(newUser);
-                return ResponseEntity.of(version, HttpStatus.FOUND, null, Map.of(LOCATION_HEADER, INDEX_PAGE));
+                return HttpResponse.of(version, HttpStatus.FOUND, null, Map.of(LOCATION_HEADER, INDEX_PAGE));
             }
 
             if (requestUri.equals("login")) {
@@ -125,18 +125,18 @@ public class RequestProcessor {
                         SessionManager.add(session);
                         cookies.save(JAVA_SESSION_NAME, session.getId());
                         final String cookieInfo = cookies.cookieInfo(JAVA_SESSION_NAME);
-                        return ResponseEntity.of(version, HttpStatus.FOUND, content,
+                        return HttpResponse.of(version, HttpStatus.FOUND, content,
                                 Map.of(LOCATION_HEADER, INDEX_PAGE,
                                         "Set-Cookie", cookieInfo));
                     }
                 }
 
-                return ResponseEntity.of(version, HttpStatus.FOUND, content,
+                return HttpResponse.of(version, HttpStatus.FOUND, content,
                         Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE));
             }
         }
 
-        return ResponseEntity.of(version, HttpStatus.NOT_FOUND, content,
+        return HttpResponse.of(version, HttpStatus.NOT_FOUND, content,
                 Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                         CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
     }

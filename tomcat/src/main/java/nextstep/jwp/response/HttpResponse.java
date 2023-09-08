@@ -1,8 +1,6 @@
 package nextstep.jwp.response;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import nextstep.jwp.common.HttpStatus;
 import nextstep.jwp.common.HttpVersion;
 
@@ -21,11 +19,12 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse from(final ResponseEntity responseEntity) {
-        final StatusLine statusLine = StatusLine.of(responseEntity.getHttpVersion(), responseEntity.getHttpStatus());
-        final ResponseHeaders headers = ResponseHeaders.from(responseEntity.getHeaders());
-        final String content = responseEntity.getContent();
-        return new HttpResponse(statusLine, headers, content);
+    public static HttpResponse of(final HttpVersion httpVersion, final HttpStatus httpStatus,
+                                  final String responseBody,
+                                  final Map<String, String> headers) {
+        final StatusLine statusLine = StatusLine.of(httpVersion, httpStatus);
+        final ResponseHeaders responseHeaders = ResponseHeaders.from(headers);
+        return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
     public String toResponse() {

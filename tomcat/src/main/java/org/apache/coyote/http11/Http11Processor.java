@@ -9,7 +9,6 @@ import nextstep.jwp.RequestProcessor;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
-import nextstep.jwp.response.ResponseEntity;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final RequestProcessor requestProcessor = new RequestProcessor();
-            final ResponseEntity responseEntity = requestProcessor.process(httpRequest);
-            final HttpResponse httpResponse = HttpResponse.from(responseEntity);
+            final HttpResponse httpResponse = requestProcessor.process(httpRequest);
 
             outputStream.write(httpResponse.toResponse().getBytes());
             outputStream.flush();

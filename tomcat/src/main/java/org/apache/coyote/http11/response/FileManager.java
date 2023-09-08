@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class FileManager {
         return fileName.substring(extensionSignIndex + 1);
     }
 
-    public String fileContent() {
+    public String readFileContent() {
         try {
             return new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e) {

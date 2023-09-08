@@ -1,10 +1,11 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.FileManager.from;
+import static org.apache.coyote.http11.response.FileManager.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
+import org.apache.coyote.http11.response.FileManager;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class FileManagerTest {
         FileManager fileManager = from(location);
 
         // when
-        String fileContent = fileManager.fileContent();
+        String fileContent = fileManager.readFileContent();
 
         // then
         assertThat(fileContent).isEqualTo(
@@ -95,7 +96,7 @@ class FileManagerTest {
         FileManager fileManager = new FileManager(new File("wrong.file"));
 
         // when
-        assertThatThrownBy(fileManager::fileContent)
+        assertThatThrownBy(fileManager::readFileContent)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("파일을 불러올 수 없습니다.");
     }

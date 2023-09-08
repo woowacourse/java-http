@@ -3,10 +3,6 @@ package org.apache.coyote.http11;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.coyote.http11.request.HttpMethod.GET;
 import static org.apache.coyote.http11.request.HttpMethod.POST;
-import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
-import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;
-import static org.apache.coyote.http11.response.HttpHeader.LOCATION;
 import static org.apache.coyote.http11.response.HttpHeader.SET_COOKIE;
 import static org.apache.coyote.http11.response.ResponseStatus.FOUND;
 import static org.apache.coyote.http11.response.ResponseStatus.OK;
@@ -15,7 +11,6 @@ import static org.apache.coyote.http11.response.ResponseStatus.UNAUTHORIZED;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +19,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +46,8 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream(), UTF_8)
-                );
-                final OutputStream outputStream = connection.getOutputStream()
+                final var reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), UTF_8));
+                final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest httpRequest = readHttpRequest(reader);
             HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
@@ -81,11 +73,7 @@ public class Http11Processor implements Runnable, Processor {
     private String process(HttpRequest request, HttpResponse response) {
         // 특별한 친구
         if (request.consistsOf(GET, "/")) {
-            response.setResponseStatus(OK);
-            response.setResponseBody(DEFAULT_BODY);
-
-            response.setResponseHeader(CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8));
-            response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+            response.setResponseMessage(OK, DEFAULT_BODY);
             return response.responseMessage();
         }
 
@@ -101,21 +89,13 @@ public class Http11Processor implements Runnable, Processor {
                     Session session = new Session(UUID.randomUUID().toString());
                     sessionManager.add(session);
 
-                    response.setResponseStatus(FOUND);
-                    response.setResponseHeader(LOCATION, "/index.html");
+                    response.setResponseRedirect(FOUND, "/index.html");
                     response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
                     return response.responseMessage();
                 }
             }
 
-            FileManager fileManager = FileManager.from("/401.html");
-            String fileContent = fileManager.fileContent();
-            String fileExtension = fileManager.extractFileExtension();
-
-            response.setResponseStatus(UNAUTHORIZED);
-            response.setResponseBody(fileContent);
-            response.setResponseHeader(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
-            response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+            response.setResponseResource(UNAUTHORIZED, "/401.html");
             return response.responseMessage();
         }
 
@@ -130,21 +110,13 @@ public class Http11Processor implements Runnable, Processor {
                     Session session = new Session(UUID.randomUUID().toString());
                     sessionManager.add(session);
 
-                    response.setResponseStatus(FOUND);
-                    response.setResponseHeader(LOCATION, "/index.html");
+                    response.setResponseRedirect(FOUND, "/index.html");
                     response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
                     return response.responseMessage();
                 }
             }
 
-            FileManager fileManager = FileManager.from("/401.html");
-            String fileContent = fileManager.fileContent();
-            String fileExtension = fileManager.extractFileExtension();
-
-            response.setResponseStatus(UNAUTHORIZED);
-            response.setResponseBody(fileContent);
-            response.setResponseHeader(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
-            response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+            response.setResponseResource(UNAUTHORIZED, "/401.html");
             return response.responseMessage();
         }
 
@@ -153,8 +125,7 @@ public class Http11Processor implements Runnable, Processor {
             Session session = sessionManager.findSession(sessionId);
 
             if (session != null) {
-                response.setResponseStatus(FOUND);
-                response.setResponseHeader(LOCATION, "/index.html");
+                response.setResponseRedirect(FOUND, "/index.html");
                 return response.responseMessage();
             }
         }
@@ -171,23 +142,13 @@ public class Http11Processor implements Runnable, Processor {
             Session session = new Session(UUID.randomUUID().toString());
             sessionManager.add(session);
 
-            response.setResponseStatus(FOUND);
-            response.setResponseHeader(LOCATION, "/index.html");
+            response.setResponseRedirect(FOUND, "/index.html");
             response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
             return response.responseMessage();
         }
 
         // 권한이 필요하지 않은 URI
-        String uri = request.requestUri();
-
-        FileManager fileManager = FileManager.from(uri);
-        String fileContent = fileManager.fileContent();
-        String fileExtension = fileManager.extractFileExtension();
-
-        response.setResponseStatus(OK);
-        response.setResponseBody(fileContent);
-        response.setResponseHeader(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
-        response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+        response.setResponseResource(OK, request.requestUri());
         return response.responseMessage();
     }
 }

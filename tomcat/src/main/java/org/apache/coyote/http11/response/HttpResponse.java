@@ -1,5 +1,12 @@
 package org.apache.coyote.http11.response;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
+import static org.apache.coyote.http11.response.HttpContentType.mimeTypeWithCharset;
+import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.HttpHeader.LOCATION;
+
 import java.util.LinkedHashMap;
 
 public class HttpResponse {
@@ -12,10 +19,6 @@ public class HttpResponse {
     public HttpResponse(String httpVersion) {
         this.responseLine = new ResponseLine(httpVersion, null);
         this.responseHeader = new ResponseHeader(new LinkedHashMap<>());
-    }
-
-    public int measureContentLength() {
-        return responseBody.measureContentLength();
     }
 
     public String responseMessage() {
@@ -31,6 +34,37 @@ public class HttpResponse {
         }
 
         return messageBuilder.toString();
+    }
+
+    public void setResponseMessage(ResponseStatus responseStatus, String bodyMessage) {
+        responseLine.setResponseStatus(responseStatus);
+        setBodyAndHeaderByMessage(bodyMessage);
+    }
+
+    private void setBodyAndHeaderByMessage(String message) {
+        responseBody = new ResponseBody(message);
+        responseHeader.put(CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8));
+        responseHeader.put(CONTENT_LENGTH, String.valueOf(responseBody.measureContentLength()));
+    }
+
+    public void setResponseResource(ResponseStatus responseStatus, String resourceUri) {
+        responseLine.setResponseStatus(responseStatus);
+        setBodyAndHeaderByResource(resourceUri);
+    }
+
+    private void setBodyAndHeaderByResource(String uri) {
+        FileManager fileManager = FileManager.from(uri);
+        String fileContent = fileManager.readFileContent();
+        String fileExtension = fileManager.extractFileExtension();
+
+        responseBody = new ResponseBody(fileContent);
+        responseHeader.put(CONTENT_TYPE, mimeTypeWithCharset(fileExtension, UTF_8));
+        responseHeader.put(CONTENT_LENGTH, String.valueOf(responseBody.measureContentLength()));
+    }
+
+    public void setResponseRedirect(ResponseStatus responseStatus, String redirectUri) {
+        responseLine.setResponseStatus(responseStatus);
+        responseHeader.put(LOCATION, redirectUri);
     }
 
     public void setResponseHeader(HttpHeader field, String value) {

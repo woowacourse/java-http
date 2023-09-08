@@ -31,7 +31,8 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(String id) {
-        sessions.remove(id);
+    public void remove(Session session) {
+        session.invalidate();
+        sessions.remove(session.getId());
     }
 }

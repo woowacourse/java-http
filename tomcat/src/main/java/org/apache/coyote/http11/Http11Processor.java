@@ -1,16 +1,38 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.Map;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.FileHandler;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.header.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final String HTTP_VERSION = "HTTP/1.1 ";
+    private static final String CRLF = "\r\n";
+
+    private static final Handler DEFAULT_HANDLER = new FileHandler();
+    private static final LoginHandler LOGIN_HANDLER = new LoginHandler();
+    private static final RegisterHandler REGISTER_HANDLER = new RegisterHandler();
+    private static final Map<String, Handler> PREDEFINED_HANDLERS = Map.of(
+            "/", httpRequest -> new HttpResponse("Hello world!", "text/html"),
+            "/login", LOGIN_HANDLER,
+            "/login.html", LOGIN_HANDLER,
+            "/register", REGISTER_HANDLER,
+            "/register.html", REGISTER_HANDLER
+    );
 
     private final Socket connection;
 
@@ -26,22 +48,33 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            HttpResponse httpResponse = handle(httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+            String headerLines = httpResponse.getHeaders().stream()
+                    .map(HttpHeader::toLine)
+                    .collect(Collectors.joining(CRLF));
+            final var response = String.join(CRLF,
+                    HTTP_VERSION + httpResponse.getStatus().toLine(),
+                    headerLines,
                     "",
-                    responseBody);
+                    httpResponse.getBody()
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse handle(final HttpRequest httpRequest) {
+        if (PREDEFINED_HANDLERS.containsKey(httpRequest.getTarget().getPath())) {
+            return PREDEFINED_HANDLERS.get(httpRequest.getTarget().getPath()).handle(httpRequest);
+        }
+        return DEFAULT_HANDLER.handle(httpRequest);
     }
 }

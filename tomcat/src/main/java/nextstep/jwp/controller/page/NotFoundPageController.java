@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
@@ -15,7 +16,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseStatusLine;
 
-public class NotFoundPageController implements Controller {
+public class NotFoundPageController extends AbstractController {
 
     private NotFoundPageController() {
     }
@@ -25,7 +26,7 @@ public class NotFoundPageController implements Controller {
     }
 
     @Override
-    public HttpResponse process(final HttpRequest request) throws IOException {
+    protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final URL url = HttpResponse.class.getClassLoader()
                 .getResource(STATIC + NOT_FOUND_URI + HTML);
 

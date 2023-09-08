@@ -18,11 +18,11 @@ public abstract class AbstractController implements Controller {
         return doGet(request);
     }
 
-    protected HttpResponse doPost(final HttpRequest request) {
+    protected HttpResponse doPost(final HttpRequest request) throws IOException {
         throw new IllegalArgumentException("지원하지 않는 메서드입니다.");
     }
 
-    protected HttpResponse doGet(final HttpRequest request) {
+    protected HttpResponse doGet(final HttpRequest request) throws IOException {
         throw new IllegalArgumentException("지원하지 않는 메서드입니다.");
     }
 }

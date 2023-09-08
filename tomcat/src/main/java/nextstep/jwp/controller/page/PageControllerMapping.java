@@ -6,30 +6,28 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public enum PageControllerMapping {
 
-    HELLO_WORLD("/", "GET", HelloWorldPageController.create()),
-    REGISTER_GET("/register", "GET", RegisterGetPageController.create()),
-    REGISTER_POST("/register", "POST", RegisterPostPageController.create()),
-    LOGIN_GET("/login", "GET", LoginGetPageController.create()),
-    LOGIN_POST("/login", "POST", LoginPostPageController.create()),
-    INDEX_GET("/index", "GET", IndexGetPageController.create());
+    HELLO_WORLD("/", HelloWorldController.create()),
+    REGISTER_GET("/register", RegisterGetPageController.create()),
+    LOGIN_GET("/login", LoginGetPageController.create()),
+    INDEX_GET("/index", IndexController.create());
+
+    private static final String COMMA_REGEX = "\\.";
+    private static final int URI_INDEX = 0;
 
     private final String uri;
-    private final String method;
     private final Controller controller;
 
-    PageControllerMapping(final String uri, final String method, final Controller controller) {
+    PageControllerMapping(final String uri, final Controller controller) {
         this.uri = uri;
-        this.method = method;
         this.controller = controller;
     }
 
     public static Controller find(final HttpRequest httpRequest) {
         final String requestUri = httpRequest.getUri();
-        final String requestUriWithoutExtension = requestUri.split("\\.")[0];
-        final String requestMethod = httpRequest.getMethod();
+        final String requestUriWithoutExtension = requestUri.split(COMMA_REGEX)[URI_INDEX];
 
         return Arrays.stream(PageControllerMapping.values())
-                .filter(value -> value.uri.equals(requestUriWithoutExtension) && value.method.equals(requestMethod))
+                .filter(value -> value.uri.equals(requestUriWithoutExtension))
                 .map(value -> value.controller)
                 .findFirst()
                 .orElse(NotFoundPageController.create());

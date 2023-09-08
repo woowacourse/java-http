@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestHandler;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
@@ -9,7 +10,7 @@ import java.util.Set;
 
 import static nextstep.jwp.controller.Path.NOT_FOUND;
 
-public class FrontController implements Controller {
+public class FrontHandler implements RequestHandler {
 
     private static final Set<Controller> requestControllers = new HashSet<>();
 
@@ -21,12 +22,7 @@ public class FrontController implements Controller {
     }
 
     @Override
-    public boolean supports(final HttpRequest httpRequest) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void handle(final HttpRequest request, final HttpResponse response) throws Exception {
         for (final Controller controller : requestControllers) {
             if (controller.supports(request)) {
                 controller.service(request, response);

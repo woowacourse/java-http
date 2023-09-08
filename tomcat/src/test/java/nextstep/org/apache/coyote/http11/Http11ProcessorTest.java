@@ -1,6 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
-import nextstep.jwp.controller.FrontController;
+import nextstep.jwp.controller.FrontHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -18,7 +18,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new FrontController());
+        final var processor = new Http11Processor(socket, new FrontHandler());
 
         // when
         processor.process(socket);
@@ -45,7 +45,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new FrontController());
+        final Http11Processor processor = new Http11Processor(socket, new FrontHandler());
 
         // when
         processor.process(socket);

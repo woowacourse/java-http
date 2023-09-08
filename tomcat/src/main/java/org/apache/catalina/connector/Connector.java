@@ -1,6 +1,6 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestHandler;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +18,15 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
-    private final Controller controller;
+    private final RequestHandler requestHandler;
     private boolean stopped;
 
-    public Connector(final Controller controller) {
-        this(controller, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final RequestHandler requestHandler) {
+        this(requestHandler, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final Controller controller, final int port, final int acceptCount) {
-        this.controller = controller;
+    public Connector(final RequestHandler requestHandler, final int port, final int acceptCount) {
+        this.requestHandler = requestHandler;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -59,17 +59,17 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept(), controller);
+            process(serverSocket.accept(), requestHandler);
         } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection, final Controller controller) {
+    private void process(final Socket connection, final RequestHandler requestHandler) {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, controller);
+        final var processor = new Http11Processor(connection, requestHandler);
         new Thread(processor).start();
     }
 

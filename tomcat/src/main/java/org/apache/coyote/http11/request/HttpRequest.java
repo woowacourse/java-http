@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.headers.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.requestline.HttpMethod;
 import org.apache.coyote.http11.requestline.RequestLine;
 

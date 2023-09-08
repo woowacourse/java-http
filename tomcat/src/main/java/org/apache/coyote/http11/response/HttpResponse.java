@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.headers.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.responseline.ResponseLine;
 
 public class HttpResponse {
@@ -24,7 +24,6 @@ public class HttpResponse {
   }
 
   public String build() {
-
     return String.join(System.lineSeparator(),
         this.responseLine.build(),
         this.headers.build(),

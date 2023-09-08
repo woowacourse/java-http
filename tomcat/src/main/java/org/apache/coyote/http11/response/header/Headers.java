@@ -30,8 +30,7 @@ public class Headers {
         this.headers.putAll(headers);
     }
 
-    @Override
-    public String toString() {
+    public String collectHeaders() {
         return headers.keySet()
                 .stream()
                 .map(key -> String.join(

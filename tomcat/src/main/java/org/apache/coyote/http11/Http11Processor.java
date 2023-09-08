@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void response(final BufferedWriter bufferedWriter, final HttpResponse httpResponse) throws IOException {
-        bufferedWriter.write(httpResponse.toString());
+        bufferedWriter.write(httpResponse.collectResponse());
         bufferedWriter.flush();
     }
 }

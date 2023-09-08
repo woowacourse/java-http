@@ -49,14 +49,13 @@ public class HttpResponse {
     }
 
     public void setCookie(final Cookie cookie) {
-        headers.put(Header.SET_COOKIE, cookie.toString());
+        headers.put(Header.SET_COOKIE, cookie.collectCookie());
     }
 
-    @Override
-    public String toString() {
-        return status.toString() +
+    public String collectResponse() {
+        return status.collectStatus() +
                 "\r\n" +
-                headers.toString() +
+                headers.collectHeaders() +
                 "\r\n\r\n" +
                 body;
     }

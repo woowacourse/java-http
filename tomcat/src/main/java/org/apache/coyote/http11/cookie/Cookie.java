@@ -43,8 +43,7 @@ public class Cookie {
         return Optional.ofNullable(cookie.get(JSESSIONID));
     }
 
-    @Override
-    public String toString() {
+    public String collectCookie() {
         return cookie.entrySet()
                 .stream()
                 .map(entry -> String.join(

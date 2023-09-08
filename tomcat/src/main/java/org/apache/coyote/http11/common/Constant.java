@@ -2,6 +2,7 @@ package org.apache.coyote.http11.common;
 
 public class Constant {
 
+    public static final String SUPPORTED_HTTP_VERSION = "HTTP/1.1";
     public static final String EQUALS_VALUE = "=";
     public static final String PARAM_SEPARATOR = "&";
     public static final String HEADER_SEPARATOR = ": ";

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response.header;
 
+import static org.apache.coyote.http11.common.Constant.SUPPORTED_HTTP_VERSION;
 import static org.apache.coyote.http11.common.Constant.URI_SEPARATOR;
 
 public enum Status {
@@ -12,8 +13,6 @@ public enum Status {
     UNSUPPORTED_METHOD(405, "METHOD NOT ALLOWED"),
     INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR");
 
-    private static final String VERSION = "HTTP/1.1";
-
     private final int code;
     private final String message;
 
@@ -22,9 +21,16 @@ public enum Status {
         this.message = message;
     }
 
-    @Override
-    public String toString() {
-        return VERSION + URI_SEPARATOR +
+    public int getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String collectStatus() {
+        return SUPPORTED_HTTP_VERSION + URI_SEPARATOR +
                 this.code + URI_SEPARATOR +
                 this.message + URI_SEPARATOR;
     }

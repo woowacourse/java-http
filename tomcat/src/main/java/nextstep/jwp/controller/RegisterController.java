@@ -1,48 +1,47 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.DuplicationMemberException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.ResponseEntity;
+import org.apache.coyote.response.ResponseStatus;
+import org.apache.exception.MethodMappingFailException;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class RegisterController implements Controller {
 
-    public static final String QUERY_ACCOUNT_KEY = "account";
-    public static final String QUERY_PASSWORD_KEY = "password";
-    public static final String QUERY_EMAIL_KEY = "email";
+    public static final String ACCOUNT_KEY = "account";
+    public static final String PASSWORD_KEY = "password";
+    public static final String EMAIL_KEY = "email";
 
     @Override
-    public ResponseEntity handle(Request request) {
+    public ResponseEntity handle(final Request request) {
         if (request.isPost()) {
             return join(request);
         }
-//        return new PathResponse(request.getPath(), HttpURLConnection.HTTP_OK, "OK");
-        return null;
+        if (request.isGet()) {
+            return joinPage(request);
+        }
+        throw new MethodMappingFailException();
     }
 
-    private ResponseEntity join(Request request) {
-        Map<String, String> requestBody = request.getRequestBody();
-
-        if (!requestBody.containsKey(QUERY_ACCOUNT_KEY) || !requestBody.containsKey(QUERY_PASSWORD_KEY) || !requestBody.containsKey(QUERY_EMAIL_KEY)) {
-            throw new IllegalArgumentException();
-        }
-
-        final String account = requestBody.get(QUERY_ACCOUNT_KEY);
-        final String password = requestBody.get(QUERY_PASSWORD_KEY);
-        final String email = requestBody.get(QUERY_EMAIL_KEY);
+    private ResponseEntity join(final Request request) {
+        final String account = request.getBodyValue(ACCOUNT_KEY);
+        final String password = request.getBodyValue(PASSWORD_KEY);
+        final String email = request.getBodyValue(EMAIL_KEY);
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 회원입니다.");
+            throw new DuplicationMemberException();
         }
-
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
+        return ResponseEntity.fromViewPathWithRedirect(request.httpVersion(), request.getPath(), ResponseStatus.MOVED_TEMP, "/index.html");
+    }
 
-//        return new PathResponse("/index", HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
-        return null;
+    private ResponseEntity joinPage(final Request request) {
+        return ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.OK);
     }
 }

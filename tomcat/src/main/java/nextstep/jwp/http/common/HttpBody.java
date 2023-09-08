@@ -4,30 +4,40 @@ import nextstep.jwp.exception.BadRequestException;
 
 public class HttpBody {
 
-    private final String message;
+    private static final HttpBody EMPTY_HTTP_BODY = new HttpBody("");
 
-    private HttpBody(String message) {
-        this.message = message;
+    private String body;
+
+    private HttpBody(String body) {
+        this.body = body;
     }
 
-    public static HttpBody from(String httpBody) {
-        if (httpBody == null) {
+    public static HttpBody from(String message) {
+        if (message == null) {
             throw new BadRequestException("HttpBody is Null");
         }
 
-        return new HttpBody(httpBody);
+        return new HttpBody(message);
     }
 
-    public static HttpBody createEmptyBody() {
+    public static HttpBody createEmptyHttpBody() {
         return new HttpBody("");
     }
 
-    public int getBytesLength() {
-        return message.getBytes().length;
+    public static HttpBody getEmptyHttpBody() {
+        return EMPTY_HTTP_BODY;
     }
 
-    public String getMessage() {
-        return message;
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public int getBytesLength() {
+        return body.getBytes().length;
+    }
+
+    public String getBody() {
+        return body;
     }
 
 }

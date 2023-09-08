@@ -26,7 +26,15 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    public static HttpHeaders createDefaultHeaders(String requestNativePath, HttpBody httpBody) {
+    public static HttpHeaders from(Map<String, String> headers) {
+        return new HttpHeaders(headers);
+    }
+
+    public static HttpHeaders createEmptyHeaders() {
+        return new HttpHeaders(new LinkedHashMap<>());
+    }
+
+    public static HttpHeaders createLengthType(String requestNativePath, HttpBody httpBody) {
         Map<String, String> headers = new LinkedHashMap<>();
 
         headers.put(HeaderType.CONTENT_TYPE.getValue(), ContentType.extractValueFromPath(requestNativePath));
@@ -42,6 +50,18 @@ public class HttpHeaders {
         headers.put(key, value);
     }
 
+    public void setContentType(String value) {
+        validateValue(value);
+
+        addHeader(HeaderType.CONTENT_TYPE.getValue(), value);
+    }
+
+    public void setContentLength(String value) {
+        validateValue(value);
+
+        addHeader(HeaderType.CONTENT_LENGTH.getValue(), value);
+    }
+
     private void validateKey(String key) {
         if (key == null) {
             throw new BadRequestException("Header Key is Null");
@@ -55,6 +75,8 @@ public class HttpHeaders {
     }
 
     public void setLocation(String value) {
+        validateValue(value);
+
         addHeader(HeaderType.LOCATION.getValue(), value);
     }
 

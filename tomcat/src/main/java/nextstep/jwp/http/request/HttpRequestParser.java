@@ -58,7 +58,7 @@ public class HttpRequestParser {
 
     private static HttpBody readBody(HttpHeaders headers, BufferedReader br) throws IOException {
         if (!headers.containsKey(HeaderType.CONTENT_TYPE.getValue())) {
-            return HttpBody.createEmptyBody();
+            return HttpBody.createEmptyHttpBody();
         }
 
         int contentLength = Integer.parseInt(headers.get(HeaderType.CONTENT_LENGTH.getValue()));

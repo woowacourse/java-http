@@ -1,38 +1,37 @@
 package nextstep.jwp.exception;
 
-import nextstep.jwp.http.common.HttpBody;
-import nextstep.jwp.http.common.HttpHeaders;
+import nextstep.jwp.http.common.HeaderType;
 import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.HttpStatusLine;
 
 public class ExceptionHandler {
 
     private ExceptionHandler() {
     }
 
-    public static HttpResponse handle(HttpRequest request, HttpStatus httpStatus) {
+    public static void handle(HttpResponse response, HttpStatus httpStatus) {
         if (httpStatus == HttpStatus.BAD_REQUEST) {
-            return createRedirectResponse(request, "/400.html");
+            createRedirectResponse(response, "/400.html");
+            return;
         }
         if (httpStatus == HttpStatus.UNAUTHORIZED) {
-            return createRedirectResponse(request, "/401.html");
+            createRedirectResponse(response, "/401.html");
+            return;
         }
         if (httpStatus == HttpStatus.NOT_FOUND) {
-            return createRedirectResponse(request, "/404.html");
+            createRedirectResponse(response, "/404.html");
+            return;
         }
 
-        return createRedirectResponse(request, "/500.html");
+        createRedirectResponse(response, "/500.html");
     }
 
-    private static HttpResponse createRedirectResponse(HttpRequest request, String location) {
-        HttpStatusLine httpStatusLine = new HttpStatusLine(request.getHttpVersion(), HttpStatus.FOUND);
-        HttpBody httpBody = HttpBody.createEmptyBody();
-        HttpHeaders httpHeaders = HttpHeaders.createDefaultHeaders(request.getNativePath(), httpBody);
-        httpHeaders.setLocation(location);
+    private static HttpResponse createRedirectResponse(HttpResponse response, String location) {
+        HttpResponse.createEmptyResponse();
+        response.setStatus(HttpStatus.FOUND);
+        response.setHeader(HeaderType.LOCATION.getValue(), location);
 
-        return new HttpResponse(httpStatusLine, httpHeaders, httpBody);
+        return response;
     }
 
 }

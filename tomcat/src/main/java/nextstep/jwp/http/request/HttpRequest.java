@@ -34,6 +34,14 @@ public class HttpRequest {
         return httpStartLine.getHttpMethod();
     }
 
+    public boolean isGetMethod() {
+        return httpStartLine.getHttpMethod() == HttpMethod.GET;
+    }
+
+    public boolean isPostMethod() {
+        return httpStartLine.getHttpMethod() == HttpMethod.POST;
+    }
+
     public HttpVersion getHttpVersion() {
         return httpStartLine.getHttpVersion();
     }

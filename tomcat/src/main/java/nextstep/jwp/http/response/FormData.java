@@ -25,7 +25,7 @@ public class FormData {
             throw new BadRequestException("httpBody is Null");
         }
 
-        String formData = httpBody.getMessage();
+        String formData = httpBody.getBody();
         String[] params = formData.split(FORM_DATA_DELIMITER);
 
         Map<String, String> paramMap = Arrays.stream(params)

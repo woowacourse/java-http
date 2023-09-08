@@ -1,5 +1,6 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
+import nextstep.jwp.controller.UserController;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpStatus;
@@ -9,13 +10,16 @@ import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.session.HttpSession;
 
-public class LoginHandler extends UserHandler {
+public class LoginController extends AbstractController<UserController> {
 
-    @Override
-    public boolean canHandle(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
+    private static final LoginController INSTANCE = new LoginController(UserController.getInstance());
 
-        return "/login".equals(requestLine.getPath());
+    private LoginController(UserController userController) {
+        super(userController);
+    }
+
+    public static LoginController getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -49,7 +53,7 @@ public class LoginHandler extends UserHandler {
 
     private ResponseEntity getResponseEntity(HttpRequest httpRequest, String account, String password) {
         try {
-            User user = userController.login(account, password);
+            User user = controller.login(account, password);
             HttpSession httpSession = httpRequest.getSession(true);
             httpSession.setAttribute("user", user);
 
@@ -60,7 +64,7 @@ public class LoginHandler extends UserHandler {
 
             return ResponseEntity.cookie(httpCookie, HttpStatus.FOUND, "/index");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.of(HttpStatus.FOUND, "/401.html");
+            return ResponseEntity.of(HttpStatus.FOUND, "/401");
         }
     }
 

@@ -1,22 +1,25 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-public class ResourceHandler implements HttpHandler {
+public class IndexController implements Controller {
 
-    @Override
-    public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.isStaticResource();
+    private static final IndexController INSTANCE = new IndexController();
+
+    private IndexController() {
+    }
+
+    public static IndexController getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    public ResponseEntity handle(HttpRequest httpRequest) {
+    public ResponseEntity service(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
         return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
-
 }

@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.ViewResolver;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.MimeType;
@@ -14,18 +15,22 @@ import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.ResponseHeaders;
 import org.apache.coyote.http11.response.ResponseLine;
 
-public class HandlerMapping {
+public enum RequestMapping {
 
-    private static final List<HttpHandler> HTTP_HANDLERS = List.of(
-            new ResourceHandler(),
-            new DefaultHandler(),
-            new IndexHandler(),
-            new LoginHandler(),
-            new RegisterHandler()
-    );
+    INSTANCE;
+
+    private static final Map<String, Controller> CONTROLLERS = new ConcurrentHashMap<>();
+
+    static {
+        CONTROLLERS.put("/", DefaultController.getInstance());
+        CONTROLLERS.put("/index", IndexController.getInstance());
+        CONTROLLERS.put("/login", LoginController.getInstance());
+        CONTROLLERS.put("/register", RegisterController.getInstance());
+        CONTROLLERS.put("/401", UnauthorizedController.getInstance());
+    }
 
     public HttpResponse extractHttpResponse(HttpRequest request) {
-        ResponseEntity responseEntity = handle(request);
+        ResponseEntity responseEntity = service(request);
         File viewFile = ViewResolver.findViewFile(responseEntity.getPath());
 
         return new HttpResponse(
@@ -35,22 +40,28 @@ public class HandlerMapping {
         );
     }
 
-    private ResponseEntity handle(final HttpRequest request) {
+    private ResponseEntity service(HttpRequest request) {
         try {
-            return HTTP_HANDLERS.stream()
-                    .filter(httpHandler -> httpHandler.canHandle(request))
-                    .findFirst()
-                    .orElseGet(NotFoundHandler::new)
-                    .handle(request);
+            String path = request.getRequestLine().getPath();
+            Controller controller = getController(path);
+
+            return controller.service(request);
         } catch (RuntimeException e) {
             return ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR, "/500");
         }
     }
 
+    private Controller getController(String path) {
+        if (path.contains(".")) {
+            return ResourceController.getInstance();
+        }
+        return CONTROLLERS.getOrDefault(path, NotFoundController.getInstance());
+    }
+
     private String readString(File file) {
         try {
             return Files.readString(file.toPath());
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             return "";
         }
     }

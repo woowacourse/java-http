@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.HandlerMapping;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HandlerMapping HANDLER_MAPPING = new HandlerMapping();
+    private static final RequestMapping REQUEST_MAPPING = RequestMapping.INSTANCE;
 
     private final Socket connection;
 
@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         ) {
             HttpRequest httpRequest = HttpRequestParser.extract(reader);
-            HttpResponse httpResponse = HANDLER_MAPPING.extractHttpResponse(httpRequest);
+            HttpResponse httpResponse = REQUEST_MAPPING.extractHttpResponse(httpRequest);
             String response = httpResponse.extractResponse();
 
             outputStream.write(response.getBytes());

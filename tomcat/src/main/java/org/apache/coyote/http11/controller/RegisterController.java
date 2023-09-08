@@ -1,18 +1,22 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
+import nextstep.jwp.controller.UserController;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-public class RegisterHandler extends UserHandler {
+public class RegisterController extends AbstractController<UserController> {
 
-    @Override
-    public boolean canHandle(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
+    private static final RegisterController INSTANCE = new RegisterController(UserController.INSTANCE);
 
-        return "/register".equals(requestLine.getPath());
+    private RegisterController(UserController userController) {
+        super(userController);
+    }
+
+    public static RegisterController getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -24,7 +28,7 @@ public class RegisterHandler extends UserHandler {
             String password = requestLine.findQueryStringValue("password");
             String email = requestLine.findQueryStringValue("email");
 
-            return userController.signUp(account, password, email);
+            return controller.signUp(account, password, email);
         }
         return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
@@ -37,6 +41,6 @@ public class RegisterHandler extends UserHandler {
         String password = requestBody.get("password");
         String email = requestBody.get("email");
 
-        return userController.signUp(account, password, email);
+        return controller.signUp(account, password, email);
     }
 }

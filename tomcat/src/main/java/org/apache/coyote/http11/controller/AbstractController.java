@@ -1,21 +1,19 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
-import nextstep.jwp.controller.UserController;
-import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
 
-public abstract class UserHandler implements HttpHandler {
+public abstract class AbstractController<T> implements Controller {
 
-    protected final UserController userController;
+    protected final T controller;
 
-    protected UserHandler() {
-        this.userController = new UserController(new UserService());
+    protected AbstractController(T controller) {
+        this.controller = controller;
     }
 
     @Override
-    public ResponseEntity handle(HttpRequest httpRequest) {
+    public ResponseEntity service(HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
             return doGet(httpRequest);
         }

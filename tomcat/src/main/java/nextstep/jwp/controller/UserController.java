@@ -7,10 +7,16 @@ import org.apache.coyote.http11.response.ResponseEntity;
 
 public class UserController {
 
+    public static final UserController INSTANCE = new UserController(UserService.getInstance());
+
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    public static UserController getInstance() {
+        return INSTANCE;
     }
 
     public User login(String account, String password) {

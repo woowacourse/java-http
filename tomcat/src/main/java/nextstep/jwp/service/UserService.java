@@ -9,6 +9,15 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
+    private static final UserService INSTANCE = new UserService();
+
+    private UserService() {
+    }
+
+    public static UserService getInstance() {
+        return INSTANCE;
+    }
+
     public User login(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));

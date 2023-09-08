@@ -42,10 +42,10 @@ public class RequestLine {
         if (QUERY_PARAM_PATTERN.matcher(requestUri).matches()) {
             final int queryParamStartIndex = requestUri.indexOf(QUERY_PARAM_START_DELIMITER);
             final String requestPathValue = requestUri.substring(0, queryParamStartIndex);
-            final String queryParamsValue = requestUri.substring(queryParamStartIndex);
+            final String queryParamNamesAndValues = requestUri.substring(queryParamStartIndex);
 
             requestPath = new RequestPath(requestPathValue);
-            queryParams = QueryParams.from(queryParamsValue);
+            queryParams = QueryParams.from(queryParamNamesAndValues);
         }
 
         return new RequestLine(httpMethod, httpVersion, requestPath, queryParams);

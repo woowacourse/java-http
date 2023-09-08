@@ -21,20 +21,20 @@ public class Cookies {
         this.cookie = cookie;
     }
 
-    public static Cookies from(final String cookieValues) {
-        if (Objects.isNull(cookieValues) || cookieValues.isBlank()) {
+    public static Cookies from(final String cookieNamesAndValues) {
+        if (Objects.isNull(cookieNamesAndValues) || cookieNamesAndValues.isBlank()) {
             return empty();
         }
 
-        return new Cookies(collectCookieMapping(cookieValues));
+        return new Cookies(collectCookieMapping(cookieNamesAndValues));
     }
 
     private static Map<String, String> collectCookieMapping(final String cookieValues) {
         return Arrays.stream(cookieValues.split(COOKIE_HEADER_DELIMITER))
                 .map(cookieEntry -> cookieEntry.split(COOKIE_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
-                        cookieEntry -> cookieEntry[COOKIE_KEY_INDEX].trim(),
-                        cookieEntry -> cookieEntry[COOKIE_VALUE_INDEX].trim()
+                        cookieEntry -> cookieEntry[COOKIE_KEY_INDEX].strip(),
+                        cookieEntry -> cookieEntry[COOKIE_VALUE_INDEX].strip()
                 ));
     }
 

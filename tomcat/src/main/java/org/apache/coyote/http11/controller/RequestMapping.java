@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.coyote.http11.ViewResolver;
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,7 +22,7 @@ public enum RequestMapping {
 
     static {
         CONTROLLERS.put("/", DefaultController.getInstance());
-        CONTROLLERS.put("/index", IndexController.getInstance());
+        CONTROLLERS.put("/index", ResourceController.getInstance());
         CONTROLLERS.put("/login", LoginController.getInstance());
         CONTROLLERS.put("/register", RegisterController.getInstance());
         CONTROLLERS.put("/401", UnauthorizedController.getInstance());

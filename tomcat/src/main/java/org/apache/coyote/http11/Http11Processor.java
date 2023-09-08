@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handle.DispatcherServlet;
+import org.apache.catalina.servlet.StandardWrapper;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.support.HttpRequestExtractor;
+import org.apache.coyote.http11.parser.HttpRequestExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = HttpRequestExtractor.extract(inputStream);
-            final HttpResponse httpResponses = DispatcherServlet.from(request);
+            final HttpResponse httpResponses = StandardWrapper.invoke(request);
 
             outputStream.write(httpResponses.getResponse().getBytes());
             outputStream.flush();

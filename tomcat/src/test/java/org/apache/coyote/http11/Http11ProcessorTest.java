@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.Controller;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -11,7 +12,11 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final Controller controller = (req, res) -> {
+            res.setStatus(HttpStatus.OK);
+            res.setBody(ResponseBody.from("Hello world!"));
+        };
+        final var processor = new Http11Processor(socket, controller);
 
         // when
         processor.process(socket);
@@ -26,5 +31,4 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
-
 }

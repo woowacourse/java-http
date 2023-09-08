@@ -2,15 +2,21 @@ package org.apache.catalina.startup;
 
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private final Controller controller;
+
+    public Tomcat(Controller controller) {
+        this.controller = controller;
+    }
 
     public void start() {
-        var connector = new Connector();
+        var connector = new Connector(controller);
         connector.start();
 
         try {

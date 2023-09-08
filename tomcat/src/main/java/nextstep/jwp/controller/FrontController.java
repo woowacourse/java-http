@@ -9,7 +9,7 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.ResourceResponseHandler;
 import org.apache.coyote.http11.ResponseBody;
 
-public class RequestHandler implements Controller {
+public class FrontController implements Controller {
 
     private static final Map<String, Controller> uriToController = new HashMap();
 
@@ -24,7 +24,7 @@ public class RequestHandler implements Controller {
 
     private final ResourceResponseHandler resourceResponseHandler;
 
-    public RequestHandler() {
+    public FrontController() {
         this.resourceResponseHandler = new ResourceResponseHandler();
     }
 

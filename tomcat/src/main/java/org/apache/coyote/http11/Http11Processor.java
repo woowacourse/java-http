@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.net.Socket;
-import nextstep.jwp.controller.RequestHandler;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.slf4j.Logger;
@@ -13,12 +13,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestParser httpRequestParser;
-    private final RequestHandler requestHandler;
+    private final Controller controller;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Controller controller) {
         this.connection = connection;
         httpRequestParser = new HttpRequestParser();
-        requestHandler = new RequestHandler();
+        this.controller = controller;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
             final var request = httpRequestParser.accept(inputStream);
             final var response = HttpResponse.prepareFrom(request);
 
-            requestHandler.service(request, response);
+            controller.service(request, response);
 
             outputStream.write(response.buildResponse().getBytes());
             outputStream.flush();

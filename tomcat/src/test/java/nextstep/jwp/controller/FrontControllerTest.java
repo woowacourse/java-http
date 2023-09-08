@@ -17,12 +17,12 @@ import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestHandlerTest {
+class FrontControllerTest {
 
-    private RequestHandler requestHandler = new RequestHandler();
+    private FrontController frontController = new FrontController();
 
     @Test
-    void responseHelloWorld() throws Exception {
+    void base() throws Exception {
         //given
         final var request = new HttpRequest(
                 GET,
@@ -37,7 +37,7 @@ class RequestHandlerTest {
         final var response = HttpResponse.prepareFrom(request);
 
         //when
-        requestHandler.service(request, response);
+        frontController.service(request, response);
 
         //then
         final var expected = HttpResponse.builder()
@@ -66,11 +66,10 @@ class RequestHandlerTest {
         final var response = HttpResponse.prepareFrom(request);
 
         //when
-        requestHandler.service(request, response);
+        frontController.service(request, response);
 
         //then
-        final var resource = getClass().getClassLoader().getResource("static" + uri);
-        final var body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final var body = buildMessageBody(uri);
         final var expected = HttpResponse.builder()
                 .httpVersion(HTTP_1_1)
                 .httpStatus(HttpStatus.OK)
@@ -79,33 +78,6 @@ class RequestHandlerTest {
         assertThat(response).usingRecursiveComparison()
                 .isEqualTo(expected);
     }
-
-    @Test
-    void index() throws Exception {
-        //given
-        final var request = HttpRequest.builder()
-                .method(GET)
-                .path(new HttpPath("/index.html"))
-                .version(HTTP_1_1)
-                .headers(Map.of("Host", "localhost:8080", "Connection", "keep-alive"))
-                .build();
-        final var response = HttpResponse.prepareFrom(request);
-
-        //when
-        requestHandler.service(request, response);
-
-        //then
-        final var body = ResponseBody.of(new ContentType("text/html"), buildMessageBody("/index.html"));
-        final var expect = HttpResponse.builder()
-                .httpVersion(HTTP_1_1)
-                .httpStatus(HttpStatus.OK)
-                .body(body)
-                .build();
-
-        assertThat(response).usingRecursiveComparison()
-                .isEqualTo(expect);
-    }
-
     private String buildMessageBody(String staticFileUri) throws Exception {
         final var resource = getClass().getClassLoader().getResource("static" + staticFileUri);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

@@ -29,7 +29,7 @@ public class HttpRequestParser {
     ) throws IOException {
         final String contentLength = headers.get("Content-Length");
         if (contentLength.isEmpty()) {
-            return RequestBody.empty();
+            return new RequestBody();
         }
         final int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];

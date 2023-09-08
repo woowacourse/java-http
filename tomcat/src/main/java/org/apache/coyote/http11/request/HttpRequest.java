@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
@@ -25,6 +26,10 @@ public class HttpRequest {
 
     public boolean isPost() {
         return requestLine.getHttpMethod() == HttpMethod.POST;
+    }
+
+    public HttpCookie parseCookie() {
+        return headers.parseCookie();
     }
 
     public RequestLine getRequestLine() {

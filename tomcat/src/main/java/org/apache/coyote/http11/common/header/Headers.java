@@ -3,7 +3,7 @@ package org.apache.coyote.http11.common.header;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.MimeType;
 
 public abstract class Headers {
 
@@ -54,7 +54,7 @@ public abstract class Headers {
     private String format(final String headerName, final String value) {
 
         if (HeaderName.CONTENT_TYPE.getValue().equals(headerName)) {
-            return String.join(": ", headerName, ContentType.withCharset(value));
+            return String.join(": ", headerName, MimeType.withCharset(value));
         }
         return String.join(": ", headerName, value);
     }

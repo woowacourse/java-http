@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.common.ContentType.HTML;
+import static org.apache.coyote.http11.common.MimeType.HTML;
 
 import java.io.IOException;
 import java.util.Objects;

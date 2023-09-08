@@ -1,7 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.common.ContentType.CSS;
-import static org.apache.coyote.http11.common.ContentType.HTML;
+import static org.apache.coyote.http11.common.MimeType.CSS;
+import static org.apache.coyote.http11.common.MimeType.HTML;
 import static org.apache.coyote.http11.common.Protocol.HTTP11;
 import static org.apache.coyote.http11.common.header.HeaderName.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;

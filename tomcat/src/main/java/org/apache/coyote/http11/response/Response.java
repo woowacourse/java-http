@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.common.ContentType.HTML;
+import static org.apache.coyote.http11.common.MimeType.HTML;
 import static org.apache.coyote.http11.common.Status.FOUND;
 import static org.apache.coyote.http11.common.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;

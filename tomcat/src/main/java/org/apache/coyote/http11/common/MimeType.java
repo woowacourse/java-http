@@ -5,7 +5,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 
-public enum ContentType {
+public enum MimeType {
 
     ANY("*/*"),
     TEXT("text/plain"),
@@ -19,52 +19,52 @@ public enum ContentType {
             "multipart/mixed", "multipart/parallel", "multipart/related", "multipart/report", "multipart/signed",
             "multipart/encrypted");
 
-    private final String[] contentTypeStrings;
+    private final String[] mimeTypeStrings;
 
-    ContentType(final String... contentTypeStrings) {
-        this.contentTypeStrings = contentTypeStrings;
+    MimeType(final String... mimeTypeStrings) {
+        this.mimeTypeStrings = mimeTypeStrings;
     }
 
-    public static String withCharset(final String contentTypeString) {
+    public static String withCharset(final String mimeTypeString) {
 
-        return withCharset(contentTypeString, "utf-8");
+        return withCharset(mimeTypeString, "utf-8");
     }
 
-    public static String withCharset(final String contentTypeString, final String charset) {
-        validate(contentTypeString);
+    public static String withCharset(final String mimeTypeString, final String charset) {
+        validate(mimeTypeString);
 
         if (StringUtils.isBlank(charset)) {
             throw new IllegalArgumentException("charset cannot be empty");
         }
 
-        return String.format("%s;charset=%s", contentTypeString, trim(charset));
+        return String.format("%s;charset=%s", mimeTypeString, trim(charset));
     }
 
-    public static void validate(final String contentTypeStrings) {
-        final var invalidStrings = Arrays.stream(contentTypeStrings.split(","))
-                .noneMatch(ContentType::isContentType);
+    public static void validate(final String mimeTypeStrings) {
+        final var invalidStrings = Arrays.stream(mimeTypeStrings.split(","))
+                .noneMatch(MimeType::isContentType);
 
         if (invalidStrings) {
             throw new IllegalArgumentException("invalid content type string");
         }
     }
 
-    private static boolean isContentType(final String contentTypeString) {
+    private static boolean isContentType(final String mimeTypeString) {
         return Arrays.stream(values())
-                .anyMatch(contentType -> contentType.matches(contentTypeString));
+                .anyMatch(mimeType -> mimeType.matches(mimeTypeString));
     }
 
-    private boolean matches(final String contentTypeString) {
-        if (contentTypeString == null) {
+    private boolean matches(final String mimeTypeString) {
+        if (mimeTypeString == null) {
             return false;
         }
 
-        return Arrays.stream(this.contentTypeStrings)
-                .anyMatch(contentType -> contentType.equalsIgnoreCase(contentTypeString.trim()));
+        return Arrays.stream(this.mimeTypeStrings)
+                .anyMatch(mimeType -> mimeType.equalsIgnoreCase(mimeTypeString.trim()));
     }
 
     @Override
     public String toString() {
-        return contentTypeStrings[0];
+        return mimeTypeStrings[0];
     }
 }

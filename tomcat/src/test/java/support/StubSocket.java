@@ -20,7 +20,13 @@ public class StubSocket extends Socket {
     }
 
     public StubSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        this(
+                "GET / HTTP/1.1" +
+                        System.lineSeparator() +
+                        "Host: localhost:8080" +
+                        System.lineSeparator() +
+                        System.lineSeparator()
+        );
     }
 
     public InetAddress getInetAddress() {

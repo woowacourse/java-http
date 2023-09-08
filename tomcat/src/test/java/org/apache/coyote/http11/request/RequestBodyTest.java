@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class RequestBodyTest {
 
     @Test
-    @DisplayName("RequsteBody 생성 성공 테스트")
-    void of() throws IOException {
+    @DisplayName("RequestBody 생성 성공 테스트")
+    void of() {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "body check");
 
         final InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
@@ -32,10 +32,10 @@ class RequestBodyTest {
     }
 
     @Test
-    @DisplayName("RequsteBody 조회 성공 테스트")
+    @DisplayName("RequestBody 조회 성공 테스트")
     void getContent() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
+        final String httpRequest = String.join(System.lineSeparator(),
                 "body check");
 
         final InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());

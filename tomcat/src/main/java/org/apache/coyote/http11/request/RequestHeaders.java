@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpCookie;
+
 import java.io.BufferedReader;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,5 +26,9 @@ public class RequestHeaders {
 
     public String getValue(final String key) {
         return headers.get(key);
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.parseCookie(getValue("Cookie"));
     }
 }

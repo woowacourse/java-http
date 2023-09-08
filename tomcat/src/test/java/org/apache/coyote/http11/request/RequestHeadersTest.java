@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +17,7 @@ class RequestHeadersTest {
 
     @Test
     @DisplayName("HttpHeader 파싱 성공 테스트")
-    void from() throws IOException {
+    void from() {
         // given
         final String httpRequest = String.join("Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -35,7 +34,7 @@ class RequestHeadersTest {
 
     @Test
     @DisplayName("파싱한 Header 조회 테스트")
-    void getValues() throws IOException {
+    void getValues() {
         // given
         final String httpRequest = String.join("ocean: king \r\n",
                 "wooteco: god \r\n",

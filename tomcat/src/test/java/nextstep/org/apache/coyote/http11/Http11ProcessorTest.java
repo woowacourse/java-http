@@ -66,7 +66,7 @@ class Http11ProcessorTest {
     void getCss() throws IOException {
         // given
         String httpRequest = String.join(System.lineSeparator(),
-                        "GET /css/styles.css HTTP/1.1 ",
+                "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1",
                 "Connection: keep-alive ",
@@ -89,7 +89,7 @@ class Http11ProcessorTest {
     @Test
     @DisplayName("URL에 확장자가 없을 시 HTML로 반환한다.")
     void getHtmlWhenNotExistUrl() throws IOException {
-        String httpRequest = String.join("\r\n",
+        String httpRequest = String.join(System.lineSeparator(),
                 "GET /index HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -106,7 +106,7 @@ class Http11ProcessorTest {
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 200 OK " + System.lineSeparator() +
                 "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
-                "Content-Length: 5564 "+ System.lineSeparator() +
+                "Content-Length: 5564 " + System.lineSeparator() +
                 System.lineSeparator() +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -117,7 +117,7 @@ class Http11ProcessorTest {
     @DisplayName("로그인 페이지를 반환한다.")
     void getLoginPage() throws IOException {
         // given
-        String httpRequest = String.join("\r\n",
+        String httpRequest = String.join(System.lineSeparator(),
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -141,7 +141,7 @@ class Http11ProcessorTest {
     @DisplayName("로그인이 성공하면 /index.html로 리다이렉트 된다.")
     void redirectIfLoginSuccess() {
         // given
-        String httpRequest = String.join("\r\n",
+        String httpRequest = String.join(System.lineSeparator(),
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -165,7 +165,7 @@ class Http11ProcessorTest {
     @DisplayName("회원 account, password가 잘못되었을 경우 401.html로 리다이렉트 한다.")
     void redirectIfLoginFail() {
         // given
-        String httpRequest = String.join("\r\n",
+        String httpRequest = String.join(System.lineSeparator(),
                 "POST /login?account=zz&password=zz HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -189,7 +189,7 @@ class Http11ProcessorTest {
     @DisplayName("회원 가입 완료 시 index.html로 리다이렉트 한다.")
     void register() {
         // given
-        String httpRequest = String.join("\r\n",
+        String httpRequest = String.join(System.lineSeparator(),
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

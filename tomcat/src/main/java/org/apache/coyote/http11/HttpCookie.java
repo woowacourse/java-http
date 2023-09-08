@@ -38,4 +38,5 @@ public class HttpCookie {
     public String getValue(final String key){
         return cookies.get(key);
     }
+
 }

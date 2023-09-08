@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.Socket;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -30,8 +29,8 @@ class HttpRequestTest {
 
         //then
         assertAll(
-                () -> Assertions.assertThat(request.getRequestURL().getUrl()).isEqualTo("/"),
-                () -> Assertions.assertThat(request.getRequestURL().getRequestParam()).isEmpty(),
+                () -> Assertions.assertThat(request.getRequestLine().getUrl()).isEqualTo("/"),
+                () -> Assertions.assertThat(request.getRequestLine().getRequestParam()).isEmpty(),
                 () -> Assertions.assertThat(request.getRequestHeaders().getValue("Host")).isEqualTo("localhost:8080")
         );
     }

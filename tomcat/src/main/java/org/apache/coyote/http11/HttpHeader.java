@@ -26,6 +26,14 @@ public class HttpHeader {
         return values.containsKey(CONTENT_LENGTH);
     }
 
+    public boolean containJsessionId() {
+        final String cookie = values.get(COOKIE);
+        if (cookie == null) {
+            return false;
+        }
+        return cookie.contains("JSESSIONID");
+    }
+
     public boolean notContainJsessionId() {
         final String cookie = values.get(COOKIE);
         if (cookie == null) {

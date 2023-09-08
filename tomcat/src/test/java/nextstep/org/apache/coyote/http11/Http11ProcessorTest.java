@@ -2,14 +2,16 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nextstep.jwp.HandlerResolver;
+import nextstep.jwp.HandlerMapping;
 import nextstep.jwp.JwpHttpDispatcher;
 import nextstep.jwp.SessionManager;
-import nextstep.jwp.handler.get.LoginGetController;
-import nextstep.jwp.handler.get.RegisterGetController;
-import nextstep.jwp.handler.get.RootGetController;
-import nextstep.jwp.handler.post.LoginPostController;
-import org.apache.coyote.http11.Controller;
+import nextstep.jwp.handler.Handler;
+import nextstep.jwp.handler.get.LoginGetHandler;
+import nextstep.jwp.handler.get.RegisterGetHandler;
+import nextstep.jwp.handler.get.RootGetHandler;
+import nextstep.jwp.handler.post.LoginPostHandler;
+import nextstep.jwp.interceptor.AuthInterceptor;
+import nextstep.jwp.interceptor.HandlerInterceptor;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.junit.jupiter.api.Test;
@@ -18,22 +20,26 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 
 class Http11ProcessorTest {
 
-    private final Map<String, Controller> httpGetHandlers =
-            Map.of("/", new RootGetController(),
-                    "/login", new LoginGetController(new SessionManager()),
-                    "/register", new RegisterGetController());
-    private final Map<String, Controller> httpPostHandlers =
-            Map.of("/login", new LoginPostController(new SessionManager()));
+    private final Map<String, Handler> httpGetHandlers =
+            Map.of("/", new RootGetHandler(),
+                    "/login", new LoginGetHandler(new SessionManager()),
+                    "/register", new RegisterGetHandler());
+    private final Map<String, Handler> httpPostHandlers =
+            Map.of("/login", new LoginPostHandler(new SessionManager()));
+
+    private static final List<HandlerInterceptor> handlerInterceptors =
+            List.of(new AuthInterceptor(List.of("/login"), new SessionManager()));
 
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerMapping(httpGetHandlers, httpPostHandlers, handlerInterceptors));
         final var processor = new Http11Processor(socket, new HttpRequestParser(), httpDispatcher);
 
         // when
@@ -61,7 +67,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerMapping(httpGetHandlers, httpPostHandlers, handlerInterceptors));
         final var processor = new Http11Processor(socket, new HttpRequestParser(), httpDispatcher);
 
         // when

@@ -1,10 +1,13 @@
 package nextstep.jwp.handler.post;
 
+import nextstep.jwp.SessionManager;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BusinessException;
+import nextstep.jwp.handler.Handler;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Controller;
+import org.apache.coyote.http11.Cookies;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
@@ -12,15 +15,26 @@ import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.UUID;
 
-public class RegisterPostController implements Controller {
+public class RegisterPostHandler implements Handler {
 
     private static final String STATIC = "static";
+
+    private final SessionManager sessionManager;
+
+    public RegisterPostHandler(final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws IOException {
         final User user = makeUser(request.getRequestBody());
         InMemoryUserRepository.save(user);
+        final Session session = new Session(String.valueOf(UUID.randomUUID()));
+        session.addAttribute("user", user);
+        sessionManager.add(session);
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
         final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
         setResponse(response, StatusCode.CREATED, ContentType.HTML, resource);
     }

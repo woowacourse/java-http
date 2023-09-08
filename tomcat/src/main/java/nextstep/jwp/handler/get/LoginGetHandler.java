@@ -2,8 +2,8 @@ package nextstep.jwp.handler.get;
 
 import nextstep.jwp.SessionManager;
 import nextstep.jwp.exception.BusinessException;
+import nextstep.jwp.handler.Handler;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -11,13 +11,13 @@ import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.URL;
 
-public class LoginGetController implements Controller {
+public class LoginGetHandler implements Handler {
 
     private static final String STATIC = "static";
 
     private final SessionManager sessionManager;
 
-    public LoginGetController(final SessionManager sessionManager) {
+    public LoginGetHandler(final SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 

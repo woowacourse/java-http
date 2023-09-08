@@ -1,14 +1,14 @@
 package nextstep.jwp.handler.get;
 
+import nextstep.jwp.handler.Handler;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.URL;
 
-public class RegisterGetController implements Controller {
+public class RegisterGetHandler implements Handler {
 
     private static final String STATIC = "static";
 

@@ -21,6 +21,10 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
+    public boolean containJsessionId() {
+        return httpHeader.containJsessionId();
+    }
+
     public boolean notContainJsessionId() {
         return httpHeader.notContainJsessionId();
     }

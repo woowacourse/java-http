@@ -1,29 +1,35 @@
 package nextstep;
 
-import nextstep.jwp.HandlerResolver;
+import nextstep.jwp.HandlerMapping;
 import nextstep.jwp.JwpHttpDispatcher;
 import nextstep.jwp.SessionManager;
-import nextstep.jwp.handler.get.LoginGetController;
-import nextstep.jwp.handler.get.RegisterGetController;
-import nextstep.jwp.handler.get.RootGetController;
-import nextstep.jwp.handler.post.LoginPostController;
-import nextstep.jwp.handler.post.RegisterPostController;
+import nextstep.jwp.handler.Handler;
+import nextstep.jwp.handler.get.LoginGetHandler;
+import nextstep.jwp.handler.get.RegisterGetHandler;
+import nextstep.jwp.handler.get.RootGetHandler;
+import nextstep.jwp.handler.post.LoginPostHandler;
+import nextstep.jwp.handler.post.RegisterPostHandler;
+import nextstep.jwp.interceptor.AuthInterceptor;
+import nextstep.jwp.interceptor.HandlerInterceptor;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.http11.Controller;
+import java.util.List;
 import java.util.Map;
 
 public class Application {
 
-    private static final Map<String, Controller> httpGetHandlers =
-            Map.of("/", new RootGetController(),
-                    "/login", new LoginGetController(new SessionManager()),
-                    "/register", new RegisterGetController());
-    private static final Map<String, Controller> httpPostHandlers =
-            Map.of("/login", new LoginPostController(new SessionManager()),
-                    "/register", new RegisterPostController());
+    private static final Map<String, Handler> httpGetHandlers =
+            Map.of("/", new RootGetHandler(),
+                    "/login", new LoginGetHandler(new SessionManager()),
+                    "/register", new RegisterGetHandler());
+    private static final Map<String, Handler> httpPostHandlers =
+            Map.of("/login", new LoginPostHandler(new SessionManager()),
+                    "/register", new RegisterPostHandler(new SessionManager()));
+
+    private static final List<HandlerInterceptor> handlerInterceptors =
+            List.of(new AuthInterceptor(List.of("/login"), new SessionManager()));
 
     public static void main(final String[] args) {
-        final var tomcat = new Tomcat(new JwpHttpDispatcher(new HandlerResolver(httpGetHandlers, httpPostHandlers)));
+        final var tomcat = new Tomcat(new JwpHttpDispatcher(new HandlerMapping(httpGetHandlers, httpPostHandlers, handlerInterceptors)));
         tomcat.start();
     }
 }

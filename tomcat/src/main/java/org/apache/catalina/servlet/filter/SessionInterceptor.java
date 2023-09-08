@@ -12,7 +12,7 @@ public class SessionInterceptor implements Interceptor {
         if (request.getHttpHeadersLine().hasCookie(("JSESSIONID"))) {
             final String session = request.getCookie()
                     .orElseThrow(NoSuchElementException::new);
-            if (SessionRepository.islogin(session)) {
+            if (SessionRepository.isLogin(session)) {
                 return true;
             }
         }

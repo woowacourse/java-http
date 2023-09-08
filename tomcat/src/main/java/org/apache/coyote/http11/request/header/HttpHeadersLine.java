@@ -36,9 +36,6 @@ public class HttpHeadersLine {
     public boolean hasCookie(final String key) {
         return headers.containsKey("Cookie") && headers.get("Cookie").contains(key);
     }
-    public String getHeadersBy(String key) {
-        return headers.get(key);
-    }
 
     public Map<String, String> getHeaders() {
         return headers;

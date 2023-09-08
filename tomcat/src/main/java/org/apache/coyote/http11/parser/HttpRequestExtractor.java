@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.support;
+package org.apache.coyote.http11.parser;
 
 import org.apache.coyote.http11.request.body.HttpBodyLine;
 import org.apache.coyote.http11.request.header.HttpHeadersLine;

@@ -8,9 +8,8 @@ public enum HttpStatus {
     FOUND(302, "302 FOUND"),
     OK(200, "200 OK"),
     UNAUTHORIZED(401, "401 UNAUTHORIZED"),
-    NOT_FOUND(404, "404 NOT FOUND"),
+    NOT_FOUND(404, "404 NOT FOUND");
 
-    NOT(4011,"4011 NOT FOUND");
     private final int status;
     private final String statusName;
 
@@ -20,8 +19,6 @@ public enum HttpStatus {
     }
 
     public static HttpStatus from(final String message) {
-        System.out.println(message);
-
         return Arrays.stream(HttpStatus.values())
                 .filter(status -> status.getStatusName().equalsIgnoreCase(message))
                 .findAny()

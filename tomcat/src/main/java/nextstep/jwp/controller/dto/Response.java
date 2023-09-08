@@ -7,11 +7,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Response {
-    private final Map<String, String> responseHeader = new HashMap<>();
     private final HttpStatus httpStatus;
+    private final Map<String, String> responseHeader = new HashMap<>();
 
     public Response(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
+    }
+
+    public String get(final String key) {
+        return responseHeader.get(key);
     }
 
     public void setCookie(final UUID session) {

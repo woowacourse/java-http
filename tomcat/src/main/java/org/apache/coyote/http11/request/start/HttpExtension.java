@@ -5,24 +5,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public enum HttpExtension {
-    HTML(".html"),
-    CSS(".css"),
-    JS(".js"),
-    ICO(".ico"),
-    DEFAULT("")
+    HTML(".html", "default"),
+    CSS(".css","default"),
+    JS(".js","default"),
+    ICO(".ico","default"),
+    QUERY("?","dispatcher"),
+    DEFAULT("","dispatcher")
     ;
 
     private final String extension;
+    private final String servletType;
 
-    HttpExtension(final String extension) {
+    HttpExtension(final String extension, final String servletType) {
         this.extension = extension;
+        this.servletType = servletType;
     }
 
     public static HttpExtension from(final String requestTarget) {
         return initHttpExtension().stream()
                 .filter(extension -> requestTarget.contains(extension.extension))
                 .findFirst()
-                .orElse(HttpExtension.DEFAULT);
+                .orElse(DEFAULT);
     }
 
     public String findResources(final String requestTarget) {
@@ -40,5 +43,9 @@ public enum HttpExtension {
 
     public String getExtension() {
         return extension;
+    }
+
+    public String getServletType() {
+        return servletType;
     }
 }

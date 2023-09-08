@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import nextstep.jwp.controller.dto.Response;
 import org.apache.coyote.http11.request.start.HttpVersion;
 
 import java.util.Map;
@@ -19,58 +18,49 @@ public class HttpResponse {
 
     public static HttpResponse of(
             final HttpVersion httpVersion,
-            final String httpStatus,
-            final String contentType,
+            final HttpStatus httpStatus,
+            final Map<String, String> headers,
             final String responseBody
     ) {
         return new HttpResponse(
-                httpVersion.getVersion() + " " + httpStatus + " \r\n",
-                "Content-Type: " + contentType + " \r\n" +
+                httpVersion.getVersion() + " " + httpStatus.getStatusName() + " \r\n",
+                makeHeader(headers) +
                         "Content-Length: " + responseBody.getBytes().length + " \r\n",
                 responseBody);
     }
 
-    public static HttpResponse of(
+    public static HttpResponse resourceOf(
             final HttpVersion httpVersion,
-            final Response response,
-            final Map<String, String> contentType,
+            final HttpStatus httpStatus,
+            final Map<String, String> headers,
             final String responseBody
     ) {
-        return new HttpResponse(httpVersion.getVersion() + " " + response.getHttpStatus() + " \r\n",
-//                "Set-Cookie: " + response.getResponseHeader().get("Set-Cookie") + " \r\n" +
-                "Content-Type: " + contentType.get("Content-Type") + " \r\n" +
+        return new HttpResponse(
+                httpVersion.getVersion() + " " + httpStatus.getStatusName() + " \r\n",
+                makeHeader(headers) + " \r\n",
+                responseBody);
+    }
+
+    public static HttpResponse redirectOf(
+            final HttpVersion httpVersion,
+            final HttpStatus httpStatus,
+            final Map<String, String> headers,
+            final String responseBody
+    ) {
+        return new HttpResponse(
+                httpVersion.getVersion() + " " + httpStatus.getStatusName() + " \r\n",
+                makeHeader(headers) +
                         "Content-Length: " + responseBody.getBytes().length + " \r\n",
                 responseBody);
-
     }
 
-    public static HttpResponse of(
-            final HttpVersion httpVersion,
-            final String httpStatus,
-            final String redirectUri
-    ) {
-        System.out.println(redirectUri);
 
-        return new HttpResponse(
-                httpVersion.getVersion() + " " + httpStatus + " \r\n",
-                "Location: " + redirectUri + " \r\n",
-                "");
-    }
 
-    public static HttpResponse of(
-            final HttpVersion httpVersion,
-            final String httpStatus,
-            final Map<String, String> body,
-            final String redirectUri) {
-        final String headers = body.entrySet()
+    private static String makeHeader(final Map<String, String> body) {
+        return body.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + "\r\n")
                 .collect(Collectors.joining());
-        return new HttpResponse(
-                httpVersion.getVersion() + " " + httpStatus + " \r\n",
-                headers + " \r\n" +
-                        "Location: " + redirectUri + " \r\n",
-                "");
     }
 
     public String getResponse() {

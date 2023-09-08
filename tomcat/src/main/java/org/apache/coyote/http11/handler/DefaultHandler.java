@@ -4,6 +4,7 @@ import static org.apache.coyote.http11.response.HttpStatusCode.OK;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 
+import org.apache.catalina.SessionManger;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
@@ -13,6 +14,10 @@ import org.apache.coyote.http11.response.HttpResponseStatusLine;
 public class DefaultHandler extends RequestHandler {
 
     public static final String DEFAULT_MESSAGE = "Hello world!";
+
+    public DefaultHandler(final SessionManger sessionManger) {
+        super(sessionManger);
+    }
 
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {

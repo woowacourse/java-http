@@ -4,6 +4,7 @@ import static org.apache.coyote.http11.response.HttpStatusCode.NOT_FOUND;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
+import static org.apache.coyote.http11.response.ResponseHeaderType.SET_COOKIE;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManger;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestUri;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -38,6 +41,11 @@ public abstract class RequestHandler {
     public static final String CONTENT_TYPE_HTML = "text/html;charset=utf-8";
     public static final String NOT_FOUND_RESOURCE = "/404.html";
 
+    final SessionManger sessionManager;
+
+    protected RequestHandler(final SessionManger sessionManager) {
+        this.sessionManager = sessionManager;
+    }
 
     public abstract HttpResponse handle(final HttpRequest httpRequest) throws IOException;
 
@@ -82,13 +90,29 @@ public abstract class RequestHandler {
         return getPage(httpRequest, DIRECTORY + NOT_FOUND_RESOURCE, NOT_FOUND);
     }
 
-    HttpResponse getRedirectPage(final HttpRequest httpRequest, final String redirectPath, final HttpStatusCode statusCode) {
+    HttpResponse getRedirectPage(final HttpRequest httpRequest, final String redirectPath,
+                                 final HttpStatusCode statusCode) {
         final HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getHttpVersion(), statusCode);
 
         final HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
         httpResponseHeaders.add(CONTENT_TYPE, CONTENT_TYPE_HTML);
         httpResponseHeaders.add(CONTENT_LENGTH, String.valueOf(EMPTY.getBytes().length));
         httpResponseHeaders.add(LOCATION, redirectPath);
+
+        final HttpResponseBody body = new HttpResponseBody(EMPTY);
+
+        return new HttpResponse(statusLine, httpResponseHeaders, body);
+    }
+
+    HttpResponse getRedirectPageForLogin(final HttpRequest httpRequest, final String redirectPath,
+                                         final HttpStatusCode statusCode, final Session session) {
+        final HttpResponseStatusLine statusLine = new HttpResponseStatusLine(httpRequest.getHttpVersion(), statusCode);
+
+        final HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders();
+        httpResponseHeaders.add(CONTENT_TYPE, CONTENT_TYPE_HTML);
+        httpResponseHeaders.add(CONTENT_LENGTH, String.valueOf(EMPTY.getBytes().length));
+        httpResponseHeaders.add(LOCATION, redirectPath);
+        httpResponseHeaders.add(SET_COOKIE, "JSESSIONID=" + session.getId());
 
         final HttpResponseBody body = new HttpResponseBody(EMPTY);
 

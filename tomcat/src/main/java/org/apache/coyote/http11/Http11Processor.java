@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,8 +21,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    public static final String EMPTY_INPUT = "";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String EMPTY_INPUT = "";
 
     private final Socket connection;
 
@@ -40,9 +39,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final HttpRequest httpRequest = createHttpRequest(inputStream);
+             final var outputStream = connection.getOutputStream();
+             final InputStreamReader reader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(reader)
+        ) {
+            final HttpRequest httpRequest = createHttpRequest(bufferedReader);
             final RequestHandler requestHandler = findHandler(httpRequest);
             final HttpResponse httpResponse = requestHandler.handle(httpRequest);
 
@@ -58,9 +59,7 @@ public class Http11Processor implements Runnable, Processor {
         return handlerAdapter.find(httpRequest);
     }
 
-    private HttpRequest createHttpRequest(final InputStream inputStream) throws IOException {
-        final InputStreamReader reader = new InputStreamReader(inputStream);
-        final BufferedReader bufferedReader = new BufferedReader(reader);
+    private HttpRequest createHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final String startLine = bufferedReader.readLine();
         final HttpRequestStartLine requestStartLine = HttpRequestStartLine.from(startLine);
         final HttpRequestHeaders httpRequestHeaders = getRequestHeader(bufferedReader);

@@ -41,4 +41,13 @@ public class HttpRequest {
     public HttpRequestUri getUri() {
         return startLine.getHttpRequestUri();
     }
+
+    public String getSessionId() {
+        HttpCookie cookie = header.getCookie();
+
+        if (cookie != null && cookie.containsKey("JSESSIONID")) {
+            return cookie.getValue("JSESSIONID");
+        }
+        return null;
+    }
 }

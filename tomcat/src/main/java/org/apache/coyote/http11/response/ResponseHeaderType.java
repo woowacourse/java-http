@@ -4,7 +4,8 @@ public enum ResponseHeaderType {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    LOCATION("Location");
+    LOCATION("Location"),
+    SET_COOKIE("Set-Cookie");
 
     private final String type;
 

@@ -59,7 +59,7 @@ public class HttpResponse {
     private static String makeHeader(final Map<String, String> body) {
         return body.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + "\r\n")
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " \r\n")
                 .collect(Collectors.joining());
     }
 

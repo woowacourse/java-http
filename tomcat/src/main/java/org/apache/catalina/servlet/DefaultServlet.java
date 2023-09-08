@@ -26,7 +26,7 @@ public class DefaultServlet implements Servlet {
         return HttpResponse.of(
                 httpVersion,
                 HttpStatus.OK,
-                Map.of("Content-Type ", HttpContentType.from(request.getHttpExtension()).getContentType()),
+                Map.of("Content-Type", HttpContentType.from(request.getHttpExtension()).getContentType()),
                 responseBody
         );
     }

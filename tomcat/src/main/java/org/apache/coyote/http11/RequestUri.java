@@ -1,37 +1,30 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestUri {
 
-    private final String method;
-    private final RequestUrl requestUrl;
-    private final String protocol;
+    private final String uri;
+    private final HashMap<String, String> queries = new HashMap<>();
 
-    public RequestUri(String method, RequestUrl requestUrl, String protocol) {
-        this.method = method;
-        this.requestUrl = requestUrl;
-        this.protocol = protocol;
+    public RequestUri(String requestUri) {
+        String[] uriSplit = requestUri.split("\\?");
+        uri = uriSplit[0];
+        if (uriSplit.length > 1) {
+            String[] queriesSplit = uriSplit[1].split("&");
+            for (String query : queriesSplit) {
+                String[] keyValue = query.split("=");
+                queries.put(keyValue[0], keyValue[1]);
+            }
+        }
     }
 
-    public static RequestUri of(String line) {
-        String[] split = line.split(" ");
-        return new RequestUri(split[0], new RequestUrl(split[1]), split[2]);
+    public String getUri() {
+        return uri;
     }
 
-    public String getMethod() {
-        return method;
-    }
-
-    public String getUrl() {
-        return requestUrl.getUrl();
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public Map<String, String> getParams() {
-        return requestUrl.getParams();
+    public Map<String, String> getQueries() {
+        return new HashMap<>(queries);
     }
 }

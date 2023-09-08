@@ -22,8 +22,8 @@ public class RequestReader {
     private static final String SPACE = " ";
     private static final String COMMA = ",";
     private final BufferedReader bufferedReader;
+    private RequestLine requestLine;
     private final Map<String, String> headers = new HashMap<>();
-    private RequestUri requestUri;
     private final Map<String, String> bodies = new HashMap<>();
 
     public RequestReader(BufferedReader bufferedReader) {
@@ -31,15 +31,25 @@ public class RequestReader {
     }
 
     public void read() throws IOException {
-        String line;
-        requestUri = RequestUri.of(bufferedReader.readLine());
+        requestLine = RequestLine.of(bufferedReader.readLine());
 
+        String line;
         while (!(line = bufferedReader.readLine()).isBlank()) {
             putHeader(line);
         }
         if (URL_ENCODED.getType().equals(headers.get(CONTENT_TYPE.getName()))) {
             readBody();
         }
+    }
+
+    public void putHeader(String line) {
+        if (line.endsWith(CRLF)) {
+            return;
+        }
+        String[] split = line.split(SPACE);
+        String key = split[0].substring(0, split[0].length() - 1);
+        String value = split[1];
+        headers.put(key, value);
     }
 
     private void readBody() throws IOException {
@@ -59,16 +69,6 @@ public class RequestReader {
             String[] keyValue = s.split(EQUAL_SIGN);
             bodies.put(keyValue[0], keyValue[1]);
         }
-    }
-
-    public void putHeader(String line) {
-        if (line.endsWith(CRLF)) {
-            return;
-        }
-        String[] split = line.split(SPACE);
-        String key = split[0].substring(0, split[0].length() - 1);
-        String value = split[1];
-        headers.put(key, value);
     }
 
     public String getContentType() {
@@ -102,18 +102,18 @@ public class RequestReader {
 
 
     public String getProtocol() {
-        return requestUri.getProtocol();
+        return requestLine.getProtocol();
     }
 
     public String getRequestUrl() {
-        return requestUri.getUrl();
+        return requestLine.getUri();
     }
 
     public String getMethod() {
-        return requestUri.getMethod();
+        return requestLine.getMethod();
     }
 
     public Map<String, String> getParams() {
-        return requestUri.getParams();
+        return requestLine.getParams();
     }
 }

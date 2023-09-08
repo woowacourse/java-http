@@ -14,7 +14,7 @@ import static org.apache.coyote.http11.response.HttpProtocolVersion.HTTP11;
 @Getter
 public class HttpResponse {
 
-    private static final String DELIMITER = "\r\n";
+    private static final String CRLF = "\r\n";
     private static final String BLANK_LINE = "";
     private static final String BLANK_SPACE = " ";
 
@@ -73,7 +73,7 @@ public class HttpResponse {
         String responseBody = formatResponseBody();
 
         return String.join(
-                DELIMITER,
+                CRLF,
                 responseStatusLine,
                 responseHeaders,
                 BLANK_LINE,
@@ -93,7 +93,7 @@ public class HttpResponse {
         return headers.getHeaders().keySet()
                 .stream()
                 .map(it -> String.format("%s: %s ", it, headers.find(it)))
-                .collect(Collectors.joining(DELIMITER));
+                .collect(Collectors.joining(CRLF));
     }
 
     private String formatResponseBody() {

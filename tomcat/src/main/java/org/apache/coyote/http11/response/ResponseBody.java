@@ -20,6 +20,10 @@ public class ResponseBody {
         return new ResponseBody("", contentType);
     }
 
+    public static ResponseBody rootContent() {
+        return new ResponseBody("Hello world!", ContentType.HTML);
+    }
+
     public String getContent() {
         return content;
     }

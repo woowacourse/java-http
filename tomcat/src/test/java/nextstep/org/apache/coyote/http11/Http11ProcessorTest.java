@@ -2,7 +2,6 @@ package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestMapping;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -15,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    @Disabled
     @Test
     void process() {
         // given

@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.HttpUtils.getContentType;
 import static org.apache.coyote.http11.HttpUtils.parseParam;
-import static org.apache.coyote.http11.HttpUtils.readContentsFromFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,12 +34,6 @@ public class RegisterController extends AbstractController {
 
   @Override
   protected HttpResponse doGet(final HttpRequest request) throws IOException {
-    final String body = readContentsFromFile(REGISTER_PAGE);
-    final String contentType = getContentType(request.getHeader("Accept"));
-    final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
-    final HttpHeader header = new HttpHeader();
-    header.setHeader("Content-Type", contentType + ";charset=utf-8");
-    header.setHeader("Content-Length", body.getBytes().length + "");
-    return new HttpResponse(responseLine, header, body);
+    return responseStaticFile(request, REGISTER_PAGE);
   }
 }

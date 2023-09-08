@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.HttpUtils.getContentType;
 import static org.apache.coyote.http11.HttpUtils.parseParam;
-import static org.apache.coyote.http11.HttpUtils.readContentsFromFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -61,13 +59,7 @@ public class LoginController extends AbstractController {
   protected HttpResponse doGet(final HttpRequest request) throws IOException {
     final String sessionId = request.getCookie(JSESSIONID);
     if (request.getSession(sessionId) == null) {
-      final String body = readContentsFromFile(LOGIN_PAGE);
-      final String contentType = getContentType(request.getHeader("Accept"));
-      final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
-      final HttpHeader header = new HttpHeader();
-      header.setHeader("Content-Type", contentType + ";charset=utf-8");
-      header.setHeader("Content-Length", body.getBytes().length + "");
-      return new HttpResponse(responseLine, header, body);
+      return responseStaticFile(request, LOGIN_PAGE);
     }
     final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
     final HttpHeader header = new HttpHeader();

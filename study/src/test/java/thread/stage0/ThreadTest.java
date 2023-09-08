@@ -5,14 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 자바로 동시에 여러 작업을 처리할 때 스레드를 사용한다.
- * 스레드 객체를 직접 생성하는 방법부터 알아보자.
- * 진행하면서 막히는 부분은 아래 링크를 참고해서 해결한다.
+ * 자바로 동시에 여러 작업을 처리할 때 스레드를 사용한다. <br/>
+ * 스레드 객체를 직접 생성하는 방법부터 알아보자. <br/>
+ * 진행하면서 막히는 부분은 아래 링크를 참고해서 해결한다. <br/>
  *
- * Thread Objects
- * https://docs.oracle.com/javase/tutorial/essential/concurrency/threads.html
+ * Thread Objects <br/>
+ * https://docs.oracle.com/javase/tutorial/essential/concurrency/threads.html <br/>
  *
- * Defining and Starting a Thread
+ * Defining and Starting a Thread <br/>
  * https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html
  */
 class ThreadTest {
@@ -20,8 +20,8 @@ class ThreadTest {
     private static final Logger log = LoggerFactory.getLogger(ThreadTest.class);
 
     /**
-     * 자바에서 직접 스레드를 만드는 방법은 2가지가 있다.
-     * 먼저 Thread 클래스를 상속해서 스레드로 만드는 방법을 살펴보자.
+     * 자바에서 직접 스레드를 만드는 방법은 2가지가 있다. <br/>
+     * 먼저 Thread 클래스를 상속해서 스레드로 만드는 방법을 살펴보자. <br/>
      * 주석을 참고하여 테스트 코드를 작성하고, 테스트를 실행시켜서 메시지가 잘 나오는지 확인한다.
      */
     @Test
@@ -37,7 +37,7 @@ class ThreadTest {
     }
 
     /**
-     * Runnable 인터페이스를 사용하는 방법도 있다.
+     * Runnable 인터페이스를 사용하는 방법도 있다. <br/>
      * 주석을 참고하여 테스트 코드를 작성하고, 테스트를 실행시켜서 메시지가 잘 나오는지 확인한다.
      */
     @Test

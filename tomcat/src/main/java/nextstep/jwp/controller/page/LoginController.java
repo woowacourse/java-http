@@ -1,6 +1,7 @@
 package nextstep.jwp.controller.page;
 
 import static nextstep.jwp.controller.FileContent.HTML;
+import static nextstep.jwp.controller.FileContent.INDEX;
 import static nextstep.jwp.controller.FileContent.INDEX_URI;
 import static nextstep.jwp.controller.FileContent.STATIC;
 import static nextstep.jwp.controller.FileContent.UNAUTHORIZED_URI;
@@ -19,6 +20,7 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.FileContent;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.PathUtil;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -52,11 +54,7 @@ public class LoginController extends AbstractController {
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
         final String splitUri = uri.split(COMMA_REGEX)[FILENAME_INDEX];
-        final String s = STATIC + FileContent.findPage(splitUri) + HTML;
-        final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + FileContent.findPage(splitUri) + HTML);
-
-        final Path path = new File(url.getPath()).toPath();
+        final Path path = PathUtil.findPathWithExtension(splitUri, HTML);
 
         final byte[] content = Files.readAllBytes(path);
 
@@ -68,9 +66,7 @@ public class LoginController extends AbstractController {
             return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
         }
 
-        final URL indexUrl = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + INDEX_URI + HTML);
-        final Path loginPath = new File(indexUrl.getPath()).toPath();
+        final Path loginPath = PathUtil.findPathWithExtension(INDEX_URI, HTML);
 
         final byte[] loginContent = Files.readAllBytes(loginPath);
         final String loginResponseBody = new String(loginContent);
@@ -88,9 +84,7 @@ public class LoginController extends AbstractController {
         final String password = parseQuery[SECOND].split(PARAM_DELIMITER)[VALUE_INDEX];
 
         if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
-            final URL unauthorizedUrl = HttpResponse.class.getClassLoader()
-                    .getResource(STATIC + UNAUTHORIZED_URI + HTML);
-            final Path path = new File(unauthorizedUrl.getPath()).toPath();
+            final Path path = PathUtil.findPathWithExtension(UNAUTHORIZED_URI, HTML);
 
             final byte[] content = Files.readAllBytes(path);
 
@@ -100,9 +94,7 @@ public class LoginController extends AbstractController {
             return new HttpResponse(ResponseStatusLine.create(HttpStatus.UNAUTHORIZED), headers, responseBody);
         }
 
-        final URL indexUrl = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + INDEX_URI + HTML);
-        final Path path = new File(indexUrl.getPath()).toPath();
+        final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
 
         final User user = InMemoryUserRepository.findByAccountAndPassword(username, password)
                 .orElseThrow(() -> new IllegalArgumentException("알 수 없는 에러입니다."));

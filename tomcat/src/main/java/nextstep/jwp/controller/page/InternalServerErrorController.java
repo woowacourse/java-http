@@ -1,13 +1,13 @@
 package nextstep.jwp.controller.page;
 
-import static nextstep.jwp.controller.FileContent.STATIC;
+import static nextstep.jwp.controller.FileContent.HTML;
+import static nextstep.jwp.controller.FileContent.INTERNAL_SERVER_ERROR_URI;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
+import nextstep.jwp.util.PathUtil;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,9 +17,7 @@ import org.apache.coyote.http11.response.ResponseStatusLine;
 public class InternalServerErrorController extends AbstractController {
 
     public static HttpResponse create(final HttpRequest request) throws IOException {
-        final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + "/500.html");
-        final Path path = new File(url.getPath()).toPath();
+        final Path path = PathUtil.findPathWithExtension(INTERNAL_SERVER_ERROR_URI, HTML);
 
         final ResponseStatusLine statusLine = ResponseStatusLine.create(HttpStatus.INTERNAL_SERVER_ERROR);
         final HttpHeaders headers = HttpHeaders.createResponse(path);

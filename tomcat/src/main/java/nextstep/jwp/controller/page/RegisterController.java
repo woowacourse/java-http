@@ -2,6 +2,7 @@ package nextstep.jwp.controller.page;
 
 import static nextstep.jwp.controller.FileContent.HTML;
 import static nextstep.jwp.controller.FileContent.INDEX_URI;
+import static nextstep.jwp.controller.FileContent.NOT_FOUND_URI;
 import static nextstep.jwp.controller.FileContent.STATIC;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.PathUtil;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -35,10 +37,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
-        final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + uri + HTML);
-
-        final Path path = new File(url.getPath()).toPath();
+        final Path path = PathUtil.findPathWithExtension(uri, HTML);
 
         final byte[] content = Files.readAllBytes(path);
 
@@ -50,9 +49,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
-        final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + INDEX_URI + HTML);
-        final Path path = new File(url.getPath()).toPath();
+        final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
 
         final String[] splitUserInfo = request.getRequestBody().split(BODY_DELIMITER);
         if (splitUserInfo.length != 3) {

@@ -14,6 +14,7 @@ public enum FileContent {
     public static final String INDEX_URI = "/index";
     public static final String UNAUTHORIZED_URI = "/401";
     public static final String NOT_FOUND_URI = "/404";
+    public static final String INTERNAL_SERVER_ERROR_URI = "/500";
     public static final String STATIC = "static";
     public static final String HTML = ".html";
 

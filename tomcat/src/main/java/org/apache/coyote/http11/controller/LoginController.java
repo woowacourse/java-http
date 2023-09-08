@@ -74,10 +74,8 @@ public class LoginController extends AbstractController {
         return false;
     }
 
-    private HttpResponse redirect(final String path) throws IOException {
-        final StaticResource staticResource = StaticResource.from(path);
-        final ResponseBody responseBody = ResponseBody.from(staticResource);
-        return HttpResponse.redirect(HttpStatus.FOUND, path, responseBody);
+    private HttpResponse redirect(final String path) {
+        return HttpResponse.redirect(HttpStatus.FOUND, path);
     }
 
     private HttpResponse redirectWithSession(final String path, final String sessionId) throws IOException {

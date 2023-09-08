@@ -149,13 +149,11 @@ class LoginControllerTest {
         final HttpResponse response = loginController.service(postRequest);
 
         // then
-        final StaticResource staticResource = StaticResource.from("/401.html");
-        final String content = staticResource.getContent();
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 FOUND ",
                 "Location: /401.html ",
                 "",
-                content);
+                "");
         assertThat(response.toString()).isEqualTo(expected);
     }
 
@@ -188,7 +186,7 @@ class LoginControllerTest {
                 "Location: /index.html ",
                 "Set-Cookie: " + cookieValue + " ",
                 "",
-                content);
+                "");
 
         assertAll(
                 () -> assertThat(response.toString()).isEqualTo(expected),

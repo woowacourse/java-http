@@ -25,16 +25,6 @@ public class HttpResponse {
     }
 
     public static HttpResponse redirect(final HttpStatus httpStatus,
-                                        final String redirectPath,
-                                        final ResponseBody responseBody) {
-        return new HttpResponse(
-                StatusLine.from(httpStatus),
-                ResponseHeaders.redirect(redirectPath),
-                responseBody
-        );
-    }
-
-    public static HttpResponse redirect(final HttpStatus httpStatus,
                                         final String redirectPath) {
         return new HttpResponse(
                 StatusLine.from(httpStatus),

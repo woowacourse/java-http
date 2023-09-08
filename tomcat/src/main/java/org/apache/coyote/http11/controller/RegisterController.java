@@ -54,9 +54,7 @@ public class RegisterController extends AbstractController {
         return redirect(indexUri.getFullPath());
     }
 
-    private HttpResponse redirect(final String path) throws IOException {
-        final StaticResource staticResource = StaticResource.from(path);
-        final ResponseBody responseBody = ResponseBody.from(staticResource);
-        return HttpResponse.redirect(HttpStatus.FOUND, path, responseBody);
+    private HttpResponse redirect(final String path) {
+        return HttpResponse.redirect(HttpStatus.FOUND, path);
     }
 }

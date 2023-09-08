@@ -16,7 +16,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseLine;
+import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class RegisterPostPageController implements Controller {
 
@@ -59,6 +59,6 @@ public class RegisterPostPageController implements Controller {
 
         final String responseBody = new String(content);
 
-        return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, responseBody);
+        return new HttpResponse(ResponseStatusLine.create(HttpStatus.FOUND), headers, responseBody);
     }
 }

@@ -13,7 +13,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseLine;
+import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class NotFoundPageController implements Controller {
 
@@ -33,6 +33,6 @@ public class NotFoundPageController implements Controller {
 
         final HttpHeaders headers = HttpHeaders.createResponse(path);
 
-        return new HttpResponse(ResponseLine.create(HttpStatus.NOT_FOUND), headers, "");
+        return new HttpResponse(ResponseStatusLine.create(HttpStatus.NOT_FOUND), headers, "");
     }
 }

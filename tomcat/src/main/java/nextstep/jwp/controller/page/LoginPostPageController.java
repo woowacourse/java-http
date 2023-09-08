@@ -22,7 +22,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseLine;
+import org.apache.coyote.http11.response.ResponseStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class LoginPostPageController implements Controller {
             final HttpHeaders headers = HttpHeaders.createResponse(path);
             final String responseBody = new String(content);
 
-            return new HttpResponse(ResponseLine.create(HttpStatus.UNAUTHORIZED), headers, responseBody);
+            return new HttpResponse(ResponseStatusLine.create(HttpStatus.UNAUTHORIZED), headers, responseBody);
         }
 
         final URL indexUrl = HttpResponse.class.getClassLoader()
@@ -84,6 +84,6 @@ public class LoginPostPageController implements Controller {
         headers.setHeader(LOCATION, INDEX_URI + HTML);
         final String responseBody = new String(content);
 
-        return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, responseBody);
+        return new HttpResponse(ResponseStatusLine.create(HttpStatus.FOUND), headers, responseBody);
     }
 }

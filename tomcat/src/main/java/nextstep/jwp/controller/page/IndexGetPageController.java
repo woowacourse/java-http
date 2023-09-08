@@ -12,7 +12,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseLine;
+import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class IndexGetPageController implements Controller {
 
@@ -36,6 +36,6 @@ public class IndexGetPageController implements Controller {
         final HttpHeaders headers = HttpHeaders.createResponse(path);
         final String responseBody = new String(content);
 
-        return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
+        return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
     }
 }

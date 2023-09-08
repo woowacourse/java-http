@@ -10,12 +10,12 @@ public class HttpResponse {
 
     private static final String NEW_LINE = "\r\n";
 
-    private final ResponseLine responseLine;
+    private final ResponseStatusLine responseStatusLine;
     private final HttpHeaders headers;
     private final String responseBody;
 
-    public HttpResponse(final ResponseLine responseLine, final HttpHeaders headers, final String responseBody) {
-        this.responseLine = responseLine;
+    public HttpResponse(final ResponseStatusLine responseStatusLine, final HttpHeaders headers, final String responseBody) {
+        this.responseStatusLine = responseStatusLine;
         this.headers = headers;
         this.responseBody = responseBody;
     }
@@ -27,7 +27,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return responseLine.toString() +
+        return responseStatusLine.toString() +
                 NEW_LINE +
                 headers.toString() +
                 NEW_LINE +

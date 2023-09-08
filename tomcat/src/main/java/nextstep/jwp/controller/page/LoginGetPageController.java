@@ -20,7 +20,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseLine;
+import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class LoginGetPageController implements Controller {
 
@@ -51,7 +51,7 @@ public class LoginGetPageController implements Controller {
 
         final Session session = SessionManager.findSession(request.getHeaders().getCookie(COOKIE_NAME));
         if (Objects.isNull(session)) {
-            return new HttpResponse(ResponseLine.create(HttpStatus.OK), headers, responseBody);
+            return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
         }
 
         final URL indexUrl = HttpResponse.class.getClassLoader()
@@ -63,6 +63,6 @@ public class LoginGetPageController implements Controller {
 
         headers.setHeader(LOCATION, INDEX_URI + HTML);
 
-        return new HttpResponse(ResponseLine.create(HttpStatus.FOUND), headers, loginResponseBody);
+        return new HttpResponse(ResponseStatusLine.create(HttpStatus.FOUND), headers, loginResponseBody);
     }
 }

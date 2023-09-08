@@ -5,7 +5,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseLine;
+import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class HelloWorldPageController implements Controller {
 
@@ -20,7 +20,7 @@ public class HelloWorldPageController implements Controller {
 
     @Override
     public HttpResponse process(final HttpRequest request) {
-        return new HttpResponse(ResponseLine.create(HttpStatus.OK),
+        return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK),
                 HttpHeaders.createSimpleText(),
                 HELLO_WORLD);
     }

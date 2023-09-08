@@ -2,13 +2,11 @@ package org.apache.coyote.http11.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestBody;
-import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.request.*;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.session.HttpCookie;
 import org.apache.coyote.http11.session.JSessionIdGenerator;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -30,6 +28,7 @@ public class LoginController implements Controller {
     @Override
     public ResponseEntity service(HttpRequest request) {
         HttpRequestStartLine httpRequestStartLine = request.getHttpRequestStartLine();
+        HttpRequestHeader httpRequestHeader = request.getHttpRequestHeader();
         HttpRequestBody httpRequestBody = request.getHttpRequestBody();
 
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
@@ -37,6 +36,16 @@ public class LoginController implements Controller {
         String account = httpRequestBody.find("account");
 
         if (httpMethod == HttpMethod.GET && account == null) {
+            HttpCookie httpCookie = httpRequestHeader.getCookie();
+            Session session = sessionManager.findSession(httpCookie.findJSessionId());
+            if (session != null) {
+                return ResponseEntity.builder()
+                        .httpStatus(HttpStatus.FOUND)
+                        .contentType(generateContentType(requestURI))
+                        .location(INDEX_PAGE_URI)
+                        .build();
+            }
+
             return ResponseEntity.builder()
                     .httpStatus(HttpStatus.OK)
                     .contentType(generateContentType(requestURI))

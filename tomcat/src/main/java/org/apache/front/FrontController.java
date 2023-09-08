@@ -5,5 +5,5 @@ import org.apache.coyote.response.ResponseEntity;
 
 public interface FrontController {
 
-    ResponseEntity process(Request request);
+    ResponseEntity process(final Request request);
 }

@@ -14,14 +14,14 @@ public class Proxy {
         this.dynamicController = new DynamicController();
     }
 
-    public ResponseEntity process(Request request){
+    public ResponseEntity process(final Request request){
         if(request.isStatic()){
             return doProcess(staticController, request);
         }
         return doProcess(dynamicController, request);
     }
 
-    private ResponseEntity doProcess(FrontController frontController, Request request) {
+    private ResponseEntity doProcess(final FrontController frontController, final Request request) {
         return frontController.process(request);
     }
 

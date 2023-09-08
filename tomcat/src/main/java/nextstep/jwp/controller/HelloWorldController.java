@@ -7,7 +7,7 @@ import org.apache.coyote.response.ResponseStatus;
 public class HelloWorldController implements Controller{
 
     @Override
-    public ResponseEntity handle(Request request) {
+    public ResponseEntity handle(final Request request) {
         return ResponseEntity.fromString(request, "Hello world!", ResponseStatus.OK);
     }
 }

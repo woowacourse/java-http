@@ -35,10 +35,6 @@ public class RequestStartLine {
         return pathUrl.hasExtension();
     }
 
-    public String getFileType() {
-        return pathUrl.getFileType();
-    }
-
     public String getPath() {
         return pathUrl.getPath();
     }

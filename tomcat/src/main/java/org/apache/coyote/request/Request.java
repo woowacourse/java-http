@@ -5,16 +5,18 @@ import org.apache.coyote.common.PathUrl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class Request {
     private final RequestStartLine requestStartLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
-    public Request(RequestStartLine requestStartLine, RequestHeader requestHeader, RequestBody requestBody) {
+    public Request(
+            final RequestStartLine requestStartLine,
+            final RequestHeader requestHeader,
+            final RequestBody requestBody
+    ) {
         this.requestStartLine = requestStartLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
@@ -36,10 +38,6 @@ public class Request {
         return new String(buffer);
     }
 
-    public boolean isStatic() {
-        return requestStartLine.isStatic();
-    }
-
     public boolean hasQueryString() {
         return requestStartLine.hasQueryString();
     }
@@ -48,15 +46,12 @@ public class Request {
         return requestStartLine.getQueryValueBy(key);
     }
 
-    public String getFileType() {
-        if (isStatic()) {
-            return requestStartLine.getFileType();
-        }
-        return "";
-    }
-
     public String getPath() {
         return requestStartLine.getPath();
+    }
+
+    public boolean isStatic() {
+        return requestStartLine.isStatic();
     }
 
     public boolean isPost() {
@@ -65,10 +60,6 @@ public class Request {
 
     public boolean isGet() {
         return requestStartLine.isGet();
-    }
-
-    public Map<String, String> getRequestBody() {
-        return Collections.emptyMap();
     }
 
     public PathUrl getRequestUrl() {

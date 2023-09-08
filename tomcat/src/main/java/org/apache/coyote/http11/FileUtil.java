@@ -57,7 +57,6 @@ public class FileUtil {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-
         return "";
     }
 }

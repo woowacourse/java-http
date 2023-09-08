@@ -18,11 +18,11 @@ public enum HttpVersion {
 
     private final String version;
 
-    HttpVersion(String version) {
+    HttpVersion(final String version) {
         this.version = version;
     }
 
-    public static HttpVersion get(String version) {
+    public static HttpVersion get(final String version) {
         if (!map.containsKey(version)) {
             throw new UnMatchedHttpVersionException();
         }

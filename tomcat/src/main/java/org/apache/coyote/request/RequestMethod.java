@@ -3,7 +3,7 @@ package org.apache.coyote.request;
 public enum RequestMethod {
     GET, POST;
 
-    public static RequestMethod get(String method) {
+    public static RequestMethod get(final String method) {
         try{
             return RequestMethod.valueOf(method);
         } catch (IllegalArgumentException e){

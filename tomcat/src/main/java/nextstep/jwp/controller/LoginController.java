@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.ResponseEntity;
 import org.apache.coyote.response.ResponseStatus;
+import org.apache.exception.MethodMappingFailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,10 @@ public class LoginController implements Controller {
         if(request.isGet() && request.hasQueryString()){
             return loginInConsole(request);
         }
-        return loginPage(request);
+        if(request.isGet()){
+            return loginPage(request);
+        }
+        throw new MethodMappingFailException();
     }
 
     private ResponseEntity loginInConsole(final Request request) {
@@ -38,7 +42,7 @@ public class LoginController implements Controller {
         return ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.OK);
     }
 
-    private ResponseEntity login(Request request) {
+    private ResponseEntity login(final Request request) {
         final String account = request.getBodyValue(ACCOUNT_KEY);
         final String password = request.getBodyValue(PASSWORD_KEY);
 

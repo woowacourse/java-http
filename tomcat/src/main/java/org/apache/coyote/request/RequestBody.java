@@ -13,7 +13,7 @@ public class RequestBody {
 
     private final Map<String, String> body;
 
-    public RequestBody(final Map<String, String> body) {
+    private RequestBody(final Map<String, String> body) {
         this.body = body;
     }
 
@@ -25,7 +25,7 @@ public class RequestBody {
         return new RequestBody(body);
     }
 
-    private static Map<String, String> getKeyAndValue(String line) {
+    private static Map<String, String> getKeyAndValue(final String line) {
         final Map<String, String> body = new LinkedHashMap<>();
         Arrays.stream(line.split("&"))
                 .forEach(string -> body.put(string.split("=")[0], string.split("=")[1]));

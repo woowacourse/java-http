@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class RequestHeader {
     private final Map<String, String> headers;
 
-    public RequestHeader(final Map<String, String> headers) {
+    private RequestHeader(final Map<String, String> headers) {
         this.headers = headers;
     }
 

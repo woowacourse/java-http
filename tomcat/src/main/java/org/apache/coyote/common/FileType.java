@@ -31,9 +31,7 @@ public enum FileType {
         if(!path.contains(".")){
             return NONE;
         }
-
         final String extension = path.substring(path.indexOf("."));
-
         if(map.containsKey(extension)){
             return map.get(extension);
         }

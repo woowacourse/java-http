@@ -36,10 +36,6 @@ public class PathUrl {
         return fileType.hasExtension();
     }
 
-    public String getFileType() {
-        return fileType.getExtension();
-    }
-
     public String getContentType(){
         return fileType.getContentType();
     }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Objects;
 
-import static org.apache.coyote.http11.Header.CONTENT_LENGTH;
-import static org.apache.coyote.http11.Header.CONTENT_TYPE;
-import static org.apache.coyote.http11.Header.SET_COOKIE;
+import static org.apache.coyote.http11.response.Header.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.Header.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.Header.SET_COOKIE;
 
 public class Response {
 

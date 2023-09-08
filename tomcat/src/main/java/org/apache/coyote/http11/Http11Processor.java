@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.RequestReader;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

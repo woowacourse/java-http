@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,10 +8,10 @@ import java.util.Map;
 import static org.apache.coyote.http11.ContentType.ALL;
 import static org.apache.coyote.http11.ContentType.HTML;
 import static org.apache.coyote.http11.ContentType.URL_ENCODED;
-import static org.apache.coyote.http11.Header.ACCEPT;
-import static org.apache.coyote.http11.Header.CONTENT_LENGTH;
-import static org.apache.coyote.http11.Header.CONTENT_TYPE;
-import static org.apache.coyote.http11.Header.COOKIE;
+import static org.apache.coyote.http11.response.Header.ACCEPT;
+import static org.apache.coyote.http11.response.Header.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.Header.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.Header.COOKIE;
 
 public class RequestReader {
 

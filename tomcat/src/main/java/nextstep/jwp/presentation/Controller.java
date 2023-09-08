@@ -1,7 +1,7 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.RequestReader;
-import org.apache.coyote.http11.Response;
+import org.apache.coyote.http11.request.RequestReader;
+import org.apache.coyote.http11.response.Response;
 
 import java.io.IOException;
 

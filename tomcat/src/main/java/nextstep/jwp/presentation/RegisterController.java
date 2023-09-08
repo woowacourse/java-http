@@ -2,16 +2,16 @@ package nextstep.jwp.presentation;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.RequestReader;
-import org.apache.coyote.http11.Response;
+import org.apache.coyote.http11.request.RequestReader;
+import org.apache.coyote.http11.response.Response;
 
 import java.io.IOException;
 
-import static org.apache.coyote.http11.Header.LOCATION;
+import static org.apache.coyote.http11.response.Header.LOCATION;
 import static org.apache.coyote.http11.Method.GET;
 import static org.apache.coyote.http11.Method.POST;
-import static org.apache.coyote.http11.StatusCode.FOUND;
-import static org.apache.coyote.http11.StatusCode.OK;
+import static org.apache.coyote.http11.response.StatusCode.FOUND;
+import static org.apache.coyote.http11.response.StatusCode.OK;
 
 public class RegisterController implements Controller {
 

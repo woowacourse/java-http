@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,6 @@ import java.util.stream.Stream;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
 
     private final Socket connection;
     private final SessionManager sessionManager = new SessionManager();
@@ -61,8 +61,8 @@ public class Http11Processor implements Runnable, Processor {
             String requestMethod = splitStatusLine[0];
             String requestUri = splitStatusLine[1];
 
-            String requestAcceptHeader = findHeader("Accept", headers);
-            String contentTypeHeader = getContentTypeHeaderFrom(requestAcceptHeader);
+            HttpHeaders httpHeaders = HttpHeaders.from(headers.subList(1, headers.size()));
+            String contentTypeHeader = getContentTypeHeaderFrom(httpHeaders);
 
             RequestHandler requestHandler;
             if (requestMethod.equalsIgnoreCase("POST")) {
@@ -70,8 +70,8 @@ public class Http11Processor implements Runnable, Processor {
                 String requestBody = readRequestBody(bufferedReader, contentLength);
                 requestHandler = handlePostRequest(requestUri, requestBody);
             } else {
-                String cookieHeader = findHeader("Cookie", headers);
-                requestHandler = handleGetRequest(requestMethod, requestUri, cookieHeader);
+                List<String> cookieHeaderValues = httpHeaders.get("Cookie");
+                requestHandler = handleGetRequest(requestMethod, requestUri, cookieHeaderValues);
             }
 
             String responseBody = readFile(requestHandler.getResponseFilePath());
@@ -96,20 +96,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String findHeader(String key, List<String> headers) {
-        return headers.stream()
-                      .filter(it -> it.startsWith(key + ": "))
-                      .findFirst()
-                      .orElse("Accept: " + SAFARI_CHROME_ACCEPT_HEADER_DEFAULT_VALUE);
-    }
-
-    private static String getContentTypeHeaderFrom(String requestAcceptHeader) {
-        String[] splitAcceptHeader = requestAcceptHeader.split(" ");
-        String headerValue = splitAcceptHeader[1];
-        String[] acceptTypes = headerValue.split(";");
-        String[] splitAcceptTypes = acceptTypes[0].split(",");
-
-        if (Arrays.asList(splitAcceptTypes).contains("text/css")) {
+    private static String getContentTypeHeaderFrom(HttpHeaders httpHeaders) {
+        List<String> acceptHeaderValues = httpHeaders.get("Accept");
+        if (acceptHeaderValues != null && acceptHeaderValues.contains("text/css")) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";
@@ -191,21 +180,25 @@ public class Http11Processor implements Runnable, Processor {
         return RequestHandler.of("GET", "302 Found", "static/index.html");
     }
 
-    private RequestHandler handleGetRequest(String requestMethod, String requestUri, String cookie) throws IOException {
+    private RequestHandler handleGetRequest(
+            String requestMethod,
+            String requestUri,
+            List<String> cookies
+    ) throws IOException {
         if (!requestMethod.equalsIgnoreCase("GET")) {
             throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
         }
 
         if (requestUri.equals("/login.html") || requestUri.equals("/login")) {
-            return handleLoginPageRequest(cookie);
+            return handleLoginPageRequest(cookies);
         }
 
         String fileName = "static" + requestUri;
         return RequestHandler.of("GET", "200 OK", fileName);
     }
 
-    private RequestHandler handleLoginPageRequest(String cookie) throws IOException {
-        Optional<String> sessionId = getSessionId(cookie);
+    private RequestHandler handleLoginPageRequest(List<String> cookies) {
+        Optional<String> sessionId = getSessionFrom(cookies);
         if (sessionId.isEmpty()) {
             return RequestHandler.of("GET", "200 OK", "static/login.html");
         }
@@ -217,9 +210,11 @@ public class Http11Processor implements Runnable, Processor {
         return RequestHandler.of("GET", "200 OK", "static/login.html");
     }
 
-    private Optional<String> getSessionId(String cookieHeader) {
-        String[] splitCookie = cookieHeader.split(" ");
-        return getValueOf("JSESSIONID", splitCookie);
+    private Optional<String> getSessionFrom(List<String> cookies) {
+        return cookies.stream()
+                      .filter(cookie -> cookie.startsWith("JSESSIONID="))
+                      .map(jsessionid -> jsessionid.substring(jsessionid.indexOf('=') + 1))
+                      .findFirst();
     }
 
     private User getUser(Session session) {

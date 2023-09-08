@@ -31,13 +31,6 @@ public class LoginController extends AbstractController<UserController> {
             return ResponseEntity.of(HttpStatus.FOUND, "/index");
         }
 
-        if (requestLine.isQueryStringExisted()) {
-            String account = requestLine.findQueryStringValue("account");
-            String password = requestLine.findQueryStringValue("password");
-
-            return getResponseEntity(httpRequest, account, password);
-        }
-
         return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
 

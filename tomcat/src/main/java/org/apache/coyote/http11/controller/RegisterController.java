@@ -23,13 +23,6 @@ public class RegisterController extends AbstractController<UserController> {
     protected ResponseEntity doGet(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        if (requestLine.isQueryStringExisted()) {
-            String account = requestLine.findQueryStringValue("account");
-            String password = requestLine.findQueryStringValue("password");
-            String email = requestLine.findQueryStringValue("email");
-
-            return controller.signUp(account, password, email);
-        }
         return ResponseEntity.of(HttpStatus.OK, requestLine.getPath());
     }
 

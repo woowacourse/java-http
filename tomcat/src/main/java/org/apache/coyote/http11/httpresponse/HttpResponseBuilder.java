@@ -30,8 +30,17 @@ public class HttpResponseBuilder {
         return this;
     }
 
+    public HttpResponseBuilder header(String key, String value) {
+        headers.put(key, value);
+        return this;
+    }
+
+    public HttpResponseBuilder headers(Headers headers) {
+        this.headers = headers;
+        return this;
+    }
+
     public HttpResponse build() {
         return new HttpResponse(httpVersion, httpStatus, body, headers);
     }
-
 }

@@ -5,5 +5,5 @@ import nextstep.org.apache.coyote.http11.Http11Response;
 
 public interface Servlet {
 
-    void Service(Http11Request request, Http11Response response) throws Exception;
+    void service(Http11Request request, Http11Response response) throws Exception;
 }

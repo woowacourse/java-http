@@ -1,5 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
+import static nextstep.org.apache.coyote.http11.HttpUtil.selectFirstContentTypeOrDefault;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,14 +10,13 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.dto.LoginResponseDto;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.org.apache.coyote.Processor;
+import nextstep.org.apache.coyote.http11.servlet.LoginServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +25,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final String RESOURCES_PATH_PREFIX = "static";
-    private static final int ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX = 0;
     private static final String NOT_FOUND_DEFAULT_MESSAGE = "404 Not Found";
+    private static final String INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE = "500 Internal Server Error";
 
     private final Socket connection;
     private final HandlerMapper handlerMapper;
@@ -47,50 +48,55 @@ public class Http11Processor implements Runnable, Processor {
                 InputStream inputStream = connection.getInputStream();
                 OutputStream outputStream = connection.getOutputStream()
         ) {
-            Http11Request http11Request = new Http11Request(inputStream);
-            Cookies cookies = http11Request.getCookies();
+            Http11Request request = new Http11Request(inputStream);
+            Cookies cookies = request.getCookies();
 
-            Http11Response response = null;
-            String requestPathInfo = http11Request.getPathInfo();
+            Http11Response response = new Http11Response(Status.OK);
+            String requestPathInfo = request.getPathInfo();
 
             Object handler = handlerMapper.mapHandler(requestPathInfo);
             if (Objects.nonNull(handler)
-                    && http11Request.getMethod().equals("POST")
+                    && request.getMethod().equals("POST")
                     && requestPathInfo.equals("/login")) {
-                LoginController loginController = (LoginController) handler;
-                LoginResponseDto loginDto = loginController.login(
-                        cookies,
-                        http11Request.getParsedBodyValue("account"),
-                        http11Request.getParsedBodyValue("password"));
+                try {
+                    LoginServlet loginServlet = new LoginServlet();
+                    loginServlet.service(request, response);
+                } catch (Exception e) {
+                    responseInternalServerError(request, response);
+                }
 
-                response = new Http11Response(Status.FOUND)
-                        .setHeader("Location", loginDto.getRedirectUrl())
-                        .setCookies(cookies);
+                writeResponse(outputStream, response);
+                return;
             }
 
             if (Objects.nonNull(handler)
-                    && http11Request.getMethod().equals("POST")
+                    && request.getMethod().equals("POST")
                     && requestPathInfo.equals("/register")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.register(
-                        http11Request.getParsedBodyValue("account"),
-                        http11Request.getParsedBodyValue("password"),
-                        http11Request.getParsedBodyValue("email")
+                        request.getParsedBodyValue("account"),
+                        request.getParsedBodyValue("password"),
+                        request.getParsedBodyValue("email")
                 );
 
                 response = new Http11Response(Status.FOUND)
                         .setHeader("Location", loginDto.getRedirectUrl());
+                writeResponse(outputStream, response);
+                return;
             }
 
-            if (http11Request.getMethod().equals("GET") && Objects.isNull(response)) {
+            if (request.getMethod().equals("GET")) {
                 String contentType = selectFirstContentTypeOrDefault(
-                        http11Request.getHeader("Accept"));
+                        request.getHeader("Accept")
+                );
 
-                // Todo: createResponseBody() pageController로 위임해보기
-                // Todo: 헤더에 담긴 sessionId 유효성 검증
                 if (requestPathInfo.contains("/login") && cookies.hasCookie("JSESSIONID")) {
-                    response = new Http11Response(Status.FOUND)
-                            .setHeader("Location", "/index.html");
+                    LoginServlet loginServlet = new LoginServlet();
+                    try {
+                        loginServlet.service(request, response);
+                    } catch (Exception e) {
+                        responseInternalServerError(request, response);
+                    }
                     writeResponse(outputStream, response);
                     return;
                 }
@@ -122,18 +128,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void responseInternalServerError(Http11Request request, Http11Response response)
+            throws IOException {
+        String internalServerErrorPageBody = createResponseBody("/500.html")
+                .orElse(INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE);
+        String contentType = selectFirstContentTypeOrDefault(request.getHeader("Accept"));
+        response.setStatus(Status.INTERNAL_SERVER_ERROR)
+                .setHeader("Content-Type", contentType + ";charset=utf-8")
+                .setHeader("Content-Length", String.valueOf(
+                        internalServerErrorPageBody.getBytes(
+                                StandardCharsets.UTF_8).length))
+                .setBody(internalServerErrorPageBody);
+    }
+
     private void writeResponse(OutputStream outputStream, Http11Response response)
             throws IOException {
         outputStream.write(response.createResponseAsByteArray());
         outputStream.flush();
-    }
-
-    private String selectFirstContentTypeOrDefault(String acceptHeader) {
-        if (Objects.isNull(acceptHeader)) {
-            return "text/html";
-        }
-        List<String> acceptHeaderValues = Arrays.asList(acceptHeader.split(","));
-        return acceptHeaderValues.get(ACCEPT_HEADER_BEST_CONTENT_TYPE_INDEX);
     }
 
     private Optional<String> createResponseBody(String requestPath) throws IOException {

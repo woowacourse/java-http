@@ -1,8 +1,7 @@
-package org.apache.coyote.handler.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.RequestController;
 import org.apache.coyote.http.LoginManager;
 import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
@@ -21,9 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.apache.coyote.handler.controller.Path.LOGIN;
-import static org.apache.coyote.handler.controller.Path.MAIN;
-import static org.apache.coyote.handler.controller.Path.UNAUTHORIZED;
+import static nextstep.jwp.controller.Path.LOGIN;
+import static nextstep.jwp.controller.Path.MAIN;
+import static nextstep.jwp.controller.Path.UNAUTHORIZED;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http.common.HttpHeader.COOKIE;
 

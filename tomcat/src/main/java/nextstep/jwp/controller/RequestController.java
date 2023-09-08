@@ -1,5 +1,6 @@
-package org.apache.coyote.handler;
+package nextstep.jwp.controller;
 
+import org.apache.coyote.controller.Controller;
 import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
@@ -20,8 +21,6 @@ public abstract class RequestController implements Controller {
 
         throw new UnsupportedOperationException("지원하지 않는 HTTP Method 입니다.");
     }
-
-    protected abstract boolean supports(final HttpRequest httpRequest);
 
     protected abstract void doPost(final HttpRequest request, final HttpResponse response) throws Exception;
 

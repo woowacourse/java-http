@@ -1,4 +1,4 @@
-package org.apache.coyote.handler.controller;
+package nextstep.jwp.controller;
 
 public enum Path {
 

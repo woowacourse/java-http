@@ -1,6 +1,5 @@
-package org.apache.coyote.handler.controller;
+package nextstep.jwp.controller;
 
-import org.apache.coyote.handler.RequestController;
 import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.request.HttpRequest;

@@ -1,8 +1,7 @@
-package org.apache.coyote.handler.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.RequestController;
 import org.apache.coyote.http.common.ContentType;
 import org.apache.coyote.http.common.HttpBody;
 import org.apache.coyote.http.request.HttpRequest;
@@ -12,8 +11,8 @@ import org.apache.coyote.http.response.StatusLine;
 
 import java.util.Map;
 
-import static org.apache.coyote.handler.controller.Path.MAIN;
-import static org.apache.coyote.handler.controller.Path.REGISTER;
+import static nextstep.jwp.controller.Path.MAIN;
+import static nextstep.jwp.controller.Path.REGISTER;
 import static org.apache.coyote.http.common.HttpHeader.CONTENT_TYPE;
 
 public class RegisterController extends RequestController {

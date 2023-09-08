@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.util.X_WWW_Form_UrlEncodedDecoder;
 
 public class HttpRequestFactory {
 

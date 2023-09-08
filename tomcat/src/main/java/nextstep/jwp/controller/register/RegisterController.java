@@ -1,5 +1,6 @@
 package nextstep.jwp.controller.register;
 
+import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.http11.handler.mapper.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -28,8 +29,17 @@ public class RegisterController extends AbstractController {
     @Override
     protected HttpResponse doPost(final HttpRequest httpRequest) throws Exception {
         Map<String, String> params = httpRequest.getParams();
+
+        validateRegisterValueIsNull(params.get(ACCOUNT), params.get(PASSWORD), params.get(EMAIL));
         userService.register(params.get(ACCOUNT), params.get(PASSWORD), params.get(EMAIL));
 
         return HttpResponse.responseWithResource(Status.FOUND, "/index.html");
     }
+
+    private void validateRegisterValueIsNull(final String account, final String password, final String email) {
+        if (account == null || password == null || email == null) {
+            throw new BadRequestException("Account, Password, Email 값은 공백이 될 수 없습니다..");
+        }
+    }
+
 }

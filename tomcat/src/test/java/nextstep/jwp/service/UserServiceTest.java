@@ -1,6 +1,5 @@
 package nextstep.jwp.service;
 
-import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.exception.DuplicatedAccountException;
 import nextstep.jwp.exception.InvalidEmailFormException;
 import nextstep.jwp.exception.UnAuthorizedException;
@@ -88,17 +87,5 @@ class UserServiceTest {
         // when & then
         assertThatThrownBy(() -> userService.register(account, password, email))
                 .isInstanceOf(InvalidEmailFormException.class);
-    }
-
-    @DisplayName("값이 비어있다면 회원가입이 진행되지 않는다")
-    @Test
-    void throws_exception_when_register_values_blank() {
-        // given
-        String password = "1234";
-        String email = "test@com";
-
-        // when & then
-        assertThatThrownBy(() -> userService.register(null, password, email))
-                .isInstanceOf(BadRequestException.class);
     }
 }

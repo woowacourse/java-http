@@ -52,4 +52,25 @@ public class HttpPath {
     public Optional<String> getQueryParameter(String parameter) {
         return Optional.ofNullable(this.getQueryParameters().get(parameter));
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HttpPath httpPath = (HttpPath) o;
+        return Objects.equals(path, httpPath.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
+
+    public String getFullUri() {
+        return this.path;
+    }
 }

@@ -27,6 +27,14 @@ public class HttpRequest {
         this.cookies = cookies;
     }
 
+    public HttpPath getUri() {
+        return uri;
+    }
+
+    public String getFullUri() {
+        return uri.getFullUri();
+    }
+
     public boolean isMethodEqualTo(final HttpMethod method) {
         return Objects.equals(this.method, method);
     }

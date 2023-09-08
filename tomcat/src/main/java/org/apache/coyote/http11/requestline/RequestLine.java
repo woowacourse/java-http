@@ -56,4 +56,16 @@ public class RequestLine {
   public String getParam(final String key) {
     return this.params.get(key);
   }
+
+  public boolean isGetMethod() {
+    return this.method.equals(HttpMethod.GET);
+  }
+
+  public boolean isPostMethod() {
+    return this.method.equals(HttpMethod.POST);
+  }
+
+  public boolean isSameUrl(final String url) {
+    return this.url.equals(url);
+  }
 }

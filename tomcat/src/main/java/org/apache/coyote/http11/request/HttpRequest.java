@@ -87,4 +87,16 @@ public class HttpRequest {
   public Session getSession(final String id) {
     return this.sessionManager.findSession(id);
   }
+
+  public boolean isGetMethod() {
+    return this.requestLine.isGetMethod();
+  }
+
+  public boolean isPostMethod() {
+    return this.requestLine.isPostMethod();
+  }
+
+  public boolean isSameUrl(final String url) {
+    return this.requestLine.isSameUrl(url);
+  }
 }

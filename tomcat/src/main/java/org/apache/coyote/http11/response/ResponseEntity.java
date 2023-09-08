@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.auth.Cookie;
+import org.apache.coyote.http11.request.Page;
 import org.apache.coyote.http11.request.line.Protocol;
 
 public class ResponseEntity {
@@ -19,10 +20,17 @@ public class ResponseEntity {
 
     public static ResponseEntity getCookieNullResponseEntity(
             final Protocol protocol,
-            final HttpStatus httpStatus,
+            final Page page
+    ) {
+        return new ResponseEntity(protocol, page.statusCode(), Cookie.from(null), Location.from(page.redirectUrl()));
+    }
+
+    public static ResponseEntity getCookieNullResponseEntity(
+            final Protocol protocol,
+            final HttpStatus status,
             final Location location
     ) {
-        return new ResponseEntity(protocol, httpStatus, Cookie.from(null), location);
+        return new ResponseEntity(protocol, status, Cookie.from(null), location);
     }
 
     public String getProtocol() {

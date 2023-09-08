@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
             return;
         }
         response.setHttpResponseStartLine(StatusCode.OK);
-        byte[] file = FileIOUtils.getFileInBytes(PREFIX+request.getPath()+SUFFIX);
+        byte[] file = FileIOUtils.getFileInBytes(PREFIX + request.getPath() + SUFFIX);
         response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8");
         response.setResponseBody(file);
     }
@@ -37,16 +37,17 @@ public class LoginController extends AbstractController {
 
         Optional<User> findAccount = InMemoryUserRepository.findByAccount(requestParam.get("account"));
 
-        if (findAccount.isPresent()) {
-            User user = findAccount.get();
-            if (user.checkPassword(requestParam.get("password"))) {
-                Session session = request.getSession();
-                session.setAttribute("user", user);
-                response.addCookie(JSESSIONID, request.getSession().getId());
-                response.sendRedirect("/index.html");
-                return;
-            }
-        }
-        response.sendRedirect("/401.html");
+        findAccount.ifPresentOrElse(user ->
+                {
+                    if (user.checkPassword(requestParam.get("password"))) {
+                        Session session = request.getSession();
+                        session.setAttribute("user", user);
+                        response.addCookie(JSESSIONID, request.getSession().getId());
+                        response.sendRedirect("/index.html");
+                    }
+                },
+                () -> response.sendRedirect("/401.html")
+        );
+
     }
 }

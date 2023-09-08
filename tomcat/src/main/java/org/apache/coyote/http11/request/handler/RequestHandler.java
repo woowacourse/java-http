@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request.handler;
 
 import org.apache.coyote.http11.auth.AuthService;
+import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.Protocol;
@@ -14,13 +15,14 @@ public class RequestHandler {
 
     private final AuthService authService = new AuthService();
 
-    public ResponseEntity getResponse(
-            RequestLine requestLine,
-            RequestHeader requestHeader,
-            RequestBody requestBody
-    ) {
-        Protocol protocol = requestLine.protocol();
-        final String path = requestLine.path().defaultPath();
+    public ResponseEntity getResponse(Request request) {
+        final RequestLine requestLine = request.requestLine();
+        final RequestHeader requestHeader = request.requestHeader();
+        final RequestBody requestBody = request.requestBody();
+
+        final Protocol protocol = request.requestLine().protocol();
+        final String path = request.requestLine().path().defaultPath();
+
         if (path.equals("/login")) {
             return authService.login(requestLine, requestHeader, requestBody);
         }

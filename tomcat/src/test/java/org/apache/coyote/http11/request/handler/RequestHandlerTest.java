@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.auth.Cookie;
 import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.auth.SessionRepository;
+import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
@@ -72,10 +73,11 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(GET, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    Request request = Request.of(requestLine, requestHeader, requestBody);
                     SessionRepository.clearSessions();
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = requestHandler.getResponse(request);
 
                     // then
                     assertAll(
@@ -98,9 +100,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    Request request = Request.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = requestHandler.getResponse(request);
 
                     // then
                     assertAll(
@@ -118,9 +121,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    Request request = Request.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = requestHandler.getResponse(request);
 
                     // then
                     assertAll(
@@ -146,9 +150,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(GET, "/register");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    Request request = Request.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = requestHandler.getResponse(request);
 
                     // then
                     assertAll(
@@ -171,9 +176,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/register");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    Request request = Request.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = requestHandler.getResponse(request);
 
                     // then
                     assertAll(
@@ -189,9 +195,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/register");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
+                    Request request = Request.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(requestLine, requestHeader, requestBody);
+                    ResponseEntity response = requestHandler.getResponse(request);
 
                     // then
                     assertAll(

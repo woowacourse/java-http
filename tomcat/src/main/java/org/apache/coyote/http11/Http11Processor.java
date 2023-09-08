@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,23 +14,18 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final String REQUEST_LINE = "Request-Line";
-    private static final String COOKIE = "Cookie";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String TEXT_HTML = "text/html;";
     private static final String TEXT_CSS = "text/css;";
     private static final String INDEX_PAGE = "/index.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
     private static final String HTML_EXTENSION = ".html";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+    private static final String COOKIE = "Cookie";
 
     private final Socket connection;
 
@@ -48,15 +44,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStreamReader = new InputStreamReader(connection.getInputStream());
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()) {
-            final Map<String, String> requestHeader = readRequestHeader(bufferedReader);
-            final String uri = requestHeader.get(REQUEST_LINE).split(" ")[1];
-            final String contentType = requestHeader.get(CONTENT_TYPE);
+            final var httpRequest = HttpRequest.from(bufferedReader);
 
-            final String cookieHeader = requestHeader.getOrDefault(COOKIE, null);
-            final var cookie = HttpCookie.from(cookieHeader);
-
-            final String requestBody = readRequestBody(bufferedReader, requestHeader, contentType);
-            final String response = handleRequest(uri, requestBody, cookie);
+            final String response = handleRequest(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -65,21 +55,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestBody(final BufferedReader bufferedReader, final Map<String, String> requestHeader,
-                                   final String contentType) throws IOException {
-        if (!Objects.equals(contentType, FORM_CONTENT_TYPE)) {
-            return null;
-        }
-        final var contentLength = Integer.parseInt(requestHeader.get(CONTENT_LENGTH));
-        final var buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        final var requestBody = new String(buffer);
+    private String handleRequest(final HttpRequest httpRequest) throws IOException {
+        final String uri = httpRequest.getRequestLine().getPath();
+        final String cookieHeader = httpRequest.getRequestHeader().getValue(COOKIE);
+        final var cookie = HttpCookie.from(cookieHeader);
+        final String requestBody = httpRequest.getRequestBody();
 
-        log.info("Request-Body: {}", requestBody);
-        return requestBody;
-    }
-
-    private String handleRequest(final String uri, final String requestBody, final HttpCookie cookie) throws IOException {
         final String path = uri.split("\\?")[0];
 
         if (path.equals("/")) {
@@ -209,21 +190,5 @@ public class Http11Processor implements Runnable, Processor {
             return getClass().getClassLoader().getResource("./static" + NOT_FOUND_PAGE);
         }
         return fileUrl;
-    }
-
-    private Map<String, String> readRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        final var requestHeader = new HashMap<String, String>();
-
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            return Map.of();
-        }
-        requestHeader.put(REQUEST_LINE, line);
-
-        while (!"".equals(line = bufferedReader.readLine())) {
-            final String[] splitLine = line.split(": ");
-            requestHeader.put(splitLine[0], splitLine[1]);
-        }
-        return requestHeader;
     }
 }

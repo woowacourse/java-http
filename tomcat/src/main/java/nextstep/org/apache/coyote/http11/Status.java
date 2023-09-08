@@ -4,7 +4,8 @@ public enum Status {
 
     OK("200", "OK"),
     FOUND("302", "Found"),
-    NOT_FOUND("404", "Not Found");
+    NOT_FOUND("404", "Not Found"),
+    NOT_IMPLEMENTED("501", "Not Implemented");
 
     private final String code;
     private final String message;

@@ -17,12 +17,12 @@ public class RequestBody {
 
     private final Map<String, String> items = new HashMap<>();
 
-    private RequestBody(final Map<String, String> items) {
-        this.items.putAll(items);
+    public RequestBody() {
+        this(Collections.emptyMap());
     }
 
-    public static RequestBody empty() {
-        return new RequestBody(Collections.emptyMap());
+    private RequestBody(final Map<String, String> items) {
+        this.items.putAll(items);
     }
 
     public static RequestBody from(final String body) {

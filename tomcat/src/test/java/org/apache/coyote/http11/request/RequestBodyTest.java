@@ -28,13 +28,6 @@ class RequestBodyTest {
     }
 
     @Test
-    void 빈_RequestBody를_반환한다() {
-        // expect
-        final RequestBody requestBody = RequestBody.empty();
-        assertThat(requestBody.getItems()).isEmpty();
-    }
-
-    @Test
     void key를_입력받아_값을_반환한다() {
         // given
         final String body = "account=gugu&password=password&email=hkkang@woowahan.com";

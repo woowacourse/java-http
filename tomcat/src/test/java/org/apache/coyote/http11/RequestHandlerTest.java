@@ -1,14 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
+import nextstep.jwp.controller.RequestHandler;
+import org.apache.coyote.http11.httprequest.HttpRequest;
+import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.apache.coyote.http11.ContentType.PLAINTEXT_UTF8;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 import static org.assertj.core.api.Assertions.assertThat;

@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http11.HttpResponse.BLANK;
-import static org.apache.coyote.http11.HttpResponse.CRLF;
+import static org.apache.coyote.http11.httpresponse.HttpResponse.BLANK;
+import static org.apache.coyote.http11.httpresponse.HttpResponse.CRLF;
 
 public class Headers {
 

@@ -1,8 +1,13 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Controller;
+import org.apache.coyote.http11.httprequest.HttpRequest;
+import org.apache.coyote.http11.httpresponse.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.ResourceResponseHandler;
+import org.apache.coyote.http11.ResponseBody;
 
 public class RequestHandler implements Controller {
 

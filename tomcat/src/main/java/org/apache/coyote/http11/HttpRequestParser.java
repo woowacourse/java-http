@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class HttpRequestParser {
 

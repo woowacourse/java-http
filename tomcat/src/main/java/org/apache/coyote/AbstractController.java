@@ -1,7 +1,7 @@
 package org.apache.coyote;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.httprequest.HttpRequest;
+import org.apache.coyote.http11.httpresponse.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 

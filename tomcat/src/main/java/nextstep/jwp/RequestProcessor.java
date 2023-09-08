@@ -33,10 +33,11 @@ public class RequestProcessor {
     private static final String INDEX_PAGE = "index.html";
     private static final String REGISTER_PAGE = "register.html";
     private static final String UNAUTHORIZED_PAGE = "401.html";
+    private static final String JAVA_SESSION_NAME = "JSESSIONID";
 
     private static final Logger log = LoggerFactory.getLogger(RequestProcessor.class);
 
-    public ResponseEntity processRequest(final HttpRequest httpRequest) throws URISyntaxException, IOException {
+    public ResponseEntity process(final HttpRequest httpRequest) throws URISyntaxException, IOException {
 
         final HttpVersion version = httpRequest.getHttpVersion();
         final HttpMethod method = httpRequest.getHttpMethod();
@@ -52,7 +53,7 @@ public class RequestProcessor {
             }
 
             if (requestUri.equals("login")) {
-                final String sessionId = cookies.ofSessionId("JSESSIONID");
+                final String sessionId = cookies.ofSessionId(JAVA_SESSION_NAME);
                 final Session session = SessionManager.findSession(sessionId);
                 if (session != null) {
                     return ResponseEntity.of(version, HttpStatus.FOUND, null,
@@ -122,8 +123,8 @@ public class RequestProcessor {
                         final Session session = new Session(UUID.randomUUID().toString());
                         session.setAttribute("user", user);
                         SessionManager.add(session);
-                        cookies.save("JSESSIONID", session.getId());
-                        final String cookieInfo = cookies.cookieInfo("JSESSIONID");
+                        cookies.save(JAVA_SESSION_NAME, session.getId());
+                        final String cookieInfo = cookies.cookieInfo(JAVA_SESSION_NAME);
                         return ResponseEntity.of(version, HttpStatus.FOUND, content,
                                 Map.of(LOCATION_HEADER, INDEX_PAGE,
                                         "Set-Cookie", cookieInfo));

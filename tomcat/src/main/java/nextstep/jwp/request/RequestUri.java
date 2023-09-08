@@ -16,13 +16,17 @@ public class RequestUri {
     }
 
     public static RequestUri from(final String requestUri) {
-        final int index = requestUri.indexOf("?");
-        if (index != -1) {
-            String uri = requestUri.substring(0, index);
-            Map<String, String> params = parseParams(requestUri.substring(index+1));
+        if (notExistQueryParametersIn(requestUri)) {
+            final int queryParamStartIndex = requestUri.indexOf("?");
+            final String uri = requestUri.substring(0, queryParamStartIndex);
+            final Map<String, String> params = parseParams(requestUri.substring(queryParamStartIndex+1));
             return new RequestUri(uri, params);
         }
         return new RequestUri(requestUri, Collections.emptyMap());
+    }
+
+    private static boolean notExistQueryParametersIn(final String uri) {
+        return !uri.contains("?");
     }
 
     private static Map<String, String> parseParams(final String params) {

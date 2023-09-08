@@ -10,42 +10,29 @@ public class HttpResponse {
 
     private static final String DELIMITER = "\r\n";
 
-    private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
+    private final StatusLine statusLine;
     private final ResponseHeaders responseHeaders;
-    private final String content;
+    private final String responseBody;
 
-    private HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus,
-                         final ResponseHeaders responseHeaders, final String content) {
-        this.httpVersion = httpVersion;
-        this.httpStatus = httpStatus;
+    private HttpResponse(final StatusLine statusLine, final ResponseHeaders responseHeaders,
+                         final String responseBody) {
+        this.statusLine = statusLine;
         this.responseHeaders = responseHeaders;
-        this.content = content;
+        this.responseBody = responseBody;
     }
 
     public static HttpResponse from(final ResponseEntity responseEntity) {
-        final HttpVersion httpVersion = responseEntity.getHttpVersion();
-        final HttpStatus httpStatus = responseEntity.getHttpStatus();
+        final StatusLine statusLine = StatusLine.of(responseEntity.getHttpVersion(), responseEntity.getHttpStatus());
         final ResponseHeaders headers = ResponseHeaders.from(responseEntity.getHeaders());
         final String content = responseEntity.getContent();
-        return new HttpResponse(httpVersion, httpStatus, headers, content);
+        return new HttpResponse(statusLine, headers, content);
     }
 
     public String toResponse() {
         return String.join(DELIMITER,
-                httpVersion.getVersion() + " " + httpStatus.getStatusCode() + " " + httpStatus.name() + " ",
-                makeHeaderResponse(),
+                statusLine.toResponse(),
+                responseHeaders.toResponse(),
                 "",
-                content);
-    }
-
-    private String makeHeaderResponse() {
-        final Map<String, String> headers = responseHeaders.getHeaders();
-        final List<String> headerStrings = headers.keySet()
-                .stream()
-                .map(key -> key + ": " + headers.get(key) + " ")
-                .collect(Collectors.toList());
-
-        return String.join(DELIMITER, headerStrings);
+                responseBody);
     }
 }

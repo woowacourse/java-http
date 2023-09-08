@@ -13,12 +13,12 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public static HttpCookie from(final String cookies) {
-        if (cookies == null) {
+    public static HttpCookie from(final String cookieHeader) {
+        if (cookieHeader == null) {
             return new HttpCookie(Collections.emptyMap());
         }
 
-        final Map<String, String> cookieMap = Arrays.stream(cookies.split(";"))
+        final Map<String, String> cookieMap = Arrays.stream(cookieHeader.split(";"))
                 .map(cookie -> cookie.split("="))
                 .collect(Collectors.toMap(cookie -> cookie[0].trim(), cookie -> cookie[1].trim()));
 
@@ -27,10 +27,6 @@ public class HttpCookie {
 
     public void save(final String cookie, final String value) {
         cookies.put(cookie, value);
-    }
-
-    public boolean hasJSessionCookie() {
-        return cookies.containsKey("JSESSIONID");
     }
 
     public String ofSessionId(final String sessionId) {

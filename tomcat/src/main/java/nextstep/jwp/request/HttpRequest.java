@@ -2,7 +2,6 @@ package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import nextstep.jwp.common.HttpMethod;
 import nextstep.jwp.common.HttpVersion;
 import nextstep.jwp.model.HttpCookie;

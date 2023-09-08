@@ -3,7 +3,9 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerMapping;
+import nextstep.jwp.controller.page.InternalServerErrorController;
 import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
@@ -21,8 +23,12 @@ public class HttpResponse {
     }
 
     public static HttpResponse parse(final HttpRequest request) throws IOException {
-        final Controller controller = ControllerMapping.find(request);
-        return controller.process(request);
+        try {
+            final Controller controller = ControllerMapping.find(request);
+            return controller.process(request);
+        } catch (final Exception e) {
+            return InternalServerErrorController.create(request);
+        }
     }
 
     @Override

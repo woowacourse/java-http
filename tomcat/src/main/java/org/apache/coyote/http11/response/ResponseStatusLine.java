@@ -24,18 +24,6 @@ public class ResponseStatusLine {
         return new ResponseStatusLine(HTTP_VERSION, statusCode, statusText);
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public String getStatusCode() {
-        return statusCode;
-    }
-
-    public String getStatusText() {
-        return statusText;
-    }
-
     @Override
     public String toString() {
         return httpVersion + BLANK

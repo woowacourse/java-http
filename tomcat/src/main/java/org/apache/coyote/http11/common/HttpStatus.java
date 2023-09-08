@@ -6,6 +6,7 @@ public enum HttpStatus {
     FOUND(302, "FOUND"),
     UNAUTHORIZED(401, "UNAUTHORIZED"),
     NOT_FOUND(404, "NOT_FOUND"),
+    INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR")
     ;
 
     private final Integer value;

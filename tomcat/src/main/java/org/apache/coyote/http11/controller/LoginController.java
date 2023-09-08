@@ -76,7 +76,7 @@ public class LoginController implements Controller {
         log.info("account {} 비밀번호 불일치로 로그인 실패", findAccount.getAccount());
         return ResponseEntity
                 .builder()
-                .httpStatus(HttpStatus.UNAUTHORIZED)
+                .httpStatus(HttpStatus.FOUND)
                 .contentType(generateContentType(requestURI))
                 .location(UNAUTHORIZED_PAGE_URI)
                 .build();

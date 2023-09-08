@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import nextstep.jwp.controller.FrontHandler;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -24,6 +25,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        new HttpResponse()
         final var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",

@@ -17,15 +17,6 @@ public class HttpResponse {
     private HttpHeaders httpHeaders;
     private HttpBody body;
 
-    public HttpResponse() {
-    }
-
-    HttpResponse(final StatusLine statusLine, final HttpHeaders httpHeaders, final HttpBody body) {
-        this.statusLine = statusLine;
-        this.httpHeaders = httpHeaders;
-        this.body = body;
-    }
-
     public void mapToRedirect(final String redirectUri) {
         changeStatusLine(StatusLine.from(StatusCode.FOUND));
         addHeader(HttpHeader.LOCATION, redirectUri);
@@ -46,10 +37,6 @@ public class HttpResponse {
 
     public void changeBody(final HttpBody body) {
         this.body = body;
-    }
-
-    public static HttpResponseBuilder builder() {
-        return new HttpResponseBuilder();
     }
 
     public String serialize() {

@@ -33,12 +33,11 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
-
         final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
         final String requestBody = request.getRequestBody();
         saveUser(requestBody);
 
-        return HttpResponse.createRedirect(HttpStatus.FOUND, path, INDEX_URI + HTML);
+        return HttpResponse.createRedirect(path, INDEX_URI + HTML);
     }
 
     private void saveUser(final String requestBody) {

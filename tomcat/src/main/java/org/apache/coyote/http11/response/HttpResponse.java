@@ -33,10 +33,19 @@ public class HttpResponse {
         return new HttpResponse(statusLine, headers, responseBody);
     }
 
-    public static HttpResponse createRedirect(final HttpStatus httpStatus, final Path path, final String redirectUri)
+    public static HttpResponse createRedirect(final Path path, final String redirectUri)
             throws IOException {
-        final ResponseStatusLine statusLine = ResponseStatusLine.create(httpStatus);
+        final ResponseStatusLine statusLine = ResponseStatusLine.create(HttpStatus.FOUND);
         final HttpHeaders headers = HttpHeaders.createResponse(path);
+        headers.setHeader(HttpHeaders.LOCATION, redirectUri);
+        final String responseBody = ResponseBodyUtil.alter(path);
+
+        return new HttpResponse(statusLine, headers, responseBody);
+    }
+
+    public static HttpResponse createRedirectWithHeaders(final HttpHeaders headers, final Path path,
+                                                         final String redirectUri) throws IOException {
+        final ResponseStatusLine statusLine = ResponseStatusLine.create(HttpStatus.FOUND);
         headers.setHeader(HttpHeaders.LOCATION, redirectUri);
         final String responseBody = ResponseBodyUtil.alter(path);
 

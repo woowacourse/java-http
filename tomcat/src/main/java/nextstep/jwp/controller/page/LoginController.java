@@ -54,46 +54,42 @@ public class LoginController extends AbstractController {
         }
 
         final Path indexPath = PathUtil.findPathWithExtension(INDEX_URI, HTML);
-        return HttpResponse.createRedirect(HttpStatus.FOUND, indexPath, INDEX_URI + HTML);
+        return HttpResponse.createRedirect(indexPath, INDEX_URI + HTML);
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
         final String body = request.getRequestBody();
-        final String[] parseQuery = body.split(QUERY_DELIMITER);
-        final String username = parseQuery[FIRST].split(PARAM_DELIMITER)[VALUE_INDEX];
-        final String password = parseQuery[SECOND].split(PARAM_DELIMITER)[VALUE_INDEX];
+        final String username = getBodyValue(body, FIRST);
+        final String password = getBodyValue(body, SECOND);
 
         if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
             final Path path = PathUtil.findPathWithExtension(UNAUTHORIZED_URI, HTML);
-
-            final byte[] content = Files.readAllBytes(path);
-
-            final HttpHeaders headers = HttpHeaders.createResponse(path);
-            final String responseBody = new String(content);
-
-            return new HttpResponse(ResponseStatusLine.create(HttpStatus.UNAUTHORIZED), headers, responseBody);
+            return HttpResponse.create(HttpStatus.UNAUTHORIZED, path);
         }
+        final User user = InMemoryUserRepository.findByAccountAndPassword(username, password)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        log.info(user.toString());
 
         final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
 
-        final User user = InMemoryUserRepository.findByAccountAndPassword(username, password)
-                .orElseThrow(() -> new IllegalArgumentException("알 수 없는 에러입니다."));
-        log.info(user.toString());
-
-        final byte[] content = Files.readAllBytes(path);
-
         final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String uuid = UUID.randomUUID().toString();
+        final String uuid = saveSession(user);
+        headers.setCookie(COOKIE_NAME, uuid);
 
+        return HttpResponse.createRedirectWithHeaders(headers, path, INDEX_URI + HTML);
+    }
+
+    private String saveSession(final User user) {
+        final String uuid = UUID.randomUUID().toString();
         final Session session = new Session(uuid);
         session.setAttribute(USER, user);
         SessionManager.add(session);
+        return uuid;
+    }
 
-        headers.setCookie(COOKIE_NAME, uuid);
-        headers.setHeader(LOCATION, INDEX_URI + HTML);
-        final String responseBody = new String(content);
-
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.FOUND), headers, responseBody);
+    private String getBodyValue(final String body, final int index) {
+        final String[] parseQuery = body.split(QUERY_DELIMITER);
+        return parseQuery[index].split(PARAM_DELIMITER)[VALUE_INDEX];
     }
 }

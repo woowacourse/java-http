@@ -24,6 +24,7 @@ public class GreetingController {
                 .noCache()
                 .cachePrivate()
                 .getHeaderValue();
+
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
         return "index";
     }

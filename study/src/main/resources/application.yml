@@ -7,3 +7,7 @@ server:
     max-connections: 1
     threads:
       max: 2
+
+  compression:
+    enabled: true
+    min-response-size: 10

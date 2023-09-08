@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.presentation.ControllerFinder;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +11,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import static nextstep.jwp.presentation.ControllerType.findController;
+
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final ControllerFinder controllerFinder = ControllerFinder.getInstance();
 
     private final Socket connection;
 
@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
             requestReader.read();
 
-            Controller controller = controllerFinder.findController(requestReader.getRequestUri());
+            Controller controller = findController(requestReader.getRequestUri());
             Response response = controller.service(requestReader);
 
             outputStream.write(response.format(requestReader.getProtocol()).getBytes());

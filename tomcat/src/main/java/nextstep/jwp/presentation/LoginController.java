@@ -9,6 +9,8 @@ import org.apache.coyote.http11.SessionManager;
 import java.io.IOException;
 
 import static org.apache.coyote.http11.Header.LOCATION;
+import static org.apache.coyote.http11.Method.GET;
+import static org.apache.coyote.http11.Method.POST;
 import static org.apache.coyote.http11.StatusCode.FOUND;
 import static org.apache.coyote.http11.StatusCode.OK;
 import static org.apache.coyote.http11.StatusCode.UNAUTHORIZED;
@@ -21,20 +23,14 @@ public class LoginController implements Controller {
     @Override
     public Response service(RequestReader requestReader) throws IOException {
         String method = requestReader.getMethod();
-        String uri = requestReader.getUri();
 
-        if (method.equalsIgnoreCase("GET") && uri.equals("/login.html")) {
+        if (GET.matches(method)) {
             return loginPage(requestReader);
         }
-        if (method.equalsIgnoreCase("POST") && uri.equals("/login.html")) {
+        if (POST.matches(method)) {
             return tryLogin(requestReader);
         }
-        if (method.equalsIgnoreCase("GET") && uri.equals("/register.html")) {
-            return registerPage(requestReader);
-        }
-        if (method.equalsIgnoreCase("POST") && uri.equals("/register.html")) {
-            return register(requestReader);
-        }
+
         return null;
     }
 
@@ -72,23 +68,5 @@ public class LoginController implements Controller {
         }
 
         return SessionManager.getSessionId(user);
-    }
-
-    private Response registerPage(RequestReader requestReader) throws IOException {
-        return new Response(OK)
-                .addBaseHeader(requestReader.getContentType())
-                .createBodyByFile(requestReader.getUri());
-    }
-
-    private Response register(RequestReader requestReader) throws IOException {
-        InMemoryUserRepository.save(new User(
-                requestReader.getBodyValue("account"),
-                requestReader.getBodyValue("email"),
-                requestReader.getBodyValue("password")
-        ));
-        return new Response(FOUND)
-                .createBodyByFile(INDEX)
-                .addHeader(LOCATION, INDEX)
-                .addBaseHeader(requestReader.getContentType());
     }
 }

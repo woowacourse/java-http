@@ -56,9 +56,10 @@ public class RequestReader {
         }
     }
 
-    private void readBody() {
+    private void readBody() throws IOException {
         int contentLength = getContentLength();
         char[] chars = new char[contentLength];
+        bufferedReader.read(chars, 0, contentLength);
         putBody(new String(chars));
     }
 
@@ -105,7 +106,7 @@ public class RequestReader {
         return requestLine.getUri();
     }
 
-    public RequestUri getRequestUri() {
+    public String getRequestUri() {
         return requestLine.getRequestUri();
     }
 

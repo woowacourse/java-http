@@ -4,6 +4,7 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.*;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.resource.FileHandler;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,7 +24,7 @@ public class LoginHandler implements HttpRequestHandler {
 
     @Override
     public boolean support(HttpRequest httpRequest) {
-        return httpRequest.isMethodEqualTo("POST") && httpRequest.isUriEqualTo("/login");
+        return httpRequest.isMethodEqualTo(HttpMethod.POST) && httpRequest.isUriEqualTo("/login");
     }
 
     @Override

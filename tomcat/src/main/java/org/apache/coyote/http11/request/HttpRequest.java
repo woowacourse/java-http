@@ -12,7 +12,7 @@ public class HttpRequest {
 
     private String uri;
 
-    private String method;
+    private HttpMethod method;
 
     private String requestBody;
 
@@ -24,12 +24,12 @@ public class HttpRequest {
 
     public HttpRequest(String uri, String method, String requestBody, Cookies cookies) {
         this.uri = uri;
-        this.method = method;
+        this.method = HttpMethod.from(method);
         this.requestBody = requestBody;
         this.cookies = cookies;
     }
 
-    public boolean isMethodEqualTo(final String method) {
+    public boolean isMethodEqualTo(final HttpMethod method) {
         return Objects.equals(this.method, method);
     }
 
@@ -43,11 +43,11 @@ public class HttpRequest {
     }
 
     public boolean isJavascriptRequest() {
-        return isMethodEqualTo("GET") && this.uri.startsWith("/js/");
+        return isMethodEqualTo(HttpMethod.GET) && this.uri.startsWith("/js/");
     }
 
     public boolean isAssetRequest() {
-        return isMethodEqualTo("GET") && this.uri.startsWith("/assets/");
+        return isMethodEqualTo(HttpMethod.GET) && this.uri.startsWith("/assets/");
     }
 
     public String getEndPoint() {

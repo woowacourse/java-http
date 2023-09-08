@@ -2,7 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.resource.FileHandler;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 public class RegistrationHandler implements HttpRequestHandler {
     @Override
     public boolean support(HttpRequest httpRequest) {
-        return httpRequest.isMethodEqualTo("POST") && httpRequest.isUriEqualTo("/register");
+        return httpRequest.isMethodEqualTo(HttpMethod.POST) && httpRequest.isUriEqualTo("/register");
     }
 
     @Override

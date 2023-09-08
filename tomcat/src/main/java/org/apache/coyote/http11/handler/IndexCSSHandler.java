@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.resource.FileHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -13,7 +14,7 @@ public class IndexCSSHandler implements HttpRequestHandler {
 
     @Override
     public boolean support(final HttpRequest httpRequest) {
-        return httpRequest.isMethodEqualTo("GET") && httpRequest.isUriEqualTo("/css/styles.css");
+        return httpRequest.isMethodEqualTo(HttpMethod.GET) && httpRequest.isUriEqualTo("/css/styles.css");
     }
 
     @Override

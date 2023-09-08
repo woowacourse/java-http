@@ -9,15 +9,17 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum ContentType {
 
-    HTML("text/html"),
-    CSS("text/css"),
+    HTML("html", "text/html"),
+    CSS("css", "text/css"),
+    JAVASCRIPT("js", "text/javascript"),
     ;
 
+    private final String extension;
     private final String name;
 
     public static ContentType from(String contentName) {
         return Arrays.stream(ContentType.values())
-                .filter(it -> contentName.endsWith(it.name().toLowerCase()))
+                .filter(it -> contentName.endsWith(it.extension.toLowerCase()))
                 .findFirst()
                 .orElse(HTML);
     }

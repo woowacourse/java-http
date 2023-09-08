@@ -5,6 +5,11 @@ import java.util.Map;
 
 public class HttpHeaders {
 
+    public static final String COOKIE = "Cookie";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String ACCEPT = "Accept";
+
     private static final String EMPTY_VALUE = "";
     private static final String CONTENT_TYPE_DELIMITER = ",";
 
@@ -19,9 +24,9 @@ public class HttpHeaders {
     }
 
     public String getContentType() {
-        String value = values.getOrDefault("Content-Type", EMPTY_VALUE);
+        String value = values.getOrDefault(CONTENT_TYPE, EMPTY_VALUE);
         if (value.isEmpty()) {
-            value = values.get("Accept");
+            value = values.get(ACCEPT);
         }
         return value.split(CONTENT_TYPE_DELIMITER)[0];
     }

@@ -9,7 +9,6 @@ import java.util.Map;
 public class HttpRequestParser {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final int HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final int NON_EXIST = -1;
@@ -33,16 +32,17 @@ public class HttpRequestParser {
     }
 
     public HttpRequest parse(final BufferedReader reader) {
-        final String firstLine = readLine(reader);
-        final HttpMethod httpMethod = parseHttpMethod(firstLine);
-        final String requestUri = parseRequestUri(firstLine);
-        final QueryStrings queryStrings = parseQueryStrings(firstLine);
+        final String requestLine = readLine(reader);
+        final HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
+        final QueryStrings queryStrings = parseQueryStrings(requestLine);
+
         final HttpHeaders httpHeaders = parseHttpHeaders(reader);
-        final HttpCookies httpCookies = parseHttpCookies(httpHeaders.get("Cookie"));
-        final Map<String, String> requestBody = parseRequestBody(reader, httpHeaders.get("Content-Length"),
+        final HttpCookies httpCookies = parseHttpCookies(httpHeaders.get(HttpHeaders.COOKIE));
+
+        final Map<String, String> requestBody = parseRequestBody(reader, httpHeaders.get(HttpHeaders.CONTENT_LENGTH),
                 bodyParsers.get(httpHeaders.getContentType()));
 
-        return new HttpRequest(httpMethod, requestUri, queryStrings, httpHeaders, httpCookies, requestBody);
+        return new HttpRequest(httpRequestLine, queryStrings, httpHeaders, httpCookies, requestBody);
     }
 
     private String readLine(final BufferedReader reader) {
@@ -51,19 +51,6 @@ public class HttpRequestParser {
         } catch (final IOException e) {
             throw new UncheckedIOException("요청을 읽어오는데 실패했습니다.", e);
         }
-    }
-
-    private HttpMethod parseHttpMethod(final String line) {
-        return HttpMethod.valueOf(line.split(REQUEST_LINE_DELIMITER)[HTTP_METHOD_INDEX]);
-    }
-
-    private String parseRequestUri(final String line) {
-        final String requestUri = line.split(REQUEST_LINE_DELIMITER)[REQUEST_URI_INDEX];
-        final int queryStringBeginIndex = requestUri.indexOf(QUERY_STRING_DELIMITER);
-        if (queryStringBeginIndex == NON_EXIST) {
-            return requestUri;
-        }
-        return requestUri.substring(0, queryStringBeginIndex);
     }
 
     private QueryStrings parseQueryStrings(final String line) {

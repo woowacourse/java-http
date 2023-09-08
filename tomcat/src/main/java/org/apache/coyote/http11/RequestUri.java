@@ -5,12 +5,16 @@ import java.util.Map;
 
 public class RequestUri {
 
+    private static final String PERIOD = ".";
+    private static final String HTML_EXTENSION = ".html";
+
     private final String uri;
     private final HashMap<String, String> queries = new HashMap<>();
 
     public RequestUri(String requestUri) {
         String[] uriSplit = requestUri.split("\\?");
-        uri = uriSplit[0];
+        uri = resolveExtension(uriSplit[0]);
+
         if (uriSplit.length > 1) {
             String[] queriesSplit = uriSplit[1].split("&");
             for (String query : queriesSplit) {
@@ -26,5 +30,12 @@ public class RequestUri {
 
     public Map<String, String> getQueries() {
         return new HashMap<>(queries);
+    }
+
+    private String resolveExtension(String uri) {
+        if (uri.contains(PERIOD)) {
+            return uri;
+        }
+        return uri + HTML_EXTENSION;
     }
 }

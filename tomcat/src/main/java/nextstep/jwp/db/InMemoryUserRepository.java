@@ -20,7 +20,7 @@ public class InMemoryUserRepository {
     public static void save(User user) {
         database.put(
                 user.getAccount(),
-                new User(sequence.incrementAndGet(), user.getAccount(), user.getPassword(), user.getEmail())
+                new User(sequence.incrementAndGet(), user.getAccount(), user.getEmail(), user.getPassword())
         );
     }
 
@@ -28,5 +28,6 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

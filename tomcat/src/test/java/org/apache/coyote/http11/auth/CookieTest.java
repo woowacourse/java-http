@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.auth;
 
 import java.util.List;
-import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.RequestBody;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

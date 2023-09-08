@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request.body;
 
+import org.apache.coyote.http11.request.RequestBody;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

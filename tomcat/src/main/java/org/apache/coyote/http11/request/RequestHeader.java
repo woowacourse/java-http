@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.header;
+package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +11,8 @@ import static java.util.Collections.EMPTY_LIST;
 
 public class RequestHeader {
 
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, List<String>> headers;
@@ -27,8 +29,11 @@ public class RequestHeader {
         Map<String, List<String>> keyAndValues = new HashMap<>();
         for (String header : headers) {
             List<String> keyAndValue = asList(header.split(":"));
-            String key = keyAndValue.get(0);
-            List<String> values = removalSpace(asList(keyAndValue.get(1).split(",")));
+
+            String key = keyAndValue.get(KEY_INDEX);
+            String value = keyAndValue.get(VALUE_INDEX);
+
+            List<String> values = removalSpace(asList(value.split(",")));
             keyAndValues.put(key, values);
         }
         return keyAndValues;

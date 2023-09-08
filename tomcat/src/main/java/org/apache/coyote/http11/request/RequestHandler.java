@@ -1,9 +1,6 @@
-package org.apache.coyote.http11.request.handler;
+package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.auth.AuthService;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.body.RequestBody;
-import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.Location;

@@ -7,6 +7,7 @@ import org.apache.coyote.request.Request;
 import org.apache.coyote.response.ResponseEntity;
 import org.apache.coyote.response.ResponseStatus;
 import org.apache.exception.MethodMappingFailException;
+import org.apache.exception.PageRedirectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +48,12 @@ public class LoginController implements Controller {
         final String password = request.getBodyValue(PASSWORD_KEY);
 
         final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(MemberNotFoundException::new);
+                .orElseThrow(()-> new PageRedirectException.Unauthorized(request.httpVersion()));
 
         if (user.checkPassword(password)) {
             return ResponseEntity.fromViewPathWithRedirect(request.httpVersion(), request.getPath(), ResponseStatus.MOVED_TEMP, "/index.html");
         }
-
-//        return new PathResponse("/401", HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized");
-        return null;
+        throw new PageRedirectException.Unauthorized(request.httpVersion());
     }
 
     private ResponseEntity loginPage(final Request request) {

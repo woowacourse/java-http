@@ -1,12 +1,13 @@
 package org.apache.coyote.response;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.net.HttpURLConnection;
+import static java.net.HttpURLConnection.*;
 
 public enum ResponseStatus {
-    OK(HttpURLConnection.HTTP_OK, "OK"),
-    UNAUTHORIZED(HttpsURLConnection.HTTP_UNAUTHORIZED, "Unauthorized"),
-    MOVED_TEMP(HttpURLConnection.HTTP_MOVED_TEMP, "Temporary Redirect");
+    OK(HTTP_OK, "OK"),
+    UNAUTHORIZED(HTTP_UNAUTHORIZED, "Unauthorized"),
+    MOVED_TEMP(HTTP_MOVED_TEMP, "Temporary Redirect"),
+    INTERNET_SERVER(HTTP_INTERNAL_ERROR, "Internal Server Error"),
+    NOT_FOUND(HTTP_NOT_FOUND, "Not Found");
 
     private final int code;
     private final String message;

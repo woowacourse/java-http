@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.PathUrl;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ class FileUtilTest {
     @Test
     void 정적_요청일때_파일을_제대로_찾아오는지_확인한다() {
         final PathUrl pathUrl = PathUrl.from("/hi.html");
-        final String resource = FileUtil.getResource(pathUrl);
+        final String resource = FileUtil.getResource(HttpVersion.HTTP11, pathUrl);
 
         final String expect = "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
@@ -35,7 +36,7 @@ class FileUtilTest {
     void 정적_요청일때_파일이_없다면_404_html_을_띄운다() throws IOException {
         // given
         final PathUrl badPathUrl = PathUrl.from("/bad.html");
-        final String actualResource = FileUtil.getResource(badPathUrl);
+        final String actualResource = FileUtil.getResource(HttpVersion.HTTP11, badPathUrl);
 
         // then
         final StringBuilder expected_404 = new StringBuilder();

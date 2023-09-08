@@ -2,6 +2,7 @@ package org.apache.front;
 
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.ResponseEntity;
+import org.apache.exception.PageRedirectException;
 
 public class Proxy {
 
@@ -10,8 +11,8 @@ public class Proxy {
     private final DynamicController dynamicController;
 
     public Proxy() {
-        this.staticController = new StaticController();
-        this.dynamicController = new DynamicController();
+        this.staticController = StaticController.singleTone();
+        this.dynamicController = DynamicController.singleTone();
     }
 
     public ResponseEntity process(final Request request){
@@ -22,7 +23,11 @@ public class Proxy {
     }
 
     private ResponseEntity doProcess(final FrontController frontController, final Request request) {
-        return frontController.process(request);
+        try{
+            return frontController.process(request);
+        } catch (PageRedirectException pageRedirectException){
+            return pageRedirectException.getResponseEntity();
+        }
     }
 
 }

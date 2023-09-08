@@ -12,7 +12,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.Handler;
-import org.apache.coyote.handler.HandlerComposite;
 import org.apache.coyote.parser.HttpRequestReader;
 import org.apache.coyote.request.Cookie;
 import org.apache.coyote.request.HttpRequest;
@@ -30,11 +29,11 @@ public class Http11Processor implements Runnable, Processor {
   private static final Manager SESSION_MANAGER = new SessionManager();
 
   private final Socket connection;
-  private final HandlerComposite handlerComposite;
+  private final Handler handlerComposite;
 
-  public Http11Processor(final Socket connection, final List<Handler> handlers) {
+  public Http11Processor(final Socket connection, final Handler handler) {
     this.connection = connection;
-    this.handlerComposite = new HandlerComposite(handlers);
+    this.handlerComposite = handler;
   }
 
   @Override

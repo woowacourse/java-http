@@ -2,10 +2,16 @@ package study;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.ResourceUtils;
 
-import java.nio.file.Path;
-import java.util.Collections;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +24,7 @@ class FileTest {
 
     /**
      * resource 디렉터리 경로 찾기
-     *
+     * <p>
      * File 객체를 생성하려면 파일의 경로를 알아야 한다.
      * 자바 애플리케이션은 resource 디렉터리에 HTML, CSS 같은 정적 파일을 저장한다.
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
@@ -27,27 +33,46 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        final URL resource = FileTest.class.getClassLoader().getResource(fileName);
+        final String actual = Objects.requireNonNull(resource).getPath();
+
+        assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void resource_디렉터리에_있는_파일의_경로를_찾는다_방법2() {
+        final String fileName = "nextstep.txt";
+
+        final String actual = ResourceUtils.CLASSPATH_URL_PREFIX + fileName;
+
+        assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void resource_디렉터리에_있는_파일의_경로를_찾는다_방법3() {
+        final String fileName = "nextstep.txt";
+
+        final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        final URL resources = classLoader.getResource(fileName);
+        final String actual = resources.getPath();
 
         assertThat(actual).endsWith(fileName);
     }
 
     /**
      * 파일 내용 읽기
-     *
+     * <p>
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        final URL resource = FileTest.class.getClassLoader().getResource(fileName);
+        final File file = new File(URLDecoder.decode(resource.getPath(), StandardCharsets.UTF_8));
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
 
         assertThat(actual).containsOnly("nextstep");
     }

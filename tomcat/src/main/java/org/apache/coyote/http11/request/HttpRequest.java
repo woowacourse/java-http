@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
 
@@ -16,6 +17,14 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = requestHeader;
         this.requestBody = requestBody;
+    }
+
+    public boolean isGet() {
+        return requestLine.getHttpMethod() == HttpMethod.GET;
+    }
+
+    public boolean isPost() {
+        return requestLine.getHttpMethod() == HttpMethod.POST;
     }
 
     public RequestLine getRequestLine() {

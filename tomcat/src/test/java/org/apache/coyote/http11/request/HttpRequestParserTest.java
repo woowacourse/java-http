@@ -58,6 +58,5 @@ class HttpRequestParserTest {
                         entry("email", "hkkang@woowahan.com")
                 )
         );
-
     }
 }

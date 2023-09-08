@@ -1,6 +1,8 @@
 package org.apache.coyote.request;
 
+import java.io.IOException;
 import java.util.UUID;
+import org.apache.catalina.Manager;
 
 public class HttpRequest {
 
@@ -14,12 +16,32 @@ public class HttpRequest {
       final HttpRequestLine httpRequestLine,
       final QueryString queryString,
       final RequestBody requestBody,
-      final Cookie cookie
+      final Cookie cookie,
+      final Manager sessionManager
   ) {
     this.httpRequestLine = httpRequestLine;
     this.queryString = queryString;
     this.requestBody = requestBody;
     this.cookie = cookie;
+    initializeSession(sessionManager);
+  }
+
+  private void initializeSession(final Manager sessionManager) {
+    cookie.getJSessionId()
+        .ifPresentOrElse(
+            id -> {
+              try {
+                addSession(sessionManager.findSession(id));
+              } catch (IOException e) {
+                initializeSession(sessionManager);
+              }
+            },
+            () -> {
+              final Session session = new Session(UUID.randomUUID().toString());
+              sessionManager.add(session);
+              addSession(session);
+            }
+        );
   }
 
   public boolean isPostMethod() {
@@ -38,36 +60,8 @@ public class HttpRequest {
     return httpRequestLine.isSameUri(uri);
   }
 
-  public void addCookie(final String value) {
-    cookie.putJSessionId(value);
-  }
-
-  public boolean hasCookie() {
-    return cookie.isNotEmpty();
-  }
-
-  public Session getSession() {
-    if (session == null) {
-      session = new Session(UUID.randomUUID().toString());
-      return session;
-    }
-    return session;
-  }
-
-  public HttpRequestLine getHttpRequestLine() {
-    return httpRequestLine;
-  }
-
-  public String getHttpMethod() {
-    return httpRequestLine.getHttpMethod();
-  }
-
   public String getUri() {
     return httpRequestLine.getUri();
-  }
-
-  public QueryString getQueryString() {
-    return queryString;
   }
 
   public RequestBody getRequestBody() {
@@ -76,5 +70,13 @@ public class HttpRequest {
 
   public Cookie getCookie() {
     return cookie;
+  }
+
+  public Session getSession() {
+    return session;
+  }
+
+  public void addSession(final Session session) {
+    this.session = session;
   }
 }

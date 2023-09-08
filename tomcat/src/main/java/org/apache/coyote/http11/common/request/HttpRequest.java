@@ -18,28 +18,28 @@ public class HttpRequest {
     public static final String SESSIONID = "JSESSIONID";
     public static final String COOKIE = "Cookie";
 
-    private final StartLine startLine;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final MessageBody body;
     private final SessionManager sessionManager;
 
-    private HttpRequest(final StartLine startLine, final HttpHeaders headers, final MessageBody body) {
-        this.startLine = startLine;
+    private HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final MessageBody body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
         this.sessionManager = new SessionManager();
     }
 
     public static HttpRequest create(BufferedReader br) throws IOException {
-        StartLine startLine = findStartLine(br);
+        RequestLine requestLine = findStartLine(br);
         HttpHeaders headers = findHeaders(br);
         MessageBody body = findBody(headers, br);
-        return new HttpRequest(startLine, headers, body);
+        return new HttpRequest(requestLine, headers, body);
     }
 
-    private static StartLine findStartLine(BufferedReader br) throws IOException {
+    private static RequestLine findStartLine(BufferedReader br) throws IOException {
         String firstLine = br.readLine();
-        return StartLine.create(firstLine);
+        return RequestLine.create(firstLine);
     }
 
     private static HttpHeaders findHeaders(BufferedReader br) throws IOException {
@@ -64,11 +64,11 @@ public class HttpRequest {
     }
 
     public RequestUri getUri() {
-        return this.startLine.getUri();
+        return this.requestLine.getUri();
     }
 
     public HttpMethod getMethod() {
-        return this.startLine.getMethod();
+        return this.requestLine.getMethod();
     }
 
     public Cookies getCookies() {

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.common.request;
 
-public class StartLine {
+public class RequestLine {
     public static final String DELIMITER = " ";
     public static final int METHOD_IDX = 0;
     public static final int URI_IDX = 1;
@@ -9,13 +9,13 @@ public class StartLine {
     private final RequestUri uri;
     private final QueryParams params;
 
-    private StartLine(final HttpMethod method, final RequestUri uri, final QueryParams params) {
+    private RequestLine(final HttpMethod method, final RequestUri uri, final QueryParams params) {
         this.method = method;
         this.uri = uri;
         this.params = params;
     }
 
-    public static StartLine create(final String line) {
+    public static RequestLine create(final String line) {
         String[] targets = line.split(DELIMITER);
 
         HttpMethod method = HttpMethod.from(targets[METHOD_IDX]);
@@ -24,7 +24,7 @@ public class StartLine {
         RequestUri uri = RequestUri.create(uriWithParams);
         QueryParams params = QueryParams.create(uriWithParams);
 
-        return new StartLine(method, uri, params);
+        return new RequestLine(method, uri, params);
     }
 
     public RequestUri getUri() {

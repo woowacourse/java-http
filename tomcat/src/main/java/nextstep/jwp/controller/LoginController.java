@@ -16,6 +16,7 @@ import org.apache.coyote.http.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,82 +44,126 @@ public class LoginController extends RequestController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        try {
+            final User user = getValidateUser(request);
+
+            log.info("로그인 성공! user = {}", user);
+            final UUID uuid = createSessionToUser(user);
+
+            setCookieAndRedirectToMain(response, uuid);
+        } catch (final IllegalArgumentException e) {
+            log.warn("login error = {}", e);
+            redirectToUnAuthorized(response);
+        }
+    }
+
+    private static User getValidateUser(final HttpRequest request) {
         final Map<String, String> bodyParams = request.getParsedBody();
         final String account = bodyParams.get("account");
         final String password = bodyParams.get("password");
 
-        User user = null;
-        try {
-            user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
 
-            if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
-            }
-            log.info("로그인 성공! user = {}", user);
-        } catch (final IllegalArgumentException e) {
-            log.warn("login error = {}", e);
-            response.mapToRedirect(UNAUTHORIZED.getPath());
-            return;
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
         }
 
-        final UUID uuid = UUID.randomUUID();
-        setSession(uuid.toString(), Map.of("account", user.getAccount()));
+        return user;
+    }
 
+    private UUID createSessionToUser(final User user) {
+        final UUID uuid = UUID.randomUUID();
+
+        final Map<String, String> sessionData = Map.of("account", user.getAccount());
+        final Session session = new Session(uuid.toString());
+        for (final Map.Entry<String, String> entry : sessionData.entrySet()) {
+            session.add(entry.getKey(), entry.getValue());
+        }
+
+        loginManager.add(session);
+
+        return uuid;
+    }
+
+    private static void setCookieAndRedirectToMain(final HttpResponse response, final UUID uuid) {
         response.changeStatusLine(StatusLine.from(StatusCode.FOUND));
         response.addHeader(HttpHeader.LOCATION, MAIN.getPath());
         response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid);
         response.changeBody(HttpBody.empty());
     }
 
-    private void setSession(final String jSessionId, final Map<String, String> sessionData) {
-        final Session session = new Session(jSessionId);
-        for (final Map.Entry<String, String> entry : sessionData.entrySet()) {
-            session.add(entry.getKey(), entry.getValue());
-        }
-        loginManager.add(session);
-    }
-
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (request.containsHeader(COOKIE)) {
-            final HttpCookie cookies = HttpCookie.from(request.getHeader(COOKIE));
-            if (isAlreadyLogined(cookies.get("JSESSIONID"))) {
-                response.mapToRedirect(MAIN.getPath());
-                return;
-            }
-        }
-
-        if (request.hasQueryString()) {
-            final QueryString queryString = request.getQueryString();
-
-            final String account = queryString.get("account");
-            final String password = queryString.get("password");
-
-            try {
-                final User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
-
-                if (!user.checkPassword(password)) {
-                    throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
-                }
-                log.info("로그인 성공! user = {}", user);
-            } catch (final IllegalArgumentException e) {
-                log.warn("login error = {}", e);
-                response.mapToRedirect(UNAUTHORIZED.getPath());
-                return;
-            }
-
-            response.mapToRedirect(MAIN.getPath());
+        if (isAlreadyLogined(request)) {
+            redirectToMain(response);
             return;
         }
 
+        if (wantToLogin(request)) {
+            doLoginProcess(request, response);
+            return;
+        }
+
+        redirectToLoginPage(response);
+    }
+
+    private boolean isAlreadyLogined(final HttpRequest request) {
+        if (!request.containsHeader(COOKIE)) {
+            return false;
+        }
+
+        final HttpCookie cookies = HttpCookie.from(request.getHeader(COOKIE));
+
+        return checkLogin(cookies.get("JSESSIONID"));
+    }
+
+    private void redirectToMain(final HttpResponse response) {
+        response.mapToRedirect(MAIN.getPath());
+    }
+
+    private static boolean wantToLogin(final HttpRequest request) {
+        return request.hasQueryString();
+    }
+
+    private void doLoginProcess(final HttpRequest request, final HttpResponse response) {
+        final QueryString queryString = request.getQueryString();
+
+        final String account = queryString.get("account");
+        final String password = queryString.get("password");
+
+        try {
+            validateUserCredentials(account, password);
+            log.info("로그인 성공! account = {}", account);
+        } catch (final IllegalArgumentException e) {
+            log.warn("login error = {}", e);
+            redirectToUnAuthorized(response);
+            return;
+        }
+
+        redirectToMain(response);
+    }
+
+    private void redirectToUnAuthorized(final HttpResponse response) {
+        response.mapToRedirect(UNAUTHORIZED.getPath());
+    }
+
+    private void validateUserCredentials(final String account, final String password) {
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
+
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다. 다시 입력해주세요.");
+        }
+    }
+
+    private boolean checkLogin(final String jSessionId) {
+        return loginManager.isAlreadyLogined(jSessionId);
+    }
+
+    private void redirectToLoginPage(final HttpResponse response) throws IOException {
         response.changeStatusLine(StatusLine.from(StatusCode.OK));
         response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue());
         response.changeBody(HttpBody.file(LOGIN.getPath()));
-    }
-
-    private boolean isAlreadyLogined(final String jSessionId) {
-        return loginManager.isAlreadyLogined(jSessionId);
     }
 }

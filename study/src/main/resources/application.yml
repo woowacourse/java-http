@@ -2,8 +2,27 @@ handlebars:
   suffix: .html
 
 server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+    min-response-size: 10
   tomcat:
     accept-count: 1
-    max-connections: 1
+    max-connections: 2
     threads:
       max: 2
+#   The maximum length of the operating system provided queue for incoming connection requests when maxConnections has been reached.
+#   The operating system may ignore this setting and use a different size for the queue.
+#   When this queue is full, the operating system may actively refuse additional connections or those connections may time out.
+#   The default value is 100.
+
+#   The maximum number of connections that the server will accept and process at any given time.
+#   When this number has been reached, the server will accept, but not process, one further connection.
+#   This additional connection be blocked until the number of connections being processed falls below maxConnections at which point the server will start accepting and processing new connections again.
+#   Note that once the limit has been reached, the operating system may still accept connections based on the acceptCount setting. The default value is 8192.
+#
+#   For NIO/NIO2 only, setting the value to -1, will disable the maxConnections feature and connections will not be counted.
+
+#   The maximum number of request processing threads to be created by this Connector, which therefore determines the maximum number of simultaneous requests that can be handled.
+#   If not specified, this attribute is set to 200. If an executor is associated with this connector, this attribute is ignored as the connector will execute tasks using the executor rather than an internal thread pool.
+#   Note that if an executor is configured any value set for this attribute will be recorded correctly but it will be reported (e.g. via JMX) as -1 to make clear that it is not used.

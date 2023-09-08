@@ -16,7 +16,15 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        final String account = user.getAccount();
+        if (duplicateAccount(account)) {
+            throw new IllegalArgumentException("이미 사용 중인 계정입니다.");
+        }
+        database.put(account, user);
+    }
+
+    private static boolean duplicateAccount(final String account) {
+        return database.containsKey(account);
     }
 
     public static Optional<User> findByAccount(String account) {

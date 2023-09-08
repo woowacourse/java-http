@@ -9,24 +9,19 @@ import java.util.Map.Entry;
 
 public class HttpResponseWriter {
 
+    private static final String CRLF = "\r\n";
+
     private HttpResponseWriter() {
     }
 
     public static void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
-        final String response = String.join("\r\n",
-                extractStartLine(httpResponse),
+        final String response = String.join(CRLF,
+                httpResponse.getStatusLine(),
                 extractHeaders(httpResponse),
                 "",
                 httpResponse.getBody());
 
         outputStream.write(response.getBytes());
-    }
-
-    private static String extractStartLine(final HttpResponse httpResponse) {
-        final String httpVersion = httpResponse.getProtocolVersion();
-        final int statusCode = httpResponse.getStatusCode().getCode();
-        final String statusText = httpResponse.getStatusCode().getMessage();
-        return String.join(" ", httpVersion, String.valueOf(statusCode), statusText) + " ";
     }
 
     private static String extractHeaders(final HttpResponse httpResponse) {
@@ -39,6 +34,6 @@ public class HttpResponseWriter {
                     + " ";
             headerLines.add(headerLine);
         }
-        return String.join("\r\n", headerLines);
+        return String.join(CRLF, headerLines);
     }
 }

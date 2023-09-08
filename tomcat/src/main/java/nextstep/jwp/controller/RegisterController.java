@@ -28,7 +28,7 @@ public class RegisterController implements Controller {
         User user = extractUser(httpRequest.getBody());
         InMemoryUserRepository.save(user);
 
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
+        final HttpResponse httpResponse = HttpResponse.from(StatusCode.FOUND);
         httpResponse.addHeader(LOCATION, INDEX_PAGE_PATH);
         return httpResponse;
     }

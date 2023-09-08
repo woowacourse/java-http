@@ -40,7 +40,7 @@ public class StaticResourceHandler implements ResourceHandler {
             throws IOException {
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));
-        final HttpResponse httpResponse = new HttpResponse(statusCode, body);
+        final HttpResponse httpResponse = HttpResponse.of(statusCode, body);
         httpResponse.addHeader(CONTENT_TYPE, contentType);
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return httpResponse;

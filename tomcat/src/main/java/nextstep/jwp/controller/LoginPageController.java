@@ -37,7 +37,7 @@ public class LoginPageController implements Controller {
         if (session == null) {
             return resolveViewPage(UNAUTHENTICATED_USER_VIEW_NAME, StatusCode.OK);
         }
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
+        final HttpResponse httpResponse = HttpResponse.from(StatusCode.FOUND);
         httpResponse.addHeader(LOCATION, AUTHENTICATED_USER_PAGE_PATH);
         return httpResponse;
     }
@@ -50,7 +50,7 @@ public class LoginPageController implements Controller {
 
     private HttpResponse resolveViewPage(final String viewName, final StatusCode statusCode) throws IOException {
         final String body = ViewResolver.findView(viewName);
-        final HttpResponse httpResponse = new HttpResponse(statusCode, body);
+        final HttpResponse httpResponse = HttpResponse.of(statusCode, body);
         httpResponse.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return httpResponse;

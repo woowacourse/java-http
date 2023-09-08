@@ -12,11 +12,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Optional;
-import java.util.UUID;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.AuthService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -71,53 +68,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String process(HttpRequest request, HttpResponse response) {
-        // 특별한 친구
+        AuthService authService = new AuthService(sessionManager);
+
         if (request.consistsOf(GET, "/")) {
             response.setResponseMessage(OK, DEFAULT_BODY);
             return response.responseMessage();
         }
 
-        // login
         if (request.consistsOf(POST, "/login", "/login.html")) {
             String account = request.getBodyValue("account");
             String password = request.getBodyValue("password");
 
-            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                if (user.checkPassword(password)) {
-                    Session session = new Session(UUID.randomUUID().toString());
-                    sessionManager.add(session);
-
-                    response.setResponseRedirect(FOUND, "/index.html");
-                    response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
-                    return response.responseMessage();
-                }
-            }
-
-            response.setResponseResource(UNAUTHORIZED, "/401.html");
-            return response.responseMessage();
+            return processLogin(response, authService, account, password);
         }
 
         if (request.consistsOf(GET, "/login", "/login.html") & request.hasQueryString()) {
             String account = request.getQueryStringValue("account");
             String password = request.getQueryStringValue("password");
 
-            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                if (user.checkPassword(password)) {
-                    Session session = new Session(UUID.randomUUID().toString());
-                    sessionManager.add(session);
-
-                    response.setResponseRedirect(FOUND, "/index.html");
-                    response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
-                    return response.responseMessage();
-                }
-            }
-
-            response.setResponseResource(UNAUTHORIZED, "/401.html");
-            return response.responseMessage();
+            return processLogin(response, authService, account, password);
         }
 
         if (request.consistsOf(GET, "/login", "/login.html") & request.hasSessionId()) {
@@ -130,25 +99,34 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        // register
         if (request.consistsOf(POST, "/register", "/register.html") & request.hasBody()) {
-            String account = request.getBodyValue("account");
-            String password = request.getBodyValue("password");
-            String email = request.getBodyValue("email");
-
-            User user = new User(account, password, email);
-            InMemoryUserRepository.save(user);
-
-            Session session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
-
-            response.setResponseRedirect(FOUND, "/index.html");
-            response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
-            return response.responseMessage();
+            return processRegister(request, response, authService);
         }
 
-        // 권한이 필요하지 않은 URI
         response.setResponseResource(OK, request.requestUri());
+        return response.responseMessage();
+    }
+
+    private String processLogin(HttpResponse response, AuthService authService, String account, String password) {
+        try {
+            String sessionId = authService.login(account, password);
+            response.setResponseRedirect(FOUND, "/index.html");
+            response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + sessionId);
+            return response.responseMessage();
+        } catch (IllegalArgumentException e) {
+            response.setResponseResource(UNAUTHORIZED, "/401.html");
+            return response.responseMessage();
+        }
+    }
+
+    private String processRegister(HttpRequest request, HttpResponse response, AuthService authService) {
+        String account = request.getBodyValue("account");
+        String password = request.getBodyValue("password");
+        String email = request.getBodyValue("email");
+
+        String sessionId = authService.register(account, password, email);
+        response.setResponseRedirect(FOUND, "/index.html");
+        response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + sessionId);
         return response.responseMessage();
     }
 }

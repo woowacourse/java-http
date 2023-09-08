@@ -19,9 +19,4 @@ public class SessionManager implements Manager {
     public Session findSession(String id) {
         return SESSIONS.get(id);
     }
-
-    @Override
-    public void remove(String id) {
-        SESSIONS.remove(id);
-    }
 }

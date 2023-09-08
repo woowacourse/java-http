@@ -53,4 +53,16 @@ public class HttpRequest {
     public RequestUri getRequestUri() {
         return requestLine.getRequestUri();
     }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public HttpBody getHttpBody() {
+        return httpBody;
+    }
 }

@@ -42,6 +42,10 @@ public class RequestLine {
         return requestUri.getQueryString();
     }
 
+    public Protocol getProtocol() {
+        return protocol;
+    }
+
     public RequestUri getRequestUri() {
         return requestUri;
     }

@@ -35,8 +35,7 @@ class LoginControllerTest {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
@@ -60,8 +59,7 @@ class LoginControllerTest {
             session.setAttribute("user", "user");
             SessionManager.add(session);
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
@@ -85,8 +83,7 @@ class LoginControllerTest {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             assertThat(httpResponse.getResponse()).contains("HTTP/1.1 302 FOUND ", "Set-Cookie: JSESSIONID=");
@@ -104,8 +101,7 @@ class LoginControllerTest {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             List<String> responses = List.of(

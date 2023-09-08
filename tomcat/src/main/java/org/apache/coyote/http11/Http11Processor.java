@@ -39,8 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getResponse().getBytes());

@@ -33,8 +33,7 @@ class ResisterControllerTest {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
@@ -58,8 +57,7 @@ class ResisterControllerTest {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
@@ -80,8 +78,7 @@ class ResisterControllerTest {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            RequestMapping requestMapping = new RequestMapping();
-            AbstractController controller = requestMapping.findController(httpRequest);
+            AbstractController controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             List<String> responses = List.of(

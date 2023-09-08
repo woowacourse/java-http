@@ -19,7 +19,10 @@ public class RequestMapping {
         handlers.put("/register", new ResisterController());
     }
 
-    public AbstractController findController(HttpRequest httpRequest) {
+    private RequestMapping() {
+    }
+
+    public static AbstractController findController(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
         if (isQueryString(path)) {
             path = extractPathWithoutQuery(path);
@@ -28,11 +31,11 @@ public class RequestMapping {
         return handlers.getOrDefault(path, new FileController());
     }
 
-    private boolean isQueryString(String path) {
+    private static boolean isQueryString(String path) {
         return path.contains(QUERY_STRING);
     }
 
-    private String extractPathWithoutQuery(String path) {
+    private static String extractPathWithoutQuery(String path) {
         int index = path.indexOf(QUERY_STRING);
         path = path.substring(0, index);
         return path;

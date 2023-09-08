@@ -29,8 +29,7 @@ class RequestMappingTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-        RequestMapping requestMapping = new RequestMapping();
-        AbstractController controller = requestMapping.findController(httpRequest);
+        AbstractController controller = RequestMapping.findController(httpRequest);
 
         assertThat(controller).isNotNull();
     }
@@ -45,8 +44,7 @@ class RequestMappingTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-        RequestMapping requestMapping = new RequestMapping();
-        AbstractController controller = requestMapping.findController(httpRequest);
+        AbstractController controller = RequestMapping.findController(httpRequest);
 
         assertThat(controller).isInstanceOf(FileController.class);
     }

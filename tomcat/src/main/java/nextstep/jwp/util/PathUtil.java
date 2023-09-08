@@ -1,13 +1,13 @@
 package nextstep.jwp.util;
 
-import static nextstep.jwp.controller.FileContent.STATIC;
-
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class PathUtil {
+
+    private static final String STATIC = "static";
 
     public static Path findPath(final String uri) {
         final URL url = HttpResponse.class.getClassLoader()

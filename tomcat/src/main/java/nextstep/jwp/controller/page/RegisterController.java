@@ -1,8 +1,5 @@
 package nextstep.jwp.controller.page;
 
-import static nextstep.jwp.controller.FileContent.HTML;
-import static nextstep.jwp.controller.FileContent.INDEX_URI;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;

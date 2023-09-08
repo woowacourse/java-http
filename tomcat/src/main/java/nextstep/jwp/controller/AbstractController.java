@@ -6,6 +6,13 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
+    protected static final String INDEX_URI = "/index";
+    protected static final String UNAUTHORIZED_URI = "/401";
+    protected static final String NOT_FOUND_URI = "/404";
+    protected static final String INTERNAL_SERVER_ERROR_URI = "/500";
+    protected static final String STATIC = "static";
+    protected static final String HTML = ".html";
+
     private static final String POST = "POST";
 
     @Override

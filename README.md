@@ -61,3 +61,16 @@
 
 ### 요구사항을 만족시키기 위해 필요한 기능
 - [x] Set-Cookie에 JSESSIONID를 담아 보낸다.
+  - [x] 로그인에 성공하면 Set-Cookie에 JSESSIONID를 전달한다.
+
+## 4. Session 구현하기
+- 쿠키에서 전달받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있다.
+
+### 요구사항을 만족시키기 위해 필요한 기능
+- [ ] 세션을 이용해 로그인 여부를 확인할 수 있다.
+  - [ ] 세션에 저장된 JSESSIONID를 전달하면 로그인에 성공한다.
+  - [ ] 세션에 저장되지 않은 JSESSIONID를 전달한 경우에는 로그인에 실패한다.
+- [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
+  - [ ] <JSESSIONID: User>의 형태로 구성한다.
+- [ ] 로그인한 상태에서 /login 페이지에 GET Method로 접근하면 index.html 페이지로 리다이렉트 처리한다.
+

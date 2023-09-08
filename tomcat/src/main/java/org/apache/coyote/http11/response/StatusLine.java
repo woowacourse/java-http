@@ -8,16 +8,9 @@ public class StatusLine {
     private final String protocolVersion;
     private final HttpStatus httpStatus;
 
-    private StatusLine(String protocolVersion, HttpStatus httpStatus) {
+    public StatusLine(String protocolVersion, HttpStatus httpStatus) {
         this.protocolVersion = protocolVersion;
         this.httpStatus = httpStatus;
-    }
-
-    public static StatusLine from(String responseLine) {
-        String[] elements = responseLine.split(DELIMITER);
-        String protocol = elements[PROTOCOL_VERSION_INDEX];
-        String statusCode = elements[STATUS_CODE_INDEX];
-        return new StatusLine(protocol, HttpStatus.from(statusCode));
     }
 
     public String getProtocolVersion() {

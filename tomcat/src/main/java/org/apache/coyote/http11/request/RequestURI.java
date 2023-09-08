@@ -44,7 +44,7 @@ public class RequestURI {
     }
 
     public boolean isRegister() {
-        return uri.contains("/register");
+        return uri.equals("/register");
     }
 
     public String getResourcePath() {

@@ -16,6 +16,8 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestURI;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseBody;
+import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -35,10 +37,12 @@ public class Handler {
     public static HttpResponse run(HttpRequest httpRequest) throws IOException {
         RequestURI requestURI = httpRequest.getRequestLine().getRequestURI();
         if (requestURI.isLoginPage() && httpRequest.isMethod(GET)) {
+            ResponseBody responseBody = new ResponseBody(parseResponseBody(requestURI.getResourcePath()));
             return HttpResponse.builder()
-                    .httpStatus(HttpStatus.OK)
-                    .responseBody(parseResponseBody(requestURI.getResourcePath()))
+                    .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.OK))
                     .contentType(httpRequest.contentType())
+                    .contentLength(responseBody.getValue().length())
+                    .responseBody(responseBody)
                     .build();
         }
         if (requestURI.isLoginPage() && httpRequest.isMethod(POST)) {
@@ -46,28 +50,34 @@ public class Handler {
         }
         if (requestURI.isHome()) {
             return HttpResponse.builder()
-                    .httpStatus(HttpStatus.OK)
-                    .responseBody("Hello world!")
+                    .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.OK))
                     .contentType(httpRequest.contentType())
+                    .contentLength("Hello world!".getBytes().length)
+                    .responseBody(new ResponseBody("Hello world!"))
                     .build();
         }
         if (requestURI.isRegister()) {
             return doRegister(httpRequest);
         }
+        ResponseBody responseBody = new ResponseBody(parseResponseBody(requestURI.getResourcePath()));
         return HttpResponse.builder()
-                .httpStatus(HttpStatus.OK)
-                .responseBody(parseResponseBody(requestURI.getResourcePath()))
+                .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.OK))
                 .contentType(httpRequest.contentType())
+                .contentLength(responseBody.getValue().length())
+                .responseBody(responseBody)
                 .build();
     }
 
     private static HttpResponse doRegister(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isRequestBodyEmpty()) {
+            String resourcePath = httpRequest.getRequestLine().getRequestURI().getResourcePath();
+            ResponseBody responseBody = new ResponseBody(parseResponseBody(resourcePath));
             return HttpResponse.builder()
-                    .httpStatus(HttpStatus.OK)
-                    .responseBody(parseResponseBody("static/register.html"))
+                    .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
                     .contentType(httpRequest.contentType())
-                    .redirectPage("register.html")
+                    .contentLength(responseBody.getValue().length())
+                    .redirect("http://localhost:8080/register.html")
+                    .responseBody(responseBody)
                     .build();
         }
 
@@ -76,21 +86,27 @@ public class Handler {
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
+            String resourcePath = httpRequest.getRequestLine().getRequestURI().getResourcePath();
+            ResponseBody responseBody = new ResponseBody(parseResponseBody(resourcePath));
             return HttpResponse.builder()
-                    .httpStatus(HttpStatus.FOUND)
-                    .responseBody(parseResponseBody("static/register.html"))
+                    .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
                     .contentType(httpRequest.contentType())
-                    .redirectPage("register.html")
+                    .contentLength(responseBody.getValue().length())
+                    .redirect("http://localhost:8080/register.html")
+                    .responseBody(responseBody)
                     .build();
         }
         String password = requestBody.getValueOf("password");
         String email = requestBody.getValueOf("email");
         InMemoryUserRepository.save(new User(account, password, email));
+        String resourcePath = httpRequest.getRequestLine().getRequestURI().getResourcePath();
+        ResponseBody responseBody = new ResponseBody(parseResponseBody(resourcePath));
         return HttpResponse.builder()
-                .httpStatus(HttpStatus.CREATED)
-                .responseBody(parseResponseBody("static/login.html"))
+                .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.CREATED))
                 .contentType(httpRequest.contentType())
-                .redirectPage("login.html")
+                .contentLength(responseBody.getValue().length())
+                .redirect("http://localhost:8080/login.html")
+                .responseBody(responseBody)
                 .build();
     }
 
@@ -102,34 +118,42 @@ public class Handler {
         log.info(user.toString());
         String password = requestBody.getValueOf("password");
         if (!user.checkPassword(password)) {
+            String resourcePath = httpRequest.getRequestLine().getRequestURI().getResourcePath();
+            ResponseBody responseBody = new ResponseBody(parseResponseBody(resourcePath));
             return HttpResponse.builder()
-                    .httpStatus(HttpStatus.UNAUTHORIZED)
-                    .responseBody(parseResponseBody("static/401.html"))
+                    .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.UNAUTHORIZED))
                     .contentType(httpRequest.contentType())
-                    .redirectPage("401.html")
+                    .contentLength(responseBody.getValue().length())
+                    .redirect("http://localhost:8080/401")
+                    .responseBody(responseBody)
                     .build();
         }
         HttpCookie cookie = HttpCookie.from(httpRequest.getHeaderValue("Cookie"));
         Session foundSession = sessionManager.findSession(cookie.getValue("JSESSIONID"));
         if (foundSession != null) {
+            String resourcePath = httpRequest.getRequestLine().getRequestURI().getResourcePath();
+            ResponseBody responseBody = new ResponseBody(parseResponseBody(resourcePath));
             return HttpResponse.builder()
-                    .httpStatus(HttpStatus.FOUND)
-                    .responseBody(parseResponseBody("static/index.html"))
+                    .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
                     .contentType(httpRequest.contentType())
-                    .redirectPage("index.html")
-                    .httpCookie(HttpCookie.jSessionId(foundSession.getId()))
+                    .contentLength(responseBody.getValue().length())
+                    .redirect("http://localhost:8080/index")
+                    .setCookie(cookie)
+                    .responseBody(responseBody)
                     .build();
         }
         String uuid = UUID.randomUUID().toString();
         Session session = new Session(uuid);
         session.setAttribute("user", user);
         sessionManager.add(session);
+        String resourcePath = httpRequest.getRequestLine().getRequestURI().getResourcePath();
+        ResponseBody responseBody = new ResponseBody(parseResponseBody(resourcePath));
         return HttpResponse.builder()
-                .httpStatus(HttpStatus.FOUND)
-                .responseBody(parseResponseBody("static/index.html"))
+                .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
                 .contentType(httpRequest.contentType())
-                .redirectPage("index.html")
-                .httpCookie(HttpCookie.jSessionId(uuid))
+                .contentLength(responseBody.getValue().length())
+                .redirect("http://localhost:8080/index")
+                .responseBody(responseBody)
                 .build();
     }
 

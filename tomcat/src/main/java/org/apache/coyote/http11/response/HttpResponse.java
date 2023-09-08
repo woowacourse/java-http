@@ -1,92 +1,74 @@
 package org.apache.coyote.http11.response;
 
+import java.util.stream.Collectors;
+
+import org.apache.coyote.http11.Headers;
 import org.apache.coyote.http11.cookie.HttpCookie;
-import org.apache.coyote.http11.request.ContentType;
 
 public class HttpResponse {
+
     private static final String ENTER = "\r\n";
-    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final StatusLine statusLine;
-    private final String responseBody;
-    private final ContentType contentType;
-    private final String redirectPage;
-    private final HttpCookie httpCookie;
+    private final Headers headers;
+    private final ResponseBody responseBody;
 
-    private HttpResponse(
-            StatusLine statusLine,
-            String responseBody,
-            ContentType contentType,
-            String redirectPage,
-            HttpCookie httpCookie
-    ) {
+    private HttpResponse(StatusLine statusLine, Headers headers, ResponseBody responseBody) {
         this.statusLine = statusLine;
+        this.headers = headers;
         this.responseBody = responseBody;
-        this.contentType = contentType;
-        this.redirectPage = redirectPage;
-        this.httpCookie = httpCookie;
     }
 
     public String getResponse() {
-        HttpStatus httpStatus = statusLine.getHttpStatus();
-        String statusLineResponse = String.format("&s &d &s", statusLine, httpStatus.getStatusCode(), httpStatus.getMessage());
-
-        String contentTypeHeader = "Content-Type: " + contentType.getValue() + ";charset=utf-8 ";
-        String contentLengthHeader = "Content-Length: " + responseBody.getBytes().length + " ";
-
-        StringBuilder response = new StringBuilder();
-        response.append(statusLineResponse).append(ENTER)
-                .append(contentTypeHeader).append(ENTER)
-                .append(contentLengthHeader).append(ENTER);
-
-        if (redirectPage != null) {
-            response.append("Location: http://localhost:8080/").append(redirectPage + " ").append(ENTER);
-        }
-        if (httpCookie != null) {
-            response.append("Set-Cookie: ").append(
-                    "JSESSIONID" + KEY_VALUE_DELIMITER + httpCookie.getValue("JSESSIONID") + " "
-            ).append(ENTER);
-        }
-
-        response.append(ENTER).append(responseBody);
-        return response.toString();
+        String statusLineResponse =
+                statusLine.getProtocolVersion() + " " +
+                statusLine.getHttpStatus().getStatusCode() + " " +
+                statusLine.getHttpStatus().getMessage() + " " + ENTER;
+        String headerResponse = headers.getValues().entrySet()
+                .stream()
+                .map(header -> header.getKey() + ": " + header.getValue() + " ")
+                .collect(Collectors.joining(ENTER));
+        return statusLineResponse + headerResponse + ENTER + ENTER + responseBody.getValue();
     }
 
     public static class Builder {
 
         private StatusLine statusLine;
-        private String responseBody;
-        private ContentType contentType;
-        private String redirectPage;
-        private HttpCookie httpCookie;
+        private Headers headers = Headers.empty();
+        private ResponseBody responseBody;
 
         public Builder statusLine(StatusLine statusLine) {
             this.statusLine = statusLine;
             return this;
         }
 
-        public Builder responseBody(String responseBody) {
+        public Builder redirect(String uri) {
+            this.headers.add("Location", uri);
+            return this;
+        }
+
+        public Builder contentType(String contentType) {
+            this.headers.add("Content-Type", contentType + ";charset=utf-8");
+            return this;
+        }
+
+        public Builder contentLength(int contentLength) {
+            this.headers.add("Content-Length", String.valueOf(contentLength));
+            return this;
+        }
+
+        public Builder setCookie(HttpCookie httpCookie) {
+            this.headers.setCookie(httpCookie);
+            return this;
+        }
+
+        public Builder responseBody(ResponseBody responseBody) {
             this.responseBody = responseBody;
             return this;
         }
 
-        public Builder contentType(ContentType contentType) {
-            this.contentType = contentType;
-            return this;
-        }
-
-        public Builder redirectPage(String redirectPage) {
-            this.redirectPage = redirectPage;
-            return this;
-        }
-
-        public Builder httpCookie(HttpCookie httpCookie) {
-            this.httpCookie = httpCookie;
-            return this;
-        }
-
         public HttpResponse build() {
-            return new HttpResponse(statusLine, responseBody, contentType, redirectPage, httpCookie);
+            return new HttpResponse(statusLine, headers, responseBody);
         }
 
     }

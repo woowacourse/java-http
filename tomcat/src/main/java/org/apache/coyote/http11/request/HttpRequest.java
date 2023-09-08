@@ -7,6 +7,7 @@ import org.apache.coyote.http11.Headers;
 public class HttpRequest {
     private static final int REQUEST_LINE_INDEX = 0;
     private static final int HEADER_INDEX = 1;
+    private static final String CONTENT_TYPE_KEY = "Accept";
 
     private final RequestLine requestLine;
     private final Headers headers;
@@ -31,6 +32,13 @@ public class HttpRequest {
 
     public String getHeaderValue(String key) {
         return headers.getValue(key);
+    }
+
+    public String contentType() {
+        if (!headers.containsKey(CONTENT_TYPE_KEY)) {
+            return ContentType.HTML.getValue();
+        }
+        return ContentType.from(headers.getValue(CONTENT_TYPE_KEY)).getValue();
     }
 
     public boolean isMethod(HttpMethod httpMethod) {

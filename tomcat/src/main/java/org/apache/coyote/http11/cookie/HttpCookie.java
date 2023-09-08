@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.cookie;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpCookie {
@@ -36,6 +38,10 @@ public class HttpCookie {
         Map<String, String> values = new HashMap<>();
         values.put(JSESSIONID_KEY, id);
         return new HttpCookie(values);
+    }
+
+    public List<String> names() {
+        return new ArrayList<>(values.keySet());
     }
 
     public String getValue(String key) {

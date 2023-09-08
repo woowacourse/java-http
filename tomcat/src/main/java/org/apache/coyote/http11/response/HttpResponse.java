@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.HttpVersion;
 
@@ -9,6 +10,7 @@ public class HttpResponse {
     private final HttpVersion httpVersion;
     private final Headers headers = new Headers();
     private HttpStatus httpStatus;
+    private HttpCookie httpCookie = new HttpCookie();
     private String redirect;
 
     public HttpResponse(HttpVersion httpVersion) {
@@ -28,6 +30,10 @@ public class HttpResponse {
     public HttpResponse sendRedirect(final String url) {
         this.redirect = url;
         return this;
+    }
+
+    public void setCookie(final String key, final String value) {
+        httpCookie.put(key, value);
     }
 
     public HttpVersion getHttpVersion() {

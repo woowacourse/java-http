@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.coyote.http11.common.Constants.EMPTY;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +36,7 @@ public class RequestBody {
     }
 
     public String get(final String key) {
-        return items.get(key);
+        return items.getOrDefault(key, EMPTY);
     }
 
     public Map<String, String> getItems() {

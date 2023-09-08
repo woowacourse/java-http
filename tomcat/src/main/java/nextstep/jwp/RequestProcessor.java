@@ -33,6 +33,7 @@ public class RequestProcessor {
     private static final String INDEX_PAGE = "index.html";
     private static final String REGISTER_PAGE = "register.html";
     private static final String UNAUTHORIZED_PAGE = "401.html";
+    private static final String SERVER_ERROR_PAGE = "500.html";
     private static final String JAVA_SESSION_NAME = "JSESSIONID";
 
     private static final Logger log = LoggerFactory.getLogger(RequestProcessor.class);
@@ -43,10 +44,17 @@ public class RequestProcessor {
         final HttpMethod method = httpRequest.getHttpMethod();
         final String requestUri = httpRequest.getRequestUri();
         final HttpCookie cookies = httpRequest.getCookies();
-        String content = "Hello world!";
 
         if (method.equals(HttpMethod.GET)) {
             if (requestUri.isEmpty()) {
+                final String content = "Hello world!";
+                return HttpResponse.of(version, HttpStatus.OK, content,
+                        Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+            }
+
+            if (requestUri.equals("register")) {
+                final String content = makeResponseBody(requestUri);
                 return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
@@ -59,35 +67,16 @@ public class RequestProcessor {
                     return HttpResponse.of(version, HttpStatus.FOUND, null,
                             Map.of(LOCATION_HEADER, INDEX_PAGE));
                 }
-                content = makeResponseBody(requestUri);
+                final String content = makeResponseBody(requestUri);
                 return HttpResponse.of(version, HttpStatus.OK, content,
                         Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
 
-            content = makeResponseBody(requestUri);
-
-            if (requestUri.endsWith(".html") || requestUri.equals("register")) {
+            if (ContentType.isSupportedType(requestUri)) {
+                final String content = makeResponseBody(requestUri);
                 return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
-            }
-
-            if (requestUri.endsWith(".css")) {
-                return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.CSS.getType(),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
-            }
-
-            if (requestUri.endsWith(".js")) {
-                return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.JS.getType(),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
-            }
-
-            if (requestUri.endsWith(".svg")) {
-                return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.SVG.getType(),
+                        Map.of(CONTENT_TYPE_HEADER, ContentType.getTypeByExtension(requestUri),
                                 CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
             }
         }
@@ -104,6 +93,7 @@ public class RequestProcessor {
                     return HttpResponse.of(version, HttpStatus.FOUND, null,
                             Map.of(LOCATION_HEADER, REGISTER_PAGE));
                 }
+
                 final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"),
                         registerInfo.get("email"));
                 InMemoryUserRepository.save(newUser);
@@ -125,17 +115,18 @@ public class RequestProcessor {
                         SessionManager.add(session);
                         cookies.save(JAVA_SESSION_NAME, session.getId());
                         final String cookieInfo = cookies.cookieInfo(JAVA_SESSION_NAME);
-                        return HttpResponse.of(version, HttpStatus.FOUND, content,
+                        return HttpResponse.of(version, HttpStatus.FOUND, null,
                                 Map.of(LOCATION_HEADER, INDEX_PAGE,
                                         "Set-Cookie", cookieInfo));
                     }
                 }
 
-                return HttpResponse.of(version, HttpStatus.FOUND, content,
+                return HttpResponse.of(version, HttpStatus.FOUND, null,
                         Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE));
             }
         }
 
+        final String content = SERVER_ERROR_PAGE;
         return HttpResponse.of(version, HttpStatus.NOT_FOUND, content,
                 Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
                         CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));

@@ -1,5 +1,6 @@
 package thread.stage1;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 어떤 사례가 있는지 아래 테스트 코드를 통해 알아보자.
  */
 class ConcurrencyTest {
-
     @Test
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();

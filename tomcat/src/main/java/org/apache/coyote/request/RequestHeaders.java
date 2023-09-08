@@ -6,11 +6,9 @@ import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import static org.apache.coyote.common.HeaderType.*;
+import static org.apache.coyote.common.HeaderType.COOKIE;
 
 public class RequestHeaders {
 
@@ -29,33 +27,37 @@ public class RequestHeaders {
     }
 
     public static RequestHeaders from(final List<String> headersWithValue) {
-        final Map<String, String> headerMapping = collectHeaderMapping(headersWithValue);
-        final Cookies newCookies = getCookiesBy(headerMapping);
-        final Session foundSession = getSessionBy(newCookies);
+        final Headers headers = collectHeaderMapping(headersWithValue);
+        final Cookies cookies = getCookiesBy(headers);
+        final Session session = getSessionBy(cookies);
 
-        return new RequestHeaders(new Headers(headerMapping), newCookies, foundSession);
+        return new RequestHeaders(headers, cookies, session);
     }
 
-    private static Map<String, String> collectHeaderMapping(final List<String> headersWithValue) {
-        return headersWithValue.stream()
+    private static Headers collectHeaderMapping(final List<String> headersWithValue) {
+        final Headers newHeaders = Headers.empty();
+
+        headersWithValue.stream()
                 .map(headerWithValue -> headerWithValue.split(HEADER_DELIMITER))
-                .collect(Collectors.toMap(
-                        entry -> entry[HEADER_NAME_INDEX].trim(),
-                        entry -> entry[HEADER_VALUE_INDEX].trim()
+                .forEach(entry -> newHeaders.addHeader(
+                        entry[HEADER_NAME_INDEX].strip(),
+                        entry[HEADER_VALUE_INDEX].strip()
                 ));
+
+        return newHeaders;
     }
 
-    private static Cookies getCookiesBy(final Map<String, String> headers) {
-        final String cookiesWithValue = headers.getOrDefault(COOKIE.value(), null);
-        if (Objects.isNull(COOKIE.value())) {
+    private static Cookies getCookiesBy(final Headers headers) {
+        final String cookieNamesAndValues = headers.getHeaderValue(COOKIE.value());
+        if (Objects.isNull(cookieNamesAndValues)) {
             return Cookies.empty();
         }
 
-        return Cookies.from(cookiesWithValue);
+        return Cookies.from(cookieNamesAndValues);
     }
 
-    private static Session getSessionBy(final Cookies newCookies) {
-        final String sessionId = newCookies.getCookieValue("JSESSIONID");
+    private static Session getSessionBy(final Cookies cookies) {
+        final String sessionId = cookies.getCookieValue("JSESSIONID");
         if (Objects.isNull(sessionId)) {
             return Session.empty();
         }

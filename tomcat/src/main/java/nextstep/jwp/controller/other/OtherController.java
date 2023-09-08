@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.util.PathUtil;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -23,18 +24,10 @@ public class OtherController extends AbstractController {
     }
 
     @Override
-    public HttpResponse process(final HttpRequest request) throws IOException {
+    protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
-        final URL url = HttpResponse.class.getClassLoader()
-                .getResource(STATIC + uri);
+        final Path path = PathUtil.findPath(uri);
 
-        final Path path = new File(url.getPath()).toPath();
-
-        final byte[] content = Files.readAllBytes(path);
-
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String responseBody = new String(content);
-
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
+        return HttpResponse.create(HttpStatus.OK, path);
     }
 }

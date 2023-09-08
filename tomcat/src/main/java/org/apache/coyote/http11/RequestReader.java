@@ -105,8 +105,12 @@ public class RequestReader {
         return requestLine.getProtocol();
     }
 
-    public String getRequestUrl() {
+    public String getUri() {
         return requestLine.getUri();
+    }
+
+    public RequestUri getRequestUri() {
+        return requestLine.getRequestUri();
     }
 
     public String getMethod() {

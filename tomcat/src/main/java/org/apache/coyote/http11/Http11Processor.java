@@ -37,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
             requestReader.read();
 
-            Controller controller = controllerFinder.findController(requestReader);
+            Controller controller = controllerFinder.findController(requestReader.getRequestUri());
             Response response = controller.service(requestReader);
 
             outputStream.write(response.format().getBytes());

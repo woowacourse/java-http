@@ -17,21 +17,23 @@ import static org.apache.coyote.http11.StatusCode.UNAUTHORIZED;
 public class LoginController implements Controller {
 
     private static final String INDEX = "/index.html";
-    private static final String LOGIN = "/login.html";
     private static final String UNAUTHORIZED_HTML = "/401.html";
 
     @Override
     public Response service(RequestReader requestReader) throws IOException {
-        if (requestReader.getMethod().equalsIgnoreCase("GET") && requestReader.getRequestUrl().equals("/login")) {
+        String method = requestReader.getMethod();
+        String uri = requestReader.getUri();
+
+        if (method.equalsIgnoreCase("GET") && uri.equals("/login")) {
             return loginPage(requestReader);
         }
-        if (requestReader.getMethod().equalsIgnoreCase("POST") && requestReader.getRequestUrl().equals("/login")) {
+        if (method.equalsIgnoreCase("POST") && uri.equals("/login")) {
             return tryLogin(requestReader);
         }
-        if (requestReader.getMethod().equalsIgnoreCase("GET") && requestReader.getRequestUrl().equals("/register")) {
+        if (method.equalsIgnoreCase("GET") && uri.equals("/register")) {
             return registerPage(requestReader);
         }
-        if (requestReader.getMethod().equalsIgnoreCase("POST") && requestReader.getRequestUrl().equals("/register")) {
+        if (method.equalsIgnoreCase("POST") && uri.equals("/register")) {
             return register(requestReader);
         }
         return null;
@@ -41,7 +43,7 @@ public class LoginController implements Controller {
         if (requestReader.isSessionExits()) {
             return new Response(requestReader, OK)
                     .addBaseHeader()
-                    .createBodyByFile(requestReader.getRequestUrl());
+                    .createBodyByFile(requestReader.getUri());
         }
         return new Response(requestReader, FOUND)
                 .createBodyByFile(INDEX)
@@ -78,7 +80,7 @@ public class LoginController implements Controller {
     private Response registerPage(RequestReader requestReader) throws IOException {
         return new Response(requestReader, OK)
                 .addBaseHeader()
-                .createBodyByFile(requestReader.getRequestUrl());
+                .createBodyByFile(requestReader.getUri());
     }
 
     private Response register(RequestReader requestReader) throws IOException {

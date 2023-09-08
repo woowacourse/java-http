@@ -27,6 +27,10 @@ public class RequestLine {
         return requestUri.getUri();
     }
 
+    public RequestUri getRequestUri() {
+        return requestUri;
+    }
+
     public String getProtocol() {
         return protocol;
     }

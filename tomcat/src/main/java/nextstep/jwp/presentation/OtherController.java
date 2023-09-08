@@ -12,6 +12,6 @@ public class OtherController implements Controller {
     public Response service(RequestReader requestReader) throws IOException {
         return new Response(requestReader, StatusCode.OK)
                 .addBaseHeader()
-                .createBodyByFile(requestReader.getRequestUrl());
+                .createBodyByFile(requestReader.getUri());
     }
 }

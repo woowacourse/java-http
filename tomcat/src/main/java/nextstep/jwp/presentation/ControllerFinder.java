@@ -1,6 +1,6 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.RequestReader;
+import org.apache.coyote.http11.RequestUri;
 
 public class ControllerFinder {
 
@@ -18,14 +18,15 @@ public class ControllerFinder {
         return INSTANCE;
     }
 
-    public Controller findController(RequestReader requestReader) {
-        if (requestReader.getRequestUrl().equals("/")) {
+    public Controller findController(RequestUri requestUri) {
+        String uri = requestUri.getUri();
+        if (uri.equals("/")) {
             return mainController;
         }
-        if (requestReader.getRequestUrl().equals("/login") || requestReader.getRequestUrl().equals("/register")) {
+        if (uri.equals("/login") || uri.equals("/register")) {
             return loginController;
         }
-        if (requestReader.getRequestUrl().equals("/index") || requestReader.getRequestUrl().equals("/index.html")) {
+        if (uri.equals("/index") || uri.equals("/index.html")) {
             return indexController;
         }
         return otherController;

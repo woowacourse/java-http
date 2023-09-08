@@ -1,15 +1,15 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.Controller;
+import org.apache.catalina.controller.HttpController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 import java.util.*;
 
-import static org.apache.coyote.http11.HttpHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.HttpStatusCode.OK;
 
-public class RootController extends Controller {
+public class RootController extends HttpController {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {

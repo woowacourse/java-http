@@ -1,9 +1,7 @@
-package org.apache.catalina;
+package org.apache.coyote.http11.common;
 
-import org.apache.coyote.http11.HttpHeaders;
-
-import static org.apache.coyote.http11.HttpHeaderType.ACCEPT;
-import static org.apache.coyote.http11.HttpHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaderType.ACCEPT;
+import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
 
 public class ResourceContentTypeResolver {
 
@@ -39,8 +37,8 @@ public class ResourceContentTypeResolver {
         if (lastDotIndex >= 0) {
             final String fileExtension = fileName.substring(lastDotIndex + 1);
             if ("js".equals(fileExtension)) {
-                final MediaType javascript = MediaType.getMediaTypeByFileExtension("javascript");
-                return javascript.stringify();
+                final MediaType jsContentType = MediaType.getMediaTypeByFileExtension("javascript");
+                return jsContentType.stringify();
             }
             final MediaType mediaType = MediaType.getMediaTypeByFileExtension(fileExtension);
             if (MediaType.isSupported(mediaType)) {

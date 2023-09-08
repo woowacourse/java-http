@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.apache.coyote.http11.HttpHeaderType.CONTENT_LENGTH;
-import static org.apache.coyote.http11.HttpHeaderType.COOKIE;
+import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.HttpHeaderType.COOKIE;
 
 public class HttpRequestParser {
 

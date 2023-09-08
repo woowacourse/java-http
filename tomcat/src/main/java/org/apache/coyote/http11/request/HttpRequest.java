@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.util.Map;
 

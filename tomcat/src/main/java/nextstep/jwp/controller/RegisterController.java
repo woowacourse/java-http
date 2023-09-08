@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.Controller;
+import org.apache.catalina.controller.HttpController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -12,11 +12,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.coyote.http11.HttpHeaderType.CONTENT_TYPE;
-import static org.apache.coyote.http11.HttpHeaderType.LOCATION;
+import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 
-public class RegisterController extends Controller {
+public class RegisterController extends HttpController {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {

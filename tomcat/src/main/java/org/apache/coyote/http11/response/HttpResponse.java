@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpHeaderType;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.common.HttpHeaderType;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.util.Map;
 

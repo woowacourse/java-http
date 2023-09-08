@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
 
@@ -54,7 +54,7 @@ public enum MediaType {
     }
 
     public String stringify() {
-        return type + "/" + subType;
+        return type + "/" + subType + ";" + "charset=utf-8";
     }
 
     public String getType() {

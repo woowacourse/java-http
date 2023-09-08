@@ -21,5 +21,5 @@
 
 ## 4단계 기능 요구 사항
 
-- [ ] Executors로 Thread Pool 적용
+- [x] Executors로 Thread Pool 적용
 - [ ] 동시성 컬렉션 사용하기

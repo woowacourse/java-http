@@ -72,25 +72,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getRequestBodyAsMap() {
-        return parseParametersIntoMap(this.requestBody);
-    }
-
-    private HashMap<String, String> parseParametersIntoMap(String parameters) {
-        final HashMap<String, String> queryParameters = new HashMap<>();
-        final StringTokenizer stringTokenizer = new StringTokenizer(parameters, "&");
-        while (stringTokenizer.hasMoreTokens()) {
-            final String parameter = stringTokenizer.nextToken();
-            parseParameterIntoMap(queryParameters, parameter);
-        }
-        return queryParameters;
-    }
-
-    private static void parseParameterIntoMap(final HashMap<String, String> queryParameters, final String parameter) {
-        final StringTokenizer stringTokenizer = new StringTokenizer(parameter, "=");
-        if (!stringTokenizer.hasMoreTokens()) {
-            return;
-        }
-        queryParameters.put(stringTokenizer.nextToken(), stringTokenizer.nextToken());
+        return HttpParameterParser.parseParametersIntoMap(this.requestBody);
     }
 
     public Optional<String> getSessionId() {

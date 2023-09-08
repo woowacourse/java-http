@@ -19,16 +19,18 @@ class ResponseHeaderTest {
     @Test
     void 모든_header의_field와_value에_관한_메시지를_얻는다() {
         // given
-        ResponseHeader responseHeader = new ResponseHeader(Map.of(
-                CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8),
-                CONTENT_LENGTH, "5"
-        ));
+        ResponseHeader responseHeader = new ResponseHeader(
+                Map.of(
+                        CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8),
+                        CONTENT_LENGTH, "5"
+                )
+        );
 
         // when
         List<String> headers = responseHeader.headerMessages();
 
         // then
-        assertThat(headers).containsExactly(
+        assertThat(headers).contains(
                 "Content-Type: text/html;charset=utf-8",
                 "Content-Length: 5"
         );

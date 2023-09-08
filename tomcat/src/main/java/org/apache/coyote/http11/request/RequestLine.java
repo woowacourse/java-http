@@ -12,13 +12,16 @@ public class RequestLine {
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
-    private static final String QUERY_STRING_SIGN = "?";
 
     private final HttpMethod httpMethod;
-    private final String requestUri;
+    private final RequestUri requestUri;
     private final String httpVersion;
 
-    public RequestLine(HttpMethod httpMethod, String requestUri, String httpVersion) {
+    public RequestLine(
+            HttpMethod httpMethod,
+            RequestUri requestUri,
+            String httpVersion
+    ) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -28,19 +31,24 @@ public class RequestLine {
         List<String> requests = Arrays.stream(requestLine.split(DELIMITER))
                 .map(String::trim)
                 .collect(toList());
+
         return new RequestLine(
                 HttpMethod.valueOf(requests.get(HTTP_METHOD_INDEX)),
-                requests.get(REQUEST_URI_INDEX),
+                RequestUri.from(requests.get(REQUEST_URI_INDEX)),
                 requests.get(HTTP_VERSION_INDEX)
         );
     }
 
     public boolean consistsOf(HttpMethod httpMethod, String uri) {
-        return this.httpMethod.equals(httpMethod) & Objects.equals(requestUri, uri);
+        return this.httpMethod.equals(httpMethod) & requestUri.consistsOf(uri);
     }
 
     public boolean hasQueryString() {
-        return requestUri.contains(QUERY_STRING_SIGN);
+        return requestUri.hasQueryString();
+    }
+
+    public String getQueryStringValue(String field) {
+        return requestUri.getQueryStringValue(field);
     }
 
     public HttpMethod httpMethod() {
@@ -48,7 +56,7 @@ public class RequestLine {
     }
 
     public String requestUri() {
-        return requestUri;
+        return requestUri.uri();
     }
 
     public String httpVersion() {

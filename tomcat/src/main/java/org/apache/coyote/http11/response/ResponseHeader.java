@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 public class ResponseHeader {
 
-    private static final String SUFFIX = " " + System.lineSeparator();
     private static final String DELIMITER = ": ";
     private final Map<HttpHeader, String> headersMap;
 

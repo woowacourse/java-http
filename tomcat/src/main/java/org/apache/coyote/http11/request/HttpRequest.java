@@ -71,6 +71,10 @@ public class HttpRequest {
         return requestBody.get(fieldName);
     }
 
+    public String getQueryStringValue(String fieldName) {
+        return requestLine.getQueryStringValue(fieldName);
+    }
+
     public void setRequestBody(String requestBody) {
         if (requestBody.isBlank()) {
             return;

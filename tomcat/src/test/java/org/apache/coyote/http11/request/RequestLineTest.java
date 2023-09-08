@@ -21,7 +21,7 @@ class RequestLineTest {
 
         // then
         assertThat(line).isEqualTo(
-                new RequestLine(GET, "/index.html", "HTTP/1.1")
+                new RequestLine(GET, RequestUri.from("/index.html"), "HTTP/1.1")
         );
     }
 
@@ -39,7 +39,7 @@ class RequestLineTest {
     }
 
     @Test
-    void Request_Ling에_Query_String이_있는지_확인한다() {
+    void Request_Line에_Query_String이_있는지_확인한다() {
         // given
         String requestLine = "GET /login?account=gugu&password=password HTTP/1.1 ";
         RequestLine line = RequestLine.from(requestLine);
@@ -49,5 +49,18 @@ class RequestLineTest {
 
         // then
         assertThat(actual).isTrue();
+    }
+
+    @Test
+    void Request_Line의_Query_String의_값을_꺼낸다() {
+        // given
+        String requestLine = "GET /login?account=gugu&password=password HTTP/1.1 ";
+        RequestLine line = RequestLine.from(requestLine);
+
+        // when
+        String account = line.getQueryStringValue("account");
+
+        // then
+        assertThat(account).isEqualTo("gugu");
     }
 }

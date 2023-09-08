@@ -1,33 +1,45 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.coyote.http11.request.HttpMethod.GET;
+import static org.apache.coyote.http11.request.HttpMethod.POST;
+import static org.apache.coyote.http11.response.HttpContentType.TEXT_HTML;
+import static org.apache.coyote.http11.response.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.response.HttpHeader.SET_COOKIE;
+import static org.apache.coyote.http11.response.ResponseStatus.FOUND;
+import static org.apache.coyote.http11.response.ResponseStatus.OK;
+import static org.apache.coyote.http11.response.ResponseStatus.UNAUTHORIZED;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.dto.ResponseDto;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpContentType;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String END_OF_LINE = "";
+    private static final String DEFAULT_BODY = "Hello world!";
 
     private final Socket connection;
-    private final SessionManager sessionManager = new SessionManager();
+    private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, SessionManager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -39,15 +51,15 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final InputStream inputStream = connection.getInputStream();
-                final OutputStream outputStream = connection.getOutputStream();
                 final BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(inputStream, StandardCharsets.UTF_8)
-                )
+                        new InputStreamReader(connection.getInputStream(), UTF_8)
+                );
+                final OutputStream outputStream = connection.getOutputStream()
         ) {
-            HttpRequestHeader header = readHttpRequestHeader(reader);
+            HttpRequest httpRequest = readHttpRequest(reader);
+            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
 
-            String response = makeResponse(header, reader);
+            String response = process(httpRequest, httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -56,184 +68,125 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestHeader readHttpRequestHeader(BufferedReader reader) throws IOException {
-        String line;
-        StringBuilder builder = new StringBuilder();
-        while ((line = reader.readLine()) != null & !Objects.equals(END_OF_LINE, line)) {
-            builder.append(line).append(System.lineSeparator());
-        }
+    private HttpRequest readHttpRequest(BufferedReader reader) throws IOException {
+        String requestLine = HttpRequestReader.readLine(reader);
+        String requestHeader = HttpRequestReader.readHeader(reader);
+        HttpRequest request = HttpRequest.of(requestLine, requestHeader);
 
-        return HttpRequestHeader.from(builder.toString());
+        request.setRequestBody(HttpRequestReader.readBody(reader, request.contentLength()));
+        return request;
     }
 
-    private String makeResponse(HttpRequestHeader header, BufferedReader reader) throws IOException {
-        String url = header.get("URL");
-        Session session = null;
-        HttpCookie httpCookie = HttpCookie.from(header.get("Cookie"));
-        if (httpCookie != null) {
-            String sessionId = httpCookie.get("JESSIONID");
-            session = sessionManager.findSession(sessionId);
+    private String process(HttpRequest request, HttpResponse response) {
+        // 특별한 친구
+        if (request.consistsOf(GET, "/")) {
+            response.setResponseStatus(OK);
+            response.setResponseBody(DEFAULT_BODY);
+
+            response.setResponseHeader(CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8));
+            response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+            return response.responseMessage();
         }
 
-        if (Objects.equals(header.get("HTTP Method"), "POST")) {
-            String bodyContent = readBodyContent(header, reader);
-            HttpRequestBody requestBody = HttpRequestBody.from(bodyContent);
+        // login
+        if (request.consistsOf(POST, "/login", "/login.html")) {
+            String account = request.getBodyValue("account");
+            String password = request.getBodyValue("password");
 
-            if (url.contains("/login")) {
-                ResponseDto responseDto = checkUserCredentials(
-                        requestBody.get("account"),
-                        requestBody.get("password"),
-                        session
-                );
+            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                if (user.checkPassword(password)) {
+                    Session session = new Session(UUID.randomUUID().toString());
+                    sessionManager.add(session);
 
-                String location = responseDto.location();
-                String code = responseDto.code();
-                FileManager fileManager = FileManager.from(location);
-                String type = fileManager.mimeType();
-                String responseBody = fileManager.fileContent();
-
-                if (code.equals("401 Unauthorized ")) {
-                    return String.join(
-                            System.lineSeparator(),
-                            "HTTP/1.1 " + code,
-                            "Location:" + location,
-                            "Content-Type: " + type + ";charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody
-                    );
+                    response.setResponseStatus(FOUND);
+                    response.setResponseHeader(LOCATION, "/index.html");
+                    response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
+                    return response.responseMessage();
                 }
+            }
 
-                if (responseDto.id() == null) {
-                    return String.join(
-                            System.lineSeparator(),
-                            "HTTP/1.1 " + "200 OK ",
-                            "Location:" + location,
-                            "Content-Type: " + type + ";charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody
-                    );
+            FileManager fileManager = FileManager.from("/401.html");
+            String fileContent = fileManager.fileContent();
+            HttpContentType contentType = fileManager.decideContentType();
+
+            response.setResponseStatus(UNAUTHORIZED);
+            response.setResponseBody(fileContent);
+            response.setResponseHeader(CONTENT_TYPE, contentType.mimeTypeWithCharset(UTF_8));
+            response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+            return response.responseMessage();
+        }
+
+        if (request.consistsOf(GET, "/login", "/login.html") & request.hasQueryString()) {
+            String account = request.getQueryStringValue("account");
+            String password = request.getQueryStringValue("password");
+
+            Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                if (user.checkPassword(password)) {
+                    Session session = new Session(UUID.randomUUID().toString());
+                    sessionManager.add(session);
+
+                    response.setResponseStatus(FOUND);
+                    response.setResponseHeader(LOCATION, "/index.html");
+                    response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
+                    return response.responseMessage();
                 }
-
-                return String.join(
-                        System.lineSeparator(),
-                        "HTTP/1.1 " + code,
-                        "Location:" + location,
-                        "Set-Cookie:" + "JESSIONID=" + responseDto.id(),
-                        "Content-Type: " + type + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody
-                );
             }
 
-            if (url.contains("/register")) {
-                ResponseDto responseDto = save(
-                        requestBody.get("account"),
-                        requestBody.get("password"),
-                        requestBody.get("email")
-                );
+            FileManager fileManager = FileManager.from("/401.html");
+            String fileContent = fileManager.fileContent();
+            HttpContentType contentType = fileManager.decideContentType();
 
-                String location = responseDto.location();
-                String code = responseDto.code();
-                FileManager fileManager = FileManager.from(location);
-                String type = fileManager.mimeType();
-                String responseBody = fileManager.fileContent();
+            response.setResponseStatus(UNAUTHORIZED);
+            response.setResponseBody(fileContent);
+            response.setResponseHeader(CONTENT_TYPE, contentType.mimeTypeWithCharset(UTF_8));
+            response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+            return response.responseMessage();
+        }
 
-                return String.join(
-                        System.lineSeparator(),
-                        "HTTP/1.1 " + code,
-                        "Location:" + location,
-                        "Content-Type: " + type + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody
-                );
+        if (request.consistsOf(GET, "/login", "/login.html") & request.hasSessionId()) {
+            String sessionId = request.sessionId();
+            Session session = sessionManager.findSession(sessionId);
+
+            if (session != null) {
+                response.setResponseStatus(FOUND);
+                response.setResponseHeader(LOCATION, "/index.html");
+                return response.responseMessage();
             }
         }
 
-        if (Objects.equals(header.get("HTTP Method"), "GET")) {
+        // register
+        if (request.consistsOf(POST, "/register", "/register.html") & request.hasBody()) {
+            String account = request.getBodyValue("account");
+            String password = request.getBodyValue("password");
+            String email = request.getBodyValue("email");
 
-            if (url.contains("/login") & session != null) {
-                String location = "index.html";
-                String code = "200 OK ";
-                FileManager fileManager = FileManager.from(location);
-                String type = fileManager.mimeType();
-                String responseBody = fileManager.fileContent();
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
 
-                return String.join(
-                        System.lineSeparator(),
-                        "HTTP/1.1 " + code,
-                        "Location:" + location,
-                        "Content-Type: " + type + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody
-                );
-            }
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
 
-            if (Objects.equals(url, "/")) {
-                String responseBody = "Hello world!";
-                return String.join(
-                        System.lineSeparator(),
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody
-                );
-            }
-
-            FileManager fileManager = FileManager.from(url);
-            String type = fileManager.mimeType();
-            String responseBody = fileManager.fileContent();
-
-            return String.join(
-                    System.lineSeparator(),
-                    "HTTP/1.1 " + "200 OK ",
-                    "Content-Type: " + type + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody
-            );
+            response.setResponseStatus(FOUND);
+            response.setResponseHeader(LOCATION, "/index.html");
+            response.setResponseHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
+            return response.responseMessage();
         }
 
-        throw new IllegalArgumentException();
-    }
+        // 권한이 필요하지 않은 URI
+        String uri = request.requestUri();
 
-    private String readBodyContent(HttpRequestHeader header, BufferedReader reader) throws IOException {
-        int contentLength = Integer.parseInt(header.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        return new String(buffer);
-    }
+        FileManager fileManager = FileManager.from(uri);
+        String fileContent = fileManager.fileContent();
+        HttpContentType contentType = fileManager.decideContentType();
 
-    public ResponseDto checkUserCredentials(String account, String password, Session session) {
-        Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if ((user.checkPassword(password)) & session == null) {
-                session = new Session(UUID.randomUUID().toString());
-                session.setAttribute("user", user);
-                sessionManager.add(session);
-                String id = session.getId();
-
-                log.info("user : {}", user);
-                return new ResponseDto("302 Found ", "index.html", id);
-            }
-
-            if ((user.checkPassword(password))) {
-                log.info("user : {}", user);
-                return new ResponseDto("302 Found ", "index.html", null);
-            }
-        }
-        return new ResponseDto("401 Unauthorized ", "401.html", null);
-    }
-
-    public ResponseDto save(String account, String password, String email) {
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        return new ResponseDto("200 OK ", "index.html", null);
+        response.setResponseStatus(OK);
+        response.setResponseBody(fileContent);
+        response.setResponseHeader(CONTENT_TYPE, contentType.mimeTypeWithCharset(UTF_8));
+        response.setResponseHeader(CONTENT_LENGTH, String.valueOf(response.measureContentLength()));
+        return response.responseMessage();
     }
 }

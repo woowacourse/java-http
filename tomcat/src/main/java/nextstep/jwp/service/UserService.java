@@ -22,7 +22,6 @@ public class UserService {
             User user = userOptional.get();
             if ((user.checkPassword(password)) & session == null) {
                 session = new Session(UUID.randomUUID().toString());
-                session.setAttribute("user", user);
                 String id = session.getId();
 
                 log.info("user : {}", user);

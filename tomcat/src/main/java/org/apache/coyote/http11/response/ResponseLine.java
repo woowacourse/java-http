@@ -6,7 +6,7 @@ public class ResponseLine {
 
     private static final String DELIMITER = " ";
     private final String httpVersion;
-    private final ResponseStatus responseStatus;
+    private ResponseStatus responseStatus;
 
     public ResponseLine(String httpVersion, ResponseStatus responseStatus) {
         this.httpVersion = httpVersion;
@@ -28,6 +28,10 @@ public class ResponseLine {
 
     public ResponseStatus responseStatus() {
         return responseStatus;
+    }
+
+    public void setResponseStatus(ResponseStatus responseStatus) {
+        this.responseStatus = responseStatus;
     }
 
     @Override

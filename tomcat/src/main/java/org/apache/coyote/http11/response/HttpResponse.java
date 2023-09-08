@@ -9,8 +9,8 @@ public class HttpResponse {
     private final ResponseHeader responseHeader;
     private ResponseBody responseBody;
 
-    public HttpResponse(String httpVersion, ResponseStatus responseStatus) {
-        this.responseLine = new ResponseLine(httpVersion, responseStatus);
+    public HttpResponse(String httpVersion) {
+        this.responseLine = new ResponseLine(httpVersion, null);
         this.responseHeader = new ResponseHeader(new LinkedHashMap<>());
     }
 
@@ -33,11 +33,15 @@ public class HttpResponse {
         return messageBuilder.toString();
     }
 
-    public void putResponseHeader(HttpHeader field, String value) {
+    public void setResponseHeader(HttpHeader field, String value) {
         responseHeader.put(field, value);
     }
 
     public void setResponseBody(String responseBody) {
         this.responseBody = new ResponseBody(responseBody);
+    }
+
+    public void setResponseStatus(ResponseStatus responseStatus) {
+        responseLine.setResponseStatus(responseStatus);
     }
 }

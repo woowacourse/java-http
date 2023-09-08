@@ -18,7 +18,7 @@ class HttpResponseTest {
     @Test
     void Content_Length를_잰다() {
         // given
-        HttpResponse httpResponse = new HttpResponse("HTTP/1.1", OK);
+        HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
         httpResponse.setResponseBody("Hello world!");
 
         // when
@@ -31,10 +31,11 @@ class HttpResponseTest {
     @Test
     void 응답_본문을_반환한다() {
         // given
-        HttpResponse httpResponse = new HttpResponse("HTTP/1.1", OK);
+        HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+        httpResponse.setResponseStatus(OK);
         httpResponse.setResponseBody("Hello world!");
-        httpResponse.putResponseHeader(CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8));
-        httpResponse.putResponseHeader(CONTENT_LENGTH, String.valueOf(httpResponse.measureContentLength()));
+        httpResponse.setResponseHeader(CONTENT_TYPE, TEXT_HTML.mimeTypeWithCharset(UTF_8));
+        httpResponse.setResponseHeader(CONTENT_LENGTH, String.valueOf(httpResponse.measureContentLength()));
 
         // when
         String message = httpResponse.responseMessage();

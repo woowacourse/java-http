@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.response.HttpStatus;
-
 import static org.apache.coyote.http11.response.HttpStatus.CONFLICT;
 import static org.apache.coyote.http11.response.HttpStatus.FOUND;
 import static org.apache.coyote.http11.response.HttpStatus.OK;

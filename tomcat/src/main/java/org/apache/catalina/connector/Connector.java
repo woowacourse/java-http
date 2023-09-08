@@ -4,6 +4,14 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +22,12 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_THREAD = 250;
+    private static final int CORE_POOL_SIZE = 10;
+    private static final Long KEEP_ALIVE_TIME = 60L;
 
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor threadPoolExecutor;
     private boolean stopped;
 
     public Connector() {
@@ -24,6 +36,12 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.threadPoolExecutor = new ThreadPoolExecutor(
+                CORE_POOL_SIZE,
+                MAX_THREAD,
+                KEEP_ALIVE_TIME,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT));
         this.stopped = false;
     }
 
@@ -66,13 +84,14 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        threadPoolExecutor.execute(processor);
     }
 
     public void stop() {
         stopped = true;
         try {
             serverSocket.close();
+            threadPoolExecutor.shutdown();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

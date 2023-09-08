@@ -66,12 +66,15 @@ public class LoginController implements Controller {
     }
 
     private String login(RequestReader requestReader) {
-        User find = InMemoryUserRepository.findByAccount(requestReader.getBodyValue("account"))
-                .filter(user -> user.checkPassword(requestReader.getBodyValue("password")))
-                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다"));
+        User user = InMemoryUserRepository.findByAccount(requestReader.getBodyValue("account"))
+                .orElseThrow(() -> new IllegalArgumentException("해당 아이디의 사용자가 존재하지 않습니다"));
+
+        if (!user.checkPassword(requestReader.getBodyValue("password"))) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+        }
 
         String sessionId = UUID.randomUUID().toString();
-        SessionManager.addSession(sessionId, find);
+        SessionManager.addSession(sessionId, user);
 
         return sessionId;
     }

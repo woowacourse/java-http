@@ -12,7 +12,7 @@ import org.apache.coyote.response.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginPageHandler implements Handler {
+public class LoginPageHandler implements StaticHandler {
 
   private static final Logger log = LoggerFactory.getLogger(LoginPageHandler.class);
   private static final String REDIRECT_URL = "http://localhost:8080/index.html";

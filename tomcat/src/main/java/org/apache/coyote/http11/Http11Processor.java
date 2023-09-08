@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,33 +51,31 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            List<String> headers = new ArrayList<>();
+            List<String> lines = new ArrayList<>();
 
-            String header = "";
-            while (!(header = bufferedReader.readLine()).equals("")) {
-                headers.add(header);
+            String line = "";
+            while (!(line = bufferedReader.readLine()).equals("")) {
+                lines.add(line);
             }
-            String[] splitStatusLine = Objects.requireNonNull(headers.get(0)).split(" ");
-            String requestMethod = splitStatusLine[0];
-            String requestUri = splitStatusLine[1];
+            RequestLine requestLine = RequestLine.from(lines.get(0));
 
-            HttpHeaders httpHeaders = HttpHeaders.from(headers.subList(1, headers.size()));
+            HttpHeaders httpHeaders = HttpHeaders.from(lines.subList(1, lines.size()));
             String contentTypeHeader = getContentTypeHeaderFrom(httpHeaders);
 
             RequestHandler requestHandler;
-            if (requestMethod.equalsIgnoreCase("POST")) {
-                int contentLength = getContentLength(headers);
+            if (requestLine.equalsMethod("POST")) {
+                int contentLength = getContentLength(lines);
                 String requestBody = readRequestBody(bufferedReader, contentLength);
-                requestHandler = handlePostRequest(requestUri, requestBody);
+                requestHandler = handlePostRequest(requestLine.getRequestUri(), requestBody);
             } else {
                 List<String> cookieHeaderValues = httpHeaders.get("Cookie");
-                requestHandler = handleGetRequest(requestMethod, requestUri, cookieHeaderValues);
+                requestHandler = handleGetRequest(requestLine.getHttpMethod(), requestLine.getRequestUri(), cookieHeaderValues);
             }
 
             String responseBody = readFile(requestHandler.getResponseFilePath());
 
             List<String> responseHeaders = new ArrayList<>();
-            responseHeaders.add("HTTP/1.1 " + requestHandler.getHttpStatus() + " ");
+            responseHeaders.add(requestLine.getHttpVersion() + " " + requestHandler.getHttpStatus() + " ");
             responseHeaders.add(contentTypeHeader);
             responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
             for (Entry<String, String> headerEntry : requestHandler.getHeaders().entrySet()) {
@@ -184,7 +182,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestMethod,
             String requestUri,
             List<String> cookies
-    ) throws IOException {
+    ) {
         if (!requestMethod.equalsIgnoreCase("GET")) {
             throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
         }

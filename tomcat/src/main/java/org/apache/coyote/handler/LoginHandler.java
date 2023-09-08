@@ -19,6 +19,13 @@ public class LoginHandler {
 
     public void login(Request request, Response response) {
         if (request.isSameHttpMethod(HttpMethod.POST)) {
+            if (request.getSession(false) != null) {
+                Session session = request.getSession(false);
+                User user = (User) session.getAttribute("user");
+                response.setHttpStatus(HttpStatus.FOUND);
+                response.redirectLocation("/index.html");
+                return;
+            }
             Map<String, String> requestBody = request.getBody();
             String account = requestBody.get(ACCOUNT);
             String password = requestBody.get(PASSWORD);
@@ -35,8 +42,8 @@ public class LoginHandler {
             Session session = request.getSession(true);
             session.setAttribute("user", user);
 
-            response.setHttpStatus(HttpStatus.FOUND);
             response.addCookie(JSESSIONID, session.getId());
+            response.setHttpStatus(HttpStatus.FOUND);
             response.redirectLocation("/index.html");
         }
         if (request.isSameHttpMethod(HttpMethod.GET)) {

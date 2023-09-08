@@ -13,7 +13,6 @@ public class SessionRepository {
     public static UUID save(Long userId) {
         UUID uuid = UUID.randomUUID();
         sessions.put(userId, new Session(uuid));
-        System.out.println(sessions.size());
         return uuid;
     }
 

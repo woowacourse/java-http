@@ -8,28 +8,25 @@ public class HttpHeaders {
     private static final String EMPTY_VALUE = "";
     private static final String CONTENT_TYPE_DELIMITER = ",";
 
-    private final Map<String, String> headers = new HashMap<>();
-
-    public HttpHeaders() {
-    }
+    private final Map<String, String> values = new HashMap<>();
 
     public void add(final String key, final String value) {
-        headers.put(key, value);
+        values.put(key, value);
     }
 
     public String get(final String headerName) {
-        return headers.getOrDefault(headerName, EMPTY_VALUE);
+        return values.getOrDefault(headerName, EMPTY_VALUE);
     }
 
     public String getContentType() {
-        String value = headers.getOrDefault("Content-Type", EMPTY_VALUE);
+        String value = values.getOrDefault("Content-Type", EMPTY_VALUE);
         if (value.isEmpty()) {
-            value = headers.get("Accept");
+            value = values.get("Accept");
         }
         return value.split(CONTENT_TYPE_DELIMITER)[0];
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public Map<String, String> getValues() {
+        return values;
     }
 }

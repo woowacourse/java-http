@@ -27,7 +27,7 @@ public class HttpResponse {
     }
 
     public Map<String, String> getHeaders() {
-        return headers.getHeaders();
+        return headers.getValues();
     }
 
     public void setHeader(final String key, final String value) {

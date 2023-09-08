@@ -18,6 +18,7 @@ public class HttpRequestParser {
     private static final String EMPTY_LINE = "";
     private static final String HEADER_DELIMITER = ": ";
     private static final int EXIST_HEADER_VALUE = 2;
+    private static final String COOKIE_DELIMITER = "; ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -37,10 +38,11 @@ public class HttpRequestParser {
         final String requestUri = parseRequestUri(firstLine);
         final QueryStrings queryStrings = parseQueryStrings(firstLine);
         final HttpHeaders httpHeaders = parseHttpHeaders(reader);
+        final HttpCookies httpCookies = parseHttpCookies(httpHeaders.get("Cookie"));
         final Map<String, String> requestBody = parseRequestBody(reader, httpHeaders.get("Content-Length"),
                 bodyParsers.get(httpHeaders.getContentType()));
 
-        return new HttpRequest(httpMethod, requestUri, queryStrings, httpHeaders, requestBody);
+        return new HttpRequest(httpMethod, requestUri, queryStrings, httpHeaders, httpCookies, requestBody);
     }
 
     private String readLine(final BufferedReader reader) {
@@ -95,6 +97,20 @@ public class HttpRequestParser {
             line = readLine(reader);
         }
         return httpHeaders;
+    }
+
+    private HttpCookies parseHttpCookies(final String cookieValue) {
+        final HttpCookies httpCookies = new HttpCookies();
+        if (!cookieValue.isEmpty()) {
+            final String[] cookies = cookieValue.split(COOKIE_DELIMITER);
+            for (final String cookie : cookies) {
+                final String[] splitKeyValue = cookie.split(KEY_AND_VALUE_DELIMITER);
+                final String key = splitKeyValue[KEY_INDEX];
+                final String value = splitKeyValue[VALUE_INDEX];
+                httpCookies.add(key, value);
+            }
+        }
+        return httpCookies;
     }
 
     private Map<String, String> parseRequestBody(final BufferedReader reader, final String contentLength,

@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.HandlerMapper;
+import org.apache.coyote.http11.message.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -14,8 +17,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    private final HandlerMapper handlerMapper;
+
+    public Http11Processor(final Socket connection, final HandlerMapper handlerMapper) {
         this.connection = connection;
+        this.handlerMapper = handlerMapper;
     }
 
     @Override
@@ -27,21 +33,18 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            final Request request = Request.from(bufferedReader);
+            final String response = createResponse(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createResponse(final Request request) {
+        return handlerMapper.handle(request).getResponse();
     }
 }

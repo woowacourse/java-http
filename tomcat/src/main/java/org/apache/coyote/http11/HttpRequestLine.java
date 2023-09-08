@@ -12,6 +12,12 @@ public class HttpRequestLine {
         this.version = version;
     }
 
+    public HttpRequestLine(HttpMethod method, String path, String version) {
+        this.method = method;
+        this.path = path;
+        this.version = version;
+    }
+
     public HttpMethod getMethod() {
         return method;
     }

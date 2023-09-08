@@ -8,14 +8,6 @@ public class HttpRedirectResponse extends HttpResponse {
 
     protected final String redirectUri;
 
-    public HttpRedirectResponse(
-            final OutputStream outputStream,
-            final String redirectUri
-    ) {
-        super(outputStream, "302", null, null, null);
-        this.redirectUri = redirectUri;
-    }
-
     public HttpRedirectResponse(final OutputStream outputStream,
                                 final Cookies cookies,
                                 final String redirectUri) {

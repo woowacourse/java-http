@@ -39,32 +39,8 @@ public class HttpRequest {
         return Objects.equals(this.method, method);
     }
 
-    public boolean isUriEqualTo(final String uri) {
-        return this.uri.isUriEqualTo(uri);
-    }
-
-    public boolean isJavascriptRequest() {
-        return isMethodEqualTo(HttpMethod.GET) && this.uri.isJavascriptRequest();
-    }
-
-    public boolean isAssetRequest() {
-        return isMethodEqualTo(HttpMethod.GET) && this.uri.isAssetRequest();
-    }
-
     public String getEndPoint() {
         return this.uri.getEndPoint();
-    }
-
-    public Map<String, String> getQueryParameters() {
-        return this.uri.getQueryParameters();
-    }
-
-    public boolean hasQueryParameter() {
-        return this.uri.hasQueryParameter();
-    }
-
-    public Optional<String> getQueryParameter(String parameter) {
-        return this.uri.getQueryParameter(parameter);
     }
 
     public Map<String, String> getRequestBodyAsMap() {

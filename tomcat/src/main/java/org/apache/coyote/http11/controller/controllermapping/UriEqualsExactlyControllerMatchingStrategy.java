@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.controllermapping.ControllerMatchingStrategy;
-import org.apache.coyote.http11.controller.controllermapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpPath;
 
 public class UriEqualsExactlyControllerMatchingStrategy implements ControllerMatchingStrategy {

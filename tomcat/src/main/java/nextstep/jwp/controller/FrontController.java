@@ -3,17 +3,18 @@ package nextstep.jwp.controller;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.Controller;
+import org.apache.coyote.exception.ResourceNotFoundException;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.ResponseBody;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.ResourceResponseBuilder;
-import org.apache.coyote.http11.ResponseBody;
 
 import static org.apache.coyote.http11.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
 
 public class FrontController implements Controller {
 
-    private static final Map<String, Controller> uriToController = new HashMap();
+    private static final Map<String, Controller> uriToController = new HashMap<>();
 
     static {
         uriToController.put("/", (req, res) -> {
@@ -35,6 +36,9 @@ public class FrontController implements Controller {
             }
             response.setStatus(HttpStatus.OK);
             response.setBody(uri);
+        } catch (ResourceNotFoundException e) {
+            response.setStatus(NOT_FOUND);
+            response.setBody("/404.html");
         } catch (Exception e) {
             response.setStatus(INTERNAL_SERVER_ERROR);
             response.setBody("/500.html");

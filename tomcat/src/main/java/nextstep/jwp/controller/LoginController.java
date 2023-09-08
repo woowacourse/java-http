@@ -8,9 +8,9 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +54,7 @@ public class LoginController extends AbstractController {
         final var form = request.getForm();
         final var account = form.get("account");
         final var password = form.get("password");
-        final var optionalUser = findUser(account, password);
-        return optionalUser;
+        return findUser(account, password);
     }
 
     private Optional<User> findUser(String account, String password) {

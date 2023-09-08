@@ -24,11 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    private static final String SPACE = " ";
-    private static final String HEADER_DELIMETER = ": ";
-    private static final String CRLF = "\r\n";
-    private static final String BLANK_LINE = "";
-
     @Test
     void process() {
         // given
@@ -56,7 +51,7 @@ class Http11ProcessorTest {
         headers.add(HttpHeader.CONNECTION, "keep-alive");
         final HttpRequest httpRequest = new HttpRequest(requestLine, headers, HttpBody.empty());
 
-        final var socket = new StubSocket(serialize(httpRequest));
+        final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, new FrontHandler());
 
         // when
@@ -69,41 +64,5 @@ class Http11ProcessorTest {
         expected.changeBody(HttpBody.file("/index.html"));
 
         assertThat(socket.output()).isEqualTo(expected.serialize());
-    }
-
-    private String serialize(final HttpRequest request) {
-        final StringBuilder builder = new StringBuilder();
-
-        serializeRequestLine(request, builder);
-        serializeHeaders(request, builder);
-
-        if (request.getHttpBody() == null || request.getHttpBody().getValue().isEmpty()) {
-            builder.append(CRLF);
-            return builder.toString();
-        }
-
-        builder.append(HttpHeader.CONTENT_LENGTH.getValue())
-                .append(HEADER_DELIMETER)
-                .append(request.getHttpBody().getValue().getBytes().length)
-                .append(SPACE).append(CRLF);
-
-        serializeBody(request, builder);
-        return builder.toString();
-    }
-
-    private void serializeRequestLine(final HttpRequest request, final StringBuilder builder) {
-        builder.append(request.getRequestLine().getHttpMethod().name()).append(SPACE);
-        builder.append(request.getRequestLine().getRequestUri().getRequestUri()).append(SPACE);
-        builder.append(request.getRequestLine().getProtocol().getName()).append(SPACE).append(CRLF);
-    }
-
-    private void serializeHeaders(final HttpRequest request, final StringBuilder builder) {
-        request.getHeaders().getHeaders()
-                .forEach((key, value) -> builder.append(key.getValue()).append(HEADER_DELIMETER).append(value).append(SPACE).append(CRLF));
-    }
-
-    private void serializeBody(final HttpRequest request, final StringBuilder builder) {
-        builder.append(BLANK_LINE).append(CRLF);
-        builder.append(request.getHttpBody().getValue());
     }
 }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11.response.header;
 
 import java.util.Arrays;
 
+import static org.apache.coyote.http11.common.Constant.CONTENT_TYPE_SEPARATOR;
+
 public enum ContentType {
 
     HTML("text/html", ".html"),
@@ -16,7 +18,7 @@ public enum ContentType {
     private final String extension;
 
     ContentType(final String content, final String extension) {
-        this.content = String.join(";", content, CHARSET);
+        this.content = String.join(CONTENT_TYPE_SEPARATOR, content, CHARSET);
         this.extension = extension;
     }
 

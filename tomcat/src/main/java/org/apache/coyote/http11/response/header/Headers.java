@@ -4,6 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.common.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.http11.common.Constant.HEADER_SPACE;
+
 public class Headers {
 
     private final LinkedHashMap<Header, String> headers;
@@ -27,11 +30,13 @@ public class Headers {
         this.headers.putAll(headers);
     }
 
-    @Override
-    public String toString() {
+    public String collectHeaders() {
         return headers.keySet()
                 .stream()
-                .map(key -> String.join(": ", key.getName(), headers.get(key) + " "))
-                .collect(Collectors.joining("\r\n"));
+                .map(key -> String.join(
+                        HEADER_DELIMITER,
+                        key.getName(),
+                        headers.get(key) + HEADER_SPACE)
+                ).collect(Collectors.joining("\r\n"));
     }
 }

@@ -5,7 +5,7 @@ public enum Header {
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
     LOCATION("Location"),
-    Accept("Accept"),
+    ACCEPT("Accept"),
     COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie");
 

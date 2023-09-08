@@ -3,7 +3,10 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 15 # Max-Connection 경우 추가로 들어온 몇 개의 Connection을 대기 시킬지
+    max-connections: 10 # 최대 처리할 수 있는 Connection의 수
     threads:
-      max: 2
+      max: 5 # 요청을 처리하는 스레드의 최대 수
+  compression:
+    enabled: true
+    min-response-size: 10

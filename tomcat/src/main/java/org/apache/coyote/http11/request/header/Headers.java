@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.request.header;
 
 import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.response.header.Header;
@@ -8,7 +8,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.common.Constant.HEADER_SEPARATOR;
+
 public class Headers {
+
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -18,10 +23,10 @@ public class Headers {
 
     public static Headers from(final List<String> request) {
         Map<String, String> headers = request.stream()
-                .map(header -> header.split(": "))
+                .map(header -> header.split(HEADER_SEPARATOR))
                 .collect(Collectors.toMap(
-                        splitLine -> splitLine[0],
-                        splitLine -> splitLine[1]
+                        key -> key[KEY_INDEX],
+                        value -> value[VALUE_INDEX]
                 ));
 
         return new Headers(headers);
@@ -38,20 +43,20 @@ public class Headers {
     }
 
     public Cookie getCookie() {
-        Optional<String> cookie = get(Header.COOKIE);
+        Optional<String> cookie = getHeaderValue(Header.COOKIE);
 
-        if (cookie.isEmpty()) {
-            return Cookie.createDefault();
-        }
+        return cookie.map(Cookie::from)
+                .orElseGet(Cookie::createDefault);
 
-        return Cookie.from(cookie.get());
     }
 
-    public Optional<String> get(final Header header) {
-        final String key = header.getName();
+    public Optional<String> getHeaderValue(final Header header) {
+        String key = header.getName();
+
         if (headers.containsKey(key)) {
             return Optional.of(headers.get(key));
         }
+
         return Optional.empty();
     }
 }

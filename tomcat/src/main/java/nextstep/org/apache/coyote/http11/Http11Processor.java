@@ -47,21 +47,21 @@ public class Http11Processor implements Runnable, Processor {
                 InputStream inputStream = connection.getInputStream();
                 OutputStream outputStream = connection.getOutputStream()
         ) {
-            HttpRequest httpRequest = new HttpRequest(inputStream);
-            Cookies cookies = httpRequest.getCookies();
+            Http11Request http11Request = new Http11Request(inputStream);
+            Cookies cookies = http11Request.getCookies();
 
             Http11Response response = null;
-            String requestPathInfo = httpRequest.getPathInfo();
+            String requestPathInfo = http11Request.getPathInfo();
 
             Object handler = handlerMapper.mapHandler(requestPathInfo);
             if (Objects.nonNull(handler)
-                    && httpRequest.getMethod().equals("POST")
+                    && http11Request.getMethod().equals("POST")
                     && requestPathInfo.equals("/login")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.login(
                         cookies,
-                        httpRequest.getParsedBodyValue("account"),
-                        httpRequest.getParsedBodyValue("password"));
+                        http11Request.getParsedBodyValue("account"),
+                        http11Request.getParsedBodyValue("password"));
 
                 response = new Http11Response(Status.FOUND)
                         .setHeader("Location", loginDto.getRedirectUrl())
@@ -69,22 +69,22 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (Objects.nonNull(handler)
-                    && httpRequest.getMethod().equals("POST")
+                    && http11Request.getMethod().equals("POST")
                     && requestPathInfo.equals("/register")) {
                 LoginController loginController = (LoginController) handler;
                 LoginResponseDto loginDto = loginController.register(
-                        httpRequest.getParsedBodyValue("account"),
-                        httpRequest.getParsedBodyValue("password"),
-                        httpRequest.getParsedBodyValue("email")
+                        http11Request.getParsedBodyValue("account"),
+                        http11Request.getParsedBodyValue("password"),
+                        http11Request.getParsedBodyValue("email")
                 );
 
                 response = new Http11Response(Status.FOUND)
                         .setHeader("Location", loginDto.getRedirectUrl());
             }
 
-            if (httpRequest.getMethod().equals("GET") && Objects.isNull(response)) {
+            if (http11Request.getMethod().equals("GET") && Objects.isNull(response)) {
                 String contentType = selectFirstContentTypeOrDefault(
-                        httpRequest.getHeader("Accept"));
+                        http11Request.getHeader("Accept"));
 
                 // Todo: createResponseBody() pageController로 위임해보기
                 // Todo: 헤더에 담긴 sessionId 유효성 검증

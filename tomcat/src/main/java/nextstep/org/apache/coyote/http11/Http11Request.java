@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequest {
+public class Http11Request {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -23,7 +23,7 @@ public class HttpRequest {
     private final Cookies cookies = new Cookies();
     private Map<String, String> parsedBody = null;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
+    public Http11Request(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         this.startLine = new StartLine(bufferedReader.readLine());

@@ -39,6 +39,15 @@
 
 - [x] Request, Response 객체 분리
 - [x] Http11Processor의 메서드 분리
-- [ ] Controller 분리
+- [x] Controller 분리
+- [ ] 테스트 작성하기
+    - [ ] / 페이지 리다이렉트 확인
+    - [ ] /login 페이지 리다이렉트 확인
+    - [ ] 로그인 시 index.html 리다이렉트 및 set-cookie 설정 여부 확인
+    - [ ] 로그인 후 /login 페이지 접근 시 index.html 리다이렉트 확인
+    - [ ] /register 페이지 리다이렉트 확인
+    - [ ] 회원가입 시 로그인 가능해지는지 확인
+    - [ ] 404 페이지 리다이렉트 확인
+    - [ ] 유효성 검증 테스트
 
 ## 4단계 - 동시성 확장하기

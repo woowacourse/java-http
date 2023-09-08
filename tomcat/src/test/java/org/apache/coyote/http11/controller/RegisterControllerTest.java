@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -75,13 +76,13 @@ class RegisterControllerTest {
 
         //then
         final StaticResource staticResource = StaticResource.from("/register.html");
-        final String content = staticResource.getContent();
+        final byte[] content = staticResource.getContent();
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + content.getBytes().length + " ",
+                "Content-Length: " + content.length + " ",
                 "",
-                staticResource.getContent());
+                new String(content, StandardCharsets.UTF_8));
         assertThat(expected).isEqualTo(response.toString());
     }
 

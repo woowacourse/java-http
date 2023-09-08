@@ -46,6 +46,6 @@ public class HttpResponse {
         return statusLine.getStatusLine() + "\r\n" +
                 responseHeaders.toString() +
                 "" + "\r\n" +
-                responseBody.getContent();
+                new String(responseBody.getContent());
     }
 }

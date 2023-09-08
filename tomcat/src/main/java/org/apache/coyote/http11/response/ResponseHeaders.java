@@ -15,7 +15,7 @@ public class ResponseHeaders {
     public static ResponseHeaders from(final ResponseBody responseBody) {
         final Map<String, String> result = new LinkedHashMap<>();
         result.put("Content-Type", responseBody.getContentType().getType());
-        result.put("Content-Length", String.valueOf(responseBody.getContent().getBytes().length));
+        result.put("Content-Length", String.valueOf(responseBody.getLength()));
         return new ResponseHeaders(result);
     }
 

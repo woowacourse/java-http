@@ -13,10 +13,10 @@ import java.nio.file.Paths;
 public class StaticResource {
     private static final Logger log = LoggerFactory.getLogger(StaticResource.class);
 
-    private final String content;
+    private final byte[] content;
     private final String fileType;
 
-    private StaticResource(final String content, final String fileType) {
+    private StaticResource(final byte[] content, final String fileType) {
         this.content = content;
         this.fileType = fileType;
     }
@@ -25,11 +25,11 @@ public class StaticResource {
         return new StaticResource(extractContent(fileName), extractFileExtension(fileName));
     }
 
-    private static String extractContent(final String fileName) throws IOException {
+    private static byte[] extractContent(final String fileName) throws IOException {
         try {
             final URL resource = HttpResponse.class.getClassLoader().getResource("static" + fileName);
             final Path path = Paths.get(resource.getPath());
-            return Files.readString(path);
+            return Files.readAllBytes(path);
         } catch (final NullPointerException e) {
             log.error("error fileName = {}", fileName, e);
             throw new FileNotFoundException(fileName, e);
@@ -37,10 +37,10 @@ public class StaticResource {
     }
 
     private static String extractFileExtension(final String fileName) {
-        return fileName.split("\\.")[1];
+        return fileName.split("\\.")[1].strip();
     }
 
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 

@@ -21,7 +21,7 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws Exception {
+    protected HttpResponse doPost(final HttpRequest request) {
         throw new UnsupportedOperationException();
     }
 }

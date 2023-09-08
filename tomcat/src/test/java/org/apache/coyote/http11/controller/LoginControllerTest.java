@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -86,13 +87,13 @@ class LoginControllerTest {
 
         //then
         final StaticResource staticResource = StaticResource.from("/login.html");
-        final String content = staticResource.getContent();
+        final byte[] content = staticResource.getContent();
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + content.getBytes().length + " ",
+                "Content-Length: " + content.length + " ",
                 "",
-                content);
+                new String(content, StandardCharsets.UTF_8));
         assertThat(expected).isEqualTo(response.toString());
     }
 
@@ -176,8 +177,6 @@ class LoginControllerTest {
         final String cookieValue = response.getCookieValue();
 
         // then
-        final StaticResource staticResource = StaticResource.from("/index.html");
-        final String content = staticResource.getContent();
         final Session session = SessionManager.findSession(cookieValue.split("=")[1]);
         final User user = InMemoryUserRepository.findByAccount("gugu").get();
 

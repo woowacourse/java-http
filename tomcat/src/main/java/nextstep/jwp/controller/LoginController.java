@@ -13,7 +13,6 @@ import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
 import org.apache.coyote.http.session.Session;
-import org.apache.coyote.http.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +27,14 @@ import static org.apache.coyote.http.common.HttpHeader.COOKIE;
 
 public class LoginController extends RequestController {
 
-    private static final LoginManager loginManager = new SessionManager();
-
     private static final String TARGET_URI = "login";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
+    private final LoginManager loginManager;
+
+    public LoginController(final LoginManager loginManager) {
+        this.loginManager = loginManager;
+    }
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {

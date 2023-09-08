@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestHandler;
+import org.apache.coyote.http.LoginManager;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
@@ -14,10 +15,10 @@ public class FrontHandler implements RequestHandler {
 
     private static final Set<Controller> requestControllers = new HashSet<>();
 
-    static {
+    public FrontHandler(final LoginManager loginManager) {
         requestControllers.add(new HomePageController());
         requestControllers.add(new StaticFileController());
-        requestControllers.add(new LoginController());
+        requestControllers.add(new LoginController(loginManager));
         requestControllers.add(new RegisterController());
     }
 

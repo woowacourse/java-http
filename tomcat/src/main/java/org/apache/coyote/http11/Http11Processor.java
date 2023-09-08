@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.RequestHandlerMapper;
+import org.apache.coyote.http11.controller.ControllerMapper;
 import org.apache.coyote.http11.header.HeaderName;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
+    private static final ControllerMapper controllerMapper = new ControllerMapper();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int DEFAULT_BUFFER_SIZE = 1024;
 
@@ -47,8 +47,10 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final OutputStream outputStream = connection.getOutputStream()
         ) {
-            final HttpRequest request = createHttpRequest(bufferedReader);
-            final HttpResponse response = requestHandlerMapper.getHandler(request).handle(request);
+            HttpRequest request = createHttpRequest(bufferedReader);
+            HttpResponse response = HttpResponse.notFound();
+
+            controllerMapper.getController(request).service(request, response);
 
             outputStream.write(response.convertToMessage().getBytes());
             outputStream.flush();
@@ -68,31 +70,33 @@ public class Http11Processor implements Runnable, Processor {
         }
         final Headers headers = new Headers(headerLines);
 
-        final String contentLengthHeader = "content-length";
-        String body = "";
-
-        if (headers.containsHeader(HeaderName.CONTENT_LENGTH.toString())) {
-            final String contentLengthValue = headers.getHeaderValue(contentLengthHeader);
-            final int bodyLength = Integer.parseInt(contentLengthValue.strip());
-
-            final StringBuilder bodyBuilder = new StringBuilder();
-
-            int totalRead = 0;
-            final char[] buffer = new char[DEFAULT_BUFFER_SIZE];
-
-            while (totalRead < bodyLength) {
-                final int readBytesCount =
-                    bufferedReader.read(buffer, 0, Math.min(buffer.length, bodyLength - totalRead));
-                if (readBytesCount == -1) {
-                    break;
-                }
-                bodyBuilder.append(buffer, 0, readBytesCount);
-                totalRead += readBytesCount;
-            }
-
-            body = bodyBuilder.toString();
+        if (!headers.containsHeader(HeaderName.CONTENT_LENGTH.getValue())) {
+            return HttpRequest.builder(start)
+                .headers(headers)
+                .build();
         }
 
-        return new HttpRequest(start, headers, body);
+        final String contentLengthValue = headers.getHeaderValue("Content-Length");
+        final int bodyLength = Integer.parseInt(contentLengthValue.strip());
+
+        final StringBuilder bodyBuilder = new StringBuilder();
+
+        int totalRead = 0;
+        final char[] buffer = new char[DEFAULT_BUFFER_SIZE];
+
+        while (totalRead < bodyLength) {
+            final int readBytesCount =
+                bufferedReader.read(buffer, 0, Math.min(buffer.length, bodyLength - totalRead));
+            if (readBytesCount == -1) {
+                break;
+            }
+            bodyBuilder.append(buffer, 0, readBytesCount);
+            totalRead += readBytesCount;
+        }
+
+        return HttpRequest.builder(start)
+            .headers(headers)
+            .body(bodyBuilder.toString())
+            .build();
     }
 }

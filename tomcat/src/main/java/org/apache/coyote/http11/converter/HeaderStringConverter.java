@@ -5,13 +5,17 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.header.HeaderName;
 import org.apache.coyote.http11.response.ContentType;
 
-public class HeaderConverter {
+public class HeaderStringConverter {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String COOKIE_VALUE_DELIMITER = "=";
 
-    private HeaderConverter() {
+    private HeaderStringConverter() {
 
+    }
+
+    public static String convert(final String headerName, final String headerValue) {
+        return headerName + HEADER_DELIMITER + headerValue + " ";
     }
 
     public static String toLocation(final String locationUrl) {
@@ -27,15 +31,16 @@ public class HeaderConverter {
     }
 
     public static String toSetCookie(final Map<String, String> cookieValues) {
-        return cookieValues.entrySet().stream()
+        final String headerMessage = cookieValues.entrySet().stream()
             .map(entry ->
                 {
                     final String cookieValue =
                         entry.getKey() + COOKIE_VALUE_DELIMITER + entry.getValue();
 
-                    return HeaderName.SET_COOKIE + HEADER_DELIMITER + cookieValue;
+                    return HeaderName.SET_COOKIE + HEADER_DELIMITER + cookieValue + " ";
                 }
             )
             .collect(Collectors.joining(System.lineSeparator()));
+        return headerMessage + System.lineSeparator();
     }
 }

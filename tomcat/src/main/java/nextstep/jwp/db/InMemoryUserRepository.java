@@ -16,7 +16,7 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        user.setId(RESERVED_ID);
+        user.setId(++RESERVED_ID);
         database.put(user.getAccount(), user);
     }
 

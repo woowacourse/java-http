@@ -14,11 +14,19 @@ public class HttpRequestQueryString {
 
     private final Map<String, String> parameters;
 
-    public HttpRequestQueryString(final String queryString) {
-        parameters = parseQueryString(queryString);
+    public HttpRequestQueryString(final Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
+    public static HttpRequestQueryString from(final String queryString) {
+        return new HttpRequestQueryString(parseQueryString(queryString));
+    }
+
+    public static HttpRequestQueryString emtpy() {
+        return new HttpRequestQueryString(Collections.emptyMap());
+    }
+
+    private static Map<String, String> parseQueryString(final String queryString) {
         if (Objects.isNull(queryString) || queryString.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -35,10 +43,6 @@ public class HttpRequestQueryString {
             ));
     }
 
-    public boolean contains(final String parmeterKey) {
-        return parameters.containsKey(parmeterKey);
-    }
-
     public String getValue(final String parameterKey) {
         if (parameters.containsKey(parameterKey)) {
             return parameters.get(parameterKey);
@@ -48,5 +52,12 @@ public class HttpRequestQueryString {
 
     public Map<String, String> getParameters() {
         return new HashMap<>(parameters);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequestQueryString{" +
+            "parameters=" + parameters +
+            '}';
     }
 }

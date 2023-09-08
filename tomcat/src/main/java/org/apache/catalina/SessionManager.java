@@ -15,6 +15,9 @@ public class SessionManager {
     }
 
     public static Session findSession(final String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 

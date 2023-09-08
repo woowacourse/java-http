@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Map;
-
 public class RequestLine {
 
     private final String method;
@@ -33,9 +31,5 @@ public class RequestLine {
 
     public String getProtocol() {
         return protocol;
-    }
-
-    public Map<String, String> getParams() {
-        return requestUri.getQueries();
     }
 }

@@ -2,24 +2,17 @@ package nextstep.jwp.controller.page;
 
 import static nextstep.jwp.controller.FileContent.HTML;
 import static nextstep.jwp.controller.FileContent.INDEX_URI;
-import static nextstep.jwp.controller.FileContent.NOT_FOUND_URI;
-import static nextstep.jwp.controller.FileContent.STATIC;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.PathUtil;
-import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class RegisterController extends AbstractController {
 

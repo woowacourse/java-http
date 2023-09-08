@@ -2,11 +2,8 @@ package nextstep.jwp.controller.page;
 
 import static nextstep.jwp.controller.FileContent.HTML;
 import static nextstep.jwp.controller.FileContent.NOT_FOUND_URI;
-import static nextstep.jwp.controller.FileContent.STATIC;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;

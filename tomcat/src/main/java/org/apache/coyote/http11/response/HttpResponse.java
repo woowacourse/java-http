@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import static nextstep.jwp.controller.FileContent.HTML;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import nextstep.jwp.controller.Controller;

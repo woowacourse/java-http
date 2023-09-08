@@ -1,27 +1,21 @@
 package nextstep.jwp.controller.page;
 
 import static nextstep.jwp.controller.FileContent.HTML;
-import static nextstep.jwp.controller.FileContent.INDEX;
 import static nextstep.jwp.controller.FileContent.INDEX_URI;
-import static nextstep.jwp.controller.FileContent.STATIC;
 import static nextstep.jwp.controller.FileContent.UNAUTHORIZED_URI;
 import static org.apache.coyote.http11.common.HttpHeaders.COOKIE_NAME;
 import static org.apache.coyote.http11.common.HttpHeaders.LOCATION;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.FileContent;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.PathUtil;
-import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.common.HttpHeaders;

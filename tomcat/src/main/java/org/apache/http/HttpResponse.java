@@ -66,10 +66,10 @@ public final class HttpResponse {
     }
 
     public void write(final String responseBody) throws IOException {
-        addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
         outputStream.write(
                 String.join(CRLF,
                         toString(),
+                        HttpHeaders.CONTENT_LENGTH + HEADER_DELIMITER + responseBody.getBytes(StandardCharsets.UTF_8).length + SPACE,
                         "",
                         responseBody
                 ).getBytes(StandardCharsets.UTF_8)

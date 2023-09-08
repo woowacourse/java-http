@@ -78,6 +78,18 @@ public class HttpRequest {
         return requestHeaders.getCookieValue(cookieName);
     }
 
+    public HttpMethod httpMethod() {
+        return requestLine.httpMethod();
+    }
+
+    public RequestPath requestPath() {
+        return requestLine.requestPath();
+    }
+
+    public QueryParams queryParams() {
+        return requestLine.queryParams();
+    }
+
     public Headers headers() {
         return requestHeaders.headers();
     }

@@ -12,11 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.dto.LoginResponseDto;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.org.apache.coyote.Processor;
 import nextstep.org.apache.coyote.http11.servlet.LoginServlet;
+import nextstep.org.apache.coyote.http11.servlet.RegisterServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,15 +71,13 @@ public class Http11Processor implements Runnable, Processor {
             if (Objects.nonNull(handler)
                     && request.getMethod().equals("POST")
                     && requestPathInfo.equals("/register")) {
-                LoginController loginController = (LoginController) handler;
-                LoginResponseDto loginDto = loginController.register(
-                        request.getParsedBodyValue("account"),
-                        request.getParsedBodyValue("password"),
-                        request.getParsedBodyValue("email")
-                );
+                RegisterServlet registerServlet = new RegisterServlet();
+                try {
+                    registerServlet.service(request, response);
+                } catch (Exception e) {
+                    responseInternalServerError(request, response);
+                }
 
-                response = new Http11Response(Status.FOUND)
-                        .setHeader("Location", loginDto.getRedirectUrl());
                 writeResponse(outputStream, response);
                 return;
             }
@@ -101,31 +98,37 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                Optional<String> responseBody = createResponseBody(requestPathInfo);
-                if (responseBody.isEmpty()) {
-                    String notFoundPageBody = createResponseBody("/404.html")
-                            .orElse(NOT_FOUND_DEFAULT_MESSAGE);
-
-                    response = new Http11Response(Status.NOT_FOUND)
-                            .setHeader("Content-Type", contentType + ";charset=utf-8")
-                            .setHeader("Content-Length", String.valueOf(
-                                    notFoundPageBody.getBytes(StandardCharsets.UTF_8).length))
-                            .setBody(notFoundPageBody);
-                    writeResponse(outputStream, response);
-                    return;
-                }
-
-                response = new Http11Response(Status.OK)
-                        .setHeader("Content-Type", contentType + ";charset=utf-8")
-                        .setHeader("Content-Length", String.valueOf(
-                                responseBody.get().getBytes(StandardCharsets.UTF_8).length))
-                        .setBody(responseBody.get());
+                responseWithFoundResource(request, response);
             }
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void responseWithFoundResource(Http11Request request, Http11Response response)
+            throws IOException {
+        Optional<String> responseBody = createResponseBody(request.getPathInfo());
+        String contentType = selectFirstContentTypeOrDefault(request.getHeader("Accept"));
+
+        if (responseBody.isEmpty()) {
+            String notFoundPageBody = createResponseBody("/404.html")
+                    .orElse(NOT_FOUND_DEFAULT_MESSAGE);
+
+            response.setStatus(Status.NOT_FOUND)
+                    .setHeader("Content-Type", contentType + ";charset=utf-8")
+                    .setHeader("Content-Length", String.valueOf(
+                            notFoundPageBody.getBytes(StandardCharsets.UTF_8).length))
+                    .setBody(notFoundPageBody);
+            return;
+        }
+
+        response.setStatus(Status.OK)
+                .setHeader("Content-Type", contentType + ";charset=utf-8")
+                .setHeader("Content-Length", String.valueOf(
+                        responseBody.get().getBytes(StandardCharsets.UTF_8).length))
+                .setBody(responseBody.get());
     }
 
     private void responseInternalServerError(Http11Request request, Http11Response response)

@@ -1,7 +1,7 @@
 package org.apache.front;
 
 import org.apache.coyote.request.Request;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.response.ResponseEntity;
 
 public class Proxy {
 
@@ -14,14 +14,14 @@ public class Proxy {
         this.dynamicController = new DynamicController();
     }
 
-    public Response process(Request request){
-        if(request.isFile()){
+    public ResponseEntity process(Request request){
+        if(request.isStatic()){
             return doProcess(staticController, request);
         }
         return doProcess(dynamicController, request);
     }
 
-    private Response doProcess(FrontController frontController, Request request) {
+    private ResponseEntity doProcess(FrontController frontController, Request request) {
         return frontController.process(request);
     }
 

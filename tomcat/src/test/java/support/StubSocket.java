@@ -1,9 +1,6 @@
 package support;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -24,10 +21,11 @@ public class StubSocket extends Socket {
     }
 
     private InputStream createInputStream(String request) {
-        String delimiter = System.lineSeparator() + System.lineSeparator();
-        String requestBody = request.substring(request.lastIndexOf(delimiter) + delimiter.length());
-        byte[] requestBodyBytes = requestBody.getBytes(StandardCharsets.UTF_8);
-        return new ByteArrayInputStream(requestBodyBytes);
+//        String delimiter = System.lineSeparator() + System.lineSeparator();
+//        String requestBody = request.substring(request.lastIndexOf(delimiter) + delimiter.length());
+//        byte[] requestBodyBytes = request.getBytes(StandardCharsets.UTF_8);
+//        return new StringBufferInputStream(request);
+        return new ByteArrayInputStream(request.getBytes(StandardCharsets.UTF_8));
     }
 
     public InetAddress getInetAddress() {

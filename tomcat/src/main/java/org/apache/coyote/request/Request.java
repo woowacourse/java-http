@@ -1,5 +1,8 @@
 package org.apache.coyote.request;
 
+import org.apache.coyote.common.HttpVersion;
+import org.apache.coyote.common.PathUrl;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collections;
@@ -33,8 +36,8 @@ public class Request {
         return new String(buffer);
     }
 
-    public boolean isFile() {
-        return true;
+    public boolean isStatic() {
+        return requestStartLine.isStatic();
     }
 
     public boolean hasQueryString() {
@@ -46,14 +49,14 @@ public class Request {
     }
 
     public String getFileType() {
-        if (isFile()) {
-            return "fileType";
+        if (isStatic()) {
+            return requestStartLine.getFileType();
         }
         return "";
     }
 
     public String getPath() {
-        return "path";
+        return requestStartLine.getPath();
     }
 
     public boolean isPost() {
@@ -73,5 +76,17 @@ public class Request {
         return requestStartLine + System.lineSeparator() +
                 requestHeader + System.lineSeparator() + System.lineSeparator() +
                 requestBody;
+    }
+
+    public PathUrl getRequestUrl() {
+        return requestStartLine.getRequestUrl();
+    }
+
+    public HttpVersion httpVersion() {
+        return requestStartLine.getHttpVersion();
+    }
+
+    public String getContentType() {
+        return requestStartLine.getContentType();
     }
 }

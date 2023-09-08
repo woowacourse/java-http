@@ -5,7 +5,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.PathResponse;
 import org.apache.coyote.response.Response;
-import org.apache.coyote.response.StaticResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,8 @@ public class LoginController implements Controller{
         if(request.isPost()){
             return login(request);
         }
-        return new StaticResponse("html", "/login.html", 200, "OK");
+//        return new StaticResponse("html", "/login.html", 200, "OK");
+        return null;
     }
 
     private static PathResponse login(Request request) {

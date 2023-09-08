@@ -5,10 +5,8 @@ import nextstep.jwp.controller.HelloWorldController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.request.Request;
-import org.apache.coyote.response.PathResponse;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.response.ResponseEntity;
 
-import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,11 +22,13 @@ public class DynamicController implements FrontController {
     }
 
     @Override
-    public Response process(Request request) {
+    public ResponseEntity process(final Request request) {
         if (!urlMapper.containsKey(request.getPath())) {
-            return new PathResponse(request.getPath(), HttpURLConnection.HTTP_OK, "OK");
+//            return new PathResponse(request.getPath(), HttpURLConnection.HTTP_OK, "OK");
+            return null;
         }
         Controller controller = urlMapper.get(request.getPath());
-        return controller.handle(request);
+//        return controller.handle(request);
+        return null;
     }
 }

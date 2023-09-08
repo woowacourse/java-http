@@ -6,16 +6,13 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.adapter.LoginAdapter;
-import org.apache.coyote.adapter.RegisterAdapter;
-import org.apache.coyote.adapter.StringAdapter;
+import org.apache.coyote.handler.DefaultHandler;
+import org.apache.coyote.handler.LoginHandler;
+import org.apache.coyote.handler.RegisterHandler;
+import org.apache.coyote.handler.ResourceHandler;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
-import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
-import org.apache.coyote.view.Resource;
-import org.apache.coyote.view.ResponseResolver;
-import org.apache.coyote.view.ViewResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +21,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ResponseResolver responseResolver;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.responseResolver = new ResponseResolver();
     }
 
     @Override
@@ -43,8 +38,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
             RequestParser requestParser = new RequestParser(inputStream);
             Request request = requestParser.parse();
+            Response response = new Response();
 
-            Response response = doHandler(request);
+            doHandler(request, response);
 
             outputStream.write(response.getResponseBytes());
             outputStream.flush();
@@ -53,20 +49,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Response doHandler(Request request) {
+    private void doHandler(Request request, Response response) {
         if (request.isSamePath("/")) {
-            Resource resource = new StringAdapter().adapt(request);
-            return responseResolver.resolve(request, resource);
+            new DefaultHandler().response(request, response);
+            return;
         }
         if (request.isSamePath("/login")) {
-            Resource resource = new LoginAdapter().adapt(request);
-            return responseResolver.resolve(request, resource);
+            new LoginHandler().login(request, response);
+            return;
         }
         if (request.isSamePath("/register")) {
-            Resource resource = new RegisterAdapter().adapt(request);
-            return responseResolver.resolve(request, resource);
+            new RegisterHandler().register(request, response);
+            return;
         }
-        return responseResolver.resolve(request,
-                ViewResource.of(request.getPath(), HttpStatus.OK, HttpCookie.from("")));
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.getResource(request, response);
     }
 }

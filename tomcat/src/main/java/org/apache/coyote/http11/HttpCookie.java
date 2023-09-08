@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
@@ -28,6 +29,10 @@ public class HttpCookie {
             values.put(key, value);
         }
         return new HttpCookie(values);
+    }
+
+    public void addCookie(String key, String value) {
+        values.put(key, value);
     }
 
     public Session getSession(boolean isCreate) {
@@ -58,7 +63,9 @@ public class HttpCookie {
         return values.isEmpty();
     }
 
-    public Map<String, String> getCookies() {
-        return values;
+    public String getCookies() {
+        return values.keySet().stream()
+                .map(key -> key + "=" + values.get(key))
+                .collect(Collectors.joining("&"));
     }
 }

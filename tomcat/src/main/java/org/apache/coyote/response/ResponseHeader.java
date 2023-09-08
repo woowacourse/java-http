@@ -1,19 +1,39 @@
 package org.apache.coyote.response;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.Protocol;
 
 public class ResponseHeader {
 
-    private final Protocol protocol;
-    private final HttpStatus httpStatus;
-    private final Map<String, String> headers;
+    private Protocol protocol;
+    private HttpStatus httpStatus;
+    private Map<String, String> headers;
+    private HttpCookie httpCookie;
 
-    public ResponseHeader(Protocol protocol, HttpStatus httpStatus, Map<String, String> headers) {
+    public ResponseHeader() {
+        this.protocol = Protocol.HTTP1_1;
+        this.httpStatus = HttpStatus.OK;
+        this.headers = new HashMap<>();
+        this.httpCookie = HttpCookie.from("");
+    }
+
+    public void setProtocol(Protocol protocol) {
         this.protocol = protocol;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-        this.headers = headers;
+    }
+
+    public void addHeaders(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public void addCookie(String key, String value) {
+        httpCookie.addCookie(key, value);
     }
 
     public String getHeader() {
@@ -24,6 +44,10 @@ public class ResponseHeader {
             String value = entry.getValue();
             stringBuilder.append(key + ": " + value + "\r\n");
         }
+        if (!httpCookie.isEmpty()) {
+            stringBuilder.append("Set-Cookie: " + httpCookie.getCookies());
+        }
         return stringBuilder.toString();
     }
+
 }

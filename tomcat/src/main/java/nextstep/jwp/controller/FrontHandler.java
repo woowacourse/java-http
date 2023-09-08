@@ -6,6 +6,7 @@ import org.apache.coyote.http.LoginManager;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ public class FrontHandler implements RequestHandler {
     }
 
     @Override
-    public void handle(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void handle(final HttpRequest request, final HttpResponse response) throws IOException {
         for (final Controller controller : requestControllers) {
             if (controller.supports(request)) {
                 controller.service(request, response);
@@ -31,6 +32,6 @@ public class FrontHandler implements RequestHandler {
             }
         }
 
-        response.mapToRedirect(NOT_FOUND.getPath());
+        response.mapToRedirect(NOT_FOUND.getValue());
     }
 }

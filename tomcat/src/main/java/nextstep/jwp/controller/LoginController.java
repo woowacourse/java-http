@@ -30,6 +30,8 @@ public class LoginController extends RequestController {
 
     private static final String TARGET_URI = "login";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final String CREDENTIALS = "account";
+    private static final String PASSWORD = "password";
 
     private final LoginManager loginManager;
 
@@ -43,7 +45,7 @@ public class LoginController extends RequestController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         try {
             final User user = getValidateUser(request);
 
@@ -52,15 +54,15 @@ public class LoginController extends RequestController {
 
             setCookieAndRedirectToMain(response, uuid);
         } catch (final IllegalArgumentException e) {
-            log.warn("login error = {}", e);
+            log.warn("login error = {}", e.getMessage());
             redirectToUnAuthorized(response);
         }
     }
 
     private static User getValidateUser(final HttpRequest request) {
         final Map<String, String> bodyParams = request.getParsedBody();
-        final String account = bodyParams.get("account");
-        final String password = bodyParams.get("password");
+        final String account = bodyParams.get(CREDENTIALS);
+        final String password = bodyParams.get(PASSWORD);
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 계정입니다. 다시 입력해주세요."));
@@ -75,7 +77,7 @@ public class LoginController extends RequestController {
     private UUID createSessionToUser(final User user) {
         final UUID uuid = UUID.randomUUID();
 
-        final Map<String, String> sessionData = Map.of("account", user.getAccount());
+        final Map<String, String> sessionData = Map.of(CREDENTIALS, user.getAccount());
         final Session session = new Session(uuid.toString());
         for (final Map.Entry<String, String> entry : sessionData.entrySet()) {
             session.add(entry.getKey(), entry.getValue());
@@ -88,13 +90,13 @@ public class LoginController extends RequestController {
 
     private static void setCookieAndRedirectToMain(final HttpResponse response, final UUID uuid) {
         response.changeStatusLine(StatusLine.from(StatusCode.FOUND));
-        response.addHeader(HttpHeader.LOCATION, MAIN.getPath());
+        response.addHeader(HttpHeader.LOCATION, MAIN.getValue());
         response.addHeader(HttpHeader.SET_COOKIE, "JSESSIONID=" + uuid);
         response.changeBody(HttpBody.empty());
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         if (isAlreadyLogined(request)) {
             redirectToMain(response);
             return;
@@ -119,7 +121,7 @@ public class LoginController extends RequestController {
     }
 
     private void redirectToMain(final HttpResponse response) {
-        response.mapToRedirect(MAIN.getPath());
+        response.mapToRedirect(MAIN.getValue());
     }
 
     private static boolean wantToLogin(final HttpRequest request) {
@@ -129,14 +131,14 @@ public class LoginController extends RequestController {
     private void doLoginProcess(final HttpRequest request, final HttpResponse response) {
         final QueryString queryString = request.getQueryString();
 
-        final String account = queryString.get("account");
-        final String password = queryString.get("password");
+        final String account = queryString.get(CREDENTIALS);
+        final String password = queryString.get(PASSWORD);
 
         try {
             validateUserCredentials(account, password);
             log.info("로그인 성공! account = {}", account);
         } catch (final IllegalArgumentException e) {
-            log.warn("login error = {}", e);
+            log.warn("login error = {}", e.getMessage());
             redirectToUnAuthorized(response);
             return;
         }
@@ -145,7 +147,7 @@ public class LoginController extends RequestController {
     }
 
     private void redirectToUnAuthorized(final HttpResponse response) {
-        response.mapToRedirect(UNAUTHORIZED.getPath());
+        response.mapToRedirect(UNAUTHORIZED.getValue());
     }
 
     private void validateUserCredentials(final String account, final String password) {
@@ -164,6 +166,6 @@ public class LoginController extends RequestController {
     private void redirectToLoginPage(final HttpResponse response) throws IOException {
         response.changeStatusLine(StatusLine.from(StatusCode.OK));
         response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue());
-        response.changeBody(HttpBody.file(LOGIN.getPath()));
+        response.changeBody(HttpBody.file(LOGIN.getValue()));
     }
 }

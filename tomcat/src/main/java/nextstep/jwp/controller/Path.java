@@ -9,13 +9,13 @@ public enum Path {
     UNAUTHORIZED("/401.html"),
     NOT_FOUND("/404.html");
 
-    private final String path;
+    private final String value;
 
-    Path(final String path) {
-        this.path = path;
+    Path(final String value) {
+        this.value = value;
     }
 
-    public String getPath() {
-        return path;
+    public String getValue() {
+        return value;
     }
 }

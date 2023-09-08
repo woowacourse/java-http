@@ -30,12 +30,12 @@ public class StaticFileController extends RequestController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final String filePath = request.getRequestUri().getRequestUri();
 
         if (request.isRequestUriEndsWith(HTML.getFileExtension())) {

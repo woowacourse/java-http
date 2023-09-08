@@ -20,12 +20,12 @@ public class HomePageController extends RequestController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.changeStatusLine(StatusLine.from(StatusCode.OK));
         response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue());
         response.changeBody(new HttpBody(HOME_MESSAGE));

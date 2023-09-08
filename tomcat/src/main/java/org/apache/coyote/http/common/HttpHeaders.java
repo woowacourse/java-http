@@ -1,13 +1,12 @@
 package org.apache.coyote.http.common;
 
-import java.util.EnumMap;
 import java.util.Map;
 
 public class HttpHeaders {
 
-    private final EnumMap<HttpHeader, String> headers;
+    private final Map<HttpHeader, String> headers;
 
-    public HttpHeaders(final EnumMap<HttpHeader, String> headers) {
+    public HttpHeaders(final Map<HttpHeader, String> headers) {
         this.headers = headers;
     }
 
@@ -30,6 +29,7 @@ public class HttpHeaders {
     public void add(final HttpHeaders httpHeaders) {
         headers.putAll(httpHeaders.getHeaders());
     }
+
     public Map<HttpHeader, String> getHeaders() {
         return headers;
     }

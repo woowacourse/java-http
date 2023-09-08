@@ -9,6 +9,7 @@ import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static nextstep.jwp.controller.Path.MAIN;
@@ -24,7 +25,7 @@ public class RegisterController extends RequestController {
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Map<String, String> bodyParams = request.getParsedBody();
 
         final String account = bodyParams.get("account");
@@ -34,13 +35,13 @@ public class RegisterController extends RequestController {
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        response.mapToRedirect(MAIN.getPath());
+        response.mapToRedirect(MAIN.getValue());
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         response.changeStatusLine(StatusLine.from(StatusCode.OK));
         response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue());
-        response.changeBody(HttpBody.file(REGISTER.getPath()));
+        response.changeBody(HttpBody.file(REGISTER.getValue()));
     }
 }

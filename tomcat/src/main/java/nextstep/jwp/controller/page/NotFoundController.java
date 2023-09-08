@@ -30,8 +30,9 @@ public class NotFoundController extends AbstractController {
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final Path path = PathUtil.findPathWithExtension(NOT_FOUND_URI, HTML);
 
+        final ResponseStatusLine statusLine = ResponseStatusLine.create(HttpStatus.NOT_FOUND);
         final HttpHeaders headers = HttpHeaders.createResponse(path);
 
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.NOT_FOUND), headers, "");
+        return new HttpResponse(statusLine, headers, "");
     }
 }

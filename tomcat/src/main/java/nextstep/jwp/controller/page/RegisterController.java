@@ -38,41 +38,41 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
         final Path path = PathUtil.findPathWithExtension(uri, HTML);
-
-        final byte[] content = Files.readAllBytes(path);
-
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String responseBody = new String(content);
-
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
+        return HttpResponse.create(HttpStatus.OK, path);
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws IOException {
-        final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
 
-        final String[] splitUserInfo = request.getRequestBody().split(BODY_DELIMITER);
-        if (splitUserInfo.length != 3) {
-            throw new IllegalArgumentException("아이디, 이메일, 비밀번호가 전부 들어와야 합니다.");
-        }
+        final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
+        final String requestBody = request.getRequestBody();
+        saveUser(requestBody);
+
+        return HttpResponse.createRedirect(HttpStatus.FOUND, path, INDEX_URI + HTML);
+    }
+
+    private void saveUser(final String requestBody) {
+        final String[] splitUserInfo = requestBody.split(BODY_DELIMITER);
+        validateParameterLength(splitUserInfo);
 
         final String account = splitUserInfo[0].split(PARAM_DELIMITER)[VALUE_INDEX];
         final String password = splitUserInfo[1].split(PARAM_DELIMITER)[VALUE_INDEX];
         final String email = splitUserInfo[2].split(PARAM_DELIMITER)[VALUE_INDEX];
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-        }
+        validateExistUserInMemory(account);
 
         final User user = new User(account, email, password);
         InMemoryUserRepository.save(user);
+    }
 
-        final byte[] content = Files.readAllBytes(path);
+    private void validateExistUserInMemory(final String account) {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+        }
+    }
 
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        headers.setHeader(HttpHeaders.LOCATION, INDEX_URI + HTML);
-
-        final String responseBody = new String(content);
-
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.FOUND), headers, responseBody);
+    private void validateParameterLength(final String[] splitUserInfo) {
+        if (splitUserInfo.length != 3) {
+            throw new IllegalArgumentException("아이디, 이메일, 비밀번호가 전부 들어와야 합니다.");
+        }
     }
 }

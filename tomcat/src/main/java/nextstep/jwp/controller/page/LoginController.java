@@ -21,6 +21,7 @@ import nextstep.jwp.controller.FileContent;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.PathUtil;
+import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.common.HttpHeaders;
@@ -52,28 +53,17 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        final String uri = request.getUri();
-        final String splitUri = uri.split(COMMA_REGEX)[FILENAME_INDEX];
-        final Path path = PathUtil.findPathWithExtension(splitUri, HTML);
-
-        final byte[] content = Files.readAllBytes(path);
-
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String responseBody = new String(content);
+        final String uri = request.getUri()
+                .split(COMMA_REGEX)[FILENAME_INDEX];
+        final Path loginPath = PathUtil.findPathWithExtension(uri, HTML);
 
         final Session session = SessionManager.findSession(request.getHeaders().getCookie(COOKIE_NAME));
         if (Objects.isNull(session)) {
-            return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
+            return HttpResponse.create(HttpStatus.OK, loginPath);
         }
 
-        final Path loginPath = PathUtil.findPathWithExtension(INDEX_URI, HTML);
-
-        final byte[] loginContent = Files.readAllBytes(loginPath);
-        final String loginResponseBody = new String(loginContent);
-
-        headers.setHeader(LOCATION, INDEX_URI + HTML);
-
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.FOUND), headers, loginResponseBody);
+        final Path indexPath = PathUtil.findPathWithExtension(INDEX_URI, HTML);
+        return HttpResponse.createRedirect(HttpStatus.FOUND, indexPath, INDEX_URI + HTML);
     }
 
     @Override

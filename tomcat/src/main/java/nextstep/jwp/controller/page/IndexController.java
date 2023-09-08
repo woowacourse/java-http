@@ -1,15 +1,11 @@
 package nextstep.jwp.controller.page;
 
-import static nextstep.jwp.controller.FileContent.STATIC;
-
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.util.PathUtil;
+import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -28,11 +24,6 @@ public class IndexController extends AbstractController {
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
         final Path path = PathUtil.findPath(request.getUri());
-        final byte[] content = Files.readAllBytes(path);
-
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String responseBody = new String(content);
-
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK), headers, responseBody);
+        return HttpResponse.create(HttpStatus.OK, path);
     }
 }

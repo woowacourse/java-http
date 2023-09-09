@@ -8,6 +8,8 @@ import org.apache.coyote.http11.Protocol;
 
 public class ResponseHeader {
 
+    private static final String LINE_SPLIT_DELIMITER = "\r\n";
+
     private Protocol protocol;
     private HttpStatus httpStatus;
     private Map<String, String> headers;
@@ -15,7 +17,7 @@ public class ResponseHeader {
 
     public ResponseHeader() {
         this.protocol = Protocol.HTTP1_1;
-        this.httpStatus = HttpStatus.OK;
+        this.httpStatus = null;
         this.headers = new HashMap<>();
         this.httpCookie = HttpCookie.from("");
     }
@@ -38,16 +40,22 @@ public class ResponseHeader {
 
     public String getHeader() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(protocol.getValue() + " " + httpStatus.getStatusCode() + " " + httpStatus.getStatus() + "\r\n");
+        stringBuilder.append(protocol.getValue() + " " + httpStatus.getStatusCode() + " " + httpStatus.getStatus()
+                + LINE_SPLIT_DELIMITER);
         for (Entry<String, String> entry : headers.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            stringBuilder.append(key + ": " + value + "\r\n");
+            stringBuilder.append(key + ": " + value + LINE_SPLIT_DELIMITER);
         }
-        if (!httpCookie.isEmpty()) {
-            stringBuilder.append("Set-Cookie: " + httpCookie.getCookies());
-        }
+        addCookieHeader(stringBuilder);
         return stringBuilder.toString();
+    }
+
+    private void addCookieHeader(StringBuilder stringBuilder) {
+        if (httpCookie.isEmpty()) {
+            return;
+        }
+        stringBuilder.append("Set-Cookie: " + httpCookie.getCookies());
     }
 
 }

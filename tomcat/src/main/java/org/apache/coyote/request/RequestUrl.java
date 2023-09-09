@@ -22,9 +22,10 @@ public class RequestUrl {
             return new RequestUrl(url, new HashMap<>());
         }
         String path = url.split(QUERY_STRING_SPLIT_DELIMITER)[0];
-        String queryStrings = url.split(QUERY_STRING_SPLIT_DELIMITER)[1];
 
-        Map<String, String> queryString = getQueryString(queryStrings);
+        String queries = url.split(QUERY_STRING_SPLIT_DELIMITER)[1];
+        Map<String, String> queryString = getQueryString(queries);
+
         return new RequestUrl(path, queryString);
     }
 
@@ -47,14 +48,7 @@ public class RequestUrl {
     }
 
     public String getQueryValue(String key) {
-        if (!has(key)) {
-            throw new IllegalArgumentException("키가 존재하지 않습니다.");
-        }
-        return queryString.get(key);
-    }
-
-    public boolean has(String key) {
-        return queryString.containsKey(key);
+        return queryString.getOrDefault(key, null);
     }
 
     public String getPath() {
@@ -63,9 +57,5 @@ public class RequestUrl {
 
     public Map<String, String> getQueryString() {
         return queryString;
-    }
-
-    public boolean hasQueryString() {
-        return !queryString.isEmpty();
     }
 }

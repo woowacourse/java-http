@@ -10,7 +10,10 @@ import org.apache.coyote.http11.HttpMethod;
 public class RequestHeader {
 
     private static final SessionManager sessionManager = SessionManager.getInstance();
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
+    private static final String ACCEPT = "Accept";
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
@@ -20,19 +23,12 @@ public class RequestHeader {
         this.headers = headers;
     }
 
-    public String getHeader(String key) {
-        return headers.getOrDefault(key, null);
-    }
-
     public int getContentLength() {
-        if (has("Content-Length")) {
-            return Integer.parseInt(headers.get("Content-Length"));
-        }
-        return 0;
+        return Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH, "0"));
     }
 
-    public boolean has(String key) {
-        return headers.containsKey(key);
+    public boolean hasRequestBody() {
+        return headers.containsKey(CONTENT_LENGTH);
     }
 
     public Session getSession(boolean isCreate) {
@@ -49,10 +45,11 @@ public class RequestHeader {
     }
 
     public HttpCookie getCookie() {
-        if (has("Cookie")) {
-            return HttpCookie.from(headers.get("Cookie"));
-        }
-        return HttpCookie.from("");
+        return HttpCookie.from(headers.getOrDefault(COOKIE, ""));
+    }
+
+    public String getResourceType() {
+        return headers.get(ACCEPT);
     }
 
     public String getPath() {

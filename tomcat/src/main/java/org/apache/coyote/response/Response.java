@@ -4,6 +4,8 @@ import org.apache.coyote.http11.Protocol;
 
 public class Response {
 
+    private static final String LOCATION = "Location";
+
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
@@ -34,7 +36,7 @@ public class Response {
     }
 
     public void redirectLocation(String path) {
-        addHeaders("Location", path);
+        addHeaders(LOCATION, path);
     }
 
     public void setResponseBody(String body) {

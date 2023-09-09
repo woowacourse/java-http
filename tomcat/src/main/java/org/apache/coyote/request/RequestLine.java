@@ -20,8 +20,8 @@ public class RequestLine {
         return requestUrl.isSamePath(otherPath);
     }
 
-    public String getQueryValue(String key) {
-        return requestUrl.getQueryValue(key);
+    public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
+        return httpMethod == otherHttpMethod;
     }
 
     public HttpMethod getHttpMethod() {
@@ -32,19 +32,7 @@ public class RequestLine {
         return requestUrl.getPath();
     }
 
-    public Protocol getProtocol() {
-        return protocol;
-    }
-
     public Map<String, String> getQueryString() {
         return requestUrl.getQueryString();
-    }
-
-    public boolean hasQueryString() {
-        return requestUrl.hasQueryString();
-    }
-
-    public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
-        return httpMethod == otherHttpMethod;
     }
 }

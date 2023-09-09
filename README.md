@@ -82,3 +82,4 @@
 - [ ] response resolver에 request가 안넘어가도록 구현
 - [ ] controller, adapter 구조 분리
   - [ ] controller, adapter 추상화 및 역할 구분
+- [x] request, response 객체 내 map에서 key에 해당하는 value가 없더라도 null 반환하도록 모두 변경 

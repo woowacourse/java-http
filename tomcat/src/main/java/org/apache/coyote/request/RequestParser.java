@@ -29,8 +29,7 @@ public class RequestParser {
         Map<String, String> headers = getHeaders();
 
         RequestHeader requestHeader = new RequestHeader(requestLine, headers);
-        RequestBody requestBody = getRequestBody(requestHeader.getContentLength());
-
+        RequestBody requestBody = getRequestBody(requestHeader);
         return new Request(requestHeader, requestBody);
     }
 
@@ -44,33 +43,34 @@ public class RequestParser {
     }
 
     public Map<String, String> getHeaders() throws IOException {
-        String header;
         Map<String, String> headers = new HashMap<>();
-        while ((header = bufferedReader.readLine()) != null) {
-            if (header.isBlank()) {
-                break;
-            }
-            String firstHeader = header.split(SPLIT_VALUE_DELIMITER)[0];
-            String key = firstHeader.split(HEADER_DELIMITER)[0];
-            String value = firstHeader.split(HEADER_DELIMITER)[1];
+        String header;
+        while ((header = bufferedReader.readLine()) != null && !header.isBlank()) {
+            String entry = header.split(SPLIT_VALUE_DELIMITER)[0];
+            String key = entry.split(HEADER_DELIMITER)[0];
+            String value = entry.split(HEADER_DELIMITER)[1];
             headers.put(key, value);
         }
         return headers;
     }
 
-    public RequestBody getRequestBody(int contentLength) throws IOException {
-        char[] requestBodyBuffer = new char[contentLength];
-        bufferedReader.read(requestBodyBuffer, 0, contentLength);
-        String body = new String(requestBodyBuffer);
-        Map<String, String> requestBody = new HashMap<>();
-        if (body.isEmpty()) {
-            return new RequestBody(requestBody);
+    public RequestBody getRequestBody(RequestHeader requestHeader) throws IOException {
+        if (!requestHeader.hasRequestBody()) {
+            return new RequestBody(new HashMap<>());
         }
+        String body = getBody(requestHeader.getContentLength());
+        Map<String, String> requestBody = new HashMap<>();
         for (String entry : body.split(BODY_KEY_PAIR_SPLIT_DELIMITER)) {
             String key = entry.split(BODY_KEY_VALUE_SPLIT_DELIMITER)[0];
             String value = entry.split(BODY_KEY_VALUE_SPLIT_DELIMITER)[1];
             requestBody.put(key, value);
         }
         return new RequestBody(requestBody);
+    }
+
+    private String getBody(int contentLength) throws IOException {
+        char[] requestBodyBuffer = new char[contentLength];
+        bufferedReader.read(requestBodyBuffer, 0, contentLength);
+        return new String(requestBodyBuffer);
     }
 }

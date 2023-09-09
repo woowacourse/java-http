@@ -71,6 +71,8 @@ public class LoginController implements Controller {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
         }
 
-        return SessionManager.getSessionId(user);
+        String sessionId = SessionManager.getSessionId(user);
+        httpResponse.setCookie(sessionId);
+        log.info("로그인 성공: {}", SessionManager.getSession(sessionId).getAttribute("user"));
     }
 }

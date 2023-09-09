@@ -27,6 +27,9 @@ public class SessionManager {
         return sessionId;
     }
 
+    public static Session getSession(String sessionId) {
+        return sessions.get(sessionId);
+    }
 
     private static void add(Session session) {
         sessions.put(session.getId(), session);

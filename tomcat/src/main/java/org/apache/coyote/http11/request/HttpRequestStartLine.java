@@ -23,19 +23,16 @@ public class HttpRequestStartLine {
         }
         final List<String> startLineTokens = List.of(startLine.split(" "));
         final HttpMethod method = HttpMethod.valueOf(startLineTokens.get(0));
-        String path;
-        Map<String, String> queryProperties;
-        final String uri = startLineTokens.get(1);
+        String protocolVersion = startLineTokens.get(2);
+        return makeStartLine(startLineTokens.get(1), method, protocolVersion);
+    }
+
+    private static HttpRequestStartLine makeStartLine(String uri, HttpMethod method, String protocolVersion) {
         int uriSeparatorIndex = uri.indexOf("?");
         if (uriSeparatorIndex == -1) {
-            path = uri;
-            queryProperties = new HashMap<>();
-        } else {// TODO: 2023/09/07 else 없애기
-            path = uri.substring(0, uriSeparatorIndex);
-            queryProperties = makeQueryProperties(uri.substring(uriSeparatorIndex + 1));
+            return new HttpRequestStartLine(method, uri, new HashMap<>(), protocolVersion);
         }
-        String protocolVersion = startLineTokens.get(2);
-        return new HttpRequestStartLine(method, path, queryProperties, protocolVersion);
+        return new HttpRequestStartLine(method, uri.substring(0, uriSeparatorIndex), makeQueryProperties(uri.substring(uriSeparatorIndex + 1)), protocolVersion);
     }
 
     private static Map<String, String> makeQueryProperties(final String queryString) {
@@ -63,7 +60,7 @@ public class HttpRequestStartLine {
         return this.path.equals(path);
     }
 
-    public String getPath() {// TODO: 2023/09/07 getter 없애기
+    public String getPath() {
         return this.path;
     }
 }

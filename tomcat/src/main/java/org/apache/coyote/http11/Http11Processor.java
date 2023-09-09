@@ -8,8 +8,6 @@ import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseHeader;
-import org.apache.coyote.http11.response.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,14 +15,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -97,27 +89,13 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequestBody(new String(buffer));
     }
 
-    private HttpResponse handleRequest(final HttpRequest request)
-            throws URISyntaxException, IOException {
+    private HttpResponse handleRequest(final HttpRequest request) {
         final Controller controller = RequestMapping.getController(request);
         try {
             return controller.service(request);
-        } catch (Exception exception) { // TODO: 2023/09/08  커스텀 에외 만들기
-            return handle500();
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            return null;
         }
-    }
-
-    private HttpResponse handle500() throws IOException, URISyntaxException {
-        String responseBody = getHtmlFile(getClass().getResource("/static/500.html"));
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
-                HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
-                String.valueOf(responseBody.getBytes().length), null, null);
-        return HttpResponse.of(HttpResponseStatus.INTERNAL_SERVER_ERROR, responseHeader, responseBody);
-    }
-
-    // TODO: 2023/09/08 util로 분리
-    private String getHtmlFile(URL filePathUrl) throws URISyntaxException, IOException {
-        final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
-        return new String(Files.readAllBytes(filePath));
     }
 }

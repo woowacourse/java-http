@@ -6,9 +6,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 import java.util.List;
 
 public class RequestMapping {
-    private static List<Controller> CONTROLLER_INSTANCES = List.of(
+    private static final List<Controller> CONTROLLER_INSTANCES = List.of(
             new LoginGetController(), new LoginPostController(), new RegisterGetController(), new RegisterPostController(), new DefaultGetController()
     );
+
+    private RequestMapping() {
+    }
 
     public static Controller getController(HttpRequest request) {
         return CONTROLLER_INSTANCES.stream()

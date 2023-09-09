@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 public class HttpResponse {
     public static final String DEFAULT_PROTOCOL_VERSION = "HTTP/1.1";
     private final String protocolVersion;
-
     private final HttpResponseStatus responseStatus;
     private final HttpResponseHeader responseHeader;
     private final String responseBody;
@@ -24,7 +23,7 @@ public class HttpResponse {
     @Override
     public String toString() {
         return String.join("\r\n",
-                "HTTP/1.1 " + responseStatus.toString() + " ",
+                protocolVersion + " " + responseStatus.toString() + " ",
                 responseHeader.toString() + " ",
                 "",
                 responseBody);

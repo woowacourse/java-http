@@ -18,6 +18,8 @@ public class RegisterController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
     private static final String RESOURCE_URL = "/register.html";
+    private static final String URL = "/register";
+
     private final AuthService authService;
 
     public RegisterController(AuthService authService) {
@@ -26,11 +28,11 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.consistsOf(POST, "/register")) {
+        if (httpRequest.consistsOf(POST, URL)) {
             doPost(httpRequest, httpResponse);
             return;
         }
-        if (httpRequest.consistsOf(GET, "/register")) {
+        if (httpRequest.consistsOf(GET, URL)) {
             doGet(httpRequest, httpResponse);
         }
     }

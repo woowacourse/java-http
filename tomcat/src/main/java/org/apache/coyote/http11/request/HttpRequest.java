@@ -39,6 +39,10 @@ public class HttpRequest {
                 .anyMatch(requestUri -> requestLine.consistsOf(httpMethod, requestUri));
     }
 
+    public boolean consistsOf(HttpMethod httpMethod) {
+        return requestLine.consistsOf(httpMethod);
+    }
+
     public boolean hasQueryString() {
         return requestLine.hasQueryString();
     }

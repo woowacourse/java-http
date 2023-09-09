@@ -19,6 +19,7 @@ public class LoginController extends AbstractController {
     private static final String JSESSIONID_COOKIE = "JSESSIONID=";
     private static final String UNAUTHORIZED_URL = "/401.html";
     private static final String RESOURCE_URL = "/login.html";
+    private static final String URL = "/login";
 
     private final AuthService authService;
 
@@ -28,11 +29,11 @@ public class LoginController extends AbstractController {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.consistsOf(POST, "/login")) {
+        if (httpRequest.consistsOf(POST, URL)) {
             doPost(httpRequest, httpResponse);
             return;
         }
-        if (httpRequest.consistsOf(GET, "/login")) {
+        if (httpRequest.consistsOf(GET, URL)) {
             doGet(httpRequest, httpResponse);
         }
     }

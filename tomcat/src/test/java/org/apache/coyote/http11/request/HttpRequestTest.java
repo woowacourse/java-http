@@ -4,11 +4,14 @@ import static org.apache.coyote.http11.request.line.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http11.request.header.RequestHeader;
+import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -107,7 +110,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void Request_Line의_구성을_확인한다() {
+    void Request_Line의_구성을_Http_Method와_URI로_확인한다() {
         // given
         String requestLine = "POST /login HTTP/1.1 ";
         String requestHeader = String.join(System.lineSeparator(),
@@ -121,6 +124,24 @@ class HttpRequestTest {
 
         // then
         assertThat(actual).isTrue();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"GET, false", "POST, true"})
+    void Request_Line의_구성을_Http_Method로_확인한다(HttpMethod httpMethod, boolean expected) {
+        // given
+        String requestLine = "POST /login HTTP/1.1 ";
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 10 ");
+        HttpRequest request = HttpRequest.of(requestLine, requestHeader);
+
+        // when
+        boolean actual = request.consistsOf(httpMethod);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

@@ -3,11 +3,14 @@ package org.apache.coyote.http11.request;
 import static org.apache.coyote.http11.request.line.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.request.line.RequestUri;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -28,7 +31,7 @@ class RequestLineTest {
     }
 
     @Test
-    void Request_Line의_구성을_확인한다() {
+    void Request_Line의_구성을_Http_Method와_URI로_확인한다() {
         // given
         String requestLine = "GET /index.html HTTP/1.1 ";
         RequestLine line = RequestLine.from(requestLine);
@@ -38,6 +41,20 @@ class RequestLineTest {
 
         // then
         assertThat(actual).isTrue();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"GET, true", "POST, false"})
+    void Request_Line의_구성을_Http_Method로_확인한다(HttpMethod httpMethod, boolean expected) {
+        // given
+        String requestLine = "GET /index.html HTTP/1.1 ";
+        RequestLine line = RequestLine.from(requestLine);
+
+        // when
+        boolean actual = line.consistsOf(httpMethod);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

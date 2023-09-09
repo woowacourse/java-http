@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import support.HttpClient;
 
 class RegistrationIntegrationTest extends IntegrationTest {
+
     @Test
     void 회원가입_페이지_조회기능() {
         HttpResponse<String> response = HttpClient.send(port, "/register");

@@ -7,15 +7,15 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-     public void addSession(final Session session) {
+     public static void addSession(final Session session) {
          SESSIONS.put(session.getId(), session);
      }
 
-     public Session findSession(final String sessionId) {
+     public static Session findSession(final String sessionId) {
          return SESSIONS.get(sessionId);
      }
 
-     public void removeSession(final String sessionId) {
+     public static void removeSession(final String sessionId) {
          SESSIONS.remove(sessionId);
      }
 }

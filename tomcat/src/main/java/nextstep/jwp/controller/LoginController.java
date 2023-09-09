@@ -8,7 +8,6 @@ import java.util.Map;
 import nextstep.jwp.db.InMemorySession;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.model.AuthUser;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -19,9 +18,9 @@ public class LoginController {
 
     public static Response login(Request request){
         Map<String, String> body = request.getBody();
-        AuthUser authUser = AuthUser.from(body);
-        User user = InMemoryUserRepository.findByAccount(authUser.getAccount()).orElseThrow(()->new UnauthorizedException("해당 유저가 없습니다."));
-        if(!user.checkPassword(authUser.getPassword())){
+        User user = InMemoryUserRepository.findByAccount(body.get("account"))
+                .orElseThrow(()->new UnauthorizedException("해당 유저가 없습니다."));
+        if(!user.checkPassword(body.get("password"))){
             throw new UnauthorizedException("아이디 및 패스워드가 틀렸습니다.");
         }
         String jSessionId = InMemorySession.login(user);

@@ -3,8 +3,7 @@ package org.apache.coyote.http11.common.response;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import org.apache.coyote.http11.common.HttpHeaders;
+import org.apache.coyote.http11.servlet.Page;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
@@ -14,24 +13,11 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
 
     @Test
-    void StatusCode와_HttpHeader를_넣으면_HttpReponse를_만들_수_있다() {
-        // given
-        StatusCode code = StatusCode.FOUND;
-        HttpHeaders headers = HttpHeaders.create(Map.of("Location", "/index.html"));
-
-        // when
-        HttpResponse response = HttpResponse.create(code, headers);
-
-        // then
-        assertThat(response).isNotNull();
-    }
-
-    @Test
     void Response를_byte로_변환할_수_있다() {
         // given
-        StatusCode code = StatusCode.FOUND;
-        HttpHeaders headers = HttpHeaders.create(Map.of("Location", "/index.html"));
-        HttpResponse response = HttpResponse.create(code, headers);
+        HttpResponse response = HttpResponse.create();
+        response.setStatusCode(StatusCode.FOUND);
+        response.setLocation(Page.INDEX);
 
         // when
         byte[] actual = response.getBytes();

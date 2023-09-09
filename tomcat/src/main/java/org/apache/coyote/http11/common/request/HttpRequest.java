@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpHeaderName;
-import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
@@ -19,11 +18,11 @@ public class HttpRequest {
     public static final String COOKIE = "Cookie";
 
     private final RequestLine requestLine;
-    private final HttpHeaders headers;
+    private final RequestHeaders headers;
     private final MessageBody body;
     private final SessionManager sessionManager;
 
-    private HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final MessageBody body) {
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers, final MessageBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
@@ -32,7 +31,7 @@ public class HttpRequest {
 
     public static HttpRequest create(BufferedReader br) throws IOException {
         RequestLine requestLine = findStartLine(br);
-        HttpHeaders headers = findHeaders(br);
+        RequestHeaders headers = findHeaders(br);
         MessageBody body = findBody(headers, br);
         return new HttpRequest(requestLine, headers, body);
     }
@@ -42,17 +41,17 @@ public class HttpRequest {
         return RequestLine.create(firstLine);
     }
 
-    private static HttpHeaders findHeaders(BufferedReader br) throws IOException {
+    private static RequestHeaders findHeaders(BufferedReader br) throws IOException {
         List<String> headers = new ArrayList<>();
         String line = br.readLine();
         while (!"".equals(line)) {
             headers.add(line);
             line = br.readLine();
         }
-        return HttpHeaders.create(headers);
+        return RequestHeaders.create(headers);
     }
 
-    private static MessageBody findBody(HttpHeaders headers, BufferedReader br) throws IOException {
+    private static MessageBody findBody(RequestHeaders headers, BufferedReader br) throws IOException {
         String contentLength = headers.getHeader(HttpHeaderName.CONTENT_LENGTH.getName());
         if (contentLength.isEmpty()) {
             return MessageBody.empty();

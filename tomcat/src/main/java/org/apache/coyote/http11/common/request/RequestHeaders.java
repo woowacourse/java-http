@@ -1,41 +1,29 @@
-package org.apache.coyote.http11.common;
+package org.apache.coyote.http11.common.request;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpHeaders {
+public class RequestHeaders {
 
     private static final String DELIMITER = ": ";
     private static final String EMPTY_STRING = "";
 
     private Map<String, String> headers;
 
-    public HttpHeaders() {
-        headers = new LinkedHashMap<>();
-    }
-
-    private HttpHeaders(final Map<String, String> headers) {
+    private RequestHeaders(final Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static HttpHeaders create(final List<String> lines) {
+    public static RequestHeaders create(final List<String> lines) {
         Map<String, String> headers = new LinkedHashMap<>();
         for (String line : lines) {
             String[] split = line.split(DELIMITER);
             headers.put(split[0], split[1]);
         }
 
-        return new HttpHeaders(headers);
-    }
-
-    public static HttpHeaders create(final Map<String, String> headers) {
-        return new HttpHeaders(new LinkedHashMap<>(headers));
-    }
-
-    public void addHeader(HttpHeaderName header, String value) {
-        headers.put(header.getName(), value);
+        return new RequestHeaders(headers);
     }
 
     public String getHeader(String name) {

@@ -67,6 +67,10 @@ public class HttpRequest {
         return requestHeaders.hasJSessionId();
     }
 
+    public boolean isSameRequestMethod(final RequestMethod requestMethod) {
+        return httpRequestLine.isSameRequestMethod(requestMethod);
+    }
+
     public String getPath() {
         return httpRequestLine.getPath();
     }

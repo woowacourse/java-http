@@ -3,22 +3,23 @@ package org.apache.coyote.http11.response.line;
 public enum ResponseStatus {
     OK(200, "OK"),
     FOUND(302, "Found"),
+    BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     ;
 
     private final int code;
-    private final String message;
+    private final String response;
 
-    ResponseStatus(int code, String message) {
+    ResponseStatus(int code, String response) {
         this.code = code;
-        this.message = message;
+        this.response = response;
     }
 
-    public int code() {
-        return code;
+    public String codeMessage() {
+        return String.valueOf(code);
     }
 
-    public String message() {
-        return message;
+    public String responseMessage() {
+        return response;
     }
 }

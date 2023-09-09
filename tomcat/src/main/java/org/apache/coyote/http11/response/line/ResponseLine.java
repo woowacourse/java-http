@@ -18,8 +18,8 @@ public class ResponseLine {
         return String.join(
                 DELIMITER,
                 httpVersion,
-                String.valueOf(responseStatus.code()),
-                responseStatus.message()
+                responseStatus.codeMessage(),
+                responseStatus.responseMessage()
         );
     }
 

@@ -6,6 +6,7 @@ import static org.apache.coyote.http11.response.header.HttpContentType.mimeTypeW
 import static org.apache.coyote.http11.response.header.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.header.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.header.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.response.line.ResponseStatus.BAD_REQUEST;
 
 import java.util.LinkedHashMap;
 import org.apache.coyote.http11.response.body.ResponseBody;
@@ -23,7 +24,7 @@ public class HttpResponse {
     private ResponseBody responseBody;
 
     public HttpResponse(String httpVersion) {
-        this.responseLine = new ResponseLine(httpVersion, null);
+        this.responseLine = new ResponseLine(httpVersion, BAD_REQUEST);
         this.responseHeader = new ResponseHeader(new LinkedHashMap<>());
     }
 

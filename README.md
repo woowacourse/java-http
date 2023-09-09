@@ -20,3 +20,7 @@
 - [x] HttpRequest 구현
 - [x] HttpResponse 구현
 - [x] Controller 구현
+
+4단계 동시성 확장하기
+- [ ] Executors로 Thread Pool 적용
+- [ ] 동시성 컬렉션 사용하기

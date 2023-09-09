@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.session.Session;
+import org.apache.catalina.session.Session;
 import org.apache.catalina.controller.HttpController;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;

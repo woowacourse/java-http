@@ -5,7 +5,7 @@ import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.RootController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.Controller;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.controller.ResourceController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;

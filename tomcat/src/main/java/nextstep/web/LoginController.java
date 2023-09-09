@@ -7,7 +7,6 @@ import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.mvc.AbstractController;
-import org.apache.coyote.http11.mvc.view.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -20,29 +19,31 @@ public class LoginController extends AbstractController {
     private final UserService userService = new UserService();
 
     @Override
-    public ResponseEntity doGetRequest(final HttpRequest request, final HttpResponse response) {
+    public void doGetRequest(final HttpRequest request, final HttpResponse response) {
         final Session session = SessionManager.findSession(request.getCookie("JSESSIONID"));
         if (session != null) {
             final User user = (User) session.getAttribute("user");
             log.info("already login: {}", user);
-            return ResponseEntity.redirectTo("/index.html");
+            response.redirectTo("/index.html");
+            return;
         }
 
-        return ResponseEntity.forwardTo("/login.html");
+        response.forwardTo("/login.html");
     }
 
     @Override
-    public ResponseEntity doPostRequest(final HttpRequest request, final HttpResponse response) {
+    public void doPostRequest(final HttpRequest request, final HttpResponse response) {
         final String account = request.getPayloadValue("account");
         final String password = request.getPayloadValue("password");
         if (userService.validateLogin(account, password)) {
-            return successLogin(response, account);
+            successLogin(response, account);
+            return;
         }
 
-        return ResponseEntity.forwardTo(HttpStatus.UNAUTHORIZED, "/401.html");
+        response.forwardTo(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
-    private ResponseEntity successLogin(final HttpResponse response, final String account) {
+    private void successLogin(final HttpResponse response, final String account) {
         final User user = userService.getUserByAccount(account);
         log.info("login success: {}", user);
 
@@ -51,6 +52,6 @@ public class LoginController extends AbstractController {
         final Session session = new Session(uuid);
         session.setAttribute("user", user);
         SessionManager.add(session);
-        return ResponseEntity.redirectTo("/index.html");
+        response.redirectTo("/index.html");
     }
 }

@@ -26,7 +26,7 @@ public class ResponseEntity {
     }
 
     public static ResponseEntity fromSimpleStringData(final String body) {
-        return new ResponseEntity(HttpStatus.OK, new SimpleStringDataView(body));
+        return new ResponseEntity(HttpStatus.OK, SimpleStringDataView.from(body));
     }
 
     public static ResponseEntity forwardTo(final String path) {

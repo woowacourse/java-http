@@ -6,8 +6,12 @@ public class SimpleStringDataView implements View {
 
     private final String data;
 
-    public SimpleStringDataView(final String data) {
+    private SimpleStringDataView(final String data) {
         this.data = data;
+    }
+
+    public static SimpleStringDataView from(final String data) {
+        return new SimpleStringDataView(data);
     }
 
     @Override

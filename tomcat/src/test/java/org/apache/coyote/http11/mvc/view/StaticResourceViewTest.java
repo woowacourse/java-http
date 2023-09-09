@@ -42,9 +42,10 @@ class StaticResourceViewTest {
     void 존재하지_않는_리소스_접근시_예외발생() {
         // given
         final String resourcePath = "/not_found.html";
+        final StaticResourceView staticResourceView = StaticResourceView.of(resourcePath);
 
         // when & then
-        assertThatThrownBy(() -> StaticResourceView.of(resourcePath))
+        assertThatThrownBy(staticResourceView::renderView)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Resource not found: " + resourcePath);
     }

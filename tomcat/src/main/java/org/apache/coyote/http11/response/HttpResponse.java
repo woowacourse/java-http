@@ -1,9 +1,10 @@
 package org.apache.coyote.http11.response;
 
-import java.io.IOException;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.mvc.view.ResponseEntity;
+import org.apache.coyote.http11.mvc.view.SimpleStringDataView;
+import org.apache.coyote.http11.mvc.view.StaticResourceView;
+import org.apache.coyote.http11.mvc.view.View;
 
 public class HttpResponse {
 
@@ -11,25 +12,47 @@ public class HttpResponse {
     private static final HttpResponseStatusLine DEFAULT_RESPONSE_STATUS =
             HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, HttpStatus.OK);
     private static final String NO_CONTENT = "";
+    private static final String DEFAULT_METHOD_NOT_ALLOWED_RESOURCE = "/405.html";
+    private static final String DEFAULT_NOT_FOUND_RESOURCE = "/404.html";
 
     private final HttpHeaders httpHeaders = HttpHeaders.getInstance();
     private HttpResponseStatusLine httpResponseStatusLine = DEFAULT_RESPONSE_STATUS;
     private String body;
 
-    public void updateHttpResponseStatusLineByStatus(final HttpStatus httpStatus) {
-        this.httpResponseStatusLine = HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, httpStatus);
+    public void notAllowedMethod() {
+        forwardTo(HttpStatus.METHOD_NOT_ALLOWED, DEFAULT_METHOD_NOT_ALLOWED_RESOURCE);
     }
 
-    public void updateByResponseEntity(final ResponseEntity response) throws IOException {
-        final HttpStatus httpStatus = response.getHttpStatus();
-        updateHttpResponseStatusLineByStatus(httpStatus);
-        response.getHeaders().forEach(this::setHeader);
-        if (httpStatus == HttpStatus.FOUND) {
-            noContentResponse();
-            return;
+    public void notFound() {
+        forwardTo(HttpStatus.NOT_FOUND, DEFAULT_NOT_FOUND_RESOURCE);
+    }
+
+    public void redirectTo(final String path) {
+        this.httpResponseStatusLine = HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, HttpStatus.FOUND);
+        this.httpHeaders.addHeader("Location", path);
+        noContentResponse();
+    }
+
+    public void forwardTo(final String path) {
+        forwardTo(HttpStatus.OK, path);
+    }
+
+    public void forwardTo(final HttpStatus httpStatus, final String path) {
+        try {
+            this.httpResponseStatusLine = HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, httpStatus);
+            final View resourceView = StaticResourceView.of(path);
+            setHeader("Content-Type", resourceView.getContentType());
+            setBody(resourceView.renderView());
+        } catch (final IllegalArgumentException exception) {
+            notFound();
         }
-        setHeader("Content-Type", response.getView().getContentType());
-        setBody(response.getView().renderView());
+    }
+
+    public void textPlain(final String simpleTextData) {
+        this.httpResponseStatusLine = HttpResponseStatusLine.of(SUPPORTED_HTTP_VERSION, HttpStatus.OK);
+        final View simpleStringDataView = SimpleStringDataView.from(simpleTextData);
+        setHeader("Content-Type", simpleStringDataView.getContentType());
+        setBody(simpleStringDataView.renderView());
     }
 
     private void noContentResponse() {

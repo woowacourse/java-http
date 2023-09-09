@@ -33,7 +33,9 @@ public class HttpRequestMessageReader {
     }
 
     public static HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+        try (final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             final BufferedReader br = new BufferedReader(inputStreamReader)) {
+
             final HttpRequestLine startLine = readStartLine(br.readLine());
             final HttpHeaders httpHeaders = readHeaders(br);
             final HttpCookie httpCookie = parseCookieFromHeaders(httpHeaders);

@@ -1,19 +1,30 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.request.FileReader;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-import java.io.IOException;
+public class IndexController extends AbstractController {
 
-import static org.apache.coyote.http11.response.StatusCode.OK;
+    private static final IndexController INSTANCE = new IndexController();
 
-public class IndexController implements Controller {
+    private IndexController() {
+    }
+
+    public static IndexController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
-    public Response service(RequestReader requestReader) throws IOException {
-        return new Response()
-                .addResponseLine(requestReader.getProtocol(), OK)
-                .addBaseHeader(requestReader.getContentType())
-                .createBodyByFile(requestReader.getUri());
+    public HttpResponse doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        String body = FileReader.read(httpRequest.getUri());
+        return httpResponse
+                .addBaseHeader(httpRequest.getContentType())
+                .addBody(body);
+    }
+
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        return null;
     }
 }

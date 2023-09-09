@@ -4,10 +4,10 @@ import java.util.List;
 
 public enum ControllerType {
 
-    MAIN("/", new MainController()),
-    LOGIN("/login.html", new LoginController()),
-    REGISTER("/register.html", new RegisterController()),
-    INDEX("/index.html", new IndexController()),
+    MAIN("/", MainController.getInstance()),
+    LOGIN("/login.html", LoginController.getInstance()),
+    REGISTER("/register.html", RegisterController.getInstance()),
+    INDEX("/index.html", IndexController.getInstance()),
     ;
 
     private final String requestUri;
@@ -24,6 +24,6 @@ public enum ControllerType {
                 .filter(findController -> findController.requestUri.equals(requestUri))
                 .findFirst()
                 .map(findController -> findController.controller)
-                .orElse(new OtherController());
+                .orElse(OtherController.getInstance());
     }
 }

@@ -15,8 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpResponseBuilderTest {
-    
-    private static final HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
+
     private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private HttpRequest httpRequest;
     private HttpResponse httpResponse;
@@ -31,7 +30,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileOkResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath());
+        String response = HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath());
 
         //then
         assertAll(
@@ -44,7 +43,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileRedirectResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, httpRequest.getPath());
+        String response = HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, httpRequest.getPath());
 
         //then
         assertAll(
@@ -58,7 +57,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileNotFoundResponse() throws IOException {
         //when
-        String response = httpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest, httpResponse);
+        String response = HttpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest, httpResponse);
 
         //then
         assertAll(
@@ -71,7 +70,7 @@ class HttpResponseBuilderTest {
     @Test
     void buildCustomResponse() {
         //when
-        String response = httpResponseBuilder.buildCustomResponse(httpRequest, httpResponse, "test");
+        String response = HttpResponseBuilder.buildCustomResponse(httpRequest, httpResponse, "test");
 
         //then
         assertAll(

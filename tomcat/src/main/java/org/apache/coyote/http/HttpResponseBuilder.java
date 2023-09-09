@@ -9,6 +9,9 @@ public class HttpResponseBuilder {
     private static final String LINE_FEED = "\r\n";
     private static final String SPACE = " ";
 
+    private HttpResponseBuilder() {
+    }
+
     public static String buildStaticFileOkResponse(HttpRequest httpRequest, HttpResponse httpResponse, String path) throws IOException {
         try {
             httpResponse.updateFileMessageBody(path);

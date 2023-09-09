@@ -28,17 +28,26 @@ public class ResponseViewer {
     }
 
     public String getView() {
-        String protocolVersion = statusLine.getProtocolVersion();
-        int statusCode = statusLine.getHttpStatus().getStatusCode();
-        String message = statusLine.getHttpStatus().getMessage();
+        String responseHeaderView = statusLineToView() + generateHeaderView();
+        String responseBodyView = responseBody.getValue();
+        return responseHeaderView + ENTER + ENTER + responseBodyView;
+    }
 
-        String statusLineResponse = protocolVersion + BLANK + statusCode + BLANK + message + BLANK + ENTER;
+    private String statusLineToView() {
+        return String.format(
+                "%s %d %s %s",
+                statusLine.getProtocolVersion(),
+                statusLine.getHttpStatus().getStatusCode(),
+                statusLine.getHttpStatus().getMessage(),
+                ENTER
+        );
+    }
 
-        String headerResponse = headers.getValues().entrySet()
+    private String generateHeaderView() {
+        return headers.getValues().entrySet()
                 .stream()
                 .map(header -> header.getKey() + KEY_VALUE_DELIMITER + header.getValue() + BLANK)
                 .collect(Collectors.joining(ENTER));
-        return statusLineResponse + headerResponse + ENTER + ENTER + responseBody.getValue();
     }
 
 }

@@ -10,12 +10,16 @@ public class HttpResponseBuilder {
     private static final String SPACE = " ";
 
     public static String buildStaticFileOkResponse(HttpRequest httpRequest, HttpResponse httpResponse, String path) throws IOException {
+        try {
+            httpResponse.updateFileMessageBody(path);
+        } catch (NullPointerException e) {
+            return buildStaticFileNotFoundResponse(httpRequest, httpResponse);
+        }
         String status = joinStatus(HttpStatus.OK.getHttpStatusCode(), HttpStatus.OK.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
 
         String startLine = joinStartLine(status, protocol);
         httpResponse.updateStartLine(startLine);
-        httpResponse.updateFileMessageBody(path);
 
         appendCookie(httpRequest, httpResponse);
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.findType(path));

@@ -41,8 +41,8 @@ public class RegisterController implements Controller {
     private Response register(RequestReader requestReader) throws IOException {
         InMemoryUserRepository.save(new User(
                 requestReader.getBodyValue("account"),
-                requestReader.getBodyValue("email"),
-                requestReader.getBodyValue("password")
+                requestReader.getBodyValue("password"),
+                requestReader.getBodyValue("email")
         ));
         return new Response()
                 .addResponseLine(requestReader.getProtocol(), FOUND)

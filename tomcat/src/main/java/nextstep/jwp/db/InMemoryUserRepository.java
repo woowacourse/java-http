@@ -20,7 +20,7 @@ public class InMemoryUserRepository {
     public static void save(User user) {
         database.put(
                 user.getAccount(),
-                new User(sequence.incrementAndGet(), user.getAccount(), user.getEmail(), user.getPassword())
+                new User(sequence.incrementAndGet(), user.getAccount(), user.getPassword(), user.getEmail())
         );
     }
 

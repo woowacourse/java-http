@@ -57,8 +57,6 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = requestUri.getPath();
 
-            System.out.println("path = " + path);
-
             HttpResponse response = null;
 
             if (path.equals("/")) {
@@ -70,6 +68,30 @@ public class Http11Processor implements Runnable, Processor {
                 response = getLoginHttpResponse(httpRequest);
             } else if (path.equals("/login") && httpRequest.getRequestLine().isPostMethod()) {
                 response = postLoginHttpResponse(httpRequest);
+            } else if (path.equals("/register") && httpRequest.getRequestLine().isGetMethod()) {
+                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/register.html")).getPath());
+                var responseBody = new String(Files.readAllBytes(filePath));
+
+                response = new HttpResponse.Builder()
+                        .contentType(ContentType.from(requestUri.getExtension()))
+                        .body(responseBody)
+                        .build();
+            } else if (path.equals("/register") && httpRequest.getRequestLine().isPostMethod()) {
+                HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
+
+                String account = httpRequestBody.getValue("account");
+                String password = httpRequestBody.getValue("password");
+                String email = httpRequestBody.getValue("email");
+
+                InMemoryUserRepository.save(new User(account, password, email));
+
+                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
+
+                response = new HttpResponse.Builder()
+                        .status(FOUND)
+                        .contentType(HTML)
+                        .header("Location", "/index.html")
+                        .build();
             } else {
                 final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri.getPath())).getPath());
                 var responseBody = new String(Files.readAllBytes(filePath));
@@ -80,22 +102,6 @@ public class Http11Processor implements Runnable, Processor {
                         .build();
             }
 
-
-//            // pass 가 register 일때 분기
-//            if (path.equals("/register") && httpRequestLine.isPostMethod()) {
-//                String account = httpRequestBody.getValue("account");
-//                String password = httpRequestBody.getValue("password");
-//                String email = httpRequestBody.getValue("email");
-//
-//                InMemoryUserRepository.save(new User(account, password, email));
-//
-//                statusCode = 302;
-//                statusMessage = "Found";
-//                path = "/index.html";
-//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
-//
-//                responseBody = new String(Files.readAllBytes(filePath));
-//            }
 
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();

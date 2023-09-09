@@ -80,6 +80,7 @@ public class HttpResponse {
             stringBuilder.append(header.getValue())
                          .append(MESSAGE_HEADERS_DELIMITER)
                          .append(messageHeaders.get(header))
+                         .append(SP)
                          .append(CRLF);
         }
         return stringBuilder.toString();

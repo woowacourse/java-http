@@ -13,7 +13,6 @@ public class FileController extends Controller {
     @Override
     public HttpResponse run(final HttpRequest request) throws IOException {
         final String uri = request.getUri();
-        Extension.validateContaining(uri);
         return createResponse(uri);
     }
 

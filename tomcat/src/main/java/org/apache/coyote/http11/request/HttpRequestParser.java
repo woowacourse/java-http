@@ -5,8 +5,8 @@ import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,20 +46,19 @@ public class HttpRequestParser {
         return HttpRequestLine.from(s[0], s[1], s[2]);
     }
 
-    private Map<String, String> parseQueryString(final String queryStrings) throws UnsupportedEncodingException {
+    private Map<String, String> parseQueryString(final String queryStrings) {
         final Map<String, String> queries = new HashMap<>();
         final String[] keyValuePairs = queryStrings.split("&");
         for (String keyValuePair : keyValuePairs) {
             String[] keyValue = keyValuePair.split("=");
             if (keyValue.length >= 2) {
-                queries.put(keyValue[0], URLDecoder.decode(keyValue[1], "UTF-8"));
+                queries.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
             }
         }
         return queries;
     }
 
     private HttpHeaders parseRequestHeader() throws IOException {
-        // TODO: Change to MultiValueMap
         final Map<String, String> headers = new HashMap<>();
         String line;
         while (!"".equals(line = reader.readLine()) && line != null) {
@@ -75,7 +74,6 @@ public class HttpRequestParser {
     }
 
     private Map<String, String> parseRequestBody(final String contentLengthHeader) throws IOException {
-        // TODO: Change to MultiValueMap
         final Map<String, String> body = new HashMap<>();
         int contentLength = Integer.parseInt(contentLengthHeader);
         char[] buffer = new char[contentLength];
@@ -84,7 +82,7 @@ public class HttpRequestParser {
         for (String temp : new String(buffer).split("&")) {
             String[] value = temp.split("=");
             if (value.length >= 2) {
-                body.put(value[0], URLDecoder.decode(value[1], "UTF-8"));
+                body.put(value[0], URLDecoder.decode(value[1], StandardCharsets.UTF_8));
             }
         }
         return body;

@@ -129,7 +129,7 @@ class Http11ProcessorTest {
                     "GET /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
-                    "Cookie: JSESSIONID=" + sessionId + " ",
+                    "Cookie: JSESSIONID=" + sessionId,
                     "",
                     "");
 
@@ -139,18 +139,32 @@ class Http11ProcessorTest {
             // when
             processor.process(socket);
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            var expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Length: 5564 \r\n" +
+            var expected = "HTTP/1.1 302 Found \r\n" +
+                    "Content-Length: 0 \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "\r\n" +
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                    "Location: /index.html \r\n" +
+                    "\r\n";
 
             assertThat(socket.output()).isEqualTo(expected);
         }
 
         private String createSessionId() {
-            return ""; // TODO: 2023/09/09
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 30 ",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "",
+                    "account=gugu&password=password");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            processor.process(socket);
+
+            return socket.output().split("JSESSIONID=")[1].split(" \r\n")[0].trim();
         }
 
         @Test
@@ -186,7 +200,7 @@ class Http11ProcessorTest {
     class PostTest {
         @Test
         @DisplayName("/register에 POST 요청을 보내면 index.html로 리다이렉트하는 302 응답이 반환된다.")
-        void register() throws IOException {
+        void register() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
@@ -243,7 +257,7 @@ class Http11ProcessorTest {
 
         @Test
         @DisplayName("/login에 POST 요청을 보내면 Set-Cookie에 세션 아이디가 포함된 302 응답이 반환된다.")
-        void login() throws IOException {
+        void login() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",

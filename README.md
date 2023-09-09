@@ -46,7 +46,7 @@
     - [x] /login 페이지 리다이렉트 확인
     - [x] 로그인 성공 시 index.html 리다이렉트 및 set-cookie 설정 여부 확인
     - [x] 로그인 실패 시 401.html 파일 리다이렉트 확인
-    - [ ] 로그인 후 /login 페이지 접근 시 index.html 리다이렉트 확인
+    - [x] 로그인 후 /login 페이지 접근 시 index.html 리다이렉트 확인
     - [x] /register 페이지 리다이렉트 확인
     - [ ] 회원가입 시 로그인 가능해지는지 확인
     - [x] 회원가입 후 index.html 리다이렉트 확인

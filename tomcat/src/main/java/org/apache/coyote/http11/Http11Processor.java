@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -45,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             final HttpResponse response = handleRequest(httpRequest);
 
-            outputStream.write(response.toString().getBytes());
+            outputStream.write(Objects.requireNonNull(response).toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

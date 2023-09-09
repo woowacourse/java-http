@@ -6,8 +6,8 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class ResourceHandlerMapper {
 
-    private static final List<ResourceHandler> handlers = new ArrayList<>();
-    private static final ResourceHandler unsupportedResourceHandler = new UnsupportedResourceHandler();
+    private static final List<Controller> handlers = new ArrayList<>();
+    private static final Controller unsupportedResourceHandler = new UnsupportedResourceHandler();
 
     static {
         handlers.add(new DefaultResourceHandler());
@@ -17,7 +17,7 @@ public class ResourceHandlerMapper {
     private ResourceHandlerMapper() {
     }
 
-    public static ResourceHandler findHandler(final HttpRequest request) {
+    public static Controller findHandler(final HttpRequest request) {
         return handlers.stream()
                 .filter(each -> each.supports(request))
                 .findAny()

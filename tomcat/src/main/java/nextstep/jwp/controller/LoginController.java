@@ -1,16 +1,19 @@
 package nextstep.jwp.controller;
 
+import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.HttpResponseHeader.LOCATION;
 import static org.apache.coyote.http11.response.HttpResponseHeader.SET_COOKIE;
 
+import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.QueryStringUtil;
 import org.apache.coyote.http11.cookie.Cookie;
-import org.apache.coyote.http11.handler.Controller;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.handler.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.session.Session;
@@ -18,7 +21,7 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String PATH = "/login";
@@ -26,41 +29,38 @@ public class LoginController implements Controller {
     private static final String UNAUTHORIZED_PAGE_PATH = "/401.html";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String LOGIN_PAGE_VIEW_NAME = "login";
 
     @Override
     public boolean supports(final HttpRequest httpRequest) {
-        return PATH.equals(httpRequest.getPath())
-                && HttpMethod.POST == httpRequest.getHttpMethod();
+        return PATH.equals(httpRequest.getPath());
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         try {
-            final Map<String, String> data = QueryStringUtil.parse(httpRequest.getBody());
+            final Map<String, String> data = QueryStringUtil.parse(request.getBody());
             checkQueryParameter(data);
             final String account = data.get(ACCOUNT);
             final String password = data.get(PASSWORD);
             final User user = findUser(account, password);
             log.info("login success! : user = {}", user);
 
-            final HttpResponse httpResponse = HttpResponse.from(StatusCode.FOUND);
-            if (extractSessionId(httpRequest) == null) {
+            response.setStatusCode(StatusCode.FOUND);
+            if (extractSessionId(request) == null) {
                 final Session session = createSession(user);
-                httpResponse.addHeader(SET_COOKIE, Session.getName() + "=" + session.getId());
+                response.addHeader(SET_COOKIE, Session.getName() + "=" + session.getId());
             }
-            httpResponse.addHeader(LOCATION, INDEX_PAGE_PATH);
-
-            return httpResponse;
+            response.addHeader(LOCATION, INDEX_PAGE_PATH);
         } catch (IllegalArgumentException exception) {
             log.info("login fail! : {}", exception.getMessage());
-            final HttpResponse httpResponse = HttpResponse.from(StatusCode.FOUND);
-            httpResponse.addHeader(LOCATION, UNAUTHORIZED_PAGE_PATH);
-            return httpResponse;
+            response.setStatusCode(StatusCode.FOUND);
+            response.addHeader(LOCATION, UNAUTHORIZED_PAGE_PATH);
         }
     }
 
     private void checkQueryParameter(final Map<String, String> data) {
-        if(!data.containsKey(ACCOUNT) || !data.containsKey(PASSWORD)){
+        if (!data.containsKey(ACCOUNT) || !data.containsKey(PASSWORD)) {
             throw new IllegalArgumentException("쿼리 파라미터가 비었어요~");
         }
     }
@@ -85,5 +85,29 @@ public class LoginController implements Controller {
         session.setAttribute("user", user);
         SessionManager.add(session);
         return session;
+    }
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        final String sessionId = extractSessionId(request);
+        if (sessionId == null) {
+            resolveLoginPage(response);
+            return;
+        }
+        final Session session = SessionManager.findSession(sessionId);
+        if (session == null) {
+            resolveLoginPage(response);
+            return;
+        }
+        response.setStatusCode(StatusCode.FOUND);
+        response.addHeader(LOCATION, INDEX_PAGE_PATH);
+    }
+
+    private void resolveLoginPage(final HttpResponse response) throws IOException {
+        final String body = ViewResolver.findView(LOGIN_PAGE_VIEW_NAME);
+        response.setStatusCode(StatusCode.OK);
+        response.setBody(body);
+        response.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
+        response.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
     }
 }

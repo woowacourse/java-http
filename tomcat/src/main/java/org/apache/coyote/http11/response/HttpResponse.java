@@ -7,9 +7,9 @@ public class HttpResponse {
 
     private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final Map<HttpResponseHeader, String> headers;
-    private final String body;
+    private String body;
 
     private HttpResponse(final StatusLine statusLine, final Map<HttpResponseHeader, String> headers, final String body) {
         this.statusLine = statusLine;
@@ -17,19 +17,11 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse from(final StatusCode statusCode) {
+    public static HttpResponse create() {
         return new HttpResponse(
-                new StatusLine(PROTOCOL_VERSION, statusCode),
+                new StatusLine(PROTOCOL_VERSION),
                 new LinkedHashMap<>(),
                 ""
-        );
-    }
-
-    public static HttpResponse of(final StatusCode statusCode, final String body) {
-        return new HttpResponse(
-                new StatusLine(PROTOCOL_VERSION, statusCode),
-                new LinkedHashMap<>(),
-                body
         );
     }
 
@@ -47,5 +39,13 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusLine.setStatusCode(statusCode);
+    }
+
+    public void setBody(final String body) {
+        this.body = body;
     }
 }

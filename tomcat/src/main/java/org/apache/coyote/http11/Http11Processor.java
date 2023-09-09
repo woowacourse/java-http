@@ -8,7 +8,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.http11.handler.ControllerMapper;
-import org.apache.coyote.http11.handler.ResourceHandler;
 import org.apache.coyote.http11.handler.ResourceHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestReader;
@@ -54,11 +53,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(final HttpRequest request) throws IOException {
+        final HttpResponse response = HttpResponse.create();
+
         final Controller controller = ControllerMapper.findController(request);
         if (controller != null) {
-            return controller.handle(request);
+            controller.service(request, response);
+            return response;
         }
-        final ResourceHandler resourceHandler = ResourceHandlerMapper.findHandler(request);
-        return resourceHandler.handle(request);
+
+        final Controller resourceHandler = ResourceHandlerMapper.findHandler(request);
+        resourceHandler.service(request, response);
+        return response;
     }
 }

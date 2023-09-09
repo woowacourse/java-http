@@ -5,16 +5,19 @@ public class StatusLine {
     private static final String SP = " ";
 
     private final String protocolVersion;
-    private final StatusCode statusCode;
+    private StatusCode statusCode;
 
-    public StatusLine(final String protocolVersion, final StatusCode statusCode) {
+    public StatusLine(final String protocolVersion) {
         this.protocolVersion = protocolVersion;
-        this.statusCode = statusCode;
     }
 
     public String getStatusLine() {
         return protocolVersion + SP
                 + statusCode.getCode() + SP
                 + statusCode.getMessage() + SP;
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 }

@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 public class FileController extends Controller {
 
@@ -65,8 +67,16 @@ public class FileController extends Controller {
         if (uri.equals("/")) {
             return "Hello world!";
         }
-        final URL url = ClassLoader.getSystemClassLoader().getResource(STATIC + uri);
-        return new String(Files.readAllBytes(new File(url.getPath()).toPath()));
+        return new String(Files.readAllBytes(findFilePath(uri)));
+    }
+
+    private Path findFilePath(final String uri) {
+        try {
+            final URL url = ClassLoader.getSystemClassLoader().getResource(STATIC + uri);
+            return new File(Objects.requireNonNull(url).getPath()).toPath();
+        } catch (final NullPointerException exception) {
+            throw new IllegalArgumentException("잘못된 파일 경로입니다.");
+        }
     }
 
     private String createResponseHeader(final String uri, final String responseBody) {

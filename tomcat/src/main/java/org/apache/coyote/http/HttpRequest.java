@@ -1,7 +1,6 @@
 package org.apache.coyote.http;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -12,7 +11,7 @@ public class HttpRequest {
     private static final int VALUE_INDEX = 1;
 
     private StartLine startLine;
-    private Map<String, String> header = new HashMap<>();
+    private Map<String, String> header;
     private String messageBody;
 
     public HttpRequest(StartLine startLine, Map<String, String> header, String messageBody) {

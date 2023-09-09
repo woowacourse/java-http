@@ -59,6 +59,10 @@ public class HttpRequest {
         return requestLine.requestUri();
     }
 
+    public String httpVersion() {
+        return requestLine.httpVersion();
+    }
+
     public RequestLine requestLine() {
         return requestLine;
     }

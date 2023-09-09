@@ -24,7 +24,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_BODY = "Hello world!";
-    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
     private final SessionManager sessionManager;
@@ -47,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest httpRequest = readHttpRequest(reader);
-            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
+            HttpResponse httpResponse = new HttpResponse(httpRequest.httpVersion());
 
             String response = process(httpRequest, httpResponse);
 

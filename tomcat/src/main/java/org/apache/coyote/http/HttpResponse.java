@@ -49,7 +49,7 @@ public class HttpResponse {
     }
 
     private String joinExistedCookie() {
-        return header.entrySet().stream()
+        return mapCookies().entrySet().stream()
                 .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
                 .reduce((cookie1, cookie2) -> cookie1 + COOKIE_DELIMITER + cookie2)
                 .orElse("");

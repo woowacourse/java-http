@@ -47,38 +47,32 @@ public class LoginController implements Controller {
         String password = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
-            addSession(user, httpRequest);
+            addSession(user, httpRequest, httpResponse);
             return redirect(password, user, httpRequest, httpResponse);
         } catch (UserNotFoundException e) {
             return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
         }
     }
 
-    private void addSession(User user, HttpRequest httpRequest) {
+    private void addSession(User user, HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> cookies = httpRequest.findCookies();
         if (!cookies.containsKey(SESSION_ID)) {
             String uuid = UUID.randomUUID().toString();
-            addCookie(httpRequest, cookies, uuid);
+            addCookie(httpRequest, httpResponse, uuid);
             cookies.put(SESSION_ID, uuid);
         }
         String jsessionid = cookies.get(SESSION_ID);
         SessionManager.add(jsessionid, user);
     }
 
-    private void addCookie(HttpRequest httpRequest, Map<String, String> cookies, String uuid) {
+    private void addCookie(HttpRequest httpRequest, HttpResponse httpResponse, String uuid) {
+        Map<String, String> cookies = httpRequest.findCookies();
         if (cookies.isEmpty()) {
             httpRequest.addHeader(HttpHeader.COOKIE.getName(), SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
             return;
         }
-        String existedCookie = joinExistedCookie(cookies);
+        String existedCookie = httpResponse.joinResponse();
         httpRequest.addHeader(HttpHeader.COOKIE.getName(), existedCookie + COOKIE_SEPARATOR + SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
-    }
-
-    private String joinExistedCookie(Map<String, String> cookies) {
-        return cookies.entrySet().stream()
-                .map(entry -> entry.getKey() + KEY_VALUE_SEPARATOR + entry.getValue())
-                .reduce((cookie1, cookie2) -> cookie1 + COOKIE_SEPARATOR + cookie2)
-                .orElse("");
     }
 
     private String redirect(String password, User user, HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

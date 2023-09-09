@@ -21,11 +21,11 @@ public class LoginHandler implements Handler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        if (httpRequest.getRequestMethod() == GET) {
+        if (httpRequest.isMatchedMethod(GET)) {
             doGet(httpRequest, httpResponse);
             return;
         }
-        if (httpRequest.getRequestMethod() == POST) {
+        if (httpRequest.isMatchedMethod(POST)) {
             doPost(httpRequest, httpResponse);
             return;
         }

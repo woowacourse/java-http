@@ -72,6 +72,10 @@ public class HttpRequest {
         return requestHeader.parseCookie();
     }
 
+    public boolean isMatchedMethod(RequestMethod requestMethod) {
+        return this.requestMethod == requestMethod;
+    }
+
     private static String[] validateRequestFirstLine(String requestFirstLine) {
         String[] requestLine = requestFirstLine.split(" ");
         if (requestLine.length != VALID_ELEMENT_COUNT) {

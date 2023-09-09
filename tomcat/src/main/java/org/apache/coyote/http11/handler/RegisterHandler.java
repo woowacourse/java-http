@@ -6,19 +6,21 @@ import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestData;
-import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.response.HttpResponse;
+
+import static org.apache.coyote.http11.request.RequestMethod.GET;
+import static org.apache.coyote.http11.request.RequestMethod.POST;
 
 public class RegisterHandler implements Handler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        if (httpRequest.getRequestMethod() == RequestMethod.GET) {
+        if (httpRequest.isMatchedMethod(GET)) {
             doGet(httpRequest, httpResponse);
             return;
         }
 
-        if (httpRequest.getRequestMethod() == RequestMethod.POST) {
+        if (httpRequest.isMatchedMethod(POST)) {
             doPost(httpRequest, httpResponse);
             return;
         }

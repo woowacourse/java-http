@@ -5,14 +5,13 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.manager.SessionManager;
-
-import org.apache.coyote.utils.FileUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.ContentType;
 import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.Session;
 import org.apache.coyote.request.*;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.utils.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +77,10 @@ public class Http11Processor implements Runnable, Processor {
                 String account = httpRequestBody.getValue("account");
                 String password = httpRequestBody.getValue("password");
                 String email = httpRequestBody.getValue("email");
+
+                if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+                    throw new IllegalArgumentException("중복 ID 입니다");
+                }
 
                 InMemoryUserRepository.save(new User(account, password, email));
 

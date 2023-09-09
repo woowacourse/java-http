@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -7,8 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.org.apache.coyote.http11.support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.support.StubSocket;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

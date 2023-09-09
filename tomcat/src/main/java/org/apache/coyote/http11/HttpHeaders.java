@@ -35,7 +35,7 @@ public class HttpHeaders {
         try {
             String headerLine;
             while (!"".equals(headerLine = bufferedReader.readLine())) {
-                final String[] rowHeaderData = headerLine.split(":");
+                final String[] rowHeaderData = headerLine.split(": ");
                 final HttpHeaderName headerName = HttpHeaderName.getHeaderName(rowHeaderData[0].trim());
                 final String headerContent = rowHeaderData[1].trim();
 

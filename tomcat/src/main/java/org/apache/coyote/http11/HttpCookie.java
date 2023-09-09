@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class HttpCookie {
 
@@ -46,7 +49,11 @@ public class HttpCookie {
 
     @Override
     public String toString() {
-        return String.join(COOKIE_DELIMITER, values.entrySet().stream()
+        final List<Entry<String, String>> entrySet = values.entrySet().stream()
+            .sorted(Entry.comparingByKey())
+            .collect(Collectors.toList());
+
+        return String.join(COOKIE_DELIMITER, entrySet.stream()
             .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
             .toArray(String[]::new));
     }

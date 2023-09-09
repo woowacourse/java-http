@@ -1,6 +1,5 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -27,6 +26,7 @@ public abstract class AbstractController implements Controller {
     protected void doGet(HttpRequest request, HttpResponse response) { /* NOOP */ }
 
     protected void doPost(HttpRequest request, HttpResponse response) { /* NOOP */ }
+
     private void doDefault(HttpRequest request, HttpResponse response) {
         response.statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.NOT_FOUND))
                 .redirect("/404.html");

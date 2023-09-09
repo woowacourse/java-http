@@ -14,10 +14,10 @@ public class StartLine {
     private static final int VALUE_INDEX = 1;
     private static final String KEY_VALUE_DELIMITER = "=";
 
-    private HttpMethod method;
-    private String path;
-    private Map<String, String> queryString;
-    private HttpProtocol protocol;
+    private final HttpMethod method;
+    private final String path;
+    private final Map<String, String> queryString;
+    private final HttpProtocol protocol;
 
     public StartLine(String startLine) {
         this.method = HttpMethod.from(divideMethod(startLine));

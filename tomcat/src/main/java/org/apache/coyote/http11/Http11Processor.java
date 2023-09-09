@@ -14,6 +14,7 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +46,11 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.of(requestHeader, requestBody);
 
             Controller frontController = new FrontController();
-            HttpResponse httpResponse = frontController.service(httpRequest);
+            HttpResponse httpResponse = new HttpResponse();
+            frontController.service(httpRequest, httpResponse);
+            ResponseViewer from = ResponseViewer.from(httpResponse);
 
-            outputStream.write(httpResponse.getResponse().getBytes());
+            outputStream.write(from.getView().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

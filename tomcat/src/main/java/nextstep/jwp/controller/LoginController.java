@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -20,7 +21,7 @@ import org.apache.coyote.http11.util.FileReader;
 import static org.apache.coyote.http11.request.ContentType.HTML;
 import static org.apache.coyote.http11.request.HttpMethod.GET;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String URI = "/login.html";
     private static final String UNAUTHORIZED = "/401.html";
@@ -29,18 +30,21 @@ public class LoginController implements Controller {
     public static final SessionManager SESSION_MANAGER = new SessionManager();
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) {
         if (request.getRequestLine().getHttpMethod().is(GET)) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
-        return doPost(request);
+        doPost(request, response);
     }
 
-    private HttpResponse doGet(HttpRequest request) {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (hasCookie(request)) {
-            return redirectHome(request);
+            redirectHome(request, response);
+            return;
         }
-        return showLoginPage(request);
+        showLoginPage(request, response);
     }
 
     private boolean hasCookie(HttpRequest httpRequest) {
@@ -48,36 +52,36 @@ public class LoginController implements Controller {
         return SESSION_MANAGER.findSession(cookie.getValue("JSESSIONID")) != null;
     }
 
-    private HttpResponse redirectHome(HttpRequest request) {
+    private void redirectHome(HttpRequest request, HttpResponse response) {
         StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND);
         ResponseBody responseBody = new ResponseBody(FileReader.read(REDIRECT_HOME_URI));
-        return HttpResponse.builder()
+        response
                 .statusLine(statusLine)
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(REDIRECT_HOME_URI)
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
-    private HttpResponse showLoginPage(HttpRequest request) {
+    private void showLoginPage(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(URI));
         StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
-        return HttpResponse.builder()
+        response
                 .statusLine(statusLine)
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().length())
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
-    private HttpResponse doPost(HttpRequest httpRequest) {
+    @Override
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         Optional<User> optionalUser = findUser(httpRequest);
         if (optionalUser.isEmpty()) {
-            return redirectUnauthorized(httpRequest);
+            redirectUnauthorized(httpRequest, httpResponse);
+            return;
         }
 
-        return successLogin(httpRequest);
+        successLogin(httpRequest, httpResponse);
     }
 
     private Optional<User> findUser(HttpRequest request) {
@@ -90,29 +94,27 @@ public class LoginController implements Controller {
                 .findFirst();
     }
 
-    private HttpResponse redirectUnauthorized(HttpRequest httpRequest) {
+    private void redirectUnauthorized(HttpRequest httpRequest, HttpResponse httpResponse) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(UNAUTHORIZED));
-        return HttpResponse.builder()
+        httpResponse
                 .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.UNAUTHORIZED))
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(UNAUTHORIZED)
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
-    private HttpResponse successLogin(HttpRequest httpRequest) {
+    private void successLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
         String sessionId = addSession();
 
         ResponseBody responseBody = new ResponseBody(FileReader.read(REDIRECT_HOME_URI));
-        return HttpResponse.builder()
+        httpResponse
                 .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .setCookie(HttpCookie.jSessionId(sessionId))
                 .redirect(REDIRECT_HOME_URI)
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
     private String addSession() {

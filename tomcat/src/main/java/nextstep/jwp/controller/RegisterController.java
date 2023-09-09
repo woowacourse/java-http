@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -13,62 +14,63 @@ import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.util.FileReader;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     private static final String REGISTER_URI = "/register.html";
     private static final String LOGIN_URI = "/login.html";
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) {
         if (request.getRequestLine().getHttpMethod().is(HttpMethod.GET)) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
-        return doPost(request);
+        doPost(request, response);
     }
 
-    private HttpResponse doGet(HttpRequest request) {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(REGISTER_URI));
-        return HttpResponse.builder()
+        response
                 .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
-    private HttpResponse doPost(HttpRequest request) {
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
         RequestBody requestBody = request.getRequestBody();
         String account = requestBody.getValueOf("account");
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return redirectLogin(request);
+            redirectLogin(request, response);
+            return;
         }
 
-        return registerUser(request, requestBody);
+        registerUser(request, requestBody, response);
     }
 
-    private  HttpResponse redirectLogin(HttpRequest request) {
+    private void redirectLogin(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
-        return HttpResponse.builder()
+        response
                 .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(LOGIN_URI)
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
-    private HttpResponse registerUser(HttpRequest request, RequestBody requestBody) {
+    private void registerUser(HttpRequest request, RequestBody requestBody, HttpResponse response) {
         saveUser(requestBody);
 
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
-        return HttpResponse.builder()
+        response
                 .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.CREATED))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(LOGIN_URI)
-                .responseBody(responseBody)
-                .build();
+                .responseBody(responseBody);
     }
 
     private void saveUser(RequestBody requestBody) {

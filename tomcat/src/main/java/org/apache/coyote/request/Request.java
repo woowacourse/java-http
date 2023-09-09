@@ -3,7 +3,6 @@ package org.apache.coyote.request;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.Protocol;
 
 public class Request {
 
@@ -21,10 +20,6 @@ public class Request {
 
     public String getPath() {
         return requestHeader.getPath();
-    }
-
-    public Protocol getProtocol() {
-        return requestHeader.getProtocol();
     }
 
     public String getResourceTypes() {

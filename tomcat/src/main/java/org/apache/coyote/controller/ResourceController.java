@@ -5,21 +5,24 @@ import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
 
-public class ResourceController {
+public class ResourceController extends AbstractController {
 
-    public void getResource(Request request, Response response) {
-        String path = request.getPath();
-        FileReader fileReader = FileReader.from(path);
+    @Override
+    protected void doGet(Request request, Response response) {
+        FileReader fileReader = FileReader.from(request.getPath());
         String body = fileReader.read();
 
+        setHttpResponse(response, fileReader);
+        response.addHeaders(CONTENT_TYPE, request.getResourceTypes());
+        response.addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        response.setResponseBody(body);
+    }
+
+    private void setHttpResponse(Response response, FileReader fileReader) {
         if (fileReader.isFound()) {
             response.setHttpStatus(HttpStatus.OK);
+            return;
         }
-        if (!fileReader.isFound()) {
-            response.setHttpStatus(HttpStatus.NOT_FOUND);
-        }
-        response.addHeaders("Content-Type", request.getResourceTypes());
-        response.addHeaders("Content-Length", String.valueOf(body.getBytes().length));
-        response.setResponseBody(body);
+        response.setHttpStatus(HttpStatus.NOT_FOUND);
     }
 }

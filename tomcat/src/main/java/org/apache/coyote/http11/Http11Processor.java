@@ -51,18 +51,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doHandler(Request request, Response response) {
         if (request.isSamePath("/")) {
-            new DefaultController().response(request, response);
+            new DefaultController().service(request, response);
             return;
         }
         if (request.isSamePath("/login")) {
-            new LoginController().login(request, response);
+            new LoginController().service(request, response);
             return;
         }
         if (request.isSamePath("/register")) {
-            new RegisterController().register(request, response);
+            new RegisterController().service(request, response);
             return;
         }
         ResourceController resourceController = new ResourceController();
-        resourceController.getResource(request, response);
+        resourceController.service(request, response);
     }
 }

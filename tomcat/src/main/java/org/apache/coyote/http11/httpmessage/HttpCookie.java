@@ -6,6 +6,11 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final String SPACE = " ";
+    private static final String COOKIE_DELIMITER = "=";
+
     private final Map<String, String> cookies;
 
     public HttpCookie(final Map<String, String> cookies) {
@@ -13,11 +18,11 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String cookieValues) {
-        final Map<String, String> cookies = Arrays.stream(cookieValues.split(" "))
-            .map(headerContent -> headerContent.split("="))
+        final Map<String, String> cookies = Arrays.stream(cookieValues.split(SPACE))
+            .map(headerContent -> headerContent.split(COOKIE_DELIMITER))
             .collect(Collectors.toMap(
-                headerContent -> headerContent[0],
-                headerContent -> headerContent[1]));
+                headerContent -> headerContent[KEY_INDEX],
+                headerContent -> headerContent[VALUE_INDEX]));
         return new HttpCookie(cookies);
     }
 

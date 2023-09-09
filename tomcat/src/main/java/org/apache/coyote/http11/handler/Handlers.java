@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class Handlers {
@@ -21,10 +20,10 @@ public class Handlers {
 
     }
 
-    public static ResponseEntity handle(HttpRequest request) throws IOException {
-        String requestUri = request.getEndPoint();
+    public static void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        String requestUri = httpRequest.getEndPoint();
         Handler handler = findHandler(requestUri);
-        return handler.handle(request);
+        handler.handle(httpRequest, httpResponse);
     }
 
     private static Handler findHandler(String requestUri) {

@@ -7,26 +7,34 @@ import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestData;
 import org.apache.coyote.http11.request.RequestMethod;
-import org.apache.coyote.http11.response.ResponseEntity;
-
-import java.io.IOException;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterHandler implements Handler {
 
     @Override
-    public ResponseEntity handle(HttpRequest request) throws IOException {
-        if (request.getRequestMethod() == RequestMethod.GET) {
-            String fileData = FileReader.readFile("/register.html");
-            return ResponseEntity.ok(fileData, ContentType.HTML);
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        if (httpRequest.getRequestMethod() == RequestMethod.GET) {
+            doGet(httpRequest, httpResponse);
+            return;
         }
 
-        if (request.getRequestMethod() == RequestMethod.POST) {
-            RequestData requestData = request.getRequestData();
-            saveUser(requestData);
-            return ResponseEntity.redirect("index.html");
+        if (httpRequest.getRequestMethod() == RequestMethod.POST) {
+            doPost(httpRequest, httpResponse);
+            return;
         }
 
         throw new UnsupportedOperationException("get, post만 가능합니다");
+    }
+
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        RequestData requestData = httpRequest.getRequestData();
+        saveUser(requestData);
+        httpResponse.redirect("index.html");
+    }
+
+    protected void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
+        String fileData = FileReader.readFile("/register.html");
+        httpResponse.ok(fileData, ContentType.HTML);
     }
 
     private void saveUser(RequestData requestData) {

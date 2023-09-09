@@ -27,7 +27,7 @@ public class HttpRequest {
         this.requestHeader = requestHeader;
     }
 
-    public static HttpRequest from(BufferedReader request) throws IOException {
+    public static HttpRequest from(BufferedReader request) throws Exception {
         String[] requestLine = validateRequestFirstLine(request);
 
         RequestMethod requestMethod = RequestMethod.find(requestLine[METHOD_INDEX]);
@@ -101,9 +101,5 @@ public class HttpRequest {
 
     public RequestData getRequestData() {
         return requestData;
-    }
-
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
     }
 }

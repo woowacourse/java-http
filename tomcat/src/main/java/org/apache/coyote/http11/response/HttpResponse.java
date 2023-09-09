@@ -4,38 +4,48 @@ import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.request.HttpVersion;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class ResponseEntity {
+import static org.apache.coyote.http11.request.HttpVersion.HTTP_1_1;
+import static org.apache.coyote.http11.response.ResponseStatus.FOUND;
+import static org.apache.coyote.http11.response.ResponseStatus.OK;
+
+public class HttpResponse {
 
     public static final String RESPONSE_DELIMITER = " ";
     public static final String JSESSIONID = "JSESSIONID";
 
-    private final HttpVersion httpVersion;
-    private final ResponseStatus responseStatus;
-    private final Map<String, String> responseHeaders;
-    private final String responseBody;
-    private final Cookie cookie = Cookie.from("");
+    private HttpVersion httpVersion;
+    private ResponseStatus responseStatus;
+    private Map<String, String> responseHeaders = new HashMap<>();
+    private String responseBody;
+    private Cookie cookie = Cookie.from("");
 
-    private ResponseEntity(HttpVersion httpVersion, ResponseStatus responseStatus, Map<String, String> responseHeaders, String responseBody) {
-        this.httpVersion = httpVersion;
-        this.responseStatus = responseStatus;
-        this.responseHeaders = responseHeaders;
-        this.responseBody = responseBody;
+    public static HttpResponse create() {
+        return new HttpResponse();
     }
 
-    public static ResponseEntity redirect(String redirectionFile) {
-        Map<String, String> headers = Map.of("Location", redirectionFile);
-        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.FOUND, headers, "");
+    public void redirect(String redirectionFile) {
+        this.httpVersion = HTTP_1_1;
+        this.responseStatus = FOUND;
+        this.responseHeaders.put("Location", redirectionFile);
+        this.responseBody = "";
     }
 
-    public static ResponseEntity ok(String fileData, ContentType contentType) {
-        Map<String, String> headers = Map.of("Content-Type", contentType.getHttpContentType(), "Content-Length", String.valueOf(fileData.getBytes().length));
-        return new ResponseEntity(HttpVersion.HTTP_1_1, ResponseStatus.OK, headers, fileData);
+    public void ok(String fileData, ContentType contentType) {
+        this.httpVersion = HTTP_1_1;
+        this.responseStatus = OK;
+        this.responseHeaders.put("Content-Type", contentType.getHttpContentType());
+        this.responseHeaders.put("Content-Length", String.valueOf(fileData.getBytes().length));
+        this.responseBody = fileData;
     }
 
     public void addCookie(String key, String value) {
+        if (cookie == null) {
+            this.cookie = Cookie.from("");
+        }
         cookie.addCookie(key, value);
     }
 

@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
-
-import java.io.IOException;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Handler {
 
-    ResponseEntity handle(HttpRequest request) throws IOException;
+    void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception;
 }

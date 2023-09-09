@@ -72,23 +72,7 @@ public class Http11Processor implements Runnable, Processor {
                         .body(FileUtils.readFile("/register.html"))
                         .build();
             } else if (path.equals("/register") && httpRequest.getRequestLine().isPostMethod()) {
-                HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
-
-                String account = httpRequestBody.getValue("account");
-                String password = httpRequestBody.getValue("password");
-                String email = httpRequestBody.getValue("email");
-
-                if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-                    throw new IllegalArgumentException("중복 ID 입니다");
-                }
-
-                InMemoryUserRepository.save(new User(account, password, email));
-
-                response = new HttpResponse.Builder()
-                        .status(FOUND)
-                        .contentType(HTML)
-                        .header("Location", "/index.html")
-                        .build();
+                response = postRegisterHttpResponse(httpRequest);
             } else {
                 response = new HttpResponse.Builder()
                         .contentType(ContentType.from(requestUri.getExtension()))
@@ -208,6 +192,26 @@ public class Http11Processor implements Runnable, Processor {
                 .status(FOUND)
                 .contentType(HTML)
                 .header("Location", "/401.html")
+                .build();
+    }
+
+    private HttpResponse postRegisterHttpResponse(HttpRequest httpRequest) {
+        HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
+
+        String account = httpRequestBody.getValue("account");
+        String password = httpRequestBody.getValue("password");
+        String email = httpRequestBody.getValue("email");
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new IllegalArgumentException("중복 ID 입니다");
+        }
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        return new HttpResponse.Builder()
+                .status(FOUND)
+                .contentType(HTML)
+                .header("Location", "/index.html")
                 .build();
     }
 }

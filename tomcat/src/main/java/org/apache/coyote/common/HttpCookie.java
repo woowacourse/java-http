@@ -1,5 +1,7 @@
 package org.apache.coyote.common;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,7 +17,7 @@ public class HttpCookie {
     public static HttpCookie of(String cookieString) {
         Map<String, String> cookies = new LinkedHashMap<>();
 
-        if (cookieString != null && !cookieString.isEmpty()) {
+        if (StringUtils.isNotBlank(cookieString)) {
             String[] cookiePairs = cookieString.split("; ");
             for (String cookiePair : cookiePairs) {
                 String[] parts = cookiePair.split("=");

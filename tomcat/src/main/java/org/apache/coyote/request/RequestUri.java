@@ -24,7 +24,6 @@ public class RequestUri {
     public static RequestUri from(String requestUri) {
         URI uri = URI.create(requestUri);
 
-
         String path = uri.getPath();
         String query = uri.getQuery();
         String extension = getExtension(path);

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.mvc;
+package org.apache.coyote.http11.controller;
 
 import java.util.Map;
 import nextstep.web.HelloController;

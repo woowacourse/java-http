@@ -6,7 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
-import org.apache.coyote.http11.mvc.AbstractController;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;

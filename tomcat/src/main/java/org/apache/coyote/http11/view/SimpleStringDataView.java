@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.mvc.view;
+package org.apache.coyote.http11.view;
 
 public class SimpleStringDataView implements View {
 

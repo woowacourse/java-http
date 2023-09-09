@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.mvc.FrontController;
+import org.apache.coyote.http11.controller.FrontController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.parser.HttpRequestMessageReader;
 import org.apache.coyote.http11.response.HttpResponse;

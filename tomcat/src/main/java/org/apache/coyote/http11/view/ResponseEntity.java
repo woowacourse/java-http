@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.mvc.view;
+package org.apache.coyote.http11.view;
 
 import java.util.Map;
 import org.apache.coyote.http11.common.HttpStatus;

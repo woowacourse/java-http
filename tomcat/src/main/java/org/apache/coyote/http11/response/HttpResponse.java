@@ -2,9 +2,9 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.mvc.view.SimpleStringDataView;
-import org.apache.coyote.http11.mvc.view.StaticResourceView;
-import org.apache.coyote.http11.mvc.view.View;
+import org.apache.coyote.http11.view.SimpleStringDataView;
+import org.apache.coyote.http11.view.StaticResourceView;
+import org.apache.coyote.http11.view.View;
 
 public class HttpResponse {
 

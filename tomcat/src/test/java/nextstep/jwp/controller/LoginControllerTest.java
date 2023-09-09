@@ -47,7 +47,7 @@ class LoginControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("login.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/login.html")
         );
     }
 
@@ -68,7 +68,7 @@ class LoginControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("index.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/index.html")
         );
     }
 
@@ -87,7 +87,7 @@ class LoginControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("401.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/401.html")
         );
     }
 
@@ -106,7 +106,7 @@ class LoginControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("index.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/index.html")
         );
     }
 }

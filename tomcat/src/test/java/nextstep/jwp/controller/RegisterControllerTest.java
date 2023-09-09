@@ -41,7 +41,7 @@ class RegisterControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("register.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/register.html")
         );
     }
 
@@ -58,7 +58,7 @@ class RegisterControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("register.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/register.html")
         );
     }
 
@@ -75,7 +75,7 @@ class RegisterControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("index.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/index.html")
         );
     }
 }

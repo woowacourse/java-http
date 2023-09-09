@@ -34,7 +34,7 @@ class HomeControllerTest {
         // then
         assertAll(
                 () -> assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(httpResponse.getRedirect()).isEqualTo("home.html")
+                () -> assertThat(httpResponse.getRedirect()).isEqualTo("/home.html")
         );
     }
 }

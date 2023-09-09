@@ -1,6 +1,11 @@
 package nextstep.jwp.presentation.handler;
 
-import nextstep.jwp.presentation.*;
+import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.LoginController;
+import nextstep.jwp.presentation.NotFoundController;
+import nextstep.jwp.presentation.RegisterController;
+import nextstep.jwp.presentation.RootController;
+import nextstep.jwp.presentation.StaticController;
 import org.apache.coyote.http.HttpRequest;
 
 import java.io.IOException;

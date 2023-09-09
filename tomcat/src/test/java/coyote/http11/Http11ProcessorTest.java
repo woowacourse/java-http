@@ -1,9 +1,8 @@
 package coyote.http11;
 
-import org.junit.jupiter.api.Assertions;
-import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,10 +1,9 @@
 package nextstep.jwp.presentation;
 
+import coyote.http.RequestFixture;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.http.HttpResponseBuilder;
-import coyote.http.RequestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -12,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class RootControllerTest {
 

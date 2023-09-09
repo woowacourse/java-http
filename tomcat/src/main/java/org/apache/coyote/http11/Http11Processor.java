@@ -83,7 +83,7 @@ public class Http11Processor implements Runnable, Processor {
         if (contentLength == null) {
             return null;
         }
-        int length = Integer.parseInt(contentLength);
+        int length = Integer.parseInt(contentLength.trim());
         char[] buffer = new char[length];
         bufferedReader.read(buffer, 0, length);
         return new HttpRequestBody(new String(buffer));

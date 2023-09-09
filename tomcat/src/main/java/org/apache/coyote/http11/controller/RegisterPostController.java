@@ -33,7 +33,7 @@ public class RegisterPostController extends AbstractController {
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 getContentType(request.getAccept(), request.getPath()),
                 String.valueOf(0), "/index.html", null);
-        return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, null);
+        return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, "");
     }
 
     private Map<String, String> parseRequestBody(HttpRequest request) {

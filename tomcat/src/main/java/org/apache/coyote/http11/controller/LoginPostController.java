@@ -44,7 +44,7 @@ public class LoginPostController extends AbstractController {
             HttpResponseHeader responseHeader = new HttpResponseHeader(
                     getContentType(request.getAccept(), request.getPath()),
                     String.valueOf(0), "/index.html", setCookie);
-            return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, null);
+            return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, "");
         }
         return handle401(request);
     }

@@ -32,11 +32,10 @@ public class LoginController extends HttpController {
     }
 
     @Override
-    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final HttpCookie httpCookie = httpRequest.getHeaders().getCookie();
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final HttpCookie httpCookie = httpRequest.getCookie();
         String sessionId = httpCookie.getCookie("JSESSIONID");
-        final Session session = sessionManager.findSession(sessionId);
-        if (session != null) { // already login user
+        if (sessionId != null && sessionManager.findSession(sessionId) != null) { // already login user
             httpResponse.setStatusCode(FOUND);
             httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
             httpResponse.addHeader(LOCATION, "/index.html");
@@ -46,8 +45,8 @@ public class LoginController extends HttpController {
     }
 
     @Override
-    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final HttpCookie httpCookie = httpRequest.getHeaders().getCookie();
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final HttpCookie httpCookie = httpRequest.getCookie();
         String sessionId = httpCookie.getCookie("JSESSIONID");
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getBody().get("account"));

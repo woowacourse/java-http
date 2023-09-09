@@ -1,6 +1,7 @@
 package org.apache.catalina.controller;
 
 import org.apache.catalina.Controller;
+import org.apache.coyote.http11.HttpException;
 import org.apache.coyote.http11.common.ResourceContentTypeResolver;
 import org.apache.coyote.http11.common.ResourceReader;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -24,10 +25,10 @@ public abstract class HttpController implements Controller {
     }
 
     @Override
-    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
             if (!canHandle(httpRequest)) {
-                throw new IllegalArgumentException("There is no controller to handle.");
+                throw new HttpException("There is no controller to handle.");
             }
             final String method = httpRequest.getMethod();
             if ("GET".equals(method)) {
@@ -36,7 +37,6 @@ public abstract class HttpController implements Controller {
             if ("POST".equals(method)) {
                 doPost(httpRequest, httpResponse);
             }
-            // TODO: exception - invalid http method
         } catch (final Exception e) {
             httpResponse.setStatusCode(NOT_FOUND);
             httpResponse.setBody(e.getMessage());
@@ -50,14 +50,14 @@ public abstract class HttpController implements Controller {
     ) throws IOException {
         final URL resourceUrl = ResourceReader.getResourceUrl(resourceName);
         if (resourceUrl == null) {
-            throw new IllegalArgumentException("The resource corresponding to the request does not exist");
+            throw new HttpException("The resource corresponding to the request does not exist");
         }
 
         final ResourceContentTypeResolver resourceContentTypeResolver = new ResourceContentTypeResolver();
         final String contentType = resourceContentTypeResolver.getContentType(httpRequest.getHeaders(), resourceName);
 
         if (contentType == null) {
-            throw new IllegalArgumentException("Content type is not supported.");
+            throw new HttpException("Content type is not supported.");
         }
 
         final String responseBody = ResourceReader.read(resourceUrl);
@@ -71,6 +71,6 @@ public abstract class HttpController implements Controller {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
     }
 
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
     }
 }

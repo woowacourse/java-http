@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.util.Map;
@@ -34,6 +35,10 @@ public class HttpRequest {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public HttpCookie getCookie() {
+        return headers.getCookie();
     }
 
     public Map<String, String> getBody() {

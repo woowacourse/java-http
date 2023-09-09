@@ -13,7 +13,7 @@ public class ResourceController extends HttpController {
     }
 
     @Override
-    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         handleResource(httpRequest.getTarget(), httpRequest, httpResponse);
     }
 }

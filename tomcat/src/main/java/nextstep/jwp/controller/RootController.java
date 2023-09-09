@@ -26,7 +26,7 @@ public class RootController extends HttpController {
     }
 
     @Override
-    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
         httpResponse.setStatusCode(OK);
         httpResponse.setBody("Hello world!");

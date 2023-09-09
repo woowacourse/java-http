@@ -22,13 +22,6 @@ public class LoginController extends RestController {
         super("/login");
     }
 
-    private static Session createSession(final User user) {
-        final Session session = new Session();
-        SessionManager.getInstance().add(session);
-        session.setAttribute("user", user);
-        return session;
-    }
-
     @Override
     public ResponseEntity service(final HttpRequest httpRequest) {
         return login(httpRequest);
@@ -65,6 +58,13 @@ public class LoginController extends RestController {
         final HttpCookie httpCookie = HttpCookie.fromJSessionId(session.getId());
         return ResponseEntityFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), INDEX_PAGE,
             httpCookie);
+    }
+
+    private Session createSession(final User user) {
+        final Session session = new Session();
+        SessionManager.getInstance().add(session);
+        session.setAttribute("user", user);
+        return session;
     }
 
     @Override

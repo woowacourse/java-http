@@ -8,16 +8,8 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class FrontController implements Adaptor {
 
-    private static final Map<String, Controller> controllers = new HashMap<>();
-    private static final FrontController frontController = new FrontController();
-    private static ResourceHandler resourceHandler;
-
-    private FrontController() {
-    }
-
-    public static FrontController getInstance() {
-        return frontController;
-    }
+    private final Map<String, Controller> controllers = new HashMap<>();
+    private ResourceHandler resourceHandler;
 
     public Controller findController(HttpRequest httpRequest) {
         return controllers.getOrDefault(httpRequest.getRequestUrl(), resourceHandler);

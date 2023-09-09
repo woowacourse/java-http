@@ -10,7 +10,7 @@ import org.apache.catalina.startup.Tomcat;
 public class Application {
 
     public static void main(String[] args) {
-        FrontController adaptor = FrontController.getInstance();
+        FrontController adaptor = new FrontController();
         adaptor.addController("/", MainPageController.getInstance());
         adaptor.addController("/login", LoginController.getInstance());
         adaptor.addController("/register", RegisterController.getInstance());

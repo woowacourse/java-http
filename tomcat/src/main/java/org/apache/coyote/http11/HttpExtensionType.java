@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import org.apache.coyote.http11.request.RequestLine;
+import nextstep.jwp.exception.NotAllowedMethodException;
 
 public enum HttpExtensionType {
 
@@ -23,14 +23,7 @@ public enum HttpExtensionType {
         return Arrays.stream(values())
                 .filter(it -> extension.contains(it.extension))
                 .findAny()
-                .orElse(HTML);
-    }
-
-    public static HttpExtensionType from(final RequestLine requestLine) {
-        return Arrays.stream(values())
-                .filter(it -> requestLine.hasFileExtension(it.getExtension()))
-                .findAny()
-                .orElse(HTML);
+                .orElseThrow(NotAllowedMethodException::new);
     }
 
     public String getExtension() {

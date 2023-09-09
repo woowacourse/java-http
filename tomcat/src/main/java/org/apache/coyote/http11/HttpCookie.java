@@ -12,6 +12,8 @@ public class HttpCookie {
 
     private static final String DELIMITER = "; ";
     private static final String EQUAL = "=";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String EMPTY_STRING = "";
 
     private final Map<String, String> items;
 
@@ -45,6 +47,10 @@ public class HttpCookie {
 
     public String getCookie(final String key) {
         return items.get(key);
+    }
+
+    public String getJSessionId() {
+        return items.getOrDefault(JSESSIONID, EMPTY_STRING);
     }
 
     @Override

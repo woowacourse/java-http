@@ -21,7 +21,7 @@ class HttpExtensionTypeTest {
         assertThat(actual.getContentType()).isEqualTo(expected);
     }
 
-    @DisplayName("ExtensionType에 해당하는 확장자가 없으면 HTML 타입을 반환한다.")
+    @DisplayName("ExtensionType에 해당하는 확장자가 없으면 null 반환한다.")
     @Test
     void from_emptyExtension() {
         // given
@@ -32,6 +32,6 @@ class HttpExtensionTypeTest {
         final HttpExtensionType actual = HttpExtensionType.from(extension);
 
         // then
-        assertThat(actual.getContentType()).isEqualTo(expected);
+        assertThat(actual).isNull();
     }
 }

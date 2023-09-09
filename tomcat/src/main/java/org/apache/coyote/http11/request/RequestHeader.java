@@ -2,10 +2,12 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.HttpCookie;
 
 public class RequestHeader {
 
     private static final String EMPTY_STRING = "";
+    private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, String> elements;
 
@@ -20,5 +22,9 @@ public class RequestHeader {
 
     public Map<String, String> getElements() {
         return elements;
+    }
+
+    public HttpCookie getCookie() {
+        return HttpCookie.from(elements.getOrDefault(COOKIE_HEADER, EMPTY_STRING));
     }
 }

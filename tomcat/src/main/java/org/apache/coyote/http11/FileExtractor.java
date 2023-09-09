@@ -10,17 +10,22 @@ import org.apache.coyote.http11.response.ResponseBody;
 public class FileExtractor {
 
     private static final ClassLoader CLASSLOADER = ClassLoader.getSystemClassLoader();
+    private static final String STATIC = "static";
+    private static final String TYPE_SEPARATOR = ".";
 
     private FileExtractor() {
     }
 
     public static ResponseBody extractFile(final String resource) throws IOException {
-        final URL url = CLASSLOADER.getResource("static" + resource);
+        if (!resource.contains(TYPE_SEPARATOR)) {
+            return extractHtmlFile(resource);
+        }
+        final URL url = CLASSLOADER.getResource(STATIC + resource);
         return ResponseBody.of(HttpExtensionType.from(resource).getExtension(), makeBodyContent(url));
     }
 
-    public static ResponseBody extractHtmlFile(final String resource) throws IOException {
-        final URL url = CLASSLOADER.getResource("static" + resource + HttpExtensionType.HTML.getExtension());
+    private static ResponseBody extractHtmlFile(final String resource) throws IOException {
+        final URL url = CLASSLOADER.getResource(STATIC + resource + HttpExtensionType.HTML.getExtension());
         return ResponseBody.of(HttpExtensionType.HTML.getExtension(), makeBodyContent(url));
     }
 

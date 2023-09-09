@@ -34,8 +34,8 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public String uri() {
-        return requestLine.getRequestUri();
+    public String path() {
+        return requestLine.getPath();
     }
 
     public String httpVersion() {

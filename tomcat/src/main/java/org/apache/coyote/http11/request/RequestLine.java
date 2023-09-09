@@ -7,33 +7,29 @@ public class RequestLine {
     private static final String TOKEN_DELIMITER = " ";
 
     private final String httpMethod;
-    private final String requestUri;
+    private final String path;
     private final String httpVersion;
 
-    private RequestLine(String httpMethod, String requestUri, String httpVersion) {
+    private RequestLine(String httpMethod, String path, String httpVersion) {
         this.httpMethod = httpMethod;
-        this.requestUri = requestUri;
+        this.path = path;
         this.httpVersion = httpVersion;
     }
 
     public static RequestLine from(String requestLine) {
         String[] splitStatusLine = Objects.requireNonNull(requestLine.trim()).split(TOKEN_DELIMITER);
         String httpMethod = splitStatusLine[0];
-        String requestUri = splitStatusLine[1];
+        String path = splitStatusLine[1];
         String httpVersion = splitStatusLine[2];
-        return new RequestLine(httpMethod, requestUri, httpVersion);
-    }
-
-    public boolean equalsMethod(String other) {
-        return this.httpMethod.equalsIgnoreCase(other);
+        return new RequestLine(httpMethod, path, httpVersion);
     }
 
     public String getHttpMethod() {
         return httpMethod;
     }
 
-    public String getRequestUri() {
-        return requestUri;
+    public String getPath() {
+        return path;
     }
 
     public String getHttpVersion() {

@@ -63,10 +63,10 @@ public class Http11Processor implements Runnable, Processor {
             if (httpRequest.method().equals("POST")) {
                 int contentLength = getContentLength(lines);
                 String requestBody = readRequestBody(bufferedReader, contentLength);
-                requestHandler = handlePostRequest(httpRequest.uri(), requestBody);
+                requestHandler = handlePostRequest(httpRequest.path(), requestBody);
             } else {
                 List<String> cookieHeaderValues = httpRequest.header("Cookie");
-                requestHandler = handleGetRequest(httpRequest.method(), httpRequest.uri(), cookieHeaderValues);
+                requestHandler = handleGetRequest(httpRequest.method(), httpRequest.path(), cookieHeaderValues);
             }
 
             String responseBody = readFile(requestHandler.getResponseFilePath());

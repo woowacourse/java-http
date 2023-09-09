@@ -25,7 +25,7 @@ public class HttpRequestParser {
         String line = bufferedReader.readLine();
         while (line != null && !line.isBlank()) {
             String[] split = line.split(":");
-            header.put(split[KEY_INDEX], split[VALUE_INDEX].trim());
+            header.put(split[KEY_INDEX], split[VALUE_INDEX].strip());
             line = bufferedReader.readLine();
         }
         return header;

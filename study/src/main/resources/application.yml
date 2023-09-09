@@ -3,10 +3,10 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 2 # 쓰레드가 사용중일 때, 받은 요청이 대기하는 큐의 최대값
+    max-connections: 2 # 서버가 유지할 수 있는 최대 커넥션 수
     threads:
-      max: 2
+      max: 2 # 실행가능 쓰레드 수
   compression:
     enabled: true
     min-response-size : 10

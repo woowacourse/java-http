@@ -20,5 +20,5 @@
   - [x] 알 수 없는 예외 발생시 Internal Server Error 페이지 반환한다.
   - [x] Controller 인터페이스를 추가한다.
   - [x] Controller를 매핑해주는 클래스를 구현한다.
-- [ ] ThreadPoolExecutor를 사용해서 스레드 풀(thread pool) 기능을 추가한다.
-- [ ] 세션의 경우 동시성 컬렉션을 사용한다.
+- [x] ThreadPoolExecutor를 사용해서 스레드 풀(thread pool) 기능을 추가한다.
+- [x] 세션의 경우 동시성 컬렉션을 사용한다.

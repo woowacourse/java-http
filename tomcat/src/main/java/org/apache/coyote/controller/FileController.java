@@ -20,7 +20,7 @@ public class FileController extends Controller {
     private FileController() {
     }
 
-    public static FileController from() {
+    public static FileController getController() {
         return new FileController();
     }
 

@@ -24,7 +24,7 @@ public class RegisterController extends Controller {
     public String run(final HttpRequest request) throws IOException {
         final String method = request.getMethod();
         if (HttpMethod.GET.isSameMethod(method)) {
-            return FileController.from().createResponse(FileResolver.REGISTER);
+            return FileController.getController().createResponse(FileResolver.REGISTER);
         }
         if (HttpMethod.POST.isSameMethod(method)) {
             final Map<String, String> body = request.getBody();

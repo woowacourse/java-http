@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 public enum ControllerHandler {
 
-    FILE_HANDLER(null, null),
+    FILE_HANDLER(null, FileController::getController),
     LOGIN("/login", LoginController::getController),
     REGISTER("/register", RegisterController::getController),
     ;
@@ -28,6 +28,6 @@ public enum ControllerHandler {
                      .filter(handler -> handler.uri != null && handler.uri.equals(uri))
                      .map(handler -> handler.getController.get())
                      .findAny()
-                     .orElseGet(FileController::from);
+                     .orElseGet(FILE_HANDLER.getController);
     }
 }

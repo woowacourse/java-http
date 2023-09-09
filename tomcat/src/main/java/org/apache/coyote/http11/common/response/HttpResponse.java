@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.HttpHeaderName;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.MessageBody;
-import org.apache.coyote.http11.common.request.HttpMethod;
 import org.apache.coyote.http11.servlet.Page;
 
 public class HttpResponse {
@@ -74,25 +74,4 @@ public class HttpResponse {
         return String.join(System.lineSeparator(), status, headers, "", body)
                 .getBytes(StandardCharsets.UTF_8);
     }
-
-//    public static HttpResponse createMethodNotAllowed(List<HttpMethod> methods) {
-//        String allowedMethod = methods.stream()
-//                .map(Enum::toString)
-//                .collect(Collectors.joining(", "));
-//
-//        ResponseHeaders headers = new ResponseHeaders();
-//        headers.addHeader(HttpHeaderName.ALLOW, allowedMethod);
-//        return HttpResponse.create(StatusCode.METHOD_NOT_ALLOWED, headers);
-//    }
-//
-//    public static HttpResponse createBadRequest() throws IOException {
-//        String content = StaticFileLoader.load(Page.BAD_REQUEST.getUri());
-//
-//        ResponseHeaders headers = new ResponseHeaders();
-//        headers.addHeader(HttpHeaderName.CONTENT_TYPE, ContentType.TEXT_HTML.getDetail());
-//        headers.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
-//
-//        return HttpResponse.create(StatusCode.BAD_REQUEST, headers, content);
-
-//    }
 }

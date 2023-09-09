@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpHeaderName;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.MessageBody;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;

@@ -6,8 +6,7 @@ public enum Page {
     REGISTER("/register.html"),
     BAD_REQUEST("/400.html"),
     UNAUTHORIZED("/401.html"),
-    NOT_FOUND("/404.html")
-    ;
+    NOT_FOUND("/404.html");
 
     private String uri;
 

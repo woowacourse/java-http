@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.common.request;
 
+import org.apache.coyote.http11.common.HttpMethod;
+
 public class RequestLine {
     public static final String DELIMITER = " ";
     public static final int METHOD_IDX = 0;

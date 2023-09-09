@@ -8,7 +8,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.common.request.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.request.HttpRequest;
 import org.apache.coyote.http11.common.response.HttpResponse;
 import org.apache.coyote.http11.common.response.StatusCode;

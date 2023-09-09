@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
-import org.apache.coyote.http11.common.request.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.request.HttpRequest;
 import org.apache.coyote.http11.common.response.HttpResponse;
 import org.apache.coyote.http11.exception.MethodNotAllowedException;

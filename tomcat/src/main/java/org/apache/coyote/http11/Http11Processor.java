@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.exception.UncheckedServletException;
 import org.apache.coyote.Adapter;
 import org.apache.coyote.Processor;
@@ -36,8 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             var httpRequest = HttpRequest.parse(inputStream);
             var httpResponse = HttpResponse.create();
-            Controller controller = adapter.getController(httpRequest);
-            controller.service(httpRequest, httpResponse);
+            adapter.service(httpRequest, httpResponse);
             outputStream.write(httpResponse.parse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

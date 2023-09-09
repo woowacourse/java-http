@@ -11,7 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(HttpServletResponse response) {
+        String cacheControl = CacheControl
+                .noCache()
+                .cachePrivate()
+                .getHeaderValue();
+        response.addHeader("Transfer-Encoding", "chunked");
+        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
         return "index";
     }
 
@@ -27,6 +33,13 @@ public class GreetingController {
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
         return "index";
     }
+
+//    @GetMapping("/test")
+//    public String aa(final HttpServletResponse response) {
+//
+//        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
+//        return "index";
+//    }
 
     @GetMapping("/etag")
     public String etag() {

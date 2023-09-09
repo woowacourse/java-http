@@ -14,8 +14,8 @@ import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.org.apache.coyote.Processor;
-import nextstep.org.apache.coyote.http11.servlet.LoginServlet;
-import nextstep.org.apache.coyote.http11.servlet.RegisterServlet;
+import nextstep.org.apache.coyote.http11.servlet.Context;
+import nextstep.org.apache.coyote.http11.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +24,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private static final String RESOURCES_PATH_PREFIX = "static";
-    private static final String NOT_FOUND_DEFAULT_MESSAGE = "404 Not Found";
     private static final String INTERNAL_SERVER_ERROR_DEFAULT_MESSAGE = "500 Internal Server Error";
 
     private final Socket connection;
-    private final HandlerMapper handlerMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.handlerMapper = new HandlerMapper();
     }
 
     @Override
@@ -48,87 +45,20 @@ public class Http11Processor implements Runnable, Processor {
                 OutputStream outputStream = connection.getOutputStream()
         ) {
             Http11Request request = new Http11Request(inputStream);
-            Cookies cookies = request.getCookies();
-
             Http11Response response = new Http11Response(Status.OK);
-            String requestPathInfo = request.getPathInfo();
 
-            Object handler = handlerMapper.mapHandler(requestPathInfo);
-            if (Objects.nonNull(handler)
-                    && request.getMethod().equals("POST")
-                    && requestPathInfo.equals("/login")) {
-                try {
-                    LoginServlet loginServlet = new LoginServlet();
-                    loginServlet.service(request, response);
-                } catch (Exception e) {
-                    responseInternalServerError(request, response);
-                }
-
-                writeResponse(outputStream, response);
-                return;
-            }
-
-            if (Objects.nonNull(handler)
-                    && request.getMethod().equals("POST")
-                    && requestPathInfo.equals("/register")) {
-                RegisterServlet registerServlet = new RegisterServlet();
-                try {
-                    registerServlet.service(request, response);
-                } catch (Exception e) {
-                    responseInternalServerError(request, response);
-                }
-
-                writeResponse(outputStream, response);
-                return;
-            }
-
-            if (request.getMethod().equals("GET")) {
-                String contentType = selectFirstContentTypeOrDefault(
-                        request.getHeader("Accept")
-                );
-
-                if (requestPathInfo.contains("/login") && cookies.hasCookie("JSESSIONID")) {
-                    LoginServlet loginServlet = new LoginServlet();
-                    try {
-                        loginServlet.service(request, response);
-                    } catch (Exception e) {
-                        responseInternalServerError(request, response);
-                    }
-                    writeResponse(outputStream, response);
-                    return;
-                }
-
-                responseWithFoundResource(request, response);
+            Context servletContainer = new Context();
+            Servlet servlet = servletContainer.getServlet(request.getPathInfo());
+            try {
+                servlet.service(request, response);
+            } catch (Exception e) {
+                responseInternalServerError(request, response);
             }
 
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void responseWithFoundResource(Http11Request request, Http11Response response)
-            throws IOException {
-        Optional<String> responseBody = createResponseBody(request.getPathInfo());
-        String contentType = selectFirstContentTypeOrDefault(request.getHeader("Accept"));
-
-        if (responseBody.isEmpty()) {
-            String notFoundPageBody = createResponseBody("/404.html")
-                    .orElse(NOT_FOUND_DEFAULT_MESSAGE);
-
-            response.setStatus(Status.NOT_FOUND)
-                    .setHeader("Content-Type", contentType + ";charset=utf-8")
-                    .setHeader("Content-Length", String.valueOf(
-                            notFoundPageBody.getBytes(StandardCharsets.UTF_8).length))
-                    .setBody(notFoundPageBody);
-            return;
-        }
-
-        response.setStatus(Status.OK)
-                .setHeader("Content-Type", contentType + ";charset=utf-8")
-                .setHeader("Content-Length", String.valueOf(
-                        responseBody.get().getBytes(StandardCharsets.UTF_8).length))
-                .setBody(responseBody.get());
     }
 
     private void responseInternalServerError(Http11Request request, Http11Response response)

@@ -4,17 +4,22 @@ import java.util.Objects;
 
 public class RequestPath {
 
-    private final String source;
+    private final String value;
 
-    public RequestPath(final String source) {
-        if (Objects.isNull(source)) {
+    public RequestPath(final String value) {
+        if (Objects.isNull(value)) {
             throw new IllegalArgumentException("RequestPath 에 null 이 들어올 수 없습니다.");
         }
-        this.source = source;
+
+        this.value = value;
+    }
+
+    public static RequestPath from(String requestPathValue) {
+        return new RequestPath(requestPathValue);
     }
 
     public String value() {
-        return source;
+        return value;
     }
 
     @Override
@@ -22,16 +27,16 @@ public class RequestPath {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final RequestPath that = (RequestPath) o;
-        return Objects.equals(source, that.source);
+        return Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(source);
+        return Objects.hash(value);
     }
 
     @Override
     public String toString() {
-        return source;
+        return value;
     }
 }

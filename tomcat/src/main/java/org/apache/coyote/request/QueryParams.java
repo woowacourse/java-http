@@ -13,13 +13,14 @@ public class QueryParams {
     private static final String QUERY_PARAM_START_CONDITION = "?";
     private static final String QUERY_PARAMS_DELIMITER = "&";
     private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
+
     private static final int PARAM_NAME_INDEX = 0;
     private static final int PARAM_VALUE_INDEX = 1;
 
-    private final Map<String, String> params = new HashMap<>();
+    private final Map<String, String> params;
 
     private QueryParams(final Map<String, String> params) {
-        this.params.putAll(params);
+        this.params = params;
     }
 
     public static QueryParams empty() {
@@ -27,6 +28,10 @@ public class QueryParams {
     }
 
     public static QueryParams from(final String queryParamNamesAndValues) {
+        if (Objects.isNull(queryParamNamesAndValues) || queryParamNamesAndValues.isBlank()) {
+            return empty();
+        }
+
         final int paramStartIndex = queryParamNamesAndValues.indexOf(QUERY_PARAM_START_CONDITION) + 1;
         return new QueryParams(collectQueryParamMapping(queryParamNamesAndValues, paramStartIndex));
     }

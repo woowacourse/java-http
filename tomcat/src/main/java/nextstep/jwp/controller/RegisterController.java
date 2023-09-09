@@ -44,7 +44,7 @@ public class RegisterController implements Controller {
             return redirectLogin(request);
         }
 
-        return registerUser(request, requestBody, account);
+        return registerUser(request, requestBody);
     }
 
     private  HttpResponse redirectLogin(HttpRequest request) {
@@ -58,10 +58,8 @@ public class RegisterController implements Controller {
                 .build();
     }
 
-    private HttpResponse registerUser(HttpRequest request, RequestBody requestBody, String account) {
-        String password = requestBody.getValueOf("password");
-        String email = requestBody.getValueOf("email");
-        InMemoryUserRepository.save(new User(account, password, email));
+    private HttpResponse registerUser(HttpRequest request, RequestBody requestBody) {
+        saveUser(requestBody);
 
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
         return HttpResponse.builder()
@@ -71,6 +69,13 @@ public class RegisterController implements Controller {
                 .redirect(LOGIN_URI)
                 .responseBody(responseBody)
                 .build();
+    }
+
+    private void saveUser(RequestBody requestBody) {
+        String account = requestBody.getValueOf("account");
+        String password = requestBody.getValueOf("password");
+        String email = requestBody.getValueOf("email");
+        InMemoryUserRepository.save(new User(account, password, email));
     }
 
 }

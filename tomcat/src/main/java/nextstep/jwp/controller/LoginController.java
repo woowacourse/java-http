@@ -102,18 +102,23 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse successLogin(HttpRequest httpRequest) {
-        String uuid = UUID.randomUUID().toString();
-        SESSION_MANAGER.add(new Session(uuid));
+        String sessionId = addSession();
 
         ResponseBody responseBody = new ResponseBody(FileReader.read(REDIRECT_HOME_URI));
         return HttpResponse.builder()
                 .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
-                .setCookie(HttpCookie.jSessionId(uuid))
+                .setCookie(HttpCookie.jSessionId(sessionId))
                 .redirect(REDIRECT_HOME_URI)
                 .responseBody(responseBody)
                 .build();
+    }
+
+    private String addSession() {
+        String uuid = UUID.randomUUID().toString();
+        SESSION_MANAGER.add(new Session(uuid));
+        return uuid;
     }
 
 }

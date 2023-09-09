@@ -22,5 +22,4 @@ public class HomeController implements Controller {
                 .build();
     }
 
-
 }

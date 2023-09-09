@@ -91,7 +91,7 @@ public class HttpResponse {
 
         if (cookie.containsKey(JSESSIONID)) {
             String jsessionid = cookie.findByKey(JSESSIONID);
-            headers.add("Set-Cookie: " + JSESSIONID + "=" + jsessionid + " ");
+            headers.add(String.format("Set-Cookie: %s=%s ", JSESSIONID, jsessionid));
         }
         return headers.toString();
     }

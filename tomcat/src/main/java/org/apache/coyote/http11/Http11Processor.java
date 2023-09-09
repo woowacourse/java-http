@@ -1,10 +1,12 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.UserAlreadyExistException;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.MissingRequestBody;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -39,17 +41,24 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+
+        final HttpResponse response = new HttpResponse();
+
         try (final var outputStream = connection.getOutputStream();
              final var inputStream = connection.getInputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final HttpRequest request = HttpRequestFactory.readFrom(bufferedReader);
-            final HttpResponse response = new HttpResponse();
 
             makeSessionIfNotExist(request, response);
 
             final Controller controller = requestMapper.getController(request);
-            controller.service(request, response);
+            try {
+                controller.service(request, response);
+            } catch (MissingRequestBody | UserAlreadyExistException e) {
+                log.warn(e.getMessage());
+                response.badRequest(e.getMessage());
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

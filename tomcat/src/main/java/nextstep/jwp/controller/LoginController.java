@@ -5,6 +5,7 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.controller.AbstrcatController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.exception.MissingRequestBody;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -49,7 +50,7 @@ public class LoginController extends AbstrcatController {
 
     private boolean processLogin(final HttpRequest request) {
         if (!request.containsBody(ACCOUNT_KEY) || !request.containsBody(PASSWORD_KEY)) {
-            return false;
+            throw new MissingRequestBody();
         }
         final String account = request.getBody(ACCOUNT_KEY);
         final String password = request.getBody(PASSWORD_KEY);

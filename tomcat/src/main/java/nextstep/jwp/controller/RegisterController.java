@@ -1,10 +1,12 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UserAlreadyExistException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.controller.AbstrcatController;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.exception.MissingRequestBody;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -45,14 +47,14 @@ public class RegisterController extends AbstrcatController {
 
     private User processRegister(final HttpRequest request) {
         if (!request.containsBody(ACCOUNT_KEY) || !request.containsBody(PASSWORD_KEY) || !request.containsBody(EMAIL_KEY)) {
-            return null;
+            throw new MissingRequestBody();
         }
         final String account = request.getBody(ACCOUNT_KEY);
         final String password = request.getBody(PASSWORD_KEY);
         final String email = request.getBody(EMAIL_KEY);
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return null;
+            throw new UserAlreadyExistException(account);
         }
         final User registeredUser = new User(account, password, email);
         InMemoryUserRepository.save(registeredUser);

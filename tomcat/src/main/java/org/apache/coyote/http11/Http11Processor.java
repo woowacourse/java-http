@@ -5,11 +5,8 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.controller.Controller;
 import org.apache.coyote.Processor;
-import org.apache.controller.DefaultController;
-import org.apache.controller.LoginController;
-import org.apache.controller.RegisterController;
-import org.apache.controller.ResourceController;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
 import org.apache.coyote.response.Response;
@@ -40,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
             Request request = requestParser.parse();
             Response response = new Response();
 
-            doHandler(request, response);
+            doService(request, response);
 
             outputStream.write(response.getResponseBytes());
             outputStream.flush();
@@ -49,20 +46,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void doHandler(Request request, Response response) {
-        if (request.isSamePath("/")) {
-            new DefaultController().service(request, response);
-            return;
-        }
-        if (request.isSamePath("/login")) {
-            new LoginController().service(request, response);
-            return;
-        }
-        if (request.isSamePath("/register")) {
-            new RegisterController().service(request, response);
-            return;
-        }
-        ResourceController resourceController = new ResourceController();
-        resourceController.service(request, response);
+    private void doService(Request request, Response response) {
+        Controller controller = RequestMapping.getController(request);
+        controller.service(request, response);
     }
 }

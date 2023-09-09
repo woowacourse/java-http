@@ -9,7 +9,7 @@ import org.apache.coyote.response.Response;
 
 public class ResourceController extends AbstractController {
 
-    private static final String URL = "/";
+    private static final String URL = "";
     private static final Set<HttpMethod> AVAILABLE_HTTP_METHODS = Set.of(HttpMethod.GET);
 
     public ResourceController() {

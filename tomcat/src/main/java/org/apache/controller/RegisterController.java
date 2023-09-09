@@ -12,7 +12,7 @@ import org.apache.coyote.response.Response;
 
 public class RegisterController extends AbstractController {
 
-    private static final String URL = "/";
+    private static final String URL = "/register";
     private static final Set<HttpMethod> AVAILABLE_HTTP_METHODS = Set.of(HttpMethod.GET, HttpMethod.POST);
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";

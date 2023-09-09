@@ -14,7 +14,7 @@ import org.apache.coyote.response.Response;
 
 public class LoginController extends AbstractController {
 
-    private static final String URL = "/";
+    private static final String URL = "/login";
     private static final Set<HttpMethod> AVAILABLE_HTTP_METHODS = Set.of(HttpMethod.GET, HttpMethod.POST);
     private static final String JSESSIONID = "JSESSIONID";
     private static final String ACCOUNT = "account";

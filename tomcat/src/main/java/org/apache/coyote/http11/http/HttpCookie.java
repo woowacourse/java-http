@@ -17,6 +17,9 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(final String cookie) {
+        if (cookie.isEmpty()) {
+            return new HttpCookie(new HashMap<>());
+        }
         final String[] splitCookies = splitCookies(cookie);
         final Map<String, String> cookies = splitValues(splitCookies);
         return new HttpCookie(cookies);

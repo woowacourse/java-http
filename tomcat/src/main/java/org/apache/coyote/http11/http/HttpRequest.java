@@ -11,6 +11,7 @@ public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String HTTP_COOKIE = "Cookie";
+    private static final String EMPTY_COOKIE = "";
 
     private final HttpRequestHeader requestHeader;
     private final Map<String, String> requestBody;
@@ -41,11 +42,9 @@ public class HttpRequest {
             final String[] splitHeader = header.split(HEADER_DELIMITER);
             requestHeaders.put(splitHeader[0], splitHeader[1]);
         }
-        if (requestHeaders.containsKey(HTTP_COOKIE)) {
-            final HttpCookie cookie = HttpCookie.from(requestHeaders.get(HTTP_COOKIE));
-            return new HttpRequestHeader(method, uri, version, cookie, requestHeaders);
-        }
-        return new HttpRequestHeader(method, uri, version, null, requestHeaders);
+        final String rawCookie = requestHeaders.getOrDefault(HTTP_COOKIE, EMPTY_COOKIE);
+        final HttpCookie cookie = HttpCookie.from(rawCookie);
+        return new HttpRequestHeader(method, uri, version, cookie, requestHeaders);
     }
 
     private static List<String> parseHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {

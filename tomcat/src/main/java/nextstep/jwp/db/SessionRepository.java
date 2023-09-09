@@ -2,13 +2,13 @@ package nextstep.jwp.db;
 
 import nextstep.jwp.model.Session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionRepository {
 
-    private static final Map<Long, Session> sessions = new HashMap<>();
+    private static final Map<Long, Session> sessions = new ConcurrentHashMap<>();
 
     public static UUID save(Long userId) {
         UUID uuid = UUID.randomUUID();

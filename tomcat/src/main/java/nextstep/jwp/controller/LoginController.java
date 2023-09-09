@@ -5,7 +5,6 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -13,12 +12,10 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
-    
+
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
-
-    private final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {

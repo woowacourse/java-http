@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import org.apache.coyote.http11.http.HttpSession;
+import org.apache.coyote.http11.http.message.HttpSession;
 
 import java.io.IOException;
 

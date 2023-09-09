@@ -2,7 +2,7 @@ package org.apache.coyote.handler;
 
 import nextstep.jwp.model.User;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.http.HttpSession;
+import org.apache.coyote.http11.http.message.HttpSession;
 
 import java.util.HashMap;
 import java.util.Map;

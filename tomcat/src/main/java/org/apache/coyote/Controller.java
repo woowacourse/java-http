@@ -2,8 +2,8 @@ package org.apache.coyote;
 
 import org.apache.coyote.controller.util.FileResolver;
 import org.apache.coyote.controller.util.HttpResponse;
-import org.apache.coyote.http11.http.HttpRequest;
-import org.apache.coyote.http11.http.HttpSession;
+import org.apache.coyote.http11.http.message.HttpRequest;
+import org.apache.coyote.http11.http.message.HttpSession;
 
 import java.io.IOException;
 

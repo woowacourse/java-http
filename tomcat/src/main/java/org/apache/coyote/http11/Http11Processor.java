@@ -4,7 +4,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.ControllerHandler;
-import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.message.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

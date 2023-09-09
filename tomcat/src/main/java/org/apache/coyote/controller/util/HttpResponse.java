@@ -1,6 +1,6 @@
 package org.apache.coyote.controller.util;
 
-import org.apache.coyote.http11.http.HttpSession;
+import org.apache.coyote.http11.http.message.HttpSession;
 
 public enum HttpResponse {
 

@@ -3,10 +3,11 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 8 # 연결된 요청이 max-connections에 도달했을 경우, 추가로 연결 대기할 수 있는 요청의 갯수
+    max-connections: 2 # 서버가 동시에 처리할 수 있는 클라이언트 연결의 최대 개수,
+    #max-connections이 thread의 최대 갯수보다 많으면 추가 연결이 처리 대기열에 배치된다.
     threads:
-      max: 2
+      max: 2 # 요청을 처리하는 Thread의 최대 갯수, AppTest의 count.intValue()는 해당 값을 의미한다.
   compression:
     enabled: true
     min-response-size: 10

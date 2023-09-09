@@ -24,25 +24,30 @@ class AppTest {
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;
-        var threads = new Thread[NUMBER_OF_THREAD];
 
+        // Thread 객체 배열 생성 및 10개의 Thread 객체 생성하여 배열에 할당한다.
+        var threads = new Thread[NUMBER_OF_THREAD];
         for (int i = 0; i < NUMBER_OF_THREAD; i++) {
             threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));
         }
 
+        // Thread 객체의 start() 메서드를 호출하면, Thread를 생성하고, 해당 스레드에서 run()메서드를 실행한다.
         for (final var thread : threads) {
             thread.start();
             Thread.sleep(50);
         }
 
+        // join() 메서드를 호출한 스레드가 join() 메서드를 실행한 스레드의 종료를 기다린다.
         for (final var thread : threads) {
             thread.join();
         }
 
+        // count.intValue()는 실제 생성된 스레드의 갯수이다.
         assertThat(count.intValue()).isEqualTo(2);
     }
 
     private static void incrementIfOk(final HttpResponse<String> response) {
+        // 요청이 200일때 AtomicInteger의 수량 증가
         if (response.statusCode() == 200) {
             count.incrementAndGet();
         }

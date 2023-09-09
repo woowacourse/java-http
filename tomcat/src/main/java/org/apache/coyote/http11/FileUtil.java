@@ -15,6 +15,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FileUtil {
 
@@ -43,14 +44,9 @@ public class FileUtil {
     private static String readResource(final URL resource) {
         final Path path = Paths.get(resource.getPath());
         try (final BufferedReader fileReader = new BufferedReader(new FileReader(path.toFile()))) {
-
-            final StringBuilder actual = new StringBuilder();
-            fileReader.lines()
-                    .forEach(br -> actual.append(br)
-                            .append(System.lineSeparator()));
-
-            return actual.toString();
-
+            return fileReader.lines()
+                    .collect(Collectors.joining(System.lineSeparator()))
+                    + System.lineSeparator();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

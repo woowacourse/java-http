@@ -41,9 +41,7 @@ public class LoginPageController extends AbstractController {
 
     private boolean isAuthenticated(final HttpRequest httpRequest) {
         final String jsessionid = httpRequest.getCookieValue("JSESSIONID");
-        System.out.println("jsessionid = " + jsessionid);
         final Session foundSession = SessionManager.findSession(jsessionid);
-        System.out.println("foundSession = " + foundSession);
 
         return Objects.nonNull(foundSession);
     }

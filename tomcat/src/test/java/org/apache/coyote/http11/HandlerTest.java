@@ -38,9 +38,9 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.NOT_FOUND);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).isEqualTo("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type", "text/html");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
     }
 
     @Test
@@ -58,9 +58,10 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.OK);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.length()));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.length()));
     }
 
     @Test
@@ -80,9 +81,10 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.OK);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
     }
 
     @Test
@@ -102,9 +104,10 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.OK);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
     }
 
     @Test
@@ -128,10 +131,11 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
-        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Location", "/index.html");
     }
 
     @Test
@@ -154,10 +158,11 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
-        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Location", "/index.html");
     }
 
     @ParameterizedTest
@@ -183,10 +188,11 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
-        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/401.html");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Location", "/401.html");
     }
 
     private static Stream<Arguments> getWrongMember() {
@@ -217,10 +223,11 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
-        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Location", "/index.html");
     }
 
     @Test
@@ -245,9 +252,10 @@ class HandlerTest {
 
         assertThat(result.getBody()).isEqualTo(expectBody);
         assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
-        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
-        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
-            .isEqualTo(String.valueOf(expectBody.getBytes().length));
-        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Type",
+            "text/html;charset=utf-8");
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Content-Length",
+            String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader()).containsEntry("Location", "/index.html");
     }
 }

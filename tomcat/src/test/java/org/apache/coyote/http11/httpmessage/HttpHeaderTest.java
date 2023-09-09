@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httpmessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,9 @@ class HttpHeaderTest {
         final HttpHeader result = HttpHeader.fromRequest(headers);
 
         // then
-        assertThat(result.getHeader().size()).isEqualTo(2);
-        assertThat(result.getHeader().get("Host")).isEqualTo("localhost:8080");
-        assertThat(result.getHeader().get("Connection")).isEqualTo("keep-alive");
+        assertThat(result.getHeader()).hasSize(2);
+        assertThat(result.getHeader()).containsEntry("Host", "localhost:8080");
+        assertThat(result.getHeader()).containsEntry("Connection", "keep-alive");
     }
 
     @Test
@@ -37,8 +38,10 @@ class HttpHeaderTest {
         final String result = httpHeader.makeResponseForm();
 
         // then
-        assertThat(result).contains("Content-Type: text/html");
-        assertThat(result).contains("Content-Length: 5536");
+        assertAll(
+            () -> assertThat(result).contains("Content-Type: text/html"),
+            () -> assertThat(result).contains("Content-Length: 5536")
+        );
     }
 
     @Test
@@ -55,7 +58,7 @@ class HttpHeaderTest {
         final HttpCookie cookies = httpHeader.getCookies();
 
         // then
-        assertThat(cookies.getCookies().size()).isEqualTo(1);
+        assertThat(cookies.getCookies()).hasSize(1);
     }
 
     @Test
@@ -71,6 +74,6 @@ class HttpHeaderTest {
         final HttpCookie cookies = httpHeader.getCookies();
 
         // then
-        assertThat(cookies.getCookies().size()).isEqualTo(0);
+        assertThat(cookies.getCookies().size()).isZero();
     }
 }

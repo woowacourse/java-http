@@ -16,8 +16,8 @@ class RequestBodyTest {
         final RequestBody result = RequestBody.fromRequest(requestBody);
 
         // then
-        assertThat(result.getBody().size()).isEqualTo(2);
-        assertThat(result.getBody().get("account")).isEqualTo("ako");
-        assertThat(result.getBody().get("password")).isEqualTo("password");
+        assertThat(result.getBody()).hasSize(2);
+        assertThat(result.getBody()).containsEntry("account", "ako");
+        assertThat(result.getBody()).containsEntry("password", "password");
     }
 }

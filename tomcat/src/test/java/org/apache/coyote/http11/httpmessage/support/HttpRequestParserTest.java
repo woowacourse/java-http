@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.httpmessage.support;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 import java.util.Objects;
@@ -86,11 +86,10 @@ class HttpRequestParserTest {
         // then
         final Map<String, String> header = result.getHeader();
 
-        assertThat(header.size()).isEqualTo(3);
-        assertThat(header.get("Host")).isEqualTo("localhost:8080");
-        assertThat(header.get("Connection")).isEqualTo("keep-alive");
-        assertThat(header.get("Accept")).isEqualTo("*/*");
-
+        assertThat(header).hasSize(3);
+        assertThat(header).containsEntry("Host", "localhost:8080");
+        assertThat(header).containsEntry("Connection", "keep-alive");
+        assertThat(header).containsEntry("Accept", "*/*");
     }
 
     @Test
@@ -109,8 +108,8 @@ class HttpRequestParserTest {
         // then
         final Map<String, String> queryString = Objects.requireNonNull(result).getQueryString();
 
-        assertThat(queryString.size()).isEqualTo(1);
-        assertThat(queryString.get("account")).isEqualTo("ako");
+        assertThat(queryString).hasSize(1);
+        assertThat(queryString).containsEntry("account", "ako");
     }
 
     @Test
@@ -148,8 +147,8 @@ class HttpRequestParserTest {
         // then
         final Map<String, String> body = Objects.requireNonNull(result).getBody();
 
-        assertThat(body.get("account")).isEqualTo("ako");
-        assertThat(body.get("password")).isEqualTo("password");
+        assertThat(body).containsEntry("account", "ako");
+        assertThat(body).containsEntry("password", "password");
     }
 
     @Test

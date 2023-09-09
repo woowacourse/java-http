@@ -19,8 +19,8 @@ class QueryStringTest {
         final QueryString result = QueryString.fromRequest(queryStrings);
 
         // then
-        assertThat(result.getQueryString().size()).isEqualTo(2);
-        assertThat(result.getQueryString().get("account")).isEqualTo("ako");
-        assertThat(result.getQueryString().get("password")).isEqualTo("password");
+        assertThat(result.getQueryString()).hasSize(2);
+        assertThat(result.getQueryString()).containsEntry("account", "ako");
+        assertThat(result.getQueryString()).containsEntry("password", "password");
     }
 }

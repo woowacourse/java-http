@@ -31,6 +31,8 @@ public class Handler {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "set-cookie";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String INDEX_PAGE = "/index.html";
 
     private final HandlerMapping handlerMapping;
     private final QueryString queryString;
@@ -77,7 +79,7 @@ public class Handler {
 
     private HttpResponse makeStringResponse(final Map<String, String> headers) {
         final String body = handlerMapping.getResponse();
-        headers.put(CONTENT_TYPE, ContentType.HTML.getValue() + ";charset=utf-8");
+        headers.put(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8);
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
     }
@@ -86,7 +88,7 @@ public class Handler {
         throws IOException {
         final String body = findFile(handlerMapping.getResponse());
         headers.put(CONTENT_TYPE,
-            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+            ContentType.valueOf(fileType.toUpperCase()).getValue() + CHARSET_UTF_8);
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
     }
@@ -95,7 +97,7 @@ public class Handler {
         throws IOException {
         final String body = findFile(handlerMapping.getResponse());
         headers.put(CONTENT_TYPE,
-            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+            ContentType.valueOf(fileType.toUpperCase()).getValue() + CHARSET_UTF_8);
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 
         if (queryString == null && requestBody == null) {
@@ -103,7 +105,7 @@ public class Handler {
             if (SessionManger.findSession(authorizedCookie) == null) {
                 return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
             }
-            headers.put(LOCATION, "/index.html");
+            headers.put(LOCATION, INDEX_PAGE);
             return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
         }
 
@@ -114,7 +116,7 @@ public class Handler {
                 final Session session = new Session(UUID.randomUUID().toString());
                 session.setAttribute("user", member);
                 SessionManger.add(session);
-                headers.put(LOCATION, "/index.html");
+                headers.put(LOCATION, INDEX_PAGE);
                 headers.put(SET_COOKIE, "JSESSIONID=" + session.getId());
             }
         }, () -> headers.put(LOCATION, "/401.html"));
@@ -142,9 +144,9 @@ public class Handler {
     ) throws IOException {
         final String body = findFile(handlerMapping.getResponse());
         headers.put(CONTENT_TYPE,
-            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+            ContentType.valueOf(fileType.toUpperCase()).getValue() + CHARSET_UTF_8);
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        headers.put(LOCATION, "/index.html");
+        headers.put(LOCATION, INDEX_PAGE);
         final User registerUser = new User(requestBody.getAccount(), requestBody.getPassword(),
             requestBody.getEmail());
         InMemoryUserRepository.save(registerUser);

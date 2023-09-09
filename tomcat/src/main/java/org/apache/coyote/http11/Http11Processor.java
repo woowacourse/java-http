@@ -1,18 +1,10 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
-import org.apache.catalina.manager.SessionManager;
-import org.apache.coyote.HttpCookie;
 import org.apache.coyote.Processor;
-import org.apache.coyote.Session;
-import org.apache.coyote.request.HttpRequestBody;
-import org.apache.coyote.request.HttpRequestHeader;
-import org.apache.coyote.request.HttpRequestLine;
+import org.apache.coyote.request.*;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpResponseHeader;
-import org.apache.coyote.response.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +13,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+
+import static org.apache.coyote.ContentType.HTML;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,180 +39,148 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            String requestLine = reader.readLine();
-            if (requestLine == null) {
-                return;
-            }
+            HttpRequest httpRequest = generateHttpRequest(reader);
 
-            HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
+            RequestUri requestUri = httpRequest.getRequestLine().getRequestUri();
 
-            final StringBuilder requestHeader = new StringBuilder();
+            String path = requestUri.getPath();
 
-            String line;
-            while (!Objects.equals(line = reader.readLine(), "")) {
-                requestHeader.append(line).append("\r\n");
-            }
-
-            HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(requestHeader.toString());
-
-
-            int contentLength = httpRequestHeader.getContentLength();
-
-            StringBuilder requestBody = new StringBuilder();
-            if (contentLength > 0) {
-                char[] buffer = new char[contentLength];
-                int bytesRead = reader.read(buffer, 0, contentLength);
-                if (bytesRead > 0) {
-                    requestBody.append(buffer, 0, bytesRead);
-                }
-            }
-
-            HttpRequestBody httpRequestBody = HttpRequestBody.from(requestBody.toString());
-
-            String uri = extractRequestUriFromRequest(requestLine);
-
-            // requestUri 에서 path 와 queryString 분리
-            int index = uri.indexOf("?");
-            String path;
-            String queryString = "";
-
-            int statusCode = 200;
-            String statusMessage = "OK";
-
-            if (index != -1) {
-                path = uri.substring(0, index);
-                queryString = uri.substring(index + 1);
-            } else {
-                path = uri;
-            }
-
-            String setCookie = "";
-
-            // path 가 login 일때 분기
-            if (path.equals("login") && httpRequestLine.isGetMethod()) {
-                statusCode = 302;
-                statusMessage = "Found";
-
-                HttpCookie cookie = httpRequestHeader.getCookie();
-
-
-                if (cookie == null || !cookie.existJSESSIONID()) {
-                    path = "/login.html";
-                } else {
-                    String jSessionId = cookie.getJSessionId();
-                    Session session = SessionManager.findSession(jSessionId);
-
-                    Optional<User> user = (Optional<User>) session.getAttribute("user");
-
-                    if (user.isPresent()) {
-                        path = "/index.html";
-                    } else {
-                        path = "/login.html";
-                    }
-                }
-            }
-
-
-            if (path.equals("login") && httpRequestLine.isPostMethod()) {
-                statusCode = 302;
-                statusMessage = "Found";
-
-                String account = httpRequestBody.getValue("account");
-                String password = httpRequestBody.getValue("password");
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                if (user.isPresent()) {
-                    log.info(user.toString());
-                    UUID uuid = UUID.randomUUID();
-                    Session session = new Session(uuid.toString());
-                    session.setAttribute("user", user);
-                    SessionManager.add(session);
-
-                    setCookie = "Set-Cookie: JSESSIONID=" + uuid;
-
-                    path = "/index.html";
-                } else {
-                    log.warn("미가입회원입니다");
-
-                    path = "/401.html";
-                }
-            }
-
-            // pass 가 register 일때 분기
-            if (path.equals("register") && httpRequestLine.isPostMethod()) {
-                String account = httpRequestBody.getValue("account");
-                String password = httpRequestBody.getValue("password");
-                String email = httpRequestBody.getValue("email");
-
-                InMemoryUserRepository.save(new User(account, password, email));
-
-                statusCode = 302;
-                statusMessage = "Found";
-                path = "/index.html";
-            }
-
-            // content-Type 처리
-            String contentType = "html";
-            if (path.length() != 0) {
-                String[] splitedFileName = path.split("\\.");
-                if (splitedFileName.length != 1) {
-                    contentType = splitedFileName[1];
-                }
-                if (splitedFileName.length == 1) {
-                    path += ".html";
-                }
-            }
-
-            var responseBody = "";
+            HttpResponse response = null;
 
             // / 일때 분기
-            if (uri.length() == 0) {
-                responseBody = "Hello world!";
-            } else {
-                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/" + path)).getPath());
-
-                responseBody = new String(Files.readAllBytes(filePath));
+            if (path.equals("/")) {
+                response = new HttpResponse.Builder()
+                        .contentType(HTML)
+                        .body("hello world")
+                        .build();
             }
 
-            StatusLine statusLine = StatusLine.from(statusCode, statusMessage);
-            HttpResponseHeader responseHeader = new HttpResponseHeader(new LinkedHashMap<>());
-            responseHeader.add("Content-Type", "text/" + contentType + ";charset=utf-8");
-            responseHeader.add("Content-Length", responseBody.getBytes().length);
+//            // path 가 index 일때 분기
+//            if (path.equals("/index")) {
+//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
+//                responseBody = new String(Files.readAllBytes(filePath));
+//            }
+//
+//            // path 가 login 일때 분기
+//            if (path.equals("/login") && httpRequestLine.isGetMethod()) {
+//                statusCode = 302;
+//                statusMessage = "Found";
+//
+//                HttpCookie cookie = httpRequestHeader.getCookie();
+//
+//                if (cookie == null || !cookie.existJSESSIONID()) {
+//                    path = "/login.html";
+//                } else {
+//                    String jSessionId = cookie.getJSessionId();
+//                    Session session = SessionManager.findSession(jSessionId);
+//
+//                    Optional<User> user = (Optional<User>) session.getAttribute("user");
+//
+//                    if (user.isPresent()) {
+//                        path = "/index.html";
+//                    } else {
+//                        path = "/login.html";
+//                    }
+//                }
+//
+//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
+//                responseBody = new String(Files.readAllBytes(filePath));
+//            }
+//
+//
+//            if (path.equals("/login") && httpRequestLine.isPostMethod()) {
+//                statusCode = 302;
+//                statusMessage = "Found";
+//
+//                String account = httpRequestBody.getValue("account");
+//                String password = httpRequestBody.getValue("password");
+//
+//                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+//                if (user.isPresent() && user.get().checkPassword(password)) {
+//                    log.info(user.toString());
+//                    UUID uuid = UUID.randomUUID();
+//                    Session session = new Session(uuid.toString());
+//                    session.setAttribute("user", user);
+//                    SessionManager.add(session);
+//
+//                    setCookie = "Set-Cookie: JSESSIONID=" + uuid;
+//
+//                    path = "/index.html";
+//                } else if (user.isPresent()) {
+//                    log.warn("비밀번호가 틀렸습니다");
+//
+//                    path = "/401.html";
+//
+//                } else {
+//                    log.warn("미가입회원입니다");
+//
+//                    path = "/401.html";
+//                }
+//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
+//
+//                responseBody = new String(Files.readAllBytes(filePath));
+//            }
+//
+//            // pass 가 register 일때 분기
+//            if (path.equals("/register") && httpRequestLine.isPostMethod()) {
+//                String account = httpRequestBody.getValue("account");
+//                String password = httpRequestBody.getValue("password");
+//                String email = httpRequestBody.getValue("email");
+//
+//                InMemoryUserRepository.save(new User(account, password, email));
+//
+//                statusCode = 302;
+//                statusMessage = "Found";
+//                path = "/index.html";
+//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
+//
+//                responseBody = new String(Files.readAllBytes(filePath));
+//            }
 
-            String response = new HttpResponse(statusLine, responseHeader, responseBody).getResponse();
-
-            if (setCookie.length() != 0) {
-                response = String.join("\r\n",
-                        "HTTP/1.1 " + statusCode + " " + statusMessage + " ",
-                        setCookie,
-                        "Content-Type: text/" + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            }
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
 
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException |
+                 UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String extractRequestUriFromRequest(String request) {
-        int startIndex = 0;
-        if (request.indexOf("GET") != -1) {
-            startIndex = request.indexOf("GET ") + 4;
-        }
-        if (request.indexOf("POST") != -1) {
-            startIndex = request.indexOf("POST ") + 5;
-        }
-        int endIndex = request.indexOf(" HTTP/1.1");
+    private HttpRequest generateHttpRequest(BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
 
-        if (startIndex != -1 && endIndex != -1) {
-            return request.substring(startIndex + 1, endIndex);
+        if (requestLine == null) {
+            return null;
         }
 
-        return "";
+        HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
+        HttpRequestHeader httpRequestHeader = getRequestHeader(reader);
+
+        int contentLength = httpRequestHeader.getContentLength();
+        HttpRequestBody httpRequestBody = getRequestBody(reader, contentLength);
+
+        return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
+    }
+
+    private HttpRequestBody getRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        StringBuilder requestBody = new StringBuilder();
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            int bytesRead = reader.read(buffer, 0, contentLength);
+            requestBody.append(buffer, 0, bytesRead);
+        }
+
+        return HttpRequestBody.from(requestBody.toString());
+    }
+
+    private HttpRequestHeader getRequestHeader(BufferedReader reader) throws IOException {
+        StringBuilder requestHeader = new StringBuilder();
+
+        String line;
+        while (!Objects.equals(line = reader.readLine(), "")) {
+            requestHeader.append(line).append("\r\n");
+        }
+
+        return HttpRequestHeader.from(requestHeader.toString());
     }
 }

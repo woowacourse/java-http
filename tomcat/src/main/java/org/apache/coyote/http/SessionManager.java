@@ -7,13 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, User> sessions = new ConcurrentHashMap<>();
+    private static final Map<String, User> SESSIONS = new ConcurrentHashMap<>();
 
     public static void add(String sessionId, User user) {
-        sessions.put(sessionId, user);
+        SESSIONS.put(sessionId, user);
     }
 
     public static boolean isAlreadyLogin(String sessionId) {
-        return sessions.containsKey(sessionId);
+        return SESSIONS.containsKey(sessionId);
     }
 }

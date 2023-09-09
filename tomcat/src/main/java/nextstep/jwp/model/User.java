@@ -2,7 +2,7 @@ package nextstep.jwp.model;
 
 public class User {
 
-    private final Long id;
+    private Long id;
     private final String account;
     private final String password;
     private final String email;
@@ -18,12 +18,21 @@ public class User {
         this(null, account, password, email);
     }
 
+    public User setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public boolean checkPassword(String password) {
         return this.password.equals(password);
     }
 
     public String getAccount() {
         return account;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override

@@ -19,12 +19,26 @@ public class HttpResponse {
 
     private HttpVersion httpVersion;
     private ResponseStatus responseStatus;
-    private Map<String, String> responseHeaders = new HashMap<>();
+    private Map<String, String> responseHeaders;
     private String responseBody;
-    private Cookie cookie = Cookie.from("");
+    private Cookie cookie;
+
+    private HttpResponse(HttpVersion httpVersion, ResponseStatus responseStatus, Map<String, String> responseHeaders, String responseBody, Cookie cookie) {
+        this.httpVersion = httpVersion;
+        this.responseStatus = responseStatus;
+        this.responseHeaders = responseHeaders;
+        this.responseBody = responseBody;
+        this.cookie = cookie;
+    }
 
     public static HttpResponse create() {
-        return new HttpResponse();
+        return new HttpResponse(
+                HTTP_1_1,
+                OK,
+                new HashMap<>(),
+                "",
+                Cookie.from("")
+        );
     }
 
     public void redirect(String redirectionFile) {

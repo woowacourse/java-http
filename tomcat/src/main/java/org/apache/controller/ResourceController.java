@@ -1,6 +1,6 @@
 package org.apache.controller;
 
-import org.apache.coyote.FileReader.FileReader;
+import org.apache.controller.FileReader.FileReader;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;

@@ -3,7 +3,7 @@ package org.apache.controller;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.FileReader.FileReader;
+import org.apache.controller.FileReader.FileReader;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;

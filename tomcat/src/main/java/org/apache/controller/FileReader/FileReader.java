@@ -1,4 +1,4 @@
-package org.apache.coyote.FileReader;
+package org.apache.controller.FileReader;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -10,6 +10,7 @@ public class FileReader {
 
     private static final URL NOT_FOUND_HTML = FileReader.class.getResource("/static/404.html");
     private static final String DEFAULT_RESOURCE_PATH = "/static";
+    private static final String HTML_EXTENSION = ".html";
 
     private final Path path;
     private final boolean found;
@@ -27,13 +28,13 @@ public class FileReader {
             }
             return new FileReader(Path.of(resource.toURI()), true);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("파일 경로가 잘못됐습니다.");
+            throw new FileReadException();
         }
     }
 
     private static URL getResource(String path) {
         if (FileReader.class.getResource(DEFAULT_RESOURCE_PATH + path) == null) {
-            return FileReader.class.getResource(DEFAULT_RESOURCE_PATH + path + ".html");
+            return FileReader.class.getResource(DEFAULT_RESOURCE_PATH + path + HTML_EXTENSION);
         }
         return FileReader.class.getResource(DEFAULT_RESOURCE_PATH + path);
     }
@@ -42,7 +43,7 @@ public class FileReader {
         try {
             return new String(Files.readAllBytes(path));
         } catch (IOException e) {
-            throw new IllegalArgumentException("파일을 읽을 수 없습니다.");
+            throw new FileReadException();
         }
     }
 

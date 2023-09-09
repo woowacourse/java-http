@@ -30,7 +30,7 @@ class HttpRequestTest {
         //then
         assertAll(
                 () -> Assertions.assertThat(request.getRequestLine().getUrl()).isEqualTo("/"),
-                () -> Assertions.assertThat(request.getRequestLine().getRequestParam()).isEmpty(),
+                () -> Assertions.assertThat(request.getRequestLine().getRequestParams()).isEmpty(),
                 () -> Assertions.assertThat(request.getRequestHeaders().getValue("Host")).isEqualTo("localhost:8080")
         );
     }

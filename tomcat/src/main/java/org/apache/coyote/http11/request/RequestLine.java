@@ -11,9 +11,6 @@ import java.util.Collections;
 import java.util.Map;
 
 public class RequestLine {
-    private static final int METHOD_INDEX = 0;
-    private static final int URL_INDEX = 1;
-    private static final int VERSION_INDEX = 2;
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String NON_RESERVED_QUERY_PARAM_DELIMITER = "\\?";
     private static final String NON_RESERVED_EXTENSION_DELIMITER = "\\.";
@@ -23,13 +20,13 @@ public class RequestLine {
     private final HttpMethod method;
     private final String url;
     private final String version;
-    private final Map<String, String> requestParam;
+    private final Map<String, String> requestParams;
 
-    private RequestLine(final HttpMethod method, final String url, final String version, final Map<String, String> requestParam) {
+    private RequestLine(final HttpMethod method, final String url, final String version, final Map<String, String> requestParams) {
         this.method = method;
         this.url = url;
         this.version = version;
-        this.requestParam = requestParam;
+        this.requestParams = requestParams;
     }
 
     public static RequestLine from(final BufferedReader br) throws IOException {
@@ -38,8 +35,8 @@ public class RequestLine {
 
         final String[] splitLine = line.split(SPACE_DELIMITER);
 
-        return new RequestLine(getMethod(splitLine[METHOD_INDEX]), splitLine[URL_INDEX],
-                splitLine[VERSION_INDEX], parseQueryParam(splitLine[URL_INDEX]));
+        return new RequestLine(getMethod(splitLine[0]), splitLine[1],
+                splitLine[2], parseQueryParam(splitLine[1]));
     }
 
     private static void validate(final String line) {
@@ -52,20 +49,16 @@ public class RequestLine {
         if (!url.contains(QUERY_STRING_DELIMITER)) {
             return Collections.emptyMap();
         }
-
         return Parser.queryParamParse(url.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[1]);
     }
 
     public String getAbsolutePath() {
         String absolutePath = url;
-        if (absolutePath.equals("/")) {
+        if (absolutePath.equals("/") || absolutePath.contains(EXTENSION_DELIMITER)) {
             return absolutePath;
         }
         if (absolutePath.contains(QUERY_STRING_DELIMITER)) {
             absolutePath = absolutePath.split(NON_RESERVED_QUERY_PARAM_DELIMITER)[0];
-        }
-        if (absolutePath.contains(EXTENSION_DELIMITER)) {
-            return absolutePath;
         }
         return absolutePath + EXTENSION_DELIMITER + HttpContentType.HTML.getExtension();
     }
@@ -90,7 +83,7 @@ public class RequestLine {
         return method;
     }
 
-    public Map<String, String> getRequestParam() {
-        return requestParam;
+    public Map<String, String> getRequestParams() {
+        return requestParams;
     }
 }

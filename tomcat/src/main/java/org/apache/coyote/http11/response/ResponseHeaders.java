@@ -1,35 +1,29 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.request.HttpRequest;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class ResponseHeaders {
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String LOCATION = "Location";
     private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public ResponseHeaders init() {
-        return new ResponseHeaders();
-    }
-
     public ResponseHeaders addContentType(final String value) {
-        headers.put("Content-Type", value);
+        headers.put(CONTENT_TYPE, value);
         return this;
     }
 
     public ResponseHeaders addContentLength(final String body) {
         if (!body.isBlank()) {
-            headers.put("Content-Length", body.getBytes().length + " ");
+            headers.put(CONTENT_LENGTH, body.getBytes().length + " ");
         }
         return this;
     }
 
     public ResponseHeaders addLocation(final String location) {
-        headers.put("Location", location);
+        headers.put(LOCATION, location);
         return this;
     }
 
@@ -37,19 +31,8 @@ public class ResponseHeaders {
         return headers;
     }
 
-    public ResponseHeaders addCookie(final HttpRequest httpRequest) {
-        final HttpCookie cookie = HttpCookie.parseCookie(httpRequest.getRequestHeaders().getValue("Cookie"));
-        if (!cookie.checkIdInCookie()) {
-            final UUID sessionId = UUID.randomUUID();
-            createSession(sessionId.toString());
-            headers.put("Set-Cookie", cookie.makeCookieValue(sessionId));
-        }
+    public ResponseHeaders addCookie(final String value) {
+        headers.put(SET_COOKIE, value);
         return this;
-    }
-
-    private static void createSession(final String sessionId) {
-        final Session session = new Session(sessionId);
-        final SessionManager sessionManager = new SessionManager();
-        sessionManager.add(session);
     }
 }

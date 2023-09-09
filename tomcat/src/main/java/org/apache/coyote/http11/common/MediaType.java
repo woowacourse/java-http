@@ -39,10 +39,17 @@ public enum MediaType {
     }
 
     public static MediaType getMediaTypeByFileExtension(final String fileExtension) {
+        if ("js".equals(fileExtension)) {
+            return TEXT_JAVASCRIPT;
+        }
         return Arrays.stream(values())
                 .filter(mediaType -> mediaType.getSubType().equals(fileExtension))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private String stringify() {
+        return type + "/" + subType;
     }
 
     public static boolean isSupported(final MediaType mediaType) {
@@ -53,7 +60,7 @@ public enum MediaType {
         return mediaType.equals(ALL);
     }
 
-    public String stringify() {
+    public String stringifyWithUtf() {
         return type + "/" + subType + ";" + "charset=utf-8";
     }
 

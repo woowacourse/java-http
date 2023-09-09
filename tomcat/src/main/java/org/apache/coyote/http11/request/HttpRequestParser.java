@@ -5,6 +5,7 @@ import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,17 +37,36 @@ public class HttpRequestParser {
 
     private HttpRequestLine parseRequestLine() throws IOException {
         final String line = reader.readLine();
-        String[] s = line.split(" ");
+        final String[] s = line.split(" ");
+        if (s[1].contains("?")) {
+            String[] split = s[1].split("\\?");
+            Map<String, String> queryString = parseQueryString(split[1]);
+            return HttpRequestLine.from(s[0], split[0], queryString, s[2]);
+        }
         return HttpRequestLine.from(s[0], s[1], s[2]);
+    }
+
+    private Map<String, String> parseQueryString(final String queryStrings) throws UnsupportedEncodingException {
+        final Map<String, String> queries = new HashMap<>();
+        final String[] keyValuePairs = queryStrings.split("&");
+        for (String keyValuePair : keyValuePairs) {
+            String[] keyValue = keyValuePair.split("=");
+            if (keyValue.length >= 2) {
+                queries.put(keyValue[0], URLDecoder.decode(keyValue[1], "UTF-8"));
+            }
+        }
+        return queries;
     }
 
     private HttpHeaders parseRequestHeader() throws IOException {
         // TODO: Change to MultiValueMap
         final Map<String, String> headers = new HashMap<>();
         String line;
-        while (!"".equals(line = reader.readLine())) {
+        while (!"".equals(line = reader.readLine()) && line != null) {
             String[] value = line.split(": ");
-            headers.put(value[0], value[1]);
+            if (value.length >= 2) {
+                headers.put(value[0], value[1]);
+            }
         }
         final HttpHeaders httpHeaders = HttpHeaders.of(headers);
         final HttpCookie httpCookie = HttpCookie.of(headers.get(COOKIE.getName()));
@@ -61,10 +81,11 @@ public class HttpRequestParser {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
 
-        // TODO: Query Parse
         for (String temp : new String(buffer).split("&")) {
             String[] value = temp.split("=");
-            body.put(value[0], URLDecoder.decode(value[1], "UTF-8"));
+            if (value.length >= 2) {
+                body.put(value[0], URLDecoder.decode(value[1], "UTF-8"));
+            }
         }
         return body;
     }

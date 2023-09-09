@@ -25,7 +25,7 @@ public class ResourceContentTypeResolver {
             for (String mediaTypeStr : mediaTypes) {
                 final MediaType mediaType = MediaType.getMediaType(mediaTypeStr.trim());
                 if (MediaType.isSupported(mediaType)) {
-                    return mediaTypeStr.trim();
+                    return mediaType.stringifyWithUtf();
                 }
             }
         }
@@ -36,13 +36,9 @@ public class ResourceContentTypeResolver {
         final int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex >= 0) {
             final String fileExtension = fileName.substring(lastDotIndex + 1);
-            if ("js".equals(fileExtension)) {
-                final MediaType jsContentType = MediaType.getMediaTypeByFileExtension("javascript");
-                return jsContentType.stringify();
-            }
             final MediaType mediaType = MediaType.getMediaTypeByFileExtension(fileExtension);
             if (MediaType.isSupported(mediaType)) {
-                return mediaType.stringify();
+                return mediaType.stringifyWithUtf();
             }
         }
         return null;

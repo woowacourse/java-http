@@ -13,6 +13,7 @@ import java.util.*;
 
 import static org.apache.coyote.http11.Http11Processor.sessionManager;
 import static org.apache.coyote.http11.common.HttpHeaderType.*;
+import static org.apache.coyote.http11.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 
 public class LoginController extends HttpController {
@@ -37,7 +38,7 @@ public class LoginController extends HttpController {
         final Session session = sessionManager.findSession(sessionId);
         if (session != null) { // already login user
             httpResponse.setStatusCode(FOUND);
-            httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+            httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
             httpResponse.addHeader(LOCATION, "/index.html");
         } else { // not login user
             handleResource("/login.html", httpRequest, httpResponse);
@@ -52,14 +53,14 @@ public class LoginController extends HttpController {
         final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getBody().get("account"));
         if (user.isEmpty() || !user.get().checkPassword(httpRequest.getBody().get("password"))) {
             // invalid user
-            httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+            httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
             httpResponse.addHeader(LOCATION, "/401.html");
             httpResponse.setStatusCode(FOUND);
             return;
         }
 
         if (sessionId != null) { // if already have session
-            httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+            httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
             httpResponse.addHeader(LOCATION, "/index.html");
             httpResponse.setStatusCode(FOUND);
             return;
@@ -71,7 +72,7 @@ public class LoginController extends HttpController {
         sessionManager.add(session);
         sessionId = session.getId();
 
-        httpResponse.addHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+        httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
         httpResponse.addHeader(LOCATION, "/index.html");
         httpResponse.addHeader(SET_COOKIE, "JSESSIONID=" + sessionId);
         httpResponse.setStatusCode(FOUND);

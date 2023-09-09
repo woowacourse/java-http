@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.util.Optional;
-
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.controller.Controller;
@@ -17,43 +15,60 @@ import org.apache.coyote.http11.util.FileReader;
 
 public class RegisterController implements Controller {
 
-    private static final String URI = "/register.html";
+    private static final String REGISTER_URI = "/register.html";
+    private static final String LOGIN_URI = "/login.html";
 
     @Override
     public HttpResponse service(HttpRequest request) {
         if (request.getRequestLine().getHttpMethod().is(HttpMethod.GET)) {
-            ResponseBody responseBody = new ResponseBody(FileReader.read(URI));
-            String version = request.getRequestLine().getVersion();
-            return HttpResponse.builder()
-                    .statusLine(new StatusLine(version, HttpStatus.FOUND))
-                    .contentType(ContentType.HTML.getValue())
-                    .contentLength(responseBody.getValue().getBytes().length)
-                    .responseBody(responseBody)
-                    .build();
+            return doGet(request);
         }
+        return doPost(request);
+    }
+
+    private HttpResponse doGet(HttpRequest request) {
+        ResponseBody responseBody = new ResponseBody(FileReader.read(REGISTER_URI));
+        return HttpResponse.builder()
+                .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND))
+                .contentType(ContentType.HTML.getValue())
+                .contentLength(responseBody.getValue().getBytes().length)
+                .responseBody(responseBody)
+                .build();
+    }
+
+    private HttpResponse doPost(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
         String account = requestBody.getValueOf("account");
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent()) {
-            ResponseBody responseBody = new ResponseBody(FileReader.read(URI));
-            return HttpResponse.builder()
-                    .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND))
-                    .contentType(ContentType.HTML.getValue())
-                    .contentLength(responseBody.getValue().getBytes().length)
-                    .redirect("http://localhost:8080/register.html")
-                    .responseBody(responseBody)
-                    .build();
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return redirectLogin(request);
         }
+
+        return registerUser(request, requestBody, account);
+    }
+
+    private  HttpResponse redirectLogin(HttpRequest request) {
+        ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
+        return HttpResponse.builder()
+                .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND))
+                .contentType(ContentType.HTML.getValue())
+                .contentLength(responseBody.getValue().getBytes().length)
+                .redirect(LOGIN_URI)
+                .responseBody(responseBody)
+                .build();
+    }
+
+    private HttpResponse registerUser(HttpRequest request, RequestBody requestBody, String account) {
         String password = requestBody.getValueOf("password");
         String email = requestBody.getValueOf("email");
         InMemoryUserRepository.save(new User(account, password, email));
-        ResponseBody responseBody = new ResponseBody(FileReader.read("/login.html"));
+
+        ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
         return HttpResponse.builder()
                 .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.CREATED))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
-                .redirect("http://localhost:8080/login.html")
+                .redirect(LOGIN_URI)
                 .responseBody(responseBody)
                 .build();
     }

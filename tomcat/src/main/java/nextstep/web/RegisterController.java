@@ -11,12 +11,12 @@ public class RegisterController extends AbstractController {
     private final RegisterService registerService = new RegisterService();
 
     @Override
-    public ResponseEntity handleGetRequest(final HttpRequest request, final HttpResponse response) {
+    public ResponseEntity doGetRequest(final HttpRequest request, final HttpResponse response) {
         return ResponseEntity.forwardTo("/register.html");
     }
 
     @Override
-    public ResponseEntity handlePostRequest(final HttpRequest request, final HttpResponse response) {
+    public ResponseEntity doPostRequest(final HttpRequest request, final HttpResponse response) {
         final String account = request.getPayloadValue("account");
         final String password = request.getPayloadValue("password");
         final String email = request.getPayloadValue("email");

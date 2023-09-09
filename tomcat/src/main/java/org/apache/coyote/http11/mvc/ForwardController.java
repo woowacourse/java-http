@@ -13,7 +13,7 @@ public class ForwardController extends AbstractController {
     }
 
     @Override
-    protected ResponseEntity handleGetRequest(final HttpRequest request, final HttpResponse response) {
+    protected ResponseEntity doGetRequest(final HttpRequest request, final HttpResponse response) {
         return ResponseEntity.forwardTo(forwardPath);
     }
 }

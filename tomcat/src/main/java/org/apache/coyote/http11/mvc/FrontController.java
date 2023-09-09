@@ -7,15 +7,15 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class FrontController {
 
-    private final ControllerMapping controllerMapping;
+    private final RequestMapping requestMapping;
 
-    public FrontController(final ControllerMapping controllerMapping) {
-        this.controllerMapping = controllerMapping;
+    public FrontController(final RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
     }
 
     public void handleHttpRequest(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final Controller controller = controllerMapping.findController(httpRequest.getHttpStartLine());
-        final ResponseEntity response = controller.handleRequest(httpRequest, httpResponse);
+        final Controller controller = requestMapping.getController(httpRequest.getHttpStartLine());
+        final ResponseEntity response = controller.service(httpRequest, httpResponse);
         httpResponse.updateByResponseEntity(response);
     }
 }

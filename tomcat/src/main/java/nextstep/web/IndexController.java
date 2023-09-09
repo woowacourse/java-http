@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class IndexController extends AbstractController {
 
     @Override
-    public ResponseEntity handleGetRequest(final HttpRequest request, final HttpResponse response) {
+    public ResponseEntity doGetRequest(final HttpRequest request, final HttpResponse response) {
         return ResponseEntity.forwardTo("/index.html");
     }
 }

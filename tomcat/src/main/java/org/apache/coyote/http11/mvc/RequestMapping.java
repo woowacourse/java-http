@@ -7,7 +7,7 @@ import nextstep.web.LoginController;
 import nextstep.web.RegisterController;
 import org.apache.coyote.http11.request.HttpRequestLine;
 
-public class ControllerMapping {
+public class RequestMapping {
     private static final String HTML_EXTENSION = ".html";
 
     private final Map<String, Controller> controllerMap = Map.of(
@@ -17,7 +17,7 @@ public class ControllerMapping {
             "/register", new RegisterController()
     );
 
-    public Controller findController(final HttpRequestLine requestStartLine) {
+    public Controller getController(final HttpRequestLine requestStartLine) {
         final String requestURI = removeHtmlExtension(requestStartLine.getRequestURI());
         return controllerMap.getOrDefault(requestURI, new ForwardController(requestStartLine.getRequestURI()));
     }

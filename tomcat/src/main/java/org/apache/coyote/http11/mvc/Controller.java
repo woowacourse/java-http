@@ -6,5 +6,5 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    ResponseEntity handleRequest(HttpRequest request, HttpResponse response);
+    ResponseEntity service(HttpRequest request, HttpResponse response);
 }

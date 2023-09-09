@@ -32,7 +32,7 @@ class HomeControllerTest {
     }
 
     @Test
-    void uri가_일치하면_GET_요청을_처리한다() {
+    void uri가_일치하는_GET_요청이면_OK로_응답한다() {
         // given
         when(mockHttpRequest.consistsOf(GET, "/"))
                 .thenReturn(true);

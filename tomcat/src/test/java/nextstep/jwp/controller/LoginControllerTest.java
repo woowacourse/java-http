@@ -47,10 +47,10 @@ class LoginControllerTest {
     }
 
     @Nested
-    class uri가_일치해_POST_요청을_처리할_때 {
+    class uri가_일치하는_POST_요청일_때 {
 
         @Test
-        void 로그인되면_쿠키에_세션을_넣고_리다이렉트_시킨다() {
+        void body_값으로_로그인하면_쿠키에_세션을_넣고_FOUND로_응답한다() {
             // given
             when(mockHttpRequest.consistsOf(POST, "/login"))
                     .thenReturn(true);
@@ -68,7 +68,7 @@ class LoginControllerTest {
         }
 
         @Test
-        void 로그인_예외가_발생하면_Unauthorized_처리한다() {
+        void body_값으로_로그인_중_예외가_발생하면_Unauthorized로_응답한다() {
             // given
             when(mockHttpRequest.consistsOf(POST, "/login"))
                     .thenReturn(true);
@@ -85,10 +85,10 @@ class LoginControllerTest {
     }
 
     @Nested
-    class uri가_일치해_GET_요청을_처리할_때 {
+    class uri가_일치하는_GET_요청일_때 {
 
         @Test
-        void query_String_으로_로그인되면_쿠키에_세션을_넣고_리다이렉트_시킨다() {
+        void query_String_으로_로그인되면_쿠키에_세션을_넣고_FOUND로_응답한다() {
             // given
             when(mockHttpRequest.consistsOf(GET, "/login"))
                     .thenReturn(true);
@@ -108,7 +108,7 @@ class LoginControllerTest {
         }
 
         @Test
-        void query_String_으로_로그인하다가_예외가_발생하면_Unauthorized_처리한다() {
+        void query_String_으로_로그인하다가_예외가_발생하면_Unauthorized로_응답한다() {
             // given
             when(mockHttpRequest.consistsOf(GET, "/login"))
                     .thenReturn(true);
@@ -126,7 +126,7 @@ class LoginControllerTest {
         }
 
         @Test
-        void 이미_로그인한_경우_리다이렉트_시킨다() {
+        void session으로_기존_로그인을_확인하고_FOUND로_응답한다() {
             // given
             when(mockHttpRequest.consistsOf(GET, "/login"))
                     .thenReturn(true);
@@ -143,7 +143,7 @@ class LoginControllerTest {
         }
 
         @Test
-        void 로그인_페이지를_응답한다() {
+        void OK로_응답한다() {
             // given
             when(mockHttpRequest.consistsOf(GET, "/login"))
                     .thenReturn(true);

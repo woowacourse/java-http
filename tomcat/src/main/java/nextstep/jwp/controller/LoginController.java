@@ -30,6 +30,7 @@ public class LoginController extends AbstractController {
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.consistsOf(POST, "/login")) {
             doPost(httpRequest, httpResponse);
+            return;
         }
         if (httpRequest.consistsOf(GET, "/login")) {
             doGet(httpRequest, httpResponse);

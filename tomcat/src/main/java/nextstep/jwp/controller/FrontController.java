@@ -26,8 +26,4 @@ public class FrontController extends AbstractController {
         controller.service(request, response);
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) { /* NOOP */ }
-
-    protected void doGet(HttpRequest request, HttpResponse response) { /* NOOP */ }
-
 }

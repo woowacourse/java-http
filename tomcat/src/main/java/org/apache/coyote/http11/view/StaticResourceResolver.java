@@ -10,6 +10,9 @@ public class StaticResourceResolver {
 
     private static final String RESOURCE_DIRECTORY = "static/";
 
+    private StaticResourceResolver() {
+    }
+
     public static String resolveResource(String viewName) {
         final URL viewPath = findResourceByViewName(viewName);
         return readResource(viewPath);

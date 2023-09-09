@@ -6,28 +6,27 @@ import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
 
 import java.util.Arrays;
-import java.util.function.Supplier;
 
 public enum ControllerHandler {
 
-    FILE_HANDLER(null, FileController::getController),
-    LOGIN("/login", LoginController::getController),
-    REGISTER("/register", RegisterController::getController),
+    FILE_HANDLER(null, new FileController()),
+    LOGIN("/login", new LoginController(new SessionManager())),
+    REGISTER("/register", new RegisterController()),
     ;
 
     private final String uri;
-    private final Supplier<Controller> getController;
+    private final Controller controller;
 
-    ControllerHandler(final String uri, final Supplier<org.apache.coyote.Controller> getControllerInstance) {
+    ControllerHandler(final String uri, final Controller controller) {
         this.uri = uri;
-        this.getController = getControllerInstance;
+        this.controller = controller;
     }
 
     public static Controller findController(final String uri) {
         return Arrays.stream(ControllerHandler.values())
                      .filter(handler -> handler.uri != null && handler.uri.equals(uri))
-                     .map(handler -> handler.getController.get())
+                     .map(handler -> handler.controller)
                      .findAny()
-                     .orElseGet(FILE_HANDLER.getController);
+                     .orElseGet(() -> FILE_HANDLER.controller);
     }
 }

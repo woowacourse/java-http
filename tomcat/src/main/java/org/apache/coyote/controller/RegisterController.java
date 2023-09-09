@@ -12,19 +12,10 @@ import java.util.Map;
 
 public class RegisterController extends Controller {
 
-    private static final RegisterController registerController = new RegisterController();
-
-    private RegisterController() {
-    }
-
-    public static RegisterController getController() {
-        return registerController;
-    }
-
     public String run(final HttpRequest request) throws IOException {
         final String method = request.getMethod();
         if (HttpMethod.GET.isSameMethod(method)) {
-            return FileController.getController().createResponse(FileResolver.REGISTER);
+            return new FileController().createResponse(FileResolver.REGISTER);
         }
         if (HttpMethod.POST.isSameMethod(method)) {
             final Map<String, String> body = request.getBody();

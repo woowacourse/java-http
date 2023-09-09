@@ -20,14 +20,9 @@ public class LoginController extends Controller {
     private static final String PASSWORD = "password";
 
     private final SessionManager sessionManager;
-    private static final LoginController loginController = new LoginController(new SessionManager());
 
-    private LoginController(final SessionManager sessionManager) {
+    public LoginController(final SessionManager sessionManager) {
         this.sessionManager = sessionManager;
-    }
-
-    public static LoginController getController() {
-        return loginController;
     }
 
     @Override

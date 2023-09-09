@@ -17,13 +17,6 @@ public class FileController extends Controller {
 
     private static final String STATIC = "static";
 
-    private FileController() {
-    }
-
-    public static FileController getController() {
-        return new FileController();
-    }
-
     @Override
     public String run(final HttpRequest request) throws IOException {
         final String uri = request.getUri();

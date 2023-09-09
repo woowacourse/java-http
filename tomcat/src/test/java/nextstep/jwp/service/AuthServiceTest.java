@@ -3,11 +3,14 @@ package nextstep.jwp.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -73,5 +76,20 @@ class AuthServiceTest {
 
         // then
         assertThat(sessionId).isNotEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"notLoggedInId, false", "loggedInId, true"})
+    void session_Id로_이미_로그인이_되었는지_확인한다(String sessionId, boolean expected) {
+        // given
+        AuthService authService = new AuthService(sessionManager);
+        Session session = new Session("loggedInId");
+        sessionManager.add(session);
+
+        // when
+        boolean actual = authService.isLoggedIn(sessionId);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 }

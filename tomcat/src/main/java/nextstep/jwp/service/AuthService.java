@@ -1,5 +1,6 @@
 package nextstep.jwp.service;
 
+import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -17,6 +18,10 @@ public class AuthService {
 
     public AuthService(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
+    }
+
+    public boolean isLoggedIn(String sessionId) {
+        return Objects.nonNull(sessionManager.findSession(sessionId));
     }
 
     public String login(String account, String password) {

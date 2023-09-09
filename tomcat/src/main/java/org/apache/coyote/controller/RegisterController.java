@@ -30,7 +30,7 @@ public class RegisterController extends Controller {
             final Map<String, String> body = request.getBody();
             final User user = new User(body.get("account"), body.get("password"), body.get("email"));
             InMemoryUserRepository.save(user);
-            return createRedirectResponse(null, FileResolver.INDEX_HTML);
+            return createRedirectResponse(FileResolver.INDEX_HTML);
         }
         throw new IllegalArgumentException("잘못된 메소드 형식입니다.");
     }

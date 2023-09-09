@@ -18,7 +18,15 @@ public abstract class Controller {
         );
     }
 
-    protected String createRedirectResponse(final HttpSession session, final FileResolver file) {
+    protected String createRedirectResponse(final FileResolver file) {
+        return joinResponses(
+                HttpResponse.HTTP_302_FOUND.getValue(),
+                HttpResponse.getLocation(file),
+                HttpResponse.EMPTY.getValue()
+        );
+    }
+
+    protected String createRedirectResponseWithSession(final HttpSession session, final FileResolver file) {
         return joinResponses(
                 HttpResponse.HTTP_302_FOUND.getValue(),
                 HttpResponse.getLocation(file),

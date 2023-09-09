@@ -44,9 +44,9 @@ public class LoginController extends Controller {
 
     private String getLoginPage(final HttpRequest request) {
         if (request.containsCookie()) {
-            return createRedirectResponse(null, FileResolver.INDEX_HTML);
+            return createRedirectResponse(FileResolver.INDEX_HTML);
         }
-        return createRedirectResponse(null, FileResolver.LOGIN);
+        return createRedirectResponse(FileResolver.LOGIN);
     }
 
     private String login(final HttpRequest request) {
@@ -54,9 +54,9 @@ public class LoginController extends Controller {
         final Optional<User> user = InMemoryUserRepository.findByAccount(body.get("account"));
         if (user.isPresent() && isValidUser(user.get(), body.get(PASSWORD))) {
             final HttpSession newSession = sessionManager.createSession(user.get());
-            return createRedirectResponse(newSession, FileResolver.INDEX_HTML);
+            return createRedirectResponseWithSession(newSession, FileResolver.INDEX_HTML);
         }
-        return createRedirectResponse(null, FileResolver.HTML_401);
+        return createRedirectResponse(FileResolver.HTML_401);
     }
 
     private boolean isValidUser(final User user, final String password) {

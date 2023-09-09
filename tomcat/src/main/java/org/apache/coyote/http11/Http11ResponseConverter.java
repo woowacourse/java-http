@@ -7,42 +7,41 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Http11ResponseConverter {
 
     private static final String SPACE = " ";
-    private static final String ENTER = "\r\n";
+    private static final String CRLF = "\r\n";
 
     private Http11ResponseConverter() {
     }
 
     public static byte[] convertToBytes(final HttpResponse response) {
-        final StringBuilder responseByteBuilder = new StringBuilder();
-        appendResponseLine(response, responseByteBuilder);
-        appendResponseHeaders(response, responseByteBuilder);
-        appendResponseBody(response, responseByteBuilder);
+        final StringBuilder responseBuilder = new StringBuilder();
+        appendResponseLine(response, responseBuilder);
+        appendResponseHeader(response, responseBuilder);
+        appendResponseBody(response, responseBuilder);
 
-        return responseByteBuilder.toString().getBytes(UTF_8);
+        return responseBuilder.toString().getBytes(UTF_8);
     }
 
-    private static void appendResponseLine(final HttpResponse response, final StringBuilder responseByteBuilder) {
-        responseByteBuilder
+    private static void appendResponseLine(final HttpResponse response, final StringBuilder responseBuilder) {
+        responseBuilder
                 .append(response.httpVersion().version()).append(SPACE)
                 .append(response.httpStatus().statusCode()).append(SPACE)
                 .append(response.httpStatus().statusName()).append(SPACE)
-                .append(ENTER);
+                .append(CRLF);
     }
 
-    private static void appendResponseHeaders(final HttpResponse response, final StringBuilder responseByteBuilder) {
-        response.httpHeaders()
-                .headerNames()
-                .forEach(headerName -> {
-                    final String headerValue = response.httpHeaders().getHeaderValue(headerName);
-                    responseByteBuilder
-                            .append(headerName).append(": ").append(headerValue).append(SPACE)
-                            .append(ENTER);
-                });
+    private static void appendResponseHeader(final HttpResponse response, final StringBuilder responseBuilder) {
+        for (String headerName : response.headerNames()) {
+            final String headerValue = response.getHeaderValue(headerName);
+
+            responseBuilder
+                    .append(headerName).append(": ").append(headerValue).append(SPACE)
+                    .append(CRLF);
+        }
     }
 
-    private static void appendResponseBody(final HttpResponse response, final StringBuilder responseByteBuilder) {
-        responseByteBuilder
-                .append(ENTER)
-                .append(response.responseBody().value());
+    private static void appendResponseBody(final HttpResponse response, final StringBuilder responseBuilder) {
+        responseBuilder
+                .append(CRLF)
+                .append(response.responseBody().body());
     }
 }

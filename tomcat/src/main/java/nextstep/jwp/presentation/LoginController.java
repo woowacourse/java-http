@@ -36,11 +36,13 @@ public class LoginController implements Controller {
 
     private Response loginPage(RequestReader requestReader) throws IOException {
         if (requestReader.hasSessionId()) {
-            return new Response(FOUND)
+            return new Response()
+                    .addResponseLine(requestReader.getProtocol(), FOUND)
                     .addHeader(LOCATION, INDEX)
                     .addBaseHeader(requestReader.getContentType());
         }
-        return new Response(OK)
+        return new Response()
+                .addResponseLine(requestReader.getProtocol(), OK)
                 .addBaseHeader(requestReader.getContentType())
                 .createBodyByFile(requestReader.getUri());
     }
@@ -48,12 +50,14 @@ public class LoginController implements Controller {
     private Response tryLogin(RequestReader requestReader) throws IOException {
         try {
             String sessionId = login(requestReader);
-            return new Response(FOUND)
+            return new Response()
+                    .addResponseLine(requestReader.getProtocol(), FOUND)
                     .addBaseHeader(requestReader.getContentType())
                     .addHeader(LOCATION, INDEX)
                     .setCookie(sessionId);
         } catch (IllegalArgumentException e) {
-            return new Response(UNAUTHORIZED)
+            return new Response()
+                    .addResponseLine(requestReader.getProtocol(), UNAUTHORIZED)
                     .addBaseHeader(requestReader.getContentType())
                     .createBodyByFile(UNAUTHORIZED_HTML);
         }

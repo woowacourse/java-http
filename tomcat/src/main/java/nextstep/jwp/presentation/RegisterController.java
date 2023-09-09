@@ -32,7 +32,8 @@ public class RegisterController implements Controller {
     }
 
     private Response registerPage(RequestReader requestReader) throws IOException {
-        return new Response(OK)
+        return new Response()
+                .addResponseLine(requestReader.getProtocol(), OK)
                 .addBaseHeader(requestReader.getContentType())
                 .createBodyByFile(requestReader.getUri());
     }
@@ -43,7 +44,8 @@ public class RegisterController implements Controller {
                 requestReader.getBodyValue("email"),
                 requestReader.getBodyValue("password")
         ));
-        return new Response(FOUND)
+        return new Response()
+                .addResponseLine(requestReader.getProtocol(), FOUND)
                 .createBodyByFile(INDEX)
                 .addHeader(LOCATION, INDEX)
                 .addBaseHeader(requestReader.getContentType());

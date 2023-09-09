@@ -19,22 +19,35 @@ public class Response {
     private static final String CRLF = "\r\n";
     private static final String COLON = ": ";
 
-    private final StatusCode statusCode;
     private final EnumMap<Header, String> headers = new EnumMap<>(Header.class);
+    private String responseLine = "";
+    private String body = "";
 
-    private String body;
-
-    public Response(StatusCode statusCode) {
-        this.statusCode = statusCode;
+    public Response() {
     }
 
-    public String format(String protocol) {
+    public String format() {
         StringBuilder sb = new StringBuilder();
-        sb.append(protocol).append(SPACE).append(statusCode.format()).append(SPACE_CRLF);
+        sb.append(responseLine);
         headers.forEach((header, value) -> sb.append(header.getName()).append(COLON).append(value).append(SPACE_CRLF));
         sb.append(CRLF).append(body);
 
         return sb.toString();
+    }
+
+    public Response addResponseLine(String protocol, StatusCode statusCode) {
+        responseLine = protocol + SPACE + statusCode.format() + SPACE_CRLF;
+        return this;
+    }
+
+    public Response addBaseHeader(String contentType) {
+        headers.put(CONTENT_TYPE, contentType);
+        return this;
+    }
+
+    public Response addHeader(Header header, String value) {
+        headers.put(header, value);
+        return this;
     }
 
     public Response createBodyByText(String text) {
@@ -55,16 +68,6 @@ public class Response {
             this.body = sb.toString();
         }
         headers.put(CONTENT_LENGTH, String.valueOf(file.length()));
-        return this;
-    }
-
-    public Response addBaseHeader(String contentType) {
-        headers.put(CONTENT_TYPE, contentType);
-        return this;
-    }
-
-    public Response addHeader(Header header, String value) {
-        headers.put(header, value);
         return this;
     }
 

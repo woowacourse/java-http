@@ -30,16 +30,6 @@ public class HttpRequest {
         return new HttpRequest(httpRequestHeader, requestBody);
     }
 
-    private static List<String> parseHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
-        final List<String> lines = new ArrayList<>();
-        String line = bufferedReader.readLine();
-        while (!line.isEmpty()) {
-            lines.add(line);
-            line = bufferedReader.readLine();
-        }
-        return lines;
-    }
-
     private static HttpRequestHeader createHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
         final List<String> httpRequestHeader = parseHttpRequestHeaders(bufferedReader);
         final String[] firstHeader = httpRequestHeader.remove(0).split(" ");
@@ -56,6 +46,16 @@ public class HttpRequest {
             return new HttpRequestHeader(method, uri, version, cookie, requestHeaders);
         }
         return new HttpRequestHeader(method, uri, version, null, requestHeaders);
+    }
+
+    private static List<String> parseHttpRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+        final List<String> lines = new ArrayList<>();
+        String line = bufferedReader.readLine();
+        while (!line.isEmpty()) {
+            lines.add(line);
+            line = bufferedReader.readLine();
+        }
+        return lines;
     }
 
     private static Map<String, String> parseHttpRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
@@ -90,10 +90,6 @@ public class HttpRequest {
 
     public String getMethod() {
         return requestHeader.getMethod();
-    }
-
-    public HttpCookie getCookie() {
-        return requestHeader.getCookie();
     }
 
     @Override

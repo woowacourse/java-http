@@ -4,38 +4,59 @@ import org.apache.coyote.http11.request.HttpHeaders;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final HttpHeaders headers;
-    private final String body;
+    private final String httpVersion;
+    private HttpStatus httpStatus;
+    private HttpHeaders headers = HttpHeaders.empty();
+    private String body;
+    private String responseFileName;
 
-    private HttpResponse(StatusLine statusLine, HttpHeaders headers, String body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
-        this.body = body;
-    }
-
-    public static HttpResponse of(String httpVersion, HttpStatus httpStatus, String body) {
-        StatusLine statusLine = new StatusLine(httpVersion, httpStatus);
-        return new HttpResponse(statusLine, HttpHeaders.empty(), body);
-    }
-
-    public void addHeader(String key, String value) {
-        headers.add(key, value);
-    }
-
-    public HttpStatus httpStatus() {
-        return statusLine.getHttpStatus();
+    public HttpResponse(String httpVersion) {
+        this.httpVersion = httpVersion;
     }
 
     public String getBody() {
         return body;
     }
 
+    public String getResponseFileName() {
+        return responseFileName;
+    }
+
+    public HttpResponse addHeader(String key, String value) {
+        headers.add(key, value);
+        return this;
+    }
+
+    public HttpResponse setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+        return this;
+    }
+
+    public HttpResponse setResponseFileName(String responseFileName) {
+        this.responseFileName = responseFileName;
+        return this;
+    }
+
+    public HttpResponse setBody(String body) {
+        this.body = body;
+        return this;
+    }
+
     public String format() {
         StringBuilder responseBuilder = new StringBuilder();
-        responseBuilder.append(statusLine.format());
+        responseBuilder.append(statusLineFormat());
         responseBuilder.append(headers.format()).append("\r\n");
         responseBuilder.append(body);
         return responseBuilder.toString();
+    }
+
+    private String statusLineFormat() {
+        return String.join(
+                " ",
+                httpVersion,
+                httpStatus.getCode(),
+                httpStatus.name(),
+                "\r\n"
+        );
     }
 }

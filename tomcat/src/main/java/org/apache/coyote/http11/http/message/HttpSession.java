@@ -21,6 +21,10 @@ public class HttpSession {
         return session;
     }
 
+    public void setAttribute(final String name, final Object value) {
+        values.put(name, value);
+    }
+
     private static String createSession() {
         return UUID.randomUUID().toString();
     }
@@ -31,9 +35,5 @@ public class HttpSession {
 
     public Object getAttribute(final String name) {
         return values.get(name);
-    }
-
-    public void setAttribute(final String name, final Object value) {
-        values.put(name, value);
     }
 }

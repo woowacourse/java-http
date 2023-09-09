@@ -10,9 +10,9 @@ public class MessageBody {
 
     private static final String BODY_VALUES_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private final Map<String, String> messageBody;
-
     private static final String CONTENT_LENGTH = "Content-Length";
+
+    private final Map<String, String> messageBody;
 
     private MessageBody(final Map<String, String> messageBody) {
         this.messageBody = messageBody;

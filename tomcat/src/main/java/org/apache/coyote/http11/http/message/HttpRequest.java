@@ -16,12 +16,12 @@ public class HttpRequest {
     private static final int REQUEST_HEADER_START_INDEX = 1;
 
     private final RequestLine requestLine;
-    private final RequestHeaders requestHeaders;
+    private final RequestHeaders headers;
     private final MessageBody messageBody;
 
-    private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders, final MessageBody messageBody) {
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers, final MessageBody messageBody) {
         this.requestLine = requestLine;
-        this.requestHeaders = requestHeaders;
+        this.headers = headers;
         this.messageBody = messageBody;
     }
 
@@ -46,7 +46,7 @@ public class HttpRequest {
     }
 
     public boolean containsCookie() {
-        return requestHeaders.containsKey(COOKIE);
+        return headers.containsKey(COOKIE);
     }
 
     public String getUri() {
@@ -64,7 +64,7 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "requestHeader=" + requestHeaders +
+                "requestHeader=" + headers +
                 ", requestBody=" + messageBody +
                 '}';
     }

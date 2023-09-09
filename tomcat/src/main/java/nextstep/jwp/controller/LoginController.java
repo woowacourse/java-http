@@ -2,8 +2,9 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.session.Session;
 import org.apache.catalina.controller.HttpController;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -11,7 +12,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.util.*;
 
-import static org.apache.coyote.http11.Http11Processor.sessionManager;
 import static org.apache.coyote.http11.common.HttpHeaderType.*;
 import static org.apache.coyote.http11.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
@@ -35,7 +35,7 @@ public class LoginController extends HttpController {
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final HttpCookie httpCookie = httpRequest.getCookie();
         String sessionId = httpCookie.getCookie("JSESSIONID");
-        if (sessionId != null && sessionManager.findSession(sessionId) != null) { // already login user
+        if (sessionId != null && SessionManager.getInstance().findSession(sessionId) != null) { // already login user
             httpResponse.setStatusCode(FOUND);
             httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
             httpResponse.addHeader(LOCATION, "/index.html");
@@ -68,7 +68,7 @@ public class LoginController extends HttpController {
         // if no session
         final Session session = new Session(String.valueOf(UUID.randomUUID()));
         session.setAttribute("user", user);
-        sessionManager.add(session);
+        SessionManager.getInstance().add(session);
         sessionId = session.getId();
 
         httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());

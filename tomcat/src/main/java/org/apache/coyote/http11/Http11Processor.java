@@ -6,7 +6,6 @@ import nextstep.jwp.controller.RootController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.Controller;
 import org.apache.catalina.controller.ResourceController;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -26,7 +25,6 @@ import static org.apache.coyote.http11.response.HttpStatusCode.NOT_FOUND;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final SessionManager sessionManager = new SessionManager();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.apache.coyote.http11.Http11Processor.sessionManager;
 import static org.apache.coyote.http11.common.HttpHeaderType.*;
 import static org.apache.coyote.http11.common.MediaType.TEXT_HTML;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +35,7 @@ class RegisterControllerTest {
         String uuid = String.valueOf(UUID.randomUUID());
         httpHeadersWithSession.setCookie(HttpCookie.of("JSESSIONID=" + uuid));
         Session session = new Session(uuid);
-        sessionManager.add(session);
+        SessionManager.getInstance().add(session);
     }
 
     @DisplayName("RegisterController는 정해진 request를 핸들링할 수 있다.")

@@ -31,7 +31,15 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest from(BufferedReader bufferedReader) {
+        try {
+            return read(bufferedReader);
+        } catch (IOException e) {
+            throw new HttpException(BAD_REQUEST, "요청을 읽을 수 없습니다");
+        }
+    }
+
+    public static HttpRequest read(BufferedReader bufferedReader) throws IOException {
         String firstLine = bufferedReader.readLine();
         String[] splitByBlank = firstLine.split(BLANK);
         String method = splitByBlank[0];

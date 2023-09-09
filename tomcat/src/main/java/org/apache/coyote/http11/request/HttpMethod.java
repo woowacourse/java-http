@@ -1,15 +1,23 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import org.apache.coyote.http11.exception.NoSuchApiException;
 
 public enum HttpMethod {
     GET("GET"),
-    POST("POST");
+    POST("POST"),
+    PATCH("PATCH"),
+    PUT("PUT"),
+    DELETE("DELETE");
     private final String method;
 
     HttpMethod(String method) {
         this.method = method;
+    }
+
+    @Override
+    public String toString() {
+        return method;
     }
 
     public static HttpMethod mapping(String method){

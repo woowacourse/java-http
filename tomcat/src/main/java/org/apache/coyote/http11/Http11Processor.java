@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.config.LoginFilter;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.filter.FilterChainManager;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.servlet.Servlet;
@@ -31,13 +32,18 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
+             final var outputStream = connection.getOutputStream()
         ) {
 
             final Request request = Request.from(inputStream);
-            Response response = new Response();
-            
-            response = Servlet.getResponse(request);
+
+            FilterChainManager filterChainManager = new FilterChainManager();
+            filterChainManager.add(new LoginFilter());
+            Response response = filterChainManager.getInitialChain().doFilter(request);
+
+            if(!response.isFiltered()){
+                response = Servlet.getResponse(request);
+            }
 
             outputStream.write(response.getResponse());
             outputStream.flush();

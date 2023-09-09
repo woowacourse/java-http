@@ -1,12 +1,13 @@
 package org.apache.coyote.http11.handler;
 
 import java.util.Objects;
+import org.apache.coyote.http11.request.HttpMethod;
 
-public class ControllerInfo {
+public class RequestMapper {
     private final HttpMethod httpMethod;
     private final String path;
 
-    public ControllerInfo(HttpMethod httpMethod, String path) {
+    public RequestMapper(HttpMethod httpMethod, String path) {
         this.httpMethod = httpMethod;
         this.path = path;
     }
@@ -19,7 +20,7 @@ public class ControllerInfo {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ControllerInfo that = (ControllerInfo) o;
+        RequestMapper that = (RequestMapper) o;
         return httpMethod == that.httpMethod && Objects.equals(path, that.path);
     }
 

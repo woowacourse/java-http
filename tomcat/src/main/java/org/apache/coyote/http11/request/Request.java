@@ -9,14 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Request {
-    private final String method;
+    private final HttpMethod method;
     private final String path;
     private final Map<String, String> query;
     private final Map<String,String> header;
     private final Map<String, String> body;
 
     private Request(
-            String method,
+            HttpMethod method,
             String path,
             Map<String, String> query,
             Map<String, String> header,
@@ -34,7 +34,7 @@ public class Request {
         String line = bufferedReader.readLine();
         valid(line);
         final String[] methodUri = line.split(" ");
-        final String method = methodUri[0];
+        final HttpMethod method = HttpMethod.mapping(methodUri[0]);
         final String uri = methodUri[1];
         final Map<String, String> header = readHeader(bufferedReader);
         final Map<String, String> query = readQueries(uri);
@@ -88,16 +88,12 @@ public class Request {
         return body;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 
     public String getPath() {
         return path;
-    }
-
-    public Map<String, String> getQuery() {
-        return query;
     }
 
     public Map<String, String> getCookie() {

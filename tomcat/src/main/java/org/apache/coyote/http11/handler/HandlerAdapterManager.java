@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.ViewController;
+import org.apache.coyote.http11.request.HttpMethod;
 
 public class HandlerAdapterManager {
     private final HandlerAdapter handlerAdapter;

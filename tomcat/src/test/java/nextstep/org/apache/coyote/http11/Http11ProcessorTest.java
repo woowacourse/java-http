@@ -105,7 +105,7 @@ class Http11ProcessorTest {
         @Test
         void loginPageTest_redirect () throws IOException {
             // given
-            final String jSessionId = InMemorySession.login(new User("","","")).toString();
+            final String jSessionId = InMemorySession.login(new User("","",""));
             final String httpRequest =  String.join("\r\n",
                     "GET /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
@@ -122,7 +122,7 @@ class Http11ProcessorTest {
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            var expectedHeader = getResponseHeader(200,"OK",responseBody);
+            var expectedHeader = getResponseHeader(302,"Found",responseBody);
 
             assertThat(socket.output()).contains(expectedHeader);
             assertThat(socket.output()).contains(responseBody);

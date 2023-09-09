@@ -9,6 +9,7 @@ public class Response {
     private final String responseBody;
     private final String location;
     private final Map<String,String> cookie;
+    private final boolean filtered;
 
     private Response(Builder builder){
         this.status = builder.status;
@@ -16,6 +17,7 @@ public class Response {
         this.responseBody = builder.responseBody;
         this.location = builder.location;
         this.cookie = builder.cookie;
+        this.filtered = builder.filtered;
     }
 
     public Response(){
@@ -52,6 +54,7 @@ public class Response {
                 .location(location)
                 .cookie(cookie)
                 .responseBody(file)
+                .filtered()
                 .build();
     }
 
@@ -71,12 +74,17 @@ public class Response {
                 .collect(Collectors.joining("; "));
     }
 
+    public boolean isFiltered(){
+        return this.filtered;
+    }
+
     public static class Builder{
         private HttpStatus status;
         private String contentType;
         private String responseBody;
         private String location;
         private Map<String,String> cookie;
+        private boolean filtered;
 
         public Builder status(HttpStatus status){
             this.status = status;
@@ -100,6 +108,11 @@ public class Response {
 
         public Builder cookie(Map<String,String> cookie){
             this.cookie = cookie;
+            return this;
+        }
+
+        public Builder filtered(){
+            this.filtered = true;
             return this;
         }
 

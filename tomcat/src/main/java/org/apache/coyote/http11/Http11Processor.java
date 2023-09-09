@@ -1,10 +1,11 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.AuthController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
@@ -19,10 +20,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +29,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionManager sessionManager = new SessionManager();
+
+    private final AuthController authController = new AuthController();
+    private final RegisterController registerController = new RegisterController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -51,34 +51,44 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            List<String> lines = new ArrayList<>();
+            HttpRequest httpRequest = readHttpRequest(bufferedReader);
+            HttpResponse httpResponse = new HttpResponse(httpRequest.httpVersion());
 
-            String line = "";
-            while (!(line = bufferedReader.readLine()).equals("")) {
-                lines.add(line);
-            }
-            HttpRequest httpRequest = HttpRequest.from(lines);
-
-            HttpResponse httpResponse;
-            if (httpRequest.method().equals("POST")) {
-                int contentLength = getContentLength(lines);
-                String requestBody = readRequestBody(bufferedReader, contentLength);
-                httpResponse = handlePostRequest(httpRequest, requestBody);
+            if (httpRequest.path().equals("/login") || httpRequest.path().equals("/login.html")) {
+                authController.service(httpRequest, httpResponse);
+            } else if (httpRequest.path().equals("/register") || httpRequest.path().equals("/register.html")) {
+                registerController.service(httpRequest, httpResponse);
             } else {
-                List<String> cookieHeaderValues = httpRequest.header("Cookie");
-                httpResponse = handleGetRequest(httpRequest, cookieHeaderValues);
+                httpResponse.setHttpStatus(HttpStatus.OK).setResponseFileName(httpRequest.path());
             }
 
+            httpResponse.setBody(readFile(httpResponse.getResponseFileName()));
             httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getBody().getBytes().length));
             httpResponse.addHeader("Content-Type", getContentTypeHeaderFrom(httpRequest));
 
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-
             bufferedOutputStream.write(httpResponse.format().getBytes());
             bufferedOutputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
+        List<String> lines = readRequesteHeaders(bufferedReader);
+        RequestLine requestLine = RequestLine.from(lines.get(0));
+        HttpHeaders httpHeaders = HttpHeaders.from(lines.subList(1, lines.size()));
+        String requestBody = readRequestBody(bufferedReader, httpHeaders.contentLength());
+        return new HttpRequest(requestLine, httpHeaders, requestBody);
+    }
+
+    private List<String> readRequesteHeaders(BufferedReader bufferedReader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line = "";
+        while (!(line = bufferedReader.readLine()).equals("")) {
+            lines.add(line);
+        }
+        return lines;
     }
 
     private static String getContentTypeHeaderFrom(HttpRequest httpRequest) {
@@ -89,116 +99,13 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html;charset=utf-8";
     }
 
-    private int getContentLength(List<String> headers) {
-        Optional<String> contentLengthHeader = headers.stream()
-                                                      .filter(it -> it.startsWith("Content-Length"))
-                                                      .findFirst();
-
-        if (contentLengthHeader.isEmpty()) {
-
-            return -1;
-        }
-        int index = contentLengthHeader.get().indexOf(" ");
-        return Integer.parseInt(contentLengthHeader.get().substring(index + 1));
-    }
-
     private static String readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+        if (contentLength <= 0) {
+            return "";
+        }
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
-    }
-
-    private HttpResponse handlePostRequest(HttpRequest request, String requestBody) {
-        String[] splitRequestBody = requestBody.split("&");
-        if (request.path().equals("/login")) {
-            return handleLoginRequest(request.httpVersion(), splitRequestBody);
-        }
-        if (request.path().equals("/register")) {
-            return handleRegisterRequest(request.httpVersion(), splitRequestBody);
-        }
-        return HttpResponse.of(request.httpVersion(), HttpStatus.NOT_FOUND, readFile("/404.html"));
-    }
-
-    private HttpResponse handleLoginRequest(String httpVersion, String[] splitQueryString) {
-        Optional<String> account = getValueOf("account", splitQueryString);
-        Optional<String> password = getValueOf("password", splitQueryString);
-
-        if (account.isEmpty() || password.isEmpty()) {
-            return HttpResponse.of(httpVersion, HttpStatus.NOT_FOUND, readFile("/401.html"));
-        }
-
-        Optional<User> findUser = InMemoryUserRepository.findByAccount(account.get());
-        if (findUser.isPresent() && findUser.get().checkPassword(password.get())) {
-            User user = findUser.get();
-            log.info(user.toString());
-            Session session = new Session(UUID.randomUUID().toString());
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            HttpResponse response = HttpResponse.of(httpVersion, HttpStatus.FOUND, readFile("/index.html"));
-            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-            return response;
-        }
-        return HttpResponse.of(httpVersion, HttpStatus.UNAUTHORIZED, readFile("/401.html"));
-    }
-
-    private Optional<String> getValueOf(String key, String[] splitQueryString) {
-        return Arrays.stream(splitQueryString)
-                     .filter(it -> equalsKey(key, it))
-                     .map(it -> it.substring(it.indexOf("=") + 1))
-                     .findFirst();
-    }
-
-    private boolean equalsKey(String expected, String actual) {
-        String[] splitActual = actual.split("=");
-        return splitActual[0].equals(expected);
-    }
-
-    private HttpResponse handleRegisterRequest(String httpVersion, String[] splitQueryString) {
-        Optional<String> account = getValueOf("account", splitQueryString);
-        Optional<String> email = getValueOf("email", splitQueryString);
-        Optional<String> password = getValueOf("password", splitQueryString);
-
-        if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            return HttpResponse.of(httpVersion, HttpStatus.BAD_REQUEST, readFile("/register.html"));
-        }
-
-        InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
-        return HttpResponse.of(httpVersion, HttpStatus.FOUND, readFile("/index.html"));
-    }
-
-    private HttpResponse handleGetRequest(HttpRequest request, List<String> cookies) {
-        if (!request.method().equalsIgnoreCase("GET")) {
-            throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
-        }
-
-        if (request.path().equals("/login.html") || request.path().equals("/login")) {
-            return handleLoginPageRequest(request.httpVersion(), cookies);
-        }
-        return HttpResponse.of(request.httpVersion(), HttpStatus.OK, readFile(request.path()));
-    }
-
-    private HttpResponse handleLoginPageRequest(String httpVersion, List<String> cookies) {
-        Optional<String> sessionId = getSessionFrom(cookies);
-        if (sessionId.isEmpty()) {
-            return HttpResponse.of(httpVersion, HttpStatus.OK, readFile("/login.html"));
-        }
-        Session session = sessionManager.findSession(sessionId.get());
-        User user = getUser(session);
-        if (InMemoryUserRepository.existsByAccount(user.getAccount())) {
-            return HttpResponse.of(httpVersion, HttpStatus.NOT_FOUND, readFile("/index.html"));
-        }
-        return HttpResponse.of(httpVersion, HttpStatus.OK, readFile("/login.html"));
-    }
-
-    private Optional<String> getSessionFrom(List<String> cookies) {
-        return cookies.stream()
-                      .filter(cookie -> cookie.startsWith("JSESSIONID="))
-                      .map(jsessionid -> jsessionid.substring(jsessionid.indexOf('=') + 1))
-                      .findFirst();
-    }
-
-    private User getUser(Session session) {
-        return (User) session.getAttribute("user");
     }
 
     private String readFile(String fileName) {

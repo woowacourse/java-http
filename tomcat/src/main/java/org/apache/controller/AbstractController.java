@@ -22,14 +22,14 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        throw new IllegalArgumentException("잘못된 HTTP METHOD 요청입니다.");
+        throw new ControllerException(request.getHttpMethod());
     }
 
     protected void doGet(Request request, Response response) {
-        throw new IllegalArgumentException("잘못된 HTTP METHOD(GET) 요청입니다.");
+        throw new ControllerException(HttpMethod.GET);
     }
 
     protected void doPost(Request request, Response response) {
-        throw new IllegalArgumentException("잘못된 HTTP METHOD(POST) 요청입니다.");
+        throw new ControllerException(HttpMethod.POST);
     }
 }

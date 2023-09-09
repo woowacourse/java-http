@@ -6,7 +6,6 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.Protocol;
 
 public class RequestHeader {
 
@@ -60,8 +59,8 @@ public class RequestHeader {
         return requestLine.getPath();
     }
 
-    public Protocol getProtocol() {
-        return requestLine.getProtocol();
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
     }
 
     public boolean isSamePath(String otherPath) {

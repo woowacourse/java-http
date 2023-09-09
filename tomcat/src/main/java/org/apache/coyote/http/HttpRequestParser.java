@@ -33,9 +33,9 @@ public class HttpRequestParser {
 
     private String readMessageBody(BufferedReader bufferedReader, Map<String, String> header) throws IOException {
         String messageBody = "";
-        String key = "Content-Length";
-        if (header.containsKey(key)) {
-            int contentLength = Integer.parseInt(header.get(key));
+        String contentLengthName = HttpHeader.CONTENT_LENGTH.getName();
+        if (header.containsKey(contentLengthName)) {
+            int contentLength = Integer.parseInt(header.get(contentLengthName));
             char[] body = new char[contentLength];
             bufferedReader.read(body, 0, contentLength);
             messageBody = new String(body);

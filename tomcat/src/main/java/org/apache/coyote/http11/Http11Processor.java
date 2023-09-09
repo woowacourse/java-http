@@ -7,9 +7,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import nextstep.jwp.Handler;
+import nextstep.jwp.controller.FrontController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -42,7 +43,9 @@ public class Http11Processor implements Runnable, Processor {
             RequestBody requestBody = readRequestBody(requestHeader, bufferedReader);
 
             HttpRequest httpRequest = HttpRequest.of(requestHeader, requestBody);
-            HttpResponse httpResponse = Handler.run(httpRequest);
+
+            Controller frontController = new FrontController();
+            HttpResponse httpResponse = frontController.service(httpRequest);
 
             outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();

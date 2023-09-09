@@ -20,10 +20,13 @@ public class HttpResponse {
     }
 
     public String getResponse() {
+        String protocolVersion = statusLine.getProtocolVersion();
+        int statusCode = statusLine.getHttpStatus().getStatusCode();
+        String message = statusLine.getHttpStatus().getMessage();
         String statusLineResponse =
-                statusLine.getProtocolVersion() + " " +
-                statusLine.getHttpStatus().getStatusCode() + " " +
-                statusLine.getHttpStatus().getMessage() + " " + ENTER;
+                protocolVersion + " " +
+                        statusCode + " " +
+                        message + " " + ENTER;
         String headerResponse = headers.getValues().entrySet()
                 .stream()
                 .map(header -> header.getKey() + ": " + header.getValue() + " ")

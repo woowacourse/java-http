@@ -34,13 +34,12 @@ public class HttpRequest {
         return headers.getValue(key);
     }
 
-    public String contentType() {
+    public ContentType contentType() {
         if (!headers.containsKey(CONTENT_TYPE_KEY)) {
-            return ContentType.HTML.getValue();
+            return ContentType.HTML;
         }
-        return ContentType.from(headers.getValue(CONTENT_TYPE_KEY)).getValue();
+        return ContentType.from(headers.getValue(CONTENT_TYPE_KEY));
     }
-
     public boolean isMethod(HttpMethod httpMethod) {
         return requestLine.isMethod(httpMethod);
     }

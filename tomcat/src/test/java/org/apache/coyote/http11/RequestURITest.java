@@ -45,7 +45,7 @@ class RequestURITest {
         RequestURI requestURI = RequestURI.from(uri);
 
         // then
-        assertThat(requestURI.getResourcePath()).isEqualTo("static/login.html");
+        assertThat(requestURI.getResourcePath()).isEqualTo("/login.html");
     }
 
 }

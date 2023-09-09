@@ -23,10 +23,12 @@ public class LoginGetController extends AbstractController {
         final HttpCookie cookie = request.getCookie();
         URL filePathUrl;
         if (isLogin(cookie)) {
-            filePathUrl = getClass().getResource("/static/index.html");
-        } else {
-            filePathUrl = getClass().getResource("/static/login.html");
+            HttpResponseHeader responseHeader = new HttpResponseHeader(
+                    getContentType(request.getAccept(), request.getPath()),
+                    String.valueOf(0), "/index.html", null);
+            return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, "");
         }
+        filePathUrl = getClass().getResource("/static/login.html");
         String responseBody = getHtmlFile(filePathUrl);
 
         HttpResponseHeader responseHeader = new HttpResponseHeader(

@@ -43,7 +43,7 @@ public class RequestReader {
         }
     }
 
-    public void putHeader(String line) {
+    private void putHeader(String line) {
         if (line.endsWith(CRLF)) {
             return;
         }

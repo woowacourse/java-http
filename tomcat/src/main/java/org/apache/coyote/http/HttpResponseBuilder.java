@@ -28,10 +28,6 @@ public class HttpResponseBuilder {
         return httpResponse.joinResponse();
     }
 
-    private static String joinContentType(String contentType) {
-        return contentType + "; charset=utf-8";
-    }
-
     public static String buildStaticFileRedirectResponse(HttpRequest httpRequest, HttpResponse httpResponse, String redirectPath) throws IOException {
         String status = joinStatus(HttpStatus.REDIRECT.getHttpStatusCode(), HttpStatus.REDIRECT.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
@@ -41,7 +37,7 @@ public class HttpResponseBuilder {
         httpResponse.updateFileMessageBody(redirectPath);
 
         httpResponse.addHeader(HttpHeader.LOCATION.getName(), redirectPath);
-        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();
@@ -63,7 +59,7 @@ public class HttpResponseBuilder {
         httpResponse.updateStartLine(startLine);
         httpResponse.updateFileMessageBody("/404.html");
 
-        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();
@@ -77,7 +73,7 @@ public class HttpResponseBuilder {
         httpResponse.updateStartLine(startLine);
         httpResponse.updateMessageBody(content);
 
-        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
+        httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
         return httpResponse.joinResponse();

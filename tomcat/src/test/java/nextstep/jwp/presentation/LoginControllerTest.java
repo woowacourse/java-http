@@ -33,6 +33,8 @@ class LoginControllerTest {
         //when
         String response = loginController.process(httpRequest, httpResponse);
 
+        System.out.println(response);
+
         //then
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
@@ -56,6 +58,8 @@ class LoginControllerTest {
 
         //when
         String response = loginController.process(httpRequest, httpResponse);
+
+        System.out.println(response);
 
         //then
         Assertions.assertAll(

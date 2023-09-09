@@ -1,14 +1,14 @@
 package org.apache.catalina.connector;
 
-import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.catalina.RequestMapping;
+import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -57,17 +57,17 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept(), new SessionManager());
+            process(serverSocket.accept(), RequestMapping.init(new SessionManager()));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection, SessionManager sessionManager) {
+    private void process(final Socket connection, RequestMapping requestMapping) {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, sessionManager);
+        var processor = new Http11Processor(connection, requestMapping);
         new Thread(processor).start();
     }
 

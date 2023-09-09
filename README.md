@@ -46,8 +46,9 @@
 - [x] Controller 추가
     - [x] Controller 인터페이스 추가
     - [x] AbstractController 추가
-    - [ ] LoginController 추가
-    - [ ] RegisterController 추가
-    - [ ] ResourceController 추가
+    - [x] LoginController 추가
+    - [x] RegisterController 추가
+    - [x] ResourceController 추가
     - [x] HomeController 추가
-- [ ] if문 분기 삭제
+- [x] RequestMapping 추가
+    - [x] if문 분기 삭제

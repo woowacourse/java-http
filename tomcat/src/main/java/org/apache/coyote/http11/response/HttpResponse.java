@@ -54,8 +54,6 @@ public class HttpResponse {
                 responseBody);
     }
 
-
-
     private static String makeHeader(final Map<String, String> body) {
         return body.entrySet()
                 .stream()

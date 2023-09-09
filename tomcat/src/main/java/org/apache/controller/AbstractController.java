@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.controller;
 
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
@@ -16,9 +16,11 @@ public abstract class AbstractController implements Controller {
     public void service(Request request, Response response) {
         if (request.isSameHttpMethod(HttpMethod.GET)) {
             doGet(request, response);
+            return;
         }
         if (request.isSameHttpMethod(HttpMethod.POST)) {
             doPost(request, response);
+            return;
         }
         throw new IllegalArgumentException("잘못된 HTTP METHOD 요청입니다.");
     }

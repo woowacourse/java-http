@@ -1,8 +1,9 @@
-package org.apache.coyote.controller;
+package org.apache.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.controller.DefaultController;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;
@@ -18,7 +19,7 @@ class DefaultControllerTest {
         Response response = new Response();
 
         DefaultController defaultController = new DefaultController();
-        defaultController.response(request, response);
+        defaultController.service(request, response);
 
         String expected = "Hello world!";
 

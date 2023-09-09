@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.controller;
 
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;

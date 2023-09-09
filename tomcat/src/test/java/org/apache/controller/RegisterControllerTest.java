@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.controller.RegisterController;
 import org.apache.coyote.FileReader.FileReader;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.request.Request;
@@ -32,7 +33,7 @@ class RegisterControllerTest {
         Response response = new Response();
 
         RegisterController registerController = new RegisterController();
-        registerController.register(request, response);
+        registerController.service(request, response);
 
         String expectedLine = "HTTP/1.1 302 FOUND";
         String expectedHeader = "Location: /index.html";
@@ -50,7 +51,7 @@ class RegisterControllerTest {
         Response response = new Response();
 
         RegisterController registerController = new RegisterController();
-        registerController.register(request, response);
+        registerController.service(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/register.html").toURI());
         String expectedLine = "HTTP/1.1 200 OK";

@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.controller.LoginController;
 import org.apache.coyote.FileReader.FileReader;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.request.Request;
@@ -30,7 +31,7 @@ class LoginControllerTest {
         Response response = new Response();
 
         LoginController loginController = new LoginController();
-        loginController.login(request, response);
+        loginController.service(request, response);
 
         String expectedLine = "HTTP/1.1 302 FOUND";
         String expectedHeader = "Location: /index.html";
@@ -52,7 +53,7 @@ class LoginControllerTest {
         Response response = new Response();
 
         LoginController loginController = new LoginController();
-        loginController.login(request, response);
+        loginController.service(request, response);
 
         String expectedLine = "HTTP/1.1 401 UNAUTHORIZED";
         String expectedHeader = "Location: /401.html";
@@ -70,7 +71,7 @@ class LoginControllerTest {
         Response response = new Response();
 
         LoginController loginController = new LoginController();
-        loginController.login(request, response);
+        loginController.service(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/login.html").toURI());
         String expectedBody = new String(Files.readAllBytes(path));

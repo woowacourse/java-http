@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package org.apache.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.controller.ResourceController;
 import org.apache.coyote.FileReader.FileReader;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.request.Request;
@@ -24,7 +25,7 @@ class ResourceControllerTest {
         Response response = new Response();
 
         ResourceController resourceController = new ResourceController();
-        resourceController.getResource(request, response);
+        resourceController.service(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/index.html").toURI());
         byte[] expectedLine = "HTTP/1.1 200 OK".getBytes();
@@ -43,7 +44,7 @@ class ResourceControllerTest {
         Response response = new Response();
 
         ResourceController resourceController = new ResourceController();
-        resourceController.getResource(request, response);
+        resourceController.service(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/404.html").toURI());
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
@@ -62,7 +63,7 @@ class ResourceControllerTest {
         Response response = new Response();
 
         ResourceController resourceController = new ResourceController();
-        resourceController.getResource(request, response);
+        resourceController.service(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/index.html").toURI());
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();

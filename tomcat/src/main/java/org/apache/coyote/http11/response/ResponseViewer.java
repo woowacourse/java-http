@@ -28,12 +28,13 @@ public class ResponseViewer {
     }
 
     public String getView() {
-        String responseHeaderView = statusLineToView() + generateHeaderView();
-        String responseBodyView = responseBody.getValue();
-        return responseHeaderView + ENTER + ENTER + responseBodyView;
+        String statusView = generateStatusLineView();
+        String headersView = generateHeadersView();
+        String bodyView = responseBody.getValue();
+        return statusView + headersView + ENTER + ENTER + bodyView;
     }
 
-    private String statusLineToView() {
+    private String generateStatusLineView() {
         return String.format(
                 "%s %d %s %s",
                 statusLine.getProtocolVersion(),
@@ -43,7 +44,7 @@ public class ResponseViewer {
         );
     }
 
-    private String generateHeaderView() {
+    private String generateHeadersView() {
         return headers.getValues().entrySet()
                 .stream()
                 .map(header -> header.getKey() + KEY_VALUE_DELIMITER + header.getValue() + BLANK)

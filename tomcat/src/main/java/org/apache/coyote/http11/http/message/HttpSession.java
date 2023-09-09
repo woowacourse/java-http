@@ -32,8 +32,4 @@ public class HttpSession {
     public String getId() {
         return id;
     }
-
-    public Object getAttribute(final String name) {
-        return values.get(name);
-    }
 }

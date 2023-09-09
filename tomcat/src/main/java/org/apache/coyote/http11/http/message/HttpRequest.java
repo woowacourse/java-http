@@ -12,7 +12,6 @@ import static org.apache.coyote.http11.http.message.RequestHeaders.COOKIE;
 public class HttpRequest {
 
     private static final int REQUEST_LINE_INDEX = 0;
-    private static final String CRLF = "\r\n";
     private static final int REQUEST_HEADER_START_INDEX = 1;
 
     private final RequestLine requestLine;

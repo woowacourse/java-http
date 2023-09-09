@@ -5,7 +5,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class HandlerAdapter {
 
-    public static Controller getHandler(HttpRequest request) {
+    public static Handler getHandler(HttpRequest request) {
         String requestURI = request.getPath();
         if (requestURI.equals("/login")||requestURI.equals("/register")) {
             return new UserController();

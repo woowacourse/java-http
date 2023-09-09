@@ -1,6 +1,6 @@
 package org.apache.catalina.servlet;
 
-import org.apache.catalina.servlet.adapter.Controller;
+import org.apache.catalina.servlet.adapter.Handler;
 import org.apache.catalina.servlet.adapter.HandlerAdapter;
 import org.apache.catalina.servlet.filter.Interceptor;
 import org.apache.coyote.ResponseEntity;
@@ -29,7 +29,7 @@ public class DispatcherServlet implements Servlet {
                     Map.of("Content-Type: ", HttpContentType.from(request.getHttpExtension()).getContentType()),
                     makeResponseBody("index.html"));
         }
-        final Controller handler = HandlerAdapter.getHandler(request);
+        final Handler handler = HandlerAdapter.getHandler(request);
         final ResponseEntity responseEntity = handler.service(request);
         if (responseEntity.isRestResponse()) {
             return HttpResponse.resourceOf(

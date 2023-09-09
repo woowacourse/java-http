@@ -5,7 +5,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 import static org.apache.coyote.http11.request.start.HttpMethod.*;
 
-public abstract class AbstractController implements Controller {
+public abstract class AbstractHandler implements Handler {
 
     @Override
     public ResponseEntity service(HttpRequest request) {

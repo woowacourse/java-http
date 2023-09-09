@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.controller.dto.Response;
 import nextstep.jwp.service.UserService;
-import org.apache.catalina.servlet.adapter.AbstractController;
+import org.apache.catalina.servlet.adapter.AbstractHandler;
 import org.apache.coyote.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-public class UserController extends AbstractController {
+public class UserController extends AbstractHandler {
     private final UserService userService = new UserService();
 
 

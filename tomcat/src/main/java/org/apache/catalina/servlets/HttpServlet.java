@@ -1,5 +1,6 @@
 package org.apache.catalina.servlets;
 
+import org.apache.catalina.servlets.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -16,7 +17,11 @@ public abstract class HttpServlet implements Servlet {
         }
     }
 
-    protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse);
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new MethodNotAllowedException();
+    }
 
-    protected abstract void doPost(HttpRequest httpRequest, HttpResponse httpResponse);
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new MethodNotAllowedException();
+    }
 }

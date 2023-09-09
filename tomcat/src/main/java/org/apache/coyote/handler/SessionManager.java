@@ -23,7 +23,7 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public void remove(final HttpSession id) {
+    public void remove(final String id) {
         SESSIONS.remove(id);
     }
 

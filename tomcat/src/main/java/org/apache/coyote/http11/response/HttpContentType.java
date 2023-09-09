@@ -8,7 +8,8 @@ public enum HttpContentType {
     HTML("text/html;charset=utf-8", "html"),
     CSS("text/css;charset=utf-8", "css"),
     JAVASCRIPT("text/javascript", "js"),
-    PLAIN_TEXT("text/plain;charset=utf-8", "txt");
+    PLAIN_TEXT("text/plain;charset=utf-8", "txt"),
+    SVG("image/svg+xml", "svg");
 
     private static final Map<String, HttpContentType> CONTENT_TYPE_BY_EXTENSION;
 

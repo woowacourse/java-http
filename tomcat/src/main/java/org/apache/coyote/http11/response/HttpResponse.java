@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.exception.HostingFileNotFoundException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +27,7 @@ public class HttpResponse {
         headers.addHeader(headerName, value);
     }
 
-    public void hostingPage(final String filePath) {
+    public void hostingPage(final String filePath) throws IOException {
         responseBody = readStaticFile(filePath);
 
         headers.setContentType(getContentType(filePath));
@@ -34,14 +36,17 @@ public class HttpResponse {
         status = HttpStatus.OK;
     }
 
-    private String readStaticFile(final String fileName) {
+    private String readStaticFile(final String fileName) throws IOException {
         final String filePath = "static/" + fileName;
         final URL res = CLASS_LOADER.getResource(filePath);
 
+        if (fileName.equals("/")) {
+            return "Hello world!";
+        }
         try {
             return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
-        } catch (IOException e) {
-            return "Hello world!";
+        } catch (NullPointerException e) {
+            throw new HostingFileNotFoundException();
         }
     }
 
@@ -81,5 +86,9 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         return getResponseString().getBytes();
+    }
+
+    public void setStatus(final HttpStatus httpStatus) {
+        this.status = httpStatus;
     }
 }

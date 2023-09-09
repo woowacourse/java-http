@@ -1,20 +1,22 @@
-package nextstep.jwp.presentation;
+package nextstep.jwp.servlet;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.FileIOReader;
+import org.apache.catalina.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
+    private static final String URL = "/register";
     private static final String INDEX = "/index.html";
     public static final RegisterController instance = new RegisterController();
 
     private RegisterController() {
     }
 
-    public static Controller getInstance() {
+    public static RegisterController getInstance() {
         return instance;
     }
 

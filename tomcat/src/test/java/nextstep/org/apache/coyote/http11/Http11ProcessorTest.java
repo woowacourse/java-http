@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.FrontController;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -19,7 +20,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, FrontController.getInstance());
 
         // when
         processor.process(socket);
@@ -46,7 +47,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontController.getInstance());
 
         // when
         processor.process(socket);
@@ -73,7 +74,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(HttpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontController.getInstance());
 
         //when
         processor.process(socket);
@@ -103,7 +104,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(request);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontController.getInstance());
 
         //when
         processor.process(socket);
@@ -132,7 +133,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(request);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontController.getInstance());
 
         //when
         processor.process(socket);
@@ -157,7 +158,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(HttpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontController.getInstance());
 
         //when
         processor.process(socket);
@@ -187,7 +188,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(request);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, FrontController.getInstance());
 
         //when
         processor.process(socket);

@@ -1,9 +1,10 @@
-package nextstep.jwp.presentation;
+package nextstep.jwp.servlet;
 
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.FileIOReader;
+import org.apache.catalina.AbstractController;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.Session;
@@ -13,9 +14,9 @@ import org.apache.coyote.http11.response.StatusCode;
 
 public class LoginController extends AbstractController {
 
+    private static final String URL = "/login";
     private static final String INDEX = "/index.html";
     private static final String JSESSIONID = "JSESSIONID";
-
     private static final LoginController instance = new LoginController();
     private static final String UNAUTHORIZED = "/401.html";
 

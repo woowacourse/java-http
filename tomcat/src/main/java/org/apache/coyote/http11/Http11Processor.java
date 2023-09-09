@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.presentation.FrontController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -16,12 +14,13 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final FrontController frontController = FrontController.getInstance();
+    private final Adaptor adaptor;
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Adaptor adaptor) {
         this.connection = connection;
+        this.adaptor = adaptor;
     }
 
     @Override
@@ -37,12 +36,11 @@ public class Http11Processor implements Runnable, Processor {
                 final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             HttpRequest request = new HttpRequest(bufferedReader);
-            HttpResponse response = new HttpResponse();
 
-            Controller controller = frontController.findController(request);
-            HttpResponse httpResponse = controller.service(request, response);
+            Controller controller = adaptor.findController(request);
+            HttpResponse response = controller.service(request, new HttpResponse());
 
-            outputStream.write(httpResponse.format().getBytes());
+            outputStream.write(response.format().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

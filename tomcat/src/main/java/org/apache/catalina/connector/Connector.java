@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor executorService;
     private boolean stopped;
 
     public Connector() {
@@ -25,6 +28,13 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+        this.stopped = false;
+    }
+
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -67,7 +77,8 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+
+        executorService.execute(processor);
     }
 
     public void stop() {

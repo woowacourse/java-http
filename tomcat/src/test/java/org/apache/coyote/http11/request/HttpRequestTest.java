@@ -13,7 +13,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @SuppressWarnings("NonAsciiCharacters")
-class RequestReaderTest {
+class HttpRequestTest {
 
     @Test
     void 리퀘스트_파싱_테스트() throws IOException {
@@ -27,15 +27,15 @@ class RequestReaderTest {
 
         // when
         try (BufferedReader br = new BufferedReader(new StringReader(request))) {
-            RequestReader requestReader = new RequestReader(br);
+            HttpRequest httpRequest = new HttpRequest(br);
 
-            requestReader.read();
+            httpRequest.read();
 
             // then
             assertSoftly(softly -> {
-                softly.assertThat(requestReader.getMethod()).isEqualTo("GET");
-                softly.assertThat(requestReader.getRequestUri()).isEqualTo("/index.html");
-                softly.assertThat(requestReader.getProtocol()).isEqualTo("HTTP/1.1");
+                softly.assertThat(httpRequest.getMethod()).isEqualTo("GET");
+                softly.assertThat(httpRequest.getRequestUri()).isEqualTo("/index.html");
+                softly.assertThat(httpRequest.getProtocol()).isEqualTo("HTTP/1.1");
             });
         }
     }
@@ -53,12 +53,12 @@ class RequestReaderTest {
 
         // when
         try (BufferedReader br = new BufferedReader(new StringReader(request))) {
-            RequestReader requestReader = new RequestReader(br);
+            HttpRequest httpRequest = new HttpRequest(br);
 
-            requestReader.read();
+            httpRequest.read();
 
             // then
-            assertThat(requestReader.hasSessionId()).isFalse();
+            assertThat(httpRequest.hasSessionId()).isFalse();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,12 +77,12 @@ class RequestReaderTest {
 
         // when
         try (BufferedReader br = new BufferedReader(new StringReader(request))) {
-            RequestReader requestReader = new RequestReader(br);
+            HttpRequest httpRequest = new HttpRequest(br);
 
-            requestReader.read();
+            httpRequest.read();
 
             // then
-            assertThat(requestReader.hasSessionId()).isTrue();
+            assertThat(httpRequest.hasSessionId()).isTrue();
         } catch (IOException e) {
             e.printStackTrace();
         }

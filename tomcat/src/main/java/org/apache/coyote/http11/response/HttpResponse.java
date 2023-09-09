@@ -11,7 +11,7 @@ import static org.apache.coyote.http11.response.Header.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.Header.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.Header.SET_COOKIE;
 
-public class Response {
+public class HttpResponse {
 
     private static final String STATIC = "static";
     private static final String SPACE_CRLF = " \r\n";

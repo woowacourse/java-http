@@ -13,7 +13,7 @@ import static org.apache.coyote.http11.response.Header.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.Header.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.Header.COOKIE;
 
-public class RequestReader {
+public class HttpRequest {
 
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String AMPERSAND = "&";
@@ -27,7 +27,7 @@ public class RequestReader {
     private final Map<String, String> bodies = new HashMap<>();
     private Cookie cookie;
 
-    public RequestReader(BufferedReader bufferedReader) {
+    public HttpRequest(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
     }
 

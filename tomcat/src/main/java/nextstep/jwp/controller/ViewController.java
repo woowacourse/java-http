@@ -6,9 +6,10 @@ import org.apache.coyote.http11.util.Resource;
 
 public class ViewController {
 
-    private ViewController(){}
+    private ViewController() {
+    }
 
-    public static Response getLogin(){
+    public static Response getLogin() {
         return Response.builder()
                 .status(HttpStatus.OK)
                 .contentType("html")
@@ -16,7 +17,7 @@ public class ViewController {
                 .build();
     }
 
-    public static Response getRegister(){
+    public static Response getRegister() {
         return Response.builder()
                 .status(HttpStatus.OK)
                 .contentType("html")
@@ -24,7 +25,7 @@ public class ViewController {
                 .build();
     }
 
-    public static Response getVoid(){
+    public static Response getVoid() {
         return Response.builder()
                 .status(HttpStatus.OK)
                 .responseBody("Hello world!")

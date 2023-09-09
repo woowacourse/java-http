@@ -20,13 +20,13 @@ public class HandlerAdapter {
         this.viewFunctions = new HashMap<>();
     }
 
-    public Response mapping(Request request){
+    public Response mapping(Request request) {
         RequestMapper requestInfo
                 = new RequestMapper(request.getMethod(), request.getPath());
-        if(requestFunctions.containsKey(requestInfo)){
+        if (requestFunctions.containsKey(requestInfo)) {
             return requestFunctions.get(requestInfo).getResponse(request);
         }
-        if(viewFunctions.containsKey(requestInfo)){
+        if (viewFunctions.containsKey(requestInfo)) {
             return viewFunctions.get(requestInfo).getResponse();
         }
         if (request.getPath().contains(".")) {
@@ -40,11 +40,11 @@ public class HandlerAdapter {
         throw new NoSuchApiException();
     }
 
-    public void addRequestFunctions(HttpMethod httpMethod, String path, RequestFunction function){
-        requestFunctions.put(new RequestMapper(httpMethod,path),function);
+    public void addRequestFunctions(HttpMethod httpMethod, String path, RequestFunction function) {
+        requestFunctions.put(new RequestMapper(httpMethod, path), function);
     }
 
-    public void addNonRequestController(HttpMethod httpMethod, String path, ViewFunction function){
-        viewFunctions.put(new RequestMapper(httpMethod,path),function);
+    public void addNonRequestController(HttpMethod httpMethod, String path, ViewFunction function) {
+        viewFunctions.put(new RequestMapper(httpMethod, path), function);
     }
 }

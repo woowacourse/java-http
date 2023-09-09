@@ -15,15 +15,15 @@ public enum HttpMethod {
         this.method = method;
     }
 
+    public static HttpMethod mapping(String method) {
+        return Arrays.stream(values())
+                .filter(value -> value.method.equals(method))
+                .findFirst()
+                .orElseThrow(NoSuchApiException::new);
+    }
+
     @Override
     public String toString() {
         return method;
-    }
-
-    public static HttpMethod mapping(String method){
-        return Arrays.stream(values())
-                .filter(value-> value.method.equals(method))
-                .findFirst()
-                .orElseThrow(NoSuchApiException::new);
     }
 }

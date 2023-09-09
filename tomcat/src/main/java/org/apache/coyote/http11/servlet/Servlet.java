@@ -10,15 +10,15 @@ import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.util.Resource;
 
 public class Servlet {
-    public static Response getResponse(Request request){
+    public static Response getResponse(Request request) {
         try {
             HandlerAdapterManager handlerAdapterManager = new HandlerAdapterManager();
             Response response = handlerAdapterManager.getHandlerAdapter().mapping(request);
             return response;
         } catch (UnauthorizedException unauthorizedException) {
-            return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"),"401.html");
-        } catch (NoSuchApiException e){
-            return Response.badResponse(HttpStatus.NOTFOUND).redirect(Resource.getFile("404.html"),"404.html");
+            return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"), "401.html");
+        } catch (NoSuchApiException e) {
+            return Response.badResponse(HttpStatus.NOTFOUND).redirect(Resource.getFile("404.html"), "404.html");
         }
     }
 }

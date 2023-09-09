@@ -5,17 +5,17 @@ import org.apache.coyote.http11.response.Response;
 
 public class FilterChainManager {
 
+    private final Chain defaultChain;
     private Chain initialChain;
     private Chain lastChain;
-    private final Chain defaultChain;
 
     public FilterChainManager() {
         this.defaultChain = new Chain(new DefaultFilter());
     }
 
-    public void add(Filter filter){
+    public void add(Filter filter) {
         Chain chain = new Chain(filter);
-        if(lastChain == null){
+        if (lastChain == null) {
             initialChain = chain;
             lastChain = chain;
             initialChain.next = lastChain;
@@ -31,9 +31,9 @@ public class FilterChainManager {
         return initialChain;
     }
 
-    private class Chain implements FilterChain{
-        private Chain next;
+    private class Chain implements FilterChain {
         private final Filter filter;
+        private Chain next;
 
         public Chain(Filter filter) {
             this.filter = filter;
@@ -41,7 +41,7 @@ public class FilterChainManager {
 
         @Override
         public Response doFilter(Request request) {
-            return filter.doFilter(request,next);
+            return filter.doFilter(request, next);
         }
     }
 }

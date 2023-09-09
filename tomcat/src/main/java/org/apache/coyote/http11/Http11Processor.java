@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
+import java.net.Socket;
 import nextstep.jwp.config.LoginFilter;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -9,9 +11,6 @@ import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             filterChainManager.add(new LoginFilter());
             Response response = filterChainManager.getInitialChain().doFilter(request);
 
-            if(!response.isFiltered()){
+            if (!response.isFiltered()) {
                 response = Servlet.getResponse(request);
             }
 

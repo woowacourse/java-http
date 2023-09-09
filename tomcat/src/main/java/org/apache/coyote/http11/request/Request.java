@@ -12,7 +12,7 @@ public class Request {
     private final HttpMethod method;
     private final String path;
     private final Map<String, String> query;
-    private final Map<String,String> header;
+    private final Map<String, String> header;
     private final Map<String, String> body;
 
     private Request(
@@ -38,7 +38,7 @@ public class Request {
         final String uri = methodUri[1];
         final Map<String, String> header = readHeader(bufferedReader);
         final Map<String, String> query = readQueries(uri);
-        final Map<String, String> body = readBody(header,bufferedReader);
+        final Map<String, String> body = readBody(header, bufferedReader);
         return new Request(method, uri, query, header, body);
     }
 
@@ -48,15 +48,15 @@ public class Request {
         }
     }
 
-    private static Map<String, String> readQueries(String uri){
-        if(!uri.contains("?")){
+    private static Map<String, String> readQueries(String uri) {
+        if (!uri.contains("?")) {
             return new HashMap<>();
         }
         final Map<String, String> queriesMap = new HashMap<>();
         String[] queries = uri.split("\\?")[1].split("&");
-        for(String query : queries){
+        for (String query : queries) {
             String[] q = query.split("=");
-            queriesMap.put(q[0],q[1]);
+            queriesMap.put(q[0], q[1]);
         }
         return queriesMap;
     }
@@ -72,18 +72,19 @@ public class Request {
         return header;
     }
 
-    private static Map<String, String> readBody(Map<String, String> header,BufferedReader bufferedReader) throws IOException {
+    private static Map<String, String> readBody(Map<String, String> header, BufferedReader bufferedReader)
+            throws IOException {
         final Map<String, String> body = new HashMap<>();
-        if(!header.containsKey("Content-Length")){
+        if (!header.containsKey("Content-Length")) {
             return body;
         }
         final int contentLength = Integer.parseInt(header.get("Content-Length"));
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer,0,contentLength);
+        bufferedReader.read(buffer, 0, contentLength);
         String line = new String(buffer);
-        for(String entry : line.split("&")){
+        for (String entry : line.split("&")) {
             String[] bodyKeyValue = entry.split("=");
-            body.put(bodyKeyValue[0],bodyKeyValue[1]);
+            body.put(bodyKeyValue[0], bodyKeyValue[1]);
         }
         return body;
     }
@@ -98,13 +99,13 @@ public class Request {
 
     public Map<String, String> getCookie() {
         final Map<String, String> cookie = new HashMap<>();
-        if(!header.containsKey("Cookie")){
+        if (!header.containsKey("Cookie")) {
             return cookie;
         }
         final String cookieString = header.get("Cookie");
-        for(String entryString : cookieString.split("; ")){
-            String[] entry =entryString.split("=");
-            cookie.put(entry[0],entry[1]);
+        for (String entryString : cookieString.split("; ")) {
+            String[] entry = entryString.split("=");
+            cookie.put(entry[0], entry[1]);
         }
         return cookie;
     }

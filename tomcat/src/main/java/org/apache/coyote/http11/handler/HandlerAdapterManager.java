@@ -12,12 +12,12 @@ public class HandlerAdapterManager {
         add();
     }
 
-    private void add(){
-        handlerAdapter.addRequestFunctions(HttpMethod.POST,"/login",LoginController::login);
-        handlerAdapter.addRequestFunctions(HttpMethod.POST,"/register",LoginController::signUp);
-        handlerAdapter.addNonRequestController(HttpMethod.GET,"/login", ViewController::getLogin);
-        handlerAdapter.addNonRequestController(HttpMethod.GET,"/register",ViewController::getRegister);
-        handlerAdapter.addNonRequestController(HttpMethod.GET,"/",ViewController::getVoid);
+    private void add() {
+        handlerAdapter.addRequestFunctions(HttpMethod.POST, "/login", LoginController::login);
+        handlerAdapter.addRequestFunctions(HttpMethod.POST, "/register", LoginController::signUp);
+        handlerAdapter.addNonRequestController(HttpMethod.GET, "/login", ViewController::getLogin);
+        handlerAdapter.addNonRequestController(HttpMethod.GET, "/register", ViewController::getRegister);
+        handlerAdapter.addNonRequestController(HttpMethod.GET, "/", ViewController::getVoid);
     }
 
     public HandlerAdapter getHandlerAdapter() {

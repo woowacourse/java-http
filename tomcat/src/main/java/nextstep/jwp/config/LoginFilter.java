@@ -15,14 +15,14 @@ public class LoginFilter implements Filter {
         final String uri = request.getPath();
         final var cookie = request.getCookie();
 
-        if(uri.equals("/login") && cookie.containsKey("JSESSIONID")){
+        if (uri.equals("/login") && cookie.containsKey("JSESSIONID")) {
             return validKey(cookie.get("JSESSIONID"));
         }
         return filterChain.doFilter(request);
     }
 
-    private Response validKey(String jSessionId){
-        if(InMemorySession.isLogin(jSessionId)){
+    private Response validKey(String jSessionId) {
+        if (InMemorySession.isLogin(jSessionId)) {
             return Response.builder()
                     .status(HttpStatus.FOUND)
                     .contentType("html")
@@ -31,6 +31,6 @@ public class LoginFilter implements Filter {
                     .filtered()
                     .build();
         }
-        return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"),"401.html");
+        return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"), "401.html");
     }
 }

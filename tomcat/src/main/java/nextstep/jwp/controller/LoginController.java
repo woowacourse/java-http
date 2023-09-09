@@ -18,8 +18,7 @@ public class LoginController {
 
     public static Response login(Request request){
         Map<String, String> body = request.getBody();
-        User user = InMemoryUserRepository.findByAccount(body.get("account"))
-                .orElseThrow(()->new UnauthorizedException("해당 유저가 없습니다."));
+        User user = InMemoryUserRepository.findByAccount(body.get("account")).orElseThrow(()->new UnauthorizedException("해당 유저가 없습니다."));
         if(!user.checkPassword(body.get("password"))){
             throw new UnauthorizedException("아이디 및 패스워드가 틀렸습니다.");
         }

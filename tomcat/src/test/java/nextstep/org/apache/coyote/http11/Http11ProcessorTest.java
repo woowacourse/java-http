@@ -2,10 +2,10 @@ package nextstep.org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemorySession;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

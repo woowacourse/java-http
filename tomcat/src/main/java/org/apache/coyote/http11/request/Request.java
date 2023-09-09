@@ -10,20 +10,20 @@ import java.util.Map;
 
 public class Request {
     private final String method;
-    private final String uri;
+    private final String path;
     private final Map<String, String> query;
     private final Map<String,String> header;
     private final Map<String, String> body;
 
     private Request(
             String method,
-            String uri,
+            String path,
             Map<String, String> query,
             Map<String, String> header,
             Map<String, String> body
     ) {
         this.method = method;
-        this.uri = uri;
+        this.path = path;
         this.query = query;
         this.header = header;
         this.body = body;
@@ -88,8 +88,12 @@ public class Request {
         return body;
     }
 
-    public String getUri() {
-        return uri;
+    public String getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public Map<String, String> getQuery() {

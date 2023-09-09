@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.config.LoginFilter;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +35,11 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             final Request request = Request.from(inputStream);
-            String response = Servlet.getResponse(request);
+            Response response = new Response();
+            
+            response = Servlet.getResponse(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

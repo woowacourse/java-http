@@ -18,6 +18,10 @@ public class Response {
         this.cookie = builder.cookie;
     }
 
+    public Response(){
+        this(builder());
+    }
+
     public static Builder builder(){
         return new Builder();
     }
@@ -31,13 +35,14 @@ public class Response {
                 .build();
     }
 
-    public String getResponse(){
+    public byte[] getResponse(){
         return String.join("\r\n",
                 "HTTP/1.1 " + status + " ",
                 "Content-Type: text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 makeLocation() + makeCookie(),
-                responseBody);
+                responseBody)
+                .getBytes();
     }
 
     public Response redirect(String file, String location){
@@ -45,6 +50,7 @@ public class Response {
                 .status(this.status)
                 .contentType("html")
                 .location(location)
+                .cookie(cookie)
                 .responseBody(file)
                 .build();
     }

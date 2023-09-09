@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.controller.AbstractController;
-import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

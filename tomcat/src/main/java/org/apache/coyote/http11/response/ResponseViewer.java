@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.stream.Collectors;
 
-import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.common.Headers;
 
 public class ResponseViewer {
     private static final String ENTER = "\r\n";

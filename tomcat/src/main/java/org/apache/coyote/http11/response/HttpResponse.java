@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.response;
 
 
-import org.apache.coyote.http11.Headers;
-import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.HttpCookie;
 
 public class HttpResponse {
 

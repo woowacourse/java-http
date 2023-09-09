@@ -1,11 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.apache.coyote.http11.cookie.HttpCookie;
 
 public class Headers {
     private static final int KEY_INDEX = 0;

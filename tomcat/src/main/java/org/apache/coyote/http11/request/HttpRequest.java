@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 
-import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.common.Headers;
 
 public class HttpRequest {
     private static final int REQUEST_LINE_INDEX = 0;

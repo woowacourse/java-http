@@ -1,37 +1,50 @@
 package org.apache.coyote.response;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.apache.coyote.common.MessageBody;
+
+import java.util.Objects;
 
 public class ResponseBody {
 
-    private static final String EMPTY_BODY = "";
+    private MessageBody messageBody;
 
-    private final String value;
-
-    public ResponseBody(final String value) {
-        this.value = value;
+    private ResponseBody(final MessageBody messageBody) {
+        this.messageBody = messageBody;
     }
 
     public static ResponseBody empty() {
-        return new ResponseBody(EMPTY_BODY);
+        return new ResponseBody(MessageBody.empty());
     }
 
-    public byte[] bytes() {
-        return value.getBytes(UTF_8);
+    public static ResponseBody from(final String body) {
+        return new ResponseBody(MessageBody.from(body));
+    }
+
+    public String body() {
+        return messageBody.body();
     }
 
     public int length() {
-        return bytes().length;
+        return messageBody.bodyLength();
     }
 
-    public String value() {
-        return value;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final ResponseBody that = (ResponseBody) o;
+        return Objects.equals(messageBody, that.messageBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(messageBody);
     }
 
     @Override
     public String toString() {
-        return "ResponseBody.Length{" +
-               "source='" + value.length() + '\'' +
+        return "ResponseBody{" +
+               "messageBody=" + messageBody +
                '}';
     }
 }

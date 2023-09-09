@@ -1,33 +1,26 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
+import java.util.Optional;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
+    private final String body;
 
-    private HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String body) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
-    }
-
-    public static HttpRequest from(List<String> lines) {
-        RequestLine requestLine = RequestLine.from(lines.get(0));
-        HttpHeaders httpHeaders = HttpHeaders.from(lines.subList(1, lines.size()));
-        return new HttpRequest(requestLine, httpHeaders);
-    }
-
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
+        this.body = body;
     }
 
     public List<String> header(String headerName) {
         return httpHeaders.get(headerName);
+    }
+
+    public Optional<String> sessionId() {
+        return httpHeaders.sessionId();
     }
 
     public String method() {
@@ -40,5 +33,9 @@ public class HttpRequest {
 
     public String httpVersion() {
         return requestLine.getHttpVersion();
+    }
+
+    public String getBody() {
+        return body;
     }
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpHeaders {
 
@@ -38,6 +39,22 @@ public class HttpHeaders {
 
     public List<String> get(String key) {
         return headers.getOrDefault(key, HeaderValue.empty()).getValues();
+    }
+
+    public int contentLength() {
+        List<String> contentLength = get("Content-Length");
+        if (contentLength.isEmpty()) {
+            return 0;
+        }
+        return Integer.parseInt(contentLength.get(0));
+    }
+
+    public Optional<String> sessionId() {
+        List<String> cookies = get("Cookie");
+        return cookies.stream()
+                      .filter(cookie -> cookie.startsWith("JSESSIONID="))
+                      .map(jsessionid -> jsessionid.substring(jsessionid.indexOf('=') + 1))
+                      .findFirst();
     }
 
     public String format() {

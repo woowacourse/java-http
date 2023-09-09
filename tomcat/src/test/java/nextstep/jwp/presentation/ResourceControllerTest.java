@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package nextstep.jwp.presentation;
 
 import org.apache.coyote.HttpFormTestUtils;
 import org.apache.coyote.Processor;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class ResourceRequestHandlerTest {
+class ResourceControllerTest {
 
     @Test
     void index_html_메인_홈페이지를_응답한다() throws IOException {

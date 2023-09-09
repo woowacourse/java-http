@@ -43,11 +43,12 @@ public class FileController extends Controller {
         return createResponse(request.getUri());
     }
 
-    private static void validateExtension(final String fileName) {
-        resources.stream()
-                 .filter(fileName::contains)
-                 .findAny()
-                 .orElseThrow(() -> new IllegalArgumentException("해당 파일이 존재하지 않습니다. " + fileName));
+    private void validateExtension(final String fileName) {
+        final boolean containsExtension = resources.stream()
+                                                   .anyMatch(fileName::contains);
+        if (!containsExtension) {
+            throw new IllegalArgumentException("확장자를 포함하고 있지 않습니다.");
+        }
     }
 
     public String createResponse(final String uri) throws IOException {

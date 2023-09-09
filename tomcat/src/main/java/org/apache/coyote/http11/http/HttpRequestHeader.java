@@ -26,10 +26,6 @@ public class HttpRequestHeader {
         return uri;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
     public Map<String, String> getHeaderValues() {
         return headerValues;
     }

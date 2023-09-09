@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
+import org.apache.coyote.RunnableProcessor;
 import org.apache.coyote.http.controller.HttpController;
 import org.apache.coyote.http.controller.HttpControllers;
 import org.apache.coyote.http.controller.ViewRenderer;
@@ -18,7 +18,7 @@ import org.apache.coyote.http.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Http11Processor implements Runnable, Processor {
+public class Http11Processor implements Runnable, RunnableProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final ViewRenderer viewRenderer = new ViewRenderer();

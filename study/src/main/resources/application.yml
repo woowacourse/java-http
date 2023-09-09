@@ -4,6 +4,6 @@ handlebars:
 server:
   tomcat:
     accept-count: 1
-    max-connections: 1
+    max-connections: 4
     threads:
       max: 2

@@ -32,7 +32,6 @@ class AppTest {
 
         for (final var thread : threads) {
             thread.start();
-            Thread.sleep(50);
         }
 
         for (final var thread : threads) {

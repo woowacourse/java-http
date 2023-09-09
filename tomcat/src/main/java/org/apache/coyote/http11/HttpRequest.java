@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpRequest {
-    private String method;
+    private HttpMethod method;
     private String path;
     private String fileName;
     private Map<String, String> headers = new HashMap<>();
@@ -23,7 +23,7 @@ public class HttpRequest {
             return;
         }
         String[] requests = requestLine.split(" ");
-        method = requests[0];
+        method = HttpMethod.valueOf(requests[0]);
         path = requests[1];
         fileName = path.substring(path.lastIndexOf('/') + 1);
         headers = parseToHeaders(bufferedReader);
@@ -53,7 +53,7 @@ public class HttpRequest {
         return null;
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

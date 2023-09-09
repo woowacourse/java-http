@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +18,7 @@ import org.apache.coyote.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
     @Test
     @DisplayName("/register로 접속해서 POST 요청을 보내면 회원가입할 수 있다")
@@ -31,8 +31,8 @@ class RegisterHandlerTest {
         Request request = FixtureFactory.getPostRequest("/register", DEFAULT_HEADERS, new RequestBody(body));
         Response response = new Response();
 
-        RegisterHandler registerHandler = new RegisterHandler();
-        registerHandler.register(request, response);
+        RegisterController registerController = new RegisterController();
+        registerController.register(request, response);
 
         String expectedLine = "HTTP/1.1 302 FOUND";
         String expectedHeader = "Location: /index.html";
@@ -49,8 +49,8 @@ class RegisterHandlerTest {
         Request request = FixtureFactory.getGetRequest("/register", DEFAULT_HEADERS);
         Response response = new Response();
 
-        RegisterHandler registerHandler = new RegisterHandler();
-        registerHandler.register(request, response);
+        RegisterController registerController = new RegisterController();
+        registerController.register(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/register.html").toURI());
         String expectedLine = "HTTP/1.1 200 OK";

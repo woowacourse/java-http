@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -9,7 +9,7 @@ import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
 
-public class RegisterHandler {
+public class RegisterController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";

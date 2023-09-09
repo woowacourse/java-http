@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.handler.DefaultHandler;
-import org.apache.coyote.handler.LoginHandler;
-import org.apache.coyote.handler.RegisterHandler;
-import org.apache.coyote.handler.ResourceHandler;
+import org.apache.coyote.controller.DefaultController;
+import org.apache.coyote.controller.LoginController;
+import org.apache.coyote.controller.RegisterController;
+import org.apache.coyote.controller.ResourceController;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
 import org.apache.coyote.response.Response;
@@ -51,18 +51,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doHandler(Request request, Response response) {
         if (request.isSamePath("/")) {
-            new DefaultHandler().response(request, response);
+            new DefaultController().response(request, response);
             return;
         }
         if (request.isSamePath("/login")) {
-            new LoginHandler().login(request, response);
+            new LoginController().login(request, response);
             return;
         }
         if (request.isSamePath("/register")) {
-            new RegisterHandler().register(request, response);
+            new RegisterController().register(request, response);
             return;
         }
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.getResource(request, response);
+        ResourceController resourceController = new ResourceController();
+        resourceController.getResource(request, response);
     }
 }

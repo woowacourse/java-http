@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +9,7 @@ import org.apache.coyote.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class DefaultHandlerTest {
+class DefaultControllerTest {
 
     @Test
     @DisplayName("hello world라는 정보가 담긴 response가 생성된다.")
@@ -17,8 +17,8 @@ class DefaultHandlerTest {
         Request request = FixtureFactory.getGetRequest("/", DEFAULT_HEADERS);
         Response response = new Response();
 
-        DefaultHandler defaultHandler = new DefaultHandler();
-        defaultHandler.response(request, response);
+        DefaultController defaultController = new DefaultController();
+        defaultController.response(request, response);
 
         String expected = "Hello world!";
 

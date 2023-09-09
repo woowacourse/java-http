@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +18,7 @@ import org.apache.coyote.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginHandlerTest {
+class LoginControllerTest {
 
     @Test
     @DisplayName("로그인에 성공하면 index.html 페이지를 바디로 갖고, httpStatusCode가 302인 response를 생성한다.")
@@ -29,8 +29,8 @@ class LoginHandlerTest {
         Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
         Response response = new Response();
 
-        LoginHandler loginHandler = new LoginHandler();
-        loginHandler.login(request, response);
+        LoginController loginController = new LoginController();
+        loginController.login(request, response);
 
         String expectedLine = "HTTP/1.1 302 FOUND";
         String expectedHeader = "Location: /index.html";
@@ -51,8 +51,8 @@ class LoginHandlerTest {
         Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
         Response response = new Response();
 
-        LoginHandler loginHandler = new LoginHandler();
-        loginHandler.login(request, response);
+        LoginController loginController = new LoginController();
+        loginController.login(request, response);
 
         String expectedLine = "HTTP/1.1 401 UNAUTHORIZED";
         String expectedHeader = "Location: /401.html";
@@ -69,8 +69,8 @@ class LoginHandlerTest {
         Request request = FixtureFactory.getGetRequest("/login", DEFAULT_HEADERS);
         Response response = new Response();
 
-        LoginHandler loginHandler = new LoginHandler();
-        loginHandler.login(request, response);
+        LoginController loginController = new LoginController();
+        loginController.login(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/login.html").toURI());
         String expectedBody = new String(Files.readAllBytes(path));

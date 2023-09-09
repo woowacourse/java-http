@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
 
-public class LoginHandler {
+public class LoginController {
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String ACCOUNT = "account";

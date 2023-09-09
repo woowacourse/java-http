@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +15,7 @@ import org.apache.coyote.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ResourceHandlerTest {
+class ResourceControllerTest {
 
     @Test
     @DisplayName("url의 값을 파싱하여 Response를 생성할 수 있다.")
@@ -23,8 +23,8 @@ class ResourceHandlerTest {
         Request request = FixtureFactory.getGetRequest("/index.html", DEFAULT_HEADERS);
         Response response = new Response();
 
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.getResource(request, response);
+        ResourceController resourceController = new ResourceController();
+        resourceController.getResource(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/index.html").toURI());
         byte[] expectedLine = "HTTP/1.1 200 OK".getBytes();
@@ -42,8 +42,8 @@ class ResourceHandlerTest {
         Request request = FixtureFactory.getGetRequest("/아무것도_없어요.html", DEFAULT_HEADERS);
         Response response = new Response();
 
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.getResource(request, response);
+        ResourceController resourceController = new ResourceController();
+        resourceController.getResource(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/404.html").toURI());
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();
@@ -61,8 +61,8 @@ class ResourceHandlerTest {
         Request request = FixtureFactory.getGetRequest("/index", DEFAULT_HEADERS);
         Response response = new Response();
 
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.getResource(request, response);
+        ResourceController resourceController = new ResourceController();
+        resourceController.getResource(request, response);
 
         Path path = Path.of(FileReader.class.getResource("/static/index.html").toURI());
         byte[] expectedBody = (new String(Files.readAllBytes(path))).getBytes();

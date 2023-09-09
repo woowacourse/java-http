@@ -1,8 +1,6 @@
 package org.apache.coyote.http;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 public class HttpResponseBuilder {
 
@@ -24,7 +22,6 @@ public class HttpResponseBuilder {
         String startLine = joinStartLine(status, protocol);
         httpResponse.updateStartLine(startLine);
 
-        appendCookie(httpRequest, httpResponse);
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.findType(path));
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
@@ -43,7 +40,6 @@ public class HttpResponseBuilder {
         httpResponse.updateStartLine(startLine);
         httpResponse.updateFileMessageBody(redirectPath);
 
-        appendCookie(httpRequest, httpResponse);
         httpResponse.addHeader(HttpHeader.LOCATION.getName(), redirectPath);
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
@@ -53,13 +49,6 @@ public class HttpResponseBuilder {
 
     private static String joinStatus(String statusCode, String statusMessage) {
         return statusCode + SPACE + statusMessage;
-    }
-
-    private static void appendCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        Set<Map.Entry<String, String>> entries = httpRequest.findCookies().entrySet();
-        for (Map.Entry<String, String> entry : entries) {
-            httpResponse.addCookie(entry.getKey(), entry.getValue());
-        }
     }
 
     private static String joinStartLine(String status, String protocol) {
@@ -74,7 +63,6 @@ public class HttpResponseBuilder {
         httpResponse.updateStartLine(startLine);
         httpResponse.updateFileMessageBody("/404.html");
 
-        appendCookie(httpRequest, httpResponse);
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 
@@ -89,7 +77,6 @@ public class HttpResponseBuilder {
         httpResponse.updateStartLine(startLine);
         httpResponse.updateMessageBody(content);
 
-        appendCookie(httpRequest, httpResponse);
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), joinContentType(ContentType.HTML.getType()));
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
 

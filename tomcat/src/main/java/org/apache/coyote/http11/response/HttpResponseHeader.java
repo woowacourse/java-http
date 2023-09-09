@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.request.HttpRequestURI;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 
 public class HttpResponseHeader {
 
@@ -11,9 +12,10 @@ public class HttpResponseHeader {
         this.httpStatus = httpStatus;
     }
 
-    public static HttpResponseHeader from(final HttpRequestURI httpRequestURI) {
-        final var uri = httpRequestURI.getUri();
-        final var queryString = httpRequestURI.getRequestBody();
+    public static HttpResponseHeader from(final HttpRequest httpRequest) {
+        final RequestLine requestLine = httpRequest.requestLine();
+        final var uri = requestLine.getUri();
+        final var queryString = requestLine.getRequestBody();
 
         if (uri.startsWith("/index") && !queryString.isEmpty()) {
             return new HttpResponseHeader(HttpStatus.FOUND);

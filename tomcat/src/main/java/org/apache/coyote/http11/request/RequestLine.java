@@ -4,10 +4,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.auth.Session;
-import org.apache.coyote.http11.common.HttpStatus;
 
-public class HttpRequestURI {
+public class RequestLine {
 
     private static final String REGISTER_PAGE = "/register.html";
     private static final String LOGIN_PAGE = "/login.html";
@@ -24,7 +22,7 @@ public class HttpRequestURI {
     private final String httpMethod;
     private final String httpVersion;
 
-    private HttpRequestURI(
+    private RequestLine(
             final String uri,
             final HttpRequestBody httpRequestBody,
             final String httpMethod,
@@ -33,7 +31,7 @@ public class HttpRequestURI {
         this(uri, uri, httpRequestBody, httpMethod, httpVersion);
     }
 
-    private HttpRequestURI(
+    private RequestLine(
             final String oldUri,
             final String uri,
             final HttpRequestBody httpRequestBody,
@@ -47,7 +45,7 @@ public class HttpRequestURI {
         this.httpVersion = httpVersion;
     }
 
-    public static HttpRequestURI get(
+    public static RequestLine get(
             final List<String> requestURIElements,
             final Consumer<User> logProcessor
     ) {
@@ -58,13 +56,13 @@ public class HttpRequestURI {
         }
 
         if (uri.startsWith("/register")) {
-            return parseRequestURI(REGISTER_PAGE, HttpRequestBody.empty(), requestURIElements);
+            return parseRequest(REGISTER_PAGE, HttpRequestBody.empty(), requestURIElements);
         }
 
-        return parseRequestURI(uri, HttpRequestBody.empty(), requestURIElements);
+        return parseRequest(uri, HttpRequestBody.empty(), requestURIElements);
     }
 
-    private static HttpRequestURI parseLoginRequestURI(
+    private static RequestLine parseLoginRequestURI(
             final String uri,
             final List<String> requestURIElements,
             final Consumer<User> logProcessor
@@ -73,16 +71,15 @@ public class HttpRequestURI {
 
         if (isExistQueryString(index)) {
             final var queryString = HttpRequestBody.from(uri.substring(index + 1));
-            return parseLoginRequestURI(queryString, requestURIElements, null, logProcessor);
+            return parseLoginRequestURI(queryString, requestURIElements, logProcessor);
         }
 
-        return parseRequestURI(LOGIN_PAGE, HttpRequestBody.empty(), requestURIElements);
+        return parseRequest(LOGIN_PAGE, HttpRequestBody.empty(), requestURIElements);
     }
 
-    private static HttpRequestURI parseLoginRequestURI(
+    private static RequestLine parseLoginRequestURI(
             final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements,
-            final Consumer<User> sessionProcessor,
             final Consumer<User> logProcessor
     ) {
         final var account = httpRequestBody.getValue("account");
@@ -91,22 +88,23 @@ public class HttpRequestURI {
                 .filter(user -> user.checkPassword(password))
                 .map(user -> {
                     logProcessor.accept(user);
-                    return parseRequestURI(LOGIN_PAGE, INDEX_PAGE, httpRequestBody, requestURIElements);
+                    return parseRequest(LOGIN_PAGE, INDEX_PAGE, httpRequestBody, requestURIElements);
                 })
-                .orElseGet(() -> parseRequestURI(LOGIN_PAGE, LOGIN_FAIL_PAGE, HttpRequestBody.empty(), requestURIElements));
+                .orElseGet(() -> parseRequest(LOGIN_PAGE, LOGIN_FAIL_PAGE, HttpRequestBody.empty(),
+                        requestURIElements));
     }
 
     private static boolean isExistQueryString(final int index) {
         return index != -1;
     }
 
-    private static HttpRequestURI parseRequestURI(
+    private static RequestLine parseRequest(
             final String oldPage,
             final String page,
             final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements
     ) {
-        return new HttpRequestURI(
+        return new RequestLine(
                 oldPage,
                 page,
                 httpRequestBody,
@@ -115,12 +113,12 @@ public class HttpRequestURI {
         );
     }
 
-    private static HttpRequestURI parseRequestURI(
+    private static RequestLine parseRequest(
             final String page,
             final HttpRequestBody httpRequestBody,
             final List<String> requestURIElements
     ) {
-        return new HttpRequestURI(
+        return new RequestLine(
                 page,
                 httpRequestBody,
                 requestURIElements.get(HTTP_METHOD_INDEX),
@@ -128,12 +126,11 @@ public class HttpRequestURI {
         );
     }
 
-    public static HttpRequestURI post(
+    public static RequestLine post(
             final List<String> requestURIElements,
             final String requestBody,
-            final Consumer<User> sessionProcessor,
             final Consumer<User> logProcessor
-            ) {
+    ) {
         final var uri = requestURIElements.get(URI_INDEX);
         final HttpRequestBody parsedHttpRequestBody = HttpRequestBody.from(requestBody);
         if (uri.startsWith("/register")) {
@@ -144,10 +141,10 @@ public class HttpRequestURI {
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
 
-            return parseRequestURI(REGISTER_PAGE, INDEX_PAGE, parsedHttpRequestBody, requestURIElements);
+            return parseRequest(REGISTER_PAGE, INDEX_PAGE, parsedHttpRequestBody, requestURIElements);
         }
 
-        return parseLoginRequestURI(parsedHttpRequestBody, requestURIElements, sessionProcessor, logProcessor);
+        return parseLoginRequestURI(parsedHttpRequestBody, requestURIElements, logProcessor);
     }
 
     public boolean isLoginSuccess() {

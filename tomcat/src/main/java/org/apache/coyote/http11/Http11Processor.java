@@ -1,9 +1,14 @@
 package org.apache.coyote.http11;
 
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.ContentType;
+import org.apache.coyote.HttpCookie;
 import org.apache.coyote.Processor;
+import org.apache.coyote.Session;
 import org.apache.coyote.request.*;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
@@ -17,8 +22,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.apache.coyote.ContentType.HTML;
+import static org.apache.coyote.response.HttpStatus.FOUND;
+import static org.apache.coyote.response.HttpStatus.OK;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,18 +54,55 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestUri requestUri = httpRequest.getRequestLine().getRequestUri();
 
+
             String path = requestUri.getPath();
 
             System.out.println("path = " + path);
 
             HttpResponse response = null;
 
-            // / 일때 분기
             if (path.equals("/")) {
                 response = new HttpResponse.Builder()
                         .contentType(HTML)
                         .body("hello world")
                         .build();
+            } else if (path.equals("/login") && httpRequest.getRequestLine().isGetMethod()) {
+                response = getLoginHttpResponse(httpRequest);
+            } else if (path.equals("/login") && httpRequest.getRequestLine().isPostMethod()) {
+
+                HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
+                String account = httpRequestBody.getValue("account");
+                String password = httpRequestBody.getValue("password");
+
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                if (user.isPresent() && user.get().checkPassword(password)) {
+                    log.info(user.toString());
+
+                    Session session = new Session();
+                    session.setAttribute("user", user);
+                    SessionManager.add(session);
+
+                    path = "/index.html";
+
+                    final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
+
+//                    response = new HttpResponse.Builder()
+//                            .status(FOUND)
+//                            .contentType(HTML)
+//                            .setCookie()
+//                            .build();
+
+                } else if (user.isPresent()) {
+                    log.warn("비밀번호가 틀렸습니다");
+
+                    path = "/401.html";
+
+                } else {
+                    log.warn("미가입회원입니다");
+
+                    path = "/401.html";
+                }
+
             } else {
                 final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri.getPath())).getPath());
                 var responseBody = new String(Files.readAllBytes(filePath));
@@ -67,67 +112,8 @@ public class Http11Processor implements Runnable, Processor {
                         .body(responseBody)
                         .build();
             }
-//
-//            // path 가 login 일때 분기
-//            if (path.equals("/login") && httpRequestLine.isGetMethod()) {
-//                statusCode = 302;
-//                statusMessage = "Found";
-//
-//                HttpCookie cookie = httpRequestHeader.getCookie();
-//
-//                if (cookie == null || !cookie.existJSESSIONID()) {
-//                    path = "/login.html";
-//                } else {
-//                    String jSessionId = cookie.getJSessionId();
-//                    Session session = SessionManager.findSession(jSessionId);
-//
-//                    Optional<User> user = (Optional<User>) session.getAttribute("user");
-//
-//                    if (user.isPresent()) {
-//                        path = "/index.html";
-//                    } else {
-//                        path = "/login.html";
-//                    }
-//                }
-//
-//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
-//                responseBody = new String(Files.readAllBytes(filePath));
-//            }
-//
-//
-//            if (path.equals("/login") && httpRequestLine.isPostMethod()) {
-//                statusCode = 302;
-//                statusMessage = "Found";
-//
-//                String account = httpRequestBody.getValue("account");
-//                String password = httpRequestBody.getValue("password");
-//
-//                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-//                if (user.isPresent() && user.get().checkPassword(password)) {
-//                    log.info(user.toString());
-//                    UUID uuid = UUID.randomUUID();
-//                    Session session = new Session(uuid.toString());
-//                    session.setAttribute("user", user);
-//                    SessionManager.add(session);
-//
-//                    setCookie = "Set-Cookie: JSESSIONID=" + uuid;
-//
-//                    path = "/index.html";
-//                } else if (user.isPresent()) {
-//                    log.warn("비밀번호가 틀렸습니다");
-//
-//                    path = "/401.html";
-//
-//                } else {
-//                    log.warn("미가입회원입니다");
-//
-//                    path = "/401.html";
-//                }
-//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
-//
-//                responseBody = new String(Files.readAllBytes(filePath));
-//            }
-//
+
+
 //            // pass 가 register 일때 분기
 //            if (path.equals("/register") && httpRequestLine.isPostMethod()) {
 //                String account = httpRequestBody.getValue("account");
@@ -151,6 +137,31 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse getLoginHttpResponse(HttpRequest httpRequest) throws IOException {
+        HttpCookie cookie = httpRequest.getRequestHeader().getCookie();
+
+        String jsessionid = cookie.getValue("JSESSIONID");
+        Session session = SessionManager.findSession(jsessionid);
+
+        if (session != null) {
+            final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
+            return new HttpResponse.Builder()
+                    .status(FOUND)
+                    .header("Location", "/index.html")
+                    .contentType(HTML)
+                    .body(new String(Files.readAllBytes(filePath)))
+                    .build();
+        }
+
+
+        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/login.html")).getPath());
+        return new HttpResponse.Builder()
+                .status(OK)
+                .contentType(HTML)
+                .body(new String(Files.readAllBytes(filePath)))
+                .build();
     }
 
     private HttpRequest generateHttpRequest(BufferedReader reader) throws IOException {

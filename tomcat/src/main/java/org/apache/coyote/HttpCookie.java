@@ -1,12 +1,10 @@
 package org.apache.coyote;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
-
-    private final static String BASE_COOKIE = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
 
     private final Map<String, String> cookie;
 
@@ -14,12 +12,8 @@ public class HttpCookie {
         this.cookie = cookie;
     }
 
-    public static HttpCookie of() {
-        return parseCookieString(BASE_COOKIE);
-    }
-
-    public static HttpCookie parseCookieString(String cookieString) {
-        Map<String, String> cookies = new HashMap<>();
+    public static HttpCookie of(String cookieString) {
+        Map<String, String> cookies = new LinkedHashMap<>();
 
         if (cookieString != null && !cookieString.isEmpty()) {
             String[] cookiePairs = cookieString.split("; ");
@@ -36,12 +30,8 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public boolean existJSESSIONID() {
-        return cookie.containsKey("JSESSIONID");
-    }
-
-    public String getJSessionId() {
-        return cookie.get("JSESSIONID");
+    public String getValue(String key) {
+        return cookie.get(key);
     }
 
     public String convertToHeader() {

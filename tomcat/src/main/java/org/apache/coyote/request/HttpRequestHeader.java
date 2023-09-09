@@ -3,7 +3,7 @@ package org.apache.coyote.request;
 import org.apache.coyote.HttpCookie;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class HttpRequestHeader {
     }
 
     public static HttpRequestHeader from(String requestHeader) {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         String[] splitedLines = requestHeader.split(SEPERATOR);
 
         List<String> splited = Arrays.asList(splitedLines);
@@ -45,6 +45,6 @@ public class HttpRequestHeader {
 
     public HttpCookie getCookie() {
         String cookie = headers.get("Cookie");
-        return HttpCookie.parseCookieString(cookie);
+        return HttpCookie.of(cookie);
     }
 }

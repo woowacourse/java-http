@@ -13,10 +13,10 @@ public class IndexController extends AbstractController {
     private static final String RESOURCE = "/index.html";
 
     @Override
-    public void service(HttpRequest request, HttpResponse httpResponse) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(RESOURCE));
         StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
-        httpResponse
+        response
                 .statusLine(statusLine)
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)

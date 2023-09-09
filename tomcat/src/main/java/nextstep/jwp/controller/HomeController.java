@@ -12,9 +12,9 @@ public class HomeController extends AbstractController {
     private static final String DEFAULT_MESSAGE = "Hello world!";
 
     @Override
-    public void service(HttpRequest request, HttpResponse httpResponse) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
-        httpResponse
+        response
                 .statusLine(statusLine)
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(DEFAULT_MESSAGE.getBytes().length)

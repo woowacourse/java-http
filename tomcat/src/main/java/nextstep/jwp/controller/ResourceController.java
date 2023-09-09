@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.controller.AbstractController;
-import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -12,7 +11,7 @@ import org.apache.coyote.http11.util.FileReader;
 public class ResourceController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String resource =  request.getRequestLine().getRequestURI().getResourcePath();
         ResponseBody responseBody = new ResponseBody(FileReader.read(resource));
         StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);

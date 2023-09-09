@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,7 +18,6 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.FileReader;
 
 import static org.apache.coyote.http11.request.ContentType.HTML;
-import static org.apache.coyote.http11.request.HttpMethod.GET;
 
 public class LoginController extends AbstractController {
 
@@ -27,15 +26,6 @@ public class LoginController extends AbstractController {
     private static final String REDIRECT_HOME_URI = "/index.html";
 
     public static final SessionManager SESSION_MANAGER = new SessionManager();
-
-    @Override
-    public void service(HttpRequest request, HttpResponse response) {
-        if (request.getRequestLine().getHttpMethod().is(GET)) {
-            doGet(request, response);
-            return;
-        }
-        doPost(request, response);
-    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

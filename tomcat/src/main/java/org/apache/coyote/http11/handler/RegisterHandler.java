@@ -26,13 +26,13 @@ public class RegisterHandler implements Handler {
         throw new UnsupportedOperationException("get, post만 가능합니다");
     }
 
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    private void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         RequestData requestData = httpRequest.getRequestData();
         saveUser(requestData);
         httpResponse.redirect("index.html");
     }
 
-    protected void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
+    private void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
         String fileData = FileReader.readFile("/register.html");
         httpResponse.ok(fileData, ContentType.HTML);
     }

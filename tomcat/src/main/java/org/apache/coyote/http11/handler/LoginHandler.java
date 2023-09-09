@@ -32,7 +32,7 @@ public class LoginHandler implements Handler {
         throw new UnsupportedOperationException("get, post만 가능합니다.");
     }
 
-    protected void doPost(HttpRequest request, HttpResponse httpResponse) throws Exception {
+    private void doPost(HttpRequest request, HttpResponse httpResponse) throws Exception {
         Optional<User> userResult = findUser(request);
         if (userResult.isPresent()) {
             User user = userResult.get();
@@ -42,7 +42,7 @@ public class LoginHandler implements Handler {
         loginFailResponse(httpResponse);
     }
 
-    protected void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
+    private void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
         Cookie cookie = request.parseCookie();
         String jsessionid = cookie.findByKey("JSESSIONID");
 

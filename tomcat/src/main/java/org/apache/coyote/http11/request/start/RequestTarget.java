@@ -4,7 +4,7 @@ public class RequestTarget {
     private final String path;
     private final HttpExtension extension;
 
-    public RequestTarget(final HttpExtension extension, final String path) {
+    private RequestTarget(final HttpExtension extension, final String path) {
         this.extension = extension;
         this.path = path;
     }

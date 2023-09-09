@@ -5,6 +5,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.manager.SessionManager;
+
+import org.apache.coyote.utils.FileUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.ContentType;
 import org.apache.coyote.common.HttpCookie;
@@ -19,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -68,12 +68,9 @@ public class Http11Processor implements Runnable, Processor {
             } else if (path.equals("/login") && httpRequest.getRequestLine().isPostMethod()) {
                 response = postLoginHttpResponse(httpRequest);
             } else if (path.equals("/register") && httpRequest.getRequestLine().isGetMethod()) {
-                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/register.html")).getPath());
-                var responseBody = new String(Files.readAllBytes(filePath));
-
                 response = new HttpResponse.Builder()
                         .contentType(ContentType.from(requestUri.getExtension()))
-                        .body(responseBody)
+                        .body(FileUtils.readFile("/register.html"))
                         .build();
             } else if (path.equals("/register") && httpRequest.getRequestLine().isPostMethod()) {
                 HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
@@ -84,20 +81,15 @@ public class Http11Processor implements Runnable, Processor {
 
                 InMemoryUserRepository.save(new User(account, password, email));
 
-                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
-
                 response = new HttpResponse.Builder()
                         .status(FOUND)
                         .contentType(HTML)
                         .header("Location", "/index.html")
                         .build();
             } else {
-                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri.getPath())).getPath());
-                var responseBody = new String(Files.readAllBytes(filePath));
-
                 response = new HttpResponse.Builder()
                         .contentType(ContentType.from(requestUri.getExtension()))
-                        .body(responseBody)
+                        .body(FileUtils.readFile(requestUri.getPath()))
                         .build();
             }
 
@@ -155,21 +147,17 @@ public class Http11Processor implements Runnable, Processor {
         Session session = SessionManager.findSession(jsessionid);
 
         if (session != null) {
-            final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
             return new HttpResponse.Builder()
                     .status(FOUND)
                     .header("Location", "/index.html")
                     .contentType(HTML)
-                    .body(new String(Files.readAllBytes(filePath)))
                     .build();
         }
 
-
-        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/login.html")).getPath());
         return new HttpResponse.Builder()
                 .status(OK)
                 .contentType(HTML)
-                .body(new String(Files.readAllBytes(filePath)))
+                .body(FileUtils.readFile("/login.html"))
                 .build();
     }
 
@@ -204,8 +192,6 @@ public class Http11Processor implements Runnable, Processor {
 
         HttpCookie cookie = HttpCookie.of("JSESSIONID=" + session.getId());
 
-        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
-
         return new HttpResponse.Builder()
                 .status(FOUND)
                 .contentType(HTML)
@@ -215,8 +201,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse loginFail() {
-        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/401.html")).getPath());
-
         return new HttpResponse.Builder()
                 .status(FOUND)
                 .contentType(HTML)

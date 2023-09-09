@@ -61,11 +61,10 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @Disabled // set-cookie 설정값 반환이 랜덤하게 되어 수정 필요
     void login() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -78,11 +77,38 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Length: 3717 \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())
+                );
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void register() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Length: 3717 \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())
                 );

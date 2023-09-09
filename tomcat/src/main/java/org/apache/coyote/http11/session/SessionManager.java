@@ -1,4 +1,6 @@
-package org.apache.catalina;
+package org.apache.coyote.http11.session;
+
+import org.apache.catalina.Manager;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

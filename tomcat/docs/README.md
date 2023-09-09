@@ -49,5 +49,9 @@ Connection: keep-alive
 
 - [X] HttpRequest 클래스 구현하기
 - [X] HttpResponse 클래스 구현하기
-- [ ] Controller 인터페이스 추가하기
+- [X] Controller 인터페이스 추가하기
 
+## 4단계 - 동시성 확장하기
+
+- [ ] Executors로 Thread Pool 적용
+- [ ] 동시성 컬렉션 적용

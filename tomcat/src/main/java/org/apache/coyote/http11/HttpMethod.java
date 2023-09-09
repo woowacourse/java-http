@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.HttpSpecException.HttpMethodException;
 
 public enum HttpMethod {
 
@@ -20,6 +21,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.value.equalsIgnoreCase(value))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 HTTP 메소드 요청입니다."));
+                .orElseThrow(HttpMethodException::new);
     }
 }

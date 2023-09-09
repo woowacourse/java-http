@@ -22,4 +22,8 @@ public class Cookie {
     public boolean hasSessionId() {
         return params.containsKey(JSESSION);
     }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
 }

@@ -4,8 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpHeaders;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,25 +56,23 @@ public class Http11Processor implements Runnable, Processor {
             while (!(line = bufferedReader.readLine()).equals("")) {
                 lines.add(line);
             }
-            RequestLine requestLine = RequestLine.from(lines.get(0));
-
-            HttpHeaders httpHeaders = HttpHeaders.from(lines.subList(1, lines.size()));
-            String contentTypeHeader = getContentTypeHeaderFrom(httpHeaders);
+            HttpRequest httpRequest = HttpRequest.from(lines);
+            String contentTypeHeader = getContentTypeHeaderFrom(httpRequest);
 
             RequestHandler requestHandler;
-            if (requestLine.equalsMethod("POST")) {
+            if (httpRequest.method().equals("POST")) {
                 int contentLength = getContentLength(lines);
                 String requestBody = readRequestBody(bufferedReader, contentLength);
-                requestHandler = handlePostRequest(requestLine.getRequestUri(), requestBody);
+                requestHandler = handlePostRequest(httpRequest.uri(), requestBody);
             } else {
-                List<String> cookieHeaderValues = httpHeaders.get("Cookie");
-                requestHandler = handleGetRequest(requestLine.getHttpMethod(), requestLine.getRequestUri(), cookieHeaderValues);
+                List<String> cookieHeaderValues = httpRequest.header("Cookie");
+                requestHandler = handleGetRequest(httpRequest.method(), httpRequest.uri(), cookieHeaderValues);
             }
 
             String responseBody = readFile(requestHandler.getResponseFilePath());
 
             List<String> responseHeaders = new ArrayList<>();
-            responseHeaders.add(requestLine.getHttpVersion() + " " + requestHandler.getHttpStatus() + " ");
+            responseHeaders.add(httpRequest.httpVersion() + " " + requestHandler.getHttpStatus() + " ");
             responseHeaders.add(contentTypeHeader);
             responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
             for (Entry<String, String> headerEntry : requestHandler.getHeaders().entrySet()) {
@@ -94,8 +91,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String getContentTypeHeaderFrom(HttpHeaders httpHeaders) {
-        List<String> acceptHeaderValues = httpHeaders.get("Accept");
+    private static String getContentTypeHeaderFrom(HttpRequest httpRequest) {
+        List<String> acceptHeaderValues = httpRequest.header("Accept");
         if (acceptHeaderValues != null && acceptHeaderValues.contains("text/css")) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
@@ -108,6 +105,7 @@ public class Http11Processor implements Runnable, Processor {
                                                       .findFirst();
 
         if (contentLengthHeader.isEmpty()) {
+
             return -1;
         }
         int index = contentLengthHeader.get().indexOf(" ");

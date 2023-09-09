@@ -19,9 +19,9 @@ public class RequestLine {
     public static RequestLine from(String requestLine) {
         String[] splitStatusLine = Objects.requireNonNull(requestLine.trim()).split(TOKEN_DELIMITER);
         String httpMethod = splitStatusLine[0];
-        String requeatUri = splitStatusLine[1];
+        String requestUri = splitStatusLine[1];
         String httpVersion = splitStatusLine[2];
-        return new RequestLine(httpMethod, requeatUri, httpVersion);
+        return new RequestLine(httpMethod, requestUri, httpVersion);
     }
 
     public boolean equalsMethod(String other) {

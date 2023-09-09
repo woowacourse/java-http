@@ -1,11 +1,13 @@
 package org.apache.coyote.common;
 
+import org.apache.exception.FileNotMappingException;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public enum FileType {
     NONE("", ""),
-    TEXT(".text", "text/plain;charset=utf-8"),
+    TEXT(".text", "text/html;charset=utf-8"),
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css;charset=utf-8"),
     JS(".js", "application/x-javascript;charset=utf-8"),
@@ -35,7 +37,7 @@ public enum FileType {
         if(map.containsKey(extension)){
             return map.get(extension);
         }
-        return TEXT;
+        throw new FileNotMappingException();
     }
 
     public String getExtension() {

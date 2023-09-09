@@ -17,6 +17,7 @@ class PathUrlTest {
 
         assertThat(pathUrl).hasToString(url);
     }
+
     @ParameterizedTest
     @ValueSource(strings = {"/login", "/login.html"})
     void URL에_쿼리가_없는경우_제대로_파싱이_되는지_확인한다(final String url) {

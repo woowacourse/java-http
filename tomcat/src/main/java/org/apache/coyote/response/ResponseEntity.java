@@ -32,7 +32,8 @@ public class ResponseEntity {
     public static ResponseEntity fromString(final Request request, final String responseBody, final ResponseStatus responseStatus) {
         final ResponseStartLine responseStartLine = ResponseStartLine.from(request.httpVersion(), responseStatus);
         final ResponseContentType contentType = new ResponseContentType(FileType.TEXT.getContentType());
-        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, responseBody.length()));
+        final ResponseContentLength responseContentLength = new ResponseContentLength(responseBody.length());
+        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, responseContentLength));
         return new ResponseEntity(responseStartLine, responseHeader, responseBody);
     }
 

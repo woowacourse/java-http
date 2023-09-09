@@ -2,16 +2,11 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.PathUrl;
+import org.apache.exception.PageRedirectException;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SuppressWarnings("NonAsciiCharacters")
 class FileUtilTest {
@@ -33,20 +28,11 @@ class FileUtilTest {
     }
 
     @Test
-    void 정적_요청일때_파일이_없다면_404_html_을_띄운다() throws IOException {
+    void 정적_요청일때_파일이_없다면_404페이지로_리다이렉트_하기_위한_예외를_던진다() {
         // given
         final PathUrl badPathUrl = PathUrl.from("/bad.html");
-        final String actualResource = FileUtil.getResource(HttpVersion.HTTP11, badPathUrl);
 
-        // then
-        final StringBuilder expected_404 = new StringBuilder();
-        final URL resource = FileUtil.class.getClassLoader().getResource("static" + "/404.html");
-        final Path path = Paths.get(resource.getPath());
-        try (final BufferedReader fileReader = new BufferedReader(new FileReader(path.toFile()))) {
-            fileReader.lines()
-                    .forEach(br -> expected_404.append(br)
-                            .append(System.lineSeparator()));
-        }
-        assertThat(actualResource).isEqualTo(expected_404.toString());
+        assertThatThrownBy(() -> FileUtil.getResource(HttpVersion.HTTP11, badPathUrl))
+                .isExactlyInstanceOf(PageRedirectException.PageNotFound.class);
     }
 }

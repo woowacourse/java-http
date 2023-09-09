@@ -3,9 +3,7 @@ package org.apache.coyote.request;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.PathUrl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
 
 public class Request {
     private final RequestStartLine requestStartLine;
@@ -22,20 +20,12 @@ public class Request {
         this.requestBody = requestBody;
     }
 
-    public static Request from(final List<String> requestLines, final BufferedReader bufferedReader) throws IOException {
-        final RequestStartLine startLine = RequestStartLine.from(requestLines.get(0));
-        requestLines.remove(0);
-        final RequestHeader requestHeader = RequestHeader.from(requestLines);
-        final String readRequestBodyLine = readRequestBody(requestHeader.getContentLength(), bufferedReader);
-        final RequestBody requestBody = RequestBody.from(readRequestBodyLine);
-
+    public static Request from(final Reader reader) throws IOException {
+        final RequestStartLine startLine = RequestStartLine.from(reader.getFirstLine());
+        final RequestHeader requestHeader = RequestHeader.from(reader.getHeader());
+        final String bodyString = reader.getBody(requestHeader.getContentLength());
+        final RequestBody requestBody = RequestBody.from(bodyString);
         return new Request(startLine, requestHeader, requestBody);
-    }
-
-    private static String readRequestBody(final int contentLength, final BufferedReader bufferedReader) throws IOException {
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
     }
 
     public boolean hasQueryString() {

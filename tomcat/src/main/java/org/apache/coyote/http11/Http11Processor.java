@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.Request;
+import org.apache.coyote.request.RequestReader;
 import org.apache.coyote.response.ResponseEntity;
 import org.apache.front.Proxy;
 import org.slf4j.Logger;
@@ -13,8 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,27 +40,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final List<String> lines = readAllLines(bufferedReader);
-            final Request request = Request.from(lines, bufferedReader);
-            System.out.println("request = " + request);
+            final Request request = Request.from(RequestReader.from(bufferedReader));
             final ResponseEntity responseEntity = proxy.process(request);
-            System.out.println("responseEntity = " + responseEntity);
             writeResponse(outputStream, responseEntity);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private List<String> readAllLines(final BufferedReader reader) throws IOException {
-        final ArrayList<String> lines = new ArrayList<>();
-        while (true) {
-            final String line = reader.readLine();
-            if ("".equals(line)) {
-                break;
-            }
-            lines.add(line);
-        }
-        return lines;
     }
 
     private void writeResponse(final OutputStream outputStream, final ResponseEntity responseEntity) throws IOException {

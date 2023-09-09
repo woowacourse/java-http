@@ -69,40 +69,7 @@ public class Http11Processor implements Runnable, Processor {
             } else if (path.equals("/login") && httpRequest.getRequestLine().isGetMethod()) {
                 response = getLoginHttpResponse(httpRequest);
             } else if (path.equals("/login") && httpRequest.getRequestLine().isPostMethod()) {
-
-                HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
-                String account = httpRequestBody.getValue("account");
-                String password = httpRequestBody.getValue("password");
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                if (user.isPresent() && user.get().checkPassword(password)) {
-                    log.info(user.toString());
-
-                    Session session = new Session();
-                    session.setAttribute("user", user);
-                    SessionManager.add(session);
-
-                    path = "/index.html";
-
-                    final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
-
-//                    response = new HttpResponse.Builder()
-//                            .status(FOUND)
-//                            .contentType(HTML)
-//                            .setCookie()
-//                            .build();
-
-                } else if (user.isPresent()) {
-                    log.warn("비밀번호가 틀렸습니다");
-
-                    path = "/401.html";
-
-                } else {
-                    log.warn("미가입회원입니다");
-
-                    path = "/401.html";
-                }
-
+                response = postLoginHttpResponse(httpRequest);
             } else {
                 final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri.getPath())).getPath());
                 var responseBody = new String(Files.readAllBytes(filePath));
@@ -137,6 +104,57 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse postLoginHttpResponse(HttpRequest httpRequest) {
+        HttpRequestBody httpRequestBody = httpRequest.getRequestBody();
+        String account = httpRequestBody.getValue("account");
+        String password = httpRequestBody.getValue("password");
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info(user.toString());
+
+            return loginSuccess(user);
+
+        } else if (user.isPresent()) {
+            log.warn("비밀번호가 틀렸습니다");
+
+            return loginFail();
+
+        } else {
+            log.warn("미가입회원입니다");
+
+            return loginFail();
+        }
+    }
+
+    private HttpResponse loginSuccess(Optional<User> user) {
+        Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+
+        HttpCookie cookie = HttpCookie.of("JSESSIONID=" + session.getId());
+
+        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
+
+        return new HttpResponse.Builder()
+                .status(FOUND)
+                .contentType(HTML)
+                .header("Location", "/index.html")
+                .setCookie(cookie)
+                .build();
+    }
+
+    private HttpResponse loginFail() {
+        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/401.html")).getPath());
+
+        return new HttpResponse.Builder()
+                .status(FOUND)
+                .contentType(HTML)
+                .header("Location", "/401.html")
+                .build();
     }
 
     private HttpResponse getLoginHttpResponse(HttpRequest httpRequest) throws IOException {

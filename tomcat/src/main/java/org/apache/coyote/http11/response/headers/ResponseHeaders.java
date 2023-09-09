@@ -2,8 +2,8 @@ package org.apache.coyote.http11.response.headers;
 
 import org.apache.coyote.http11.common.header.ContentLength;
 import org.apache.coyote.http11.common.header.ContentType;
-import org.apache.coyote.http11.common.header.HeaderProperty;
-import org.apache.coyote.http11.common.header.HeaderValue;
+import org.apache.coyote.http11.common.header.HeaderName;
+import org.apache.coyote.http11.common.header.Header;
 import org.apache.coyote.http11.common.header.SetCookie;
 import org.apache.coyote.http11.response.ResponseEntity;
 
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
-    private final Map<HeaderProperty, HeaderValue> headers = new LinkedHashMap<>();
+    private final Map<HeaderName, Header> headers = new LinkedHashMap<>();
 
     public static ResponseHeaders from(final ResponseEntity responseEntity) {
         final ResponseHeaders responseHeaders = new ResponseHeaders();
@@ -36,7 +36,7 @@ public class ResponseHeaders {
         return String.join(System.lineSeparator(), headerStrings);
     }
 
-    public void addHeader(final HeaderValue header) {
+    public void addHeader(final Header header) {
         headers.put(header.getHeaderProperty(), header);
     }
 }

@@ -1,13 +1,10 @@
 package org.apache.coyote.http11.request.header;
 
-import org.apache.coyote.http11.common.header.HeaderProperty;
+import org.apache.coyote.http11.common.header.HeaderName;
 import org.apache.coyote.http11.request.headers.RequestHeaders;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.net.http.HttpHeaders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -99,7 +96,7 @@ class RequestHeadersTest {
         final RequestHeaders requestHeaders = RequestHeaders.from(headerString);
 
         // when
-        final String actual = requestHeaders.search(HeaderProperty.CONTENT_LENGTH);
+        final String actual = requestHeaders.search(HeaderName.CONTENT_LENGTH);
 
         assertThat(actual).isEqualTo(expect);
     }
@@ -113,7 +110,7 @@ class RequestHeadersTest {
         final RequestHeaders requestHeaders = RequestHeaders.from(headerString);
 
         // when
-        final boolean actual = requestHeaders.containsKey(HeaderProperty.CONTENT_LENGTH);
+        final boolean actual = requestHeaders.containsKey(HeaderName.CONTENT_LENGTH);
 
         // then
         assertThat(actual).isTrue();
@@ -127,7 +124,7 @@ class RequestHeadersTest {
         final RequestHeaders requestHeaders = RequestHeaders.from(headerString);
 
         // when
-        final boolean actual = requestHeaders.containsKey(HeaderProperty.CONTENT_LENGTH);
+        final boolean actual = requestHeaders.containsKey(HeaderName.CONTENT_LENGTH);
 
         // then
         assertThat(actual).isFalse();

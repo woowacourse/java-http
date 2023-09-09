@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.common.header;
 
-import static org.apache.coyote.http11.common.header.HeaderProperty.CONTENT_TYPE;
+import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_TYPE;
 
-public class ContentType extends HeaderValue {
+public class ContentType extends Header {
 
     private final ContentTypeValue type;
 

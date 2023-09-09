@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.common.header;
 
-public enum HeaderProperty {
+public enum HeaderName {
 
     SET_COOKIE("Set-Cookie"),
     COOKIE("Cookie"),
@@ -9,7 +9,7 @@ public enum HeaderProperty {
 
     private final String propertyName;
 
-    HeaderProperty(final String propertyName) {
+    HeaderName(final String propertyName) {
         this.propertyName = propertyName;
     }
 

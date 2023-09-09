@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.apache.coyote.http11.common.header.HeaderProperty.COOKIE;
+import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
 
 public class HttpRequest {
 

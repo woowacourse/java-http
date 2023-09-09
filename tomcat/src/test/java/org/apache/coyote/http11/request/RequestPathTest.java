@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpExtensionType;
+import org.apache.coyote.http11.ExtensionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class RequestPathTest {
         // given
         final String uri = "/index.html";
         final String expectedResource = "/index";
-        final HttpExtensionType expectedExtensionType = HttpExtensionType.HTML;
+        final ExtensionType expectedExtensionType = ExtensionType.HTML;
 
         // when
         final RequestPath requestPath = RequestPath.from(uri);
@@ -36,7 +36,7 @@ class RequestPathTest {
         // given
         final String uri = "/login?account=gugu&password=password";
         final String expectedResource = "/login";
-        final HttpExtensionType expectedExtensionType = HttpExtensionType.HTML;
+        final ExtensionType expectedExtensionType = ExtensionType.HTML;
         final Map<String, String> expectedParams = new HashMap<>();
         expectedParams.put("account", "gugu");
         expectedParams.put("password", "password");

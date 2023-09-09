@@ -1,27 +1,27 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpExtensionType;
+import org.apache.coyote.http11.ExtensionType;
 
 public class ResponseBody {
 
-    private final HttpExtensionType httpExtensionType;
+    private final ExtensionType extensionType;
     private final String content;
 
-    private ResponseBody(final HttpExtensionType httpExtensionType, final String content) {
-        this.httpExtensionType = httpExtensionType;
+    private ResponseBody(final ExtensionType extensionType, final String content) {
+        this.extensionType = extensionType;
         this.content = content;
     }
 
     public static ResponseBody html(final String content) {
-        return new ResponseBody(HttpExtensionType.HTML, content);
+        return new ResponseBody(ExtensionType.HTML, content);
     }
 
     public static ResponseBody of(final String extension, final String content) {
-        return new ResponseBody(HttpExtensionType.from(extension), content);
+        return new ResponseBody(ExtensionType.from(extension), content);
     }
 
-    public HttpExtensionType getHttpExtensionType() {
-        return httpExtensionType;
+    public ExtensionType getHttpExtensionType() {
+        return extensionType;
     }
 
     public String getContent() {

@@ -2,7 +2,7 @@ package nextstep.jwp;
 
 import java.io.IOException;
 import org.apache.catalina.AbstractController;
-import org.apache.coyote.http11.HttpExtensionType;
+import org.apache.coyote.http11.ExtensionType;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -14,7 +14,7 @@ public class HomeController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        final ResponseBody responseBody = ResponseBody.of(HttpExtensionType.HTML.getExtension(), DEFAULT_CONTENT);
+        final ResponseBody responseBody = ResponseBody.of(ExtensionType.HTML.getExtension(), DEFAULT_CONTENT);
         return HttpResponse.of(HttpStatusCode.OK, responseBody);
     }
 }

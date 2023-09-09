@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpExtensionType;
+import org.apache.coyote.http11.ExtensionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ class ResponseHeaderTest {
         // then
         assertAll(
                 () -> assertThat(responseHeader.getValue("Content-Type")).isEqualTo(
-                        HttpExtensionType.HTML.getContentType()),
+                        ExtensionType.HTML.getContentType()),
                 () -> assertThat(responseHeader.getValue("Content-Length")).isEqualTo(contentLength)
         );
     }
@@ -50,7 +50,7 @@ class ResponseHeaderTest {
     void getValue() {
         // given
         final ResponseBody responseBody = ResponseBody.html(CONTENT);
-        final String expected = HttpExtensionType.HTML.getContentType();
+        final String expected = ExtensionType.HTML.getContentType();
 
         // when
         final ResponseHeader responseHeader = ResponseHeader.from(responseBody);

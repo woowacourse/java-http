@@ -21,12 +21,12 @@ public class FileExtractor {
             return extractHtmlFile(resource);
         }
         final URL url = CLASSLOADER.getResource(STATIC + resource);
-        return ResponseBody.of(HttpExtensionType.from(resource).getExtension(), makeBodyContent(url));
+        return ResponseBody.of(ExtensionType.from(resource).getExtension(), makeBodyContent(url));
     }
 
     private static ResponseBody extractHtmlFile(final String resource) throws IOException {
-        final URL url = CLASSLOADER.getResource(STATIC + resource + HttpExtensionType.HTML.getExtension());
-        return ResponseBody.of(HttpExtensionType.HTML.getExtension(), makeBodyContent(url));
+        final URL url = CLASSLOADER.getResource(STATIC + resource + ExtensionType.HTML.getExtension());
+        return ResponseBody.of(ExtensionType.HTML.getExtension(), makeBodyContent(url));
     }
 
     private static String makeBodyContent(final URL url) throws IOException {

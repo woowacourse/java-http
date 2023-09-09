@@ -7,7 +7,7 @@ import nextstep.jwp.exception.NotAllowedMethodException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpExtensionTypeTest {
+class ExtensionTypeTest {
 
     @DisplayName("contentType을 올바르게 가져올 수 있다.")
     @Test
@@ -17,7 +17,7 @@ class HttpExtensionTypeTest {
         final String expected = "text/css";
 
         // when
-        final HttpExtensionType actual = HttpExtensionType.from(extension);
+        final ExtensionType actual = ExtensionType.from(extension);
 
         // then
         assertThat(actual.getContentType()).isEqualTo(expected);
@@ -30,7 +30,7 @@ class HttpExtensionTypeTest {
         final String extension = "EmptyExtension";
 
         // when & then
-        assertThatThrownBy(() -> HttpExtensionType.from(extension))
+        assertThatThrownBy(() -> ExtensionType.from(extension))
                 .isInstanceOf(NotAllowedMethodException.class)
                 .hasMessage("해당하는 Method가 존재하지 않습니다.");
     }

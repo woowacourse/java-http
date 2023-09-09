@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import nextstep.jwp.exception.NotAllowedMethodException;
 
-public enum HttpExtensionType {
+public enum ExtensionType {
 
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
@@ -14,12 +14,12 @@ public enum HttpExtensionType {
     private final String extension;
     private final String contentType;
 
-    HttpExtensionType(final String extension, final String contentType) {
+    ExtensionType(final String extension, final String contentType) {
         this.extension = extension;
         this.contentType = contentType;
     }
 
-    public static HttpExtensionType from(final String extension) {
+    public static ExtensionType from(final String extension) {
         return Arrays.stream(values())
                 .filter(it -> extension.contains(it.extension))
                 .findAny()

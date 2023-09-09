@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.http11.HttpExtensionType;
+import org.apache.coyote.http11.ExtensionType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ class ResponseBodyTest {
 
         // when & then
         assertAll(
-                () -> assertThat(responseBody.getHttpExtensionType()).isEqualTo(HttpExtensionType.HTML),
+                () -> assertThat(responseBody.getHttpExtensionType()).isEqualTo(ExtensionType.HTML),
                 () -> assertThat(responseBody.getContent()).isEqualTo(test)
         );
     }
@@ -32,7 +32,7 @@ class ResponseBodyTest {
 
         // when & then
         assertAll(
-                () -> assertThat(responseBody.getHttpExtensionType()).isEqualTo(HttpExtensionType.CSS),
+                () -> assertThat(responseBody.getHttpExtensionType()).isEqualTo(ExtensionType.CSS),
                 () -> assertThat(responseBody.getContent()).isEqualTo(test)
         );
     }

@@ -39,7 +39,7 @@ public class LoginController extends AbstractController {
                     .orElseThrow(LoginException::new);
 
             if (user.checkPassword(password)) {
-                log.info(user.toString());
+                log.info("user : " + user);
                 final HttpCookie cookie = HttpCookie.from(request.getRequestHeaders().geHeaderValue(COOKIE));
                 checkSession(user, cookie);
                 final ResponseBody responseBody = FileExtractor.extractFile(INDEX);

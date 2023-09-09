@@ -27,14 +27,6 @@ public class RequestPath {
         return new RequestPath(resource, QueryParameter.from(queryString));
     }
 
-    public boolean contains(final String extension) {
-        return resource.contains(extension);
-    }
-
-    public boolean isParamEmpty() {
-        return queryParameter.getParams().isEmpty();
-    }
-
     public String getResource() {
         return resource;
     }

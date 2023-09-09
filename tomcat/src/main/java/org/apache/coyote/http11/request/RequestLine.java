@@ -25,10 +25,6 @@ public class RequestLine {
         return new RequestLine(HttpMethod.from(split[0]), RequestPath.from(split[1]), split[2]);
     }
 
-    public boolean hasFileExtension(final String extension) {
-        return requestPath.isParamEmpty() && requestPath.contains(extension);
-    }
-
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

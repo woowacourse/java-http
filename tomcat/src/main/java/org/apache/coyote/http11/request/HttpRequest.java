@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
 
@@ -66,15 +65,6 @@ public class HttpRequest {
 
     public RequestHeader getRequestHeaders() {
         return requestHeader;
-    }
-
-    public String getSessionId() {
-        final HttpCookie cookie = requestHeader.getCookie();
-        return cookie.getJSessionId();
-    }
-
-    public Map<String, String> getQueryParameter() {
-        return requestLine.getRequestPath().getQueryParameter();
     }
 
     public Map<String, String> getRequestBody() {

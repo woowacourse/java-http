@@ -12,12 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class LoginController extends Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String SESSION_NAME = "JSESSIONID";
-    private static final String USER_KEY = "user";
     private static final String PASSWORD = "password";
 
     private final SessionManager sessionManager;
@@ -52,16 +51,12 @@ public class LoginController extends Controller {
 
     private String login(final HttpRequest request) {
         final Map<String, String> body = request.getBody();
-        if (request.containsCookie()) {
-            final String sessionId = request.getCookie().getValue(SESSION_NAME);
-            final HttpSession session = sessionManager.findSession(sessionId);
-            final User user = (User) session.getAttribute(USER_KEY);
-            return createResponse(isValidUser(user, body.get(PASSWORD)), session);
+        final Optional<User> user = InMemoryUserRepository.findByAccount(body.get("account"));
+        if (user.isPresent() && isValidUser(user.get(), body.get(PASSWORD))) {
+            final HttpSession newSession = sessionManager.createSession(user.get());
+            return createRedirectResponse(newSession, FileResolver.INDEX_HTML);
         }
-        final User user = InMemoryUserRepository.findByAccount(body.get("account"))
-                                                .orElseThrow(() -> new IllegalArgumentException("잘못된 유저 정보입니다."));
-        final HttpSession newSession = sessionManager.createSession(user);
-        return createResponse(true, newSession);
+        return createRedirectResponse(null, FileResolver.HTML_401);
     }
 
     private boolean isValidUser(final User user, final String password) {
@@ -70,12 +65,5 @@ public class LoginController extends Controller {
             return true;
         }
         return false;
-    }
-
-    private String createResponse(final boolean validUser, final HttpSession session) {
-        if (validUser) {
-            return createRedirectResponse(session, FileResolver.INDEX_HTML);
-        }
-        return createRedirectResponse(null, FileResolver.HTML_401);
     }
 }

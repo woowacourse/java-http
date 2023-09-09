@@ -122,7 +122,7 @@ class Http11ProcessorTest {
 
         @Test
         @DisplayName("현재 저장된 세션이 존재할 때, 로그인 화면에 접속하면 /index.html로 리다이렉트된다.")
-        void loginGet_already_login() throws IOException {
+        void loginGet_already_login() {
             // given
             String sessionId = createSessionId();
             final String httpRequest = String.join("\r\n",
@@ -216,6 +216,11 @@ class Http11ProcessorTest {
 
             // when
             processor.process(socket);
+            var registerActual = socket.output();
+
+            loginAfterRegister(socket);
+            var loginActual = socket.output();
+
             // then
             var expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Length: 0 \r\n" +
@@ -223,7 +228,25 @@ class Http11ProcessorTest {
                     "Location: /index.html \r\n" +
                     "\r\n";
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(registerActual).isEqualTo(expected);
+
+            var expectedStart = "HTTP/1.1 302 Found \r\n";
+            assertThat(loginActual).startsWith(expectedStart);
+        }
+
+        private void loginAfterRegister(StubSocket socket) {
+            final String loginRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 30 ",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "",
+                    "account=amaranth&password=test");
+
+            final Http11Processor processor = new Http11Processor(new StubSocket(loginRequest));
+
+            processor.process(socket);
         }
 
         @Test

@@ -4,6 +4,7 @@ package org.apache.coyote.request;
 public class HttpRequestLine {
 
     private static final String SEPERATOR = " ";
+
     private final String method;
     private final RequestUri requestUri;
     private final String version;

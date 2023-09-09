@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HttpRequestBody {
 
-    public static final String BODY_SEPERATOR = "=";
+    private static final String BODY_SEPERATOR = "=";
     private static final String SEPERATOR = "&";
     private final Map<String, String> body;
 
@@ -16,7 +16,7 @@ public class HttpRequestBody {
     public static HttpRequestBody from(String requestBody) {
         Map<String, String> body = new HashMap<>();
 
-        String[] keyValuePairs = requestBody.split("&");
+        String[] keyValuePairs = requestBody.split(SEPERATOR);
         for (String pair : keyValuePairs) {
             String[] keyValue = pair.split(BODY_SEPERATOR);
             if (keyValue.length == 2) {

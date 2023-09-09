@@ -9,6 +9,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.exception.ResourceLoadingException;
+import org.apache.coyote.http11.header.HeaderName;
 import org.apache.coyote.http11.parser.CookieParser;
 import org.apache.coyote.http11.parser.FormDataParser;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -53,8 +54,8 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isSessionValid(final HttpRequest httpRequest) {
-        if (httpRequest.containsHeader("cookie")) {
-            final String cookieValue = httpRequest.getHeader("cookie");
+        if (httpRequest.containsHeader(HeaderName.COOKIE.getValue())) {
+            final String cookieValue = httpRequest.getHeader(HeaderName.COOKIE.getValue());
             final Map<String, String> cookieValues = CookieParser.parse(cookieValue);
 
             if (cookieValues.containsKey(SESSION_COOKIE_KEY)) {

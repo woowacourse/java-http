@@ -153,7 +153,7 @@ class Http11ProcessorTest {
             "GET /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
-            "cookie: JSESSIONID=" + userSession.getUuid() + " ",
+            "Cookie: JSESSIONID=" + userSession.getUuid() + " ",
             "",
             ""
         );

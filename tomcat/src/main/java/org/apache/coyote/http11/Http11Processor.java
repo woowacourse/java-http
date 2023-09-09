@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +127,7 @@ public class Http11Processor implements Runnable, Processor {
         if (requestUri.equals("/register")) {
             return handleRegisterRequest(splitRequestBody);
         }
-        return RequestHandler.of("GET", "404 Not Found", "static/404.html");
+        return RequestHandler.of("GET", HttpStatus.NOT_FOUND.getCodeWithMessage(), "static/404.html");
     }
 
     private RequestHandler handleLoginRequest(String[] splitQueryString) {
@@ -134,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> password = getValueOf("password", splitQueryString);
 
         if (account.isEmpty() || password.isEmpty()) {
-            return RequestHandler.of("GET", "400 Bad Request", "static/401.html");
+            return RequestHandler.of("GET", HttpStatus.NOT_FOUND.getCodeWithMessage(), "static/401.html");
         }
 
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account.get());
@@ -144,11 +145,11 @@ public class Http11Processor implements Runnable, Processor {
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
-            RequestHandler requestHandler = RequestHandler.of("GET", "302 Found", "static/index.html");
+            RequestHandler requestHandler = RequestHandler.of("GET", HttpStatus.FOUND.getCodeWithMessage(), "static/index.html");
             requestHandler.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
             return requestHandler;
         }
-        return RequestHandler.of("GET", "401 Unauthorized", "static/401.html");
+        return RequestHandler.of("GET", HttpStatus.UNAUTHORIZED.getCodeWithMessage(), "static/401.html");
     }
 
     private Optional<String> getValueOf(String key, String[] splitQueryString) {
@@ -169,11 +170,11 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> password = getValueOf("password", splitQueryString);
 
         if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            return RequestHandler.of("GET", "400 Bad Request", "static/register.html");
+            return RequestHandler.of("GET", HttpStatus.BAD_REQUEST.getCodeWithMessage(), "static/register.html");
         }
 
         InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
-        return RequestHandler.of("GET", "302 Found", "static/index.html");
+        return RequestHandler.of("GET", HttpStatus.FOUND.getCodeWithMessage(), "static/index.html");
     }
 
     private RequestHandler handleGetRequest(
@@ -190,20 +191,20 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String fileName = "static" + requestUri;
-        return RequestHandler.of("GET", "200 OK", fileName);
+        return RequestHandler.of("GET", HttpStatus.OK.getCodeWithMessage(), fileName);
     }
 
     private RequestHandler handleLoginPageRequest(List<String> cookies) {
         Optional<String> sessionId = getSessionFrom(cookies);
         if (sessionId.isEmpty()) {
-            return RequestHandler.of("GET", "200 OK", "static/login.html");
+            return RequestHandler.of("GET", HttpStatus.OK.getCodeWithMessage(), "static/login.html");
         }
         Session session = sessionManager.findSession(sessionId.get());
         User user = getUser(session);
         if (InMemoryUserRepository.existsByAccount(user.getAccount())) {
-            return RequestHandler.of("GET", "302 Found", "static/index.html");
+            return RequestHandler.of("GET", HttpStatus.NOT_FOUND.getCodeWithMessage(), "static/index.html");
         }
-        return RequestHandler.of("GET", "200 OK", "static/login.html");
+        return RequestHandler.of("GET", HttpStatus.OK.getCodeWithMessage(), "static/login.html");
     }
 
     private Optional<String> getSessionFrom(List<String> cookies) {

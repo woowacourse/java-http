@@ -3,24 +3,18 @@ package org.apache.coyote.http11.response;
 public class StatusLine {
 
     private final String httpVersion;
-    private final String statusCode;
-    private final String statusMessage;
+    private final HttpStatus httpStatus;
 
-    public StatusLine(String httpVersion, String statusCode, String statusMessage) {
+    public StatusLine(String httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+        this.httpStatus = httpStatus;
     }
 
     public String getHttpVersion() {
         return httpVersion;
     }
 
-    public String getStatusCode() {
-        return statusCode;
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 }

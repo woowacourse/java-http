@@ -7,6 +7,7 @@ import org.apache.coyote.http.HttpRequestParser;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.SessionManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -19,7 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class LoginControllerTest {
 
-    private final HttpResponse httpResponse = new HttpResponse();
+    private HttpResponse httpResponse;
+
+    @BeforeEach
+    void setUp() {
+        httpResponse = new HttpResponse();
+    }
 
     @Test
     void processGet() throws IOException {
@@ -32,8 +38,6 @@ class LoginControllerTest {
 
         //when
         String response = loginController.process(httpRequest, httpResponse);
-
-        System.out.println(response);
 
         //then
         assertAll(
@@ -58,8 +62,6 @@ class LoginControllerTest {
 
         //when
         String response = loginController.process(httpRequest, httpResponse);
-
-        System.out.println(response);
 
         //then
         Assertions.assertAll(

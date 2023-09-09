@@ -1,8 +1,8 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,20 +27,20 @@ class Http11ProcessorTest {
         final String actual = socket.output();
         final List<String> expected = List.of("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/plain;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
 
         final boolean allMatch = expected.stream()
-                        .allMatch(actual::contains);
+                .allMatch(actual::contains);
         assertThat(allMatch).isTrue();
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -63,7 +63,7 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 
         boolean allMatches = expected.stream()
-                        .allMatch(actual::contains);
+                .allMatch(actual::contains);
         assertThat(allMatches).isTrue();
     }
 }

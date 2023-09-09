@@ -47,23 +47,8 @@ public class HttpResponse {
     }
 
     private String getContentType(final String filePath) {
-        final String[] fileNameSplit = filePath.split("\\.");
-        final String fileType = fileNameSplit[fileNameSplit.length - 1];
-
-        if (fileType.equals("html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (fileType.equals("css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (fileType.equals("js")) {
-            return "application/javascript";
-        }
-
-        if (filePath.equals("/")) {
-            return "text/html;charset=utf-8";
-        }
-        return null;
+        final HttpContentType contentType = HttpContentType.getByFilePath(filePath);
+        return contentType.getHeaderString();
     }
 
     public HttpResponse redirectTo(final String redirectUrl) {

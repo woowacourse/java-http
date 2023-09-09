@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,5 +38,17 @@ public class HttpHeaders {
 
     public List<String> get(String key) {
         return headers.getOrDefault(key, HeaderValue.empty()).getValues();
+    }
+
+    public String format() {
+        StringBuilder headerBuilder = new StringBuilder();
+
+        List<String> keys = new ArrayList<>(headers.keySet());
+        Collections.sort(keys);
+        for (String key : keys) {
+            headerBuilder.append(key).append(KEY_VALUE_DELIMITER + " ").append(headers.get(key).format());
+            headerBuilder.append(" ").append("\r\n");
+        }
+        return headerBuilder.toString();
     }
 }

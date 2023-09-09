@@ -5,6 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,34 +58,23 @@ public class Http11Processor implements Runnable, Processor {
                 lines.add(line);
             }
             HttpRequest httpRequest = HttpRequest.from(lines);
-            String contentTypeHeader = getContentTypeHeaderFrom(httpRequest);
 
-            RequestHandler requestHandler;
+            HttpResponse httpResponse;
             if (httpRequest.method().equals("POST")) {
                 int contentLength = getContentLength(lines);
                 String requestBody = readRequestBody(bufferedReader, contentLength);
-                requestHandler = handlePostRequest(httpRequest.path(), requestBody);
+                httpResponse = handlePostRequest(httpRequest, requestBody);
             } else {
                 List<String> cookieHeaderValues = httpRequest.header("Cookie");
-                requestHandler = handleGetRequest(httpRequest.method(), httpRequest.path(), cookieHeaderValues);
+                httpResponse = handleGetRequest(httpRequest, cookieHeaderValues);
             }
 
-            String responseBody = readFile(requestHandler.getResponseFilePath());
-
-            List<String> responseHeaders = new ArrayList<>();
-            responseHeaders.add(httpRequest.httpVersion() + " " + requestHandler.getHttpStatus() + " ");
-            responseHeaders.add(contentTypeHeader);
-            responseHeaders.add("Content-Length: " + responseBody.getBytes().length + " ");
-            for (Entry<String, String> headerEntry : requestHandler.getHeaders().entrySet()) {
-                responseHeaders.add(headerEntry.getKey() + ": " + headerEntry.getValue());
-            }
-            String responseHeader = String.join("\r\n", responseHeaders);
+            httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getBody().getBytes().length));
+            httpResponse.addHeader("Content-Type", getContentTypeHeaderFrom(httpRequest));
 
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
 
-            var response = String.join("\r\n", responseHeader, "", responseBody);
-
-            bufferedOutputStream.write(response.getBytes());
+            bufferedOutputStream.write(httpResponse.format().getBytes());
             bufferedOutputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -95,9 +84,9 @@ public class Http11Processor implements Runnable, Processor {
     private static String getContentTypeHeaderFrom(HttpRequest httpRequest) {
         List<String> acceptHeaderValues = httpRequest.header("Accept");
         if (acceptHeaderValues != null && acceptHeaderValues.contains("text/css")) {
-            return "Content-Type: text/css;charset=utf-8 ";
+            return "text/css;charset=utf-8";
         }
-        return "Content-Type: text/html;charset=utf-8 ";
+        return "text/html;charset=utf-8";
     }
 
     private int getContentLength(List<String> headers) {
@@ -119,23 +108,23 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private RequestHandler handlePostRequest(String requestUri, String requestBody) {
+    private HttpResponse handlePostRequest(HttpRequest request, String requestBody) {
         String[] splitRequestBody = requestBody.split("&");
-        if (requestUri.equals("/login")) {
-            return handleLoginRequest(splitRequestBody);
+        if (request.path().equals("/login")) {
+            return handleLoginRequest(request.httpVersion(), splitRequestBody);
         }
-        if (requestUri.equals("/register")) {
-            return handleRegisterRequest(splitRequestBody);
+        if (request.path().equals("/register")) {
+            return handleRegisterRequest(request.httpVersion(), splitRequestBody);
         }
-        return RequestHandler.of("GET", HttpStatus.NOT_FOUND.getCodeWithMessage(), "static/404.html");
+        return HttpResponse.of(request.httpVersion(), HttpStatus.NOT_FOUND, readFile("/404.html"));
     }
 
-    private RequestHandler handleLoginRequest(String[] splitQueryString) {
+    private HttpResponse handleLoginRequest(String httpVersion, String[] splitQueryString) {
         Optional<String> account = getValueOf("account", splitQueryString);
         Optional<String> password = getValueOf("password", splitQueryString);
 
         if (account.isEmpty() || password.isEmpty()) {
-            return RequestHandler.of("GET", HttpStatus.NOT_FOUND.getCodeWithMessage(), "static/401.html");
+            return HttpResponse.of(httpVersion, HttpStatus.NOT_FOUND, readFile("/401.html"));
         }
 
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account.get());
@@ -145,11 +134,11 @@ public class Http11Processor implements Runnable, Processor {
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
-            RequestHandler requestHandler = RequestHandler.of("GET", HttpStatus.FOUND.getCodeWithMessage(), "static/index.html");
-            requestHandler.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-            return requestHandler;
+            HttpResponse response = HttpResponse.of(httpVersion, HttpStatus.FOUND, readFile("/index.html"));
+            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            return response;
         }
-        return RequestHandler.of("GET", HttpStatus.UNAUTHORIZED.getCodeWithMessage(), "static/401.html");
+        return HttpResponse.of(httpVersion, HttpStatus.UNAUTHORIZED, readFile("/401.html"));
     }
 
     private Optional<String> getValueOf(String key, String[] splitQueryString) {
@@ -164,47 +153,41 @@ public class Http11Processor implements Runnable, Processor {
         return splitActual[0].equals(expected);
     }
 
-    private RequestHandler handleRegisterRequest(String[] splitQueryString) {
+    private HttpResponse handleRegisterRequest(String httpVersion, String[] splitQueryString) {
         Optional<String> account = getValueOf("account", splitQueryString);
         Optional<String> email = getValueOf("email", splitQueryString);
         Optional<String> password = getValueOf("password", splitQueryString);
 
         if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            return RequestHandler.of("GET", HttpStatus.BAD_REQUEST.getCodeWithMessage(), "static/register.html");
+            return HttpResponse.of(httpVersion, HttpStatus.BAD_REQUEST, readFile("/register.html"));
         }
 
         InMemoryUserRepository.save(new User(account.get(), password.get(), email.get()));
-        return RequestHandler.of("GET", HttpStatus.FOUND.getCodeWithMessage(), "static/index.html");
+        return HttpResponse.of(httpVersion, HttpStatus.FOUND, readFile("/index.html"));
     }
 
-    private RequestHandler handleGetRequest(
-            String requestMethod,
-            String requestUri,
-            List<String> cookies
-    ) {
-        if (!requestMethod.equalsIgnoreCase("GET")) {
+    private HttpResponse handleGetRequest(HttpRequest request, List<String> cookies) {
+        if (!request.method().equalsIgnoreCase("GET")) {
             throw new IllegalArgumentException("GET 요청만 처리 가능합니다.");
         }
 
-        if (requestUri.equals("/login.html") || requestUri.equals("/login")) {
-            return handleLoginPageRequest(cookies);
+        if (request.path().equals("/login.html") || request.path().equals("/login")) {
+            return handleLoginPageRequest(request.httpVersion(), cookies);
         }
-
-        String fileName = "static" + requestUri;
-        return RequestHandler.of("GET", HttpStatus.OK.getCodeWithMessage(), fileName);
+        return HttpResponse.of(request.httpVersion(), HttpStatus.OK, readFile(request.path()));
     }
 
-    private RequestHandler handleLoginPageRequest(List<String> cookies) {
+    private HttpResponse handleLoginPageRequest(String httpVersion, List<String> cookies) {
         Optional<String> sessionId = getSessionFrom(cookies);
         if (sessionId.isEmpty()) {
-            return RequestHandler.of("GET", HttpStatus.OK.getCodeWithMessage(), "static/login.html");
+            return HttpResponse.of(httpVersion, HttpStatus.OK, readFile("/login.html"));
         }
         Session session = sessionManager.findSession(sessionId.get());
         User user = getUser(session);
         if (InMemoryUserRepository.existsByAccount(user.getAccount())) {
-            return RequestHandler.of("GET", HttpStatus.NOT_FOUND.getCodeWithMessage(), "static/index.html");
+            return HttpResponse.of(httpVersion, HttpStatus.NOT_FOUND, readFile("/index.html"));
         }
-        return RequestHandler.of("GET", HttpStatus.OK.getCodeWithMessage(), "static/login.html");
+        return HttpResponse.of(httpVersion, HttpStatus.OK, readFile("/login.html"));
     }
 
     private Optional<String> getSessionFrom(List<String> cookies) {
@@ -218,7 +201,8 @@ public class Http11Processor implements Runnable, Processor {
         return (User) session.getAttribute("user");
     }
 
-    private String readFile(String filePath) {
+    private String readFile(String fileName) {
+        String filePath = this.getClass().getClassLoader().getResource("static" + fileName).getPath();
         try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
             return lines.collect(Collectors.joining("\n", "", "\n"));
         } catch (IOException | UncheckedIOException e) {

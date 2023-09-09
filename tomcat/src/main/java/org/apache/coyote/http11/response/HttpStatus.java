@@ -15,7 +15,7 @@ public enum HttpStatus {
         this.code = code;
     }
 
-    public String getCodeWithMessage() {
-        return this.code + " " + this.name();
+    public String getCode() {
+        return code;
     }
 }

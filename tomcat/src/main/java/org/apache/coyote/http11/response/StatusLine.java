@@ -17,4 +17,14 @@ public class StatusLine {
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }
+
+    public String format() {
+        return String.join(
+                " ",
+                httpVersion,
+                httpStatus.getCode(),
+                httpStatus.name(),
+                "\r\n"
+        );
+    }
 }

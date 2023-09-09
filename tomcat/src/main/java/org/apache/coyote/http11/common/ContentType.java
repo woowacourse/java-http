@@ -24,11 +24,10 @@ public enum ContentType {
         return detail;
     }
 
-    public static String getDetailfromExtension(String extension) {
+    public static ContentType getContentTypeFromExtension(String extension) {
         return Arrays.stream(ContentType.values())
                 .filter(it -> it.extension.equals(extension))
                 .findFirst()
-                .map(ContentType::getDetail)
                 .orElseThrow(() -> new IllegalArgumentException("No enum constant with extension: " + extension));
     }
 }

@@ -16,9 +16,9 @@ class ContentTypeTest {
         String extension = ".css";
 
         // when
-        String actual = ContentType.getDetailfromExtension(extension);
+        ContentType contentType = ContentType.getContentTypeFromExtension(extension);
 
         // then
-        assertThat(actual).isEqualTo("text/css");
+        assertThat(contentType).isEqualTo(ContentType.TEXT_CSS);
     }
 }

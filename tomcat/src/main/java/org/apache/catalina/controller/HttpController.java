@@ -67,6 +67,10 @@ public abstract class HttpController implements Controller {
     }
 
     public abstract boolean canHandle(final HttpRequest httpRequest);
-    public abstract void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException;
-    public abstract void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException;
+
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    }
+
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    }
 }

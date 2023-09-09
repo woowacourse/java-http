@@ -30,8 +30,4 @@ public class RootController extends HttpController {
         httpResponse.setStatusCode(OK);
         httpResponse.setBody("Hello world!");
     }
-
-    @Override
-    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-    }
 }

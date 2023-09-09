@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpStatus;
@@ -11,6 +12,7 @@ public class HttpResponse {
     private final Headers headers = new Headers();
     private HttpStatus httpStatus;
     private HttpCookie httpCookie = new HttpCookie();
+    private Session session;
     private String redirect;
 
     public HttpResponse(HttpVersion httpVersion) {
@@ -32,8 +34,14 @@ public class HttpResponse {
         return this;
     }
 
-    public void setCookie(final String key, final String value) {
+    public HttpResponse setSession(final Session session) {
+        this.session = session;
+        return this;
+    }
+
+    public HttpResponse setCookie(final String key, final String value) {
         httpCookie.put(key, value);
+        return this;
     }
 
     public HttpVersion getHttpVersion() {
@@ -54,5 +62,9 @@ public class HttpResponse {
 
     public HttpCookie getHttpCookie() {
         return httpCookie;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

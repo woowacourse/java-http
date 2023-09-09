@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.Session;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpMethod;
@@ -9,6 +10,7 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final Headers headers;
     private final RequestBody requestBody;
+    private Session session;
 
     public HttpRequest(
             final RequestLine requestLine,
@@ -32,6 +34,15 @@ public class HttpRequest {
         return headers.parseCookie();
     }
 
+    public void setSession(final Session session) {
+        this.session = session;
+    }
+
+    public String parseSessionId() {
+        final HttpCookie httpCookie = headers.parseCookie();
+        return httpCookie.getJSessionId();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -42,5 +53,9 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

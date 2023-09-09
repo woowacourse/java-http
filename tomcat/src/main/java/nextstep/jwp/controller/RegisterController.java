@@ -9,10 +9,7 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
-
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-    private static final String EMAIL = "email";
+    
     private static final String INDEX_PAGE = "/index.html";
     private static final String REGISTER_PAGE = "/register.html";
     private static final String CONFLICT_PAGE = "/409.html";
@@ -20,7 +17,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final RequestBody requestBody = request.getRequestBody();
-        final String account = requestBody.get(ACCOUNT);
+        final String account = requestBody.get("account");
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             response.setHttpStatus(HttpStatus.CONFLICT)
@@ -28,8 +25,8 @@ public class RegisterController extends AbstractController {
             return;
         }
 
-        final String password = requestBody.get(PASSWORD);
-        final String email = requestBody.get(EMAIL);
+        final String password = requestBody.get("password");
+        final String email = requestBody.get("email");
         InMemoryUserRepository.save(new User(account, password, email));
         response.setHttpStatus(HttpStatus.FOUND)
                 .addHeader("Location", INDEX_PAGE)

@@ -1,5 +1,6 @@
 package org.apache.catalina;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,12 @@ public class Session {
     private final Map<String, Object> items = new HashMap<>();
 
     public Session(final String id) {
+        this(id, Collections.emptyMap());
+    }
+
+    public Session(final String id, Map<String, Object> attributes) {
         this.id = id;
+        this.items.putAll(attributes);
     }
 
     public Object getAttribute(final String key) {

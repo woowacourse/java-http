@@ -12,6 +12,7 @@ public class RequestMapper implements Mapper {
 
     private final Controller defaultController;
     private final Map<String, Controller> controllers = new HashMap<>();
+    private final SessionManager sessionManager = new SessionManager();
 
     public RequestMapper(final Controller defaultController) {
         this.defaultController = defaultController;
@@ -25,7 +26,26 @@ public class RequestMapper implements Mapper {
     @Override
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final RequestLine requestLine = httpRequest.getRequestLine();
+        setSessionToHttpRequest(httpRequest);
         final Controller controller = controllers.getOrDefault(requestLine.parseUri(), defaultController);
         controller.service(httpRequest, httpResponse);
+        addSession(httpResponse);
+    }
+
+    private void setSessionToHttpRequest(final HttpRequest httpRequest) {
+        final String sessionId = httpRequest.parseSessionId();
+        if (sessionId == null) {
+            return;
+        }
+        final Session session = sessionManager.findSession(sessionId);
+        httpRequest.setSession(session);
+    }
+
+    private void addSession(final HttpResponse httpResponse) {
+        final Session session = httpResponse.getSession();
+        if (session == null) {
+            return;
+        }
+        sessionManager.add(session);
     }
 }

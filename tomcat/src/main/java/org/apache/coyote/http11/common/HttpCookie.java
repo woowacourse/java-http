@@ -46,7 +46,7 @@ public class HttpCookie {
     }
 
     public String getJSessionId() {
-        return items.getOrDefault(JSESSION_ID, EMPTY);
+        return items.get(JSESSION_ID);
     }
 
     public boolean isEmpty() {

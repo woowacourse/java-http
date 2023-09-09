@@ -55,10 +55,9 @@ class LoginControllerTest {
     void GET_요청을_받았을_때_세션에_사용자_정보가_있는_경우_index_페이지를_반환하도록_설정한다() {
         // given
         final RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
-        final Headers header = new Headers();
         final String uuid = UUID.randomUUID().toString();
-        header.addHeader("Cookie", "JSESSIONID=" + uuid);
-        final HttpRequest httpRequest = new HttpRequest(requestLine, header, new RequestBody());
+        final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), new RequestBody());
+        httpRequest.setSession(new Session(uuid));
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
         sessionManager.add(new Session(uuid));
 

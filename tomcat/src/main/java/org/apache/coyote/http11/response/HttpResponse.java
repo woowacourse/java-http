@@ -27,15 +27,8 @@ public class HttpResponse {
         return new HttpResponse(statusLine, responseHeader, responseBody);
     }
 
-    public static HttpResponse withCookie(
-            final HttpStatusCode httpStatusCode,
-            final ResponseBody responseBody,
-            final HttpCookie httpCookie
-    ) {
-        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+    public void addCookie(final HttpCookie httpCookie) {
         responseHeader.addCookie(httpCookie);
-        final StatusLine statusLine = new StatusLine(httpStatusCode);
-        return new HttpResponse(statusLine, responseHeader, responseBody);
     }
 
     public StatusLine getStatusLine() {

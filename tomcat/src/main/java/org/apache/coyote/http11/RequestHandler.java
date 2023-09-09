@@ -35,7 +35,9 @@ public class RequestHandler {
             final HttpCookie cookie = HttpCookie.from(httpRequest.getRequestHeaders().geHeaderValue("Cookie"));
             if (cookie.contains("JSESSIONID")) {
                 final ResponseBody responseBody = FileExtractor.extractHtmlFile("/index");
-                return HttpResponse.withCookie(HttpStatusCode.FOUND, responseBody, cookie);
+                final HttpResponse httpResponse = HttpResponse.of(HttpStatusCode.FOUND, responseBody);
+                httpResponse.addCookie(cookie);
+                return httpResponse;
             }
             final ResponseBody responseBody = FileExtractor.extractHtmlFile(requestResource);
             return HttpResponse.of(HttpStatusCode.OK, responseBody);
@@ -60,7 +62,9 @@ public class RequestHandler {
                         cookie.setCookie("JSESSIONID", UUID.randomUUID().toString());
                     }
                     final ResponseBody responseBody = FileExtractor.extractHtmlFile("/index");
-                    return HttpResponse.withCookie(HttpStatusCode.FOUND, responseBody, cookie);
+                    final HttpResponse httpResponse = HttpResponse.of(HttpStatusCode.FOUND, responseBody);
+                    httpResponse.addCookie(cookie);
+                    return httpResponse;
                 }
                 throw new LoginException();
             } catch (LoginException exception) {

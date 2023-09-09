@@ -1,6 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.request.RequestURI;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

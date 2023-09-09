@@ -3,9 +3,8 @@ package nextstep.jwp.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.coyote.http11.controller.AbstractController;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

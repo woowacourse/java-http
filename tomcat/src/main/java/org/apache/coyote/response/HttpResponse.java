@@ -1,7 +1,7 @@
 package org.apache.coyote.response;
 
-import org.apache.coyote.ContentType;
-import org.apache.coyote.HttpCookie;
+import org.apache.coyote.common.ContentType;
+import org.apache.coyote.common.HttpCookie;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -5,10 +5,10 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.manager.SessionManager;
-import org.apache.coyote.ContentType;
-import org.apache.coyote.HttpCookie;
 import org.apache.coyote.Processor;
-import org.apache.coyote.Session;
+import org.apache.coyote.common.ContentType;
+import org.apache.coyote.common.HttpCookie;
+import org.apache.coyote.common.Session;
 import org.apache.coyote.request.*;
 import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.apache.coyote.ContentType.HTML;
+import static org.apache.coyote.common.ContentType.HTML;
 import static org.apache.coyote.response.HttpStatus.FOUND;
 import static org.apache.coyote.response.HttpStatus.OK;
 

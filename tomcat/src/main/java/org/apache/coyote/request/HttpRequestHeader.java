@@ -1,6 +1,6 @@
 package org.apache.coyote.request;
 
-import org.apache.coyote.HttpCookie;
+import org.apache.coyote.common.HttpCookie;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;

@@ -1,6 +1,6 @@
 package org.apache.catalina.manager;
 
-import org.apache.coyote.Session;
+import org.apache.coyote.common.Session;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -25,4 +25,12 @@ public enum Extension {
                      .findAny()
                      .orElseThrow(() -> new IllegalArgumentException("잘못된 확장자입니다. " + uri));
     }
+
+    public static void validateContaining(final String uri) {
+        final boolean hasExtension = Arrays.stream((Extension.values()))
+                                           .anyMatch(extension -> uri.contains(extension.value));
+        if (!hasExtension) {
+            throw new IllegalArgumentException("확장자가 포함되어 있지 않습니다.");
+        }
+    }
 }

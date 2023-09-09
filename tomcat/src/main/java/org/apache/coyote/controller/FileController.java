@@ -11,25 +11,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 public class FileController extends Controller {
 
-    private static final List<String> resources = List.of(
-            "chart-area.js",
-            "chart-bar.js",
-            "chart-pie.js",
-            "script.js",
-            "styles.css",
-            "401.html",
-            "401.html",
-            "500.html",
-            "index.html",
-            "login.html",
-            "register.html",
-            "/"
-    );
     private static final String STATIC = "static";
 
     private FileController() {
@@ -41,26 +26,14 @@ public class FileController extends Controller {
 
     @Override
     public String run(final HttpRequest request) throws IOException {
-        validateExtension(request.getUri());
-        return createResponse(request.getUri());
-    }
-
-    private void validateExtension(final String fileName) {
-        final boolean containsExtension = resources.stream()
-                                                   .anyMatch(fileName::contains);
-        if (!containsExtension) {
-            throw new IllegalArgumentException("확장자를 포함하고 있지 않습니다.");
-        }
+        final String uri = request.getUri();
+        Extension.validateContaining(uri);
+        return createResponse(uri);
     }
 
     public String createResponse(final String uri) throws IOException {
         final String responseBody = getResponseBody(uri);
         return createResponseHeader(uri, responseBody);
-    }
-
-    public String createResponse(final FileResolver file) throws IOException {
-        final String responseBody = getResponseBody("/" + file.getFileName());
-        return createResponseHeader(file.getFileName(), responseBody);
     }
 
     private String getResponseBody(final String uri) throws IOException {
@@ -87,5 +60,10 @@ public class FileController extends Controller {
                 HttpResponse.EMPTY.getValue(),
                 responseBody
         );
+    }
+
+    public String createResponse(final FileResolver file) throws IOException {
+        final String responseBody = getResponseBody("/" + file.getFileName());
+        return createResponseHeader(file.getFileName(), responseBody);
     }
 }

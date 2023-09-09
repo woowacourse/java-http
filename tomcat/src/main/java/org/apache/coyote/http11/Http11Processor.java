@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.*;
 import org.apache.coyote.response.HttpResponse;
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 import static org.apache.coyote.ContentType.HTML;
@@ -45,6 +48,8 @@ public class Http11Processor implements Runnable, Processor {
 
             String path = requestUri.getPath();
 
+            System.out.println("path = " + path);
+
             HttpResponse response = null;
 
             // / 일때 분기
@@ -53,13 +58,15 @@ public class Http11Processor implements Runnable, Processor {
                         .contentType(HTML)
                         .body("hello world")
                         .build();
-            }
+            } else {
+                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + requestUri.getPath())).getPath());
+                var responseBody = new String(Files.readAllBytes(filePath));
 
-//            // path 가 index 일때 분기
-//            if (path.equals("/index")) {
-//                final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + path)).getPath());
-//                responseBody = new String(Files.readAllBytes(filePath));
-//            }
+                response = new HttpResponse.Builder()
+                        .contentType(ContentType.from(requestUri.getExtension()))
+                        .body(responseBody)
+                        .build();
+            }
 //
 //            // path 가 login 일때 분기
 //            if (path.equals("/login") && httpRequestLine.isGetMethod()) {

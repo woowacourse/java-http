@@ -1,15 +1,13 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.Handlers;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
@@ -36,12 +34,13 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            ResponseEntity responseEntity = Handlers.handle(httpRequest);
-            String response = responseEntity.generateResponseMessage();
+            HttpResponse httpResponse = HttpResponse.create();
+            Handlers.handle(httpRequest, httpResponse);
+            String response = httpResponse.generateResponseMessage();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -18,7 +18,7 @@ class RegisterHandlerTest {
     private final RegisterHandler registerHandler = new RegisterHandler();
 
     @Test
-    void GET_요청_시_registerHTML반환() throws IOException {
+    void GET_요청_시_registerHTML반환() throws Exception {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /register.html HTTP/1.1 ",
@@ -31,8 +31,9 @@ class RegisterHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = registerHandler.handle(HttpRequest.from(request));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = HttpResponse.create();
+        registerHandler.handle(HttpRequest.from(request), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         String[] responseElements = response.split("\r\n");
         String responseBody = responseElements[responseElements.length - 1];
@@ -42,7 +43,7 @@ class RegisterHandlerTest {
     }
 
     @Test
-    void POST_요청_시_indexHTML로_리다이렉션() throws IOException {
+    void POST_요청_시_indexHTML로_리다이렉션() throws Exception {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
@@ -56,8 +57,9 @@ class RegisterHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = registerHandler.handle(HttpRequest.from(request));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = HttpResponse.create();
+        registerHandler.handle(HttpRequest.from(request), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         // then
         assertThat(response).contains(

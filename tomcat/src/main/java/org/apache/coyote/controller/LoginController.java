@@ -40,7 +40,7 @@ public class LoginController extends Controller {
         if (HttpMethod.POST.isSameMethod(method)) {
             return login(request);
         }
-        return null;
+        throw new IllegalArgumentException("잘못된 메소드 형식입니다.");
     }
 
     private String getLoginPage(final HttpRequest request) {

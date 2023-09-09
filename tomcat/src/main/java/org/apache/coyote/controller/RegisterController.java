@@ -32,6 +32,6 @@ public class RegisterController extends Controller {
             InMemoryUserRepository.save(user);
             return createRedirectResponse(null, FileResolver.INDEX_HTML);
         }
-        return null;
+        throw new IllegalArgumentException("잘못된 메소드 형식입니다.");
     }
 }

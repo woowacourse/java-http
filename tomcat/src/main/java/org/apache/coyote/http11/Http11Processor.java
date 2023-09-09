@@ -5,7 +5,6 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.mvc.FrontController;
-import org.apache.coyote.http11.mvc.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.parser.HttpRequestMessageReader;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -36,10 +35,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
             final HttpResponse httpResponse = new HttpResponse();
-
-            FrontController frontController = new FrontController(new RequestMapping()); //FIXME DI
-            frontController.handleHttpRequest(httpRequest, httpResponse);
-
+            FrontController.handleHttpRequest(httpRequest, httpResponse);
             HttpResponseMessageWriter.writeHttpResponse(httpResponse, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

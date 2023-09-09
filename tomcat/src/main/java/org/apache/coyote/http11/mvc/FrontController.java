@@ -6,14 +6,14 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class FrontController {
 
-    private final RequestMapping requestMapping;
-
-    public FrontController(final RequestMapping requestMapping) {
-        this.requestMapping = requestMapping;
+    private FrontController() {
     }
 
-    public void handleHttpRequest(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final Controller controller = requestMapping.getController(httpRequest.getHttpStartLine());
+    public static void handleHttpRequest(
+            final HttpRequest httpRequest,
+            final HttpResponse httpResponse
+    ) throws IOException {
+        final Controller controller = RequestMapping.getController(httpRequest.getHttpStartLine());
         controller.service(httpRequest, httpResponse);
     }
 }

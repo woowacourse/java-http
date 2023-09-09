@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.session;
 
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
 
 import java.util.HashMap;
@@ -8,7 +9,7 @@ import java.util.Optional;
 
 public class SessionManager {
 
-    private static Map<String, Session> sessions = new HashMap<>();
+    private static Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public static void add(Session session) {
         sessions.put(session.getId(), session);

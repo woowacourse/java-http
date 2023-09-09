@@ -25,7 +25,6 @@ public class LoginServlet extends Servlet {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
-        System.out.println("LoginServlet.doGet");
         if (isLoggedIn(request)) {
             response.setStatusCode(StatusCode.FOUND);
             response.setLocation(Page.INDEX);

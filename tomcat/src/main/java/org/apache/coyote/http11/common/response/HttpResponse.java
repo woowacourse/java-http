@@ -26,14 +26,6 @@ public class HttpResponse {
         return new HttpResponse(null, ResponseHeaders.create(), MessageBody.empty());
     }
 
-    //    public static HttpResponse create(StatusCode code, HttpHeaders headers) {
-//        return new HttpResponse(StatusLine.create(code), headers, MessageBody.empty());
-//    }
-//
-//    public static HttpResponse create(StatusCode code, HttpHeaders headers, String content) {
-//        return new HttpResponse(StatusLine.create(code), headers, MessageBody.create(content));
-//    }
-
     public void setStatusCode(StatusCode code) {
         statusLine = StatusLine.create(code);
     }
@@ -67,7 +59,6 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        System.out.println(statusLine == null);
         String status = statusLine.toString();
         String headers = responseHeaders.toString();
         String body = messageBody.getContent();

@@ -8,8 +8,19 @@ public abstract class AbstrcatController implements Controller {
     private static final String GET = "GET";
     private static final String POST = "POST";
 
+    private final String mappedUrl;
+
+    protected AbstrcatController(final String mappedUrl) {
+        this.mappedUrl = mappedUrl;
+    }
+
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public boolean isMappedController(HttpRequest request) {
+        return mappedUrl.equals(request.getPath());
+    }
+
+    @Override
+    public final void service(HttpRequest request, HttpResponse response) throws Exception {
         if (GET.equals(request.getMethod())) {
             doGet(request, response);
             return;

@@ -7,11 +7,12 @@ public class DefaultController extends AbstrcatController {
 
     private static final DefaultController instance = new DefaultController();
 
-    public static DefaultController getInstance() {
-        return instance;
+    private DefaultController() {
+        super("");
     }
 
-    private DefaultController() {
+    public static DefaultController getInstance() {
+        return instance;
     }
 
     @Override

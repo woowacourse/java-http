@@ -19,6 +19,10 @@ public class LoginController extends AbstrcatController {
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
+    public LoginController() {
+        super(MAPPED_URL);
+    }
+
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final Session session = SessionManager.findSession(request.getCookie(JSESSIONID_COOKIE_NAME));
@@ -53,10 +57,5 @@ public class LoginController extends AbstrcatController {
         return InMemoryUserRepository.findByAccount(account)
                 .map(user -> user.checkPassword(password))
                 .orElse(false);
-    }
-
-    @Override
-    public boolean isMappedController(HttpRequest request) {
-        return MAPPED_URL.equals(request.getPath());
     }
 }

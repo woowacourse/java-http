@@ -20,6 +20,10 @@ public class RegisterController extends AbstrcatController {
     private static final String PASSWORD_KEY = "password";
     private static final String EMAIL_KEY = "email";
 
+    public RegisterController() {
+        super(MAPPED_URL);
+    }
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final Session session = SessionManager.findSession(request.getCookie(JSESSIONID_COOKIE_NAME));
@@ -53,10 +57,5 @@ public class RegisterController extends AbstrcatController {
         final User registeredUser = new User(account, password, email);
         InMemoryUserRepository.save(registeredUser);
         return registeredUser;
-    }
-
-    @Override
-    public boolean isMappedController(HttpRequest request) {
-        return MAPPED_URL.equals(request.getPath());
     }
 }

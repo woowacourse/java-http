@@ -2,8 +2,11 @@ handlebars:
   suffix: .html
 
 server:
+  compression:
+    enabled: true
   tomcat:
     accept-count: 1
-    max-connections: 1
+    max-connections: 10
     threads:
-      max: 2
+      max: 10
+

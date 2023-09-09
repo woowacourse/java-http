@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Optional;
 
-public class LoginController extends Controller {
+public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String PASSWORD = "password";

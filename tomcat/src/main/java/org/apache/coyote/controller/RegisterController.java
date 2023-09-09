@@ -12,8 +12,9 @@ import org.apache.coyote.http11.http.util.HttpMethod;
 import java.io.IOException;
 import java.util.Map;
 
-public class RegisterController extends Controller {
+public class RegisterController implements Controller {
 
+    @Override
     public HttpResponse run(final HttpRequest request) throws IOException {
         final String method = request.getMethod();
         if (HttpMethod.GET.isSameMethod(method)) {

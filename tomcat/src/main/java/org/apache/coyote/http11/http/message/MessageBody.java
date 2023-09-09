@@ -18,15 +18,15 @@ public class MessageBody {
         this.messageBody = messageBody;
     }
 
-    private static MessageBody ofEmpty() {
-        return new MessageBody(new HashMap<>());
-    }
-
     public static MessageBody from(final BufferedReader bufferedReader, final RequestHeaders requestHeaders) throws IOException {
         if (requestHeaders.containsKey(CONTENT_LENGTH)) {
             return new MessageBody(parseHttpRequestBody(bufferedReader, Integer.parseInt(requestHeaders.getValue(CONTENT_LENGTH))));
         }
         return MessageBody.ofEmpty();
+    }
+
+    private static MessageBody ofEmpty() {
+        return new MessageBody(new HashMap<>());
     }
 
     private static Map<String, String> parseHttpRequestBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {

@@ -5,7 +5,7 @@ import org.apache.coyote.http11.http.message.HttpResponse;
 
 import java.io.IOException;
 
-public abstract class Controller {
+public interface Controller {
 
-    public abstract HttpResponse run(final HttpRequest request) throws IOException;
+    HttpResponse run(final HttpRequest request) throws IOException;
 }

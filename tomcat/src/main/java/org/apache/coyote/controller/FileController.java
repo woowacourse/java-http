@@ -8,7 +8,7 @@ import org.apache.coyote.http11.http.message.HttpResponse;
 
 import java.io.IOException;
 
-public class FileController extends Controller {
+public class FileController implements Controller {
 
     @Override
     public HttpResponse run(final HttpRequest request) throws IOException {

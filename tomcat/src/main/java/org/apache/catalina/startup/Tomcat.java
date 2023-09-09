@@ -15,8 +15,9 @@ public class Tomcat {
 
     private final Mapper mapper = new RequestMapper(new StaticController());
 
-    public void addController(final String path, final Controller controller) {
+    public Tomcat addController(final String path, final Controller controller) {
         mapper.addController(path, controller);
+        return this;
     }
 
     public void start() {

@@ -8,10 +8,10 @@ import org.apache.catalina.startup.Tomcat;
 public class Application {
 
     public static void main(String[] args) {
-        final var tomcat = new Tomcat();
-        tomcat.addController("/", new HomeController());
-        tomcat.addController("/login", new LoginController());
-        tomcat.addController("/register", new RegisterController());
-        tomcat.start();
+        new Tomcat()
+                .addController("/", new HomeController())
+                .addController("/login", new LoginController())
+                .addController("/register", new RegisterController())
+                .start();
     }
 }

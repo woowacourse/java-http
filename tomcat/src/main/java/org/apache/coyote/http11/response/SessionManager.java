@@ -2,13 +2,13 @@ package org.apache.coyote.http11.response;
 
 import nextstep.jwp.model.User;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
     private static final String USER = "user";
 
     private SessionManager() {
@@ -32,6 +32,6 @@ public class SessionManager {
     }
 
     private static void add(Session session) {
-        sessions.put(session.getId(), session);
+        sessions.putIfAbsent(session.getId(), session);
     }
 }

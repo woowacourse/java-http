@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Map;
 import org.apache.coyote.http11.request.body.RequestBody;
@@ -41,5 +42,17 @@ class RequestBodyTest {
 
         // then
         assertThat(value).isEqualTo("gugu");
+    }
+
+    @Test
+    void body_field_이름을_입력하고_value를_얻을_때_value가_존재하지_않으면_예외를_던진다() {
+        // given
+        String requestBody = "account=gugu";
+        RequestBody body = RequestBody.from(requestBody);
+
+        // expect
+        assertThatThrownBy(() -> body.get("wrongField"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("body에 존재하지 않는 field 입니다.");
     }
 }

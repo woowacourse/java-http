@@ -30,8 +30,12 @@ public class RequestBody {
         return new RequestBody(parametersMap);
     }
 
-    public String get(String key) {
-        return parametersMap.get(key);
+    public String get(String name) {
+        String field = parametersMap.get(name);
+        if (field == null) {
+            throw new IllegalArgumentException("body에 존재하지 않는 field 입니다.");
+        }
+        return field;
     }
 
     public Map<String, String> parametersMap() {

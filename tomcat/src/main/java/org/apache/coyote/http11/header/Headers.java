@@ -60,4 +60,11 @@ public class Headers {
     public String getValue(final Header header) {
         return headers.getOrDefault(header, "");
     }
+
+    @Override
+    public String toString() {
+        return "Headers{" +
+                "headers=" + headers +
+                '}';
+    }
 }

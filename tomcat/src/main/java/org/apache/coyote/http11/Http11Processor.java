@@ -85,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (request.isMatching("/login", POST)) {
             final String account = requestParameters.getValue("account");
-            System.out.println("account = " + account);
+
             if (account == null) {
                 return findStaticResource("/login.html");
             }

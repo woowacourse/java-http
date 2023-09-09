@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.header.RequestHeader.COOKIE;
 
 public class Request {
 
+    public static final String SESSIONID_KEY = "JSESSIONID";
     private final RequestLine requestLine;
 
     private final Headers headers;
@@ -41,32 +41,19 @@ public class Request {
 
     public static Request from(final BufferedReader bufferedReader) throws IOException {
         final List<String> requestHeaderLines = getHeader(bufferedReader);
-
-        final String requestFirstLine = requestHeaderLines.get(0);
-        final RequestLine requestLine = RequestLine.from(requestFirstLine);
+        final RequestLine requestLine = RequestLine.from(requestHeaderLines.get(0));
         final Headers headers = new Headers();
         headers.addRequestHeaders(requestHeaderLines);
 
         final String body = getBody(bufferedReader, headers);
 
-        final String queryStrings = extractQueryStrings(requestFirstLine, body, headers);
-        final RequestParameters requestParameters = RequestParameters.from(queryStrings);
+        final RequestParameters requestParameters = RequestParameters.of(requestLine, headers, body);
 
-        final String cookieHeader = headers.getValue(COOKIE);
-        final HttpCookie httpCookie = HttpCookie.from(cookieHeader);
+        final HttpCookie httpCookie = HttpCookie.from(headers.getValue(COOKIE));
 
-        final String jsessionid = httpCookie.findCookie("JSESSIONID");
-        final Session session = SessionManager.findSession(jsessionid);
+        final Session session = SessionManager.findSession(httpCookie.findCookie(SESSIONID_KEY));
 
         return new Request(requestLine, headers, requestParameters, httpCookie, session, body);
-    }
-
-    private static String getBody(final BufferedReader bufferedReader, final Headers headers) throws IOException {
-        final String contentLengthValue = headers.getValue(CONTENT_LENGTH) ;
-        final int contentLength = "".equals(contentLengthValue) ? 0 : Integer.parseInt(contentLengthValue);
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
     }
 
     private static List<String> getHeader(final BufferedReader bufferedReader) throws IOException {
@@ -81,27 +68,21 @@ public class Request {
         return requestHeaderLines;
     }
 
-    private static String extractQueryStrings(final String requestFirstLine,
-                                              final String body,
-                                              final Headers headers) {
-
-        final String[] requestFirstLineElements = requestFirstLine.split(" ");
-        final String requestUriValue = requestFirstLineElements[1];
-
-        if (requestUriValue.contains("?")) {
-            return requestUriValue.substring(requestUriValue.indexOf("?") + 1);
-        }
-
-        if ("application/x-www-form-urlencoded".equalsIgnoreCase(headers.getValue(CONTENT_TYPE))) {
-            return body;
-        }
-        return "";
+    private static String getBody(final BufferedReader bufferedReader, final Headers headers) throws IOException {
+        final String contentLengthValue = headers.getValue(CONTENT_LENGTH) ;
+        final int contentLength = "".equals(contentLengthValue) ? 0 : Integer.parseInt(contentLengthValue);
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public boolean isMatching(final String requestPath, final RequestMethod requestMethod) {
         return requestLine.isMatching(requestPath, requestMethod);
     }
 
+    public String getParameter(final String parameterKey) {
+        return requestParameters.getValue(parameterKey);
+    }
 
     public RequestLine getRequestLine() {
         return requestLine;

@@ -4,7 +4,7 @@ handlebars:
 server:
   compression:
     enabled: true
-    min-response-size: 2
+    min-response-size: 10
 
   tomcat:
     accept-count: 1

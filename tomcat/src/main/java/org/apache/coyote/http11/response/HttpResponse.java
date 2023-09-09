@@ -10,16 +10,16 @@ import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 
-public class HttpResponseEntity {
+public class HttpResponse {
 
     private final HttpRequest httpRequest;
 
-    private HttpResponseEntity(final HttpRequest httpRequest) {
+    private HttpResponse(final HttpRequest httpRequest) {
         this.httpRequest = httpRequest;
     }
 
-    public static HttpResponseEntity from(final HttpRequest httpRequest) {
-        return new HttpResponseEntity(httpRequest);
+    public static HttpResponse from(final HttpRequest httpRequest) {
+        return new HttpResponse(httpRequest);
     }
 
     public String getResponse() throws IOException {

@@ -54,7 +54,6 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestUri requestUri = httpRequest.getRequestLine().getRequestUri();
 
-
             String path = requestUri.getPath();
 
             HttpResponse response = null;
@@ -62,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/")) {
                 response = new HttpResponse.Builder()
                         .contentType(HTML)
-                        .body("hello world")
+                        .body("Hello world!")
                         .build();
             } else if (path.equals("/login") && httpRequest.getRequestLine().isGetMethod()) {
                 response = getLoginHttpResponse(httpRequest);
@@ -102,7 +101,6 @@ public class Http11Processor implements Runnable, Processor {
                         .build();
             }
 
-
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
 
@@ -110,6 +108,69 @@ public class Http11Processor implements Runnable, Processor {
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest generateHttpRequest(BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
+
+        if (requestLine == null) {
+            return null;
+        }
+
+        HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
+        HttpRequestHeader httpRequestHeader = getRequestHeader(reader);
+
+        int contentLength = httpRequestHeader.getContentLength();
+        HttpRequestBody httpRequestBody = getRequestBody(reader, contentLength);
+
+        return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
+    }
+
+    private HttpRequestBody getRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        StringBuilder requestBody = new StringBuilder();
+        if (contentLength > 0) {
+            char[] buffer = new char[contentLength];
+            int bytesRead = reader.read(buffer, 0, contentLength);
+            requestBody.append(buffer, 0, bytesRead);
+        }
+
+        return HttpRequestBody.from(requestBody.toString());
+    }
+
+    private HttpRequestHeader getRequestHeader(BufferedReader reader) throws IOException {
+        StringBuilder requestHeader = new StringBuilder();
+
+        String line;
+        while (!Objects.equals(line = reader.readLine(), "")) {
+            requestHeader.append(line).append("\r\n");
+        }
+
+        return HttpRequestHeader.from(requestHeader.toString());
+    }
+
+    private HttpResponse getLoginHttpResponse(HttpRequest httpRequest) throws IOException {
+        HttpCookie cookie = httpRequest.getRequestHeader().getCookie();
+
+        String jsessionid = cookie.getValue("JSESSIONID");
+        Session session = SessionManager.findSession(jsessionid);
+
+        if (session != null) {
+            final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
+            return new HttpResponse.Builder()
+                    .status(FOUND)
+                    .header("Location", "/index.html")
+                    .contentType(HTML)
+                    .body(new String(Files.readAllBytes(filePath)))
+                    .build();
+        }
+
+
+        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/login.html")).getPath());
+        return new HttpResponse.Builder()
+                .status(OK)
+                .contentType(HTML)
+                .body(new String(Files.readAllBytes(filePath)))
+                .build();
     }
 
     private HttpResponse postLoginHttpResponse(HttpRequest httpRequest) {
@@ -161,68 +222,5 @@ public class Http11Processor implements Runnable, Processor {
                 .contentType(HTML)
                 .header("Location", "/401.html")
                 .build();
-    }
-
-    private HttpResponse getLoginHttpResponse(HttpRequest httpRequest) throws IOException {
-        HttpCookie cookie = httpRequest.getRequestHeader().getCookie();
-
-        String jsessionid = cookie.getValue("JSESSIONID");
-        Session session = SessionManager.findSession(jsessionid);
-
-        if (session != null) {
-            final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath());
-            return new HttpResponse.Builder()
-                    .status(FOUND)
-                    .header("Location", "/index.html")
-                    .contentType(HTML)
-                    .body(new String(Files.readAllBytes(filePath)))
-                    .build();
-        }
-
-
-        final Path filePath = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static/login.html")).getPath());
-        return new HttpResponse.Builder()
-                .status(OK)
-                .contentType(HTML)
-                .body(new String(Files.readAllBytes(filePath)))
-                .build();
-    }
-
-    private HttpRequest generateHttpRequest(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-
-        if (requestLine == null) {
-            return null;
-        }
-
-        HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
-        HttpRequestHeader httpRequestHeader = getRequestHeader(reader);
-
-        int contentLength = httpRequestHeader.getContentLength();
-        HttpRequestBody httpRequestBody = getRequestBody(reader, contentLength);
-
-        return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
-    }
-
-    private HttpRequestBody getRequestBody(BufferedReader reader, int contentLength) throws IOException {
-        StringBuilder requestBody = new StringBuilder();
-        if (contentLength > 0) {
-            char[] buffer = new char[contentLength];
-            int bytesRead = reader.read(buffer, 0, contentLength);
-            requestBody.append(buffer, 0, bytesRead);
-        }
-
-        return HttpRequestBody.from(requestBody.toString());
-    }
-
-    private HttpRequestHeader getRequestHeader(BufferedReader reader) throws IOException {
-        StringBuilder requestHeader = new StringBuilder();
-
-        String line;
-        while (!Objects.equals(line = reader.readLine(), "")) {
-            requestHeader.append(line).append("\r\n");
-        }
-
-        return HttpRequestHeader.from(requestHeader.toString());
     }
 }

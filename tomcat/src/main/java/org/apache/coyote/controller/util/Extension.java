@@ -4,24 +4,23 @@ import java.util.Arrays;
 
 public enum Extension {
 
-    CSS(".css", HttpResponse.CSS_CONTENT_TYPE),
-    JS(".js", HttpResponse.JS_CONTENT_TYPE),
-    HTML(".html", HttpResponse.HTML_CONTENT_TYPE),
-    INDEX("/", HttpResponse.HTML_CONTENT_TYPE),
+    CSS(".css", "text/css;charset=utf-8"),
+    JS(".js", "application/json"),
+    HTML(".html", "text/html;charset=utf-8 "),
+    ICO(".ico", ""),
     ;
 
     private final String value;
-    private final HttpResponse extensionType;
+    private final String contentType;
 
-    Extension(final String value, final HttpResponse extensionType) {
+    Extension(final String value, final String contentType) {
         this.value = value;
-        this.extensionType = extensionType;
+        this.contentType = contentType;
     }
 
-    public static HttpResponse getMappedContentType(final String uri) {
+    public static Extension findExtension(final String uri) {
         return Arrays.stream(Extension.values())
                      .filter(extension -> uri.contains(extension.value))
-                     .map(extension -> extension.extensionType)
                      .findAny()
                      .orElseThrow(() -> new IllegalArgumentException("잘못된 확장자입니다. " + uri));
     }
@@ -32,5 +31,9 @@ public enum Extension {
         if (!hasExtension) {
             throw new IllegalArgumentException("확장자가 포함되어 있지 않습니다.");
         }
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 }

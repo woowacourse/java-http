@@ -43,6 +43,9 @@ public class User {
             return false;
         }
         final User user = (User) o;
+        if (Objects.isNull(id) || Objects.isNull(user.id)) {
+            return false;
+        }
         return Objects.equals(id, user.id);
     }
 

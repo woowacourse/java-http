@@ -41,10 +41,6 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public String getHeaderCookie() {
-        return headers.getValue("Cookie");
-    }
-
     public RequestBody getRequestBody() {
         return requestBody;
     }

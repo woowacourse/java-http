@@ -1,15 +1,15 @@
 package org.apache.coyote.http11.auth;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
     private final Map<String, Session> sessions;
 
     public SessionManager() {
-        this.sessions = new HashMap<>();
+        this.sessions = new ConcurrentHashMap<>();
     }
 
     public void add(final Session session) {
@@ -17,7 +17,11 @@ public class SessionManager {
     }
 
     public Session findSession(final String id) {
-        return sessions.get(id);
+        if (Objects.isNull(id)) {
+            return null;
+        }
+
+        return sessions.getOrDefault(id, null);
     }
 
     public void remove(final String id) {

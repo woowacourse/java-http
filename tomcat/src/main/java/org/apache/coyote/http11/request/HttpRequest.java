@@ -26,10 +26,6 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, requestBody);
     }
 
-    public boolean isRequestBodyEmpty() {
-        return requestBody.isEmpty();
-    }
-
     public String getHeaderValue(String key) {
         return headers.getValue(key);
     }
@@ -40,16 +36,9 @@ public class HttpRequest {
         }
         return ContentType.from(headers.getValue(CONTENT_TYPE_KEY));
     }
-    public boolean isMethod(HttpMethod httpMethod) {
-        return requestLine.isMethod(httpMethod);
-    }
 
     public RequestLine getRequestLine() {
         return requestLine;
-    }
-
-    public Headers getHeaders() {
-        return headers;
     }
 
     public RequestBody getRequestBody() {

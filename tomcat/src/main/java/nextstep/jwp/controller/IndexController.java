@@ -10,10 +10,11 @@ import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.util.FileReader;
 
 public class IndexController implements Controller {
+    private static final String RESOURCE = "/index.html";
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        ResponseBody responseBody = new ResponseBody(FileReader.read("/index.html"));
+        ResponseBody responseBody = new ResponseBody(FileReader.read(RESOURCE));
         StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
         return HttpResponse.builder()
                 .statusLine(statusLine)

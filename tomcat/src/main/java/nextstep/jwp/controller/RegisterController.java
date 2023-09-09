@@ -21,7 +21,7 @@ public class RegisterController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request) {
-        if (request.isMethod(HttpMethod.GET)) {
+        if (request.getRequestLine().getHttpMethod().is(HttpMethod.GET)) {
             ResponseBody responseBody = new ResponseBody(FileReader.read(URI));
             String version = request.getRequestLine().getVersion();
             return HttpResponse.builder()

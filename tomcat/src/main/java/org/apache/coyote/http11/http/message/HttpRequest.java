@@ -28,9 +28,8 @@ public class HttpRequest {
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final List<String> httpRequestMessage = parseHttpRequestHeaders(bufferedReader);
         final RequestLine requestLine = RequestLine.from(httpRequestMessage.get(REQUEST_LINE_INDEX));
-        final int crlfIndex = httpRequestMessage.indexOf(CRLF);
         final RequestHeaders requestHeaders = RequestHeaders.from(
-                httpRequestMessage.subList(REQUEST_HEADER_START_INDEX, crlfIndex)
+                httpRequestMessage.subList(REQUEST_HEADER_START_INDEX, httpRequestMessage.size())
         );
         final MessageBody messageBody = MessageBody.from(bufferedReader, requestHeaders);
         return new HttpRequest(requestLine, requestHeaders, messageBody);

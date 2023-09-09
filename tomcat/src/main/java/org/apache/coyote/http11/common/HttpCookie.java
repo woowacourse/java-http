@@ -49,6 +49,10 @@ public class HttpCookie {
         return items.get(JSESSION_ID);
     }
 
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
     public Map<String, String> getItems() {
         return items;
     }

@@ -13,9 +13,9 @@ public class RegisterController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
-    private static final String INDEX_PAGE = "index.html";
-    private static final String REGISTER_PAGE = "register.html";
-    private static final String CONFLICT_PAGE = "409.html";
+    private static final String INDEX_PAGE = "/index.html";
+    private static final String REGISTER_PAGE = "/register.html";
+    private static final String CONFLICT_PAGE = "/409.html";
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
@@ -32,6 +32,7 @@ public class RegisterController extends AbstractController {
         final String email = requestBody.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
         response.setHttpStatus(HttpStatus.FOUND)
+                .addHeader("Location", INDEX_PAGE)
                 .sendRedirect(INDEX_PAGE);
     }
 

@@ -44,6 +44,10 @@ public class Headers {
         return items.getOrDefault(key, EMPTY);
     }
 
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
     public Map<String, String> getItems() {
         return items;
     }

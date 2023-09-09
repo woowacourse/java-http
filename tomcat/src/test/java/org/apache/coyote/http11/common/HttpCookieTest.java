@@ -60,4 +60,13 @@ class HttpCookieTest {
         // expect
         assertThat(cookie.getJSessionId()).isEqualTo(uuid);
     }
+
+    @Test
+    void cookie가_비어있는지_확인한다() {
+        // given
+        final HttpCookie cookie = new HttpCookie();
+
+        // expect
+        assertThat(cookie.isEmpty()).isTrue();
+    }
 }

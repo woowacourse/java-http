@@ -39,17 +39,21 @@ public class LoginController extends AbstractController {
         final Session session = new Session(uuid);
         session.setAttribute("user", user);
         sessionManager.add(session);
-        response.setHttpStatus(HttpStatus.FOUND).sendRedirect(INDEX_PAGE);
+        response.setHttpStatus(HttpStatus.FOUND)
+                .addHeader("Location", INDEX_PAGE)
+                .sendRedirect(INDEX_PAGE);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final HttpCookie httpCookie = request.parseCookie();
         final Session session = sessionManager.findSession(httpCookie.getJSessionId());
-        if (session != null) {
-            response.setHttpStatus(HttpStatus.FOUND).sendRedirect(INDEX_PAGE);
+        if (session == null) {
+            response.setHttpStatus(HttpStatus.OK).sendRedirect(LOGIN_PAGE);
             return;
         }
-        response.setHttpStatus(HttpStatus.OK).sendRedirect(LOGIN_PAGE);
+        response.setHttpStatus(HttpStatus.FOUND)
+                .addHeader("Location", INDEX_PAGE)
+                .sendRedirect(INDEX_PAGE);
     }
 }

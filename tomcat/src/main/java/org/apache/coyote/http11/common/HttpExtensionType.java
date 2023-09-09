@@ -3,10 +3,11 @@ package org.apache.coyote.http11.common;
 import java.util.Arrays;
 
 public enum HttpExtensionType {
-    HTML(".html", "text/html"),
-    CSS(".css", "text/css"),
-    JS(".js", "text/javascript"),
-    ICO(".ico", "image/svg+xml"),
+    HTML(".html", "text/html;charset=utf-8 "),
+    CSS(".css", "text/css; "),
+    JS(".js", "text/javascript; "),
+    ICO(".ico", "image/svg+xml; "),
+    SVG(".svg", "text/html; "),
     ;
 
     private final String extension;

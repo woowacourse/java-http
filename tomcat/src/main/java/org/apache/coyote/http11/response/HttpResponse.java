@@ -51,4 +51,8 @@ public class HttpResponse {
     public String getRedirect() {
         return redirect;
     }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
+    }
 }

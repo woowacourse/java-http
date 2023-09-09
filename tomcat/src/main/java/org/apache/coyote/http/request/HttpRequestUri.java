@@ -22,7 +22,7 @@ public class HttpRequestUri {
 
         return new HttpRequestUri(
             decodePath(split[0]),
-            decodeQueryString(queryString)
+            HttpParameters.from(queryString)
         );
     }
 
@@ -31,10 +31,6 @@ public class HttpRequestUri {
             return "/home";
         }
         return path;
-    }
-
-    private static HttpParameters decodeQueryString(String queryString) {
-        return HttpParameters.from(queryString);
     }
 
     public String getPath() {

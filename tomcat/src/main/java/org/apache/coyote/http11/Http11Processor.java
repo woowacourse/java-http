@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -38,9 +40,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             HttpRequestDecoder requestDecoder = new HttpRequestDecoder();
-            HttpRequest httpRequest = requestDecoder.decode(inputStream);
+            HttpRequest httpRequest = requestDecoder.decode(bufferedReader);
 
             Optional<String> sessionId = httpRequest.getSessionId();
             Session session = SessionManager.findSession(sessionId.orElse(null));

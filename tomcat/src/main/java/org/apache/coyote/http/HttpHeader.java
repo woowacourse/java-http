@@ -25,7 +25,7 @@ public class HttpHeader {
     }
 
     public HttpHeader() {
-        this(new HashMap<>(), Cookies.EMPTY_COOKIE);
+        this(new HashMap<>(), Cookies.emptyCookies());
     }
 
     public static HttpHeader from(Map<String, List<String>> header) {

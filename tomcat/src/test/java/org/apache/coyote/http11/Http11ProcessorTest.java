@@ -107,7 +107,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 3717 \r\n" +
+                "Content-Length: 4319 \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())

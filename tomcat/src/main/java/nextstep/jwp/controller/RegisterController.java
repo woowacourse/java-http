@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.request.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -11,6 +10,8 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.util.FileReader;
+
+import static org.apache.coyote.http11.request.ContentType.HTML;
 
 public class RegisterController extends AbstractController {
 
@@ -22,7 +23,7 @@ public class RegisterController extends AbstractController {
         ResponseBody responseBody = new ResponseBody(FileReader.read(REGISTER_URI));
         response
                 .statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.OK))
-                .contentType(ContentType.HTML.getValue())
+                .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .responseBody(responseBody);
     }
@@ -44,7 +45,7 @@ public class RegisterController extends AbstractController {
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
         response
                 .statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.FOUND))
-                .contentType(ContentType.HTML.getValue())
+                .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(LOGIN_URI)
                 .responseBody(responseBody);
@@ -56,7 +57,7 @@ public class RegisterController extends AbstractController {
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
         response
                 .statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.CREATED))
-                .contentType(ContentType.HTML.getValue())
+                .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(LOGIN_URI)
                 .responseBody(responseBody);

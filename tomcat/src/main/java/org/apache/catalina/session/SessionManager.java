@@ -2,14 +2,13 @@ package org.apache.catalina.session;
 
 import org.apache.catalina.Manager;
 
-import javax.swing.text.html.Option;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(final Session session) {

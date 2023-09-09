@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.common.ContentType;
-import nextstep.jwp.http.common.HeaderType;
 import nextstep.jwp.http.common.HttpBody;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
@@ -27,7 +26,7 @@ public class RegisterController extends AbstractController {
         join(request.getHttpBody());
 
         response.setStatus(HttpStatus.FOUND);
-        response.setHeader(HeaderType.LOCATION.getValue(), INDEX_URI);
+        response.setLocation(INDEX_URI);
     }
 
     private void join(HttpBody httpBody) {

@@ -7,7 +7,6 @@ import java.util.List;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.http.common.HeaderType;
 import nextstep.jwp.http.common.HttpBody;
-import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.HttpUri;
 import nextstep.jwp.http.common.HttpVersion;
 
@@ -23,10 +22,10 @@ public class HttpRequestParser {
 
     public static HttpRequest parse(BufferedReader br) throws IOException {
         HttpStartLine httpStartLine = readHttpStartLine(br);
-        HttpHeaders httpHeaders = readHeaders(br);
-        HttpBody httpBody = readBody(httpHeaders, br);
+        HttpRequestHeaders httpRequestHeaders = readHeaders(br);
+        HttpBody httpBody = readBody(httpRequestHeaders, br);
 
-        return new HttpRequest(httpHeaders, httpStartLine, httpBody);
+        return new HttpRequest(httpRequestHeaders, httpStartLine, httpBody);
     }
 
     private static HttpStartLine readHttpStartLine(BufferedReader br) throws IOException {
@@ -45,7 +44,7 @@ public class HttpRequestParser {
         return new HttpStartLine(httpMethod, httpUri, httpVersion);
     }
 
-    private static HttpHeaders readHeaders(BufferedReader br) throws IOException {
+    private static HttpRequestHeaders readHeaders(BufferedReader br) throws IOException {
         List<String> lines = new ArrayList<>();
         String line;
 
@@ -53,10 +52,10 @@ public class HttpRequestParser {
             lines.add(line);
         }
 
-        return HttpHeaders.from(lines);
+        return HttpRequestHeaders.from(lines);
     }
 
-    private static HttpBody readBody(HttpHeaders headers, BufferedReader br) throws IOException {
+    private static HttpBody readBody(HttpRequestHeaders headers, BufferedReader br) throws IOException {
         if (!headers.containsKey(HeaderType.CONTENT_TYPE.getValue())) {
             return HttpBody.createEmptyHttpBody();
         }
@@ -67,4 +66,5 @@ public class HttpRequestParser {
 
         return HttpBody.from(new String(buffer));
     }
+
 }

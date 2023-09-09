@@ -1,29 +1,27 @@
 package nextstep.jwp.http.request;
 
-import nextstep.jwp.http.common.HeaderType;
+import nextstep.jwp.http.common.Cookie;
 import nextstep.jwp.http.common.HttpBody;
-import nextstep.jwp.http.common.HttpCookie;
-import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.HttpVersion;
 
 public class HttpRequest {
 
     private final HttpStartLine httpStartLine;
-    private final HttpHeaders httpHeaders;
+    private final HttpRequestHeaders httpRequestHeaders;
     private final HttpBody httpBody;
 
     public HttpRequest(
-            HttpHeaders httpHeaders,
+            HttpRequestHeaders httpRequestHeaders,
             HttpStartLine httpStartLine,
             HttpBody httpBody
     ) {
         this.httpStartLine = httpStartLine;
-        this.httpHeaders = httpHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
         this.httpBody = httpBody;
     }
 
     public boolean hasCookie() {
-        return httpHeaders.containsKey(HeaderType.COOKIE.getValue());
+        return httpRequestHeaders.hasCookie();
     }
 
     public boolean hasQueryString() {
@@ -54,8 +52,8 @@ public class HttpRequest {
         return httpStartLine.getNativeUriPath();
     }
 
-    public HttpCookie getCookie() {
-        return HttpCookie.from(httpHeaders.get(HeaderType.COOKIE.getValue()));
+    public Cookie getCookie(String key) {
+        return httpRequestHeaders.getCookie(key);
     }
 
     public QueryString getQueryString() {

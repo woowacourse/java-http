@@ -9,8 +9,7 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.ContentType;
-import nextstep.jwp.http.common.HeaderType;
-import nextstep.jwp.http.common.HttpCookie;
+import nextstep.jwp.http.common.Cookie;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryString;
@@ -42,8 +41,8 @@ public class LoginController extends AbstractController {
         updateSession(user, session);
 
         response.setStatus(HttpStatus.FOUND);
-        response.setHeader(HeaderType.LOCATION.getValue(), INDEX_URI);
-        response.setCookie(JSESSIONID + "=" + session.getId());
+        response.setLocation(INDEX_URI);
+        response.setCookie(JSESSIONID, Cookie.from(session.getId()));
     }
 
     @Override
@@ -54,7 +53,7 @@ public class LoginController extends AbstractController {
             LOG.info("로그인 성공 ! 아이디 : {}", user.getAccount());
 
             response.setStatus(HttpStatus.FOUND);
-            response.setHeader(HeaderType.LOCATION.getValue(), INDEX_URI);
+            response.setLocation(INDEX_URI);
 
             return;
         }
@@ -67,8 +66,8 @@ public class LoginController extends AbstractController {
             updateSession(user, session);
 
             response.setStatus(HttpStatus.FOUND);
-            response.setHeader(HeaderType.LOCATION.getValue(), INDEX_URI);
-            response.setCookie(JSESSIONID + "=" + session.getId());
+            response.setLocation(INDEX_URI);
+            response.setCookie(JSESSIONID, Cookie.from(session.getId()));
 
             return;
         }
@@ -85,17 +84,14 @@ public class LoginController extends AbstractController {
     }
 
     private User loginForCookie(HttpRequest request) {
-        HttpCookie cookie = request.getCookie();
-        String jSessionId = cookie.get(JSESSIONID);
-        Session session = SESSION_MANAGER.findSession(jSessionId);
-        User user = (User) session.getAttribute("user");
+        Cookie jSessionCookie = request.getCookie(JSESSIONID);
+        Session session = SESSION_MANAGER.findSession(jSessionCookie.getValue());
 
-        // TODO: 2023/09/07 쿠키 삭제하는 로직 구현 maxAge 등
-        if (user == null) {
+        if (session == null) {
             throw new UnauthorizedException("로그인에 실패했습니다. 유효하지 않은 세션입니다.");
         }
 
-        return user;
+        return (User) session.getAttribute("user");
     }
 
     private User login(String account, String password) {

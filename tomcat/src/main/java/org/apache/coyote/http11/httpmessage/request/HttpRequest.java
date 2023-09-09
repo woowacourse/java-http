@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.httpmessage.request;
 
+import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.support.HttpRequestParser;
 
@@ -45,6 +46,10 @@ public class HttpRequest {
 
     public HttpHeader getHeader() {
         return header;
+    }
+
+    public HttpCookie getCookie() {
+        return header.getCookies();
     }
 
     public RequestBody getRequestBody() {

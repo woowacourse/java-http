@@ -8,9 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
@@ -28,19 +30,23 @@ public class Handler {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "set-cookie";
 
     private final HandlerMapping handlerMapping;
     private final QueryString queryString;
     private final RequestBody requestBody;
+    private final HttpCookie httpCookie;
 
     public Handler(
         final HandlerMapping handlerMapping,
         final QueryString queryString,
-        final RequestBody requestBody
+        final RequestBody requestBody,
+        final HttpCookie httpCookie
     ) {
         this.handlerMapping = handlerMapping;
         this.queryString = queryString;
         this.requestBody = requestBody;
+        this.httpCookie = httpCookie;
     }
 
     public HttpResponse makeResponse() throws IOException {
@@ -79,7 +85,8 @@ public class Handler {
     private HttpResponse makeFileResponse(final Map<String, String> headers, final String fileType)
         throws IOException {
         final String body = findFile(handlerMapping.getResponse());
-        headers.put(CONTENT_TYPE, ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+        headers.put(CONTENT_TYPE,
+            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
     }
@@ -87,18 +94,28 @@ public class Handler {
     private HttpResponse makeLoginResponse(final Map<String, String> headers, final String fileType)
         throws IOException {
         final String body = findFile(handlerMapping.getResponse());
-        headers.put(CONTENT_TYPE, ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
+        headers.put(CONTENT_TYPE,
+            ContentType.valueOf(fileType.toUpperCase()).getValue() + ";charset=utf-8");
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 
         if (queryString == null && requestBody == null) {
-            return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
+            final String authorizedCookie = httpCookie.getAuthorizedCookie();
+            if (SessionManger.findSession(authorizedCookie) == null) {
+                return new HttpResponse(StatusCode.OK, new HttpHeader(headers), body);
+            }
+            headers.put(LOCATION, "/index.html");
+            return new HttpResponse(StatusCode.REDIRECT, new HttpHeader(headers), body);
         }
 
         getMemberByAccount().ifPresentOrElse((member) -> {
             headers.put(LOCATION, "/401.html");
             if (isExistMember(member)) {
                 log.info("user : " + member);
+                final Session session = new Session(UUID.randomUUID().toString());
+                session.setAttribute("user", member);
+                SessionManger.add(session);
                 headers.put(LOCATION, "/index.html");
+                headers.put(SET_COOKIE, "JSESSIONID=" + session.getId());
             }
         }, () -> headers.put(LOCATION, "/401.html"));
 

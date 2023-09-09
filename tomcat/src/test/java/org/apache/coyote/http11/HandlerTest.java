@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.request.QueryString;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
@@ -24,7 +26,7 @@ class HandlerTest {
     @DisplayName("handlerMapping이 존재하지 않으면 404.html을 제공한다.")
     void not_found_response() throws IOException {
         // given
-        final Handler handler = new Handler(null, null, null);
+        final Handler handler = new Handler(null, null, null, new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -45,7 +47,8 @@ class HandlerTest {
     @DisplayName("handlerMapping이 main 요청이면 Hello world!를 반환한다.")
     void main_response() throws IOException {
         // given
-        final Handler handler = new Handler(HandlerMapping.MAIN, null, null);
+        final Handler handler = new Handler(HandlerMapping.MAIN, null, null,
+            new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -64,7 +67,8 @@ class HandlerTest {
     @DisplayName("handlerMapping이 index.html요청이면 index.html을 반환한다.")
     void index_html_response() throws IOException {
         // given
-        final Handler handler = new Handler(HandlerMapping.INDEX, null, null);
+        final Handler handler = new Handler(HandlerMapping.INDEX, null, null,
+            new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -85,7 +89,8 @@ class HandlerTest {
     @DisplayName("handlerMapping이 /login요청이면 login.html을 반환한다.")
     void login_response() throws IOException {
         // given
-        final Handler handler = new Handler(HandlerMapping.LOGIN, null, null);
+        final Handler handler = new Handler(HandlerMapping.LOGIN, null, null,
+            new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -111,7 +116,7 @@ class HandlerTest {
         queryStrings[1] = "password=password";
         final QueryString queryString = QueryString.fromRequest(queryStrings);
 
-        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null);
+        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null, null);
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -136,7 +141,8 @@ class HandlerTest {
         final String requestMemberInfo = "account=gugu&password=password&email=ako@ako.com";
         final RequestBody requestBody = RequestBody.fromRequest(requestMemberInfo);
 
-        final Handler handler = new Handler(HandlerMapping.LOGIN_POST, null, requestBody);
+        final Handler handler = new Handler(HandlerMapping.LOGIN_POST, null, requestBody,
+            new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -164,7 +170,8 @@ class HandlerTest {
         queryStrings[1] = "password=" + password;
         final QueryString queryString = QueryString.fromRequest(queryStrings);
 
-        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null);
+        final Handler handler = new Handler(HandlerMapping.LOGIN, queryString, null,
+            new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -197,7 +204,8 @@ class HandlerTest {
         final String registerMemberInfo = "account=ako&password=password&email=ako.com";
         final RequestBody requestBody = RequestBody.fromRequest(registerMemberInfo);
 
-        final Handler handler = new Handler(HandlerMapping.REGISTER_POST, null, requestBody);
+        final Handler handler = new Handler(HandlerMapping.REGISTER_POST, null, requestBody,
+            new HttpCookie(new HashMap<>()));
 
         // when
         final HttpResponse result = handler.makeResponse();
@@ -215,4 +223,31 @@ class HandlerTest {
         assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
     }
 
+    @Test
+    @DisplayName("이미 로그인된 사용자는 로그인 화면 접근시 index.html로 리다이랙트 합니다.")
+    void existed_user() throws IOException {
+        // given
+        final Session session = new Session("ako");
+        session.setAttribute("ako", "ako");
+        SessionManger.add(session);
+
+        final HttpCookie cookie = HttpCookie.from("JSESSIONID=ako");
+
+        final Handler handler = new Handler(HandlerMapping.LOGIN, null, null, cookie);
+
+        // when
+        final HttpResponse result = handler.makeResponse();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String expectBody = new String(
+            Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+
+        assertThat(result.getBody()).isEqualTo(expectBody);
+        assertThat(result.getStatusCode()).isEqualTo(StatusCode.REDIRECT);
+        assertThat(result.getHttpHeader().getHeader().get("Content-Type")).contains("text/html");
+        assertThat(result.getHttpHeader().getHeader().get("Content-Length"))
+            .isEqualTo(String.valueOf(expectBody.getBytes().length));
+        assertThat(result.getHttpHeader().getHeader().get("Location")).isEqualTo("/index.html");
+    }
 }

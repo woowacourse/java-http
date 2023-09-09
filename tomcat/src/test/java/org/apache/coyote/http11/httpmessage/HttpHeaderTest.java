@@ -40,4 +40,37 @@ class HttpHeaderTest {
         assertThat(result).contains("Content-Type: text/html");
         assertThat(result).contains("Content-Length: 5536");
     }
+
+    @Test
+    @DisplayName("쿠키 정보를 반환한다.")
+    void get_cookies() {
+        // given
+        final String[] headers = new String[3];
+        headers[0] = "Content-Type: text/html";
+        headers[1] = "Content-Length: 5536";
+        headers[2] = "Cookie: JSESSIONID=ako";
+        final HttpHeader httpHeader = HttpHeader.fromRequest(headers);
+
+        // when
+        final HttpCookie cookies = httpHeader.getCookies();
+
+        // then
+        assertThat(cookies.getCookies().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("쿠키가 없으면 빈 map을 반환한다.")
+    void get_empty() {
+        // given
+        final String[] headers = new String[2];
+        headers[0] = "Content-Type: text/html";
+        headers[1] = "Content-Length: 5536";
+        final HttpHeader httpHeader = HttpHeader.fromRequest(headers);
+
+        // when
+        final HttpCookie cookies = httpHeader.getCookies();
+
+        // then
+        assertThat(cookies.getCookies().size()).isEqualTo(0);
+    }
 }

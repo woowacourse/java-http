@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import pl.allegro.tech.boot.autoconfigure.handlebars.HandlebarsHelper;
 
+import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+
 @HandlebarsHelper
 public class VersionHandlebarsHelper {
 
@@ -20,6 +22,6 @@ public class VersionHandlebarsHelper {
 
     public String staticUrls(String path, Options options) {
         log.debug("static url : {}", path);
-        return String.format("/resources/%s%s", version.getVersion(), path);
+        return String.format(PREFIX_STATIC_RESOURCES + "/%s%s", version.getVersion(), path);
     }
 }

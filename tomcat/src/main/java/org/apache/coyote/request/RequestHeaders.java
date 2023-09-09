@@ -5,16 +5,11 @@ import org.apache.coyote.session.Cookies;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
-import java.util.List;
 import java.util.Objects;
 
 import static org.apache.coyote.common.HeaderType.COOKIE;
 
 public class RequestHeaders {
-
-    private static final String HEADER_DELIMITER = ":";
-    private static final int HEADER_NAME_INDEX = 0;
-    private static final int HEADER_VALUE_INDEX = 1;
 
     private final Headers headers;
     private final Cookies cookies;
@@ -26,25 +21,11 @@ public class RequestHeaders {
         this.session = session;
     }
 
-    public static RequestHeaders from(final List<String> headersWithValue) {
-        final Headers headers = collectHeaderMapping(headersWithValue);
+    public static RequestHeaders from(final Headers headers) {
         final Cookies cookies = getCookiesBy(headers);
         final Session session = getSessionBy(cookies);
 
         return new RequestHeaders(headers, cookies, session);
-    }
-
-    private static Headers collectHeaderMapping(final List<String> headersWithValue) {
-        final Headers newHeaders = Headers.empty();
-
-        headersWithValue.stream()
-                .map(headerWithValue -> headerWithValue.split(HEADER_DELIMITER))
-                .forEach(entry -> newHeaders.addHeader(
-                        entry[HEADER_NAME_INDEX].strip(),
-                        entry[HEADER_VALUE_INDEX].strip()
-                ));
-
-        return newHeaders;
     }
 
     private static Cookies getCookiesBy(final Headers headers) {
@@ -83,6 +64,19 @@ public class RequestHeaders {
 
     public Session session() {
         return session;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final RequestHeaders that = (RequestHeaders) o;
+        return Objects.equals(headers, that.headers) && Objects.equals(cookies, that.cookies) && Objects.equals(session, that.session);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(headers, cookies, session);
     }
 
     @Override

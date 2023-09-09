@@ -53,4 +53,5 @@
 ## 4단계 - 동시성 확장하기
 
 - [x] 학습테스트 마무리
-- [ ] Connector의 동작을 ThreadPool에서 관리하도록 구현
+- [x] Connector의 동작을 ThreadPool에서 관리하도록 구현
+- [ ] 세션을 저장하는 객체를 Concurrent Collection으로 변경

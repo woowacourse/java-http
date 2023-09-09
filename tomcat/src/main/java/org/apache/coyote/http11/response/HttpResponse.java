@@ -12,7 +12,7 @@ import org.apache.coyote.http11.request.RequestLine;
 
 public class HttpResponse {
 
-    private final HttpRequest httpRequest;
+    private HttpRequest httpRequest;
 
     private HttpResponse(final HttpRequest httpRequest) {
         this.httpRequest = httpRequest;
@@ -20,6 +20,10 @@ public class HttpResponse {
 
     public static HttpResponse from(final HttpRequest httpRequest) {
         return new HttpResponse(httpRequest);
+    }
+
+    public static HttpResponse empty() {
+        return new HttpResponse(null);
     }
 
     public String getResponse() throws IOException {
@@ -66,6 +70,10 @@ public class HttpResponse {
 
     private String parseContentLengthLine(final HttpResponseBody httpResponseBody) {
         return String.join(SPACE, "Content-Length:", String.valueOf(httpResponseBody.contentLength()), "");
+    }
+
+    public void setRequest(final HttpRequest request) {
+        this.httpRequest = request;
     }
 
 }

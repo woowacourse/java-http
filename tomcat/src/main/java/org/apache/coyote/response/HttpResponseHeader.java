@@ -4,20 +4,20 @@ import java.util.Map;
 
 public class HttpResponseHeader {
 
-    private final Map<String, Object> headers;
+    private final Map<String, String> headers;
 
-    public HttpResponseHeader(Map<String, Object> headers) {
+    public HttpResponseHeader(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public void add(String key, Object value) {
+    public void add(String key, String value) {
         headers.put(key, value);
     }
 
     public String getResponseHeader() {
         StringBuilder headerBuilder = new StringBuilder();
 
-        for (Map.Entry<String, Object> entry : headers.entrySet()) {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
 

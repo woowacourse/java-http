@@ -1,6 +1,5 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.controller.exception.UnsupportedRequestMethodException;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.RequestMethod;
 import org.apache.coyote.httpresponse.HttpResponse;
@@ -8,19 +7,17 @@ import org.apache.coyote.httpresponse.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    public HttpResponse service(final HttpRequest httpRequest) {
         if (httpRequest.isSameRequestMethod(RequestMethod.GET)) {
-            doGet(httpRequest, httpResponse);
-            return;
+            return doGet(httpRequest);
         }
         if (httpRequest.isSameRequestMethod(RequestMethod.POST)) {
-            doPost(httpRequest, httpResponse);
-            return;
+            return doPost(httpRequest);
         }
-        throw new UnsupportedRequestMethodException();
+        return new MethodNotAllowedController().service(httpRequest);
     }
 
-    protected abstract void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse);
+    protected abstract HttpResponse doPost(final HttpRequest httpRequest);
 
-    protected abstract void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse);
+    protected abstract HttpResponse doGet(final HttpRequest httpRequest);
 }

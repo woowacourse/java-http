@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler;
+package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -9,13 +9,13 @@ import org.apache.coyote.httprequest.RequestMethod;
 import org.apache.coyote.httpresponse.CookieResponseHeader;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.HttpStatus;
-import org.apache.coyote.httpresponse.handler.exception.UnauthorizedException;
+import org.apache.coyote.controller.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements Handler {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private static final String SESSION_ATTRIBUTE_OF_USER = "user";
     private static final String USER_ACCOUNT = "account";
@@ -23,23 +23,24 @@ public class LoginHandler implements Handler {
     private static final String REDIRECT_URL = "/index.html";
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
+    public HttpResponse service(final HttpRequest request) {
         final RequestMethod requestMethod = request.getRequestMethod();
         try {
             if (requestMethod == RequestMethod.POST) {
-                return handlePost(request);
+                return doPost(request);
             }
             if (requestMethod == RequestMethod.GET) {
-                return handleGet(request);
+                return doGet(request);
             }
         } catch (UnauthorizedException e) {
             log.debug("로그인 실패 : {}", e.getMessage());
-            return new UnAuthorizedHandler().handle(request);
+            return new UnAuthorizedController().service(request);
         }
-        return new MethodNotAllowedHandler().handle(request);
+        return new MethodNotAllowedController().service(request);
     }
 
-    private HttpResponse handlePost(final HttpRequest request) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest request) {
         final String resourcePath = request.getPath() + ".html";
         final User user = getUser(QueryString.from(request.getRequestBody().getContents()));
         return HttpResponse
@@ -48,6 +49,26 @@ public class LoginHandler implements Handler {
                 .setContent(resourcePath)
                 .setLocationHeader(REDIRECT_URL)
                 .setCookieHeader(createCookie(request, user));
+    }
+
+    @Override
+    protected HttpResponse doGet(final HttpRequest request) {
+        final String resourcePath = request.getPath() + ".html";
+        final HttpResponse response = HttpResponse
+                .init(request.getHttpVersion())
+                .setHttpStatus(HttpStatus.OK)
+                .setContent(resourcePath);
+        if (checkLoginUser(request)) {
+            return response
+                    .setLocationHeader(REDIRECT_URL);
+        }
+        if (request.hasQueryString()) {
+            final User user = getUser(request.getQueryString());
+            return response
+                    .setLocationHeader(REDIRECT_URL)
+                    .setCookieHeader(createCookie(request, user));
+        }
+        return response;
     }
 
     private User getUser(final QueryString queryString) {
@@ -66,25 +87,6 @@ public class LoginHandler implements Handler {
         final Session session = request.getSession(true);
         session.setAttribute(SESSION_ATTRIBUTE_OF_USER, user);
         return CookieResponseHeader.createByJSessionId(session.getId());
-    }
-
-    private HttpResponse handleGet(final HttpRequest request) {
-        final String resourcePath = request.getPath() + ".html";
-        final HttpResponse response = HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.OK)
-                .setContent(resourcePath);
-        if (checkLoginUser(request)) {
-            return response
-                    .setLocationHeader(REDIRECT_URL);
-        }
-        if (request.hasQueryString()) {
-            final User user = getUser(request.getQueryString());
-            return response
-                    .setLocationHeader(REDIRECT_URL)
-                    .setCookieHeader(createCookie(request, user));
-        }
-        return response;
     }
 
     private boolean checkLoginUser(final HttpRequest request) {

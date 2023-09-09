@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler.exception;
+package org.apache.coyote.controller.exception;
 
 public class UnauthorizedException extends IllegalArgumentException {
 

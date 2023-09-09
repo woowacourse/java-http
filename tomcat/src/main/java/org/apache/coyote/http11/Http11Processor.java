@@ -92,10 +92,6 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest generateHttpRequest(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
 
-        if (requestLine == null) {
-            return null;
-        }
-
         HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
         HttpRequestHeader httpRequestHeader = getRequestHeader(reader);
 

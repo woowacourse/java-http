@@ -37,12 +37,28 @@ public class HttpRequest {
         return ContentType.from(headers.getValue(CONTENT_TYPE_KEY));
     }
 
+    public String getProtocolVersion() {
+        return requestLine.getVersion();
+    }
+
+    public String getResourceUri(){
+        return requestLine.getRequestURI().getUri();
+    }
+
+    public String getResourcePath(){
+        return requestLine.getResourcePath();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public boolean isMethod(HttpMethod httpMethod) {
+        return requestLine.isMethod(httpMethod);
     }
 
 }

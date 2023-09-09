@@ -42,7 +42,7 @@ public class LoginController extends AbstractController {
     }
 
     private void redirectHome(HttpRequest request, HttpResponse response) {
-        StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND);
+        StatusLine statusLine = new StatusLine(request.getProtocolVersion(), HttpStatus.FOUND);
         ResponseBody responseBody = new ResponseBody(FileReader.read(REDIRECT_HOME_URI));
         response
                 .statusLine(statusLine)
@@ -54,7 +54,7 @@ public class LoginController extends AbstractController {
 
     private void showLoginPage(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(URI));
-        StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
+        StatusLine statusLine = new StatusLine(request.getProtocolVersion(), HttpStatus.OK);
         response
                 .statusLine(statusLine)
                 .contentType(HTML.getValue())
@@ -86,7 +86,7 @@ public class LoginController extends AbstractController {
     private void redirectUnauthorized(HttpRequest httpRequest, HttpResponse httpResponse) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(UNAUTHORIZED));
         httpResponse
-                .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.UNAUTHORIZED))
+                .statusLine(new StatusLine(httpRequest.getProtocolVersion(), HttpStatus.UNAUTHORIZED))
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(UNAUTHORIZED)
@@ -98,7 +98,7 @@ public class LoginController extends AbstractController {
 
         ResponseBody responseBody = new ResponseBody(FileReader.read(REDIRECT_HOME_URI));
         httpResponse
-                .statusLine(new StatusLine(httpRequest.getRequestLine().getVersion(), HttpStatus.FOUND))
+                .statusLine(new StatusLine(httpRequest.getProtocolVersion(), HttpStatus.FOUND))
                 .contentType(HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .setCookie(HttpCookie.jSessionId(sessionId))

@@ -12,9 +12,9 @@ public class ResourceController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        String resource =  request.getRequestLine().getRequestURI().getResourcePath();
+        String resource = request.getResourcePath();
         ResponseBody responseBody = new ResponseBody(FileReader.read(resource));
-        StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
+        StatusLine statusLine = new StatusLine(request.getProtocolVersion(), HttpStatus.OK);
         response
                 .statusLine(statusLine)
                 .contentType(request.contentType().getValue())

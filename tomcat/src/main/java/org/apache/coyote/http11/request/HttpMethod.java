@@ -15,7 +15,7 @@ public enum HttpMethod {
                 .orElse(GET);
     }
 
-    public boolean is(HttpMethod other) {
+    public boolean isSameTo(HttpMethod other) {
         return this == other;
     }
 

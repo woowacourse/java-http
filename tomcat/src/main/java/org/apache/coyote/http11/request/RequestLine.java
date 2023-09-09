@@ -25,8 +25,16 @@ public class RequestLine {
         );
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public boolean isMethod(HttpMethod other) {
+        return this.httpMethod.isSameTo(other);
+    }
+
+    public String getResourcePath() {
+        return requestURI.getResourcePath();
+    }
+
+    public String getResourceUri() {
+        return requestURI.getUri();
     }
 
     public RequestURI getRequestURI() {

@@ -38,10 +38,6 @@ public class RequestURI {
         return resourcePath;
     }
 
-    public QueryString getQueryString() {
-        return queryString;
-    }
-
     public String getUri() {
         return uri;
     }

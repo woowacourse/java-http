@@ -21,7 +21,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(REGISTER_URI));
         response
-                .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK))
+                .statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.OK))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .responseBody(responseBody);
@@ -43,7 +43,7 @@ public class RegisterController extends AbstractController {
     private void redirectLogin(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
         response
-                .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.FOUND))
+                .statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.FOUND))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(LOGIN_URI)
@@ -55,7 +55,7 @@ public class RegisterController extends AbstractController {
 
         ResponseBody responseBody = new ResponseBody(FileReader.read(LOGIN_URI));
         response
-                .statusLine(new StatusLine(request.getRequestLine().getVersion(), HttpStatus.CREATED))
+                .statusLine(new StatusLine(request.getProtocolVersion(), HttpStatus.CREATED))
                 .contentType(ContentType.HTML.getValue())
                 .contentLength(responseBody.getValue().getBytes().length)
                 .redirect(LOGIN_URI)

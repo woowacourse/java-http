@@ -15,7 +15,7 @@ public class IndexController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         ResponseBody responseBody = new ResponseBody(FileReader.read(RESOURCE));
-        StatusLine statusLine = new StatusLine(request.getRequestLine().getVersion(), HttpStatus.OK);
+        StatusLine statusLine = new StatusLine(request.getProtocolVersion(), HttpStatus.OK);
         response
                 .statusLine(statusLine)
                 .contentType(ContentType.HTML.getValue())

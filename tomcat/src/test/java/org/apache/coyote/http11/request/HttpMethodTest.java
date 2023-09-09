@@ -38,8 +38,8 @@ class HttpMethodTest {
     @Test
     void 같은지_검증_가능() {
         assertAll(
-                () -> Assertions.assertThat(HttpMethod.POST.is(HttpMethod.POST)).isTrue(),
-                () -> Assertions.assertThat(HttpMethod.GET.is(HttpMethod.POST)).isFalse()
+                () -> Assertions.assertThat(HttpMethod.POST.isSameTo(HttpMethod.POST)).isTrue(),
+                () -> Assertions.assertThat(HttpMethod.GET.isSameTo(HttpMethod.POST)).isFalse()
         );
     }
 

@@ -21,7 +21,7 @@ public class FrontController extends AbstractController {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        String uri = request.getRequestLine().getRequestURI().getUri();
+        String uri = request.getResourceUri();
         Controller controller = URIS.getOrDefault(uri, new ResourceController());
         controller.service(request, response);
     }

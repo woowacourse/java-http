@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private static final int DEFAULT_THREAD_COUNT = 250;
 
     private final Mapper mapper = new RequestMapper(new StaticController());
 
@@ -21,7 +22,7 @@ public class Tomcat {
     }
 
     public void start() {
-        var connector = new Connector(mapper);
+        final Connector connector = new Connector(mapper, DEFAULT_THREAD_COUNT);
 
         connector.start();
 

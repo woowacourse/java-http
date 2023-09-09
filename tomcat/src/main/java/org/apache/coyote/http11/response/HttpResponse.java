@@ -1,78 +1,70 @@
 package org.apache.coyote.http11.response;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.EnumMap;
-import java.util.Objects;
 
 import static org.apache.coyote.http11.response.Header.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.Header.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.Header.SET_COOKIE;
+import static org.apache.coyote.http11.response.StatusCode.FOUND;
+import static org.apache.coyote.http11.response.StatusCode.OK;
 
 public class HttpResponse {
 
-    private static final String STATIC = "static";
     private static final String SPACE_CRLF = " \r\n";
     private static final String SPACE = " ";
     private static final String CRLF = "\r\n";
     private static final String COLON = ": ";
+    private static final String HTTP11 = "HTTP/1.1";
 
     private final EnumMap<Header, String> headers = new EnumMap<>(Header.class);
-    private String responseLine = "";
-    private String body = "";
+    private String protocol;
+    private StatusCode statusCode;
+    private String body;
 
-    public Response() {
+    public HttpResponse() {
+        protocol = HTTP11;
+        statusCode = OK;
+        body = "";
     }
 
     public String format() {
         StringBuilder sb = new StringBuilder();
-        sb.append(responseLine);
+        sb.append(protocol).append(SPACE).append(statusCode.format()).append(SPACE_CRLF);
         headers.forEach((header, value) -> sb.append(header.getName()).append(COLON).append(value).append(SPACE_CRLF));
         sb.append(CRLF).append(body);
 
         return sb.toString();
     }
 
-    public Response addResponseLine(String protocol, StatusCode statusCode) {
-        responseLine = protocol + SPACE + statusCode.format() + SPACE_CRLF;
+    public HttpResponse addBody(String body) {
+        this.body = body;
+        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return this;
     }
 
-    public Response addBaseHeader(String contentType) {
+    public HttpResponse addBaseHeader(String contentType) {
         headers.put(CONTENT_TYPE, contentType);
         return this;
     }
 
-    public Response addHeader(Header header, String value) {
+    public HttpResponse addHeader(Header header, String value) {
         headers.put(header, value);
         return this;
     }
 
-    public Response createBodyByText(String text) {
-        this.body = text;
-        headers.put(CONTENT_LENGTH, String.valueOf(body.length()));
+    public HttpResponse redirect(String url) {
+        statusCode = FOUND;
+        headers.put(Header.LOCATION, url);
         return this;
     }
 
-    public Response createBodyByFile(String url) throws IOException {
-        String path = Objects.requireNonNull(getClass().getClassLoader().getResource(STATIC + url)).getPath();
-        File file = new File(path);
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line).append(System.lineSeparator());
-            }
-            this.body = sb.toString();
-        }
-        headers.put(CONTENT_LENGTH, String.valueOf(file.length()));
-        return this;
-    }
-
-    public Response setCookie(String sessionId) {
+    public HttpResponse setCookie(String sessionId) {
         headers.put(SET_COOKIE, "JSESSIONID=" + sessionId);
+        return this;
+    }
+
+    public HttpResponse setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
         return this;
     }
 }

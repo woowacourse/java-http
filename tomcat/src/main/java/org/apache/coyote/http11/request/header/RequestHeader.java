@@ -21,7 +21,7 @@ public class RequestHeader {
     private final HttpCookie httpCookie;
 
     public RequestHeader(Map<String, String> headersMap) {
-        this(headersMap, null);
+        this(headersMap, new HttpCookie());
     }
 
     public RequestHeader(Map<String, String> headersMap, HttpCookie httpCookie) {
@@ -61,9 +61,9 @@ public class RequestHeader {
     }
 
     public String sessionId() {
-        if (!hasSessionId()) {
-            throw new IllegalArgumentException("세션 Id가 존재하지 않습니다.");
-        }
+//        if (!hasSessionId()) {
+//            throw new IllegalArgumentException("세션 Id가 존재하지 않습니다.");
+//        }
         return httpCookie.get(JSESSIONID);
     }
 

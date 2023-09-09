@@ -6,19 +6,25 @@ import static org.apache.coyote.http11.response.header.HttpHeader.SET_COOKIE;
 import static org.apache.coyote.http11.response.line.ResponseStatus.FOUND;
 import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
 import static org.apache.coyote.http11.response.line.ResponseStatus.UNAUTHORIZED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,13 +52,28 @@ class LoginControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    @ParameterizedTest
+    @CsvSource({"true, true", "false, false"})
+    void 처리할_수_있는_요청인지_확인한다(boolean returnValue, boolean expected) {
+        // given
+        String uri = anyString();
+        when(mockHttpRequest.consistsOf(uri))
+                .thenReturn(returnValue);
+
+        // when
+        boolean actual = loginController.canProcess(mockHttpRequest);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
     @Nested
-    class uri가_일치하는_POST_요청일_때 {
+    class POST_요청일_때 {
 
         @Test
-        void body_값으로_로그인하면_쿠키에_세션을_넣고_FOUND로_응답한다() {
+        void 로그인하면_쿠키에_세션을_넣고_FOUND로_리다이렉트할_URL을_응답한다() {
             // given
-            when(mockHttpRequest.consistsOf(POST, "/login"))
+            when(mockHttpRequest.consistsOf(POST))
                     .thenReturn(true);
             when(authService.login(any(), any()))
                     .thenReturn("sessionId");
@@ -68,9 +89,9 @@ class LoginControllerTest {
         }
 
         @Test
-        void body_값으로_로그인_중_예외가_발생하면_Unauthorized로_응답한다() {
+        void 로그인_중_예외가_발생하면_Unauthorized로_응답한다() {
             // given
-            when(mockHttpRequest.consistsOf(POST, "/login"))
+            when(mockHttpRequest.consistsOf(POST))
                     .thenReturn(true);
             when(authService.login(any(), any()))
                     .thenThrow(IllegalArgumentException.class);
@@ -85,12 +106,12 @@ class LoginControllerTest {
     }
 
     @Nested
-    class uri가_일치하는_GET_요청일_때 {
+    class GET_요청일_때 {
 
         @Test
-        void query_String_으로_로그인되면_쿠키에_세션을_넣고_FOUND로_응답한다() {
+        void query_String_으로_로그인하면_쿠키에_세션을_넣고_FOUND로_리다이렉트할_URL을_응답한다() {
             // given
-            when(mockHttpRequest.consistsOf(GET, "/login"))
+            when(mockHttpRequest.consistsOf(GET))
                     .thenReturn(true);
             when(mockHttpRequest.hasQueryString())
                     .thenReturn(true);
@@ -108,9 +129,9 @@ class LoginControllerTest {
         }
 
         @Test
-        void query_String_으로_로그인하다가_예외가_발생하면_Unauthorized로_응답한다() {
+        void query_String_으로_로그인_중_예외가_발생하면_Unauthorized로_응답한다() {
             // given
-            when(mockHttpRequest.consistsOf(GET, "/login"))
+            when(mockHttpRequest.consistsOf(GET))
                     .thenReturn(true);
             when(mockHttpRequest.hasQueryString())
                     .thenReturn(true);
@@ -126,9 +147,9 @@ class LoginControllerTest {
         }
 
         @Test
-        void session으로_기존_로그인을_확인하고_FOUND로_응답한다() {
+        void session으로_기존_로그인을_확인하고_FOUND로_리다이렉트할_URL을_응답한다() {
             // given
-            when(mockHttpRequest.consistsOf(GET, "/login"))
+            when(mockHttpRequest.consistsOf(GET))
                     .thenReturn(true);
             when(mockHttpRequest.hasSessionId())
                     .thenReturn(true);
@@ -143,9 +164,9 @@ class LoginControllerTest {
         }
 
         @Test
-        void OK로_응답한다() {
+        void OK로_로그인_페이지를_응답한다() {
             // given
-            when(mockHttpRequest.consistsOf(GET, "/login"))
+            when(mockHttpRequest.consistsOf(GET))
                     .thenReturn(true);
 
             // when
@@ -154,5 +175,16 @@ class LoginControllerTest {
             // then
             verify(mockHttpResponse, times(1)).setResponseResource(OK, "/login.html");
         }
+    }
+
+    @Test
+    void 다른_요청이면_예외를_던진다() {
+        // given
+        when(mockHttpRequest.consistsOf(any(HttpMethod.class)))
+                .thenReturn(false);
+
+        // when
+        assertThatThrownBy(() -> loginController.service(mockHttpRequest, mockHttpResponse))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 }

@@ -42,4 +42,30 @@ class HttpCookieTest {
         // then
         assertThat(actual).isTrue();
     }
+
+    @Test
+    void session_Id를_꺼낸다() {
+        // given
+        String httpCookie = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ";
+        HttpCookie cookie = HttpCookie.from(httpCookie);
+
+        // when
+        String sessionId = cookie.get("JSESSIONID");
+
+        // then
+        assertThat(sessionId).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+    }
+
+    @Test
+    void session_Id를2_꺼낸다() {
+        // given
+        String httpCookie = "JSESSIONIDs=656cef62-e3c4-40bc-a8df-94732920ed46 ";
+        HttpCookie cookie = HttpCookie.from(httpCookie);
+
+        // when
+        String sessionId = cookie.get("JSESSIONID");
+
+        // then
+        assertThat(sessionId).isNull();
+    }
 }

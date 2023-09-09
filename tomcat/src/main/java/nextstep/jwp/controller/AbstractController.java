@@ -6,8 +6,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public boolean canProcess(HttpRequest httpRequest) {
+        return true;
+    }
 
+    @Override
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
     }
 
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {

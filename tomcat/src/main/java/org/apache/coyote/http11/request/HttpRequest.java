@@ -43,6 +43,10 @@ public class HttpRequest {
         return requestLine.consistsOf(httpMethod);
     }
 
+    public boolean consistsOf(String requestUri) {
+        return requestLine.consistsOf(requestUri);
+    }
+
     public boolean hasQueryString() {
         return requestLine.hasQueryString();
     }

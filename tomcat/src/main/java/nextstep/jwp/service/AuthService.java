@@ -21,7 +21,7 @@ public class AuthService {
     }
 
     public boolean isLoggedIn(String sessionId) {
-        return Objects.nonNull(sessionManager.findSession(sessionId));
+        return Objects.nonNull(sessionId) & Objects.nonNull(sessionManager.findSession(sessionId));
     }
 
     public String login(String account, String password) {

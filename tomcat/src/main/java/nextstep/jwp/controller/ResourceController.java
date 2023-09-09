@@ -9,10 +9,17 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class ResourceController extends AbstractController {
 
     @Override
+    public boolean canProcess(HttpRequest httpRequest) {
+        return super.canProcess(httpRequest);
+    }
+
+    @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.consistsOf(GET)) {
             doGet(httpRequest, httpResponse);
+            return;
         }
+        throw new UnsupportedOperationException();
     }
 
     @Override

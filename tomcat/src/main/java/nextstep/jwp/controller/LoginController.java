@@ -28,14 +28,21 @@ public class LoginController extends AbstractController {
     }
 
     @Override
+    public boolean canProcess(HttpRequest httpRequest) {
+        return httpRequest.consistsOf(URL);
+    }
+
+    @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.consistsOf(POST, URL)) {
+        if (httpRequest.consistsOf(POST)) {
             doPost(httpRequest, httpResponse);
             return;
         }
-        if (httpRequest.consistsOf(GET, URL)) {
+        if (httpRequest.consistsOf(GET)) {
             doGet(httpRequest, httpResponse);
+            return;
         }
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -2,11 +2,15 @@ package nextstep.jwp.controller;
 
 import static org.apache.coyote.http11.request.line.HttpMethod.GET;
 import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -34,7 +38,16 @@ class ResourceControllerTest {
     }
 
     @Test
-    void GET_요청일_때_OK로_응답한다() {
+    void 처리할_수_있는_요청인지_확인한다() {
+        // when
+        boolean actual = resourceController.canProcess(mockHttpRequest);
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void GET_요청일_때_OK로_자원을_응답한다() {
         // given
         when(mockHttpRequest.consistsOf(GET))
                 .thenReturn(true);
@@ -46,5 +59,16 @@ class ResourceControllerTest {
 
         // then
         verify(mockHttpResponse, times(1)).setResponseResource(OK, "css/styles.css");
+    }
+
+    @Test
+    void 다른_요청이면_예외를_던진다() {
+        // given
+        when(mockHttpRequest.consistsOf(any(HttpMethod.class)))
+                .thenReturn(false);
+
+        // expect
+        assertThatThrownBy(() -> resourceController.service(mockHttpRequest, mockHttpResponse))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 }

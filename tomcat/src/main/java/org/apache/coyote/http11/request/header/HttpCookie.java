@@ -15,6 +15,10 @@ public class HttpCookie {
 
     private final Map<String, String> parametersMap;
 
+    public HttpCookie() {
+        this(new HashMap<>());
+    }
+
     public HttpCookie(Map<String, String> parametersMap) {
         this.parametersMap = parametersMap;
     }

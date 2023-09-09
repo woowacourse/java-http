@@ -47,6 +47,10 @@ public class RequestLine {
         return this.httpMethod.equals(httpMethod);
     }
 
+    public boolean consistsOf(String uri) {
+        return requestUri.consistsOf(uri);
+    }
+
     public boolean hasQueryString() {
         return requestUri.hasQueryString();
     }

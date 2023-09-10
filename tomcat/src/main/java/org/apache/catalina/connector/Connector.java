@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class Connector implements Runnable {
 
@@ -20,7 +20,7 @@ public class Connector implements Runnable {
     private static final int MAX_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
-    private final ThreadPoolExecutor executor;
+    private final ExecutorService executor;
     private boolean stopped;
 
     public Connector() {
@@ -28,7 +28,7 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
+        this.executor = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -72,7 +72,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        executor.submit(processor);
+        executor.execute(processor);
     }
 
     public void stop() {

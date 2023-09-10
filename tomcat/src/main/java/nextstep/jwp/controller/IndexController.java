@@ -10,7 +10,7 @@ public class IndexController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        throw new MyException(HttpStatus.BAD_REQUEST.code);
+        throw new MyException(HttpStatus.METHOD_NOT_ALLOWED.code);
     }
 
     @Override

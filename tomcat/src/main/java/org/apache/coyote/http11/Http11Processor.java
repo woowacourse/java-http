@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Set;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -37,20 +39,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        try (final var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             final var writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
-            String headers = readHeaders(bufferedReader);
+            String headers = readHeaders(reader);
             int contentLength = getContentLength(headers);
-            String payload = readPayload(bufferedReader, contentLength);
+            String payload = readPayload(reader, contentLength);
 
             HttpMethod httpMethod = RequestExtractor.extractHttpMethod(headers);
             String response = http11MethodHandlerAdaptor.handle(httpMethod, headers, payload);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writer.write(response);
+            writer.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -64,8 +64,6 @@ public class Http11Processor implements Runnable, Processor {
             result.append(line).append("\r\n");
         }
         return result.toString();
-//        return bufferedReader.lines()
-//                .collect(Collectors.joining("\r\n", "", "\r\n")); // 이 방식 테스트에서 똑같이 했는데 통과함. 실제 실행하면 안됨
     }
 
     private int getContentLength(String headers) {

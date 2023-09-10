@@ -38,7 +38,10 @@ public class HttpRequestReader {
         return bufferedReader.readLine();
     }
 
-    private static String readHeader(BufferedReader bufferedReader, List<Integer> contentLengthStorage) throws IOException {
+    private static String readHeader(
+            BufferedReader bufferedReader,
+            List<Integer> contentLengthStorage
+    ) throws IOException {
         StringJoiner headerJoiner = new StringJoiner(LINE_DELIMITER);
 
         String header = "";

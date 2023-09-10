@@ -15,7 +15,7 @@ public class HttpRequestReader {
     public String readHeader(BufferedReader reader) throws IOException {
         String line;
         StringJoiner joiner = new StringJoiner(System.lineSeparator());
-        while ((line = reader.readLine()) != null & !END_OF_PARAGRAPH.equals(line)) {
+        while ((line = reader.readLine()) != null && !END_OF_PARAGRAPH.equals(line)) {
             joiner.add(line);
         }
         return joiner.toString();

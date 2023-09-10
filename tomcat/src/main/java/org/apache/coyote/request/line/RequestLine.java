@@ -40,7 +40,7 @@ public class RequestLine {
     }
 
     public boolean consistsOf(HttpMethod httpMethod, String uri) {
-        return this.httpMethod.equals(httpMethod) & requestUri.consistsOf(uri);
+        return this.httpMethod.equals(httpMethod) && requestUri.consistsOf(uri);
     }
 
     public boolean consistsOf(HttpMethod httpMethod) {

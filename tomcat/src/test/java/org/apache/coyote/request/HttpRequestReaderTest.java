@@ -119,7 +119,7 @@ class HttpRequestReaderTest {
             String paragraph = httpRequestReader.readHeader(reader);
 
             // then
-            assertThat(paragraph).isEqualTo("");
+            assertThat(paragraph).isEmpty();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

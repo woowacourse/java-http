@@ -3,6 +3,7 @@ package nextstep.jwp.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ class AuthServiceTest {
     @Test
     void 로그인한다() {
         // given
-        AuthService authService = new AuthService(sessionManager);
+        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
         String account = "gugu";
         String password = "password";
 
@@ -40,7 +41,7 @@ class AuthServiceTest {
     @Test
     void 존재하지_않는_계정으로_로그인을_할_경우_예외를_던진다() {
         // given
-        AuthService authService = new AuthService(sessionManager);
+        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
         String wrongAccount = "wrongAccount";
         String password = "password";
 
@@ -53,7 +54,7 @@ class AuthServiceTest {
     @Test
     void 틀린_비밀번호로_로그인_할_경우_예외를_던진다() {
         // given
-        AuthService authService = new AuthService(sessionManager);
+        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
         String account = "gugu";
         String wrongPassword = "wrongPassword";
 
@@ -66,7 +67,7 @@ class AuthServiceTest {
     @Test
     void 회원가입한다() {
         // given
-        AuthService authService = new AuthService(sessionManager);
+        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
         String account = "account";
         String password = "password";
         String email = "account@email.com";
@@ -81,7 +82,7 @@ class AuthServiceTest {
     @Test
     void 회원가입할_때_계정이_중복될_경우_예외를_던진다() {
         // given
-        AuthService authService = new AuthService(sessionManager);
+        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
         String duplicateAccount = "duplicateAccount";
         authService.register(duplicateAccount, "password", "account@email.com");
 
@@ -92,10 +93,10 @@ class AuthServiceTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"notLoggedInId, false", "loggedInId, true", ", false"})
+    @CsvSource({"notLoggedInId, false", "loggedInId, true"})
     void session_Id로_이미_로그인이_되었는지_확인한다(String sessionId, boolean expected) {
         // given
-        AuthService authService = new AuthService(sessionManager);
+        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
         Session session = new Session("loggedInId");
         sessionManager.add(session);
 

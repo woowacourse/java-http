@@ -66,7 +66,7 @@ public class LoginController extends AbstractController {
             doLogin(httpResponse, httpRequest.getQueryStringValue(ACCOUNT), httpRequest.getQueryStringValue(PASSWORD));
             return;
         }
-        if (httpRequest.hasSessionId() & authService.isLoggedIn(httpRequest.sessionId())) {
+        if (httpRequest.hasSessionId() && authService.isLoggedIn(httpRequest.sessionId())) {
             httpResponse.setResponseRedirect(FOUND, REDIRECT_URL);
             return;
         }

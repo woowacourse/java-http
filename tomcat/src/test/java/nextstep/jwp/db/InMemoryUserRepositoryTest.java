@@ -1,5 +1,6 @@
 package nextstep.jwp.db;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.List;
@@ -13,9 +14,38 @@ import org.junit.jupiter.api.Test;
 class InMemoryUserRepositoryTest {
 
     @Test
-    void 모든_회원을_조회한다() {
+    void 회원을_저장한다() {
+        // given
+        InMemoryUserRepository inMemoryUserRepository = InMemoryUserRepository.init();
+
         // when
-        List<User> users = InMemoryUserRepository.findAll();
+        Long id = inMemoryUserRepository.save(new User("huchu", "huchu123", "huchu@naver.com"));
+
+        // then
+        assertThat(id).isNotNull();
+    }
+
+    @Test
+    void 계정으로_회원을_조회한다() {
+        // given
+        InMemoryUserRepository inMemoryUserRepository = InMemoryUserRepository.init();
+        User user = new User("huchu", "huchu123", "huchu@naver.com");
+        inMemoryUserRepository.save(user);
+
+        // when
+        User foundUser = inMemoryUserRepository.findByAccount(user.getAccount()).get();
+
+        // then
+        assertThat(foundUser).isEqualTo(user);
+    }
+
+    @Test
+    void 모든_회원을_조회한다() {
+        // given
+        InMemoryUserRepository inMemoryUserRepository = InMemoryUserRepository.init();
+
+        // when
+        List<User> users = inMemoryUserRepository.findAll();
 
         // then
         assertSoftly(softly -> {

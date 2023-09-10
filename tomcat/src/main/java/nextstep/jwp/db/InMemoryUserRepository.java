@@ -1,35 +1,41 @@
 package nextstep.jwp.db;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
-    private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private Long id;
+    private final Map<Long, User> database;
 
-    static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+    public InMemoryUserRepository(Map<Long, User> database, Long initialId) {
+        this.database = database;
+        this.id = initialId;
     }
 
-    public static void save(User user) {
-        database.put(user.getAccount(), user);
+    public static InMemoryUserRepository init() {
+        var repository = new InMemoryUserRepository(new ConcurrentHashMap<>(), 1L);
+        repository.save(new User("gugu", "password", "hkkang@woowahan.com"));
+        return repository;
     }
 
-    public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+    public Long save(User user) {
+        database.put(id, user);
+        user.setId(id);
+        return id++;
     }
 
-    public static List<User> findAll() {
-        return database.keySet().stream()
-                .map(database::get)
-                .collect(Collectors.toList());
+    public Optional<User> findByAccount(String account) {
+        return database.values().stream()
+                .filter(user -> user.getAccount().equals(account))
+                .findAny();
     }
 
-    private InMemoryUserRepository() {
+    public List<User> findAll() {
+        return new ArrayList<>(database.values());
     }
 }

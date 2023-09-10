@@ -22,8 +22,7 @@ class FileManagerTest {
         FileManager fileManager = from(location);
 
         // then
-        File file = fileManager.file();
-        assertThat(file.getName()).isEqualTo("styles.css");
+        assertThat(fileManager.file()).hasName("styles.css");
     }
 
     @Test

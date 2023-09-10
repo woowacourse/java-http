@@ -1,6 +1,6 @@
 package org.apache.coyote.response.header;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +25,6 @@ public class ResponseHeader {
     }
 
     public Map<HttpHeader, String> headersMap() {
-        return new HashMap<>(headersMap);
+        return new EnumMap<>(headersMap);
     }
 }

@@ -203,10 +203,18 @@ class HttpRequestTest {
     @Test
     void Session_Id를_얻는다() {
         // given
+        String requestLine = "POST /login HTTP/1.1 ";
+        String requestHeader = String.join(System.lineSeparator(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 10 ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ");
+        HttpRequest request = HttpRequest.of(requestLine, requestHeader);
 
         // when
+        String sessionId = request.sessionId();
 
         // then
-
+        assertThat(sessionId).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 }

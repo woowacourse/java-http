@@ -26,7 +26,6 @@ public class HttpResponse {
         );
     }
 
-
     private static Optional<String> extractBody(ResponseEntity<Object> responseEntity) {
         if (haveBody(responseEntity)) {
             return Optional.of(bodyOf(responseEntity));

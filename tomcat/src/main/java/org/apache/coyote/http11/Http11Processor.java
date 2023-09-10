@@ -7,7 +7,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestStartLine;
+import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.response.HttpResponseEntity;
 import org.apache.coyote.http11.session.HttpSession;
 import org.apache.coyote.http11.session.SessionManager;
@@ -77,10 +77,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponseEntity makeResponseEntity(final HttpRequest httpRequest, final HttpCookie cookie) throws IOException {
-        final HttpRequestStartLine startLine = httpRequest.getStartLine();
-        final String path = startLine.getPath();
+        final HttpRequestLine requestLine = httpRequest.getRequestLine();
+        final String path = requestLine.getPathValue();
 
-        if (startLine.getHttpMethod().equals(HttpMethod.POST)) {
+        if (HttpMethod.POST == requestLine.getMethod()) {
             if (path.startsWith("/login")) {
                 return login(httpRequest);
             }
@@ -92,24 +92,25 @@ public class Http11Processor implements Runnable, Processor {
             final String jsessionid = cookie.getJSESSIONID();
             HttpSession httpSession = sessionManager.findSession(jsessionid);
             if (Objects.isNull(httpSession)) {
-                return HttpResponseEntity.ok(LOGIN_HTML, makeResponseBody(LOGIN_HTML));
+                return HttpResponseEntity.ok(LOGIN_HTML, makeResponseBody(LOGIN_HTML), requestLine.getProtocol());
             }
-            return HttpResponseEntity.found(INDEX_HTML);
+            return HttpResponseEntity.found(INDEX_HTML, requestLine.getProtocol());
         }
-        return HttpResponseEntity.ok(path, makeResponseBody(path));
+        return HttpResponseEntity.ok(path, makeResponseBody(path), requestLine.getProtocol());
     }
 
     private HttpResponseEntity login(final HttpRequest httpRequest) throws IOException {
         final Map<String, String> loginData = parseFormData(httpRequest.getBody());
+        final HttpRequestLine requestLine = httpRequest.getRequestLine();
         final User user = InMemoryUserRepository.findByAccount(loginData.get("account"))
                 .orElseThrow();
         if (user.checkPassword(loginData.get("password"))) {
             final HttpCookie newCookie = HttpCookie.create();
             saveSession(newCookie, user);
-            return HttpResponseEntity.found(INDEX_HTML)
+            return HttpResponseEntity.found(INDEX_HTML, requestLine.getProtocol())
                     .setCookie(newCookie.getJSESSIONID());
         }
-        return HttpResponseEntity.ok(UNAUTHORIZED_HTML, makeResponseBody(UNAUTHORIZED_HTML));
+        return HttpResponseEntity.ok(UNAUTHORIZED_HTML, makeResponseBody(UNAUTHORIZED_HTML), requestLine.getProtocol());
     }
 
     private void saveSession(final HttpCookie newCookie, final User user) {
@@ -120,8 +121,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponseEntity register(final HttpRequest httpRequest) throws IOException {
         final Map<String, String> registerData = parseFormData(httpRequest.getBody());
+        final HttpRequestLine requestLine = httpRequest.getRequestLine();
         InMemoryUserRepository.save(new User(registerData.get("account"), registerData.get("password"), registerData.get("email")));
-        return HttpResponseEntity.ok(INDEX_HTML, makeResponseBody(INDEX_HTML));
+        return HttpResponseEntity.ok(INDEX_HTML, makeResponseBody(INDEX_HTML), requestLine.getProtocol());
     }
 
     private Map<String, String> parseFormData(final String body) {

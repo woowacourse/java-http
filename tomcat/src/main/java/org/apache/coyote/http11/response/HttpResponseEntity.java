@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.request.HttpProtocol;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,9 +16,9 @@ public class HttpResponseEntity {
         this.body = body;
     }
 
-    public static HttpResponseEntity ok(final String path, final String body) {
+    public static HttpResponseEntity ok(final String path, final String body, final HttpProtocol protocol) {
         final Map<String, String> requestHeader = new LinkedHashMap<>();
-        requestHeader.put("HTTP/1.1 ", HttpStatusCode.OK.message());
+        requestHeader.put(protocol.message(), HttpStatusCode.OK.message());
         requestHeader.put("Content-Type: ", makeContentType(path) + ";charset=utf-8 ");
         requestHeader.put("Content-Length: ", body.getBytes().length + " ");
         return new HttpResponseEntity(requestHeader, body);
@@ -30,9 +31,9 @@ public class HttpResponseEntity {
         return "text/html";
     }
 
-    public static HttpResponseEntity found(final String path) {
+    public static HttpResponseEntity found(final String path, final HttpProtocol protocol) {
         final Map<String, String> requestHeader = new LinkedHashMap<>();
-        requestHeader.put("HTTP/1.1 ", HttpStatusCode.FOUND.message());
+        requestHeader.put(protocol.message(), HttpStatusCode.FOUND.message());
         requestHeader.put("Location: ", path);
         return new HttpResponseEntity(requestHeader, StringUtils.EMPTY);
     }

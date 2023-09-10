@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Query {
+public class HttpQuery {
     private static final String QUERY_DELIMITER = "&";
     private static final String PAIR_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
@@ -13,12 +13,12 @@ public class Query {
 
     private final Map<String, String> query;
 
-    private Query(final Map<String, String> query) {
+    private HttpQuery(final Map<String, String> query) {
         this.query = query;
     }
 
-    public static Query from(final String query) {
-        return new Query(Arrays.stream(query.split(QUERY_DELIMITER))
+    public static HttpQuery from(final String query) {
+        return new HttpQuery(Arrays.stream(query.split(QUERY_DELIMITER))
                 .map(data -> data.split(PAIR_DELIMITER))
                 .collect(Collectors.toMap(
                         data -> data[KEY_INDEX],
@@ -26,7 +26,7 @@ public class Query {
                 )));
     }
 
-    public static Query empty() {
-        return new Query(Collections.emptyMap());
+    public static HttpQuery empty() {
+        return new HttpQuery(Collections.emptyMap());
     }
 }

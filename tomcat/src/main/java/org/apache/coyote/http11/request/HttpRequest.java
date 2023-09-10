@@ -6,19 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HttpRequest {
-    private final HttpRequestStartLine startLine;
+    private final HttpRequestLine requestLine;
     private final HttpRequestHeaders headers;
     private final HttpRequestBody body;
 
-    private HttpRequest(final HttpRequestStartLine startLine, final HttpRequestHeaders headers, final HttpRequestBody body) {
-        this.startLine = startLine;
+    private HttpRequest(final HttpRequestLine requestLine, final HttpRequestHeaders headers, final HttpRequestBody body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final List<String> requestHeader = extractRequestHeader(bufferedReader);
-        final HttpRequestStartLine startLine = HttpRequestStartLine.from(requestHeader.get(0));
+        final HttpRequestLine startLine = HttpRequestLine.from(requestHeader.get(0));
         final HttpRequestHeaders headers = HttpRequestHeaders.from(requestHeader.subList(1, requestHeader.size()));
         final HttpRequestBody requestBody = extractRequestBody(bufferedReader, headers);
         return new HttpRequest(startLine, headers, requestBody);
@@ -49,8 +49,8 @@ public class HttpRequest {
         return headers.hasCookie();
     }
 
-    public HttpRequestStartLine getStartLine() {
-        return startLine;
+    public HttpRequestLine getRequestLine() {
+        return requestLine;
     }
 
     public String getBody() {

@@ -5,7 +5,7 @@ import java.util.Set;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.Container;
 import org.apache.catalina.core.servlet.HttpServlet;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.catalina.core.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

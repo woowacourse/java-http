@@ -5,8 +5,8 @@ import java.util.Objects;
 import javassist.NotFoundException;
 import org.apache.catalina.core.servlet.HttpServletRequest;
 import org.apache.catalina.core.servlet.HttpServletResponse;
+import org.apache.catalina.core.session.SessionManager.Session;
 import org.apache.catalina.core.util.ResourceReader;
-import org.apache.coyote.http11.session.SessionManager.Session;
 
 public class ViewController implements Controller {
 

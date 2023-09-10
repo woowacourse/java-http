@@ -1,12 +1,12 @@
 package org.apache.catalina.core.servlet;
 
-import static org.apache.coyote.http11.session.SessionManager.SESSION_ID_COOKIE_NAME;
+import static org.apache.catalina.core.session.SessionManager.SESSION_ID_COOKIE_NAME;
 
+import org.apache.catalina.core.session.SessionManager;
+import org.apache.catalina.core.session.SessionManager.Session;
 import org.apache.coyote.http11.common.Method;
 import org.apache.coyote.http11.common.QueryParameters;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.http11.session.SessionManager.Session;
 
 public class HttpServletRequest {
 

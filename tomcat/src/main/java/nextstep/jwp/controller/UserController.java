@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import static org.apache.catalina.core.servlet.HttpServletResponse.redirect;
-import static org.apache.coyote.http11.session.SessionManager.SESSION_ID_COOKIE_NAME;
+import static org.apache.catalina.core.session.SessionManager.SESSION_ID_COOKIE_NAME;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;

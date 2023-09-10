@@ -5,9 +5,9 @@ import org.apache.catalina.core.servlet.DefaultServlet;
 import org.apache.catalina.core.servlet.HttpServlet;
 import org.apache.catalina.core.servlet.HttpServletRequest;
 import org.apache.catalina.core.servlet.HttpServletResponse;
+import org.apache.catalina.core.session.SessionManager;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.session.SessionManager;
 
 public class Container {
 

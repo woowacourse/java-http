@@ -1,15 +1,15 @@
 package nextstep.org.apache.coyote.http11;
 
+import static org.apache.catalina.core.session.SessionManager.SESSION_ID_COOKIE_NAME;
 import static org.apache.coyote.http11.common.Protocol.HTTP11;
 import static org.apache.coyote.http11.common.header.HeaderName.ACCEPT;
 import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
-import static org.apache.coyote.http11.session.SessionManager.SESSION_ID_COOKIE_NAME;
 
 import java.util.Map;
 import org.apache.catalina.core.servlet.HttpServletRequest;
+import org.apache.catalina.core.session.SessionManager;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.session.SessionManager;
 
 public class HttpServletRequestFixture {
 

@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.org.apache.coyote.http11.HttpServletRequestFixture;
 import org.apache.catalina.core.servlet.HttpServletResponse;
+import org.apache.catalina.core.session.SessionManager;
+import org.apache.catalina.core.session.SessionManager.Session;
 import org.apache.coyote.http11.common.Status;
-import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.http11.session.SessionManager.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

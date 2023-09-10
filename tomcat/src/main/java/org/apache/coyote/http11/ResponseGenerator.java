@@ -65,7 +65,7 @@ public class ResponseGenerator {
     }
 
     private static HttpResponse getLoginResponse(final HttpRequest httpRequest) throws IOException {
-        if (Method.GET.equals(httpRequest.getMethod())) {
+        if (httpRequest.isSameMethod(Method.GET)) {
             return getLoginResponseGetMethod(httpRequest);
         }
 
@@ -129,7 +129,7 @@ public class ResponseGenerator {
     }
 
     private static HttpResponse getRegisterResponse(final HttpRequest httpRequest) throws IOException {
-        if (Method.GET.equals(httpRequest.getMethod())) {
+        if (httpRequest.isSameMethod(Method.GET)) {
             return getRegisterResponseGetMethod();
         }
 

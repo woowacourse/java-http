@@ -70,6 +70,10 @@ public class HttpRequest {
         return RequestBody.from(new String(buffer));
     }
 
+    public boolean isSameMethod(final Method method) {
+        return this.requestLine.isSameMethod(method);
+    }
+
     public boolean hasHeaderBy(final String name) {
         return requestHeaders.getHeaders().stream()
                              .anyMatch(requestHeader -> requestHeader.getName().equals(name));

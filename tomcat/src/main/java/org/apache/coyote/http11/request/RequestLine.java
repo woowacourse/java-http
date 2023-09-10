@@ -30,6 +30,10 @@ public class RequestLine {
         return new RequestLine(method, path, httpVersion);
     }
 
+    public boolean isSameMethod(final Method method) {
+        return this.method.equals(method);
+    }
+
     public Method getMethod() {
         return method;
     }

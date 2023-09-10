@@ -22,14 +22,8 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public String getUri() {
-        String target = httpRequestLine.getPath();
-        int queryStringIdx = target.indexOf("?");
-        if (queryStringIdx == -1) {
-            return target;
-        }
-
-        return target.substring(0, queryStringIdx);
+    public String getPath() {
+        return httpRequestLine.getPath();
     }
 
     public Map<String, String> getQueryString() {

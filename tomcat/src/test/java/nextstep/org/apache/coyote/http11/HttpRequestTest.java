@@ -28,7 +28,7 @@ class HttpRequestTest {
         );
 
         // when
-        String actual = request.getUri();
+        String actual = request.getPath();
 
         // then
         assertThat(actual).isEqualTo("/index.html");
@@ -46,7 +46,7 @@ class HttpRequestTest {
         );
 
         // when
-        String actual = request.getUri();
+        String actual = request.getPath();
 
         // then
         assertThat(actual).isEqualTo("/blackCat");
@@ -56,7 +56,7 @@ class HttpRequestTest {
     void body를_반환한다() {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpRequestLine("get", null, null),
+            new HttpRequestLine("get", "path", null),
             Map.of(),
             Map.of(),
             Map.of(),
@@ -74,7 +74,7 @@ class HttpRequestTest {
     void HTTP_method를_반환한다(String method) {
         // given
         HttpRequest request = new HttpRequest(
-            new HttpRequestLine(method, null, null),
+            new HttpRequestLine(method, "path", null),
             Map.of(),
             Map.of(),
             Map.of(),

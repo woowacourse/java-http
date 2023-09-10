@@ -19,7 +19,7 @@ public class StaticFileController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        File file = FileFinder.getFile(request.getUri());
+        File file = FileFinder.getFile(request.getPath());
         response.setBody(new String(Files.readAllBytes(file.toPath())));
         response.setHttpStatus(HttpStatus.OK);
         response.setHeader(HttpHeaders.CONTENT_TYPE, String.valueOf(ContentType.from(file.getName()).value));

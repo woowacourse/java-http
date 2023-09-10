@@ -22,6 +22,6 @@ public class RequestMapping {
     private static final Controller staticFileController = new StaticFileController();
 
     public static Controller getController(HttpRequest request) {
-        return values.getOrDefault(request.getUri(), staticFileController);
+        return values.getOrDefault(request.getPath(), staticFileController);
     }
 }

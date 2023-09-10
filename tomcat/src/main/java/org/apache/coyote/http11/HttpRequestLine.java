@@ -8,8 +8,15 @@ public class HttpRequestLine {
 
     public HttpRequestLine(String method, String path, String version) {
         this.method = HttpMethod.from(method);
-        this.path = path;
+        this.path = extractFromQueryString(path);
         this.version = version;
+    }
+
+    private static String extractFromQueryString(String path) {
+        if (!path.contains("?")) {
+            return path;
+        }
+        return path.substring(0, path.indexOf("?"));
     }
 
     public HttpRequestLine(HttpMethod method, String path, String version) {

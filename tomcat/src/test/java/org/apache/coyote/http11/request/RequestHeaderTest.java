@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-class HeaderTest {
+class RequestHeaderTest {
 
     @Test
     void from() {
@@ -11,7 +11,7 @@ class HeaderTest {
         final String request = "Host: localhost:8080";
 
         // when
-        final Header actual = Header.from(request);
+        final RequestHeader actual = RequestHeader.from(request);
 
         // then
         SoftAssertions.assertSoftly(softAssertions -> {

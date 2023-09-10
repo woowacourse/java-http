@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +32,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Request request = Request.from(new BufferedReader(new InputStreamReader(inputStream)));
-            final String response = ResponseGenerator.generate(request);
+            final HttpRequest httpRequest = HttpRequest.from(new BufferedReader(new InputStreamReader(inputStream)));
+            final String response = ResponseGenerator.generate(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

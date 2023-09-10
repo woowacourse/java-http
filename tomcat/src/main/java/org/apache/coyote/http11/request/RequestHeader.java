@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-public class Header {
+public class RequestHeader {
 
     private static final String SEPARATOR = ": ";
     private static final int NAME_INDEX = 0;
@@ -9,15 +9,15 @@ public class Header {
     private final String name;
     private final String value;
 
-    private Header(final String name, final String value) {
+    private RequestHeader(final String name, final String value) {
         this.name = name;
         this.value = value;
     }
 
-    public static Header from(final String request) {
+    public static RequestHeader from(final String request) {
         final String[] header = request.split(SEPARATOR);
 
-        return new Header(header[NAME_INDEX], header[VALUE_INDEX]);
+        return new RequestHeader(header[NAME_INDEX], header[VALUE_INDEX]);
     }
 
     public String getName() {

@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import org.assertj.core.api.*;
 import org.junit.jupiter.api.Test;
 
-class BodyTest {
+class RequestBodyTest {
 
     @Test
     void from() {
@@ -11,7 +11,7 @@ class BodyTest {
         final String request = "account=gugu&password=password";
 
         // when
-        final Body actual = Body.from(request);
+        final RequestBody actual = RequestBody.from(request);
 
         // then
         SoftAssertions.assertSoftly(softAssertions -> {

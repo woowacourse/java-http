@@ -8,7 +8,7 @@ import static org.apache.coyote.http11.common.header.HeaderName.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -24,10 +24,10 @@ class RequestHandlerAdaptorTest {
     @DisplayName("/로 GET 요청을 보내면 Hello world!를 반환한다.")
     @Test
     void handleRoot() {
-        final ServletResponse servletResponse = new ServletResponse();
+        final HttpServletResponse httpServletResponse = new HttpServletResponse();
         final var response = REQUEST_HANDLER_ADAPTOR.service(
                 Request.of("get", "/", HTTP11.getValue(), Map.of(ACCEPT.getValue(), "text/html"), ""),
-                servletResponse
+                httpServletResponse
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -41,12 +41,12 @@ class RequestHandlerAdaptorTest {
             "/index.html", "/login.html", "/register.html", "/401.html"
     })
     void handleHTML(final String URI) {
-        final ServletResponse servletResponse = new ServletResponse();
+        final HttpServletResponse httpServletResponse = new HttpServletResponse();
         final Response response = REQUEST_HANDLER_ADAPTOR.service(
                 Request.of("get", URI, HTTP11.getValue(),
                         Map.of(ACCEPT.getValue(), HTML.toString()),
                         ""),
-                servletResponse
+                httpServletResponse
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -56,12 +56,12 @@ class RequestHandlerAdaptorTest {
     @DisplayName("css 파일명을 자원으로 GET 요청을 보내면 resources/static 디렉토리 내의 동일한 파일을 찾아 반환한다.")
     @Test
     void handleCSS() {
-        final ServletResponse servletResponse = new ServletResponse();
+        final HttpServletResponse httpServletResponse = new HttpServletResponse();
         final Response response = REQUEST_HANDLER_ADAPTOR.service(
                 Request.of("get", "/css/styles.css", HTTP11.getValue(),
                         Map.of(ACCEPT.getValue(), CSS.toString()),
                         ""),
-                servletResponse
+                httpServletResponse
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.OK);
@@ -71,12 +71,12 @@ class RequestHandlerAdaptorTest {
     @DisplayName("resources/static 디렉토리 내에 존재하지 않는 파일명을 자원으로 GET 요청을 보내면 404 응답코드로 반환한다.")
     @Test
     void handleNotFound() {
-        final ServletResponse servletResponse = new ServletResponse();
+        final HttpServletResponse httpServletResponse = new HttpServletResponse();
         final Response response = REQUEST_HANDLER_ADAPTOR.service(
                 Request.of("get", "/neverexist/not.css", HTTP11.getValue(),
                         Map.of(ACCEPT.getValue(), HTML.toString()),
                         ""),
-                servletResponse
+                httpServletResponse
         );
 
         assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);

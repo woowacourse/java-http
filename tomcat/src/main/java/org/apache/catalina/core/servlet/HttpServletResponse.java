@@ -14,50 +14,50 @@ import org.apache.coyote.http11.common.header.GeneralHeaders;
 import org.apache.coyote.http11.common.header.ResponseHeaders;
 import org.apache.coyote.http11.response.Response;
 
-public class ServletResponse {
+public class HttpServletResponse {
     private final GeneralHeaders generalHeaders = new GeneralHeaders();
     private final ResponseHeaders responseHeaders = new ResponseHeaders();
     private final EntityHeaders entityHeaders = new EntityHeaders();
     private Status status;
     private String body;
 
-    public ServletResponse() {
+    public HttpServletResponse() {
         this.status = OK;
     }
 
-    public ServletResponse(final Status status) {
+    public HttpServletResponse(final Status status) {
         this.status = status;
     }
 
-    public static ServletResponse internalSeverError() {
-        return new ServletResponse(INTERNAL_SERVER_ERROR);
+    public static HttpServletResponse internalSeverError() {
+        return new HttpServletResponse(INTERNAL_SERVER_ERROR);
     }
 
-    public static ServletResponse ok() {
-        return new ServletResponse(OK);
+    public static HttpServletResponse ok() {
+        return new HttpServletResponse(OK);
     }
 
-    public static ServletResponse notFound() {
-        return new ServletResponse(NOT_FOUND);
+    public static HttpServletResponse notFound() {
+        return new HttpServletResponse(NOT_FOUND);
     }
 
-    public static ServletResponse redirect(final String location) {
-        return new ServletResponse(FOUND)
+    public static HttpServletResponse redirect(final String location) {
+        return new HttpServletResponse(FOUND)
                 .addContentType(HTML.toString())
                 .addLocation(location);
     }
 
-    public static ServletResponse methodNotAllowed() {
-        return new ServletResponse(METHOD_NOT_ALLOWED);
+    public static HttpServletResponse methodNotAllowed() {
+        return new HttpServletResponse(METHOD_NOT_ALLOWED);
     }
 
-    public static ServletResponse staticResource(final StaticResource staticResource) {
+    public static HttpServletResponse staticResource(final StaticResource staticResource) {
         return ok()
                 .body(staticResource.getContentBytes())
                 .addContentType(staticResource.getContentType());
     }
 
-    public void set(final ServletResponse response) {
+    public void set(final HttpServletResponse response) {
         this.generalHeaders.addAll(response.generalHeaders);
         this.responseHeaders.addAll(response.responseHeaders);
         this.entityHeaders.addAll(response.entityHeaders);
@@ -65,22 +65,22 @@ public class ServletResponse {
         this.body = response.body;
     }
 
-    public ServletResponse addSetCookie(final String cookie) {
+    public HttpServletResponse addSetCookie(final String cookie) {
         this.responseHeaders.addSetCookie(cookie);
         return this;
     }
 
-    public ServletResponse addLocation(final String location) {
+    public HttpServletResponse addLocation(final String location) {
         this.responseHeaders.addLocation(location);
         return this;
     }
 
-    public ServletResponse addContentType(final String contentType) {
+    public HttpServletResponse addContentType(final String contentType) {
         this.entityHeaders.addContentType(contentType);
         return this;
     }
 
-    public ServletResponse body(final String body) {
+    public HttpServletResponse body(final String body) {
         this.body = body;
         this.entityHeaders.addContentLength(body);
         return this;

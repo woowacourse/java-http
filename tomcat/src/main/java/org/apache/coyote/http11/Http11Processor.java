@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.net.Socket;
 import org.apache.catalina.core.RequestHandlerAdaptor;
-import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.io.RequestReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
             final var requestReader = new RequestReader(inputStream);
             final var request = requestReader.read();
             /// TODO: 2023/09/10 request 도 빈 객체 만들어서 전달하기 ? 여기서 요청, 객체 생성하는 게 맞나?
-            final var response = requestHandlerAdaptor.service(request, new ServletResponse());
+            final var response = requestHandlerAdaptor.service(request, new HttpServletResponse());
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -4,23 +4,24 @@ import java.io.IOException;
 import javassist.NotFoundException;
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.controller.ViewController;
-import org.apache.catalina.core.servlet.Servlet;
-import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.servlet.HttpServlet;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.request.Request;
 
-public class LoginRequestHandler extends Servlet {
+public class LoginRequestHandler extends HttpServlet {
 
     public LoginRequestHandler() {
         super("/login");
     }
 
     @Override
-    protected void doGet(final Request request, final ServletResponse response) throws NotFoundException, IOException {
+    protected void doGet(final Request request, final HttpServletResponse response)
+            throws NotFoundException, IOException {
         response.set(ViewController.login(request));
     }
 
     @Override
-    protected void doPost(final Request request, final ServletResponse response) {
+    protected void doPost(final Request request, final HttpServletResponse response) {
         response.set(UserController.login(request));
     }
 

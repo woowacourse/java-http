@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.common.Protocol;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.common.header.EntityHeaders;
@@ -31,12 +31,12 @@ public class Response {
         this.body = body;
     }
 
-    public Response(final ServletResponse servletResponse) {
-        this(new StatusLine(Protocol.HTTP11, servletResponse.getStatus()),
-                servletResponse.getGeneralHeaders(),
-                servletResponse.getResponseHeaders(),
-                servletResponse.getEntityHeaders(),
-                servletResponse.getBody());
+    public Response(final HttpServletResponse httpServletResponse) {
+        this(new StatusLine(Protocol.HTTP11, httpServletResponse.getStatus()),
+                httpServletResponse.getGeneralHeaders(),
+                httpServletResponse.getResponseHeaders(),
+                httpServletResponse.getEntityHeaders(),
+                httpServletResponse.getBody());
     }
 
     public Status getStatus() {

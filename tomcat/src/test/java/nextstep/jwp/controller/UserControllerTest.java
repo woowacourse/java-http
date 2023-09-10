@@ -6,7 +6,7 @@ import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
@@ -24,7 +24,7 @@ class UserControllerTest {
     void loginSuccess() {
         final Session session = sessionManager.findOrCreate(randomUUID().toString());
 
-        final ServletResponse response = UserController.login(
+        final HttpServletResponse response = UserController.login(
                 Request.of("post", "/login", HTTP11.getValue(),
                         Map.of(COOKIE.getValue(), Cookies.ofJSessionId(session.getId())),
                         "account=gugu&password=password"));
@@ -38,7 +38,7 @@ class UserControllerTest {
     void loginFail() {
         final Session session = sessionManager.findOrCreate(randomUUID().toString());
 
-        final ServletResponse response = UserController.login(
+        final HttpServletResponse response = UserController.login(
                 Request.of("post", "/login", HTTP11.getValue(),
                         Map.of(COOKIE.getValue(), Cookies.ofJSessionId(session.getId())),
                         "account=dodo&password=password"));

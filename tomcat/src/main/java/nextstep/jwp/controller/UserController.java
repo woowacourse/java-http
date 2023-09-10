@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
-import static org.apache.catalina.core.servlet.ServletResponse.redirect;
+import static org.apache.catalina.core.servlet.HttpServletResponse.redirect;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.QueryParameters;
 import org.apache.coyote.http11.request.Request;
@@ -15,7 +15,7 @@ public class UserController implements Controller {
     private UserController() {
     }
 
-    public static ServletResponse login(final Request request) {
+    public static HttpServletResponse login(final Request request) {
         final var form = QueryParameters.from(request.getBody());
         final var account = form.findSingleByKey("account");
         final var password = form.findSingleByKey("password");
@@ -26,7 +26,7 @@ public class UserController implements Controller {
                 .orElseGet(() -> redirect("/401.html"));
     }
 
-    private static ServletResponse redirectLoginUser(final Request request, final User user) {
+    private static HttpServletResponse redirectLoginUser(final Request request, final User user) {
         final var session = request.getSession();
         session.setAttribute("user", user);
 
@@ -34,7 +34,7 @@ public class UserController implements Controller {
                 .addSetCookie(Cookies.ofJSessionId(session.getId()));
     }
 
-    public static ServletResponse register(final Request request) {
+    public static HttpServletResponse register(final Request request) {
         final var form = QueryParameters.from(request.getBody());
         final var account = form.findSingleByKey("account");
         final var email = form.findSingleByKey("email");

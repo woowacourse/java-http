@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connector implements Runnable {
 
@@ -16,20 +18,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_COUNT = 250;
 
-    private final HttpDispatcher httpDispatcher;
     private final ServerSocket serverSocket;
-    
+    private final HttpDispatcher httpDispatcher;
+    private final ExecutorService executorService;
+
     private boolean stopped;
 
     public Connector(final HttpDispatcher httpDispatcher) {
-        this(httpDispatcher, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(httpDispatcher, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_COUNT);
     }
 
-    public Connector(final HttpDispatcher httpDispatcher, final int port, final int acceptCount) {
+    public Connector(final HttpDispatcher httpDispatcher, final int port, final int acceptCount, final int threadCount) {
         this.httpDispatcher = httpDispatcher;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(threadCount);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -71,7 +76,7 @@ public class Connector implements Runnable {
             return;
         }
         final var processor = new Http11Processor(connection, new HttpRequestParser(), httpDispatcher);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {

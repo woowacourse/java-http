@@ -22,21 +22,30 @@ public class HttpRequestHeaders {
     }
 
     public static HttpRequestHeaders from(List<String> lines) {
-        Map<String, String> headers = lines.stream()
+        Map<String, String> headers = createHeadersWithoutCookie(lines);
+        HttpCookies cookies = createCookieHeader(lines);
+
+        return new HttpRequestHeaders(headers, cookies);
+    }
+
+    private static Map<String, String> createHeadersWithoutCookie(List<String> lines) {
+        return lines.stream()
                 .filter(line -> !line.startsWith(COOKIE_HEADER_PREFIX))
                 .map(line -> line.split(KET_VALUE_DELIMITER))
                 .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
+    }
 
+    private static HttpCookies createCookieHeader(List<String> lines) {
         if (hasCookie(lines)) {
             String cookieLine = lines.stream()
                     .filter(line -> line.startsWith(COOKIE_HEADER_PREFIX))
                     .map(line -> line.replaceFirst(COOKIE_HEADER_PREFIX, ""))
                     .collect(Collectors.joining());
 
-            return new HttpRequestHeaders(headers, HttpCookies.from(cookieLine));
+            return HttpCookies.from(cookieLine);
         }
 
-        return new HttpRequestHeaders(headers, HttpCookies.createEmptyCookies());
+        return HttpCookies.createEmptyCookies();
     }
 
     private static boolean hasCookie(List<String> lines) {

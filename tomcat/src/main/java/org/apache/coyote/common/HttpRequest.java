@@ -8,7 +8,7 @@ import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
 
-    private static final Manager manager = new SessionManager();
+    private static final Manager MANAGER = new SessionManager();
 
     private final RequestUri requestUri;
     private final HttpHeaders headers;
@@ -49,7 +49,7 @@ public class HttpRequest {
     private HttpSession findSession() {
         String jsessionid = cookie.get("JSESSIONID");
         try {
-            return manager.findSession(jsessionid);
+            return MANAGER.findSession(jsessionid);
         } catch (IOException e) {
             // ignore
             throw new IllegalArgumentException(e);
@@ -58,7 +58,7 @@ public class HttpRequest {
 
     private HttpSession createSession() {
         HttpSession session = new HttpSession(UUID.randomUUID().toString());
-        manager.add(session);
+        MANAGER.add(session);
         return session;
     }
 
@@ -66,7 +66,7 @@ public class HttpRequest {
         HttpSession session = findSession();
         if (session != null) {
             session.invalidate();
-            manager.remove(session);
+            MANAGER.remove(session);
         }
         return createSession();
     }

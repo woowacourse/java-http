@@ -24,9 +24,7 @@ public class LoginController extends AbstractController {
     @Override
     public ResponseEntity<? extends Object> doGet(HttpRequest httpRequest) {
         if (SessionManager.loggedIn(httpRequest)) {
-            return ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, INDEX_PAGE)
-                .build();
+            return ResponseEntity.redirect(INDEX_PAGE);
         }
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
         responseEntity.responseView("/login.html");
@@ -36,9 +34,7 @@ public class LoginController extends AbstractController {
     @Override
     public ResponseEntity<? extends Object> doPost(HttpRequest httpRequest) {
         if (SessionManager.loggedIn(httpRequest)) {
-            return ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, INDEX_PAGE)
-                .build();
+            return ResponseEntity.redirect(INDEX_PAGE);
         }
 
         Optional<String> loginSession = login(httpRequest);
@@ -49,9 +45,7 @@ public class LoginController extends AbstractController {
                 .build();
         }
 
-        return ResponseEntity.status(302)
-            .addHeader(LOCATION_HEADER, "/401.html")
-            .build();
+        return ResponseEntity.redirect("/401.html");
     }
 
     private Optional<String> login(HttpRequest httpRequest) {
@@ -66,13 +60,11 @@ public class LoginController extends AbstractController {
 
     @Override
     public ResponseEntity<? extends Object> doPut(HttpRequest httpRequest) {
-        return ResponseEntity.status(405)
-            .build();
+        return ResponseEntity.notAllowed();
     }
 
     @Override
     public ResponseEntity<? extends Object> doDelete(HttpRequest httpRequest) {
-        return ResponseEntity.status(405)
-            .build();
+        return ResponseEntity.notAllowed();
     }
 }

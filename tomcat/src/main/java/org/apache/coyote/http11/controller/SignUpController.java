@@ -25,9 +25,7 @@ public class SignUpController extends AbstractController {
     @Override
     public ResponseEntity<? extends Object> doGet(HttpRequest httpRequest) {
         if (SessionManager.loggedIn(httpRequest)) {
-            return ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, INDEX_PAGE)
-                .build();
+            return ResponseEntity.redirect(INDEX_PAGE);
         }
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
         responseEntity.responseView("/register.html");
@@ -38,9 +36,7 @@ public class SignUpController extends AbstractController {
     public ResponseEntity<? extends Object> doPost(HttpRequest httpRequest) {
         try {
             if (SessionManager.loggedIn(httpRequest)) {
-                return ResponseEntity.status(302)
-                    .addHeader(LOCATION_HEADER, INDEX_PAGE)
-                    .build();
+                return ResponseEntity.redirect(INDEX_PAGE);
             }
             String loginSession = signUp(httpRequest);
             return ResponseEntity.status(302)
@@ -48,9 +44,7 @@ public class SignUpController extends AbstractController {
                 .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession)
                 .build();
         } catch (MemberAlreadyExistsException e) {
-            return ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, "/register.html")
-                .build();
+            return ResponseEntity.redirect("/register.html");
         }
     }
 
@@ -64,13 +58,11 @@ public class SignUpController extends AbstractController {
 
     @Override
     public ResponseEntity<? extends Object> doPut(HttpRequest httpRequest) {
-        return ResponseEntity.status(405)
-            .build();
+        return ResponseEntity.notAllowed();
     }
 
     @Override
     public ResponseEntity<? extends Object> doDelete(HttpRequest httpRequest) {
-        return ResponseEntity.status(405)
-            .build();
+        return ResponseEntity.notAllowed();
     }
 }

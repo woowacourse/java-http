@@ -21,6 +21,16 @@ public class ResponseEntity<T> {
         return new ResponseBuilderImpl(statusCode);
     }
 
+    public static ResponseEntity<Object> redirect(String path) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Location", path);
+        return new ResponseEntity<>(302, headers, null);
+    }
+
+    public static ResponseEntity<Object> notAllowed() {
+        return new ResponseEntity<>(405, null, null);
+    }
+
     public void responseView(String viewPath) {
         this.viewResponse = true;
         this.viewPath = viewPath;

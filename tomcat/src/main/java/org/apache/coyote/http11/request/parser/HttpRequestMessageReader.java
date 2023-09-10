@@ -2,9 +2,6 @@ package org.apache.coyote.http11.request.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,15 +29,11 @@ public class HttpRequestMessageReader {
     private HttpRequestMessageReader() {
     }
 
-    public static HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
-        try (final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-             final BufferedReader br = new BufferedReader(inputStreamReader)) {
-
-            final HttpRequestLine startLine = readStartLine(br.readLine());
-            final HttpHeaders httpHeaders = readHeaders(br);
-            final HttpCookie httpCookie = parseCookieFromHeaders(httpHeaders);
-            return httpRequestByMethod(startLine, httpHeaders, httpCookie, br);
-        }
+    public static HttpRequest readHttpRequest(final BufferedReader br) throws IOException {
+        final HttpRequestLine startLine = readStartLine(br.readLine());
+        final HttpHeaders httpHeaders = readHeaders(br);
+        final HttpCookie httpCookie = parseCookieFromHeaders(httpHeaders);
+        return httpRequestByMethod(startLine, httpHeaders, httpCookie, br);
     }
 
     private static HttpRequest httpRequestByMethod(

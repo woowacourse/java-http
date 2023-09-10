@@ -7,7 +7,7 @@ import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticFileController;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 

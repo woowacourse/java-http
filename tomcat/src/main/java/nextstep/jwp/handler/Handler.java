@@ -1,9 +1,8 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.controller.Controller;
-import org.apache.coyote.http11.DashboardException;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class Handler {
 

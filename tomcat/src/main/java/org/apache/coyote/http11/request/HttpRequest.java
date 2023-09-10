@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 

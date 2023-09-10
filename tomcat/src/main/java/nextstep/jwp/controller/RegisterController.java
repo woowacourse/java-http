@@ -1,12 +1,12 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.FileFinder;
-import nextstep.jwp.FormData;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import nextstep.jwp.utils.FileFinder;
+import org.apache.coyote.http11.FormData;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 

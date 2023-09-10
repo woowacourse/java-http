@@ -1,15 +1,15 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.FileFinder.getFileContent;
+import static nextstep.jwp.utils.FileFinder.getFileContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestLine;
-import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;

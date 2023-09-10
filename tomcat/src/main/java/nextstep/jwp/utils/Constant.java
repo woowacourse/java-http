@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.utils;
 
 public class Constant {
 

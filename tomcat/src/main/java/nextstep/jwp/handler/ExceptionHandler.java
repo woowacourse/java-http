@@ -2,9 +2,8 @@ package nextstep.jwp.handler;
 
 import com.sun.jdi.InternalException;
 import java.util.Arrays;
-import org.apache.coyote.http11.DashboardException;
-import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class ExceptionHandler {
 

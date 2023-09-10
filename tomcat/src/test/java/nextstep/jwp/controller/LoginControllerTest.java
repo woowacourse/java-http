@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.Constant.SESSION_ID;
+import static nextstep.jwp.utils.Constant.SESSION_ID;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.OK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,12 +8,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
-import nextstep.jwp.FileFinder;
-import org.apache.coyote.http11.DashboardException;
+import nextstep.jwp.handler.DashboardException;
+import nextstep.jwp.utils.FileFinder;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestLine;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;

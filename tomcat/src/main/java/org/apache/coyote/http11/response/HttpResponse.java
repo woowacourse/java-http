@@ -1,8 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 

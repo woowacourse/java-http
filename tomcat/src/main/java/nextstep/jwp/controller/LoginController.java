@@ -1,20 +1,20 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.Constant.SESSION_ID;
+import static nextstep.jwp.utils.Constant.SESSION_ID;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import nextstep.jwp.FileFinder;
-import nextstep.jwp.FormData;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.handler.DashboardException;
 import nextstep.jwp.model.User;
+import nextstep.jwp.utils.FileFinder;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.DashboardException;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.FormData;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

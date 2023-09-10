@@ -5,6 +5,10 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.Handler;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

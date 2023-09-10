@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.DashboardException;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import nextstep.jwp.handler.DashboardException;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class DefaultPageController extends AbstractController {
 

@@ -39,6 +39,7 @@ Connection: keep-alive
 
 - [X] Cookie에 JSESSIONID 값 저장하기
     - [X] 요청 헤더에 JSESSIONID가 없을 경우, 응답 헤더에 Set-Cookie를 추가한다.
+    - [X] 잘못된 JSESSIONID가 들어올 경우, 클라이언트에 해당 Cookie를 삭제하도록 요청한다.
 
 - [X] Session 구현하기
     - [X] 쿠키에서 전달받은 JSESSIONID 값으로 로그인 여부를 체크한다.
@@ -53,5 +54,5 @@ Connection: keep-alive
 
 ## 4단계 - 동시성 확장하기
 
-- [ ] Executors로 Thread Pool 적용
+- [X] Executors로 Thread Pool 적용
 - [ ] 동시성 컬렉션 적용

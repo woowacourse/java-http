@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
+import nextstep.jwp.exception.BadRequestException;
 
 public enum HttpVersion {
     V1_0("HTTP/1.0"),
@@ -16,7 +17,7 @@ public enum HttpVersion {
         return Arrays.stream(values())
                 .filter(value -> value.getValue().equals(input))
                 .findAny()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new BadRequestException("지원하지 않는 HTTP 버전입니다."));
     }
 
     public String getValue() {

@@ -13,7 +13,7 @@ import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class UnsupportedResourceHandler implements Controller {
+public class UnsupportedResourceHandler implements ResourceHandler {
 
     private static final String NOT_FOUND_PAGE_PATH = "/404.html";
     private static final String RESOURCE_DIRECTORY = "static";

@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import org.apache.catalina.startup.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,11 +17,13 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private static final Container container = new Container(List.of(new LoginController(), new RegisterController()));
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(container, socket);
 
         // when
         processor.process(socket);
@@ -44,7 +50,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(container, socket);
 
         // when
         processor.process(socket);
@@ -74,7 +80,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(container, socket);
 
             // when
             processor.process(socket);
@@ -92,7 +98,7 @@ class Http11ProcessorTest {
         }
 
         @Test
-        void get_요청으로_페이지를_조회할때_로그인된_유저는_index_페이지_리다이렉트() throws IOException {
+        void get_요청으로_페이지를_조회할때_로그인된_유저는_index_페이지_리다이렉트() {
             // given
             final String httpRequest1 = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -103,7 +109,7 @@ class Http11ProcessorTest {
                     "account=gugu&password=password ");
 
             final var socket1 = new StubSocket(httpRequest1);
-            final Http11Processor processor1 = new Http11Processor(socket1);
+            final Http11Processor processor1 = new Http11Processor(container, socket1);
             processor1.process(socket1);
 
             final String[] split = socket1.output().split("\r\n");
@@ -117,7 +123,7 @@ class Http11ProcessorTest {
                     "",
                     "");
             final var socket2 = new StubSocket(httpRequest2);
-            final Http11Processor processor2 = new Http11Processor(socket2);
+            final Http11Processor processor2 = new Http11Processor(container, socket2);
 
             //when
             processor2.process(socket2);
@@ -128,7 +134,7 @@ class Http11ProcessorTest {
         }
 
         @Test
-        void post_요청으로_로그인_성공시_index_페이지_리다이렉트() throws IOException {
+        void post_요청으로_로그인_성공시_index_페이지_리다이렉트() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -139,7 +145,7 @@ class Http11ProcessorTest {
                     "account=gugu&password=password");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(container, socket);
 
             // when
             processor.process(socket);
@@ -161,7 +167,7 @@ class Http11ProcessorTest {
                     "account=stranger&password=password");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(container, socket);
 
             // when
             processor.process(socket);
@@ -186,7 +192,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(container, socket);
 
             // when
             processor.process(socket);
@@ -215,7 +221,7 @@ class Http11ProcessorTest {
                     "account=newbi&password=1234&email=email@me.com");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket);
+            final Http11Processor processor = new Http11Processor(container, socket);
 
             // when
             processor.process(socket);

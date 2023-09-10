@@ -20,4 +20,8 @@ public class StatusLine {
     public void setStatusCode(final StatusCode statusCode) {
         this.statusCode = statusCode;
     }
+
+    public boolean isEmpty() {
+        return statusCode == null;
+    }
 }

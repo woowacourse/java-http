@@ -27,9 +27,10 @@ class NotFoundControllerTest {
         NotFoundController notFoundController = new NotFoundController();
 
         //when
-        String response = notFoundController.process(httpRequest, httpResponse);
+        notFoundController.process(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 404 Not Found"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),

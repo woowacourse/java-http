@@ -27,9 +27,10 @@ class RootControllerTest {
         RootController rootController = new RootController();
 
         //when
-        String response = rootController.process(httpRequest, httpResponse);
+        rootController.process(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),

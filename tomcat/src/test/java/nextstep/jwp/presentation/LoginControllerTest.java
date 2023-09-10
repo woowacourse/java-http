@@ -6,7 +6,6 @@ import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.SessionManager;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,9 +36,10 @@ class LoginControllerTest {
         LoginController loginController = new LoginController();
 
         //when
-        String response = loginController.process(httpRequest, httpResponse);
+        loginController.process(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
@@ -61,10 +61,11 @@ class LoginControllerTest {
         SessionManager.add(sessionId, new User("test", "test", "test"));
 
         //when
-        String response = loginController.process(httpRequest, httpResponse);
+        loginController.process(httpRequest, httpResponse);
 
         //then
-        Assertions.assertAll(
+        String response = httpResponse.joinResponse();
+        assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),
@@ -82,10 +83,11 @@ class LoginControllerTest {
         LoginController postLoginController = new LoginController();
 
         //when
-        String response = postLoginController.process(httpRequest, httpResponse);
+        postLoginController.process(httpRequest, httpResponse);
 
         //then
-        Assertions.assertAll(
+        String response = httpResponse.joinResponse();
+        assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),
@@ -103,10 +105,11 @@ class LoginControllerTest {
         LoginController postLoginController = new LoginController();
 
         //when
-        String response = postLoginController.process(httpRequest, httpResponse);
+        postLoginController.process(httpRequest, httpResponse);
 
         //then
-        Assertions.assertAll(
+        String response = httpResponse.joinResponse();
+        assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /401.html"),

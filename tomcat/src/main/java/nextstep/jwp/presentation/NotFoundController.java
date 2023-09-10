@@ -9,7 +9,7 @@ import java.io.IOException;
 public class NotFoundController implements Controller {
 
     @Override
-    public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        return HttpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest, httpResponse);
+    public void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        HttpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest, httpResponse);
     }
 }

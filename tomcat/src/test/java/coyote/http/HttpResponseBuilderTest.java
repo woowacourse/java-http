@@ -30,9 +30,10 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileOkResponse() throws IOException {
         //when
-        String response = HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath());
+        HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath());
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertTrue(response.contains("HTTP/1.1 200 OK")),
                 () -> assertTrue(response.contains("Content-Type: text/html; charset=utf-8")),
@@ -43,9 +44,10 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileRedirectResponse() throws IOException {
         //when
-        String response = HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, httpRequest.getPath());
+        HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, httpRequest.getPath());
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertTrue(response.contains("HTTP/1.1 302 FOUND")),
                 () -> assertTrue(response.contains("Content-Type: text/html; charset=utf-8")),
@@ -57,9 +59,10 @@ class HttpResponseBuilderTest {
     @Test
     void buildStaticFileNotFoundResponse() throws IOException {
         //when
-        String response = HttpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest, httpResponse);
+        HttpResponseBuilder.buildStaticFileNotFoundResponse(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertTrue(response.contains("HTTP/1.1 404 Not Found")),
                 () -> assertTrue(response.contains("Content-Type: text/html; charset=utf-8")),
@@ -70,9 +73,10 @@ class HttpResponseBuilderTest {
     @Test
     void buildCustomResponse() {
         //when
-        String response = HttpResponseBuilder.buildCustomResponse(httpRequest, httpResponse, "test");
+        HttpResponseBuilder.buildCustomResponse(httpRequest, httpResponse, "test");
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertTrue(response.contains("HTTP/1.1 200 OK")),
                 () -> assertTrue(response.contains("Content-Type: text/html; charset=utf-8")),

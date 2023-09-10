@@ -16,21 +16,23 @@ public class RegisterController implements Controller {
     private static final String KEY_VALUE_SEPARATOR = "=";
 
     @Override
-    public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.getMethod() == GET) {
-            return doGet(httpRequest, httpResponse);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (httpRequest.getMethod() == POST) {
-            return doPost(httpRequest, httpResponse);
+            doPost(httpRequest, httpResponse);
+            return;
         }
         throw new IllegalArgumentException("지원하지 않는 HTTP Method 입니다.");
     }
 
-    private String doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        return HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath() + ".html");
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, httpRequest.getPath() + ".html");
     }
 
-    private String doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String[] splitRequestBody = httpRequest.getMessageBody().split("&");
         String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
         String email = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
@@ -38,6 +40,6 @@ public class RegisterController implements Controller {
         String password = splitRequestBody[2].split(KEY_VALUE_SEPARATOR)[1];
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
+        HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
     }
 }

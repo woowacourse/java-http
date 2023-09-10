@@ -4,7 +4,6 @@ import coyote.http.RequestFixture;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpRequestParser;
 import org.apache.coyote.http.HttpResponse;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -28,9 +27,10 @@ class RegisterControllerTest {
         RegisterController registerController = new RegisterController();
 
         //when
-        String response = registerController.process(httpRequest, httpResponse);
+        registerController.process(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
@@ -48,10 +48,11 @@ class RegisterControllerTest {
         RegisterController postRegisterController = new RegisterController();
 
         //when
-        String response = postRegisterController.process(httpRequest, httpResponse);
+        postRegisterController.process(httpRequest, httpResponse);
 
         //then
-        Assertions.assertAll(
+        String response = httpResponse.joinResponse();
+        assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 302 FOUND"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),
                 () -> assertThat(response).contains("Location: /index.html"),

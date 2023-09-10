@@ -6,5 +6,5 @@ import org.apache.coyote.http.HttpResponse;
 import java.io.IOException;
 
 public interface Controller {
-    String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
+    void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
 }

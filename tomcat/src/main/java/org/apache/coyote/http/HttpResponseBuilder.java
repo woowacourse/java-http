@@ -10,11 +10,11 @@ public class HttpResponseBuilder {
     private HttpResponseBuilder() {
     }
 
-    public static String buildStaticFileOkResponse(HttpRequest httpRequest, HttpResponse httpResponse, String path) throws IOException {
+    public static void buildStaticFileOkResponse(HttpRequest httpRequest, HttpResponse httpResponse, String path) throws IOException {
         try {
             httpResponse.updateFileMessageBody(path);
         } catch (NullPointerException e) {
-            return buildStaticFileNotFoundResponse(httpRequest, httpResponse);
+            buildStaticFileNotFoundResponse(httpRequest, httpResponse);
         }
         String status = joinStatus(HttpStatus.OK.getHttpStatusCode(), HttpStatus.OK.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
@@ -24,11 +24,9 @@ public class HttpResponseBuilder {
 
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.findType(path));
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
-
-        return httpResponse.joinResponse();
     }
 
-    public static String buildStaticFileRedirectResponse(HttpRequest httpRequest, HttpResponse httpResponse, String redirectPath) throws IOException {
+    public static void buildStaticFileRedirectResponse(HttpRequest httpRequest, HttpResponse httpResponse, String redirectPath) throws IOException {
         String status = joinStatus(HttpStatus.REDIRECT.getHttpStatusCode(), HttpStatus.REDIRECT.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
         String startLine = joinStartLine(status, protocol);
@@ -39,8 +37,6 @@ public class HttpResponseBuilder {
         httpResponse.addHeader(HttpHeader.LOCATION.getName(), redirectPath);
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
-
-        return httpResponse.joinResponse();
     }
 
     private static String joinStatus(String statusCode, String statusMessage) {
@@ -51,7 +47,7 @@ public class HttpResponseBuilder {
         return protocol + SPACE + status + SPACE + LINE_FEED;
     }
 
-    public static String buildStaticFileNotFoundResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public static void buildStaticFileNotFoundResponse(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String status = joinStatus(HttpStatus.NOT_FOUND.getHttpStatusCode(), HttpStatus.NOT_FOUND.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
         String startLine = joinStartLine(status, protocol);
@@ -61,11 +57,9 @@ public class HttpResponseBuilder {
 
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
-
-        return httpResponse.joinResponse();
     }
 
-    public static String buildCustomResponse(HttpRequest httpRequest, HttpResponse httpResponse, String content) {
+    public static void buildCustomResponse(HttpRequest httpRequest, HttpResponse httpResponse, String content) {
         String status = joinStatus(HttpStatus.OK.getHttpStatusCode(), HttpStatus.OK.getHttpStatusMessage());
         String protocol = httpRequest.getProtocol().getName();
 
@@ -75,7 +69,5 @@ public class HttpResponseBuilder {
 
         httpResponse.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
         httpResponse.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(httpResponse.getMessageBody().getBytes().length));
-
-        return httpResponse.joinResponse();
     }
 }

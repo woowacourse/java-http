@@ -1,7 +1,5 @@
 package org.apache.coyote.http;
 
-import java.util.Arrays;
-
 public enum HttpHeader {
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),

@@ -23,34 +23,37 @@ public class LoginController implements Controller {
     private static final String COOKIE_SEPARATOR = "; ";
 
     @Override
-    public String process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    public void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (httpRequest.getMethod() == GET) {
-            return doGet(httpRequest, httpResponse);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (httpRequest.getMethod() == POST) {
-            return doPost(httpRequest, httpResponse);
+            doPost(httpRequest, httpResponse);
+            return;
         }
         throw new IllegalArgumentException("지원하지 않는 HTTP Method 입니다.");
     }
 
-    private String doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Map<String, String> cookies = httpRequest.findCookies();
         if (cookies.containsKey(SESSION_ID) && SessionManager.isAlreadyLogin(cookies.get(SESSION_ID))) {
-            return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
+            HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
+            return;
         }
-        return HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, "/login.html");
+        HttpResponseBuilder.buildStaticFileOkResponse(httpRequest, httpResponse, "/login.html");
     }
 
-    private String doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String[] splitRequestBody = httpRequest.getMessageBody().split("&");
         String account = splitRequestBody[0].split(KEY_VALUE_SEPARATOR)[1];
         String password = splitRequestBody[1].split(KEY_VALUE_SEPARATOR)[1];
         try {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(UserNotFoundException::new);
             addSession(user, httpRequest, httpResponse);
-            return redirect(password, user, httpRequest, httpResponse);
+            redirect(password, user, httpRequest, httpResponse);
         } catch (UserNotFoundException e) {
-            return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
+            HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
         }
     }
 
@@ -75,10 +78,11 @@ public class LoginController implements Controller {
         httpRequest.addHeader(HttpHeader.COOKIE.getName(), existedCookie + COOKIE_SEPARATOR + SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
     }
 
-    private String redirect(String password, User user, HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    private void redirect(String password, User user, HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         if (user.checkPassword(password)) {
-            return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
+            HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
+            return;
         }
-        return HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
+        HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/401.html");
     }
 }

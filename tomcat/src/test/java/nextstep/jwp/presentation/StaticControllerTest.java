@@ -27,9 +27,10 @@ class StaticControllerTest {
         StaticController staticController = new StaticController();
 
         //when
-        String response = staticController.process(httpRequest, httpResponse);
+        staticController.process(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
                 () -> assertThat(response).contains("Content-Type: text/css"),
@@ -47,9 +48,10 @@ class StaticControllerTest {
         StaticController staticController = new StaticController();
 
         //when
-        String response = staticController.process(httpRequest, httpResponse);
+        staticController.process(httpRequest, httpResponse);
 
         //then
+        String response = httpResponse.joinResponse();
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
                 () -> assertThat(response).contains("Content-Type: text/html; charset=utf-8"),

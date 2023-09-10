@@ -1,15 +1,15 @@
-package nextstep.org.apache.coyote.http11.servlet;
+package nextstep.org.apache.catalina.servlet;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidLoginInfoException;
 import nextstep.jwp.model.User;
-import nextstep.org.apache.coyote.http11.Cookies;
-import nextstep.org.apache.coyote.http11.Http11Request;
-import nextstep.org.apache.coyote.http11.Http11Response;
-import nextstep.org.apache.coyote.http11.Session;
-import nextstep.org.apache.coyote.http11.SessionManager;
+import nextstep.org.apache.catalina.cookie.Cookies;
+import nextstep.org.apache.coyote.http11.request.Http11Request;
+import nextstep.org.apache.coyote.http11.response.Http11Response;
+import nextstep.org.apache.catalina.session.Session;
+import nextstep.org.apache.catalina.session.SessionManager;
 import nextstep.org.apache.coyote.http11.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

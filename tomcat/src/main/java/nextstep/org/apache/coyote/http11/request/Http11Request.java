@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.request;
 
 import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
 
@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.org.apache.catalina.cookie.Cookies;
 
 public class Http11Request {
 

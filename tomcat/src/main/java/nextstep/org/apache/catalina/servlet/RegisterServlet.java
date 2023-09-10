@@ -1,9 +1,9 @@
-package nextstep.org.apache.coyote.http11.servlet;
+package nextstep.org.apache.catalina.servlet;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.org.apache.coyote.http11.Http11Request;
-import nextstep.org.apache.coyote.http11.Http11Response;
+import nextstep.org.apache.coyote.http11.request.Http11Request;
+import nextstep.org.apache.coyote.http11.response.Http11Response;
 import nextstep.org.apache.coyote.http11.Status;
 
 public class RegisterServlet extends AbstractServlet{

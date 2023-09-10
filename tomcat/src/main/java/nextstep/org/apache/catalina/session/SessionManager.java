@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,8 +7,6 @@ import nextstep.org.apache.catalina.Manager;
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
-
-    public SessionManager() {}
 
     @Override
     public void add(Session session) {

@@ -10,8 +10,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.org.apache.coyote.Processor;
-import nextstep.org.apache.coyote.http11.servlet.Context;
-import nextstep.org.apache.coyote.http11.servlet.Servlet;
+import nextstep.org.apache.catalina.Context;
+import nextstep.org.apache.catalina.servlet.Servlet;
+import nextstep.org.apache.coyote.http11.request.Http11Request;
+import nextstep.org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.model.User;
+import nextstep.org.apache.catalina.cookie.Cookies;
+import nextstep.org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

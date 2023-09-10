@@ -1,9 +1,11 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nextstep.org.apache.catalina.cookie.Cookies;
+import nextstep.org.apache.coyote.http11.Status;
 
 public class Http11Response {
 

@@ -1,7 +1,11 @@
-package nextstep.org.apache.coyote.http11.servlet;
+package nextstep.org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.org.apache.catalina.servlet.DefaultServlet;
+import nextstep.org.apache.catalina.servlet.LoginServlet;
+import nextstep.org.apache.catalina.servlet.RegisterServlet;
+import nextstep.org.apache.catalina.servlet.Servlet;
 
 public class Context {
 

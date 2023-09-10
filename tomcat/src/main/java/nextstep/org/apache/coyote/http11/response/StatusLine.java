@@ -1,4 +1,6 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.response;
+
+import nextstep.org.apache.coyote.http11.Status;
 
 public class StatusLine {
 

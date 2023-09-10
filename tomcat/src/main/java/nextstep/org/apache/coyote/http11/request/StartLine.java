@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.List;

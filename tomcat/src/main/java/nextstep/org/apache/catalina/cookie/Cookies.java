@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.catalina.cookie;
 
 import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
 
@@ -44,7 +44,7 @@ public class Cookies {
 
     public Cookies defensiveCopy() {
         Cookies newCookies = new Cookies();
-        cookie.forEach((key, value) -> newCookies.set(key, value));
+        cookie.forEach(newCookies::set);
         return newCookies;
     }
 }

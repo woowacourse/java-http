@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11.servlet;
+package nextstep.org.apache.catalina.servlet;
 
 import static nextstep.org.apache.coyote.http11.HttpUtil.selectFirstContentTypeOrDefault;
 
@@ -9,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.org.apache.coyote.http11.Http11Request;
-import nextstep.org.apache.coyote.http11.Http11Response;
+import nextstep.org.apache.coyote.http11.request.Http11Request;
+import nextstep.org.apache.coyote.http11.response.Http11Response;
 import nextstep.org.apache.coyote.http11.Status;
 
 public abstract class AbstractServlet implements Servlet{

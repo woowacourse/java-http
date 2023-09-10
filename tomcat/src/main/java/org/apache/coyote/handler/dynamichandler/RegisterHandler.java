@@ -2,41 +2,29 @@ package org.apache.coyote.handler.dynamichandler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.statichandler.ExceptionHandler;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.Query;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.StatusLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RegisterHandler implements Handler {
+public class RegisterHandler extends AbstractHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
     private static final String DEFAULT_DIRECTORY_PATH = "static";
     private static final String ACCOUNT = "account";
     private static final String EMAIL = "email";
     private static final String PASSWORD = "password";
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        if (HttpMethod.GET == httpRequest.httpMethod()) {
-            return handleGetMapping(httpRequest);
-        }
-        return handlePostMapping(httpRequest);
-    }
-
-    private HttpResponse handleGetMapping(HttpRequest httpRequest) {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         try {
             return HttpResponse.createStaticResponseByPath(
                     httpRequest.httpVersion(),
@@ -47,7 +35,8 @@ public class RegisterHandler implements Handler {
         }
     }
 
-    private HttpResponse handlePostMapping(HttpRequest httpRequest) {
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest) {
         Query query = Query.create(httpRequest.body());
         if (query.isEmpty()) {
             handleRedirectPage(httpRequest);

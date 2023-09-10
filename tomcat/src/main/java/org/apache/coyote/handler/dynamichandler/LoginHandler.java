@@ -2,11 +2,9 @@ package org.apache.coyote.handler.dynamichandler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.statichandler.ExceptionHandler;
 import org.apache.coyote.http11.*;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.Query;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.StatusLine;
@@ -19,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LoginHandler implements Handler {
+public class LoginHandler extends AbstractHandler {
 
     private static final String DEFAULT_DIRECTORY_PATH = "static";
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
@@ -27,17 +25,7 @@ public class LoginHandler implements Handler {
     private static final String PASSWORD = "password";
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        if (HttpMethod.GET == httpRequest.httpMethod()) {
-            return handleGetMapping(httpRequest);
-        }
-        if (HttpMethod.POST == httpRequest.httpMethod()) {
-            return handlePostMapping(httpRequest);
-        }
-        return new ExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR).handle(httpRequest);
-    }
-
-    private HttpResponse handleGetMapping(HttpRequest httpRequest) {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         try {
             /*
                     httpRequest.session() returns null when Request does not contain Session Information.
@@ -80,7 +68,8 @@ public class LoginHandler implements Handler {
         return new HttpResponse(statusLine, new Header(headers));
     }
 
-    private HttpResponse handlePostMapping(HttpRequest httpRequest) {
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest) {
         Query queries = Query.create(httpRequest.body());
 
         String account = queries.get(ACCOUNT);

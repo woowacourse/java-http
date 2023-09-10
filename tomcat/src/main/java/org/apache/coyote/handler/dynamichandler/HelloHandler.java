@@ -1,10 +1,10 @@
 package org.apache.coyote.handler.dynamichandler;
 
-import org.apache.coyote.handler.Handler;
+import org.apache.coyote.handler.statichandler.ExceptionHandler;
+import org.apache.coyote.http11.Body;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.Body;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -13,10 +13,10 @@ import org.apache.coyote.http11.response.StatusLine;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class HelloHandler implements Handler {
+public class HelloHandler extends AbstractHandler {
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    HttpResponse doGet(HttpRequest httpRequest) {
         StatusLine statusLine = new StatusLine(httpRequest.httpVersion(), HttpStatus.OK);
 
         Body body = new Body("Hello world!");
@@ -27,5 +27,10 @@ public class HelloHandler implements Handler {
         Header header = new Header(headers);
 
         return new HttpResponse(statusLine, header, body);
+    }
+
+    @Override
+    HttpResponse doPost(HttpRequest httpRequest) {
+        return new ExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR).handle(httpRequest);
     }
 }

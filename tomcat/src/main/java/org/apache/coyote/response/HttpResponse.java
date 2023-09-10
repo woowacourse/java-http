@@ -2,8 +2,9 @@ package org.apache.coyote.response;
 
 import static org.apache.coyote.response.ResponseHeader.CONTENT_LENGTH;
 import static org.apache.coyote.response.ResponseHeader.CONTENT_TYPE;
+import static org.apache.coyote.response.ResponseHeader.LOCATION;
+import static org.apache.coyote.response.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.utils.Constant.EMPTY;
-import static org.apache.coyote.utils.Constant.HEADER_DELIMITER;
 import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
 
 import java.io.File;
@@ -11,64 +12,101 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.coyote.ContentType;
+import org.apache.coyote.Cookies;
+import org.apache.coyote.Headers;
+import org.apache.coyote.Protocol;
 import org.apache.coyote.exception.PageNotFoundException;
 
 public class HttpResponse {
 
-    private final Status status;
-    private final Map<String, String> headers;
+    private final StatusLine statusLine;
+    private final Headers headers;
     private final String body;
 
-    public HttpResponse(final Status status, final String body) {
-        this.status = status;
-        this.headers = new LinkedHashMap<>();
-        headers.put(CONTENT_TYPE.getName(), "text/html;charset=utf-8 ");
-
+    public HttpResponse(final StatusLine statusLine, final Headers headers, final String body) {
+        this.statusLine = statusLine;
+        this.headers = headers;
         this.body = body;
-        if (body.length() > 0) {
-            headers.put(CONTENT_LENGTH.getName(), body.getBytes().length + " ");
-        }
     }
 
-    public HttpResponse(final Status status) {
-        this(status, EMPTY);
+    public static Builder builder(final Protocol protocol, final ContentType contentType, final Status status) {
+        return new Builder(protocol, contentType, status);
     }
 
-    public HttpResponse(final Status status, final URL resource) {
-        this(status, readResponseBody(resource));
-    }
-
-    private static String readResponseBody(final URL resource) {
-        try {
-            final Path filePath = new File(resource.getFile()).toPath();
-            return new String(Files.readAllBytes(filePath));
-
-        } catch (final NullPointerException | IOException e) {
-            throw new PageNotFoundException(resource.toString());
-        }
-    }
-
-    public void addHeader(final ResponseHeader header, final String value) {
-        headers.put(header.getName(), value);
-    }
-
-    public String getResponse() {
-        final String formattedStatus = status.getStatusLine();
-        final String formattedHeaders = headers.keySet().stream()
-                .map(this::formatHeader)
-                .collect(Collectors.joining(LINE_SEPARATOR));
-
+    public String stringify() {
         return String.join(LINE_SEPARATOR,
-                "HTTP/1.1 " + formattedStatus,
-                formattedHeaders,
+                statusLine.stringify(),
+                headers.stringify(),
                 EMPTY,
                 body);
     }
 
-    private String formatHeader(final String header) {
-        return header + HEADER_DELIMITER + headers.get(header);
+    public static class Builder {
+        private final Protocol protocol;
+        private final ContentType contentType;
+        private final Status status;
+        private String redirectUri;
+        private Cookies cookies;
+        private String body;
+
+        public Builder(final Protocol protocol, final ContentType contentType, final Status status) {
+            this.protocol = protocol;
+            this.contentType = contentType;
+            this.status = status;
+        }
+
+        private static String readResource(final URL resource) {
+            try {
+                final Path filePath = new File(resource.getFile()).toPath();
+                return new String(Files.readAllBytes(filePath));
+
+            } catch (final NullPointerException | IOException e) {
+                throw new PageNotFoundException(resource.toString());
+            }
+        }
+
+        public Builder redirectUri(final String redirectUri) {
+            this.redirectUri = redirectUri;
+            return this;
+        }
+
+        public Builder cookies(final Cookies cookies) {
+            this.cookies = cookies;
+            return this;
+        }
+
+        public Builder body(final String body) {
+            this.body = body;
+            return this;
+        }
+
+        public Builder body(final URL resource) {
+            this.body = readResource(resource);
+            return this;
+        }
+
+        public HttpResponse build() {
+            final StatusLine statusLine = new StatusLine(protocol, status);
+            final Headers headers = new Headers();
+            headers.addHeader(CONTENT_TYPE, contentType.getValueWithUTF8());
+
+            if (redirectUri != null) {
+                headers.addHeader(LOCATION, redirectUri);
+            }
+
+            if (cookies != null) {
+                headers.addHeader(SET_COOKIE, cookies.stringify());
+            }
+
+            if (body == null) {
+                body = EMPTY;
+            }
+
+            headers.addHeader(CONTENT_LENGTH, body.getBytes().length + " ");
+
+            return new HttpResponse(statusLine, headers, body);
+        }
     }
+
 }

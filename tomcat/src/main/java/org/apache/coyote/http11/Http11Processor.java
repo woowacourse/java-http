@@ -2,16 +2,12 @@ package org.apache.coyote.http11;
 
 import static org.apache.coyote.request.Method.GET;
 import static org.apache.coyote.request.Method.POST;
-import static org.apache.coyote.request.RequestHeader.ACCEPT;
-import static org.apache.coyote.response.ResponseHeader.LOCATION;
-import static org.apache.coyote.response.ResponseHeader.SET_COOKIE;
 import static org.apache.coyote.response.Status.FOUND;
 import static org.apache.coyote.response.Status.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.response.Status.NOT_FOUND;
 import static org.apache.coyote.response.Status.OK;
 import static org.apache.coyote.response.Status.UNAUTHORIZED;
 import static org.apache.coyote.utils.Constant.BASE_PATH;
-import static org.apache.coyote.utils.Constant.COOKIE_DELIMITER;
 import static org.apache.coyote.utils.Constant.EMPTY;
 import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
 import static org.apache.coyote.utils.Parser.parseFormData;
@@ -25,6 +21,7 @@ import java.net.URL;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.service.UserService;
+import org.apache.coyote.Cookies;
 import org.apache.coyote.Processor;
 import org.apache.coyote.exception.PageNotFoundException;
 import org.apache.coyote.exception.UnauthorizedException;
@@ -32,7 +29,7 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.Method;
 import org.apache.coyote.request.RequestHeader;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.ResponseHeader;
+import org.apache.coyote.response.HttpResponse.Builder;
 import org.apache.coyote.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = readRequest(inputStream);
             final HttpResponse response = handleRequest(request);
 
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.stringify().getBytes());
             outputStream.flush();
 
         } catch (final IOException | UncheckedServletException e) {
@@ -114,13 +111,13 @@ public class Http11Processor implements Runnable, Processor {
             return handleRequestWithMethod(request);
         } catch (final PageNotFoundException e) {
             log.error(e.getMessage());
-            return handleResponseWithException(NOT_FOUND);
+            return handleResponseWithException(request, NOT_FOUND);
         } catch (final UnauthorizedException e) {
             log.error(e.getMessage());
-            return handleResponseWithException(UNAUTHORIZED);
+            return handleResponseWithException(request, UNAUTHORIZED);
         } catch (final Exception e) {
             log.error(e.getMessage());
-            return handleResponseWithException(INTERNAL_SERVER_ERROR);
+            return handleResponseWithException(request, INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -136,12 +133,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleGetRequest(final HttpRequest request) {
+        final Builder getResponseBuilder = HttpResponse.builder(
+                request.getProtocol(),
+                request.getContentType(),
+                OK
+        );
+
         final String path = request.getPath();
         if (path.equals(BASE_PATH)) {
-            return new HttpResponse(OK, "Hello world!");
+            return getResponseBuilder.body("Hello world!").build();
         }
         if (path.equals("/favicon.ico")) {
-            return new HttpResponse(OK, "Icon Not Exist!");
+            return getResponseBuilder.body("Icon Not Exist!").build();
         }
         if (path.equals("/login") && request.isCookieExist(SESSION_COOKIE_NAME)) {
             return handleAuthResponse(request, request.getCookie(SESSION_COOKIE_NAME));
@@ -149,22 +152,25 @@ public class Http11Processor implements Runnable, Processor {
 
         try {
             final URL resource = convertPathToUrl(path);
-            final HttpResponse response = new HttpResponse(OK, resource);
-            checkContentType(request, response);
-            return response;
+            return getResponseBuilder.body(resource).build();
         } catch (final Exception e) {
             throw new PageNotFoundException(path);
         }
     }
 
     private HttpResponse handleAuthResponse(final HttpRequest request, final String uuid) {
-        final HttpResponse response = new HttpResponse(FOUND);
+        final Builder authResponseBuilder = HttpResponse.builder(
+                request.getProtocol(),
+                request.getContentType(),
+                FOUND
+        ).redirectUri("/index.html");
 
-        response.addHeader(LOCATION, "/index.html");
         if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
-            response.addHeader(SET_COOKIE, SESSION_COOKIE_NAME + COOKIE_DELIMITER + uuid);
+            final Cookies cookies = Cookies.create(SESSION_COOKIE_NAME, uuid);
+            authResponseBuilder.cookies(cookies);
         }
-        return response;
+
+        return authResponseBuilder.build();
     }
 
     private URL convertPathToUrl(String path) {
@@ -172,13 +178,6 @@ public class Http11Processor implements Runnable, Processor {
             path += ".html";
         }
         return getClass().getClassLoader().getResource("static" + path);
-    }
-
-    private void checkContentType(final HttpRequest request, final HttpResponse response) {
-        final String accept = request.getHeader(ACCEPT);
-        if (accept != null && accept.contains("css")) {
-            response.addHeader(ResponseHeader.CONTENT_LENGTH, "text/css;charset=utf-8 ");
-        }
     }
 
     private HttpResponse handlePostRequest(final HttpRequest request) throws UnauthorizedException {
@@ -204,8 +203,14 @@ public class Http11Processor implements Runnable, Processor {
         return handleAuthResponse(request, uuid);
     }
 
-    private HttpResponse handleResponseWithException(final Status status) {
+    private HttpResponse handleResponseWithException(final HttpRequest request, final Status status) {
         final URL resource = convertPathToUrl(BASE_PATH + status.getCode());
-        return new HttpResponse(status, resource);
+        return HttpResponse.builder(
+                        request.getProtocol(),
+                        request.getContentType(),
+                        status
+                )
+                .body(resource)
+                .build();
     }
 }

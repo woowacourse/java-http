@@ -1,46 +1,29 @@
 package org.apache.coyote.request;
 
-import static org.apache.coyote.utils.Constant.COOKIES_DELIMITER;
-import static org.apache.coyote.utils.Constant.COOKIE_DELIMITER;
-import static org.apache.coyote.utils.Constant.EMPTY;
-import static org.apache.coyote.utils.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.request.RequestHeader.ACCEPT;
+import static org.apache.coyote.request.RequestHeader.COOKIE;
 import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
-import static org.apache.coyote.utils.Parser.parseFormData;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.coyote.ContentType;
+import org.apache.coyote.Cookies;
+import org.apache.coyote.Headers;
+import org.apache.coyote.Protocol;
 
 public class HttpRequest {
-    private static final String QUERY_STRING_DELIMITER = "\\?";
-    private static final String SPLIT_DELIMITER = " ";
     private static final int REQUEST_LINE_INDEX = 0;
-    private static final int METHOD_INDEX = 0;
-    private static final int URI_INDEX = 1;
-    private static final int PATH_INDEX = 0;
-    private static final int QUERY_STRING_INDEX = 1;
-    private static final String HEADER_COOKIE = "Cookie";
-    private static final int SPLIT_LIMIT_SIZE = 2;
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
 
-    private final Method method;
-    private final String path;
-    private final Map<String, String> queryParams;
-    private final Map<String, String> headers;
-    private final Map<String, String> cookies;
+    private final RequestLine requestLine;
+    private final Headers headers;
+    private final Cookies cookies;
     private String body;
 
-    public HttpRequest(final Method method,
-                       final String path,
-                       final Map<String, String> queryParams,
-                       final Map<String, String> headers,
-                       final Map<String, String> cookies
+    public HttpRequest(final RequestLine requestLine,
+                       final Headers headers,
+                       final Cookies cookies
     ) {
-        this.method = method;
-        this.path = path;
-        this.queryParams = queryParams;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.cookies = cookies;
     }
@@ -48,87 +31,43 @@ public class HttpRequest {
     public static HttpRequest from(final String request) {
         final List<String> lines = new ArrayList<>(List.of(request.split(LINE_SEPARATOR)));
 
-        final String[] requestUri = lines.remove(REQUEST_LINE_INDEX).split(SPLIT_DELIMITER);
-        final String method = requestUri[METHOD_INDEX];
-        final String uri = requestUri[URI_INDEX];
-
-        final String[] uris = uri.split(QUERY_STRING_DELIMITER);
-        final String path = uris[PATH_INDEX];
-
-        String queryString = EMPTY;
-        if (uris.length > 1) {
-            queryString = uris[QUERY_STRING_INDEX];
-        }
-        final Map<String, String> queryParams = parseFormData(queryString);
-        final Map<String, String> headers = parseHeaders(lines);
-
-        final String cookieFields = headers.remove(HEADER_COOKIE);
-        final Map<String, String> cookies = parseCookies(cookieFields);
+        final RequestLine requestLine = RequestLine.from(lines.remove(REQUEST_LINE_INDEX));
+        final Headers headers = Headers.from(lines);
+        final Cookies cookies = Cookies.from(headers.getValueOf(COOKIE));
 
         return new HttpRequest(
-                Method.getMethod(method),
-                path,
-                queryParams,
+                requestLine,
                 headers,
                 cookies
         );
     }
 
-    private static Map<String, String> parseHeaders(final List<String> lines) {
-        final Map<String, String> headers = new HashMap<>();
-        for (final String line : lines) {
-            if (EMPTY.equals(line)) {
-                break;
-            }
-            final String[] header = line.split(HEADER_DELIMITER, SPLIT_LIMIT_SIZE);
-            headers.put(header[KEY_INDEX], header[VALUE_INDEX]);
-        }
-        return headers;
-    }
-
-    private static Map<String, String> parseCookies(final String cookieFields) {
-        final Map<String, String> cookies = new HashMap<>();
-        if (cookieFields == null) {
-            return cookies;
-        }
-
-        for (final String field : cookieFields.split(COOKIES_DELIMITER)) {
-            final String[] cookie = field.split(COOKIE_DELIMITER, SPLIT_LIMIT_SIZE);
-            cookies.put(cookie[KEY_INDEX], cookie[VALUE_INDEX]);
-        }
-        return cookies;
-    }
-
     public Method getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getUri().getPath();
     }
 
-    public boolean isQueryParamExist(final String... parameterNames) {
-        boolean isExist = true;
-        for (final String parameterName : parameterNames) {
-            isExist = isExist && queryParams.containsKey(parameterName);
-        }
-        return isExist;
+    public Protocol getProtocol() {
+        return requestLine.getProtocol();
     }
 
-    public String getQueryParam(final String parameterName) {
-        return queryParams.get(parameterName);
+    public ContentType getContentType() {
+        return ContentType.getContentType(headers.getValueOf(ACCEPT));
     }
 
     public String getHeader(final RequestHeader header) {
-        return headers.get(header.getName());
+        return headers.getValueOf(header);
     }
 
     public boolean isCookieExist(final String cookieName) {
-        return cookies.containsKey(cookieName);
+        return cookies.isExist(cookieName);
     }
 
     public String getCookie(final String cookieName) {
-        return cookies.get(cookieName);
+        return cookies.getValueOf(cookieName);
     }
 
     public String getBody() {

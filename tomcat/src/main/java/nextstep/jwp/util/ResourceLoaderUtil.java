@@ -12,6 +12,9 @@ public class ResourceLoaderUtil {
     private static final Logger log = LoggerFactory.getLogger(ResourceLoaderUtil.class);
     private static final String DEFAULT_ROOT_PATH = "static";
 
+    private ResourceLoaderUtil() {
+    }
+
     public static String loadContent(String path) {
         if (!path.contains(".")) {
             path += ".html";

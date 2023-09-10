@@ -16,12 +16,14 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws FileNotReadableException {
         final Session session = httpRequest.getSession(false);
-        String fileContent = fileReader.readStaticFile("/login.html");
         if (session != null) {
-            fileContent = fileReader.readStaticFile("/index.html");
+            httpResponse.setHttpStatus(HttpStatus.FOUND);
+            httpResponse.setHeader("Location", "/index.html");
+            return;
         }
+        final String fileContent = fileReader.readStaticFile("/login.html");
         httpResponse.setBody(fileContent, ContentType.findResponseContentTypeFromRequest(httpRequest));
-        httpResponse.setHttpStatus(HttpStatus.FOUND);
+        httpResponse.setHttpStatus(HttpStatus.OK);
     }
 
     @Override
@@ -32,8 +34,8 @@ public class LoginController extends AbstractController {
             httpResponse.setHeader("Location", "/index.html");
             httpResponse.setJSessionCookieBySession(createUserSession(httpRequest, user));
         } catch (UnauthorizedException e) {
-            httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
-            httpResponse.setBody(fileReader.readStaticFile("/login.html"), ContentType.findResponseContentTypeFromRequest(httpRequest));
+            httpResponse.setHttpStatus(HttpStatus.FOUND);
+            httpResponse.setHeader("Location", "/401.html");
         }
     }
 

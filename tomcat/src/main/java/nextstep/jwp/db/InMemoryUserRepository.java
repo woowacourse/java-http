@@ -8,10 +8,10 @@ import nextstep.jwp.model.User;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
-    private static long AUTO_INCREMENTED_ID = 1;
+    private static long auto_incremented_id = 1;
 
     static {
-        final User user = new User(AUTO_INCREMENTED_ID, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(auto_incremented_id, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 
@@ -19,7 +19,8 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        final User userForSave = new User(++AUTO_INCREMENTED_ID, user.getAccount(), user.getPassword(), user.getEmail());
+        final User userForSave = new User(++auto_incremented_id, user.getAccount(), user.getPassword(),
+            user.getEmail());
         database.put(userForSave.getAccount(), userForSave);
     }
 

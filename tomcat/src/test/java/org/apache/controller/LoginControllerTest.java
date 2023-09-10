@@ -22,7 +22,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("로그인에 성공하면 index.html 페이지를 바디로 갖고, httpStatusCode가 302인 response를 생성한다.")
-    void login_post_success() {
+    void login_post_success() throws Exception {
         Map<String, String> body = new HashMap<>();
         body.put("account", "gugu");
         body.put("password", "password");
@@ -43,7 +43,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("로그인에 실패하면 401.html 페이지를 바디로 갖고, httpStatusCode가 401인 response를 생성한다.")
-    void login_post_fail() {
+    void login_post_fail() throws Exception {
         Map<String, String> body = new HashMap<>();
         body.put("account", "gugu12");
         body.put("password", "password123");
@@ -65,7 +65,7 @@ class LoginControllerTest {
 
     @Test
     @DisplayName("로그인 페이지에 접속할 수 있다")
-    void login_get() throws IOException, URISyntaxException {
+    void login_get() throws Exception {
         Request request = FixtureFactory.getGetRequest("/login", DEFAULT_HEADERS);
         Response response = new Response();
 

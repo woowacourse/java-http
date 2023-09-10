@@ -22,7 +22,7 @@ class RegisterControllerTest {
 
     @Test
     @DisplayName("/register로 접속해서 POST 요청을 보내면 회원가입할 수 있다")
-    void register_post() {
+    void register_post() throws Exception {
         Map<String, String> body = new HashMap<>();
         body.put("account", "kong");
         body.put("password", "password");
@@ -45,7 +45,7 @@ class RegisterControllerTest {
 
     @Test
     @DisplayName("/register로 접속해서 GET 요청을 보내면 회원가입 페이지를 확인할 수 있다")
-    void register_get() throws IOException, URISyntaxException {
+    void register_get() throws Exception {
         Request request = FixtureFactory.getGetRequest("/register", DEFAULT_HEADERS);
         Response response = new Response();
 

@@ -48,6 +48,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doService(Request request, Response response) {
         Controller controller = RequestMapping.getController(request);
-        controller.service(request, response);
+        try {
+            controller.service(request, response);
+        } catch (Exception e) {
+            log.info(e.getMessage(), e);
+        }
     }
 }

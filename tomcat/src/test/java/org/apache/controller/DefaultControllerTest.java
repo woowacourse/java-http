@@ -14,7 +14,7 @@ class DefaultControllerTest {
 
     @Test
     @DisplayName("hello world라는 정보가 담긴 response가 생성된다.")
-    void doHandle() {
+    void doHandle() throws Exception {
         Request request = FixtureFactory.getGetRequest("/", DEFAULT_HEADERS);
         Response response = new Response();
 

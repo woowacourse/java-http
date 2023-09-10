@@ -5,7 +5,7 @@ import org.apache.coyote.response.Response;
 
 public interface Controller {
 
-    void service(Request request, Response response);
-
     boolean support(Request request);
+
+    void service(Request request, Response response) throws Exception;
 }

@@ -32,7 +32,7 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public void service(Request request, Response response) {
+    public void service(Request request, Response response) throws Exception {
         if (request.isSameHttpMethod(HttpMethod.GET)) {
             doGet(request, response);
             return;
@@ -44,14 +44,14 @@ public abstract class AbstractController implements Controller {
         throw new ControllerHttpMethodException(request.getHttpMethod());
     }
 
-    protected void doGet(Request request, Response response) {
+    protected void doGet(Request request, Response response) throws Exception {
         if (availableHttpMethods.contains(HttpMethod.GET)) {
             throw new ControllerNotImplementMethodException(HttpMethod.GET);
         }
         throw new ControllerHttpMethodException(HttpMethod.GET);
     }
 
-    protected void doPost(Request request, Response response) {
+    protected void doPost(Request request, Response response) throws Exception {
         if (availableHttpMethods.contains(HttpMethod.POST)) {
             throw new ControllerNotImplementMethodException(HttpMethod.POST);
         }

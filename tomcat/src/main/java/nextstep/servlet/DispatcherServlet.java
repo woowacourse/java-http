@@ -12,7 +12,7 @@ import nextstep.jwp.controller.ResponseEntity;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public class DispatcherServlet {
+public class DispatcherServlet implements Servlet {
 
     private final List<Controller> controllers = List.of(
         new LoginController(),

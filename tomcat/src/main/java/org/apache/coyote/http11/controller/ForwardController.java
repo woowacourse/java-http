@@ -12,7 +12,7 @@ public class ForwardController extends AbstractController {
     }
 
     @Override
-    protected void doGetRequest(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.forwardTo(forwardPath);
     }
 }

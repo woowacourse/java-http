@@ -9,8 +9,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     private final Map<HttpMethod, BiConsumer<HttpRequest, HttpResponse>> supportedMethods = Map.of(
-            HttpMethod.GET, this::doGetRequest,
-            HttpMethod.POST, this::doPostRequest
+            HttpMethod.GET, this::doGet,
+            HttpMethod.POST, this::doPost
     );
 
 
@@ -20,11 +20,11 @@ public abstract class AbstractController implements Controller {
         supportedMethods.get(httpMethod).accept(request, response);
     }
 
-    protected void doGetRequest(final HttpRequest request, final HttpResponse response) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.notAllowedMethod();
     }
 
-    protected void doPostRequest(final HttpRequest request, final HttpResponse response) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         response.notAllowedMethod();
     }
 }

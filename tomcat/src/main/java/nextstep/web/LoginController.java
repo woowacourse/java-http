@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     private final UserService userService = new UserService();
 
     @Override
-    public void doGetRequest(final HttpRequest request, final HttpResponse response) {
+    public void doGet(final HttpRequest request, final HttpResponse response) {
         final Session session = SessionManager.findSession(request.getCookie("JSESSIONID"));
         if (session != null) {
             final User user = (User) session.getAttribute("user");
@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public void doPostRequest(final HttpRequest request, final HttpResponse response) {
+    public void doPost(final HttpRequest request, final HttpResponse response) {
         final String account = request.getPayloadValue("account");
         final String password = request.getPayloadValue("password");
         if (userService.validateLogin(account, password)) {

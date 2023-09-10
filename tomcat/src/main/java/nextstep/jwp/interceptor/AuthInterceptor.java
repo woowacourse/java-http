@@ -1,7 +1,7 @@
 package nextstep.jwp.interceptor;
 
 import nextstep.jwp.SessionManager;
-import nextstep.jwp.handler.Handler;
+import nextstep.jwp.controller.Controller;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.Session;
@@ -9,13 +9,10 @@ import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 public class AuthInterceptor implements HandlerInterceptor {
-
-    private static final String STATIC = "static";
-
+    
     private final List<String> supportedPaths;
     private final SessionManager sessionManager;
 
@@ -25,16 +22,17 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(final HttpRequest request, final HttpResponse response, final Handler handler) throws IOException {
+    public boolean preHandle(final HttpRequest request, final HttpResponse response, final Controller controller) throws IOException {
         if (isNotSupported(request.getPath())) {
             return true;
         }
         if (request.containJsessionId()) {
-            final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
             final String jsessionId = request.findJsessionId();
             final Session session = sessionManager.findSession(jsessionId);
             response.addCookie(Cookies.ofJSessionId(session.getId()));
-            setResponse(response, StatusCode.OK, ContentType.HTML, resource);
+            response.setStatusCode(StatusCode.OK)
+                    .setContentType(ContentType.HTML)
+                    .setRedirect("/index.html");
             return false;
         }
         return true;
@@ -47,12 +45,5 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
         return true;
-    }
-
-    private void setResponse(final HttpResponse response, final StatusCode statusCode,
-                             final ContentType contentType, final URL resource) throws IOException {
-        response.setStatusCode(statusCode);
-        response.setContentType(contentType);
-        response.setResponseBodyByUrl(resource);
     }
 }

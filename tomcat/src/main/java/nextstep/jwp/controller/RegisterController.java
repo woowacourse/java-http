@@ -1,9 +1,8 @@
-package nextstep.jwp.handler.post;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.SessionManager;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BusinessException;
-import nextstep.jwp.handler.Handler;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookies;
@@ -12,40 +11,40 @@ import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
-import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class RegisterPostHandler implements Handler {
-
-    private static final String STATIC = "static";
+public class RegisterController extends AbstractController {
 
     private final SessionManager sessionManager;
 
-    public RegisterPostHandler(final SessionManager sessionManager) {
+    public RegisterController(final SessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setStatusCode(StatusCode.OK)
+                .setContentType(ContentType.HTML)
+                .setRedirect("/register.html");
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final User user = makeUser(request.getRequestBody());
         InMemoryUserRepository.save(user);
-        final Session session = new Session(String.valueOf(UUID.randomUUID()));
-        session.addAttribute("user", user);
-        sessionManager.add(session);
+        final Session session = createSession(user);
         response.addCookie(Cookies.ofJSessionId(session.getId()));
-        final var resource = getClass().getClassLoader().getResource(STATIC + "/index.html");
-        setResponse(response, StatusCode.CREATED, ContentType.HTML, resource);
+        response.setStatusCode(StatusCode.CREATED)
+                .setContentType(ContentType.HTML)
+                .setRedirect("/index.html");
     }
 
     private User makeUser(final RequestBody requestBody) {
         final String[] tokens = requestBody.getValue().split("&");
-
         final String account = findValueByKey(tokens, "account");
         final String email = findValueByKey(tokens, "email");
         final String password = findValueByKey(tokens, "password");
-
         return new User(account, password, email);
     }
 
@@ -58,10 +57,10 @@ public class RegisterPostHandler implements Handler {
                 .orElseThrow(() -> new BusinessException(key + "에 대한 정보가 존재하지 않습니다."));
     }
 
-    private void setResponse(final HttpResponse response, final StatusCode statusCode,
-                             final ContentType contentType, final URL resource) throws IOException {
-        response.setStatusCode(statusCode);
-        response.setContentType(contentType);
-        response.setResponseBodyByUrl(resource);
+    private Session createSession(final User user) {
+        final Session session = new Session(String.valueOf(UUID.randomUUID()));
+        session.addAttribute("user", user);
+        sessionManager.add(session);
+        return session;
     }
 }

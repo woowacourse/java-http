@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpException;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpMethod;
 
@@ -31,6 +33,23 @@ public class HttpRequest {
 
     public String findJsessionId() {
         return httpHeader.findJsessionId();
+    }
+
+    public boolean isGet() {
+        return httpMethod.equals(HttpMethod.GET);
+    }
+
+    public boolean isPost() {
+        return httpMethod.equals(HttpMethod.POST);
+    }
+
+    public boolean isFile() {
+        try {
+            ContentType.findByPath(this.path);
+        } catch (final HttpException exception) {
+            return false;
+        }
+        return true;
     }
 
     public HttpMethod getHttpMethod() {

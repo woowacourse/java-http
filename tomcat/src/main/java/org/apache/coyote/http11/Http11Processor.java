@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -50,33 +48,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void sendResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {
-        final String httpResponse = makeHttpResponse(response);
+        final String httpResponse = ResponseGenerator.makeResponse(response);
         outputStream.write(httpResponse.getBytes());
         outputStream.flush();
-    }
-
-    private String makeHttpResponse(final HttpResponse response) {
-        final StringBuilder httpResponse = new StringBuilder();
-
-        httpResponse.append("HTTP/1.1 ").append(response.getStatusCode().getResponse()).append("\r\n");
-        httpResponse.append("Content-Type: ").append(response.getContentType().getType()).append(";charset=utf-8\r\n");
-        httpResponse.append("Content-Length: ").append(response.getResponseBody().getBytes().length).append("\r\n");
-
-        if (response.containJsessionId()) {
-            final Map<String, String> value = response.getCookie().getValue();
-            httpResponse.append("Set-Cookie: ").append("JSESSIONID" + "=" + value.get("JSESSIONID")).append("\r\n");
-        }
-
-        if (!response.getOtherHeader().isEmpty()) {
-            final String additionalHeaders = response.getOtherHeader().entrySet().stream()
-                    .map(entry -> entry.getKey() + ": " + entry.getValue())
-                    .collect(Collectors.joining("\r\n"));
-            httpResponse.append(additionalHeaders).append("\r\n");
-        }
-
-        httpResponse.append("\r\n");
-        httpResponse.append(response.getResponseBody());
-
-        return httpResponse.toString();
     }
 }

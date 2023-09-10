@@ -5,11 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import nextstep.jwp.HandlerMapping;
 import nextstep.jwp.JwpHttpDispatcher;
 import nextstep.jwp.SessionManager;
-import nextstep.jwp.handler.Handler;
-import nextstep.jwp.handler.get.LoginGetHandler;
-import nextstep.jwp.handler.get.RegisterGetHandler;
-import nextstep.jwp.handler.get.RootGetHandler;
-import nextstep.jwp.handler.post.LoginPostHandler;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RootGetController;
 import nextstep.jwp.interceptor.AuthInterceptor;
 import nextstep.jwp.interceptor.HandlerInterceptor;
 import org.apache.coyote.http11.Http11Processor;
@@ -25,12 +24,10 @@ import java.util.Map;
 
 class Http11ProcessorTest {
 
-    private final Map<String, Handler> httpGetHandlers =
-            Map.of("/", new RootGetHandler(),
-                    "/login", new LoginGetHandler(new SessionManager()),
-                    "/register", new RegisterGetHandler());
-    private final Map<String, Handler> httpPostHandlers =
-            Map.of("/login", new LoginPostHandler(new SessionManager()));
+    private static final Map<String, Controller> controllers =
+            Map.of("/", new RootGetController(),
+                    "/login", new LoginController(new SessionManager()),
+                    "/register", new RegisterController(new SessionManager()));
 
     private static final List<HandlerInterceptor> handlerInterceptors =
             List.of(new AuthInterceptor(List.of("/login"), new SessionManager()));
@@ -39,7 +36,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerMapping(httpGetHandlers, httpPostHandlers, handlerInterceptors));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerMapping(controllers, handlerInterceptors));
         final var processor = new Http11Processor(socket, new HttpRequestParser(), httpDispatcher);
 
         // when
@@ -67,7 +64,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerMapping(httpGetHandlers, httpPostHandlers, handlerInterceptors));
+        final JwpHttpDispatcher httpDispatcher = new JwpHttpDispatcher(new HandlerMapping(controllers, handlerInterceptors));
         final var processor = new Http11Processor(socket, new HttpRequestParser(), httpDispatcher);
 
         // when

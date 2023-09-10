@@ -3,21 +3,17 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.StatusCode;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
     private final String version;
+    private final Map<String, String> otherHeader = new HashMap<>();
     private StatusCode statusCode;
     private ContentType contentType;
-    private String responseBody;
-    private final Map<String, String> otherHeader = new HashMap<>();
+    private String redirect;
+    private String body;
 
     private Cookie cookie;
 
@@ -25,11 +21,11 @@ public class HttpResponse {
         this(version, null, null, null);
     }
 
-    public HttpResponse(final String version, final StatusCode statusCode, final ContentType contentType, final String responseBody) {
+    public HttpResponse(final String version, final StatusCode statusCode, final ContentType contentType, final String redirect) {
         this.version = version;
         this.statusCode = statusCode;
         this.contentType = contentType;
-        this.responseBody = responseBody;
+        this.redirect = redirect;
     }
 
     public void addCookie(final String cookie) {
@@ -40,16 +36,16 @@ public class HttpResponse {
         return cookie != null && cookie.containsJsessionId();
     }
 
+    public boolean containBody() {
+        return this.body != null;
+    }
+
     public StatusCode getStatusCode() {
         return statusCode;
     }
 
     public ContentType getContentType() {
         return contentType;
-    }
-
-    public String getResponseBody() {
-        return responseBody;
     }
 
     public Map<String, String> getOtherHeader() {
@@ -60,25 +56,31 @@ public class HttpResponse {
         return cookie;
     }
 
-    public void setStatusCode(final StatusCode statusCode) {
+    public String getRedirect() {
+        return redirect;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public HttpResponse setStatusCode(final StatusCode statusCode) {
         this.statusCode = statusCode;
+        return this;
     }
 
-    public void setContentType(final ContentType contentType) {
+    public HttpResponse setContentType(final ContentType contentType) {
         this.contentType = contentType;
+        return this;
     }
 
-    public void setResponseBodyByUrl(final URL url) throws IOException {
-        this.responseBody = makeResponseBody(url);
+    public HttpResponse setRedirect(final String redirect) {
+        this.redirect = redirect;
+        return this;
     }
 
-    private String makeResponseBody(final URL resource) throws IOException {
-        final var actualFilePath = new File(resource.getPath()).toPath();
-        final var fileBytes = Files.readAllBytes(actualFilePath);
-        return new String(fileBytes, StandardCharsets.UTF_8);
-    }
-
-    public void setResponseBody(final String responseBody) {
-        this.responseBody = responseBody;
+    public HttpResponse setBody(final String body) {
+        this.body = body;
+        return this;
     }
 }

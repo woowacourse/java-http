@@ -70,7 +70,7 @@ class LoginServiceTest {
                     RequestBody requestBody = requestBody_생성();
 
                     // when
-                    HttpResponse response = loginService.login(requestLine, requestHeader, requestBody);
+                    HttpResponse response = loginService.getLoginViewResponse(requestLine, requestHeader, requestBody);
 
                     // then
                     assertAll(
@@ -90,7 +90,7 @@ class LoginServiceTest {
                     RequestBody requestBody = requestBody_생성();
 
                     // when
-                    HttpResponse response = loginService.login(requestLine, requestHeader, requestBody);
+                    HttpResponse response = loginService.getLoginViewResponse(requestLine, requestHeader, requestBody);
 
                     // then
                     assertAll(

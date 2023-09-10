@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.request.line.HttpMethod;
+import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
 
 public class HttpRequest {
@@ -28,6 +30,14 @@ public class HttpRequest {
 
     public RequestBody requestBody() {
         return requestBody;
+    }
+
+    public boolean methodIsEqualTo(HttpMethod httpMethod) {
+        return this.requestLine.method().equals(httpMethod);
+    }
+
+    public Protocol getProtocol() {
+        return requestLine.protocol();
     }
 
 }

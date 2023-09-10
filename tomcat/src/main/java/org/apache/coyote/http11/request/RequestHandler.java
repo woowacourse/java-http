@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.auth.LoginController;
-import org.apache.coyote.http11.auth.RegisterController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.response.Location;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -18,10 +18,10 @@ public class RequestHandler {
         final String path = httpRequest.requestLine().path().defaultPath();
 
         if (path.equals("/register")) {
-            return registerController.register(httpRequest);
+            return registerController.service(httpRequest, null);
         }
         if (path.equals("/login")) {
-            return loginController.login(httpRequest);
+            return loginController.service(httpRequest, null);
         }
         return HttpResponse.getCookieNullResponseEntity(protocol, OK, Location.from(path));
     }

@@ -2,7 +2,6 @@ package org.apache.coyote.http11.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -22,14 +21,8 @@ public class HandlerMapper {
             new LoginController(new LoginService()));
 
         controllerByMapper.put(
-            request -> "/register".equals(request.getRequestLine().getPath()) &&
-                HttpMethod.POST.equals(request.getRequestLine().getMethod()),
+            request -> "/register".equals(request.getRequestLine().getPath()),
             new SignUpController(new LoginService()));
-
-        controllerByMapper.put(
-            request -> "/register".equals(request.getRequestLine().getPath()) &&
-                HttpMethod.GET.equals(request.getRequestLine().getMethod()),
-            new SignUpViewController());
     }
 
     public boolean haveAvailableHandler(HttpRequest httpRequest) {

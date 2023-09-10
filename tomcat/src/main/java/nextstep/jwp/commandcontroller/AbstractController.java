@@ -22,9 +22,6 @@ public class AbstractController implements Controller {
         // http method 분기문
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
-
     protected String readResponseBody(final String requestUri) throws IOException, URISyntaxException {
         final URL url = getClass().getClassLoader().getResource(DEFAULT_FILE_LOCATION + requestUri);
         if (url == null) {
@@ -35,4 +32,4 @@ public class AbstractController implements Controller {
         final var path = Paths.get(url.toURI());
         return Files.readString(path);
     }
-}`
+}

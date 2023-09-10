@@ -3,11 +3,13 @@ package nextstep.jwp.model;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookies {
 
+    private static final String DELIMITER = "\r\n";
     private final Map<String, String> cookies = new LinkedHashMap<>();
 
     public HttpCookies() {
@@ -37,7 +39,16 @@ public class HttpCookies {
         return cookies.get(sessionId);
     }
 
-    public String cookieInfo(final String sessionId) {
-        return sessionId + "=" + cookies.get(sessionId);
+    public String toResponse() {
+        if (cookies.isEmpty()) {
+            return "";
+        }
+
+        final List<String> cookieString = cookies.keySet()
+                .stream()
+                .map(name -> "Set-Cookie: " + name + "=" + cookies.get(name) + " ")
+                .collect(Collectors.toList());
+
+        return String.join(DELIMITER, cookieString) + DELIMITER;
     }
 }

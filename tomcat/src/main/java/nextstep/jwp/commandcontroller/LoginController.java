@@ -39,7 +39,7 @@ public class LoginController extends AbstractController {
                 final Session session = new Session(UUID.randomUUID().toString());
                 session.setAttribute("user", user);
                 SessionManager.add(session);
-                response.addCookie("JESSIONID", session.getId());
+                response.addCookie("JSESSIONID", session.getId());
                 return;
             }
         }

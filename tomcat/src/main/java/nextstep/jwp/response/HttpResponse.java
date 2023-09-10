@@ -9,7 +9,7 @@ public class HttpResponse {
     private final ResponseHeaders responseHeaders = new ResponseHeaders();
     private final HttpCookies cookies = new HttpCookies();
     private StatusLine statusLine;
-    private String responseBody;
+    private String responseBody = "";
 
     public HttpResponse() {
     }
@@ -41,7 +41,7 @@ public class HttpResponse {
     public String toResponse() {
         return String.join(DELIMITER,
                 statusLine.toResponse(),
-                responseHeaders.toResponse(),
+                cookies.toResponse() + responseHeaders.toResponse(),
                 "",
                 responseBody);
     }

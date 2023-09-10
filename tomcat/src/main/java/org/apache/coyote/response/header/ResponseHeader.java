@@ -18,6 +18,10 @@ public class ResponseHeader {
         return new ResponseHeader(headers);
     }
 
+    public void add(Object object){
+        headers.add(String.valueOf(object));
+    }
+
     @Override
     public String toString() {
         return headers.stream()

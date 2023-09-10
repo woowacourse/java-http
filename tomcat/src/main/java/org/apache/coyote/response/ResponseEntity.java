@@ -7,10 +7,8 @@ import org.apache.coyote.request.Request;
 import org.apache.coyote.response.header.*;
 
 import java.util.List;
-import java.util.UUID;
 
 public class ResponseEntity {
-
 
     private final ResponseStartLine responseStartLine;
     private final ResponseHeader responseHeader;
@@ -48,29 +46,16 @@ public class ResponseEntity {
         return new ResponseEntity(responseStartLine, responseHeader, responseBody);
     }
 
-    public static ResponseEntity fromViewPathWithRedirect(final Request request, final ResponseStatus responseStatus, final String redirectPath) {
-        final ResponseStartLine responseStartLine = ResponseStartLine.from(request.httpVersion(), responseStatus);
-        final String responseBody = FileUtil.getResourceFromViewPath(request.httpVersion(), request.getPath());
+    public void setRedirect(final String redirectPath) {
         final Location location = new Location(redirectPath);
-        final ContentType contentType = new ContentType(FileType.HTML.getContentType());
-        final ContentLength contentLength = new ContentLength(responseBody.getBytes().length);
-        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, contentLength, location));
-        return new ResponseEntity(responseStartLine, responseHeader, responseBody);
+        responseHeader.add(location);
     }
 
-    public static ResponseEntity fromViewPathWithRedirectSetCookie(final Request request, final ResponseStatus responseStatus, final String redirectPath) {
-        final ResponseStartLine responseStartLine = ResponseStartLine.from(request.httpVersion(), responseStatus);
-        final String responseBody = FileUtil.getResourceFromViewPath(request.httpVersion(), request.getPath());
-        final Location location = new Location(redirectPath);
-        final ContentType contentType = new ContentType(FileType.HTML.getContentType());
-        final ContentLength contentLength = new ContentLength(responseBody.getBytes().length);
-        if (request.hasJsessionid()) {
-            final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, contentLength, location));
-            return new ResponseEntity(responseStartLine, responseHeader, responseBody);
-        }
-        final ResponseHeader responseHeader = ResponseHeader.from(List.of(contentType, contentLength, location, new SetCookie(UUID.randomUUID().toString())));
-        return new ResponseEntity(responseStartLine, responseHeader, responseBody);
+    public void addCookie(final String cookie) {
+        final SetCookie setCookie = new SetCookie(cookie);
+        responseHeader.add(setCookie);
     }
+
 
     @Override
     public String toString() {

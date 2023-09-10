@@ -30,6 +30,7 @@ public class RequestHeader {
         if (COOKIE.equals(header[0])) {
             final Cookie cookie = Cookie.from(header[1]);
             headers.put(header[0], cookie);
+            return;
         }
         headers.put(header[0], header[1]);
     }
@@ -54,6 +55,18 @@ public class RequestHeader {
             return cookie.hasJsessionid();
         }
         return false;
+    }
+
+    public String getJsessionid() {
+        if (!headers.containsKey(COOKIE)) {
+            return "";
+        }
+        final Object cookieObject = headers.get(COOKIE);
+        if (cookieObject instanceof Cookie) {
+            final Cookie cookie = (Cookie) cookieObject;
+            return cookie.getJsessionid();
+        }
+        return "";
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestReader implements Reader{
+public class RequestReader implements Reader {
     private final List<String> lines;
 
     private final BufferedReader reader;

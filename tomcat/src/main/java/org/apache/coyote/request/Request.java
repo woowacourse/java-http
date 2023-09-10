@@ -2,8 +2,11 @@ package org.apache.coyote.request;
 
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.PathUrl;
+import org.apache.session.Session;
+import org.apache.session.SessionManager;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class Request {
     private final RequestStartLine requestStartLine;
@@ -68,14 +71,29 @@ public class Request {
         return requestBody.getBodyValue(key);
     }
 
+
+    public Session getSession(final boolean bool) {
+        if (bool) {
+            final Session session = Session.create();
+            SessionManager.add(session);
+            return session;
+        }
+        if (requestHeader.hasJsessionid()) {
+            final Optional<Session> session = SessionManager.findSession(requestHeader.getJsessionid());
+            if (session.isPresent()) {
+                return session.get();
+            }
+            Session.create(requestHeader.getJsessionid());
+        }
+        final Session session = Session.create();
+        SessionManager.add(session);
+        return session;
+    }
+
     @Override
     public String toString() {
         return requestStartLine + System.lineSeparator() +
                 requestHeader + System.lineSeparator() + System.lineSeparator() +
                 requestBody;
-    }
-
-    public boolean hasJsessionid() {
-        return requestHeader.hasJsessionid();
     }
 }

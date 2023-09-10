@@ -11,7 +11,8 @@ public abstract class AbstractController implements Controller {
     public HttpResponse service(final HttpRequest request) throws Exception {
         if (request.getHttpMethod() == HttpMethod.GET) {
             return doGet(request);
-        } else if (request.getHttpMethod() == HttpMethod.POST) {
+        }
+        if (request.getHttpMethod() == HttpMethod.POST) {
             return doPost(request);
         }
         throw new HttpRequestException.MethodNotAllowed();

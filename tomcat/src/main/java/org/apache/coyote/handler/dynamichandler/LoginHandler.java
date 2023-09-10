@@ -52,7 +52,7 @@ public class LoginHandler implements Handler {
                         HttpStatus.OK,
                         DEFAULT_DIRECTORY_PATH + httpRequest.path() + ContentType.TEXT_HTML.extension());
             }
-            return handleAlreadyLogin(httpRequest);
+            return handleAlreadyLogin(httpRequest, session);
         } catch (IOException e) {
             return new ExceptionHandler(HttpStatus.NOT_FOUND).handle(httpRequest);
         } catch (IllegalArgumentException e) {
@@ -66,8 +66,7 @@ public class LoginHandler implements Handler {
         }
     }
 
-    private HttpResponse handleAlreadyLogin(HttpRequest httpRequest) {
-        Session session = httpRequest.session();
+    private HttpResponse handleAlreadyLogin(HttpRequest httpRequest, Session session) {
         User user = (User) session.getAttribute("user");
 
         StatusLine statusLine = new StatusLine(httpRequest.httpVersion(), HttpStatus.FOUND);

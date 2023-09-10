@@ -1,20 +1,21 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.handler.HandlerMapper;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.handler.ControllerMapper;
+import org.apache.coyote.http11.handler.HandlerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final HandlerMapper handlerMapper = new HandlerMapper();
+    private final ControllerMapper controllerMapper = new ControllerMapper();
 
     public void start() {
-        var connector = new Connector(handlerMapper);
+        var connector = new Connector(controllerMapper);
         connector.start();
 
         try {
@@ -26,5 +27,9 @@ public class Tomcat {
             log.info("web server stop.");
             connector.stop();
         }
+    }
+
+    public void addController(HandlerStatus handlerStatus, Controller controller) {
+        controllerMapper.addController(handlerStatus, controller);
     }
 }

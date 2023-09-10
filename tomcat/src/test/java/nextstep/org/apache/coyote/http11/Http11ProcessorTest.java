@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.handler.HandlerMapper;
+import org.apache.coyote.http11.handler.ControllerMapper;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -18,7 +18,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var handlerMapper = new HandlerMapper();
+        final var handlerMapper = new ControllerMapper();
         final var processor = new Http11Processor(socket, handlerMapper);
 
         // when
@@ -45,7 +45,7 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var handlerMapper = new HandlerMapper();
+        final var handlerMapper = new ControllerMapper();
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, handlerMapper);
 

@@ -57,14 +57,4 @@ public class LoginController extends AbstractController {
         }
         return Optional.empty();
     }
-
-    @Override
-    public ResponseEntity<? extends Object> doPut(HttpRequest httpRequest) {
-        return ResponseEntity.notAllowed();
-    }
-
-    @Override
-    public ResponseEntity<? extends Object> doDelete(HttpRequest httpRequest) {
-        return ResponseEntity.notAllowed();
-    }
 }

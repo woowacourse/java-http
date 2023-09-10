@@ -55,14 +55,4 @@ public class SignUpController extends AbstractController {
         String email = bodyData.get(EMAIL);
         return loginService.signUp(account, password, email);
     }
-
-    @Override
-    public ResponseEntity<? extends Object> doPut(HttpRequest httpRequest) {
-        return ResponseEntity.notAllowed();
-    }
-
-    @Override
-    public ResponseEntity<? extends Object> doDelete(HttpRequest httpRequest) {
-        return ResponseEntity.notAllowed();
-    }
 }

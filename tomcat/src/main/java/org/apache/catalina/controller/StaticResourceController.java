@@ -5,8 +5,8 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 
 import java.util.Objects;
-import org.apache.catalina.FileLoader;
-import org.apache.catalina.ResponseContentType;
+import org.apache.catalina.util.FileLoader;
+import org.apache.coyote.http11.response.ResponseContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestUri;
 import org.apache.coyote.http11.response.HttpResponse;

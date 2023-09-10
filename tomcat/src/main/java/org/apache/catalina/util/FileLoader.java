@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.catalina.util;
 
 import java.io.File;
 import java.io.IOException;

@@ -3,7 +3,7 @@ package org.apache.catalina.controller;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 
-import org.apache.catalina.ResponseContentType;
+import org.apache.coyote.http11.response.ResponseContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;

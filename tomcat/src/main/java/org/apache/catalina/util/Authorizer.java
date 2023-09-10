@@ -1,5 +1,8 @@
-package org.apache.catalina;
+package org.apache.catalina.util;
 
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManger;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class Authorizer {

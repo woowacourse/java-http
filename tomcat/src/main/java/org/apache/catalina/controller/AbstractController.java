@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-import org.apache.catalina.ResponseContentType;
+import org.apache.coyote.http11.response.ResponseContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestMethod;
 import org.apache.coyote.http11.response.HttpResponse;

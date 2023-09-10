@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.coyote.Processor;
@@ -18,11 +18,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Servlet dispatcherServlet;
+    private final Controller dispatcherController;
     private final Socket connection;
 
-    public Http11Processor(Servlet dispatcherServlet, final Socket connection) {
-        this.dispatcherServlet = dispatcherServlet;
+    public Http11Processor(Controller dispatcherController, final Socket connection) {
+        this.dispatcherController = dispatcherController;
         this.connection = connection;
     }
 
@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
             HttpRequest request = HttpRequestParser.parse(bufferedReader);
             HttpResponse response = new HttpResponse(bufferedWriter);
-            dispatcherServlet.service(request, response);
+            dispatcherController.service(request, response);
             String responseMessage = HttpResponseMessageMaker.make(response);
             bufferedWriter.write(responseMessage);
             bufferedWriter.flush();

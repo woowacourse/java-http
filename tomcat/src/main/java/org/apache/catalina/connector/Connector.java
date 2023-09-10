@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.Controller;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +19,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREADS = 250;
 
-    private final Servlet dispatcherServlet;
+    private final Controller dispatcherController;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
-    public Connector(Servlet dispatcherServlet) {
-        this(dispatcherServlet, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
+    public Connector(Controller dispatcherController) {
+        this(dispatcherController, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(Servlet dispatcherServlet, int port, int acceptCount, int maxThreads) {
-        this.dispatcherServlet = dispatcherServlet;
+    public Connector(Controller dispatcherController, int port, int acceptCount, int maxThreads) {
+        this.dispatcherController = dispatcherController;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
@@ -73,7 +73,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(dispatcherServlet, connection);
+        var processor = new Http11Processor(dispatcherController, connection);
         executorService.execute(processor);
     }
 

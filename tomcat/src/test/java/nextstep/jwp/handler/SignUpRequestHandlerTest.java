@@ -23,25 +23,6 @@ class SignUpRequestHandlerTest {
     private final SignUpRequestHandler handler = new SignUpRequestHandler();
 
     @Test
-    void POST_이면서_register으로_들어온_요청만_처리한다() {
-        // given
-        HttpRequest onlyPost = HttpRequest.builder()
-                .requestLine(RequestLine.from("POST /dd HTTP/1.1"))
-                .build();
-        HttpRequest onlyRegister = HttpRequest.builder()
-                .requestLine(RequestLine.from("GET /register HTTP/1.1"))
-                .build();
-        HttpRequest match = HttpRequest.builder()
-                .requestLine(RequestLine.from("POST /register HTTP/1.1"))
-                .build();
-
-        // when & then
-        assertThat(handler.canHandle(onlyPost)).isFalse();
-        assertThat(handler.canHandle(onlyRegister)).isFalse();
-        assertThat(handler.canHandle(match)).isTrue();
-    }
-
-    @Test
     void 회원가입에_성공하면_index_html로_redirect() {
         // given
         HttpRequest request = HttpRequest.builder()
@@ -55,7 +36,7 @@ class SignUpRequestHandlerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        handler.handle(request, response);
+        handler.service(request, response);
 
         // then
         HttpResponse expected = new HttpResponse();

@@ -29,7 +29,7 @@ class RootPageRequestHandlerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        handler.handle(request, response);
+        handler.service(request, response);
 
         // then
         HttpResponse expected = new HttpResponse();

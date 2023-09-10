@@ -38,7 +38,7 @@ class StaticResourceRequestHandlerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        handler.handle(request, response);
+        handler.service(request, response);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -63,7 +63,7 @@ class StaticResourceRequestHandlerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        handler.handle(request, response);
+        handler.service(request, response);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
@@ -87,7 +87,7 @@ class StaticResourceRequestHandlerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        handler.handle(request, response);
+        handler.service(request, response);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
@@ -111,7 +111,7 @@ class StaticResourceRequestHandlerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        handler.handle(request, response);
+        handler.service(request, response);
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/login.html");

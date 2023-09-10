@@ -3,20 +3,16 @@ package nextstep.jwp.handler;
 import static org.apache.catalina.servlet.response.HttpStatus.OK;
 
 import nextstep.jwp.util.ResourceFileUtil;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.URI;
 import org.apache.catalina.servlet.response.HttpResponse;
 import org.apache.catalina.servlet.response.StatusLine;
 
-public class StaticResourceRequestHandler implements RequestHandler {
+public class StaticResourceRequestHandler extends AbstractController {
 
     @Override
-    public boolean canHandle(HttpRequest request) {
-        return true;
-    }
-
-    @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         URI uri = request.requestLine().uri();
         String responseBody = ResourceFileUtil.readAll("static" + path(uri));
         response.setStatusLine(new StatusLine(OK));

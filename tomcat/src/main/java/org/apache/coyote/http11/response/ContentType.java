@@ -7,10 +7,12 @@ public enum ContentType {
     HTML("text/html", ".html"),
     CSS("text/css", ".css"),
     JS("application/javascript", ".js"),
-    ICO("image/x-icon", ".ico");
+    ICO("image/x-icon", ".ico"),
+    SVG("image/svg+xml", ".svg"),
+    ;
 
-    final String type;
-    final String fileExtension;
+    private final String type;
+    private final String fileExtension;
 
     ContentType(final String type, final String fileExtension) {
         this.type = type;

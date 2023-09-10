@@ -76,6 +76,25 @@ public class Response {
         return new Response("HTTP/1.1", httpStatus, responseHeaders, responseBody);
     }
 
+    public void location(final String url) {
+        this.headers.add("Location", url);
+    }
+
+    public void status(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void addHeader(final String key, final String value) {
+        this.headers.add(key, value);
+    }
+
+    public void setBy(final Response response) {
+        this.httpVersion = response.httpVersion;
+        this.httpStatus = response.httpStatus;
+        this.headers = response.headers;
+        this.responseBody = response.responseBody;
+    }
+
     public String getResponse() {
         final List<String> responseData = new ArrayList<>();
         final String responseLine = httpVersion + " " + httpStatus.getCode() + " " + httpStatus.getMessage() + " ";

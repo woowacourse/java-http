@@ -51,6 +51,10 @@ public class Request {
         return Optional.of(session.getAttribute(key));
     }
 
+    public boolean isMatchMethod(final String httpMethod) {
+        return requestLine.getHttpMethod().equals(httpMethod);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

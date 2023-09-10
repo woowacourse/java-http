@@ -31,25 +31,9 @@ public class HttpResponse {
     }
 
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {
-        String location = responseEntity.getLocation();
         HttpStatus httpStatus = responseEntity.getHttpStatus();
-        HttpResponseBody responseBody = getOrCreateResponseBody(responseEntity, location);
-
-        if (httpStatus == HttpStatus.FOUND) {
-            HttpResponseHeaders headers = new HttpResponseHeaders()
-                    .location(location)
-                    .setCookie(responseEntity.getHttpCookie());
-
-            return HttpResponse.builder()
-                    .httpResponseStatusLine(HttpResponseStatusLine.of(HTTP11, httpStatus))
-                    .httpResponseHeaders(headers)
-                    .httpResponseBody(responseBody)
-                    .build();
-        }
-
-        HttpResponseHeaders headers = new HttpResponseHeaders()
-                .contentType(responseEntity.getContentType())
-                .contentLength(responseBody);
+        HttpResponseBody responseBody = getOrGenerateResponseBody(responseEntity);
+        HttpResponseHeaders headers = generateHttpResponseHeaders(responseEntity, responseBody);
 
         return HttpResponse.builder()
                 .httpResponseStatusLine(HttpResponseStatusLine.of(HTTP11, httpStatus))
@@ -58,12 +42,27 @@ public class HttpResponse {
                 .build();
     }
 
-    private static HttpResponseBody getOrCreateResponseBody(ResponseEntity responseEntity, String location) throws IOException {
+    private static HttpResponseBody getOrGenerateResponseBody(ResponseEntity responseEntity) throws IOException {
+        String location = responseEntity.getLocation();
         HttpResponseBody responseBody = responseEntity.getResponseBody();
         if (responseBody == null) {
             responseBody = findResponseBodyFrom(location);
         }
         return responseBody;
+    }
+
+    private static HttpResponseHeaders generateHttpResponseHeaders(ResponseEntity responseEntity, HttpResponseBody responseBody) {
+        HttpStatus httpStatus = responseEntity.getHttpStatus();
+        String location = responseEntity.getLocation();
+
+        if (httpStatus == HttpStatus.FOUND) {
+            return new HttpResponseHeaders()
+                    .location(location)
+                    .setCookie(responseEntity.getHttpCookie());
+        }
+        return new HttpResponseHeaders()
+                .contentType(responseEntity.getContentType())
+                .contentLength(responseBody);
     }
 
     private static HttpResponseBody findResponseBodyFrom(String location) throws IOException {

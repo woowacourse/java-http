@@ -16,7 +16,7 @@ public class HomeController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        response.setBody(DEFAULT_MESSAGE);
         response.setContentType(ContentType.extractValueFromPath(request.getNativePath()));
+        response.setBody(DEFAULT_MESSAGE);
     }
 }

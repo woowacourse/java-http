@@ -70,16 +70,36 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
+        if (httpCookies.isEmpty()) {
+            return extractResponseWithoutCookie().getBytes();
+        }
+
+        return extractResponseWithCookie().getBytes();
+    }
+
+    private String extractResponseWithCookie() {
         String httpVersion = httpStatusLine.getHttpVersion().getValue();
         String httpStatusCode = httpStatusLine.getHttpStatus().getCode();
         String httpStatusMessage = httpStatusLine.getHttpStatus().getMessage();
 
-        String response = String.join("\r\n",
+        return String.join("\r\n",
                 String.format(RESPONSE_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusMessage),
-                httpResponseHeaders.getHeaders(), String.format(COOKIE_HEADER_FORMAT, httpCookies.getCookies()), "",
+                httpResponseHeaders.getHeaders(),
+                String.format(COOKIE_HEADER_FORMAT, httpCookies.getCookies()),
+                "",
                 httpBody.getBody());
+    }
 
-        return response.getBytes();
+    private String extractResponseWithoutCookie() {
+        String httpVersion = httpStatusLine.getHttpVersion().getValue();
+        String httpStatusCode = httpStatusLine.getHttpStatus().getCode();
+        String httpStatusMessage = httpStatusLine.getHttpStatus().getMessage();
+
+        return String.join("\r\n",
+                String.format(RESPONSE_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusMessage),
+                httpResponseHeaders.getHeaders(),
+                "",
+                httpBody.getBody());
     }
 
 }

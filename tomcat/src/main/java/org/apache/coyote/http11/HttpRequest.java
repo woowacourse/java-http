@@ -9,9 +9,15 @@ import java.util.Objects;
 public class HttpRequest {
     private HttpMethod method;
     private String path;
-    private String fileName;
     private Map<String, String> headers = new HashMap<>();
     private String body;
+
+    public HttpRequest(HttpMethod method, String path, Map<String, String> headers, String body) {
+        this.method = method;
+        this.path = path;
+        this.headers = headers;
+        this.body = body;
+    }
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         parseRequest(bufferedReader);
@@ -25,7 +31,6 @@ public class HttpRequest {
         String[] requests = requestLine.split(" ");
         method = HttpMethod.valueOf(requests[0]);
         path = requests[1];
-        fileName = path.substring(path.lastIndexOf('/') + 1);
         headers = parseToHeaders(bufferedReader);
         body = parseToBody(bufferedReader);
     }
@@ -62,7 +67,7 @@ public class HttpRequest {
     }
 
     public String getFileName() {
-        return fileName;
+        return path.substring(path.lastIndexOf('/') + 1);
     }
 
     public Map<String, String> getHeaders() {

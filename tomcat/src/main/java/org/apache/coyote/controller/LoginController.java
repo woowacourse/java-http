@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
@@ -55,7 +55,7 @@ public class LoginController extends AbstractController {
         String sessionId = cookie.findValue("JSESSIONID");
         if (sessionManager.isExist(sessionId)) {
             response.setStatus(FOUND);
-            response.setRedirectUrl("/401.html");
+            response.setRedirectUrl("/index.html");
         } else {
             response.setStatus(OK);
             response.setContentType("text/html");

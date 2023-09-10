@@ -6,11 +6,11 @@ public class RequestMapping {
 
     public Controller getController(HttpRequest request) {
         if (request.getPath().equals("/login")) {
-            new LoginController();
+            return new LoginController();
         }
 
         if (request.getPath().equals("/register")) {
-            new RegisterController();
+            return new RegisterController();
         }
 
         return new ResourceController();

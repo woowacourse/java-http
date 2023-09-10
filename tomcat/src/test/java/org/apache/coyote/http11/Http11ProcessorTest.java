@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +13,6 @@ import nextstep.jwp.servlet.RegisterRequestServlet;
 import org.apache.catalina.core.Container;
 import org.apache.catalina.core.session.SessionManager;
 import org.apache.catalina.core.util.ResourceReader;
-import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -148,5 +147,5 @@ class Http11ProcessorTest {
                 ResourceReader.read("/register.html").getContentBytes()
         );
     }
-
+    
 }

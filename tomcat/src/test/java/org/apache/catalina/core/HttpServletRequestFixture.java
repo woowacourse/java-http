@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.catalina.core;
 
 import static org.apache.catalina.core.session.SessionManager.SESSION_ID_COOKIE_NAME;
 import static org.apache.coyote.http11.common.Protocol.HTTP11;

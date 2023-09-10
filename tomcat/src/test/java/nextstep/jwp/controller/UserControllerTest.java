@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nextstep.org.apache.coyote.http11.HttpServletRequestFixture;
+import org.apache.catalina.core.HttpServletRequestFixture;
 import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.catalina.core.session.SessionManager;
 import org.apache.catalina.core.session.SessionManager.Session;

@@ -1,8 +1,10 @@
 package org.apache.catalina.core.servlet;
 
+import static org.apache.catalina.core.servlet.HttpServletResponse.notFound;
 import static org.apache.catalina.core.servlet.HttpServletResponse.staticResource;
 import static org.apache.coyote.http11.common.MimeType.HTML;
 
+import javassist.NotFoundException;
 import org.apache.catalina.core.util.ResourceReader;
 import org.apache.catalina.core.util.StaticResource;
 
@@ -23,8 +25,12 @@ public class DefaultServlet extends HttpServlet {
             return;
         }
 
-        final var resource = ResourceReader.read(httpServletRequest.getUri());
-        httpServletResponse.set(staticResource(resource));
+        try {
+            final var resource = ResourceReader.read(httpServletRequest.getUri());
+            httpServletResponse.set(staticResource(resource));
+        } catch (final NotFoundException notFoundException) {
+            httpServletResponse.set(notFound());
+        }
     }
 
 }

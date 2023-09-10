@@ -1,10 +1,8 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.catalina.core;
 
 import java.util.Set;
 import nextstep.jwp.servlet.LoginRequestServlet;
 import nextstep.jwp.servlet.RegisterRequestServlet;
-import org.apache.catalina.core.RequestHandlerAdaptor;
-import org.apache.catalina.core.RequestMapping;
 import org.apache.catalina.core.servlet.DefaultServlet;
 
 public class RequestHandlerAdaptorFixture {

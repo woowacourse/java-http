@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.RequestReader;
+import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+
+import static nextstep.jwp.presentation.ControllerType.findController;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,16 +36,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            RequestReader requestReader = new RequestReader(new BufferedReader(new InputStreamReader(inputStream)));
+            requestReader.read();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Controller controller = findController(requestReader.getRequestUri());
+            Response response = controller.service(requestReader);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.format().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

@@ -40,7 +40,7 @@ public class HttpResponseWriter {
                 .add(httpResponse.httpVersion().value())
                 .add(String.valueOf(httpResponse.httpStatus().statusCode()))
                 .add(httpResponse.httpStatus().statusText());
-        return statusLineMaker.toString() + LINE_DELIMITER;
+        return statusLineMaker + LINE_DELIMITER;
     }
 
     private static String writeHeader(HttpResponse httpResponse) {

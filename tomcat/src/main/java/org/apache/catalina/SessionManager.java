@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
     public static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public Session findOrCreate(final String id) {
         return findSession(id)

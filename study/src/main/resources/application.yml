@@ -3,10 +3,11 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 1 # 작업큐 사이즈
+    max-connections: 2 # 가능한 connection 총 개수
     threads:
-      max: 2
+      max: 2 # 생성 가능 thread 총 개수
+      min-spare: 1 # 항상 활성화 되어있는 (idle) thread 개수
 
   compression:
     enabled: true

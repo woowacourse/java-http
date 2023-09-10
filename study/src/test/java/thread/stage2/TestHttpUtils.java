@@ -11,7 +11,7 @@ public class TestHttpUtils {
 
     private static final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
-            .connectTimeout(Duration.ofSeconds(1))
+            .connectTimeout(Duration.ofSeconds(1)) // connection 1초 지나도 못 맺으면 HttpConnectTimeoutException
             .build();
 
     public static HttpResponse<String> send(final String path) {

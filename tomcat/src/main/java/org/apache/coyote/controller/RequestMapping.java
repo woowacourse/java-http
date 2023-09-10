@@ -13,6 +13,10 @@ public class RequestMapping {
             return new RegisterController();
         }
 
+        if (request.getPath().equals("/")) {
+            return new RootController();
+        }
+
         return new ResourceController();
     }
 

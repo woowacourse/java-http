@@ -66,10 +66,6 @@ public class HttpRequest {
         return path;
     }
 
-    public String getFileName() {
-        return path.substring(path.lastIndexOf('/') + 1);
-    }
-
     public Map<String, String> getHeaders() {
         return headers;
     }

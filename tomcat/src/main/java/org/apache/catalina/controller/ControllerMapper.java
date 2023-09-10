@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.LoginPageController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.RegisterPageController;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class ControllerMapper {

@@ -4,7 +4,7 @@ import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGT
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
 
 import java.io.IOException;
-import org.apache.coyote.http11.handler.Controller;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;

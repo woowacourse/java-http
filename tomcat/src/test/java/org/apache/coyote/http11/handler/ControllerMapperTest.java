@@ -7,6 +7,8 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.LoginPageController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.RegisterPageController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ControllerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 

@@ -4,7 +4,6 @@ import static java.util.UUID.randomUUID;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.SessionManager;
 
 public class Session {
 

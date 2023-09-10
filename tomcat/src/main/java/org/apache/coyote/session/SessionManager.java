@@ -1,8 +1,7 @@
-package org.apache.catalina;
+package org.apache.coyote.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.session.Session;
 
 public class SessionManager {
 

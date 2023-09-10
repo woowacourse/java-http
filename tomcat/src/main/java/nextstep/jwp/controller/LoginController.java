@@ -68,9 +68,9 @@ public class LoginController extends AbstractController {
         HttpCookie cookie = request.getRequestHeader().getCookie();
 
         String jsessionid = cookie.getValue("JSESSIONID");
-        Session session = SessionManager.findSession(jsessionid);
+        Optional<Session> session = SessionManager.findSession(jsessionid);
 
-        if (session != null) {
+        if (session.isPresent()) {
             response.setStatus(FOUND);
             response.addHeader("Location", "/index.html");
             response.setContentType(HTML);

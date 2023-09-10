@@ -3,6 +3,7 @@ package org.apache.catalina.manager;
 import org.apache.coyote.common.Session;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
@@ -16,8 +17,11 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Session findSession(final String id) {
-        return SESSIONS.get(id);
+    public static Optional<Session> findSession(final String id) {
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(SESSIONS.get(id));
     }
 
     public void remove(final String id) {

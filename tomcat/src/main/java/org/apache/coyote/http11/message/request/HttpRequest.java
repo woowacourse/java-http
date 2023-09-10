@@ -64,26 +64,21 @@ public class HttpRequest {
         return RequestBody.from(new String(buffer));
     }
 
-    public boolean isRequestOf(final HttpMethod method, final String path) {
-        return requestLine.isMatchingRequest(method, path);
-    }
-
     public Optional<String> findFirstHeaderValue(final String field) {
         return headers.findFirstValueOfField(field);
     }
 
     public Session getSession(final boolean createIfNotExist) {
         final Optional<Cookie> foundCookie = getCookie();
-        final String sessionId = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
+        final Session session = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
+            .map(SessionManager::findSession)
             .orElse(null);
 
-        if (sessionId != null) {
-            return SessionManager.findSession(sessionId);
+        if (session != null) {
+            return session;
         }
         if (createIfNotExist) {
-            final Session session = new Session(UUID.randomUUID().toString());
-            SessionManager.add(session);
-            return session;
+            return createNewSession();
         }
         return null;
     }
@@ -91,6 +86,12 @@ public class HttpRequest {
     private Optional<Cookie> getCookie() {
         final Optional<String> cookiesInHeaderLine = headers.getValuesOfField(COOKIE_HEADER);
         return cookiesInHeaderLine.map(Cookie::fromHeaderCookie);
+    }
+
+    private Session createNewSession() {
+        final Session session = new Session(UUID.randomUUID().toString());
+        SessionManager.add(session);
+        return session;
     }
 
     public RequestLine getRequestLine() {
@@ -103,6 +104,10 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getParamOf(final String field) {

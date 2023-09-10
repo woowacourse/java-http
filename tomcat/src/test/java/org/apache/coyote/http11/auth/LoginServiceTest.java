@@ -3,6 +3,7 @@ package org.apache.coyote.http11.auth;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
@@ -66,11 +67,13 @@ class LoginServiceTest {
                     InMemoryUserRepository.save(new User(1L, "베베", "password", "rltgjqmduftlagl@gmail.com"));
 
                     RequestLine requestLine = requestLine_생성(POST, "/login");
-                    RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
 
+                    String account = requestBody.getBy("account");
+                    String password = requestBody.getBy("password");
+
                     // when
-                    HttpResponse response = loginService.getLoginViewResponse(requestLine, requestHeader, requestBody);
+                    HttpResponse response = loginService.getLoginOrElseUnAuthorizedResponse(requestLine.protocol(), account, password);
 
                     // then
                     assertAll(
@@ -87,10 +90,13 @@ class LoginServiceTest {
 
                     RequestLine requestLine = requestLine_생성(POST, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
+
                     RequestBody requestBody = requestBody_생성();
+                    String account = requestBody.getBy("account");
+                    String password = requestBody.getBy("password");
 
                     // when
-                    HttpResponse response = loginService.getLoginViewResponse(requestLine, requestHeader, requestBody);
+                    HttpResponse response = loginService.getLoginOrElseUnAuthorizedResponse(requestLine.protocol(), account, password);
 
                     // then
                     assertAll(

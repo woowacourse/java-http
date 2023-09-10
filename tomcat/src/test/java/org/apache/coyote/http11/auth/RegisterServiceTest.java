@@ -2,6 +2,7 @@ package org.apache.coyote.http11.auth;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
@@ -35,28 +36,6 @@ public class RegisterServiceTest {
         }
 
         @Nested
-        class HTTP_METHOD_GET {
-
-            @Test
-            @DisplayName("REGISTER Response를 반환한다.")
-            void getRegisterResponseEntity() {
-                // given
-                RequestLine requestLine = requestLine_생성(GET, "/register");
-                RequestBody requestBody = requestBody_생성();
-
-                // when
-                HttpResponse response = registerService.register(requestLine, requestBody);
-
-                // then
-                assertAll(
-                        () -> assertThat(response.getHttpStatus()).isEqualTo(OK),
-                        () -> assertThat(response.getLocation()).isEqualTo("/register.html")
-                );
-            }
-
-        }
-
-        @Nested
         class HTTP_METHOD_POST {
 
             @Test
@@ -67,9 +46,10 @@ public class RegisterServiceTest {
 
                 RequestLine requestLine = requestLine_생성(POST, "/register");
                 RequestBody requestBody = requestBody_생성();
+                HttpRequest request = HttpRequest.of(requestLine, null, requestBody);
 
                 // when
-                HttpResponse response = registerService.register(requestLine, requestBody);
+                HttpResponse response = registerService.getIndexOrConflictResponse(request, null);
 
                 // then
                 assertAll(
@@ -85,9 +65,10 @@ public class RegisterServiceTest {
                 InMemoryUserRepository.deleteAll();
                 RequestLine requestLine = requestLine_생성(POST, "/register");
                 RequestBody requestBody = requestBody_생성();
+                HttpRequest request = HttpRequest.of(requestLine, null, requestBody);
 
                 // when
-                HttpResponse response = registerService.register(requestLine, requestBody);
+                HttpResponse response = registerService.getIndexOrConflictResponse(request, null);
 
                 // then
                 assertAll(

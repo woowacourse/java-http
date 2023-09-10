@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.common.header.ContentTypeValue;
 import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -10,6 +9,7 @@ import org.apache.coyote.http11.response.statusLine.HttpStatus;
 public class HomeController extends AbstractController {
 
     private static final String SUPPORT_URI_PATH = "/";
+    private static final String HOME_FILE_PATH = "/home.html";
 
     @Override
     public boolean support(final HttpRequest request) {
@@ -18,14 +18,19 @@ public class HomeController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.NOT_FOUND);
+        final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                            .httpStatus(HttpStatus.NOT_FOUND)
+                                                            .build();
 
         response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        final ResponseEntity responseEntity = new ResponseEntity(HttpStatus.OK, ContentTypeValue.TEXT_HTML, "Hello world!");
+        final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                            .httpStatus(HttpStatus.OK)
+                                                            .resourcePath(HOME_FILE_PATH)
+                                                            .build();
 
         response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
     }

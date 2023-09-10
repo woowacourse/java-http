@@ -9,8 +9,10 @@ public class FileController implements Controller {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) {
-        final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.OK, request.getResourcePath()
-                                                                                      .getResourcePath());
+        final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                            .httpStatus(HttpStatus.OK)
+                                                            .resourcePath(request.getResourcePath().getResourcePath())
+                                                            .build();
 
         response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
     }

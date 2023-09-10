@@ -31,17 +31,26 @@ public class RegisterController extends AbstractController {
         try {
             InMemoryUserRepository.save(user);
         } catch (IllegalArgumentException e) {
-            final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.BAD_REQUEST, REGISTER_FILE_PATH);
+            final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                                .httpStatus(HttpStatus.BAD_REQUEST)
+                                                                .resourcePath(REGISTER_FILE_PATH)
+                                                                .build();
             response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
         }
 
-        final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.FOUND, INDEX_FILE_PATH);
+        final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                            .httpStatus(HttpStatus.FOUND)
+                                                            .resourcePath(INDEX_FILE_PATH)
+                                                            .build();
         response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.OK, REGISTER_FILE_PATH);
+        final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                            .httpStatus(HttpStatus.OK)
+                                                            .resourcePath(REGISTER_FILE_PATH)
+                                                            .build();
 
         response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
     }

@@ -49,15 +49,23 @@ public class LoginController extends AbstractController {
         if (request.hasSessionId()) {
             final String jsessionId = request.findSessionIdFromRequestHeaders(JSESSIONID);
 
+            final ResponseEntity responseEntityOfNoSession = ResponseEntity.builder()
+                                                                           .httpStatus(HttpStatus.OK)
+                                                                           .resourcePath(LOGIN_FILE_PATH)
+                                                                           .build();
+
             final ResponseEntity responseEntity = SessionManager.findSession(jsessionId)
                                                                 .map(session -> loginSuccess((User) session.getAttribute("user")))
-                                                                .orElse(ResponseEntity.of(HttpStatus.OK, LOGIN_FILE_PATH));
+                                                                .orElse(responseEntityOfNoSession);
             response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
 
             return;
         }
 
-        final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.OK, LOGIN_FILE_PATH);
+        final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                            .httpStatus(HttpStatus.OK)
+                                                            .resourcePath(LOGIN_FILE_PATH)
+                                                            .build();
         response.setResponse(HttpResponse.of(request.getHttpVersion(), responseEntity));
     }
 
@@ -70,12 +78,17 @@ public class LoginController extends AbstractController {
 
         final HttpCookie httpCookie = new HttpCookie(Map.of(JSESSIONID, session.getId()));
 
-        return ResponseEntity.of(HttpStatus.FOUND, httpCookie, INDEX_FILE_PATH);
+        return ResponseEntity.builder()
+                             .httpStatus(HttpStatus.FOUND)
+                             .httpCookie(httpCookie)
+                             .resourcePath(INDEX_FILE_PATH)
+                             .build();
     }
 
     private ResponseEntity loginFail() {
-        final String unauthorizedPath = HttpStatus.UNAUTHORIZED.getResourcePath();
 
-        return ResponseEntity.of(HttpStatus.UNAUTHORIZED, unauthorizedPath);
+        return ResponseEntity.builder()
+                             .httpStatus(HttpStatus.UNAUTHORIZED)
+                             .build();
     }
 }

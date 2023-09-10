@@ -60,7 +60,10 @@ public class Http11Processor implements Runnable, Processor {
     private static HttpResponse getHttpResponse(final BufferedReader bufferedReader) throws IOException {
         try {
             final HttpRequest request = HttpRequest.from(bufferedReader);
-            final HttpResponse response = HttpResponse.of(request.getHttpVersion(), ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR));
+            final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                                .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                                .build();
+            final HttpResponse response = HttpResponse.of(request.getHttpVersion(), responseEntity);
 
             final RequestMapping requestMapping = new RequestMapping(List.of(new HomeController(), new LoginController(), new RegisterController()));
             final Controller controller = requestMapping.getController(request);
@@ -69,7 +72,9 @@ public class Http11Processor implements Runnable, Processor {
 
             return response;
         } catch (Exception e) {
-            final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
+            final ResponseEntity responseEntity = ResponseEntity.builder()
+                                                                .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                                .build();
             return HttpResponse.of(HttpVersion.HTTP_1_1, responseEntity);
         }
     }

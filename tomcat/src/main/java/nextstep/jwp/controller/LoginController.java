@@ -43,7 +43,7 @@ public class LoginController implements Controller {
             final User user = findUser(account, password);
             log.info("login success! : user = {}", user);
 
-            final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
+            final HttpResponse httpResponse = HttpResponse.from(StatusCode.FOUND);
             if (extractSessionId(httpRequest) == null) {
                 final Session session = createSession(user);
                 httpResponse.addHeader(SET_COOKIE, Session.getName() + "=" + session.getId());
@@ -52,8 +52,8 @@ public class LoginController implements Controller {
 
             return httpResponse;
         } catch (IllegalArgumentException exception) {
-            log.info("login fail! : " + exception.getMessage());
-            final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
+            log.info("login fail! : {}", exception.getMessage());
+            final HttpResponse httpResponse = HttpResponse.from(StatusCode.FOUND);
             httpResponse.addHeader(LOCATION, UNAUTHORIZED_PAGE_PATH);
             return httpResponse;
         }

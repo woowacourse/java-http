@@ -24,7 +24,7 @@ public class RegisterPageController implements Controller {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
         final String body = ViewResolver.findView(httpRequest.getPath().substring(1));
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.OK, body);
+        final HttpResponse httpResponse = HttpResponse.of(StatusCode.OK, body);
         httpResponse.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return httpResponse;

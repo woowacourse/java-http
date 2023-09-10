@@ -22,7 +22,7 @@ public class DefaultResourceHandler implements ResourceHandler {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
         final String body = "Hello world!";
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.OK, body);
+        final HttpResponse httpResponse = HttpResponse.of(StatusCode.OK, body);
         httpResponse.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return httpResponse;

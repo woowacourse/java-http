@@ -29,7 +29,7 @@ public class UnsupportedResourceHandler implements ResourceHandler {
         URL resource = getClass().getClassLoader().getResource(fileName);
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.BAD_REQUEST, body);
+        final HttpResponse httpResponse = HttpResponse.of(StatusCode.BAD_REQUEST, body);
         httpResponse.addHeader(CONTENT_TYPE, ContentType.HTML.getContentType());
         httpResponse.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return httpResponse;

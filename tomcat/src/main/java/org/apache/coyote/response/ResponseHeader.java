@@ -1,6 +1,8 @@
 package org.apache.coyote.response;
 
-public enum ResponseHeader {
+import org.apache.coyote.Header;
+
+public enum ResponseHeader implements Header {
     CONTENT_LENGTH("Content-Length"),
     CONTENT_TYPE("Content-Type"),
     LOCATION("Location"),
@@ -12,6 +14,7 @@ public enum ResponseHeader {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }

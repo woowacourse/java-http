@@ -43,7 +43,7 @@ public class LoginController extends AbstractController {
 
         response.setStatus(HttpStatus.FOUND);
         response.setLocation(INDEX_URI);
-        response.setCookie(JSESSIONID, Cookie.from(session.getId()));
+        response.setCookie(JSESSIONID, Cookie.createWithEmptyAttribute(session.getId()));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class LoginController extends AbstractController {
 
             response.setStatus(HttpStatus.FOUND);
             response.setLocation(INDEX_URI);
-            response.setCookie(JSESSIONID, Cookie.from(session.getId()));
+            response.setCookie(JSESSIONID, Cookie.createWithEmptyAttribute(session.getId()));
 
             return;
         }

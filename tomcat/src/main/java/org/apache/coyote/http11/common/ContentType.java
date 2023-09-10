@@ -23,4 +23,7 @@ public enum ContentType {
         return TEXT_HTML.value;
     }
 
+    public String getValue() {
+        return value;
+    }
 }

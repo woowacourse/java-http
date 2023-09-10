@@ -11,10 +11,7 @@ public class HttpCookies {
     private static final String COOKIE_DELIMITER = ", ";
     private static final String ATTRIBUTE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final int COOKIE_INDEX = 0;
-    private static final int ATTRIBUTE_INDEX = 0;
     private static final int COOKIE_KEY_INDEX = 0;
-    private static final int COOKIE_VALUE_INDEX = 1;
 
     private final Map<String, Cookie> cookies;
 
@@ -28,12 +25,10 @@ public class HttpCookies {
         String[] elements = line.split(COOKIE_DELIMITER);
 
         for (String element : elements) {
-            String[] cookieAndAttribute = element.split(ATTRIBUTE_DELIMITER, 2);
-            String[] cookieKeyAndValue = cookieAndAttribute[COOKIE_INDEX].split(KEY_VALUE_DELIMITER);
+            String cookieKey = element.split(KEY_VALUE_DELIMITER)[COOKIE_KEY_INDEX];
+            Cookie cookie = Cookie.from(element);
 
-            Cookie cookie = Cookie.of(cookieKeyAndValue[COOKIE_VALUE_INDEX], cookieAndAttribute[ATTRIBUTE_INDEX]);
-
-            cookies.put(cookieKeyAndValue[COOKIE_KEY_INDEX], cookie);
+            cookies.put(cookieKey, cookie);
         }
 
         return new HttpCookies(cookies);

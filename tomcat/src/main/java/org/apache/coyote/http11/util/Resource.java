@@ -6,6 +6,10 @@ import java.nio.file.Files;
 import org.apache.coyote.http11.servlet.Servlet;
 
 public class Resource {
+
+    private Resource(){
+    }
+
     public static String getFile(String fileName) {
         try {
             final var fileUrl = Servlet.class.getClassLoader().getResource("static/" + fileName);

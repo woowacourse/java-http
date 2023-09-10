@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import org.apache.coyote.http11.ResourceProvider;
 
 public class HttpResponse {
@@ -67,5 +68,21 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner responseJoiner = new StringJoiner(System.lineSeparator());
+        responseJoiner.add(statusLine.toString());
+        responseJoiner.add(headers.toString());
+        responseJoiner.add(System.lineSeparator());
+        addBody(responseJoiner);
+        return responseJoiner.toString();
+    }
+
+    private void addBody(StringJoiner responseJoiner) {
+        if (body != null) {
+            responseJoiner.add(body);
+        }
     }
 }

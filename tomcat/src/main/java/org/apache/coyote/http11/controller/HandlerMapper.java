@@ -2,24 +2,18 @@ package org.apache.coyote.http11.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-import org.apache.coyote.http11.ResourceProvider;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.service.LoginService;
 
 public class HandlerMapper {
 
     private final Map<Mapper, Controller> controllerByMapper = new HashMap<>();
-    private final ResourceProvider resourceProvider;
 
-    public HandlerMapper(ResourceProvider resourceProvider) {
+    public HandlerMapper() {
         enrollHandler();
-        this.resourceProvider = resourceProvider;
     }
 
     private void enrollHandler() {
@@ -60,62 +54,7 @@ public class HandlerMapper {
     public String controllerResponse(HttpRequest httpRequest) {
         Controller handler = getHandler(httpRequest);
         ResponseEntity<Object> responseEntity = (ResponseEntity<Object>) handler.handle(httpRequest);
-        return makeResponse(responseEntity);
-    }
-
-    private String makeResponse(ResponseEntity<Object> responseEntity) {
-        StringBuilder response = new StringBuilder();
-        response.append(requestLine(responseEntity));
-        Optional<String> body = bodyOf(responseEntity);
-        if (body.isPresent()) {
-            return response.append(responseWithBody(responseEntity, body.get())).toString();
-        }
-        String str = responseWithoutBody(responseEntity);
-        response.append("\r\n");
-        return response.append(str).toString();
-    }
-
-
-    private String requestLine(ResponseEntity<Object> responseEntity) {
-        HttpStatusCode httpStatusCode = HttpStatusCode.of(responseEntity.getStatusCode());
-        return "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.name() + " ";
-    }
-
-    private Optional<String> bodyOf(ResponseEntity<Object> responseEntity) {
-        if (responseEntity.isViewResponse()) {
-            return Optional.of(resourceProvider.resourceBodyOf(responseEntity.getViewPath()));
-        }
-        return Optional.empty();
-    }
-
-    private String responseWithBody(ResponseEntity<Object> responseEntity, String body) {
-        Map<String, String> headers = responseEntity.getHeaders();
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add(headerResponse(headers));
-        stringJoiner.add("Content-Type: " + resourceProvider.contentTypeOf(responseEntity.getViewPath()));
-        stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
-        stringJoiner.add("");
-        stringJoiner.add(body);
-        return stringJoiner.toString();
-    }
-
-    private String responseWithoutBody(ResponseEntity<Object> responseEntity) {
-        Map<String, String> headers = responseEntity.getHeaders();
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add(headerResponse(headers));
-        stringJoiner.add("");
-        return stringJoiner.toString();
-    }
-
-    private String headerResponse(Map<String, String> headers) {
-        return headers.keySet()
-            .stream()
-            .map(headerName -> makeHeader(headerName, headers.get(headerName)))
-            .collect(Collectors.joining("\r\n"));
-    }
-
-    private String makeHeader(String headerName, String value) {
-        return headerName + ": " + value;
+        return HttpResponse.from(responseEntity).toString();
     }
 
     @FunctionalInterface

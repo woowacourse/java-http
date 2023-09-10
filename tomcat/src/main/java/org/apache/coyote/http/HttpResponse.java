@@ -6,21 +6,18 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String COOKIE_DELIMITER = "; ";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
     private static final String LINE_FEED = "\r\n";
     private static final String SPACE = " ";
     private static final String STATIC_DIRECTORY = "static";
 
     private String startLine;
-    private Map<String, String> header = new HashMap<>();
+    private Map<String, Header> headers = new HashMap<>();
     private String messageBody;
 
     public void updateStartLine(String startLine) {
@@ -37,22 +34,18 @@ public class HttpResponse {
     }
 
     public void addHeader(String key, String value) {
-        header.put(key, value);
+        Header header = headers.computeIfAbsent(key, ignore -> new CommaSeperatedHeader());
+        header.add(value);
+    }
+
+    public void addHeader(String key, List<String> values) {
+        Header header = headers.computeIfAbsent(key, ignore -> new CommaSeperatedHeader());
+        header.addAll(values);
     }
 
     public void addCookie(String key, String value) {
-        if (!header.containsKey(HttpHeader.COOKIE.getName())) {
-            addHeader(HttpHeader.COOKIE.getName(), key + KEY_VALUE_DELIMITER + value);
-            return;
-        }
-        addHeader(HttpHeader.COOKIE.getName(), joinExistedCookie() + COOKIE_DELIMITER + key + KEY_VALUE_DELIMITER + value);
-    }
-
-    private String joinExistedCookie() {
-        return mapCookies().entrySet().stream()
-                .map(entry -> entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
-                .reduce((cookie1, cookie2) -> cookie1 + COOKIE_DELIMITER + cookie2)
-                .orElse("");
+        Header header = headers.computeIfAbsent(HttpHeader.COOKIE.getName(), ignore -> new SemicolonSeperatedHeader());
+        header.add(key + KEY_VALUE_DELIMITER + value);
     }
 
     public String joinResponse() {
@@ -64,46 +57,38 @@ public class HttpResponse {
     }
 
     private String joinHeaderWithoutCookie() {
-        String headers = header.entrySet().stream()
+        String headers = this.headers.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(HttpHeader.COOKIE.getName()))
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .map(entry -> entry.getKey() + ": " + entry.getValue().getValues())
                 .reduce((header1, header2) -> header1 + SPACE + LINE_FEED + header2)
                 .orElse("");
         return headers + SPACE + LINE_FEED;
     }
 
     private String joinCookie() {
-        if (isStaticPath() || !header.containsKey(HttpHeader.COOKIE.getName())) {
+        if (isStaticPath() || !headers.containsKey(HttpHeader.COOKIE.getName())) {
             return "";
         }
-        String cookieHeader = mapCookies().entrySet().stream()
-                .map(entry -> "Set-Cookie: " + entry.getKey() + KEY_VALUE_DELIMITER + entry.getValue())
+        String cookieHeader = headers.get(HttpHeader.COOKIE.getName()).getValues();
+        String cookieHeaderResponse = Arrays.stream(cookieHeader.split("; "))
+                .map(line -> "Set-Cookie: " + line)
                 .reduce((cookie1, cookie2) -> cookie1 + SPACE + LINE_FEED + cookie2)
                 .orElse("");
-        return cookieHeader + SPACE + LINE_FEED;
+
+        return cookieHeaderResponse + SPACE + LINE_FEED;
     }
 
     private boolean isStaticPath() {
-        String contentType = header.get(HttpHeader.CONTENT_TYPE.getName());
+        String contentType = headers.get(HttpHeader.CONTENT_TYPE.getName()).getValues();
         return ContentType.isStaticFile(contentType);
-    }
-
-    private Map<String, String> mapCookies() {
-        Map<String, String> cookies = header.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(HttpHeader.COOKIE.getName()))
-                .map(entry -> entry.getValue().split(COOKIE_DELIMITER))
-                .flatMap(Arrays::stream)
-                .map(line -> line.split(KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
-        return cookies;
     }
 
     public String getStartLine() {
         return startLine;
     }
 
-    public Map<String, String> getHeader() {
-        return header;
+    public Map<String, Header> getHeaders() {
+        return headers;
     }
 
     public String getMessageBody() {

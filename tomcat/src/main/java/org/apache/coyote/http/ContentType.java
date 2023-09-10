@@ -27,7 +27,7 @@ public enum ContentType {
 
     public static boolean isStaticFile(String type) {
         return Arrays.stream(values())
-                .anyMatch(contentType -> contentType.getType().equals(type));
+                .anyMatch(contentType -> contentType.getType().equals(type) && !contentType.getType().equals(HTML.getType()));
     }
 
     public String getType() {

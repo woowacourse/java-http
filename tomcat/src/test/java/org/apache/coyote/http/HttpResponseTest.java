@@ -64,7 +64,7 @@ class HttpResponseTest {
         httpResponse.addHeader(key, value);
 
         //then
-        assertThat(httpResponse.getHeader().get(key)).isEqualTo(value);
+        assertThat(httpResponse.getHeaders().get(key).getValues()).isEqualTo(value);
     }
 
     @Test
@@ -77,7 +77,7 @@ class HttpResponseTest {
         httpResponse.addCookie(key, value);
 
         //then
-        assertThat(httpResponse.getHeader().get("Cookie")).isEqualTo(key + "=" + value);
+        assertThat(httpResponse.getHeaders().get("Cookie").getValues()).isEqualTo(key + "=" + value);
     }
 
     @Test

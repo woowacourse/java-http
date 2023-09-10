@@ -3,7 +3,6 @@ package nextstep.jwp.presentation;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.http.HttpResponseBuilder;
@@ -20,7 +19,6 @@ public class LoginController implements Controller {
 
     private static final String SESSION_ID = "JSESSIONID";
     private static final String KEY_VALUE_SEPARATOR = "=";
-    private static final String COOKIE_SEPARATOR = "; ";
 
     @Override
     public void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
@@ -59,23 +57,11 @@ public class LoginController implements Controller {
 
     private void addSession(User user, HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> cookies = httpRequest.findCookies();
+        String jSessionId = UUID.randomUUID().toString();
         if (!cookies.containsKey(SESSION_ID)) {
-            String uuid = UUID.randomUUID().toString();
-            addCookie(httpRequest, httpResponse, uuid);
-            cookies.put(SESSION_ID, uuid);
+            httpResponse.addCookie(SESSION_ID, jSessionId);
         }
-        String jsessionid = cookies.get(SESSION_ID);
-        SessionManager.add(jsessionid, user);
-    }
-
-    private void addCookie(HttpRequest httpRequest, HttpResponse httpResponse, String uuid) {
-        Map<String, String> cookies = httpRequest.findCookies();
-        if (cookies.isEmpty()) {
-            httpRequest.addHeader(HttpHeader.COOKIE.getName(), SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
-            return;
-        }
-        String existedCookie = httpResponse.joinResponse();
-        httpRequest.addHeader(HttpHeader.COOKIE.getName(), existedCookie + COOKIE_SEPARATOR + SESSION_ID + KEY_VALUE_SEPARATOR + uuid);
+        SessionManager.add(jSessionId, user);
     }
 
     private void redirect(String password, User user, HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

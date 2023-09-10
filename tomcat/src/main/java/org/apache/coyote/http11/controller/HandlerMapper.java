@@ -92,7 +92,7 @@ public class HandlerMapper {
         Map<String, String> headers = responseEntity.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
-        stringJoiner.add(resourceProvider.contentTypeOf(responseEntity.getViewPath()));
+        stringJoiner.add("Content-Type: " + resourceProvider.contentTypeOf(responseEntity.getViewPath()));
         stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
         stringJoiner.add("");
         stringJoiner.add(body);

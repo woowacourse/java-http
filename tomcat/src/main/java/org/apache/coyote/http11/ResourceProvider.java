@@ -40,15 +40,15 @@ public class ResourceProvider {
         File file = getFile(resourcePath);
         String fileName = file.getName();
         if (fileName.endsWith(".js")) {
-            return "Content-Type: text/javascript ";
+            return "text/javascript ";
         }
         if (fileName.endsWith(".css")) {
-            return "Content-Type: text/css;charset=utf-8";
+            return "text/css;charset=utf-8";
         }
         if (fileName.endsWith(".html")) {
-            return "Content-Type: text/html;charset=utf-8 ";
+            return "text/html;charset=utf-8 ";
         }
-        return "Content-Type: text/plain";
+        return "text/plain";
     }
 
     private File getFile(String resourcePath) {
@@ -61,7 +61,7 @@ public class ResourceProvider {
         String responseBody = resourceBodyOf(resourcePath);
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            contentTypeOf(resourcePath),
+            "Content-Type: " + contentTypeOf(resourcePath),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

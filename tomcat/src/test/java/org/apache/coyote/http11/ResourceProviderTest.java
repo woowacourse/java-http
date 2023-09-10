@@ -56,7 +56,7 @@ class ResourceProviderTest {
         String contentTypeOf = resourceProvider.contentTypeOf(INDEX_FILE_URI);
 
         // then
-        assertThat(contentTypeOf).isEqualTo("Content-Type: text/html;charset=utf-8 ");
+        assertThat(contentTypeOf).isEqualTo("text/html;charset=utf-8 ");
     }
 
     @Test

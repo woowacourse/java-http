@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.adaptor.ControllerAdaptor;
 import org.slf4j.Logger;
@@ -16,18 +18,20 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private final ControllerAdaptor controllerAdaptor;
+    private final ExecutorService executorService;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector(ControllerAdaptor controllerAdaptor) {
-        this(controllerAdaptor, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(ControllerAdaptor controllerAdaptor, int maxThreads) {
+        this(controllerAdaptor, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
     }
 
-    public Connector(ControllerAdaptor controllerAdaptor, int port, int acceptCount) {
+    public Connector(ControllerAdaptor controllerAdaptor, int port, int acceptCount, int maxThreads) {
         this.controllerAdaptor = controllerAdaptor;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(int port, int acceptCount) {
@@ -68,7 +72,8 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, controllerAdaptor);
-        new Thread(processor).start();
+        executorService.submit(processor);
+//        new Thread(processor).start();
     }
 
     public void stop() {

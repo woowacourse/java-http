@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(method, requestUrl, version, headers, requestBody);
             HttpResponse httpResponse = new HttpResponse();
 
-            System.out.println(Thread.currentThread() + " | " + httpRequest.requestUrl());
+            log.info("requestUrl={}", httpRequest.requestUrl());
 
             controllerAdaptor.handle(httpRequest, httpResponse);
 

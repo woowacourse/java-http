@@ -16,13 +16,14 @@ import org.slf4j.LoggerFactory;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private static final int DEFAULT_MAX_THREADS = 200;
     private static final ControllerAdaptor CONTROLLER_ADAPTOR = new ControllerAdaptor(Set.of(
             new HelloController(), new ResourceController(), new LoginPageController(), new LoginController(),
             new RegisterPageController(), new RegisterController())
     );
 
     public void start() {
-        var connector = new Connector(CONTROLLER_ADAPTOR);
+        var connector = new Connector(CONTROLLER_ADAPTOR, DEFAULT_MAX_THREADS);
         connector.start();
 
         try {

@@ -78,8 +78,21 @@ class AuthServiceTest {
         assertThat(sessionId).isNotEmpty();
     }
 
+    @Test
+    void 회원가입할_때_계정이_중복될_경우_예외를_던진다() {
+        // given
+        AuthService authService = new AuthService(sessionManager);
+        String duplicateAccount = "duplicateAccount";
+        authService.register(duplicateAccount, "password", "account@email.com");
+        
+        // expect
+        assertThatThrownBy(() -> authService.register(duplicateAccount, "password", "account@emali.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("중복된 계정 입니다.");
+    }
+
     @ParameterizedTest
-    @CsvSource({"notLoggedInId, false", "loggedInId, true"})
+    @CsvSource({"notLoggedInId, false", "loggedInId, true", ", false"})
     void session_Id로_이미_로그인이_되었는지_확인한다(String sessionId, boolean expected) {
         // given
         AuthService authService = new AuthService(sessionManager);

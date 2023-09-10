@@ -21,29 +21,47 @@ public class AuthService {
     }
 
     public boolean isLoggedIn(String sessionId) {
-        return Objects.nonNull(sessionId) & Objects.nonNull(sessionManager.findSession(sessionId));
+        if (sessionId == null) {
+            return false;
+        }
+        return Objects.nonNull(sessionManager.findSession(sessionId));
     }
 
     public String login(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다."));
-        if (!user.isSamePassword(password)) {
-            throw new IllegalArgumentException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다.");
-        }
+        validatePassword(password, user);
+
+        log.info("login:" + user);
 
         Session session = new Session(UUID.randomUUID().toString());
         sessionManager.add(session);
-
         return session.getId();
     }
 
+    private void validatePassword(String password, User user) {
+        if (!user.isSamePassword(password)) {
+            throw new IllegalArgumentException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다.");
+        }
+    }
+
     public String register(String account, String password, String email) {
+        validateAccountDuplication(account);
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
+        log.info("register:" + user);
+
         Session session = new Session(UUID.randomUUID().toString());
         sessionManager.add(session);
-
         return session.getId();
+    }
+
+    private void validateAccountDuplication(String account) {
+        if (InMemoryUserRepository.findByAccount(account)
+                .isPresent()) {
+            log.info("중복된 계정");
+            throw new IllegalArgumentException("중복된 계정 입니다.");
+        }
     }
 }

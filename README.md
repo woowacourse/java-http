@@ -41,8 +41,6 @@
 
 - [x] HttpRequest 클래스 구현
 - [x] HttpResponse 클래스 구현
-    - [ ] QueryParser 구현
-    - [ ] Session
 - [x] Controller 추가
     - [x] Controller 인터페이스 추가
     - [x] AbstractController 추가
@@ -52,3 +50,8 @@
     - [x] HomeController 추가
 - [x] RequestMapping 추가
     - [x] if문 분기 삭제
+
+## 4단계
+
+- [x] ThreadPool 적용
+- [x] 동시성 컬렉션 사용

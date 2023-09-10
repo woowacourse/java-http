@@ -23,8 +23,8 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest of(final String startLine, final Map<String, String> headers, final String body) {
-        final String[] split = startLine.split(" ");
+    public static HttpRequest of(final String requestLine, final Map<String, String> headers, final String body) {
+        final String[] split = requestLine.split(" ");
         final String uri = split[1];
         String path = uri;
         String queryString = null;

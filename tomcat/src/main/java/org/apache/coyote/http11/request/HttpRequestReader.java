@@ -11,13 +11,13 @@ public class HttpRequestReader {
     }
 
     public static HttpRequest read(final BufferedReader bufferedReader) throws IOException {
-        final String startLine = bufferedReader.readLine();
-        if(startLine == null) {
+        final String requestLine = bufferedReader.readLine();
+        if(requestLine == null) {
             return null;
         }
         final Map<String, String> headers = extractHeaders(bufferedReader);
         final String body = extractBody(bufferedReader, headers.get("Content-Length"));
-        return HttpRequest.of(startLine, headers, body);
+        return HttpRequest.of(requestLine, headers, body);
     }
 
     private static Map<String, String> extractHeaders(final BufferedReader bufferedReader) throws IOException {

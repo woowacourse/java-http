@@ -14,7 +14,7 @@ public class HttpResponseWriter {
 
     public static void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
         final String response = String.join("\r\n",
-                extractStartLine(httpResponse),
+                extractRequestLine(httpResponse),
                 extractHeaders(httpResponse),
                 "",
                 httpResponse.getBody());
@@ -22,7 +22,7 @@ public class HttpResponseWriter {
         outputStream.write(response.getBytes());
     }
 
-    private static String extractStartLine(final HttpResponse httpResponse) {
+    private static String extractRequestLine(final HttpResponse httpResponse) {
         final String httpVersion = httpResponse.getHttpVersion();
         final int statusCode = httpResponse.getStatusCode().getCode();
         final String statusText = httpResponse.getStatusCode().getText();

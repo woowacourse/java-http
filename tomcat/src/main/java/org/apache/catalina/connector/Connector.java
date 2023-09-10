@@ -76,16 +76,22 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             process(serverSocket.accept());
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection) throws InterruptedException {
+    private void process(final Socket connection) {
         if (connection == null) {
             return;
         }
-        maxThreadSemaphore.acquire();
+        try {
+            maxThreadSemaphore.acquire();
+        } catch (InterruptedException e) {
+            log.error("Interruption Exception occur ", e);
+            throw new RuntimeException(e);
+        }
+
         var processor = new Http11Processor(connection, container.createServlet());
         CompletableFuture.runAsync(processor, executorService)
             .whenCompleteAsync((result, throwable) -> maxThreadSemaphore.release());

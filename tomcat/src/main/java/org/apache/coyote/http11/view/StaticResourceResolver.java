@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Optional;
 
 public class StaticResourceResolver {
 
@@ -20,8 +19,11 @@ public class StaticResourceResolver {
 
     private static URL findResourceByViewName(final String viewName) {
         final ClassLoader classLoader = StaticResourceResolver.class.getClassLoader();
-        return Optional.ofNullable(classLoader.getResource(RESOURCE_DIRECTORY + viewName))
-                .orElseThrow(() -> new IllegalArgumentException("Resource not found: " + viewName));
+        final URL resource = classLoader.getResource(RESOURCE_DIRECTORY + viewName);
+        if (resource == null) {
+            throw new IllegalArgumentException("Resource not found: " + viewName);
+        }
+        return resource;
     }
 
     private static String readResource(final URL viewPath) {

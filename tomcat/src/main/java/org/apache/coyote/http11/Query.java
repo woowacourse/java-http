@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class Query {
 
     public static Query create(String queryString) {
         if (queryString == null || queryString.isBlank()) {
-            return new Query(new HashMap<>());
+            return new Query(Collections.emptyMap());
         }
         Map<String, String> queryMap = new HashMap<>();
         Arrays.stream(queryString.split(QUERY_DELIMITER))
@@ -26,10 +27,6 @@ public class Query {
                     queryMap.put(keyAndValue[0], keyAndValue[1]);
                 });
         return new Query(queryMap);
-    }
-
-    public boolean containsKey(String queryName) {
-        return queries.containsKey(queryName);
     }
 
     public String get(String queryName) {

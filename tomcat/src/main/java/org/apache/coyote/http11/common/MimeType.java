@@ -13,6 +13,7 @@ public enum MimeType {
     XML("application/xml", "text/xml", "application/xhtml+xml"),
     HTML("text/html"),
     CSS("text/css"),
+    SVG("image/svg+xml"),
     URLENC("application/x-www-form-urlencoded"),
     BINARY("application/octet-stream"),
     MULTIPART("multipart/form-data", "multipart/alternative", "multipart/byteranges", "multipart/digest",

@@ -47,6 +47,10 @@ public class Response {
         return entityHeaders.getContentType();
     }
 
+    public String getLocation() {
+        return responseHeaders.getLocation();
+    }
+
     public String getBody() {
         return body;
     }
@@ -68,5 +72,5 @@ public class Response {
                 headerGroup,
                 body);
     }
-    
+
 }

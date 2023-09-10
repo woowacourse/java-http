@@ -1,6 +1,6 @@
 package org.apache.catalina.core.servlet;
 
-import static org.apache.catalina.core.servlet.HttpServletResponse.notFound;
+import static org.apache.catalina.core.servlet.HttpServletResponse.redirect;
 import static org.apache.catalina.core.servlet.HttpServletResponse.staticResource;
 import static org.apache.coyote.http11.common.MimeType.HTML;
 
@@ -29,7 +29,7 @@ public class DefaultServlet extends HttpServlet {
             final var resource = ResourceReader.read(httpServletRequest.getUri());
             httpServletResponse.set(staticResource(resource));
         } catch (final NotFoundException notFoundException) {
-            httpServletResponse.set(notFound());
+            httpServletResponse.set(redirect("/404.html"));
         }
     }
 

@@ -59,7 +59,7 @@ class RequestHandlerAdaptorTest {
         assertThat(response.getContentType()).isEqualTo(CSS.toString());
     }
 
-    @DisplayName("resources/static 디렉토리 내에 존재하지 않는 파일명을 자원으로 GET 요청을 보내면 404 응답코드로 반환한다.")
+    @DisplayName("resources/static 디렉토리 내에 존재하지 않는 파일명을 자원으로 GET 요청을 보내면 404.html로 리다이렉트한다.")
     @Test
     void handleNotFound() throws Exception {
         final var httpServletRequest = createGet("/neverexist/not.css", CSS.toString());
@@ -68,7 +68,8 @@ class RequestHandlerAdaptorTest {
         REQUEST_HANDLER_ADAPTOR.service(httpServletRequest, httpServletResponse);
         final var response = httpServletResponse.build();
 
-        assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);
+        assertThat(response.getStatus()).isEqualTo(Status.FOUND);
+        assertThat(response.getLocation()).isEqualTo("/404.html");
     }
 
 }

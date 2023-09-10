@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpMethod;
 
 public class HttpRequest {
 

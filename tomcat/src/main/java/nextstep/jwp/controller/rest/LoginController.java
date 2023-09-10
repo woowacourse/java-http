@@ -9,10 +9,10 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.HttpStatusCode;
 
 public class LoginController implements Controller {
 

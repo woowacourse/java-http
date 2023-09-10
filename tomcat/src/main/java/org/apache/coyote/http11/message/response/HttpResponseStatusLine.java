@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.response;
+
+import org.apache.coyote.http11.message.HttpStatusCode;
 
 public class HttpResponseStatusLine {
 

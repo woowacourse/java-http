@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpStatusCode;
 
 public class ResponseEntity {
 

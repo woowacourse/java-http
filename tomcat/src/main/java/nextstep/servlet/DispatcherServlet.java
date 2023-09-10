@@ -11,10 +11,10 @@ import nextstep.jwp.controller.rest.RegisterController;
 import nextstep.servlet.filter.Interceptor;
 import nextstep.servlet.filter.SessionInterceptor;
 import org.apache.catalina.servlet.Servlet;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestLine;
+import org.apache.coyote.http11.message.response.HttpResponse;
 
 public class DispatcherServlet implements Servlet {
 

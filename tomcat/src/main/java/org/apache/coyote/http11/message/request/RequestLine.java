@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.request;
 
 import java.util.Objects;
+import org.apache.coyote.http11.message.HttpMethod;
 
 public class RequestLine {
 

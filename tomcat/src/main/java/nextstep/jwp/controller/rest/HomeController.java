@@ -4,9 +4,9 @@ import static nextstep.jwp.controller.StaticResourceResolver.HOME_PAGE;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ResponseEntity;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.HttpStatusCode;
 
 public class HomeController implements Controller {
 

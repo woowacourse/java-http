@@ -1,10 +1,13 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.presentation;
 
 import static org.apache.coyote.http11.ContentType.TEXT_CSS;
 import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 import static org.apache.coyote.http11.HttpStatus.OK;
 
 import java.util.Optional;
+import nextstep.jwp.common.ResourceLoader;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public class ResourceController extends AbstractController {
 

@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.presentation;
+
+import org.apache.coyote.http11.HttpRequest;
 
 public class RequestMapping {
 

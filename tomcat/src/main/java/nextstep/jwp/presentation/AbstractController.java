@@ -1,8 +1,12 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.presentation;
 
+import static nextstep.jwp.exception.ControllerExceptionType.UNSUPPORTED_REQUEST;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
-import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
+
+import nextstep.jwp.exception.ControllerException;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
@@ -14,14 +18,14 @@ public abstract class AbstractController implements Controller {
         if (request.method() == GET) {
             return doGet(request);
         }
-        throw new HttpException(BAD_REQUEST, "지원되지 않는 요청입니다");
+        throw new ControllerException(UNSUPPORTED_REQUEST);
     }
 
     protected HttpResponse doPost(HttpRequest request) {
-        throw new HttpException(BAD_REQUEST, "지원되지 않는 요청입니다");
+        throw new ControllerException(UNSUPPORTED_REQUEST);
     }
 
     protected HttpResponse doGet(HttpRequest request) {
-        throw new HttpException(BAD_REQUEST, "지원되지 않는 요청입니다");
+        throw new ControllerException(UNSUPPORTED_REQUEST);
     }
 }

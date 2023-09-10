@@ -1,12 +1,17 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.presentation;
 
+import static nextstep.jwp.exception.AuthExceptionType.DUPLICATED_ID;
 import static org.apache.coyote.http11.ContentType.TEXT_HTML;
-import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.OK;
 
+import nextstep.jwp.common.FormData;
+import nextstep.jwp.common.ResourceLoader;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AuthException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
@@ -17,7 +22,7 @@ public class RegisterController extends AbstractController {
     public RegisterController(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
-    
+
     @Override
     protected HttpResponse doPost(HttpRequest request) {
         return register(request);
@@ -37,7 +42,7 @@ public class RegisterController extends AbstractController {
         String password = formData.get("password");
         String email = formData.get("email");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            throw new HttpException(BAD_REQUEST, "이미 존재하는 아이디입니다. 다른 아이디로 가입해주세요");
+            throw new AuthException(DUPLICATED_ID);
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

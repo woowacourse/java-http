@@ -9,7 +9,7 @@ import pl.allegro.tech.boot.autoconfigure.handlebars.HandlebarsHelper;
 @HandlebarsHelper
 public class VersionHandlebarsHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VersionHandlebarsHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(VersionHandlebarsHelper.class);
 
     private final ResourceVersion version;
 
@@ -19,7 +19,7 @@ public class VersionHandlebarsHelper {
     }
 
     public String staticUrls(String path, Options options) {
-        LOG.debug("static url : {}", path);
+        log.debug("static url : {}", path);
         return String.format("/resources/%s%s", version.getVersion(), path);
     }
 }

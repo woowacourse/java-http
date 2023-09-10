@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.catalina.core.RequestHandlerAdaptor;
+import org.apache.catalina.core.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,23 +23,22 @@ public class Connector implements Runnable {
     private static final int DEFAULT_MAX_THREADS = 200;
     private static final long DEFAULT_KEEP_ALIVE_TIME_MILLISECONDS = 60000L;
 
-    private final RequestHandlerAdaptor requestHandlerAdaptor;
+    private final Container container;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
-    public Connector(final RequestHandlerAdaptor requestHandlerAdaptor) {
-        this(requestHandlerAdaptor, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
+    public Connector(final Container container) {
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    // TODO Container를 통해 jwp 패키지의 빈 전달하기
     public Connector(
-            final RequestHandlerAdaptor requestHandlerAdaptor,
+            final Container container,
             final int port,
             final int acceptCount,
             final int maxThreads
     ) {
-        this.requestHandlerAdaptor = requestHandlerAdaptor;
+        this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = createExecutorService(acceptCount, maxThreads);
@@ -97,7 +96,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, requestHandlerAdaptor);
+        final var processor = new Http11Processor(connection, container);
         executorService.submit(processor);
         log.info("thread start");
     }

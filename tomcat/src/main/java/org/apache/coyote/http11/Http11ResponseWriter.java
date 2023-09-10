@@ -30,6 +30,10 @@ public class Http11ResponseWriter {
 	}
 
 	public void write(final Response response) throws IOException {
+		if (!response.isCommitted()) {
+			throw new IllegalArgumentException("올바르지 않은 Response 입니다.");
+		}
+		
 		final var statusLine = response.getStatusLine();
 		final var header = response.getHeader();
 		final var responseBody = response.getResponseBody();

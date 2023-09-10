@@ -39,7 +39,6 @@ public class Http11Processor implements Runnable, Processor {
 			 final var outputBuffer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 			final var requestReader = new Http11RequestReader(inputBuffer);
 			final var responseWriter = new Http11ResponseWriter(outputBuffer);
-
 			final var request = requestReader.read();
 			Response response = new Response();
 			handlerMapping.service(request, response);

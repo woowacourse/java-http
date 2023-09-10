@@ -19,6 +19,10 @@ public class Response {
 		this.responseBody = responseBody;
 	}
 
+	public boolean isCommitted() {
+		return statusLine != null;
+	}
+
 	public void redirect(final String location) {
 		this.statusLine = new StatusLine(StatusCode.FOUND);
 		this.header.add(HeaderType.LOCATION, location);

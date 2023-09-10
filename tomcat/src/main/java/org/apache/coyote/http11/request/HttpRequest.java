@@ -67,6 +67,10 @@ public class HttpRequest {
         return requestLine.isMethodOf(httpMethod);
     }
 
+    public boolean isPathOf(final String path) {
+        return requestLine.isPathOf(path);
+    }
+
     public boolean hasSessionId() {
         return requestHeaders.containsKey(COOKIE);
     }

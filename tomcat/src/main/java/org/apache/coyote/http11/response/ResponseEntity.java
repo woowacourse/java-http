@@ -43,6 +43,10 @@ public class ResponseEntity {
         this.content = content;
     }
 
+    public static ResponseEntity of(final HttpStatus httpStatus) {
+        return ResponseEntity.of(httpStatus, httpStatus.getResourcePath());
+    }
+
     public static ResponseEntity of(final HttpStatus httpStatus, final String resourcePath) {
         try {
             final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + resourcePath);

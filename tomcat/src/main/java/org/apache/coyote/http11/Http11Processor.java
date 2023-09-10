@@ -1,9 +1,13 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.controller.HomeController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpVersion;
-import org.apache.coyote.http11.step1Controller.Step1ControllerFinder;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -19,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -54,10 +59,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private static HttpResponse getHttpResponse(final BufferedReader bufferedReader) throws IOException {
         try {
-            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final ResponseEntity responseEntity = Step1ControllerFinder.find(httpRequest);
-            return HttpResponse.of(httpRequest.getHttpVersion(), responseEntity);
-        } catch (RuntimeException e) {
+            final HttpRequest request = HttpRequest.from(bufferedReader);
+            final HttpResponse response = HttpResponse.of(request.getHttpVersion(), ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR));
+
+            final RequestMapping requestMapping = new RequestMapping(List.of(new HomeController(), new LoginController(), new RegisterController()));
+            final Controller controller = requestMapping.getController(request);
+
+            controller.service(request, response);
+
+            return response;
+        } catch (Exception e) {
             final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
             return HttpResponse.of(HttpVersion.HTTP_1_1, responseEntity);
         }

@@ -40,6 +40,10 @@ public class RequestLine {
         return this.httpMethod == httpMethod;
     }
 
+    public boolean isPathOf(final String path) {
+        return requestUri.isPathOf(path);
+    }
+
     public ResourcePath getResourcePath() {
         return requestUri.getResourcePath();
     }

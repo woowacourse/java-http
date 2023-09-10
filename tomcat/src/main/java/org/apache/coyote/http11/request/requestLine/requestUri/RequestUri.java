@@ -30,6 +30,10 @@ public class RequestUri {
         );
     }
 
+    public boolean isPathOf(final String path) {
+        return resourcePath.is(path);
+    }
+
     public ResourcePath getResourcePath() {
         return resourcePath;
     }

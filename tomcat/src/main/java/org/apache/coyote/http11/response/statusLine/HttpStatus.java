@@ -7,10 +7,10 @@ public enum HttpStatus {
     NO_CONTENT(204, "No Content", ""),
     FOUND(302, "Found", ""),
     BAD_REQUEST(400, "Bad Request", ""),
-    UNAUTHORIZED(401, "Unauthorized", "401.html"),
+    UNAUTHORIZED(401, "Unauthorized", "/401.html"),
     FORBIDDEN(403, "Forbidden", ""),
-    NOT_FOUND(404, "Not Found", "404.html"),
-    INTERNAL_SERVER_ERROR(500, "Internal Server Error", "500.html");
+    NOT_FOUND(404, "Not Found", "/404.html"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error", "/500.html");
 
     private final int code;
     private final String message;
@@ -30,7 +30,7 @@ public enum HttpStatus {
         return message;
     }
 
-    public String getResourceName() {
+    public String getResourcePath() {
         return resourceName;
     }
 }

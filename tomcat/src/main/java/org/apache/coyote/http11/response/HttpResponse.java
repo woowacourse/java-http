@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class HttpResponse {
@@ -11,7 +11,8 @@ public class HttpResponse {
     private final Map<HttpResponseHeader, String> headers;
     private String body;
 
-    private HttpResponse(final StatusLine statusLine, final Map<HttpResponseHeader, String> headers, final String body) {
+    private HttpResponse(final StatusLine statusLine, final Map<HttpResponseHeader, String> headers,
+                         final String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
@@ -20,7 +21,7 @@ public class HttpResponse {
     public static HttpResponse create() {
         return new HttpResponse(
                 new StatusLine(HTTP_VERSION),
-                new LinkedHashMap<>(),
+                new EnumMap<>(HttpResponseHeader.class),
                 ""
         );
     }

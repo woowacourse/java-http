@@ -28,8 +28,7 @@ public class HttpCookie {
                 .map(parameter -> parameter.split(FIELD_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         fieldAndValue -> fieldAndValue[FIELD_INDEX].trim(),
-                        fieldAndValue -> fieldAndValue[VALUE_INDEX].trim(),
-                        (prev, update) -> update
+                        fieldAndValue -> fieldAndValue[VALUE_INDEX].trim()
                 ));
         return new HttpCookie(parametersMap);
     }

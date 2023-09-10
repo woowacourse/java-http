@@ -34,8 +34,7 @@ public class RequestUri {
                     .map(queryString -> queryString.split(FIELD_AND_VALUE_DELIMITER))
                     .collect(Collectors.toMap(
                             fieldAndValue -> fieldAndValue[QUERY_STRING_FIELD_INDEX],
-                            fieldAndValue -> fieldAndValue[QUERY_STRING_VALUE_INDEX],
-                            (prev, update) -> update
+                            fieldAndValue -> fieldAndValue[QUERY_STRING_VALUE_INDEX]
                     ));
         }
         return new RequestUri(requestUri, queryStringsMap);

@@ -34,8 +34,7 @@ public class RequestHeader {
                 .map(headerLine -> headerLine.split(DELIMITER, LIMIT))
                 .collect(Collectors.toMap(
                         fieldAndValue -> fieldAndValue[HEADER_FIELD_INDEX].trim(),
-                        fieldAndValue -> fieldAndValue[HEADER_VALUE_INDEX].trim(),
-                        (prev, update) -> update
+                        fieldAndValue -> fieldAndValue[HEADER_VALUE_INDEX].trim()
                 ));
 
         if (headersMap.containsKey(COOKIE)) {

@@ -24,8 +24,7 @@ public class RequestBody {
                 .map(parameter -> parameter.split(FIELD_AND_VALUE_DELIMITER))
                 .collect(Collectors.toMap(
                         fieldAndValue -> fieldAndValue[BODY_FIELD_INDEX].trim(),
-                        fieldAndValue -> fieldAndValue[BODY_VALUE_INDEX].trim(),
-                        (prev, update) -> update
+                        fieldAndValue -> fieldAndValue[BODY_VALUE_INDEX].trim()
                 ));
         return new RequestBody(parametersMap);
     }

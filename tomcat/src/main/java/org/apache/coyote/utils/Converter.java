@@ -1,11 +1,12 @@
 package org.apache.coyote.utils;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Parser {
+public class Converter {
 
-    private Parser() {
+    private Converter() {
     }
 
     public static Map<String, String> parseFormData(final String formData) {
@@ -21,5 +22,13 @@ public class Parser {
             fields.put(name, value);
         }
         return fields;
+    }
+
+
+    public static URL convertPathToUrl(String path) {
+        if (!path.contains(".")) {
+            path += ".html";
+        }
+        return Converter.class.getClassLoader().getResource("static" + path);
     }
 }

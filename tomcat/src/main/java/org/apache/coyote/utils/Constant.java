@@ -10,6 +10,7 @@ public class Constant {
     public static final int SPLIT_LIMIT_SIZE = 2;
     public static final int KEY_INDEX = 0;
     public static final int VALUE_INDEX = 1;
+    public static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private Constant() {
     }

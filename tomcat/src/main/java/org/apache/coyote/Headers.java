@@ -50,6 +50,6 @@ public class Headers {
     public String stringify() {
         return headers.entrySet().stream()
                 .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue())
-                .collect(Collectors.joining(LINE_SEPARATOR));
+                .collect(Collectors.joining(LINE_SEPARATOR)) + " ";
     }
 }

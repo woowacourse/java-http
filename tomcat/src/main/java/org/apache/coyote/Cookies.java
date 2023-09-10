@@ -7,6 +7,7 @@ import static org.apache.coyote.utils.Constant.SPLIT_LIMIT_SIZE;
 import static org.apache.coyote.utils.Constant.VALUE_INDEX;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,10 @@ public class Cookies {
 
     private Cookies(final Map<String, String> cookies) {
         this.cookies = cookies;
+    }
+
+    public Cookies() {
+        this.cookies = new LinkedHashMap<>();
     }
 
     public static Cookies from(final String line) {
@@ -34,11 +39,12 @@ public class Cookies {
         return new Cookies(cookies);
     }
 
-    public static Cookies create(final String key, final String value) {
-        final Map<String, String> cookies = new HashMap<>();
-        cookies.put(key, value);
+    public void addCookie(final String name, final String value) {
+        cookies.put(name, value);
+    }
 
-        return new Cookies(cookies);
+    public boolean isEmpty() {
+        return cookies.isEmpty();
     }
 
     public boolean isExist(final String name) {

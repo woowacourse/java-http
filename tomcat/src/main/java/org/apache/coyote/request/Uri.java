@@ -1,7 +1,7 @@
 package org.apache.coyote.request;
 
 import static org.apache.coyote.utils.Constant.EMPTY;
-import static org.apache.coyote.utils.Parser.parseFormData;
+import static org.apache.coyote.utils.Converter.parseFormData;
 
 import java.util.Map;
 

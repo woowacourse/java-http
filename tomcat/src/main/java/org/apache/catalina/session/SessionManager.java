@@ -10,14 +10,14 @@ public class SessionManager implements Manager {
 
     private static final class SessionManagerHolder {
 
-        private static final SessionManager INSTANCE = new SessionManager();
+        private static final SessionManager sessionManager = new SessionManager();
     }
 
     private SessionManager() {
     }
 
     public static SessionManager getInstance() {
-        return SessionManagerHolder.INSTANCE;
+        return SessionManagerHolder.sessionManager;
     }
 
     public Session createSession() {

@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class RequestHeaderTest {
+class HttpRequestHeaderTest {
 
     @Nested
-    class RequestHeader_생성을_검증한다 {
+    class HttpRequestHeader_생성을_검증한다 {
 
         @Test
         void 유효한_RequestHeader라면_생성한다() {

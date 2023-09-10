@@ -4,13 +4,13 @@ import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.auth.SessionRepository;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHandler;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +25,7 @@ import static org.apache.coyote.http11.response.HttpStatus.UNAUTHORIZED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class RequestHandlerTest {
+class HttpRequestHandlerTest {
 
     private final RequestHandler requestHandler = new RequestHandler();
 
@@ -35,7 +35,7 @@ class RequestHandlerTest {
     }
 
     @Nested
-    class path에_따라_다른_ResponseEntity를_반환한다 {
+    class path에_따라_다른_Http_ResponseEntity를_반환한다 {
 
         public RequestLine requestLine_생성(HttpMethod httpMethod, String defaultPath) {
             return RequestLine.from(httpMethod.name() + " " + defaultPath + " " + "HTTP/1.1");
@@ -72,11 +72,11 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(GET, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    Request request = Request.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
                     SessionRepository.clearSessions();
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(request);
+                    HttpResponse response = requestHandler.getResponse(httpRequest);
 
                     // then
                     assertAll(
@@ -99,10 +99,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    Request request = Request.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(request);
+                    HttpResponse response = requestHandler.getResponse(httpRequest);
 
                     // then
                     assertAll(
@@ -120,10 +120,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/login");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    Request request = Request.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(request);
+                    HttpResponse response = requestHandler.getResponse(httpRequest);
 
                     // then
                     assertAll(
@@ -149,10 +149,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(GET, "/register");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    Request request = Request.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(request);
+                    HttpResponse response = requestHandler.getResponse(httpRequest);
 
                     // then
                     assertAll(
@@ -175,10 +175,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/register");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    Request request = Request.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(request);
+                    HttpResponse response = requestHandler.getResponse(httpRequest);
 
                     // then
                     assertAll(
@@ -194,10 +194,10 @@ class RequestHandlerTest {
                     RequestLine requestLine = requestLine_생성(POST, "/register");
                     RequestHeader requestHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    Request request = Request.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
 
                     // when
-                    ResponseEntity response = requestHandler.getResponse(request);
+                    HttpResponse response = requestHandler.getResponse(httpRequest);
 
                     // then
                     assertAll(

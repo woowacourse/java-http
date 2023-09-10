@@ -8,13 +8,13 @@ import org.apache.coyote.http11.request.line.RequestLine;
 
 public class HttpRequestGenerator {
 
-    private Request request;
+    private HttpRequest httpRequest;
 
-    private HttpRequestGenerator(Request request) {
-        this.request = request;
+    private HttpRequestGenerator(HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
     }
 
-    public static Request generate(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest generate(BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
         if (firstLine == null) {
             return null;
@@ -22,11 +22,11 @@ public class HttpRequestGenerator {
         final RequestLine requestLine = RequestLine.from(firstLine);
         final RequestHeader requestHeader = getHeader(bufferedReader);
         final RequestBody requestBody = getBody(bufferedReader, requestHeader);
-        return Request.of(requestLine, requestHeader, requestBody);
+        return HttpRequest.of(requestLine, requestHeader, requestBody);
     }
 
-    public Request request() {
-        return request;
+    public HttpRequest request() {
+        return httpRequest;
     }
 
     private static RequestHeader getHeader(final BufferedReader bufferedReader) throws IOException {

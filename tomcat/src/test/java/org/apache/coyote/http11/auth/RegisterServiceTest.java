@@ -1,13 +1,11 @@
 package org.apache.coyote.http11.auth;
 
-import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,7 +45,7 @@ public class RegisterServiceTest {
                 RequestBody requestBody = requestBody_생성();
 
                 // when
-                ResponseEntity response = registerService.register(requestLine, requestBody);
+                HttpResponse response = registerService.register(requestLine, requestBody);
 
                 // then
                 assertAll(
@@ -71,7 +69,7 @@ public class RegisterServiceTest {
                 RequestBody requestBody = requestBody_생성();
 
                 // when
-                ResponseEntity response = registerService.register(requestLine, requestBody);
+                HttpResponse response = registerService.register(requestLine, requestBody);
 
                 // then
                 assertAll(
@@ -89,7 +87,7 @@ public class RegisterServiceTest {
                 RequestBody requestBody = requestBody_생성();
 
                 // when
-                ResponseEntity response = registerService.register(requestLine, requestBody);
+                HttpResponse response = registerService.register(requestLine, requestBody);
 
                 // then
                 assertAll(

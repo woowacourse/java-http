@@ -2,20 +2,20 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.request.line.RequestLine;
 
-public class Request {
+public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
-    private Request(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+    private HttpRequest(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
     }
 
-    public static Request of(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
-        return new Request(requestLine, requestHeader, requestBody);
+    public static HttpRequest of(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+        return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
     public RequestLine requestLine() {

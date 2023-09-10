@@ -7,17 +7,14 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.coyote.http11.request.line.HttpMethod.GET;
 import static org.apache.coyote.http11.request.line.HttpMethod.POST;
-import static org.apache.coyote.http11.response.HttpStatus.CONFLICT;
 import static org.apache.coyote.http11.response.HttpStatus.FOUND;
-import static org.apache.coyote.http11.response.HttpStatus.OK;
 import static org.apache.coyote.http11.response.HttpStatus.UNAUTHORIZED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -32,7 +29,7 @@ class LoginServiceTest {
     }
 
     @Nested
-    class path에_따라_다른_ResponseEntity를_반환한다 {
+    class path에_따라_다른_Http_ResponseEntity를_반환한다 {
 
         public RequestLine requestLine_생성(HttpMethod httpMethod, String defaultPath) {
             return RequestLine.from(httpMethod.name() + " " + defaultPath + " " + "HTTP/1.1");
@@ -73,7 +70,7 @@ class LoginServiceTest {
                     RequestBody requestBody = requestBody_생성();
 
                     // when
-                    ResponseEntity response = loginService.login(requestLine, requestHeader, requestBody);
+                    HttpResponse response = loginService.login(requestLine, requestHeader, requestBody);
 
                     // then
                     assertAll(
@@ -93,7 +90,7 @@ class LoginServiceTest {
                     RequestBody requestBody = requestBody_생성();
 
                     // when
-                    ResponseEntity response = loginService.login(requestLine, requestHeader, requestBody);
+                    HttpResponse response = loginService.login(requestLine, requestHeader, requestBody);
 
                     // then
                     assertAll(

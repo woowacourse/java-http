@@ -3,33 +3,33 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.auth.Cookie;
 import org.apache.coyote.http11.request.line.Protocol;
 
-public class ResponseEntity {
+public class HttpResponse {
 
     private final Protocol protocol;
     private final HttpStatus httpStatus;
     private final Cookie cookie;
     private final Location location;
 
-    public ResponseEntity(Protocol protocol, HttpStatus httpStatus, Cookie cookie, Location location) {
+    public HttpResponse(Protocol protocol, HttpStatus httpStatus, Cookie cookie, Location location) {
         this.protocol = protocol;
         this.httpStatus = httpStatus;
         this.cookie = cookie;
         this.location = location;
     }
 
-    public static ResponseEntity getCookieNullResponseEntity(
+    public static HttpResponse getCookieNullResponseEntity(
             final Protocol protocol,
             final ResponsePage responsePage
     ) {
-        return new ResponseEntity(protocol, responsePage.statusCode(), Cookie.from(null), Location.from(responsePage.redirectUrl()));
+        return new HttpResponse(protocol, responsePage.statusCode(), Cookie.from(null), Location.from(responsePage.redirectUrl()));
     }
 
-    public static ResponseEntity getCookieNullResponseEntity(
+    public static HttpResponse getCookieNullResponseEntity(
             final Protocol protocol,
             final HttpStatus status,
             final Location location
     ) {
-        return new ResponseEntity(protocol, status, Cookie.from(null), location);
+        return new HttpResponse(protocol, status, Cookie.from(null), location);
     }
 
     public String getProtocol() {

@@ -9,10 +9,10 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequestGenerator;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHandler;
 import org.apache.coyote.http11.response.HttpResponseGenerator;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +40,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final Request request = HttpRequestGenerator.generate(bufferedReader);
-            final ResponseEntity responseEntity = requestHandler.getResponse(request);
-            final String response = responseGenerator.generate(responseEntity);
+            final HttpRequest httpRequest = HttpRequestGenerator.generate(bufferedReader);
+            final HttpResponse httpResponse = requestHandler.getResponse(httpRequest);
+            final String response = responseGenerator.generate(httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

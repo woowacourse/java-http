@@ -19,7 +19,7 @@ public class HttpCookie {
         this.values = values;
     }
 
-    public String getValues() {
+    public String printValues() {
         return values.keySet()
                 .stream()
                 .map(key -> key + "=" + values.get(key) + "; ")

@@ -19,17 +19,9 @@ public enum ContentType {
 
     public static String getByPath(final String path) {
         return Arrays.stream(values())
-                .filter(it -> path.endsWith(it.getFileExtension()))
-                .map(ContentType::getType)
+                .filter(it -> path.endsWith(it.fileExtension))
+                .map(it -> it.type)
                 .findAny()
-                .orElse(HTML.getType());
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getFileExtension() {
-        return fileExtension;
+                .orElse(HTML.type);
     }
 }

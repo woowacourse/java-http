@@ -56,7 +56,7 @@ public class HttpResponse {
         final HttpCookie cookie = httpResponseHeader.getCookie();
         return String.join("\r\n",
                 "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Set-Cookie: " + cookie.getValues() + BLANK,
+                "Set-Cookie: " + cookie.printValues() + BLANK,
                 "Location: " + path + BLANK,
                 ""
         );
@@ -68,7 +68,7 @@ public class HttpResponse {
         final HttpCookie cookie = httpResponseHeader.getCookie();
         return String.join("\r\n",
                 httpVersion.getValue() + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Set-Cookie: " + cookie.getValues() + BLANK,
+                "Set-Cookie: " + cookie.printValues() + BLANK,
                 "Content-Type: " + contentType + BLANK,
                 "Content-Length: " + body.getBytes().length + BLANK,
                 "",
@@ -93,7 +93,7 @@ public class HttpResponse {
     public void addCookie(final HttpCookie cookie) {
         this.httpResponseHeader.setCookie(cookie);
     }
-    
+
     public void setHttpStatus(final HttpStatus httpStatus) {
         this.httpStatusLine = HttpStatusLine.from(httpStatus);
     }

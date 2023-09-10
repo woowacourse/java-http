@@ -37,7 +37,7 @@ class ContentTypeTest {
     @DisplayName("일치하는 ContentType이 없다면 예외가 발생한다.")
     void findResponseContentType_nonMatchAcceptType() throws IOException {
         // given
-        final HttpRequest httpRequest = createHttpRequest("/favicon.ico", "image/jpg");
+        final HttpRequest httpRequest = createHttpRequest("/favicon.ico", "image/jpg,image/svg");
 
         // when, then
         assertThatThrownBy(() -> ContentType.findResponseContentTypeFromRequest(httpRequest))
@@ -49,6 +49,7 @@ class ContentTypeTest {
             Arguments.of("/styles.css", "text/css", ContentType.CSS),
             Arguments.of("/styles.css", null, ContentType.CSS),
             Arguments.of("/chart-pie.js", "*/*", ContentType.JS),
+            Arguments.of("/", "image/svg;q=0.8,text/javascript", ContentType.JS),
             Arguments.of("/", "*/*", ContentType.HTML)
         );
     }

@@ -4,6 +4,7 @@ import org.apache.coyote.http11.header.Headers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 
@@ -49,12 +50,12 @@ public class RequestParameters {
         return "";
     }
 
-    public void addParamter(final String key, final String value) {
+    public void addParameter(final String key, final String value) {
         requestParameters.put(key, value);
     }
 
-    public String getValue(final String key) {
-        return requestParameters.get(key);
+    public Optional<String> getValue(final String key) {
+        return Optional.ofNullable(requestParameters.get(key));
     }
 
     public Map<String, String> getRequestParameters() {

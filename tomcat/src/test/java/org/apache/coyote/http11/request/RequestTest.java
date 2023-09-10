@@ -1,10 +1,13 @@
 package org.apache.coyote.http11.request;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class RequestTest {
@@ -49,10 +52,10 @@ class RequestTest {
         final Request request = Request.from(bufferedReader);
 
         // when
-        final String actual = request.getParameter("b");
+        final Optional<String> actual = request.getParameter("b");
 
         // then
-        assertThat(actual).isEqualTo("2");
+        assertThat(actual).contains("2");
     }
 
 
@@ -73,10 +76,10 @@ class RequestTest {
         final Request request = Request.from(bufferedReader);
 
         // when
-        final String actual = request.getParameter("b");
+        final Optional<String> actual = request.getParameter("b");
 
         // then
-        assertThat(actual).isEqualTo("2");
+        assertThat(actual).contains("2");
     }
 
     @Test

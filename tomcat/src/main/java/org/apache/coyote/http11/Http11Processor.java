@@ -70,7 +70,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response mapPath(final Request request) throws IOException, URISyntaxException {
-        final RequestParameters requestParameters = request.getRequestParameters();
         final Session session = request.getSession();
 
         if (request.isMatching("/", GET)) {
@@ -86,18 +85,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.isMatching("/login", POST)) {
-            final String account = requestParameters.getValue("account");
+            final Optional<String> account = request.getParameter("account");
 
-            if (account == null) {
+            if (account.isEmpty()) {
                 return findStaticResource("/login.html");
             }
 
-            final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account);
+            final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account.get());
             if (maybeUser.isEmpty()) {
                 return getUnauthorizedResponse();
             }
             final User findUser = maybeUser.get();
-            if (!findUser.checkPassword(requestParameters.getValue("password"))) {
+            final Optional<String> password = request.getParameter("password");
+            if (password.isEmpty() || !findUser.checkPassword(password.get())) {
                 return getUnauthorizedResponse();
             }
             log.info("user: {}", findUser);
@@ -112,9 +112,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.isMatching("/register", POST)) {
-            final String account = requestParameters.getValue("account");
-            final String password = requestParameters.getValue("password");
-            final String email = requestParameters.getValue("email");
+            final String account = request.getParameter("account")
+                    .orElseThrow(() -> new IllegalArgumentException ("계정 입력이 잘못되었습니다."));
+            final String password = request.getParameter("password")
+                    .orElseThrow(() -> new IllegalArgumentException ("비밀번호 입력이 잘못되었습니다."));
+            final String email = request.getParameter("email")
+                    .orElseThrow(() -> new IllegalArgumentException ("이메일 입력이 잘못되었습니다."));
 
             final User user = new User(account, password, email);
             InMemoryUserRepository.save(user);

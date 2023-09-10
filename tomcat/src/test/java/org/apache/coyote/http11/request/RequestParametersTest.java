@@ -53,8 +53,8 @@ class RequestParametersTest {
 
         //when & then
         assertAll(() -> {
-            assertThat(requestParameters.getValue("a")).isEqualTo("1");
-            assertThat(requestParameters.getValue("b")).isEqualTo("2");
+            assertThat(requestParameters.getValue("a")).contains("1");
+            assertThat(requestParameters.getValue("b")).contains("2");
         });
     }
 }

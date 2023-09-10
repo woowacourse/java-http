@@ -84,10 +84,10 @@ public class Request {
 
     public void addParameter(final String key,
                              final String value) {
-        requestParameters.addParamter(key, value);
+        requestParameters.addParameter(key, value);
     }
 
-    public String getParameter(final String parameterKey) {
+    public Optional<String> getParameter(final String parameterKey) {
         return requestParameters.getValue(parameterKey);
     }
 
@@ -101,10 +101,6 @@ public class Request {
 
     public Headers getHeaders() {
         return headers;
-    }
-
-    public RequestParameters getRequestParameters() {
-        return requestParameters;
     }
 
     public Session getSession() {

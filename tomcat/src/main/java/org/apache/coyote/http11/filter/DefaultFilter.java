@@ -5,7 +5,6 @@ import org.apache.coyote.http11.response.Response;
 
 public class DefaultFilter implements Filter {
     @Override
-    public Response doFilter(Request request, FilterChain filterChain) {
-        return new Response();
+    public void doFilter(Request request, Response response, FilterChain filterChain) {
     }
 }

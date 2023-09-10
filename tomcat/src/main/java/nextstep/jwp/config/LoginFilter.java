@@ -11,26 +11,31 @@ import org.apache.coyote.http11.util.Resource;
 public class LoginFilter implements Filter {
 
     @Override
-    public Response doFilter(Request request, FilterChain filterChain) {
+    public void doFilter(Request request, Response response, FilterChain filterChain) {
         final String uri = request.getPath();
         final var cookie = request.getCookie();
 
         if (uri.equals("/login") && cookie.containsKey("JSESSIONID")) {
-            return validKey(cookie.get("JSESSIONID"));
+            validKey(cookie.get("JSESSIONID"), response);
         }
-        return filterChain.doFilter(request);
+        filterChain.doFilter(request, response);
     }
 
-    private Response validKey(String jSessionId) {
+    private void validKey(String jSessionId, Response response) {
         if (InMemorySession.isLogin(jSessionId)) {
-            return Response.builder()
-                    .status(HttpStatus.FOUND)
-                    .contentType("html")
-                    .location("/index.html")
-                    .responseBody(Resource.getFile("index.html"))
-                    .filtered()
-                    .build();
+            response
+                    .setStatus(HttpStatus.FOUND)
+                    .setContentType("html")
+                    .setLocation("/index.html")
+                    .setResponseBody(Resource.getFile("index.html"))
+                    .setFiltered(true);
+            return;
         }
-        return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"), "401.html");
+        response
+                .setStatus(HttpStatus.UNAUTHORIZED)
+                .setContentType("html")
+                .setResponseBody(Resource.getFile("401.html"))
+                .setLocation("/401.html")
+                .setFiltered(true);
     }
 }

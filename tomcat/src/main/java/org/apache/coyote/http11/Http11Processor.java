@@ -35,13 +35,14 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             final Request request = Request.from(inputStream);
+            Response response = new Response();
 
             FilterChainManager filterChainManager = new FilterChainManager();
             filterChainManager.add(new LoginFilter());
-            Response response = filterChainManager.getInitialChain().doFilter(request);
+            filterChainManager.getInitialChain().doFilter(request, response);
 
             if (!response.isFiltered()) {
-                response = Servlet.getResponse(request);
+                Servlet.getResponse(request, response);
             }
 
             outputStream.write(response.getResponse());

@@ -7,7 +7,7 @@ import org.apache.coyote.http11.servlet.Servlet;
 
 public class Resource {
 
-    private Resource(){
+    private Resource() {
     }
 
     public static String getFile(String fileName) {

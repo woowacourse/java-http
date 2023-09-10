@@ -2,54 +2,41 @@ package org.apache.coyote.http11.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import nextstep.jwp.controller.HelloWorldController;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ViewController;
-import org.apache.coyote.http11.controller.RequestFunction;
-import org.apache.coyote.http11.controller.ViewFunction;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.exception.NoSuchApiException;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.util.Resource;
 
 public class HandlerAdapter {
-    private final Map<RequestMapper, RequestFunction> requestFunctions = new HashMap<>();
-    private final Map<RequestMapper, ViewFunction> viewFunctions = new HashMap<>();
+    private final Map<RequestMapper, Controller> controllers = new HashMap<>();
 
-    public HandlerAdapter(){
-        addRequestFunctions(HttpMethod.POST, "/login", LoginController::login);
-        addRequestFunctions(HttpMethod.POST, "/register", LoginController::signUp);
-        addNonRequestController(HttpMethod.GET, "/login", ViewController::getLogin);
-        addNonRequestController(HttpMethod.GET, "/register", ViewController::getRegister);
-        addNonRequestController(HttpMethod.GET, "/", ViewController::getVoid);
+    public HandlerAdapter() {
+        addController(HttpMethod.POST, "/login", new LoginController());
+        addController(HttpMethod.POST, "/register", new RegisterController());
+        addController(HttpMethod.GET, "/login", new LoginController());
+        addController(HttpMethod.GET, "/register", new LoginController());
+        addController(HttpMethod.GET, "/", new HelloWorldController());
     }
 
-    public Response mapping(Request request) {
+    public Controller mapping(Request request) {
         RequestMapper requestInfo
                 = new RequestMapper(request.getMethod(), request.getPath());
-        if (requestFunctions.containsKey(requestInfo)) {
-            return requestFunctions.get(requestInfo).getResponse(request);
-        }
-        if (viewFunctions.containsKey(requestInfo)) {
-            return viewFunctions.get(requestInfo).getResponse();
-        }
         if (request.getPath().contains(".")) {
-            String contentType = request.getPath().split("\\.")[1];
-            return Response.builder()
-                    .status(HttpStatus.OK)
-                    .contentType(contentType)
-                    .responseBody(Resource.getFile(request.getPath()))
-                    .build();
+            return new ViewController();
         }
-        throw new NoSuchApiException();
+        return controllers.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(requestInfo))
+                .findFirst()
+                .map(Entry::getValue)
+                .orElseThrow(NoSuchApiException::new);
     }
 
-    private void addRequestFunctions(HttpMethod httpMethod, String path, RequestFunction function) {
-        requestFunctions.put(new RequestMapper(httpMethod, path), function);
-    }
-
-    private void addNonRequestController(HttpMethod httpMethod, String path, ViewFunction function) {
-        viewFunctions.put(new RequestMapper(httpMethod, path), function);
+    private void addController(HttpMethod httpMethod, String path, Controller controller) {
+        controllers.put(new RequestMapper(httpMethod, path), controller);
     }
 }

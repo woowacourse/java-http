@@ -40,8 +40,8 @@ public class FilterChainManager {
         }
 
         @Override
-        public Response doFilter(Request request) {
-            return filter.doFilter(request, next);
+        public void doFilter(Request request, Response response) {
+            filter.doFilter(request, response, next);
         }
     }
 }

@@ -11,16 +11,18 @@ import org.apache.coyote.http11.util.Resource;
 
 public class Servlet {
 
-    private Servlet(){}
+    private Servlet() {
+    }
 
-    public static Response getResponse(Request request) {
+    public static void getResponse(Request request, Response response) {
         try {
-            HandlerAdapter handlerAdapter = new HandlerAdapter();
-            return handlerAdapter.mapping(request);
+            var handlerAdapter = new HandlerAdapter();
+            var controller = handlerAdapter.mapping(request);
+            controller.service(request, response);
         } catch (UnauthorizedException unauthorizedException) {
-            return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"), "401.html");
+            response.badResponse(HttpStatus.UNAUTHORIZED, Resource.getFile("401.html"), "401.html");
         } catch (NoSuchApiException e) {
-            return Response.badResponse(HttpStatus.NOTFOUND).redirect(Resource.getFile("404.html"), "404.html");
+            response.badResponse(HttpStatus.NOTFOUND, Resource.getFile("404.html"), "404.html");
         }
     }
 }

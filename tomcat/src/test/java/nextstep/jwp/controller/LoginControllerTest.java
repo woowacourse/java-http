@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.Constant.SESSION_ID;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.OK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,10 +39,10 @@ class LoginControllerTest {
             loginController.doPost(request, response);
 
             // then
-            String sessionKey = response.getCookie().get("JSESSIONID");
+            String sessionKey = response.getCookie().get(SESSION_ID);
             assertAll(
                 () -> assertThat(response.getHttpStatus()).isEqualTo(FOUND),
-                () -> assertThat(response.getCookie()).containsKey("JSESSIONID"),
+                () -> assertThat(response.getCookie()).containsKey(SESSION_ID),
                 () -> assertUserInSession(request, sessionKey)
             );
         }

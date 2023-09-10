@@ -15,10 +15,7 @@ public abstract class AbstractController implements Controller{
 
         if (request.getMethod() == HttpMethod.POST) {
             doPost(request, response);
-            return;
         }
-
-        //TODO
     }
 
     protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;

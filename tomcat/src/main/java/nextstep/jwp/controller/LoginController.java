@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.Constant.SESSION_ID;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +44,7 @@ public class LoginController extends AbstractController {
         SessionManager sessionManager = request.getSessionManager();
         Session session = sessionManager.createSession(uuid);
         session.setAttribute("user", user);
-        response.getCookie().put("JSESSIONID", uuid);
+        response.getCookie().put(SESSION_ID, uuid);
     }
 
     @Override
@@ -58,8 +60,8 @@ public class LoginController extends AbstractController {
 
     private boolean isLogin(HttpRequest request) {
         Map<String, String> cookie = request.getCookie();
-        if (cookie.get("JSESSIONID") != null) {
-            String sessionId = cookie.get("JSESSIONID");
+        if (cookie.get(SESSION_ID) != null) {
+            String sessionId = cookie.get(SESSION_ID);
             SessionManager sessionManager = request.getSessionManager();
             Session session = sessionManager.findSession(sessionId);
             if (session.getAttribute("user") != null) {

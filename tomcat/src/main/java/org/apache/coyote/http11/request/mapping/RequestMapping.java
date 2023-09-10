@@ -9,7 +9,7 @@ import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.ResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.exception.HttpRequestException;
+import org.apache.coyote.http11.request.exception.HttpRequestException.NotFoundMappingController;
 
 public class RequestMapping {
 
@@ -30,11 +30,10 @@ public class RequestMapping {
             return new ResourceController();
         }
 
-        for (String uri : requestMapingMap.keySet()) {
-            if (uri.equals(mappingUri)) {
-                return requestMapingMap.get(uri);
-            }
-        }
-        throw new HttpRequestException.NotFoundMappingController();
+        return requestMapingMap.keySet().stream()
+                .filter(uri -> uri.equals(mappingUri))
+                .map(requestMapingMap::get)
+                .findAny()
+                .orElseThrow(NotFoundMappingController::new);
     }
 }

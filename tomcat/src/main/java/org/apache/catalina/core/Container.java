@@ -1,6 +1,7 @@
 package org.apache.catalina.core;
 
 import java.util.Set;
+import javassist.NotFoundException;
 import org.apache.catalina.core.servlet.DefaultServlet;
 import org.apache.catalina.core.servlet.HttpServlet;
 import org.apache.catalina.core.servlet.HttpServletRequest;
@@ -23,7 +24,15 @@ public class Container {
         final var httpServletRequest = new HttpServletRequest(request, sessionManager);
         final var httpServletResponse = new HttpServletResponse();
 
-        return requestHandlerAdaptor.service(httpServletRequest, httpServletResponse);
+        try {
+            requestHandlerAdaptor.service(httpServletRequest, httpServletResponse);
+
+            return httpServletResponse.build();
+        } catch (final NotFoundException exception) {
+            return HttpServletResponse.notFound().build();
+        } catch (final Exception exception) {
+            return HttpServletResponse.internalSeverError().build();
+        }
     }
 
 }

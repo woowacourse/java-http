@@ -2,9 +2,9 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
+    private StatusLine statusLine;
     private final ResponseHeader responseHeader;
-    private final ResponseBody responseBody;
+    private ResponseBody responseBody;
 
     private HttpResponse(final StatusLine statusLine, final ResponseHeader responseHeader,
                          final ResponseBody responseBody) {
@@ -13,13 +13,8 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse createGetResponse(final StatusLine statusLine, final ResponseHeader responseHeader,
-                                                 final ResponseBody responseBody) {
-        return new HttpResponse(statusLine, responseHeader, responseBody);
-    }
-
-    public static HttpResponse createPostResponse(final StatusLine statusLine, final ResponseHeader responseHeader) {
-        return new HttpResponse(statusLine, responseHeader, null);
+    public static HttpResponse createEmpty() {
+        return new HttpResponse(null, ResponseHeader.createEmpty(), null);
     }
 
     public StatusLine getStatusLine() {
@@ -32,6 +27,18 @@ public class HttpResponse {
 
     public ResponseBody getResponseBody() {
         return responseBody;
+    }
+
+    public void setStatusLine(final StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void addResponseHeader(final String key, final String value) {
+        this.responseHeader.addHeader(key, value);
+    }
+
+    public void setResponseBody(final ResponseBody responseBody) {
+        this.responseBody = responseBody;
     }
 
     @Override

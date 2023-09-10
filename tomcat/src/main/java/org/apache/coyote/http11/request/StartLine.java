@@ -22,7 +22,7 @@ public class StartLine {
         String[] splitStartLine = startLine.split(START_LINE_DELIMITER);
 
         try {
-            HttpMethod httpMethod = HttpMethod.valueOf(splitStartLine[0]);
+            HttpMethod httpMethod = HttpMethod.findByValue(splitStartLine[0]);
             RequestTarget requestTarget = RequestTarget.create(splitStartLine[1]);
             HttpVersion httpVersion = HttpVersion.findByValue(splitStartLine[2]);
             return new StartLine(httpMethod, requestTarget, httpVersion);

@@ -1,14 +1,14 @@
 package nextstep;
 
 import java.util.Set;
-import nextstep.jwp.handler.LoginRequestHandler;
-import nextstep.jwp.handler.RegisterRequestHandler;
+import nextstep.jwp.servlet.LoginRequestServlet;
+import nextstep.jwp.servlet.RegisterRequestServlet;
 import org.apache.catalina.startup.Tomcat;
 
 public class Application {
 
     public static void main(final String[] args) {
         final var tomcat = new Tomcat();
-        tomcat.start(Set.of(new LoginRequestHandler(), new RegisterRequestHandler()));
+        tomcat.start(Set.of(new LoginRequestServlet(), new RegisterRequestServlet()));
     }
 }

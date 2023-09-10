@@ -6,35 +6,37 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.header.RequestHeader.COOKIE;
 
 public class Request {
 
-    public static final String SESSIONID_KEY = "JSESSIONID";
+    public static final String SESSION_ID_KEY = "jsessionid";
     private final RequestLine requestLine;
 
     private final Headers headers;
 
     private final RequestParameters requestParameters;
 
-    private final HttpCookie httpCookie;
+    private final Map<String, Cookie> cookies;
 
     private final Session session;
 
     private final String body;
 
-    public Request(final RequestLine requestLine,
+    private Request(final RequestLine requestLine,
                    final Headers headers,
                    final RequestParameters requestParameters,
-                   final HttpCookie httpCookie,
+                   final Map<String, Cookie> cookies,
                    final Session session,
                    final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestParameters = requestParameters;
-        this.httpCookie = httpCookie;
+        this.cookies = cookies;
         this.session = session;
         this.body = body;
     }
@@ -49,11 +51,11 @@ public class Request {
 
         final RequestParameters requestParameters = RequestParameters.of(requestLine, headers, body);
 
-        final HttpCookie httpCookie = HttpCookie.from(headers.getValue(COOKIE));
+        final Map<String, Cookie> cookies = Cookie.getCookies(headers.getValue(COOKIE));
 
-        final Session session = SessionManager.findSession(httpCookie.findCookie(SESSIONID_KEY));
+        final Session session = SessionManager.findSession(cookies.getOrDefault(SESSION_ID_KEY.toLowerCase(), Cookie.EMPTY_COOKIE).getValue());
 
-        return new Request(requestLine, headers, requestParameters, httpCookie, session, body);
+        return new Request(requestLine, headers, requestParameters, cookies, session, body);
     }
 
     private static List<String> getHeader(final BufferedReader bufferedReader) throws IOException {
@@ -61,7 +63,7 @@ public class Request {
         String nextLine;
         while (!"".equals(nextLine = bufferedReader.readLine())) {
             if (nextLine == null) {
-                throw new RuntimeException("헤더가 잘못되었습니다.");
+                throw new IllegalStateException("헤더가 잘못되었습니다.");
             }
             requestHeaderLines.add(nextLine);
         }
@@ -80,8 +82,17 @@ public class Request {
         return requestLine.isMatching(requestPath, requestMethod);
     }
 
+    public void addParameter(final String key,
+                               final String value) {
+        requestParameters.addParamter(key, value);
+    }
+
     public String getParameter(final String parameterKey) {
         return requestParameters.getValue(parameterKey);
+    }
+
+    public Optional<Cookie> getCookie(final String key) {
+        return Optional.ofNullable(cookies.get(key));
     }
 
     public RequestLine getRequestLine() {
@@ -94,10 +105,6 @@ public class Request {
 
     public RequestParameters getRequestParameters() {
         return requestParameters;
-    }
-
-    public HttpCookie getHttpCookie() {
-        return httpCookie;
     }
 
     public Session getSession() {
@@ -114,7 +121,7 @@ public class Request {
                 "requestLine=" + requestLine +
                 ", headers=" + headers +
                 ", requestParameters=" + requestParameters +
-                ", httpCookie=" + httpCookie +
+                ", cookies=" + cookies +
                 ", body='" + body + '\'' +
                 '}';
     }

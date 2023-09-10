@@ -49,6 +49,10 @@ public class RequestParameters {
         return "";
     }
 
+    public void addParamter(final String key, final String value) {
+        requestParameters.put(key, value);
+    }
+
     public String getValue(final String key) {
         return requestParameters.get(key);
     }

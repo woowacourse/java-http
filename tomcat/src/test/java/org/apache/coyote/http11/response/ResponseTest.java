@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
-import org.apache.coyote.http11.request.HttpCookie;
+import org.apache.coyote.http11.request.Cookie;
 import org.apache.coyote.http11.request.Request;
 import org.junit.jupiter.api.Test;
 
@@ -114,12 +114,15 @@ class ResponseTest {
     @Test
     void 쿠키를_추가한다() {
         //given
-        // TODO: 9/10/23 쿠키 보완
+        final Cookie cookie = new Cookie("a", "1");
+        final Response response = new Response();
 
         //when
+        response.addCookie(cookie);
 
         //then
-
+        final String actual = response.parseString();
+        assertThat(actual).contains("Set-Cookie: a=1");
     }
     
     @Test

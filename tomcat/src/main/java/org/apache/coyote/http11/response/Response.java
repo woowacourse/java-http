@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.header.Header;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.RequestHeader;
+import org.apache.coyote.http11.request.Cookie;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.Session;
 
@@ -11,7 +12,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
@@ -22,7 +27,11 @@ import static org.apache.coyote.http11.response.StatusCode.*;
 public class Response {
 
     private final StatusLine statusLine;
+
     private final Headers headers;
+
+    private final Map<String, Cookie> cookies;
+
     private String body;
 
     public Response() {
@@ -36,8 +45,16 @@ public class Response {
     public Response(final StatusLine statusLine,
                     final Headers headers,
                     final String body) {
+        this(statusLine, headers, new HashMap<>(), body);
+    }
+
+    private Response(final StatusLine statusLine,
+                    final Headers headers,
+                    final Map<String, Cookie> cookies,
+                    final String body) {
         this.statusLine = statusLine;
         this.headers = headers;
+        this.cookies = cookies;
         this.body = body;
     }
 
@@ -61,6 +78,16 @@ public class Response {
                 headers.parseResponse(),
                 "",
                 body);
+    }
+
+    public void addCookie(final Cookie cookie) {
+        cookies.put(cookie.getKey(), cookie);
+
+        String setCookieValue = cookies.keySet().stream()
+                .map(key -> key + "=" + cookies.get(key).getValue())
+                .collect(Collectors.joining("; "));
+
+        headers.addHeader(SET_COOKIE, setCookieValue);
     }
 
     public void writeBody(final String content) {
@@ -108,17 +135,13 @@ public class Response {
         headers.addHeader(header, value);
     }
 
-    public void decideHeaders(final Request request) {
-        addJSessionId(request);
-        decideContentLength();
-    }
-
     public void addJSessionId(final Request request) {
         final Session session = request.getSession();
         final String sessionId = session.getId();
-        final String sessionIdCookie = request.getHttpCookie().findCookie("JSESSIONID");
-        if (!Objects.equals(sessionIdCookie, sessionId)) {
-            headers.addHeader(SET_COOKIE, "JSESSIONID=" + sessionId);
+        final Optional<Cookie> sessionIdCookie = request.getCookie("JSESSIONID");
+        if (sessionIdCookie.isEmpty() || !Objects.equals(sessionIdCookie.get().getKey(), sessionId)) {
+            final Cookie cookie = new Cookie("JSESSIONID", session.getId());
+            addCookie(cookie);
         }
     }
 
@@ -128,6 +151,11 @@ public class Response {
         final String contentTypeValue = decideResponseContentType(acceptHeaderValue, requestPath);
         headers.addHeader(CONTENT_TYPE, contentTypeValue);
     }
+
+    public void decideHeaders(final Request request) {
+        addJSessionId(request);
+    }
+
 
     private String decideResponseContentType(final String requestAcceptHeader,
                                              final String requestUri) {
@@ -167,6 +195,7 @@ public class Response {
         return "Response{" +
                 "statusLine=" + statusLine +
                 ", headers=" + headers +
+                ", cookies=" + cookies +
                 ", body='" + body + '\'' +
                 '}';
     }

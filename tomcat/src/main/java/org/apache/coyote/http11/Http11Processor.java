@@ -50,7 +50,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final Response response = handle(request);
 
-            response.decideHeaders(request);
+            response.init(request);
+
+            response.addJSessionId(request);
 
             outputStream.write(response.parseString().getBytes());
             outputStream.flush();

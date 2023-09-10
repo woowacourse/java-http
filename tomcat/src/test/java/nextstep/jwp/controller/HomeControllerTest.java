@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.request.line.HttpMethod.GET;
-import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
+import static common.ResponseStatus.OK;
+import static org.apache.coyote.request.line.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,9 +10,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.line.HttpMethod;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.line.HttpMethod;
+import org.apache.coyote.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;

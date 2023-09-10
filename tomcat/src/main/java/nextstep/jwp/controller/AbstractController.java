@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 

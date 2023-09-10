@@ -1,14 +1,14 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.request.line.HttpMethod.GET;
-import static org.apache.coyote.http11.request.line.HttpMethod.POST;
-import static org.apache.coyote.http11.response.header.HttpHeader.SET_COOKIE;
-import static org.apache.coyote.http11.response.line.ResponseStatus.FOUND;
-import static org.apache.coyote.http11.response.line.ResponseStatus.OK;
+import static common.ResponseStatus.FOUND;
+import static common.ResponseStatus.OK;
+import static org.apache.coyote.request.line.HttpMethod.GET;
+import static org.apache.coyote.request.line.HttpMethod.POST;
+import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
 
 import nextstep.jwp.service.AuthService;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 

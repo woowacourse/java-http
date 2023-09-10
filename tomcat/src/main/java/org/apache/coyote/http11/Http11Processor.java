@@ -8,10 +8,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.RequestMapping;
-import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestReader;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.HttpRequestReader;
+import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

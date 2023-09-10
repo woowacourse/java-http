@@ -5,10 +5,10 @@ import static org.apache.coyote.http11.common.MimeType.HTML;
 import java.io.IOException;
 import java.util.Objects;
 import javassist.NotFoundException;
-import org.apache.catalina.SessionManager.Session;
 import org.apache.catalina.servlet.util.ResourceReader;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.session.SessionManager.Session;
 
 public class ViewController implements HandlerAdaptor {
 

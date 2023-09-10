@@ -1,8 +1,8 @@
-package org.apache.catalina;
+package org.apache.coyote.http11.session;
 
 import java.io.IOException;
 import java.util.Optional;
-import org.apache.catalina.SessionManager.Session;
+import org.apache.coyote.http11.session.SessionManager.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a particular Container.  Different Manager

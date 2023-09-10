@@ -15,12 +15,8 @@ import org.apache.coyote.header.HttpCookie;
 import org.apache.coyote.http11.handler.Controller;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LoginPageController implements Controller {
-
-    private static final Logger log = LoggerFactory.getLogger(LoginPageController.class);
 
     @Override
     public boolean support(HttpRequest request) {

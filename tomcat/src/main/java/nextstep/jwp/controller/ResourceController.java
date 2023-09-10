@@ -10,12 +10,8 @@ import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.header.ContentType;
 import org.apache.coyote.http11.handler.Controller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ResourceController implements Controller {
-
-    private static final Logger log = LoggerFactory.getLogger(ResourceController.class);
 
     @Override
     public boolean support(HttpRequest request) {

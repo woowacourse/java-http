@@ -1,13 +1,13 @@
 package nextstep.jwp.security;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
     private static final Manager sessionManager = new SessionManager();
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

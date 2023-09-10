@@ -7,7 +7,8 @@ public enum HttpStatus {
     UNAUTHORIZED(401),
     NOT_FOUND(404),
     NOT_ACCEPTABLE(406),
-    CONFLICT(409);
+    CONFLICT(409),
+    INTERNAL_SERVER_ERROR(500);
 
     private final int statusCode;
 

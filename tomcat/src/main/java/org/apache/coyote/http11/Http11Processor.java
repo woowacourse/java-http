@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Controller;
@@ -32,10 +33,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-            final var outputStream = connection.getOutputStream()) {
-
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
+            final var outputStream = connection.getOutputStream();
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             final HttpRequest httpRequest = HttpRequest.from(reader);
             final Controller handler = UrlHandlerMapping.getHandler(httpRequest);
             final HttpResponse httpResponse = HttpResponse.create();
@@ -44,16 +44,18 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.convertToMessage().getBytes());
             outputStream.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void service(final HttpRequest httpRequest, final HttpResponse httpResponse, final Controller handler) throws Exception {
+    private void service(final HttpRequest httpRequest, final HttpResponse httpResponse, final Controller handler) {
         try {
             handler.service(httpRequest, httpResponse);
         } catch (UnsupportedContentTypeException e) {
             httpResponse.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
+        } catch (Exception e) {
+            httpResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

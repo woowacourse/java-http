@@ -36,13 +36,20 @@ public class HttpRequest {
 
     private static MessageBody createRequestBody(BufferedReader br, RequestHeaders headers) throws IOException {
         if (headers.hasNotHeader(HttpHeaderName.CONTENT_TYPE.getValue())) {
-            return MessageBody.from("");
+            return MessageBody.empty();
         }
-        int contentLength = Integer.parseInt(headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue()));
-        char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
+        String contentLength = headers.getHeaderValue(HttpHeaderName.CONTENT_LENGTH.getValue());
+        if (contentLength == null) {
+            contentLength = String.valueOf(0);
+        }
+        char[] buffer = new char[Integer.parseInt(contentLength)];
+        br.read(buffer, 0, Integer.parseInt(contentLength));
         String requestBody = new String(buffer);
         return MessageBody.from(requestBody);
+    }
+
+    public boolean isParamRequest() {
+        return requestLine.getRequestUri().isContainsQueryParam();
     }
 
     public String getHeader(final String headerKey) {
@@ -84,6 +91,10 @@ public class HttpRequest {
             return ContentType.APPLICATION_JAVASCRIPT.getValue() + CHARSET_UTF_8;
         }
         return ContentType.TEXT_HTML.getValue() + CHARSET_UTF_8;
+    }
+
+    public String getMappingUri() {
+        return requestLine.getMappingUri();
     }
 
     public RequestLine getRequestLine() {

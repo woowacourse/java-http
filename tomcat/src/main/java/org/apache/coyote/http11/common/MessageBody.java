@@ -15,6 +15,10 @@ public class MessageBody {
         return new MessageBody(messageBody);
     }
 
+    public static MessageBody empty() {
+        return new MessageBody("");
+    }
+
     public int getBodyLength() {
         return value.getBytes().length;
     }

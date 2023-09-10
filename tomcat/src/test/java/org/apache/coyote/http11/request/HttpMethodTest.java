@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.stream.Stream;
-import org.apache.coyote.http11.request.exception.HttpMethodNotAllowedException;
+import org.apache.coyote.http11.request.exception.HttpRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,7 +42,7 @@ class HttpMethodTest {
 
         // when & then
         assertThatThrownBy(() -> HttpMethod.findHttpMethod(notExistHttpMethodName))
-                .isInstanceOf(HttpMethodNotAllowedException.class)
-                .hasMessage("허용되지 않는 HTTP Method입니다.");
+                .isInstanceOf(HttpRequestException.MethodNotAllowed.class)
+                .hasMessage("허용되지 않는 HTTP Method 입니다.");
     }
 }

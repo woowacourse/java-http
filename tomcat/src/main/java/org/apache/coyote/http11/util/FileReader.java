@@ -7,6 +7,9 @@ import java.nio.file.Files;
 
 public class FileReader {
 
+    private FileReader() {
+    }
+
     public static String read(final String resourcePath) throws IOException {
         final URL resource = FileReader.class.getClassLoader().getResource("static" + resourcePath);
         if (resource == null) {

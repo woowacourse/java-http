@@ -1,15 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.HandlerAdapter;
-import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.exception.HttpRequestException;
+import org.apache.coyote.http11.request.mapping.RequestMapping;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +40,16 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            HttpRequest httpRequest = HttpRequest.from(br, startLine);
+            HttpRequest request = HttpRequest.from(br, startLine);
 
-            RequestHandler handler = HandlerAdapter.findRequestHandler(httpRequest.getRequestUri());
-            HttpResponse response = handler.handle(httpRequest);
+            Controller controller = RequestMapping.getController(request);
+            HttpResponse response = controller.service(request);
 
             outputStream.write(response.convertToBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (HttpRequestException httpRequestException) {
+            log.warn(httpRequestException.getMessage(), httpRequestException);
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

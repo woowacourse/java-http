@@ -1,13 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
@@ -15,16 +14,16 @@ public class HttpRequest {
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
+    private static final String QUERY_STRING_SYMBOL = "?";
 
     private static final String DOT = ".";
-    private static final String QUERY_STRING_SYMBOL = "?";
 
     private final HttpMethod method;
     private final String uri;
     private final String version;
-    private final Map<String, String> headers = new HashMap<>();
-    private HttpCookie cookie;
-    private Map<String, String> requestBody;
+    private Headers headers;
+    private RequestBody requestBody;
+    private QueryString queryString;
 
     public HttpRequest(String requestApi) {
         final String[] apiInfo = requestApi.split(REQUEST_API_DELIMITER);
@@ -51,39 +50,28 @@ public class HttpRequest {
         this.version = apiInfo[HTTP_VERSION_INDEX];
         initHeaders(bufferedReader);
         initRequestBody(bufferedReader);
+        initQueryString();
     }
 
     private void initHeaders(final BufferedReader bufferedReader) throws IOException {
-        String line = "";
-
-        while (!(line = bufferedReader.readLine()).isBlank()) {
-            final String[] headerInfo = line.split(":");
-            final String headerName = headerInfo[0];
-            final String value = headerInfo[1].trim();
-
-            if (headerName.equals("Cookie")) {
-                cookie = new HttpCookie(value);
-            }
-            headers.put(headerName, value);
-        }
+        headers = Headers.from(bufferedReader);
     }
 
     private void initRequestBody(final BufferedReader bufferedReader) throws IOException {
-        if (headers.containsKey("Content-Length")) {
-            this.requestBody = new HashMap<>();
+        if (headers.containsHeader("Content-Length")) {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            String requestBodyBuffer = new String(buffer);
-
-            final String[] requestBodies = requestBodyBuffer.split("&");
-            for (String body : requestBodies) {
-                final String[] requestBodyInfo = body.split("=");
-                final String requestBodyName = requestBodyInfo[0];
-                final String requestBodyValue = requestBodyInfo[1];
-                this.requestBody.put(requestBodyName, requestBodyValue);
-            }
+            requestBody = RequestBody.of(bufferedReader, contentLength);
         }
+    }
+
+    private void initQueryString() {
+        if (hasQueryString()) {
+            this.queryString = QueryString.of(uri);
+        }
+    }
+
+    public boolean hasQueryString() {
+        return uri.contains(QUERY_STRING_SYMBOL);
     }
 
     public String getUri() {
@@ -92,10 +80,6 @@ public class HttpRequest {
             return uri.substring(0, queryIndex);
         }
         return uri;
-    }
-
-    public boolean hasQueryString() {
-        return uri.contains(QUERY_STRING_SYMBOL);
     }
 
     public boolean isStaticRequest() {
@@ -107,23 +91,8 @@ public class HttpRequest {
         return uri.substring(dotIndex + 1);
     }
 
-    public Map<String, String> getQueryString() {
-        if (!hasQueryString()) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> result = new HashMap<>();
-        final int queryIndex = uri.indexOf(QUERY_STRING_SYMBOL);
-        final String[] queryParameters = uri.substring(queryIndex + 1).split("&");
-        for (String queryParameter : queryParameters) {
-            final String[] queryKeyAndValue = queryParameter.split("=");
-            if (queryKeyAndValue.length != 2) {
-                throw new IllegalArgumentException("잘못된 Query String 입니다.");
-            }
-            final String key = queryKeyAndValue[0];
-            final String value = queryKeyAndValue[1];
-            result.put(key, value);
-        }
-        return result;
+    public QueryString getQueryString() {
+        return queryString;
     }
 
     public boolean isGetRequest() {
@@ -134,16 +103,17 @@ public class HttpRequest {
         return Objects.nonNull(requestBody);
     }
 
-    public Map<String, String> getRequestBody() {
+    public RequestBody getRequestBody() {
         return requestBody;
     }
 
     public boolean hasCookie() {
-        return Objects.nonNull(cookie);
+        return headers.hasCookie();
     }
 
     public boolean hasJSessionId() {
         if (hasCookie()) {
+            final HttpCookie cookie = headers.getCookie();
             return cookie.hasJSessionId();
         }
         return false;
@@ -151,6 +121,7 @@ public class HttpRequest {
 
     public Session getSession(boolean create) {
         if (hasJSessionId()) {
+            final HttpCookie cookie = headers.getCookie();
             final String jsessionid = cookie.getJsessionid();
             Session session = SessionManager.findSession(jsessionid);
             if (Objects.nonNull(session)) {

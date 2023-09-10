@@ -7,25 +7,15 @@ import java.util.Map;
 
 public class Session {
 
-    private SessionManager sessionManager = new SessionManager();
-    private Map<String, String> attributes = new HashMap<>();
-    private String id;
+    private final Map<String, Object> attributes = new HashMap<>();
+    private final String id;
 
     public Session() {
         this.id = randomUUID().toString();
-        sessionManager.add(this);
     }
 
-    public Session(String id) {
-        this.id = id;
-    }
-
-    public void setAttribute(String key, String value) {
+    public void setAttribute(String key, Object value) {
         attributes.put(key, value);
-    }
-
-    public String getAttribute(String key) {
-        return attributes.get(key);
     }
 
     public String id() {

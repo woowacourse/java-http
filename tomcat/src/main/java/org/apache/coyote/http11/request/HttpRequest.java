@@ -5,6 +5,7 @@ import org.apache.coyote.http11.request.body.HttpBodyLine;
 import org.apache.coyote.http11.request.start.HttpExtension;
 import org.apache.coyote.http11.request.start.HttpMethod;
 import org.apache.coyote.http11.request.start.HttpStartLine;
+import org.apache.coyote.http11.request.start.HttpVersion;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -38,6 +39,9 @@ public class HttpRequest {
 
     public HttpStartLine getHttpStartLine() {
         return httpStartLine;
+    }
+    public HttpVersion getHttpVersion() {
+        return httpStartLine.getHttpVersion();
     }
 
     public HttpHeadersLine getHttpHeadersLine() {

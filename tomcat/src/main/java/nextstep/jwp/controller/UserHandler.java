@@ -3,19 +3,19 @@ package nextstep.jwp.controller;
 import nextstep.jwp.controller.dto.Response;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.servlet.adapter.AbstractHandler;
-import org.apache.coyote.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-public class UserController extends AbstractHandler {
+public class UserHandler extends AbstractHandler {
     private final UserService userService = new UserService();
 
 
     @Override
-    protected ResponseEntity doPost(final HttpRequest request) {
+    protected void doPost(final HttpRequest request ,final HttpResponse httpResponse) {
         try {
             if (request.getPath().equals("/login")) {
                 final String account = validateValue(request, "account");
@@ -23,7 +23,9 @@ public class UserController extends AbstractHandler {
                 final UUID newSessionId = userService.login(account, password);
                 final Response response = new Response(HttpStatus.FOUND);
                 response.setCookie(newSessionId);
-                return ResponseEntity.found(response, "index.html");
+                httpResponse.setHeader(request.getHttpVersion(), response.getHttpStatus(), response.getResponseHeader());
+                httpResponse.setRedirect("index.html");
+                return;
             }
             if (request.getPath().equals("/register")) {
                 final String account = validateValue(request, "account");
@@ -32,23 +34,16 @@ public class UserController extends AbstractHandler {
                 final UUID newSessionId = userService.register(account, password, email);
                 final Response response = new Response(HttpStatus.FOUND);
                 response.setCookie(newSessionId);
-                return ResponseEntity.found(response, "index.html");
+                httpResponse.setHeader(request.getHttpVersion(), response.getHttpStatus(), response.getResponseHeader());
+                httpResponse.setRedirect("index.html");
+                return;
             }
-            return ResponseEntity.found(new Response(HttpStatus.FOUND), "401.html");
+            httpResponse.setHttpStatus(request.getHttpVersion(), HttpStatus.FOUND);
+            httpResponse.setRedirect("401.html");
         } catch (NoSuchElementException e) {
-            return ResponseEntity.found(new Response(HttpStatus.FOUND), "401.html");
+            httpResponse.setHttpStatus(request.getHttpVersion(), HttpStatus.FOUND);
+            httpResponse.setRedirect("404.html");
         }
-    }
-
-    @Override
-    protected ResponseEntity doGet(final HttpRequest request) {
-        if (request.getPath().equals("/login")) {
-            return ResponseEntity.forward(HttpStatus.FOUND, "/login.html");
-        }
-        if (request.getPath().equals("/register")) {
-            return ResponseEntity.forward(HttpStatus.FOUND, "/register.html");
-        }
-        return ResponseEntity.found(new Response(HttpStatus.FOUND),"/404.html");
     }
 
     private String validateValue(final HttpRequest request, final String key) {

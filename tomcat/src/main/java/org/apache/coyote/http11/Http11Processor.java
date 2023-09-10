@@ -1,9 +1,5 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.controller.HomeController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -39,7 +35,6 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader);
              final OutputStream outputStream = connection.getOutputStream()) {
             final var httpRequest = HttpRequest.from(bufferedReader);
-
             final String response = handleRequest(httpRequest);
 
             outputStream.write(response.getBytes());
@@ -50,27 +45,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleRequest(final HttpRequest httpRequest) throws IOException {
-        final String uri = httpRequest.getRequestLine().getPath();
-        final String path = uri.split("\\?")[0];
-
         final var httpResponse = HttpResponse.createEmpty();
-        if (path.equals("/")) {
-            final var homeController = new HomeController();
-            homeController.service(httpRequest, httpResponse);
-            return httpResponse.toString();
-        }
-        if (path.equals("/login")) {
-            final var loginController = new LoginController();
-            loginController.service(httpRequest, httpResponse);
-            return httpResponse.toString();
-        }
-        if (path.equals("/register")) {
-            final var registerController = new RegisterController();
-            registerController.service(httpRequest, httpResponse);
-            return httpResponse.toString();
-        }
-        final var resourceController = new ResourceController();
-        resourceController.service(httpRequest, httpResponse);
+        final var controller = RequestMapping.getController(httpRequest);
+        controller.service(httpRequest, httpResponse);
         return httpResponse.toString();
     }
 }

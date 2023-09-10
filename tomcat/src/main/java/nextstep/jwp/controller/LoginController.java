@@ -29,41 +29,37 @@ public class LoginController extends AbstractController {
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info(user.toString());
 
-            response = loginSuccess(user);
+            loginSuccess(user, response);
 
         } else if (user.isPresent()) {
             log.warn("비밀번호가 틀렸습니다");
 
-            response = loginFail();
+            loginFail(response);
 
         } else {
             log.warn("미가입회원입니다");
 
-            response = loginFail();
+            loginFail(response);
         }
     }
 
-    private HttpResponse loginSuccess(Optional<User> user) {
+    private void loginSuccess(Optional<User> user, HttpResponse response) {
         Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session);
 
         HttpCookie cookie = HttpCookie.of("JSESSIONID=" + session.getId());
 
-        return new HttpResponse.Builder()
-                .status(FOUND)
-                .contentType(HTML)
-                .header("Location", "/index.html")
-                .setCookie(cookie)
-                .build();
+        response.setStatus(FOUND);
+        response.setContentType(HTML);
+        response.addHeader("Location", "/index.html");
+        response.setCookie(cookie);
     }
 
-    private HttpResponse loginFail() {
-        return new HttpResponse.Builder()
-                .status(FOUND)
-                .contentType(HTML)
-                .header("Location", "/401.html")
-                .build();
+    private void loginFail(HttpResponse response) {
+        response.setStatus(FOUND);
+        response.setContentType(HTML);
+        response.addHeader("Location", "/401.html");
     }
 
 
@@ -75,17 +71,14 @@ public class LoginController extends AbstractController {
         Session session = SessionManager.findSession(jsessionid);
 
         if (session != null) {
-            response = new HttpResponse.Builder()
-                    .status(FOUND)
-                    .header("Location", "/index.html")
-                    .contentType(HTML)
-                    .build();
+            response.setStatus(FOUND);
+            response.addHeader("Location", "/index.html");
+            response.setContentType(HTML);
+            return;
         }
 
-        response = new HttpResponse.Builder()
-                .status(OK)
-                .contentType(HTML)
-                .body(FileUtils.readFile("/login.html"))
-                .build();
+        response.setStatus(OK);
+        response.setContentType(HTML);
+        response.setBody(FileUtils.readFile("/login.html"));
     }
 }

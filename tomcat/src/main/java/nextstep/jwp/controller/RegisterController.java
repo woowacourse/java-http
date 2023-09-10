@@ -28,20 +28,16 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        response = new HttpResponse.Builder()
-                .status(FOUND)
-                .contentType(HTML)
-                .header("Location", "/index.html")
-                .build();
+        response.setStatus(FOUND);
+        response.setContentType(HTML);
+        response.addHeader("Location", "/index.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         RequestUri requestUri = request.getRequestLine().getRequestUri();
 
-        response = new HttpResponse.Builder()
-                .contentType(ContentType.from(requestUri.getExtension()))
-                .body(FileUtils.readFile("/register.html"))
-                .build();
+        response.setContentType(ContentType.from(requestUri.getExtension()));
+        response.setBody(FileUtils.readFile("/register.html"));
     }
 }

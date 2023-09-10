@@ -83,13 +83,11 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        HttpResponse expected = new HttpResponse.Builder()
-                .status(OK)
-                .contentType(HTML)
-                .header("Content-Length", String.valueOf(responseBody.length()))
-                .body(responseBody)
-                .build();
-
+        HttpResponse expected = HttpResponse.createDefaultResponse();
+        expected.setStatus(OK);
+        expected.setContentType(HTML);
+        expected.addHeader("Content-Length", String.valueOf(responseBody.length()));
+        expected.setBody(responseBody);
 
         assertThat(socket.output()).isEqualTo(expected.getResponse());
     }

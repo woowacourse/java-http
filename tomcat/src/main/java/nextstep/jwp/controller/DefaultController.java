@@ -12,9 +12,7 @@ public class DefaultController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         RequestUri requestUri = request.getRequestLine().getRequestUri();
 
-        response = new HttpResponse.Builder()
-                .contentType(ContentType.from(requestUri.getExtension()))
-                .body(FileUtils.readFile(requestUri.getPath()))
-                .build();
+        response.setContentType(ContentType.from(requestUri.getExtension()));
+        response.setBody(FileUtils.readFile(requestUri.getPath()));
     }
 }

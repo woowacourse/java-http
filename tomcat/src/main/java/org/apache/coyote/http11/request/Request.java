@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +21,7 @@ public class Request {
         this.body = body;
     }
 
-    public static Request from(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public static Request from(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
         valid(line);
         final RequestLine requestLine = RequestLine.from(line);

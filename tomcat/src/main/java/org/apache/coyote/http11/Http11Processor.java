@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.config.LoginFilter;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -31,10 +33,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            final Request request = Request.from(inputStream);
+            final Request request = Request.from(bufferedReader);
             Response response = new Response();
 
             FilterChainManager filterChainManager = new FilterChainManager();

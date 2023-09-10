@@ -32,6 +32,13 @@ public class Cookie {
                 ));
     }
 
+    public Cookie() {
+    }
+
+    public void setSession(Session session) {
+        elements.put("JSESSIONID", session.getId());
+    }
+
     public void put(final String key, final String value) {
         elements.put(key, value);
     }

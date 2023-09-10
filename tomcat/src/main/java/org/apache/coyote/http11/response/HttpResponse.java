@@ -17,24 +17,23 @@ public class HttpResponse {
 
     private ResponseLine responseLine;
     private ResponseHeaders responseHeaders;
-    private String responseBody;
+    private ResponseBody responseBody;
 
     public HttpResponse() {
         this.responseLine = new ResponseLine();
         this.responseHeaders = new ResponseHeaders();
-        this.responseBody = "";
+        this.responseBody = new ResponseBody();
     }
 
     public void redirect(String redirectionFile) {
         this.responseLine.redirect(HTTP_1_1);
         this.responseHeaders.addHeader(LOCATION.getResponseHeaderName(), redirectionFile);
-        this.responseBody = "";
     }
 
     public void ok(String fileData, ContentType contentType) {
         this.responseHeaders.addHeader(CONTENT_TYPE.getResponseHeaderName(), contentType.getHttpContentType());
         this.responseHeaders.addHeader(CONTENT_LENGTH.getResponseHeaderName(), String.valueOf(fileData.getBytes().length));
-        this.responseBody = fileData;
+        this.responseBody.setResponseBody(fileData);
     }
 
     public void addCookie(String key, String value) {
@@ -47,7 +46,7 @@ public class HttpResponse {
                 generateStatus(),
                 generateHeader(),
                 "",
-                responseBody
+                responseBody.getResponseBody()
         );
     }
 

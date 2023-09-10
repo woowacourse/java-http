@@ -22,22 +22,18 @@ public class RequestHeader {
 	}
 
 	public String findCookie(final String key) {
-		final var optionalCookie = cookies.stream()
+		return cookies.stream()
 			.filter(cookie -> Objects.equals(key, cookie.getKey()))
-			.findAny();
-		if (optionalCookie.isEmpty()) {
-			return null;
-		}
-		return optionalCookie.get().getValue();
+			.findAny()
+			.map(Cookie::getValue)
+			.orElse(null);
 	}
 
 	public String findSession() {
-		final var optionalCookie = cookies.stream()
+		return cookies.stream()
 			.filter(Cookie::isSession)
-			.findAny();
-		if (optionalCookie.isEmpty()) {
-			return null;
-		}
-		return optionalCookie.get().getValue();
+			.findAny()
+			.map(Cookie::getValue)
+			.orElse(null);
 	}
 }

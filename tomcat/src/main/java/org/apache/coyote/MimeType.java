@@ -21,13 +21,10 @@ public enum MimeType {
 
 	public static MimeType fromPath(final String path) {
 		validatePath(path);
-		final var optionalMimeType = Arrays.stream(values())
+		return Arrays.stream(values())
 			.filter(mimeType -> path.endsWith(mimeType.fileExtension))
-			.findAny();
-		if (optionalMimeType.isEmpty()) {
-			throw new IllegalArgumentException("지원하지 않는 파일 확장자입니다.");
-		}
-		return optionalMimeType.get();
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("지원하지 않는 파일 확장자입니다."));
 	}
 
 	private static void validatePath(final String path) {

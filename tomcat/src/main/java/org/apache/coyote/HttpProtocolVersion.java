@@ -1,5 +1,7 @@
 package org.apache.coyote;
 
+import java.util.Arrays;
+
 public enum HttpProtocolVersion {
 	HTTP11("HTTP/1.1"),
 	;
@@ -11,12 +13,10 @@ public enum HttpProtocolVersion {
 	}
 
 	public static HttpProtocolVersion version(String version) {
-		for (final HttpProtocolVersion value : values()) {
-			if (value.version.equals(version)) {
-				return value;
-			}
-		}
-		throw new IllegalArgumentException("지원하지 않는 HTTP 프로토콜 버전입니다.");
+		return Arrays.stream(values())
+			.filter(value -> value.version.equals(version))
+			.findAny()
+			.orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 프로토콜 버전입니다."));
 	}
 
 	public String getVersion() {

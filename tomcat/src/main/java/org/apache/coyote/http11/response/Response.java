@@ -7,6 +7,7 @@ import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
 
+import org.apache.catalina.servlet.util.StaticResource;
 import org.apache.coyote.http11.common.Protocol;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.common.header.EntityHeaders;
@@ -37,48 +38,49 @@ public class Response {
         this.body = body;
     }
 
-    public Response(final Builder builder) {
-        this(
-                new StatusLine(Protocol.HTTP11, builder.status),
-                builder.generalHeaders,
-                builder.responseHeaders,
-                builder.entityHeaders,
-                builder.body
-        );
+    public Response(final ServletResponse servletResponse) {
+        this(new StatusLine(Protocol.HTTP11, servletResponse.status),
+                servletResponse.generalHeaders,
+                servletResponse.responseHeaders,
+                servletResponse.entityHeaders,
+                servletResponse.body);
     }
 
-    public static Builder ok() {
-        return new Builder(OK);
+    public static ServletResponse ok() {
+        return new ServletResponse(OK);
     }
 
-    public static Builder notFound() {
-        return new Builder(NOT_FOUND);
+    public static ServletResponse notFound() {
+        return new ServletResponse(NOT_FOUND);
     }
 
-    public static Builder redirect(final String location) {
+    public static ServletResponse redirect(final String location) {
         return Response.builder(FOUND)
                 .addContentType(HTML.toString())
                 .addLocation(location);
     }
 
-    public static Builder methodNotAllowed() {
+    public static ServletResponse methodNotAllowed() {
         return Response.builder(METHOD_NOT_ALLOWED);
     }
 
-    public static Builder builder(final Status status) {
-        return new Builder(status);
+    public static ServletResponse builder(final Status status) {
+        return new ServletResponse(status);
     }
 
-    public static Builder internalSeverError() {
+    // TODO ServletResponse 클래스 분리
+    public static ServletResponse internalSeverError() {
         return Response.builder(INTERNAL_SERVER_ERROR);
+    }
+
+    public static ServletResponse staticResource(final StaticResource staticResource) {
+        return Response.ok()
+                .body(staticResource.getContentBytes())
+                .addContentType(staticResource.getContentType());
     }
 
     public Status getStatus() {
         return statusLine.getStatus();
-    }
-
-    public String getLocation() {
-        return responseHeaders.getLocation();
     }
 
     public String getContentType() {
@@ -107,33 +109,45 @@ public class Response {
                 body);
     }
 
-    public static class Builder {
-        private final Status status;
+    public static class ServletResponse {
         private final GeneralHeaders generalHeaders = new GeneralHeaders();
         private final ResponseHeaders responseHeaders = new ResponseHeaders();
         private final EntityHeaders entityHeaders = new EntityHeaders();
+        private Status status;
         private String body;
 
-        public Builder(final Status status) {
+        public ServletResponse() {
+        }
+
+        public ServletResponse(final Status status) {
             this.status = status;
         }
 
-        public Builder addSetCookie(final String cookie) {
+        // TODO ServeletResponse 대신 ResponseEntity 사용
+        public void set(final ServletResponse response) {
+            generalHeaders.addAll(response.generalHeaders);
+            responseHeaders.addAll(response.responseHeaders);
+            entityHeaders.addAll(response.entityHeaders);
+            status = response.status;
+            body = response.body;
+        }
+
+        public ServletResponse addSetCookie(final String cookie) {
             this.responseHeaders.addSetCookie(cookie);
             return this;
         }
 
-        public Builder addLocation(final String location) {
+        public ServletResponse addLocation(final String location) {
             this.responseHeaders.addLocation(location);
             return this;
         }
 
-        public Builder addContentType(final String contentType) {
+        public ServletResponse addContentType(final String contentType) {
             this.entityHeaders.addContentType(contentType);
             return this;
         }
 
-        public Builder body(final String body) {
+        public ServletResponse body(final String body) {
             this.body = body;
             this.entityHeaders.addContentLength(body);
             return this;
@@ -146,5 +160,20 @@ public class Response {
             return new Response(this);
         }
 
+        public Status getStatus() {
+            return status;
+        }
+
+        public void setStatus(final Status status) {
+            this.status = status;
+        }
+
+        public String getBody() {
+            return body;
+        }
+
+        public String getLocation() {
+            return responseHeaders.getLocation();
+        }
     }
 }

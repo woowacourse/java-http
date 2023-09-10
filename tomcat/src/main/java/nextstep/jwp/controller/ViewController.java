@@ -1,13 +1,12 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.common.MimeType.HTML;
-
 import java.io.IOException;
 import java.util.Objects;
 import javassist.NotFoundException;
 import org.apache.catalina.servlet.util.ResourceReader;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.Response.ServletResponse;
 import org.apache.coyote.http11.session.SessionManager.Session;
 
 public class ViewController implements Controller {
@@ -15,52 +14,25 @@ public class ViewController implements Controller {
     private ViewController() {
     }
 
-    public static Response login(final Request request) {
+    public static ServletResponse login(final Request request) throws NotFoundException, IOException {
         return responseByLogin(request.getSession(), "/login.html");
     }
 
-    public static Response register(final Request request) {
+    public static ServletResponse register(final Request request) throws NotFoundException, IOException {
         return responseByLogin(request.getSession(), "/register.html");
     }
 
-    private static Response responseByLogin(final Session session, final String redirectUri) {
+    private static ServletResponse responseByLogin(final Session session, final String redirectUri)
+            throws NotFoundException, IOException {
         if (isLoginUser(session)) {
-            return Response.redirect("index.html")
-                    .build();
+            return Response.redirect("index.html");
         }
 
-        return createResourceResponse(redirectUri);
+        return Response.staticResource(ResourceReader.read(redirectUri));
     }
 
     private static boolean isLoginUser(final Session session) {
         return Objects.nonNull(session.getAttribute("user"));
-    }
-
-    private static Response createResourceResponse(final String fileName) {
-        try {
-            /// TODO: 2023/09/07 여기서 ResourceReader를 아는 게 맞을까?
-            final var resource = ResourceReader.read(fileName);
-            final var responseBody = resource.getContentBytes();
-
-            return Response.ok()
-                    .body(responseBody)
-                    .addContentType(resource.getContentType())
-                    .build();
-        } catch (final IOException e) {
-            return Response.internalSeverError().build();
-        } catch (final NotFoundException e) {
-            return Response.notFound().build();
-        }
-    }
-
-    public static Response resource(final Request request) {
-        if ("/".equals(request.getUri())) {
-            return Response.ok()
-                    .body("Hello world!")
-                    .addContentType(HTML.toString())
-                    .build();
-        }
-        return createResourceResponse(request.getPath());
     }
 
 }

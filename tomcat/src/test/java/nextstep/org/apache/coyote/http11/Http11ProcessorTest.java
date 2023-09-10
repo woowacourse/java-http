@@ -1,6 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
-import static nextstep.org.apache.coyote.http11.DispatcherServletFixture.DISPATCHER_SERVLET;
+import static nextstep.org.apache.coyote.http11.DispatcherServletFixture.REQUEST_HANDLER_ADAPTOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -21,7 +21,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, DISPATCHER_SERVLET);
+        final var processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
 
         // when
         processor.process(socket);
@@ -48,13 +48,14 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
+        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
 
         // when
         processor.process(socket);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        assert resource != null;
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8",
@@ -76,7 +77,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
+        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
 
         // when
         processor.process(socket);
@@ -102,7 +103,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
+        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
 
         // when
         processor.process(socket);
@@ -128,7 +129,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
+        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
 
         // when
         processor.process(socket);

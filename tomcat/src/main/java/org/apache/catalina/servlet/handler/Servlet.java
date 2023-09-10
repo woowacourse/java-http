@@ -2,9 +2,11 @@ package org.apache.catalina.servlet.handler;
 
 import static org.apache.coyote.http11.common.Method.GET;
 import static org.apache.coyote.http11.common.Method.POST;
+import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.Response.ServletResponse;
 
 public abstract class Servlet implements RequestHandler {
 
@@ -15,14 +17,14 @@ public abstract class Servlet implements RequestHandler {
     }
 
     @Override
-    public Response service(final Request request) {
+    public void service(final Request request, final ServletResponse response) throws Exception {
         if (request.getMethod() == GET) {
-            return doGet(request);
+            doGet(request, response);
         }
         if (request.getMethod() == POST) {
-            return doPost(request);
+            doPost(request, response);
         }
-        return Response.methodNotAllowed()
+        Response.methodNotAllowed()
                 .build();
     }
 
@@ -30,14 +32,12 @@ public abstract class Servlet implements RequestHandler {
         return mappingPath;
     }
 
-    protected Response doPost(final Request request) {
-        return Response.methodNotAllowed()
-                .build();
+    protected void doGet(final Request request, final ServletResponse response) throws Exception {
+        response.setStatus(METHOD_NOT_ALLOWED);
     }
 
-    protected Response doGet(final Request request) {
-        return Response.methodNotAllowed()
-                .build();
+    protected void doPost(final Request request, final ServletResponse response) {
+        response.setStatus(METHOD_NOT_ALLOWED);
     }
 
 }

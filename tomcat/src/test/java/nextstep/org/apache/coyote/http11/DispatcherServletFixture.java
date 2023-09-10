@@ -7,7 +7,7 @@ import org.apache.catalina.servlet.RequestHandlerAdaptor;
 
 public class DispatcherServletFixture {
 
-    public static final RequestHandlerAdaptor DISPATCHER_SERVLET = new RequestHandlerAdaptor(
+    public static final RequestHandlerAdaptor REQUEST_HANDLER_ADAPTOR = new RequestHandlerAdaptor(
             Set.of(new LoginRequestHandler(), new RegisterRequestHandler())
     );
 }

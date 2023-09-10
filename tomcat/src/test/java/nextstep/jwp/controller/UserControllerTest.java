@@ -9,7 +9,7 @@ import java.util.Map;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.Response.ServletResponse;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.session.SessionManager.Session;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +24,7 @@ class UserControllerTest {
     void loginSuccess() {
         final Session session = sessionManager.findOrCreate(randomUUID().toString());
 
-        final Response response = UserController.login(
+        final ServletResponse response = UserController.login(
                 Request.of("post", "/login", HTTP11.getValue(),
                         Map.of(COOKIE.getValue(), Cookies.ofJSessionId(session.getId())),
                         "account=gugu&password=password"));
@@ -38,7 +38,7 @@ class UserControllerTest {
     void loginFail() {
         final Session session = sessionManager.findOrCreate(randomUUID().toString());
 
-        final Response response = UserController.login(
+        final ServletResponse response = UserController.login(
                 Request.of("post", "/login", HTTP11.getValue(),
                         Map.of(COOKIE.getValue(), Cookies.ofJSessionId(session.getId())),
                         "account=dodo&password=password"));

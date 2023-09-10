@@ -1,14 +1,26 @@
 package org.apache.catalina.servlet.handler;
 
-import nextstep.jwp.controller.ViewController;
+import static org.apache.coyote.http11.common.MimeType.HTML;
+import static org.apache.coyote.http11.response.Response.staticResource;
+
+import org.apache.catalina.servlet.util.ResourceReader;
+import org.apache.catalina.servlet.util.StaticResource;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.Response.ServletResponse;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 
+    private static final StaticResource DEFAULT_RESPONSE = new StaticResource("Hello world!", HTML.toString());
+
     @Override
-    public Response service(final Request request) {
-        return ViewController.resource(request);
+    public void service(final Request request, final ServletResponse response) throws Exception {
+        if ("/".equals(request.getUri())) {
+            response.set(staticResource(DEFAULT_RESPONSE));
+            return;
+        }
+
+        final var resource = ResourceReader.read(request.getUri());
+        response.set(staticResource(resource));
     }
 
 }

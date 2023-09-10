@@ -7,14 +7,14 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.QueryParameters;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.Response.ServletResponse;
 
 public class UserController implements Controller {
 
     private UserController() {
     }
 
-    public static Response login(final Request request) {
+    public static ServletResponse login(final Request request) {
         final var form = QueryParameters.from(request.getBody());
         final var account = form.findSingleByKey("account");
         final var password = form.findSingleByKey("password");
@@ -22,32 +22,29 @@ public class UserController implements Controller {
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .map(user -> redirectLoginUser(request, user))
-                .orElseGet(() -> redirect("/401.html").build());
+                .orElseGet(() -> redirect("/401.html"));
     }
 
-    private static Response redirectLoginUser(final Request request, final User user) {
+    private static ServletResponse redirectLoginUser(final Request request, final User user) {
         final var session = request.getSession();
         session.setAttribute("user", user);
 
         return redirect("/index.html")
-                .addSetCookie(Cookies.ofJSessionId(session.getId()))
-                .build();
+                .addSetCookie(Cookies.ofJSessionId(session.getId()));
     }
 
-    public static Response register(final Request request) {
+    public static ServletResponse register(final Request request) {
         final var form = QueryParameters.from(request.getBody());
         final var account = form.findSingleByKey("account");
         final var email = form.findSingleByKey("email");
         final var password = form.findSingleByKey("password");
 
         if (InMemoryUserRepository.isExistByAccount(account)) {
-            return redirect("/401.html")
-                    .build();
+            return redirect("/401.html");
         }
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return redirect("/index.html")
-                .build();
+        return redirect("/index.html");
     }
 
 }

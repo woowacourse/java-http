@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class HttpRequestCookiesTest {
 
     @Test
-    void request_cookies_생성_테스트() {
+    void http_request_cookies_생성_테스트() {
         String jsessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
         String cookies = "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + jsessionId;
 

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class HttpRequestStartLineTest {
 
     @Test
-    void request_start_line_생성_테스트() {
+    void http_request_start_line_생성_테스트() {
         String startLine = "GET /index.html HTTP/1.1";
         HttpRequestStartLine httpRequestStartLine = HttpRequestStartLine.of(startLine);
 

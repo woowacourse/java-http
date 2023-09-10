@@ -11,7 +11,7 @@ public class Response {
 
     private final HttpResponseHeaders httpResponseHeaders;
     private HttpResponseStartLine httpResponseStartLine;
-    private String responseBody;
+    private String responseBody = "";
 
     public Response() {
         this.httpResponseHeaders = HttpResponseHeaders.empty();

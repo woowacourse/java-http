@@ -11,13 +11,24 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
 
     @Test
-    void httpResponse_생성_테스트() {
+    void http_response_생성_테스트() {
         Response response = new Response();
         response.setHttpResponseStartLine(StatusCode.OK);
         response.addHeader("Content-Type", "text/html; charset=utf-8");
         byte[] body = "Hello World".getBytes();
         response.setResponseBody(body);
 
-        Assertions.assertThat(response.getResponseBody()).isEqualTo("Hello World");
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setHttpResponseStartLine(response.getHttpResponseStartLine());
+        httpResponse.setHttpResponseHeaders(response.getHttpResponseHeaders());
+        httpResponse.setResponseBody(response.getResponseBody());
+
+        String expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html; charset=utf-8\r\n" +
+                "Content-Length: " + body.length + "\r\n" +
+                "\r\n" +
+                "Hello World";
+
+        Assertions.assertThat(httpResponse.generateResponse()).isEqualTo(expected.getBytes());
     }
 }

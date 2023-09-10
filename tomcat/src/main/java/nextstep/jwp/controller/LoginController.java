@@ -41,7 +41,6 @@ public class LoginController extends AbstractController {
                 user -> login(request, response, user, requestParam),
                 () -> response.sendRedirect("/401.html")
         );
-
     }
 
     private void login(

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class HttpRequestHttpResponseHeadersTest {
     @Test
-    void request_헤더_생성_테스트() throws IOException {
+    void http_request_헤더_생성_테스트() throws IOException {
         final String request = String.join("\r\n",
                 "Host: localhost:8080",
                 "Connection: keep-alive",

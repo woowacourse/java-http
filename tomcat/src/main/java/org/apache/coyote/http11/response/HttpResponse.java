@@ -48,4 +48,8 @@ public class HttpResponse {
     public void setBody(final String body) {
         this.body = body;
     }
+
+    public boolean isEmpty() {
+        return statusLine.isEmpty();
+    }
 }

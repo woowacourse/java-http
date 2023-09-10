@@ -6,10 +6,10 @@ import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
+import org.apache.catalina.servlet.handler.ServletResponse;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response.ServletResponse;
 import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.session.SessionManager.Session;
 import org.junit.jupiter.api.DisplayName;

@@ -1,14 +1,14 @@
 package org.apache.catalina.servlet;
 
-import static org.apache.coyote.http11.response.Response.internalSeverError;
-import static org.apache.coyote.http11.response.Response.notFound;
+import static org.apache.catalina.servlet.handler.ServletResponse.internalSeverError;
+import static org.apache.catalina.servlet.handler.ServletResponse.notFound;
 
 import java.util.Set;
 import javassist.NotFoundException;
 import org.apache.catalina.servlet.handler.Servlet;
+import org.apache.catalina.servlet.handler.ServletResponse;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.response.Response.ServletResponse;
 
 public class RequestHandlerAdaptor {
 

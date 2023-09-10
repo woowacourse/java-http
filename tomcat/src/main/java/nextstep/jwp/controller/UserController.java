@@ -1,14 +1,15 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.http11.response.Response.redirect;
+import static org.apache.catalina.servlet.handler.ServletResponse.redirect;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.servlet.handler.ServletResponse;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.QueryParameters;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response.ServletResponse;
 
+/// TODO: 2023/09/10 http11 의존하지 않게 만들기
 public class UserController implements Controller {
 
     private UserController() {

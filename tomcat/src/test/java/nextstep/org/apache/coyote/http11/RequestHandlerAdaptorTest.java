@@ -8,10 +8,10 @@ import static org.apache.coyote.http11.common.header.HeaderName.ACCEPT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
+import org.apache.catalina.servlet.handler.ServletResponse;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.response.Response.ServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

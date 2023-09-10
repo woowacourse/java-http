@@ -27,12 +27,16 @@ public abstract class Headers {
 
     public abstract boolean isType(String headerName);
 
+    public void addAll(final Headers headers) {
+        values.putAll(headers.values);
+    }
+
     protected void add(final HeaderName headerName, final String headerValue) {
         values.put(headerName.getValue(), headerValue);
     }
 
-    public void addAll(final Headers headers) {
-        values.putAll(headers.values);
+    public Map<String, String> values() {
+        return new HashMap<>(values);
     }
 
     protected boolean contains(final HeaderName headerName) {

@@ -1,12 +1,11 @@
 package org.apache.catalina.servlet.handler;
 
+import static org.apache.catalina.servlet.handler.ServletResponse.staticResource;
 import static org.apache.coyote.http11.common.MimeType.HTML;
-import static org.apache.coyote.http11.response.Response.staticResource;
 
 import org.apache.catalina.servlet.util.ResourceReader;
 import org.apache.catalina.servlet.util.StaticResource;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response.ServletResponse;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 

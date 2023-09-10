@@ -7,6 +7,9 @@ import org.apache.coyote.request.RequestUri;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.utils.FileUtils;
 
+import static org.apache.coyote.common.ContentType.HTML;
+import static org.apache.coyote.response.HttpStatus.FOUND;
+
 public class DefaultController extends AbstractController {
 
     private static final Controller INSTANCE = new DefaultController();
@@ -19,7 +22,15 @@ public class DefaultController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         RequestUri requestUri = request.getRequestLine().getRequestUri();
 
-        response.setContentType(ContentType.from(requestUri.getExtension()));
-        response.setBody(FileUtils.readFile(requestUri.getPath()));
+
+        try {
+            FileUtils.readFile(requestUri.getPath());
+            response.setContentType(ContentType.from(requestUri.getExtension()));
+            response.setBody(FileUtils.readFile(requestUri.getPath()));
+        } catch (NullPointerException e) {
+            response.setStatus(FOUND);
+            response.setContentType(HTML);
+            response.addHeader("Location", "/404.html");
+        }
     }
 }

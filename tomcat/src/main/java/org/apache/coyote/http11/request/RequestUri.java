@@ -9,7 +9,7 @@ public class RequestUri {
     private final String queryString;
 
     private RequestUri(final String path,
-                      final String queryString) {
+                       final String queryString) {
         this.path = path;
         this.queryString = queryString;
     }

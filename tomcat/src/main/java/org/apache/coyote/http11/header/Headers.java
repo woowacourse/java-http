@@ -16,7 +16,7 @@ public class Headers {
     private final Map<Header, String> headers = new LinkedHashMap<>();
 
     public void addHeader(final Header header,
-                            final String value) {
+                          final String value) {
         headers.put(header, value);
     }
 

@@ -14,6 +14,7 @@ public class Session {
     public Session() {
         this(UUID.randomUUID().toString(), LocalDateTime.now().plusDays(1));
     }
+
     public Session(final String id) {
         this(id, LocalDateTime.now().plusDays(1));
     }
@@ -23,7 +24,6 @@ public class Session {
         this.id = id;
         this.expiredAt = expiredAt;
     }
-
 
 
     public Object getAttribute(final String name) {
@@ -44,7 +44,7 @@ public class Session {
         expiredAt = LocalDateTime.now();
     }
 
-    private void validate(){
+    private void validate() {
         if (expiredAt.isBefore(LocalDateTime.now())) {
             throw new RuntimeException("유효기간이 지난 세션입니다");
         }

@@ -22,7 +22,7 @@ public class RequestParameters {
                                        final String body) {
         final String requestParameters = extractRequestParameters(requestLine, headers, body);
         final Map<String, String> requestQueryParameters = new HashMap<>();
-        if (requestParameters == null || "".equals(requestParameters)){
+        if (requestParameters == null || "".equals(requestParameters)) {
             return new RequestParameters(requestQueryParameters);
         }
         final String[] queryStringsNameAndValue = requestParameters.split("&");

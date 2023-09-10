@@ -28,11 +28,11 @@ public class Request {
     private final String body;
 
     private Request(final RequestLine requestLine,
-                   final Headers headers,
-                   final RequestParameters requestParameters,
-                   final Map<String, Cookie> cookies,
-                   final Session session,
-                   final String body) {
+                    final Headers headers,
+                    final RequestParameters requestParameters,
+                    final Map<String, Cookie> cookies,
+                    final Session session,
+                    final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestParameters = requestParameters;
@@ -71,7 +71,7 @@ public class Request {
     }
 
     private static String getBody(final BufferedReader bufferedReader, final Headers headers) throws IOException {
-        final String contentLengthValue = headers.getValue(CONTENT_LENGTH) ;
+        final String contentLengthValue = headers.getValue(CONTENT_LENGTH);
         final int contentLength = "".equals(contentLengthValue) ? 0 : Integer.parseInt(contentLengthValue);
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
@@ -83,7 +83,7 @@ public class Request {
     }
 
     public void addParameter(final String key,
-                               final String value) {
+                             final String value) {
         requestParameters.addParamter(key, value);
     }
 

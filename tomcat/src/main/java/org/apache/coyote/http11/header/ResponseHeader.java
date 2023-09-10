@@ -4,8 +4,7 @@ public enum ResponseHeader implements Header {
 
     LOCATION("Location"),
     SET_COOKIE("Set-Cookie"),
-    EXPIRES("Expires")
-    ;
+    EXPIRES("Expires");
 
     final String value;
 

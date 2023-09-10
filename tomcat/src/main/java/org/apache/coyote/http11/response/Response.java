@@ -49,9 +49,9 @@ public class Response {
     }
 
     private Response(final StatusLine statusLine,
-                    final Headers headers,
-                    final Map<String, Cookie> cookies,
-                    final String body) {
+                     final Headers headers,
+                     final Map<String, Cookie> cookies,
+                     final String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.cookies = cookies;
@@ -161,7 +161,7 @@ public class Response {
                                              final String requestUri) {
         String responseFileExtension = requestUri.substring(requestUri.indexOf(".") + 1);
         if ("text/css".equals(requestAcceptHeader) || "css".equals(responseFileExtension)) {
-            return  "text/css,*/*;q=0.1";
+            return "text/css,*/*;q=0.1";
         }
         if ("application/javascript".equals(requestAcceptHeader) || "js".equals(responseFileExtension)) {
             return "application/javascript;charset=utf-8";

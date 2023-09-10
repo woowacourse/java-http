@@ -78,10 +78,13 @@ public class Connector implements Runnable {
             process(serverSocket.accept());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final Socket connection) throws InterruptedException {
         if (connection == null) {
             return;
         }
@@ -89,7 +92,7 @@ public class Connector implements Runnable {
             maxThreadSemaphore.acquire();
         } catch (InterruptedException e) {
             log.error("Interruption Exception occur ", e);
-            throw new RuntimeException(e);
+            throw e;
         }
 
         var processor = new Http11Processor(connection, container.createServlet());

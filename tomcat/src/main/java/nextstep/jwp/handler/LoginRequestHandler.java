@@ -2,6 +2,8 @@ package nextstep.jwp.handler;
 
 import static org.apache.coyote.response.StatusCode.*;
 
+import java.util.Optional;
+
 import org.apache.catalina.AbstractHandler;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -30,20 +32,40 @@ public class LoginRequestHandler extends AbstractHandler {
 
 	@Override
 	protected void doGet(final Request request, final Response response) {
-		if (isSessionExist(request)) {
-			response.redirect(REDIRECT_LOCATION);
-			return;
-		}
-		response.setStatusCode(StatusCode.OK);
-		response.setResponseBody(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
+		findAccountInSession(request)
+			.ifPresentOrElse(
+				account -> {
+					logSuccess(account);
+					response.redirect(REDIRECT_LOCATION);
+				},
+				() -> {
+					response.setStatusCode(StatusCode.OK);
+					response.setResponseBody(ResourceProvider.provide(LOGIN_PAGE_PATH),
+						MimeType.fromPath(LOGIN_PAGE_PATH));
+				});
 	}
 
-	private boolean isSessionExist(final Request request) {
-		final var sessionId = request.findSession();
-		if (sessionId == null) {
-			return false;
+	private void logSuccess(final String account) {
+		log.info("[LOGIN SUCCESS] account: {}", account);
+	}
+
+	private Optional<String> findAccountInSession(final Request request) {
+		final var sessionId = request.findSessionId();
+		if (sessionId.isEmpty()) {
+			return Optional.empty();
 		}
-		return SessionManager.findById(sessionId) != null;
+
+		final var session = SessionManager.findById(sessionId.get());
+		if (session == null) {
+			return Optional.empty();
+		}
+
+		final var account = session.getAttribute("account");
+		if (account == null) {
+			return Optional.empty();
+		}
+
+		return Optional.of(account);
 	}
 
 	@Override
@@ -68,7 +90,7 @@ public class LoginRequestHandler extends AbstractHandler {
 		final var session = createSession(user.get());
 		final var cookie = Cookie.session(session.getId());
 
-		log.info("[LOGIN SUCCESS] account: {}", account);
+		logSuccess(account);
 		response.redirect(REDIRECT_LOCATION);
 		response.addCookie(cookie);
 	}
@@ -83,7 +105,7 @@ public class LoginRequestHandler extends AbstractHandler {
 
 	private Session createSession(final User user) {
 		final var session = Session.create();
-		session.setAttribute("user", user);
+		session.setAttribute("account", user.getAccount());
 		SessionManager.add(session);
 		return session;
 	}

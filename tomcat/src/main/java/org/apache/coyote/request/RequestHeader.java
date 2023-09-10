@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.coyote.Cookie;
 
@@ -21,19 +22,17 @@ public class RequestHeader {
 		return headers.get(key);
 	}
 
-	public String findCookie(final String key) {
+	public Optional<String> findCookie(final String key) {
 		return cookies.stream()
 			.filter(cookie -> Objects.equals(key, cookie.getKey()))
 			.findAny()
-			.map(Cookie::getValue)
-			.orElse(null);
+			.map(Cookie::getValue);
 	}
 
-	public String findSession() {
+	public Optional<String> findSessionId() {
 		return cookies.stream()
 			.filter(Cookie::isSession)
 			.findAny()
-			.map(Cookie::getValue)
-			.orElse(null);
+			.map(Cookie::getValue);
 	}
 }

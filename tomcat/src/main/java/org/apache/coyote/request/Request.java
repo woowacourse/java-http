@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import java.util.Optional;
+
 import org.apache.coyote.HttpMethod;
 
 public class Request {
@@ -7,7 +9,7 @@ public class Request {
 	private final RequestLine requestLine;
 	private final RequestHeader header;
 	private final RequestBody body;
-	
+
 	public Request(final RequestLine requestLine, final RequestHeader header,
 		final RequestBody body) {
 		this.requestLine = requestLine;
@@ -31,12 +33,12 @@ public class Request {
 		return requestLine.findQueryParam(key);
 	}
 
-	public String findCookie(final String key) {
+	public Optional<String> findCookie(final String key) {
 		return header.findCookie(key);
 	}
 
-	public String findSession() {
-		return header.findSession();
+	public Optional<String> findSessionId() {
+		return header.findSessionId();
 	}
 
 	public String getPath() {

@@ -7,7 +7,7 @@ import java.util.UUID;
 public class Session {
 
 	private final String id;
-	private final Map<String, Object> attributes = new HashMap<>();
+	private final Map<String, String> attributes = new HashMap<>();
 
 	public Session(final String id) {
 		this.id = id;
@@ -22,11 +22,11 @@ public class Session {
 		return id;
 	}
 
-	public Map<String, Object> getAttributes() {
-		return attributes;
+	public String getAttribute(final String key) {
+		return attributes.get(key);
 	}
 
-	public void setAttribute(final String name, final Object value) {
+	public void setAttribute(final String name, final String value) {
 		attributes.put(name, value);
 	}
 

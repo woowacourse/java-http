@@ -15,12 +15,6 @@ public class HttpResponse {
         body = Body.EMPTY;
     }
 
-    public HttpResponse(StatusLine statusLine, Header header, Body body) {
-        this.statusLine = statusLine;
-        this.header = header;
-        this.body = body;
-    }
-
     public void setStatus(HttpStatus httpStatus) {
         statusLine = new StatusLine(HttpVersion.HTTP11, httpStatus);
     }

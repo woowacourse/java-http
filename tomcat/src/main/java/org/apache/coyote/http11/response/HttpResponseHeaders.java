@@ -19,8 +19,8 @@ public class HttpResponseHeaders {
         Map<String, String> headers = new HashMap<>();
         headers.putAll(responseEntity.getHeaders());
         if (body.isPresent()) {
-            headers.put("Content-Type: ", typeOf(responseEntity));
-            headers.put("Content-Length: ", body.get().getBytes().length + " ");
+            headers.put("Content-Type", typeOf(responseEntity));
+            headers.put("Content-Length", body.get().getBytes().length + " ");
         }
         return new HttpResponseHeaders(headers);
     }

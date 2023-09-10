@@ -1,11 +1,10 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.core;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlet.handler.RequestHandler;
-import org.apache.catalina.servlet.handler.Servlet;
-import org.apache.catalina.servlet.handler.StaticResourceRequestHandler;
+import org.apache.catalina.core.servlet.Servlet;
+import org.apache.catalina.core.servlet.StaticResourceRequestHandler;
 import org.apache.coyote.http11.request.Request;
 
 public class RequestMapping {

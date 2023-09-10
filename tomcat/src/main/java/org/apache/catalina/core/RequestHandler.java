@@ -1,5 +1,6 @@
-package org.apache.catalina.servlet.handler;
+package org.apache.catalina.core;
 
+import org.apache.catalina.core.servlet.ServletResponse;
 import org.apache.coyote.http11.request.Request;
 
 public interface RequestHandler {

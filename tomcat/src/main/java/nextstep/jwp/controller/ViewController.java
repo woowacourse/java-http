@@ -3,8 +3,8 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.util.Objects;
 import javassist.NotFoundException;
-import org.apache.catalina.servlet.handler.ServletResponse;
-import org.apache.catalina.servlet.util.ResourceReader;
+import org.apache.catalina.core.servlet.ServletResponse;
+import org.apache.catalina.core.util.ResourceReader;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.session.SessionManager.Session;
 

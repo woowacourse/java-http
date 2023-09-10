@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.util;
+package org.apache.catalina.core.util;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

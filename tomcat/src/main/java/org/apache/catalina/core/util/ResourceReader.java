@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.util;
+package org.apache.catalina.core.util;
 
 import java.io.IOException;
 import java.net.URL;

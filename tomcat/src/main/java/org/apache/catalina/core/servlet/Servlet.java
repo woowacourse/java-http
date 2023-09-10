@@ -1,10 +1,11 @@
-package org.apache.catalina.servlet.handler;
+package org.apache.catalina.core.servlet;
 
-import static org.apache.catalina.servlet.handler.ServletResponse.methodNotAllowed;
+import static org.apache.catalina.core.servlet.ServletResponse.methodNotAllowed;
 import static org.apache.coyote.http11.common.Method.GET;
 import static org.apache.coyote.http11.common.Method.POST;
 import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 
+import org.apache.catalina.core.RequestHandler;
 import org.apache.coyote.http11.request.Request;
 
 public abstract class Servlet implements RequestHandler {
@@ -25,7 +26,7 @@ public abstract class Servlet implements RequestHandler {
             doPost(request, response);
             return;
         }
-        methodNotAllowed().build();
+        response.set(methodNotAllowed());
     }
 
     public String getMappingPath() {

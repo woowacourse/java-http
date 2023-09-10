@@ -3,8 +3,8 @@ package org.apache.catalina.startup;
 import java.io.IOException;
 import java.util.Set;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.servlet.RequestHandlerAdaptor;
-import org.apache.catalina.servlet.handler.Servlet;
+import org.apache.catalina.core.RequestHandlerAdaptor;
+import org.apache.catalina.core.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

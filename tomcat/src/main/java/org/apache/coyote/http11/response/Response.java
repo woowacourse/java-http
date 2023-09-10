@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.catalina.servlet.handler.ServletResponse;
+import org.apache.catalina.core.servlet.ServletResponse;
 import org.apache.coyote.http11.common.Protocol;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.common.header.EntityHeaders;

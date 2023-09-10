@@ -4,8 +4,8 @@ import java.io.IOException;
 import javassist.NotFoundException;
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.controller.ViewController;
-import org.apache.catalina.servlet.handler.Servlet;
-import org.apache.catalina.servlet.handler.ServletResponse;
+import org.apache.catalina.core.servlet.Servlet;
+import org.apache.catalina.core.servlet.ServletResponse;
 import org.apache.coyote.http11.request.Request;
 
 public class LoginRequestHandler extends Servlet {

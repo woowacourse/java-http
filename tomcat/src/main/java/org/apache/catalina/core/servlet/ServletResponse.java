@@ -1,4 +1,4 @@
-package org.apache.catalina.servlet.handler;
+package org.apache.catalina.core.servlet;
 
 import static org.apache.coyote.http11.common.MimeType.HTML;
 import static org.apache.coyote.http11.common.Status.FOUND;
@@ -7,7 +7,7 @@ import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
 
-import org.apache.catalina.servlet.util.StaticResource;
+import org.apache.catalina.core.util.StaticResource;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.common.header.EntityHeaders;
 import org.apache.coyote.http11.common.header.GeneralHeaders;

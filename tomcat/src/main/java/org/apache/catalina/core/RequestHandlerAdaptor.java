@@ -1,12 +1,12 @@
-package org.apache.catalina.servlet;
+package org.apache.catalina.core;
 
-import static org.apache.catalina.servlet.handler.ServletResponse.internalSeverError;
-import static org.apache.catalina.servlet.handler.ServletResponse.notFound;
+import static org.apache.catalina.core.servlet.ServletResponse.internalSeverError;
+import static org.apache.catalina.core.servlet.ServletResponse.notFound;
 
 import java.util.Set;
 import javassist.NotFoundException;
-import org.apache.catalina.servlet.handler.Servlet;
-import org.apache.catalina.servlet.handler.ServletResponse;
+import org.apache.catalina.core.servlet.Servlet;
+import org.apache.catalina.core.servlet.ServletResponse;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 

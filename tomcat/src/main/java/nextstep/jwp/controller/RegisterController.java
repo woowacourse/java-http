@@ -13,9 +13,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setStatusCode(HttpStatusCode.OK);
         final String responseBody = ViewResolver.read("/register.html");
         response.setResponseBody(responseBody);
+        response.setStatusCode(HttpStatusCode.OK);
     }
 
     @Override
@@ -26,6 +26,6 @@ public class RegisterController extends AbstractController {
         final String email = requestBody.get("email");
         InMemoryUserRepository.save(new User(account, password, email));
         response.setStatusCode(HttpStatusCode.FOUND);
-        response.setHeader("Location", "/index.html");
+        response.setLocation("/index.html");
     }
 }

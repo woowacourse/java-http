@@ -25,13 +25,13 @@ public class LoginController extends AbstractController {
         final String sessionId = request.getCookie(Session.SESSION_KEY);
         final Session session = sessionManager.findSession(sessionId);
         if (session == null) {
-            response.setStatusCode(HttpStatusCode.OK);
             final String responseBody = ViewResolver.read("/login.html");
             response.setResponseBody(responseBody);
+            response.setStatusCode(HttpStatusCode.OK);
             return;
         }
         response.setStatusCode(HttpStatusCode.FOUND);
-        response.setHeader("Location", "/");
+        response.setLocation("/");
     }
 
     @Override
@@ -47,12 +47,12 @@ public class LoginController extends AbstractController {
             sessionManager.add(session);
             session.setAttribute(session.getId(), findUser.get());
             response.setStatusCode(HttpStatusCode.FOUND);
-            response.setHeader("Location", "/");
-            response.setHeader("Set-Cookie", Session.SESSION_KEY + "=" + session.getId());
+            response.setLocation("/");
+            response.setCookie(Session.SESSION_KEY, session.getId());
             log.info("로그인 성공! 로그인 아이디: " + account);
             return;
         }
         response.setStatusCode(HttpStatusCode.FOUND);
-        response.setHeader("Location", "/401.html");
+        response.setLocation("/401.html");
     }
 }

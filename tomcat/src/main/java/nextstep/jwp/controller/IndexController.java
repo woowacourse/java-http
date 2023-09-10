@@ -10,8 +10,8 @@ public class IndexController extends AbstractController {
 
     @Override
     public void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setStatusCode(HttpStatusCode.OK);
         final String responseBody = ViewResolver.read("/index.html");
         response.setResponseBody(responseBody);
+        response.setStatusCode(HttpStatusCode.OK);
     }
 }

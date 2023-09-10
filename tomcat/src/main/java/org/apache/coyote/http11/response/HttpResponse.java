@@ -32,12 +32,8 @@ public class HttpResponse {
 
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {
         String location = responseEntity.getLocation();
-        HttpResponseBody responseBody = responseEntity.getResponseBody();
         HttpStatus httpStatus = responseEntity.getHttpStatus();
-
-        if (responseBody == null) {
-            responseBody = findResponseBodyFrom(location);
-        }
+        HttpResponseBody responseBody = getOrCreateResponseBody(responseEntity, location);
 
         if (httpStatus == HttpStatus.FOUND) {
             HttpResponseHeaders headers = new HttpResponseHeaders()
@@ -60,6 +56,14 @@ public class HttpResponse {
                 .httpResponseHeaders(headers)
                 .httpResponseBody(responseBody)
                 .build();
+    }
+
+    private static HttpResponseBody getOrCreateResponseBody(ResponseEntity responseEntity, String location) throws IOException {
+        HttpResponseBody responseBody = responseEntity.getResponseBody();
+        if (responseBody == null) {
+            responseBody = findResponseBodyFrom(location);
+        }
+        return responseBody;
     }
 
     private static HttpResponseBody findResponseBodyFrom(String location) throws IOException {

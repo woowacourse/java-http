@@ -1,4 +1,4 @@
-package org.apache.coyote.handle;
+package nextstep.jwp.handle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,8 +26,7 @@ class ViewResolverTest {
             final HttpStatus httpStatus = HttpStatus.OK;
             final String page = "index.html";
 
-            final ViewResolver viewResolver = ViewResolver.getInstance();
-            viewResolver.renderPage(httpResponse, httpStatus, page);
+            ViewResolver.renderPage(httpResponse, httpStatus, page);
 
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             final String expected = String.join("\r\n",
@@ -46,8 +45,7 @@ class ViewResolverTest {
             final HttpStatus httpStatus = HttpStatus.OK;
             final String page = "hello.html";
 
-            final ViewResolver viewResolver = ViewResolver.getInstance();
-            viewResolver.renderPage(httpResponse, httpStatus, page);
+            ViewResolver.renderPage(httpResponse, httpStatus, page);
 
             final URL resource = getClass().getClassLoader().getResource("static/404.html");
             final String expected = String.join("\r\n",

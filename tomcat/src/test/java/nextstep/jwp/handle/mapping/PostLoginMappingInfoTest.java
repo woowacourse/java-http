@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.mapping;
+package nextstep.jwp.handle.mapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class HelloWorldMappingInfoTest {
+class PostLoginMappingInfoTest {
 
     @Nested
     class 요청_매핑_여부_확인 {
@@ -21,25 +21,7 @@ class HelloWorldMappingInfoTest {
         @Test
         void 요청_매핑이_가능하면_true_반환한다() throws Exception {
             final String httpRequestMessage = String.join("\r\n",
-                    "GET / HTTP/1.1",
-                    "Host: localhost:8080",
-                    "Connection: keep-alive",
-                    "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5"
-            );
-            final ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
-
-            final HelloWorldMappingInfo helloWorldMappingInfo = new HelloWorldMappingInfo();
-            final boolean result = helloWorldMappingInfo.support(httpRequest);
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 요청_매핑이_가능하지_않다면_false_반환한다() throws Exception {
-            final String httpRequestMessage = String.join("\r\n",
-                    "POST / HTTP/1.1",
+                    "POST /login HTTP/1.1",
                     "Host: localhost:8080",
                     "Connection: keep-alive",
                     "Content-Length: 12",
@@ -51,8 +33,26 @@ class HelloWorldMappingInfoTest {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
-            final HelloWorldMappingInfo helloWorldMappingInfo = new HelloWorldMappingInfo();
-            final boolean result = helloWorldMappingInfo.support(httpRequest);
+            final PostLoginMappingInfo postLoginMappingInfo = new PostLoginMappingInfo();
+            final boolean result = postLoginMappingInfo.support(httpRequest);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        void 요청_매핑이_가능하지_않다면_false_반환한다() throws Exception {
+            final String httpRequestMessage = String.join("\r\n",
+                    "GET /login HTTP/1.1",
+                    "Host: localhost:8080",
+                    "Connection: keep-alive",
+                    "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5"
+            );
+            final ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
+
+            final PostLoginMappingInfo postLoginMappingInfo = new PostLoginMappingInfo();
+            final boolean result = postLoginMappingInfo.support(httpRequest);
 
             assertThat(result).isFalse();
         }

@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.handler;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class FileHandlerTest {
+class FileControllerTest {
 
     @Test
     void GET_요청시_정적_파일을_반환한다() throws Exception {
@@ -31,8 +31,8 @@ class FileHandlerTest {
         final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-        final FileHandler fileHandler = new FileHandler();
-        fileHandler.doGet(httpRequest, httpResponse);
+        final FileController fileController = FileController.getInstance();
+        fileController.doGet(httpRequest, httpResponse);
 
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final String expected = String.join("\r\n",

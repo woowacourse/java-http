@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.handler;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class HelloWorldHandlerTest {
+class HelloWorldControllerTest {
 
     @Test
     void GET_요청시_HELLO_WORLD를_응답한다() throws Exception {
@@ -29,8 +29,8 @@ class HelloWorldHandlerTest {
         final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-        final HelloWorldHandler helloWorldHandler = new HelloWorldHandler();
-        helloWorldHandler.doGet(httpRequest, httpResponse);
+        final HelloWorldController helloWorldController = HelloWorldController.getInstance();
+        helloWorldController.doGet(httpRequest, httpResponse);
 
         final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",

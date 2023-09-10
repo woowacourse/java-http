@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.handler;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class LoginHandlerTest {
+class LoginControllerTest {
 
     @Nested
     class GET_요청_처리 {
@@ -41,8 +41,8 @@ class LoginHandlerTest {
             session.setAttribute("user", "user");
             SessionManager.add(session);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doGet(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doGet(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -65,8 +65,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doGet(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doGet(httpRequest, httpResponse);
 
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             final String expected = String.join("\r\n",
@@ -92,8 +92,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doGet(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doGet(httpRequest, httpResponse);
 
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             final String expected = String.join("\r\n",
@@ -126,8 +126,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doPost(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doPost(httpRequest, httpResponse);
 
             assertThat(httpResponse.toString())
                     .contains("HTTP/1.1 302 Found ", "Location: /index.html ", "Set-Cookie: JSESSIONID=");
@@ -149,8 +149,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doPost(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -177,8 +177,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doPost(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -205,8 +205,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doPost(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -233,8 +233,8 @@ class LoginHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final LoginHandler loginHandler = new LoginHandler();
-            loginHandler.doPost(httpRequest, httpResponse);
+            final LoginController loginController = LoginController.getInstance();
+            loginController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",

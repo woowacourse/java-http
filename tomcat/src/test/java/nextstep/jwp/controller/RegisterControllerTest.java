@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.handler;
+package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
     @Test
     void GET_요청시_등록_페이지를_반환한다() throws Exception {
@@ -32,8 +32,8 @@ class RegisterHandlerTest {
         final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-        final RegisterHandler registerHandler = new RegisterHandler();
-        registerHandler.doGet(httpRequest, httpResponse);
+        final RegisterController registerController = RegisterController.getInstance();
+        registerController.doGet(httpRequest, httpResponse);
 
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String expected = String.join("\r\n",
@@ -65,8 +65,8 @@ class RegisterHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final RegisterHandler registerHandler = new RegisterHandler();
-            registerHandler.doPost(httpRequest, httpResponse);
+            final RegisterController registerController = RegisterController.getInstance();
+            registerController.doPost(httpRequest, httpResponse);
 
             assertThat(httpResponse.toString())
                     .contains("HTTP/1.1 302 Found ", "Location: /index.html ", "Set-Cookie: JSESSIONID=");
@@ -88,8 +88,8 @@ class RegisterHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final RegisterHandler registerHandler = new RegisterHandler();
-            registerHandler.doPost(httpRequest, httpResponse);
+            final RegisterController registerController = RegisterController.getInstance();
+            registerController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -116,8 +116,8 @@ class RegisterHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final RegisterHandler registerHandler = new RegisterHandler();
-            registerHandler.doPost(httpRequest, httpResponse);
+            final RegisterController registerController = RegisterController.getInstance();
+            registerController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -144,8 +144,8 @@ class RegisterHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final RegisterHandler registerHandler = new RegisterHandler();
-            registerHandler.doPost(httpRequest, httpResponse);
+            final RegisterController registerController = RegisterController.getInstance();
+            registerController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
@@ -172,8 +172,8 @@ class RegisterHandlerTest {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_11);
 
-            final RegisterHandler registerHandler = new RegisterHandler();
-            registerHandler.doPost(httpRequest, httpResponse);
+            final RegisterController registerController = RegisterController.getInstance();
+            registerController.doPost(httpRequest, httpResponse);
 
             final String expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",

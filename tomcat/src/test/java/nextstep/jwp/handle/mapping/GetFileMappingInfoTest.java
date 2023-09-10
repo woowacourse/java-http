@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.mapping;
+package nextstep.jwp.handle.mapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class LoginMappingInfoTest {
+class GetFileMappingInfoTest {
 
     @Nested
     class 요청_매핑_여부_확인 {
@@ -21,7 +21,7 @@ class LoginMappingInfoTest {
         @Test
         void 요청_매핑이_가능하면_true_반환한다() throws Exception {
             final String httpRequestMessage = String.join("\r\n",
-                    "GET /login HTTP/1.1",
+                    "GET /index.html HTTP/1.1",
                     "Host: localhost:8080",
                     "Connection: keep-alive",
                     "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5"
@@ -30,8 +30,8 @@ class LoginMappingInfoTest {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
-            final LoginMappingInfo loginMappingInfo = new LoginMappingInfo();
-            final boolean result = loginMappingInfo.support(httpRequest);
+            final GetFileMappingInfo getFileMappingInfo = new GetFileMappingInfo();
+            final boolean result = getFileMappingInfo.support(httpRequest);
 
             assertThat(result).isTrue();
         }
@@ -39,7 +39,7 @@ class LoginMappingInfoTest {
         @Test
         void 요청_매핑이_가능하지_않다면_false_반환한다() throws Exception {
             final String httpRequestMessage = String.join("\r\n",
-                    "PUT /login HTTP/1.1",
+                    "POST /index.html HTTP/1.1",
                     "Host: localhost:8080",
                     "Connection: keep-alive",
                     "Content-Length: 12",
@@ -51,8 +51,8 @@ class LoginMappingInfoTest {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
-            final LoginMappingInfo loginMappingInfo = new LoginMappingInfo();
-            final boolean result = loginMappingInfo.support(httpRequest);
+            final GetFileMappingInfo getFileMappingInfo = new GetFileMappingInfo();
+            final boolean result = getFileMappingInfo.support(httpRequest);
 
             assertThat(result).isFalse();
         }

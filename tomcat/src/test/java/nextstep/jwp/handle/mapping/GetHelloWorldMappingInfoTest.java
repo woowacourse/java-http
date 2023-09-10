@@ -1,4 +1,4 @@
-package org.apache.coyote.handle.mapping;
+package nextstep.jwp.handle.mapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class RegisterMappingInfoTest {
+class GetHelloWorldMappingInfoTest {
 
     @Nested
     class 요청_매핑_여부_확인 {
@@ -21,7 +21,7 @@ class RegisterMappingInfoTest {
         @Test
         void 요청_매핑이_가능하면_true_반환한다() throws Exception {
             final String httpRequestMessage = String.join("\r\n",
-                    "GET /register HTTP/1.1",
+                    "GET / HTTP/1.1",
                     "Host: localhost:8080",
                     "Connection: keep-alive",
                     "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5"
@@ -30,8 +30,8 @@ class RegisterMappingInfoTest {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
-            final RegisterMappingInfo registerMappingInfo = new RegisterMappingInfo();
-            final boolean result = registerMappingInfo.support(httpRequest);
+            final GetHelloWorldMappingInfo getHelloWorldMappingInfo = new GetHelloWorldMappingInfo();
+            final boolean result = getHelloWorldMappingInfo.support(httpRequest);
 
             assertThat(result).isTrue();
         }
@@ -39,17 +39,20 @@ class RegisterMappingInfoTest {
         @Test
         void 요청_매핑이_가능하지_않다면_false_반환한다() throws Exception {
             final String httpRequestMessage = String.join("\r\n",
-                    "GET /login HTTP/1.1",
+                    "POST / HTTP/1.1",
                     "Host: localhost:8080",
                     "Connection: keep-alive",
-                    "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5"
+                    "Content-Length: 12",
+                    "Accept: */*;q=0.1, text/html;q=0.8, application/json;q=0.5",
+                    "",
+                    "Hello world!"
             );
             final ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
 
-            final RegisterMappingInfo registerMappingInfo = new RegisterMappingInfo();
-            final boolean result = registerMappingInfo.support(httpRequest);
+            final GetHelloWorldMappingInfo getHelloWorldMappingInfo = new GetHelloWorldMappingInfo();
+            final boolean result = getHelloWorldMappingInfo.support(httpRequest);
 
             assertThat(result).isFalse();
         }

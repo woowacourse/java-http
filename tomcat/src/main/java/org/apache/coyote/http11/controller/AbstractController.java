@@ -24,19 +24,19 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException("해당 HttpMethod 는 아직 지원하지 않습니다." + method);
     }
 
-    public ResponseEntity<? extends Object> doGet(HttpRequest httpRequest) {
+    protected ResponseEntity<Object> doGet(HttpRequest httpRequest) {
         return ResponseEntity.notAllowed();
     }
 
-    public ResponseEntity<? extends Object> doPost(HttpRequest httpRequest) {
+    protected ResponseEntity<Object> doPost(HttpRequest httpRequest) {
         return ResponseEntity.notAllowed();
     }
 
-    public ResponseEntity<? extends Object> doPut(HttpRequest httpRequest) {
+    protected ResponseEntity<Object> doPut(HttpRequest httpRequest) {
         return ResponseEntity.notAllowed();
     }
 
-    public ResponseEntity<? extends Object> doDelete(HttpRequest httpRequest) {
+    protected ResponseEntity<Object> doDelete(HttpRequest httpRequest) {
         return ResponseEntity.notAllowed();
     }
 }

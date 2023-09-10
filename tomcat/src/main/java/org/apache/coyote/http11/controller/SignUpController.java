@@ -23,7 +23,7 @@ public class SignUpController extends AbstractController {
     }
 
     @Override
-    public ResponseEntity<? extends Object> doGet(HttpRequest httpRequest) {
+    protected ResponseEntity<Object> doGet(HttpRequest httpRequest) {
         if (SessionManager.loggedIn(httpRequest)) {
             return ResponseEntity.redirect(INDEX_PAGE);
         }
@@ -33,7 +33,7 @@ public class SignUpController extends AbstractController {
     }
 
     @Override
-    public ResponseEntity<? extends Object> doPost(HttpRequest httpRequest) {
+    protected ResponseEntity<Object> doPost(HttpRequest httpRequest) {
         try {
             if (SessionManager.loggedIn(httpRequest)) {
                 return ResponseEntity.redirect(INDEX_PAGE);

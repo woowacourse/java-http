@@ -1,11 +1,10 @@
 package nextstep.jwp.controller;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import nextstep.jwp.FileFinder;
+import nextstep.jwp.FormData;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
@@ -23,15 +22,11 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response)  {
-        Map<String, String> body = Arrays.stream(request.getBody().split("&"))
-            .map(it -> it.split("="))
-            .collect(Collectors.toMap(
-                keyAndValue -> keyAndValue[0],
-                keyAndValue -> keyAndValue[1]));
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(body.get("account"));
+        FormData formData = new FormData(request.getBody());
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(formData.getValue("account"));
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (user.checkPassword(body.get("password"))) {
+            if (user.checkPassword(formData.getValue("password"))) {
                 log.info(user.toString());
                 addCookieAndSession(request, response, user);
                 response.toRedirect("/index.html");

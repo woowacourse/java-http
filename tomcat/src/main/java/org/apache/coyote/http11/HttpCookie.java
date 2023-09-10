@@ -1,10 +1,13 @@
-package org.apache.coyote.http11.auth;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
+
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_SEPARATOR = "=";
 
     private final Map<String, String> values;
 
@@ -22,7 +25,7 @@ public class HttpCookie {
     public String printValues() {
         return values.keySet()
                 .stream()
-                .map(key -> key + "=" + values.get(key) + "; ")
+                .map(key -> key + COOKIE_SEPARATOR + values.get(key) + COOKIE_DELIMITER)
                 .collect(Collectors.joining());
     }
 

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.auth.HttpCookie;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpResponseHeader {
 

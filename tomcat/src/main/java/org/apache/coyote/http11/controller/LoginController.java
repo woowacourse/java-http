@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.auth.HttpCookie;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

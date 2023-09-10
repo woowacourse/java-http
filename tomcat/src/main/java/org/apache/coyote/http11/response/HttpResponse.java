@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpVersion;
-import org.apache.coyote.http11.auth.HttpCookie;
 
 public class HttpResponse {
 

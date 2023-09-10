@@ -9,6 +9,7 @@ import org.apache.coyote.http11.ResourceProvider;
 public class HttpResponseHeaders {
 
     private static final ResourceProvider resourceProvider = new ResourceProvider();
+
     private final Map<String, String> headers;
 
     private HttpResponseHeaders(Map<String, String> headers) {

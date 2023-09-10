@@ -7,6 +7,7 @@ import org.apache.coyote.http11.ResourceProvider;
 public class HttpResponse {
 
     private static final ResourceProvider resourceProvider = new ResourceProvider();
+
     private final StatusLine statusLine;
     private final HttpResponseHeaders headers;
     private final String body;

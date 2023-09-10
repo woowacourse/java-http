@@ -2,8 +2,8 @@ package org.apache.coyote.request;
 
 import java.util.Map;
 import java.util.UUID;
-import org.apache.catalina.Session;
-import org.apache.catalina.SessionManager;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.apache.coyote.http11.HttpMethod;
 
 public class Request {

@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.coyote.session;
 
 import java.io.IOException;
 
@@ -42,7 +42,7 @@ public interface Manager {
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
-     * @param id Session to be removed
+     * @param session to be removed
      */
     void remove(Session session);
 }

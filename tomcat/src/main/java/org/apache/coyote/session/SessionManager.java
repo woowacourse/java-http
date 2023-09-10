@@ -1,13 +1,13 @@
-package org.apache.catalina;
+package org.apache.coyote.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private final Map<String, Session> sessions = new HashMap<>();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -26,7 +26,7 @@ public class SessionManager implements Manager {
         if (sessions.containsKey(id)) {
             return sessions.get(id);
         }
-        throw new IllegalArgumentException("요청한 세션을 찾을 수 없습니다.");
+        throw new SessionException();
     }
 
     @Override

@@ -86,3 +86,6 @@
 # 4. 동시성 확장하기
 ## 1. Executors로 Thread Pool 적용
 - [x] Executors 클래스를 활용해 ExecutorService 객체 구현
+
+## 2. 동시성 컬렉션 사용
+- [x] 쓰레드에 동시성 컬렉션을 적용

@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.Socket;
-import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +20,7 @@ import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.RequestUri;
 import org.apache.coyote.exception.MethodNotAllowedException;
+import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.handler.IndexHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.MethodNotAllowedHandler;
@@ -64,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = handle(request);
             outputStream.write(response.toBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedIOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -122,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
             List<String> allowedMethods = e.getAllowedMethods();
             response.setHeader("Allow", allowedMethods);
             return response;
-        } catch (NoSuchFileException e) {
+        } catch (ResourceNotFoundException e) {
             return NOT_FOUND_HANDLER.handle(request);
         }
     }

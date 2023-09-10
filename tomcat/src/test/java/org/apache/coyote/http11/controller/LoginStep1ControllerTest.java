@@ -14,7 +14,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 
-class LoginControllerTest {
+class LoginStep1ControllerTest {
 
     @BeforeEach
     void beforeEach() {

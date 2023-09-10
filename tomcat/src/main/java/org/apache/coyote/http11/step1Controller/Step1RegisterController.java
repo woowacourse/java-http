@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11.step1Controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -6,7 +6,7 @@ import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.statusLine.HttpStatus;
 
-public class RegisterController {
+public class Step1RegisterController {
 
     private static final String DIRECTORY_SEPARATOR = "/";
     private static final String INDEX_FILE = "index.html";

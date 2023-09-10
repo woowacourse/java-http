@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpVersion;
-import org.apache.coyote.http11.controller.ControllerFinder;
+import org.apache.coyote.http11.step1Controller.Step1ControllerFinder;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
     private static HttpResponse getHttpResponse(final BufferedReader bufferedReader) throws IOException {
         try {
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final ResponseEntity responseEntity = ControllerFinder.find(httpRequest);
+            final ResponseEntity responseEntity = Step1ControllerFinder.find(httpRequest);
             return HttpResponse.of(httpRequest.getHttpVersion(), responseEntity);
         } catch (RuntimeException e) {
             final ResponseEntity responseEntity = ResponseEntity.of(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");

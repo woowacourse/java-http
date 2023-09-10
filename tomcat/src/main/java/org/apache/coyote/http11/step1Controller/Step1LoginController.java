@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package org.apache.coyote.http11.step1Controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.UUID;
 
-public class LoginController {
+public class Step1LoginController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger log = LoggerFactory.getLogger(Step1LoginController.class);
     private static final String DIRECTORY_SEPARATOR = "/";
     private static final String INDEX_FILE = "index.html";
     private static final String LOGIN_FILE = "login.html";

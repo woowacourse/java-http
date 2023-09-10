@@ -7,6 +7,6 @@ public interface RequestHandler {
 
     Response service(Request request);
 
-    boolean canHandle(Request request);
+    String getMappingPath();
 
 }

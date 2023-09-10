@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import static nextstep.org.apache.coyote.http11.DispatcherServletFixture.DISPATCHER_SERVLET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -7,8 +8,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import javassist.NotFoundException;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.catalina.servlet.util.ResourceReader;
+import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -20,7 +21,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, DISPATCHER_SERVLET);
 
         // when
         processor.process(socket);
@@ -47,7 +48,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
 
         // when
         processor.process(socket);
@@ -75,7 +76,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
 
         // when
         processor.process(socket);
@@ -101,7 +102,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
 
         // when
         processor.process(socket);
@@ -115,7 +116,7 @@ class Http11ProcessorTest {
 
     }
 
-    @DisplayName("/register GET 요청 시 login.html을 반환한다.")
+    @DisplayName("/register GET 요청 시 register.html을 반환한다.")
     @Test
     void registerGet() throws IOException, NotFoundException {
         // given
@@ -127,7 +128,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, DISPATCHER_SERVLET);
 
         // when
         processor.process(socket);

@@ -6,7 +6,13 @@ import static org.apache.coyote.http11.common.Method.POST;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
-public abstract class AbstractHandler implements RequestHandler {
+public abstract class AbstractRequestHandler implements RequestHandler {
+
+    private final String mappingPath;
+
+    protected AbstractRequestHandler(final String mappingPath) {
+        this.mappingPath = mappingPath;
+    }
 
     @Override
     public Response service(final Request request) {
@@ -20,6 +26,11 @@ public abstract class AbstractHandler implements RequestHandler {
                 .build();
     }
 
+    @Override
+    public String getMappingPath() {
+        return mappingPath;
+    }
+
     protected Response doPost(final Request request) {
         return Response.methodNotAllowed()
                 .build();
@@ -29,4 +40,5 @@ public abstract class AbstractHandler implements RequestHandler {
         return Response.methodNotAllowed()
                 .build();
     }
+
 }

@@ -10,11 +10,12 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
     private final Socket connection;
+    private final DispatcherServlet dispatcherServlet;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final DispatcherServlet dispatcherServlet) {
         this.connection = connection;
+        this.dispatcherServlet = dispatcherServlet;
     }
 
     @Override
@@ -31,7 +32,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestReader = new RequestReader(inputStream);
             final var request = requestReader.read();
-            final var response = DispatcherServlet.service(request);
+            final var response = dispatcherServlet.service(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

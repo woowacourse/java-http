@@ -1,30 +1,27 @@
 package org.apache.catalina.servlet;
 
-import java.util.List;
-import org.apache.catalina.servlet.handler.DefaultHandler;
-import org.apache.catalina.servlet.handler.LoginHandler;
-import org.apache.catalina.servlet.handler.RegisterHandler;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import nextstep.jwp.handler.StaticResourceRequestHandler;
 import org.apache.catalina.servlet.handler.RequestHandler;
 import org.apache.coyote.http11.request.Request;
 
 public class RequestHandlerMapping {
 
-    private static final List<RequestHandler> handlers;
-    private static final RequestHandler defaultHandler;
+    private final Map<String, RequestHandler> handlers;
+    private final RequestHandler defaultHandler = new StaticResourceRequestHandler();
 
-    static {
-        handlers = List.of(new LoginHandler(), new RegisterHandler());
-        defaultHandler = new DefaultHandler();
+    public RequestHandlerMapping(final Set<RequestHandler> handlers) {
+        this.handlers = handlers.stream()
+                .collect(Collectors.toMap(
+                        RequestHandler::getMappingPath,
+                        handler -> handler
+                ));
     }
 
-    private RequestHandlerMapping() {
-    }
-
-    public static RequestHandler getHandler(final Request request) {
-        return handlers.stream()
-                .filter(requestHandler -> requestHandler.canHandle(request))
-                .findFirst()
-                .orElse(defaultHandler);
+    public RequestHandler getHandler(final Request request) {
+        return handlers.getOrDefault(request.getPath(), defaultHandler);
     }
 
 }

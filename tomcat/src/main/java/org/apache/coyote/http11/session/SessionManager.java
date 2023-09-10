@@ -30,6 +30,9 @@ public class SessionManager implements Manager {
 
     @Override
     public Optional<Session> findSession(final String id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(SESSIONS.get(id));
     }
 

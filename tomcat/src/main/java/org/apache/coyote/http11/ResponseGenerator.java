@@ -100,16 +100,6 @@ public class ResponseGenerator {
                                      .orElseGet(() -> getRedirectResponse("/401.html"));
     }
 
-    private static HttpResponse getRedirectResponse(final String location) {
-        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
-
-        return HttpResponse.ofRedirect(statusLine, location);
-    }
-
-    private static HttpResponse getLoginResponsePostMethod(final HttpRequest httpRequest) {
-        return getLoginResponse(httpRequest.getBodyValue(ACCOUNT_KEY), httpRequest.getBodyValue(PASSWORD_KEY));
-    }
-
     private static HttpResponse loginSuccess(final User user) {
         log.info(user.toString());
 
@@ -127,6 +117,16 @@ public class ResponseGenerator {
         session.addAttribute(SESSION_USER_KEY, user);
         SessionManager.add(session);
         return session;
+    }
+
+    private static HttpResponse getRedirectResponse(final String location) {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
+
+        return HttpResponse.ofRedirect(statusLine, location);
+    }
+
+    private static HttpResponse getLoginResponsePostMethod(final HttpRequest httpRequest) {
+        return getLoginResponse(httpRequest.getBodyValue(ACCOUNT_KEY), httpRequest.getBodyValue(PASSWORD_KEY));
     }
 
     private static HttpResponse getRegisterResponse(final HttpRequest httpRequest) throws IOException {

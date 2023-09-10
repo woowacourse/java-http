@@ -3,17 +3,20 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
+import org.apache.coyote.http11.resource.CharSet;
+import org.apache.coyote.http11.resource.ContentType;
 import org.apache.coyote.http11.resource.Cookies;
+import org.apache.coyote.http11.resource.ResponseStatus;
 
 public class HttpResponse {
 
     protected OutputStream outputStream;
 
-    protected String responseStatus;
+    protected ResponseStatus responseStatus;
 
-    protected String contentType;
+    protected ContentType contentType;
 
-    protected String charSet;
+    protected CharSet charSet;
 
     protected int contentLength;
 
@@ -25,8 +28,8 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public HttpResponse(final OutputStream outputStream, final String responseStatus, final String contentType,
-                        final String charSet,
+    protected HttpResponse(final OutputStream outputStream, final ResponseStatus responseStatus, final ContentType contentType,
+                        final CharSet charSet,
                         final int contentLength, final Cookies cookies, final String responseBody) {
         this.outputStream = outputStream;
         this.responseStatus = responseStatus;
@@ -42,15 +45,15 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    public void setResponseStatus(final String responseStatus) {
+    public void setResponseStatus(final ResponseStatus responseStatus) {
         this.responseStatus = responseStatus;
     }
 
-    public void setContentType(final String contentType) {
+    public void setContentType(final ContentType contentType) {
         this.contentType = contentType;
     }
 
-    public void setCharSet(final String charSet) {
+    public void setCharSet(final CharSet charSet) {
         this.charSet = charSet;
     }
 

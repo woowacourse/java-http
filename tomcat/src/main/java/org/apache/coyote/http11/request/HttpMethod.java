@@ -6,7 +6,7 @@ import java.util.Optional;
 public enum HttpMethod {
     GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT;
 
-    public static final Map<String, HttpMethod> methods = Map.of(
+    private static final Map<String, HttpMethod> methods = Map.of(
             "GET", GET,
             "POST", POST,
             "PUT", PUT,

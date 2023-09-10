@@ -49,18 +49,16 @@ public class HttpResponseParser {
 
     protected static void responseStatus(final HttpResponse httpResponse, final StringBuilder response) {
         response.append("HTTP/1.1 ")
-                .append(httpResponse.responseStatus)
+                .append(httpResponse.responseStatus.getCode())
                 .append(" ")
                 .append(System.lineSeparator());
     }
 
     protected static void charset(final HttpResponse httpResponse, final StringBuilder response) {
-        if (Objects.nonNull(httpResponse.charSet)) {
-            response
-                    .append(";charset=")
-                    .append(httpResponse.charSet)
-                    .append(" ");
-        }
+        response
+                .append(";charset=")
+                .append(httpResponse.charSet.getValue())
+                .append(" ");
         response.append(System.lineSeparator());
     }
 
@@ -74,9 +72,7 @@ public class HttpResponseParser {
     }
 
     protected static void contentType(final HttpResponse httpResponse, final StringBuilder response) {
-        if (Objects.nonNull(httpResponse.contentType)) {
-            response.append("Content-Type: ")
-                    .append(httpResponse.contentType);
-        }
+        response.append("Content-Type: ")
+                .append(httpResponse.contentType.getValue());
     }
 }

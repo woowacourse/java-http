@@ -8,7 +8,10 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.controller.controllermapping.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.resource.CharSet;
+import org.apache.coyote.http11.resource.ContentType;
 import org.apache.coyote.http11.resource.FileHandler;
+import org.apache.coyote.http11.resource.ResponseStatus;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -44,9 +47,9 @@ public class LoginController extends AbstractController {
     }
 
     private void returnUnauthorizedPage(HttpResponse response) throws IOException {
-        response.setCharSet("utf-8");
-        response.setContentType("text/html");
-        response.setResponseStatus("401");
+        response.setCharSet(CharSet.UTF_8);
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setResponseStatus(ResponseStatus.UNAUTHORIZED);
         response.setResponseBody(new FileHandler().readFromResourcePath("static/401.html"));
         response.flush();
     }
@@ -76,9 +79,9 @@ public class LoginController extends AbstractController {
             response.sendRedirect("/index.html");
         }
 
-        response.setCharSet("utf-8");
-        response.setContentType("text/html");
-        response.setResponseStatus("200");
+        response.setCharSet(CharSet.UTF_8);
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setResponseStatus(ResponseStatus.OK);
         response.setResponseBody(new FileHandler().readFromResourcePath("static/login.html"));
         response.flush();
     }

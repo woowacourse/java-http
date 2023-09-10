@@ -28,49 +28,65 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(Request request, Response response) {
         Session session = request.getSession(false);
-        if (session == null || session.getAttribute(USER_SESSION_KEY) == null) {
-            FileReader fileReader = FileReader.from(request.getPath());
-            String body = fileReader.read();
-
-            response.setHttpStatus(HttpStatus.OK);
-            response.addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-            response.addHeaders(CONTENT_TYPE, request.getResourceTypes());
-            response.setResponseBody(body);
+        if (hasUserSession(session)) {
+            redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
             return;
         }
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.addHeaders(CONTENT_TYPE, request.getResourceTypes());
-        response.redirectLocation(INDEX_PATH);
+        getLoginPage(request, response);
+    }
+
+    private void getLoginPage(Request request, Response response) {
+        FileReader fileReader = FileReader.from(request.getPath());
+        String body = fileReader.read();
+
+        makeResourceResponse(request, response, HttpStatus.OK, body);
+    }
+
+    private boolean hasUserSession(Session session) {
+        return session != null && session.getAttribute(USER_SESSION_KEY) != null;
     }
 
     @Override
     protected void doPost(Request request, Response response) {
-        if (request.getSession(false) != null) {
-            Session session = request.getSession(false);
-            User user = (User) session.getAttribute(USER_SESSION_KEY);
-            System.out.println(user);
-            response.setHttpStatus(HttpStatus.FOUND);
-            response.redirectLocation(INDEX_PATH);
+        Session session = request.getSession(false);
+        if (hasUserSession(session)) {
+            doSessionLogin(response, session);
             return;
         }
+        doLogin(request, response);
+    }
+
+    private void doSessionLogin(Response response, Session session) {
+        User user = (User) session.getAttribute(USER_SESSION_KEY);
+        System.out.println(user);
+
+        redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
+    }
+
+    private void doLogin(Request request, Response response) {
         Map<String, String> requestBody = request.getBody();
         String account = requestBody.get(ACCOUNT);
         String password = requestBody.get(PASSWORD);
 
         Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
-        if (loginUser.isEmpty() || !loginUser.get().checkPassword(password)) {
-            response.setHttpStatus(HttpStatus.UNAUTHORIZED);
-            response.redirectLocation(UNAUTHORIZED_PATH);
+        if (isInvalidLogin(password, loginUser)) {
+            redirectPage(response, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_PATH);
             return;
         }
         User user = loginUser.get();
         System.out.println(user);
 
+        registerSession(request, response, user);
+        redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
+    }
+
+    private boolean isInvalidLogin(String password, Optional<User> loginUser) {
+        return loginUser.isEmpty() || !loginUser.get().checkPassword(password);
+    }
+
+    private void registerSession(Request request, Response response, User user) {
         Session session = request.getSession(true);
         session.setAttribute(USER_SESSION_KEY, user);
-
         response.addCookie(JSESSIONID, session.getId());
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.redirectLocation(INDEX_PATH);
     }
 }

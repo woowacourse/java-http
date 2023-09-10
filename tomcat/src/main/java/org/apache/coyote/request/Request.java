@@ -6,9 +6,6 @@ import org.apache.coyote.http11.HttpMethod;
 
 public class Request {
 
-    private static final String ENCODING_UTF_8 = "charset=utf-8";
-    private static final String FINISH_VALUE = ";";
-
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
@@ -30,7 +27,7 @@ public class Request {
     }
 
     public String getResourceTypes() {
-        return requestHeader.getResourceType() + FINISH_VALUE + ENCODING_UTF_8;
+        return requestHeader.getResourceType();
     }
 
     public Session getSession(boolean isCreate) {

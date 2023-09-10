@@ -23,7 +23,7 @@ public class InMemoryUserRepository {
         return repository;
     }
 
-    public Long save(User user) {
+    public synchronized Long save(User user) {
         database.put(id, user);
         user.setId(id);
         return id++;

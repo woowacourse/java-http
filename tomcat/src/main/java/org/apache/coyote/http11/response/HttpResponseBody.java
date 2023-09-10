@@ -4,6 +4,10 @@ public class HttpResponseBody {
 
     private final String body;
 
+    public HttpResponseBody() {
+        this("");
+    }
+
     public HttpResponseBody(final String body) {
         this.body = body;
     }

@@ -2,27 +2,24 @@ package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpResponseHeaders {
 
-    private final Map<ResponseHeaderType, String> headers;
+    private final Map<ResponseHeaderType, Object> headers;
 
     public HttpResponseHeaders() {
         this(new LinkedHashMap<>());
     }
 
-    public HttpResponseHeaders(final Map<ResponseHeaderType, String> headers) {
+    public HttpResponseHeaders(final Map<ResponseHeaderType, Object> headers) {
         this.headers = headers;
     }
 
-    public void add(final ResponseHeaderType headerType, final String value) {
+    public void add(final ResponseHeaderType headerType, final Object value) {
         headers.put(headerType, value);
     }
 
-    public String toResponseFormat() {
-        return headers.entrySet().stream()
-                .map(entry -> String.format("%s: %s ", entry.getKey().getType(), entry.getValue()))
-                .collect(Collectors.joining("\r\n"));
+    public Map<ResponseHeaderType, Object> getHeaders() {
+        return headers;
     }
 }

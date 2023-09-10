@@ -22,10 +22,6 @@ public class HttpRequest {
         return new HttpRequest(startLine, header, null);
     }
 
-    public HttpRequestStartLine getStartLine() {
-        return startLine;
-    }
-
     public HttpRequestBody getBody() {
         return body;
     }
@@ -45,7 +41,7 @@ public class HttpRequest {
     public String getSessionId() {
         HttpCookie cookie = header.getCookie();
 
-        if (cookie != null && cookie.containsKey("JSESSIONID")) {
+        if (cookie != null && cookie.contains("JSESSIONID")) {
             return cookie.getValue("JSESSIONID");
         }
         return null;

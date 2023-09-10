@@ -23,7 +23,7 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public boolean containsKey(final String key) {
+    public boolean contains(final String key) {
         return cookies.containsKey(key);
     }
 

@@ -6,15 +6,15 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.HandlerAdapter;
-import org.apache.coyote.http11.handler.RequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeaders;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,19 +44,17 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(reader)
         ) {
             final HttpRequest httpRequest = createHttpRequest(bufferedReader);
-            final RequestHandler requestHandler = findHandler(httpRequest);
-            final HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            final RequestMapping requestMapping = new RequestMapping();
+            final Controller controller = requestMapping.getController(httpRequest);
+            final HttpResponse response = new HttpResponse(httpRequest.getHttpVersion());
+            controller.service(httpRequest, response);
 
-            outputStream.write(httpResponse.toResponseFormat().getBytes());
+            final ResponseConverter responseConverter = new ResponseConverter(response);
+            outputStream.write(responseConverter.responseToFormat().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private RequestHandler findHandler(final HttpRequest httpRequest) {
-        final HandlerAdapter handlerAdapter = new HandlerAdapter();
-        return handlerAdapter.find(httpRequest);
     }
 
     private HttpRequest createHttpRequest(final BufferedReader bufferedReader) throws IOException {

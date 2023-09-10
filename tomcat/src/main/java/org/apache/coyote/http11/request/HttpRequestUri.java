@@ -40,23 +40,7 @@ public class HttpRequestUri {
         return new HttpRequestUri(path, queryString);
     }
 
-    public boolean containsPath(final String path) {
-        return this.path.contains(path);
-    }
-
-    public boolean samePath(final String path) {
-        return this.path.equals(path);
-    }
-
-    public boolean hasQueryString() {
-        return this.queryString != null;
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public Map<String, String> getQueryString() {
-        return queryString;
     }
 }

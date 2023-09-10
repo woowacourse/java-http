@@ -18,4 +18,8 @@ public enum HttpStatus {
         return String.join(" ", statusCode, name());
     }
 
+    public boolean isFound() {
+        return this == FOUND;
+    }
+
 }

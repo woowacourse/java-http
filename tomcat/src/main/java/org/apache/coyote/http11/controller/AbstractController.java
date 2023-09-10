@@ -2,26 +2,29 @@ package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController<T> implements Controller {
 
-    protected final T controller;
+    protected final T service;
 
-    protected AbstractController(T controller) {
-        this.controller = controller;
+    protected AbstractController(T service) {
+        this.service = service;
     }
 
     @Override
-    public ResponseEntity service(HttpRequest httpRequest) {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
-        return doPost(httpRequest);
+        if (httpRequest.isSameHttpMethod(HttpMethod.POST)) {
+            doPost(httpRequest, httpResponse);
+        }
     }
 
-    protected abstract ResponseEntity doGet(HttpRequest httpRequest);
+    protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse);
 
-    protected abstract ResponseEntity doPost(HttpRequest httpRequest);
+    protected abstract void doPost(HttpRequest httpRequest, HttpResponse httpResponse);
 
 }

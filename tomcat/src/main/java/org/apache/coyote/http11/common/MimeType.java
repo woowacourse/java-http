@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.common;
 
-import java.io.File;
-
 public enum MimeType {
 
     HTML("text/html"),
@@ -16,13 +14,7 @@ public enum MimeType {
         this.contentType = contentType;
     }
 
-    public static MimeType from(File file) {
-        if (file == null) {
-            return HTML;
-        }
-        String fileName = file.getName();
-        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
+    public static MimeType from(String fileExtension) {
         return MimeType.valueOf(fileExtension.toUpperCase());
     }
 

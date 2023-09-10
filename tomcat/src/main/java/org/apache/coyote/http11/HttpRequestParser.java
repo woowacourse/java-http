@@ -1,10 +1,14 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.request.RequestHeaders;
+import org.apache.coyote.http11.request.RequestLine;
 
 public class HttpRequestParser {
 

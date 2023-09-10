@@ -1,18 +1,20 @@
 package org.apache.coyote.http11.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.coyote.http11.ViewResolver;
+import nextstep.jwp.controller.DefaultController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.NotFoundController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.UnauthorizedController;
+import nextstep.jwp.service.UserService;
+import org.apache.coyote.http11.Renderer;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
-import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.coyote.http11.response.ResponseHeaders;
-import org.apache.coyote.http11.response.ResponseLine;
 
 public enum RequestMapping {
 
@@ -21,50 +23,48 @@ public enum RequestMapping {
     private static final Map<String, Controller> CONTROLLERS = new ConcurrentHashMap<>();
 
     static {
-        CONTROLLERS.put("/", DefaultController.getInstance());
-        CONTROLLERS.put("/index", ResourceController.getInstance());
-        CONTROLLERS.put("/login", LoginController.getInstance());
-        CONTROLLERS.put("/register", RegisterController.getInstance());
-        CONTROLLERS.put("/401", UnauthorizedController.getInstance());
+        CONTROLLERS.put("/", new DefaultController());
+        CONTROLLERS.put("/index", new ResourceController());
+        CONTROLLERS.put("/login", new LoginController(new UserService()));
+        CONTROLLERS.put("/register", new RegisterController(new UserService()));
+        CONTROLLERS.put("/401", new UnauthorizedController());
     }
 
-    public HttpResponse extractHttpResponse(HttpRequest request) {
-        ResponseEntity responseEntity = service(request);
-        File viewFile = ViewResolver.findViewFile(responseEntity.getPath());
-
-        return new HttpResponse(
-                new ResponseLine(responseEntity.getHttpStatus()),
-                ResponseHeaders.from(responseEntity, MimeType.from(viewFile)),
-                new ResponseBody(readString(viewFile))
-        );
-    }
-
-    private ResponseEntity service(HttpRequest request) {
+    public void extractHttpResponse(HttpRequest request, HttpResponse response) {
+        RequestLine requestLine = request.getRequestLine();
+        String path = requestLine.getPath();
+        Controller controller = getController(path);
         try {
-            String path = request.getRequestLine().getPath();
-            Controller controller = getController(path);
-
-            return controller.service(request);
+            controller.service(request, response);
         } catch (RuntimeException e) {
-            return ResponseEntity.internalServerError()
-                    .path("/500")
-                    .build();
+            response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .setRedirect("/500");
         }
+
+        render(response);
     }
 
     private Controller getController(String path) {
         if (path.contains(".")) {
-            return ResourceController.getInstance();
+            return new ResourceController();
         }
-        return CONTROLLERS.getOrDefault(path, NotFoundController.getInstance());
+        return CONTROLLERS.getOrDefault(path, new NotFoundController());
     }
 
-    private String readString(File file) {
-        try {
-            return Files.readString(file.toPath());
-        } catch (IOException | NullPointerException e) {
-            return "";
+    private void render(HttpResponse response) {
+        String redirect = response.getRedirect();
+
+        if (response.isFound()) {
+            response.addHeader("Content-Type", MimeType.HTML.getContentType())
+                    .addHeader("Location", redirect)
+                    .setResponseBody(ResponseBody.empty());
+            return;
         }
+
+        Renderer renderer = Renderer.from(redirect);
+        response.addHeader("Content-Type", renderer.getMimeType())
+                .addHeader("Content-Length", renderer.getContentLength())
+                .setResponseBody(renderer.getResponseBody());
     }
 
 }

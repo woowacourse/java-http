@@ -1,17 +1,16 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ResourceController implements Controller {
+public class DefaultController implements Controller {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        RequestLine requestLine = httpRequest.getRequestLine();
-
         httpResponse.setHttpStatus(HttpStatus.OK)
-                .setRedirect(requestLine.getPath());
+                .setRedirect("/default");
     }
+
 }

@@ -1,15 +1,16 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpVersion;
 
 public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
     private final HttpMethod httpMethod;
     private final RequestUri requestUri;
-    private final String httpVersion;
+    private final HttpVersion httpVersion;
 
-    private RequestLine(HttpMethod httpMethod, RequestUri requestUri, String httpVersion) {
+    private RequestLine(HttpMethod httpMethod, RequestUri requestUri, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -20,16 +21,13 @@ public class RequestLine {
 
         HttpMethod httpMethod = HttpMethod.valueOf(requestLineParts[0].toUpperCase());
         RequestUri requestUri = RequestUri.from(requestLineParts[1]);
+        HttpVersion httpVersion = HttpVersion.from(requestLineParts[2]);
 
-        return new RequestLine(httpMethod, requestUri, requestLineParts[2]);
+        return new RequestLine(httpMethod, requestUri, httpVersion);
     }
 
     public boolean isSameHttpMethod(HttpMethod method) {
         return httpMethod.equals(method);
-    }
-
-    public boolean isStaticResource() {
-        return requestUri.isStaticResource();
     }
 
     public boolean isQueryStringExisted() {
@@ -48,7 +46,7 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return httpVersion;
     }
 

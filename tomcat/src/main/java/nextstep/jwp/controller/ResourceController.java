@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.FileIOUtils;
+import org.apache.catalina.Request;
+import org.apache.catalina.Response;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.catalina.controller.AbstractController;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
 public class ResourceController extends AbstractController {
@@ -15,7 +15,7 @@ public class ResourceController extends AbstractController {
     private static final String PREFIX = "static";
 
     @Override
-    public void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void doGet(final Request request, final Response response) throws IOException {
         response.setHttpResponseStartLine(StatusCode.OK);
 
         Path path = FileIOUtils.getPath(PREFIX + request.getPath());

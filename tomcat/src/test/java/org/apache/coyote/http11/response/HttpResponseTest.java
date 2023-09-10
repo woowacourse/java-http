@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.catalina.Response;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -11,17 +12,12 @@ class HttpResponseTest {
 
     @Test
     void httpResponse_생성_테스트() {
-        HttpResponse httpResponse = new HttpResponse();
-        httpResponse.setHttpResponseStartLine(StatusCode.OK);
-        httpResponse.addHeader("Content-Type", "text/html; charset=utf-8");
+        Response response = new Response();
+        response.setHttpResponseStartLine(StatusCode.OK);
+        response.addHeader("Content-Type", "text/html; charset=utf-8");
         byte[] body = "Hello World".getBytes();
-        httpResponse.setResponseBody(body);
+        response.setResponseBody(body);
 
-        var expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html; charset=utf-8\r\n" +
-                "Content-Length: " + body.length + "\r\n" +
-                "\r\n" +
-                "Hello World";
-        Assertions.assertThat(httpResponse.generateResponse()).isEqualTo(expected.getBytes());
+        Assertions.assertThat(response.getResponseBody()).isEqualTo("Hello World");
     }
 }

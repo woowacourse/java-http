@@ -4,7 +4,7 @@ import java.util.Map;
 import org.apache.coyote.http11.controller.util.BodyExtractor;
 import org.apache.coyote.http11.exception.MemberAlreadyExistsException;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.service.LoginService;
 import org.apache.coyote.http11.session.SessionManager;
 
@@ -22,20 +22,20 @@ public class SignUpController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    public ResponseEntity handle(HttpRequest httpRequest) {
         try {
             if (SessionManager.loggedIn(httpRequest)) {
-                return HttpResponse.status(302)
+                return ResponseEntity.status(302)
                     .addHeader(LOCATION_HEADER, "/index.html")
                     .build();
             }
             String loginSession = signUp(httpRequest);
-            return HttpResponse.status(302)
+            return ResponseEntity.status(302)
                 .addHeader(LOCATION_HEADER, "/index.html")
                 .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession)
                 .build();
         } catch (MemberAlreadyExistsException e) {
-            return HttpResponse.status(302)
+            return ResponseEntity.status(302)
                 .addHeader(LOCATION_HEADER, "/register.html")
                 .build();
         }

@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpResponse<T> {
+public class ResponseEntity<T> {
 
     private final int statusCode;
     private final Map<String, String> headers;
@@ -11,7 +11,7 @@ public class HttpResponse<T> {
     private boolean viewResponse = false;
     private String viewPath = null;
 
-    private HttpResponse(int statusCode, Map<String, String> headers, T body) {
+    private ResponseEntity(int statusCode, Map<String, String> headers, T body) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.body = body;
@@ -50,9 +50,9 @@ public class HttpResponse<T> {
 
         ResponseBuilder addHeader(String key, String value);
 
-        <T> HttpResponse<T> build();
+        <T> ResponseEntity<T> build();
 
-        <T> HttpResponse<T> body(T body);
+        <T> ResponseEntity<T> body(T body);
     }
 
     private static final class ResponseBuilderImpl implements ResponseBuilder {
@@ -72,13 +72,13 @@ public class HttpResponse<T> {
         }
 
         @Override
-        public <T> HttpResponse<T> build() {
+        public <T> ResponseEntity<T> build() {
             return body(null);
         }
 
         @Override
-        public <T> HttpResponse<T> body(T body) {
-            return new HttpResponse<>(this.statusCode, headers, body);
+        public <T> ResponseEntity<T> body(T body) {
+            return new ResponseEntity<>(this.statusCode, headers, body);
         }
     }
 }

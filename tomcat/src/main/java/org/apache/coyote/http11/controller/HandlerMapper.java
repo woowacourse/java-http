@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.ResourceProvider;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.service.LoginService;
 
 public class HandlerMapper {
@@ -59,48 +59,48 @@ public class HandlerMapper {
 
     public String controllerResponse(HttpRequest httpRequest) {
         Controller handler = getHandler(httpRequest);
-        HttpResponse<Object> httpResponse = (HttpResponse<Object>) handler.handle(httpRequest);
-        return makeResponse(httpResponse);
+        ResponseEntity<Object> responseEntity = (ResponseEntity<Object>) handler.handle(httpRequest);
+        return makeResponse(responseEntity);
     }
 
-    private String makeResponse(HttpResponse<Object> httpResponse) {
+    private String makeResponse(ResponseEntity<Object> responseEntity) {
         StringBuilder response = new StringBuilder();
-        response.append(requestLine(httpResponse));
-        Optional<String> body = bodyOf(httpResponse);
+        response.append(requestLine(responseEntity));
+        Optional<String> body = bodyOf(responseEntity);
         if (body.isPresent()) {
-            return response.append(responseWithBody(httpResponse, body.get())).toString();
+            return response.append(responseWithBody(responseEntity, body.get())).toString();
         }
-        String str = responseWithoutBody(httpResponse);
+        String str = responseWithoutBody(responseEntity);
         response.append("\r\n");
         return response.append(str).toString();
     }
 
 
-    private String requestLine(HttpResponse<Object> httpResponse) {
-        HttpStatusCode httpStatusCode = HttpStatusCode.of(httpResponse.getStatusCode());
+    private String requestLine(ResponseEntity<Object> responseEntity) {
+        HttpStatusCode httpStatusCode = HttpStatusCode.of(responseEntity.getStatusCode());
         return "HTTP/1.1 " + httpStatusCode.getStatusCode() + " " + httpStatusCode.name() + " ";
     }
 
-    private Optional<String> bodyOf(HttpResponse<Object> httpResponse) {
-        if (httpResponse.isViewResponse()) {
-            return Optional.of(resourceProvider.resourceBodyOf(httpResponse.getViewPath()));
+    private Optional<String> bodyOf(ResponseEntity<Object> responseEntity) {
+        if (responseEntity.isViewResponse()) {
+            return Optional.of(resourceProvider.resourceBodyOf(responseEntity.getViewPath()));
         }
         return Optional.empty();
     }
 
-    private String responseWithBody(HttpResponse<Object> httpResponse, String body) {
-        Map<String, String> headers = httpResponse.getHeaders();
+    private String responseWithBody(ResponseEntity<Object> responseEntity, String body) {
+        Map<String, String> headers = responseEntity.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
-        stringJoiner.add(resourceProvider.contentTypeOf(httpResponse.getViewPath()));
+        stringJoiner.add(resourceProvider.contentTypeOf(responseEntity.getViewPath()));
         stringJoiner.add("Content-Length: " + body.getBytes().length + " ");
         stringJoiner.add("");
         stringJoiner.add(body);
         return stringJoiner.toString();
     }
 
-    private String responseWithoutBody(HttpResponse<Object> httpResponse) {
-        Map<String, String> headers = httpResponse.getHeaders();
+    private String responseWithoutBody(ResponseEntity<Object> responseEntity) {
+        Map<String, String> headers = responseEntity.getHeaders();
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add(headerResponse(headers));
         stringJoiner.add("");

@@ -54,8 +54,8 @@ public class HttpResponse {
         return redirect;
     }
 
-    public HttpResponse addHeader(String key, String Value) {
-        responseHeaders.addHeader(key, Value);
+    public HttpResponse addHeader(String key, String value) {
+        responseHeaders.addHeader(key, value);
         return this;
     }
 

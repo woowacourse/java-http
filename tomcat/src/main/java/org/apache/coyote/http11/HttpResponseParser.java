@@ -5,6 +5,10 @@ import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class HttpResponseParser {
+
+    private HttpResponseParser() {
+    }
+
     public static HttpResponse extract(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 

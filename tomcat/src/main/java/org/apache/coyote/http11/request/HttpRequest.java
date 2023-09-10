@@ -11,6 +11,7 @@ import static org.apache.coyote.http11.request.RequestBody.EMPTY_REQUEST_BODY;
 public class HttpRequest {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -42,7 +43,7 @@ public class HttpRequest {
 
     private static Cookies getCookies(final RequestHeaders requestHeaders) {
         return requestHeaders.getHeaders().stream()
-                             .filter(requestHeader -> requestHeader.getName().equals("Cookie"))
+                             .filter(requestHeader -> requestHeader.getName().equals(COOKIE))
                              .findFirst()
                              .map(requestHeader -> Cookies.from(requestHeader.getValue()))
                              .orElse(Cookies.EMPTY_COOKIES);

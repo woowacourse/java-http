@@ -11,6 +11,8 @@ public class Cookies {
     public static final Cookies EMPTY_COOKIES = new Cookies(new HashMap<>());
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> cookies;
 
@@ -21,7 +23,7 @@ public class Cookies {
     public static Cookies from(final String request) {
         final Map<String, String> cookies = Arrays.stream(request.split(COOKIE_SEPARATOR))
                                                   .map(value -> value.split(KEY_VALUE_SEPARATOR))
-                                                  .collect(toMap(value -> value[0], value -> value[1]));
+                                                  .collect(toMap(value -> value[KEY_INDEX], value -> value[VALUE_INDEX]));
 
         return new Cookies(cookies);
     }

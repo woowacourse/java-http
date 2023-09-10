@@ -32,6 +32,7 @@ public class ResponseGenerator {
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String EMAIL_KEY = "email";
+    private static final String COOKIE = "Cookie";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String SESSION_USER_KEY = "user";
 
@@ -73,7 +74,7 @@ public class ResponseGenerator {
     }
 
     private static HttpResponse getLoginResponseGetMethod(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.hasHeaderBy("Cookie") && httpRequest.hasCookieKey(JSESSIONID)) {
+        if (httpRequest.hasHeaderBy(COOKIE) && httpRequest.hasCookieKey(JSESSIONID)) {
             final String jsessionid = httpRequest.getCookieValue(JSESSIONID);
             final Session session = SessionManager.findSession(jsessionid);
             final User user = (User) session.getAttribute(SESSION_USER_KEY);

@@ -40,8 +40,8 @@ public class Connector implements Runnable {
     ) {
         this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
-        this.stopped = false;
         this.executorService = createExecutorService(acceptCount, maxThreads);
+        this.stopped = false;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

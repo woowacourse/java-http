@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class Header {
 
@@ -8,6 +11,10 @@ public class Header {
     private static final String HEADER_DELIMITER = ": ";
 
     private final Map<String, String> headers;
+
+    public Header() {
+        this.headers = new LinkedHashMap<>();
+    }
 
     public Header(Map<String, String> headers) {
         this.headers = headers;
@@ -28,6 +35,10 @@ public class Header {
 
     public Set<String> getHeaderNames() {
         return headers.keySet();
+    }
+
+    public void put(String key, String value) {
+        headers.put(key, value);
     }
 
     public Optional<String> findHeaderValueByKey(String key) {

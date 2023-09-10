@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.from(inputStream);
             final HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            final Controller controller = new ControllerMatcher().matchController(httpRequest.getUri());
+            final Controller controller = ControllerMatcher.findController(httpRequest.getUri());
             if (controller == null) {
                 throw new RuntimeException("Controller Not Found");
             }

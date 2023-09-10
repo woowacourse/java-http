@@ -2,6 +2,7 @@ package org.apache.coyote.http11.httprequest;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.http11.Headers;
 import org.apache.coyote.http11.HttpCookie;
@@ -9,6 +10,7 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpPath;
 import org.apache.coyote.http11.HttpVersion;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.coyote.http11.HttpMethod.POST;
@@ -35,11 +37,11 @@ public class HttpRequest {
                        final Map<String, String> headers, final String messageBody, final Map<String, String> cookie) {
         this.method = method;
         this.path = path;
-        this.version = ofNullable(httpVersion).orElse(HTTP_1_1);
-        this.queryParameters = ofNullable(queryParameters).orElse(Map.of());
-        this.headers = ofNullable(headers).map(Headers::new).orElse(new Headers());
-        this.messageBody = Optional.ofNullable(messageBody).orElse(EMPTY);
-        this.httpCookie = ofNullable(cookie).map(HttpCookie::new).orElse(new HttpCookie(Map.of()));
+        this.version = requireNonNullElse(httpVersion, HTTP_1_1);
+        this.queryParameters = requireNonNullElse(queryParameters, Map.of());
+        this.headers = new Headers(requireNonNullElse(headers, Map.of()));
+        this.messageBody = requireNonNullElse(messageBody, EMPTY);
+        this.httpCookie = new HttpCookie(requireNonNullElse(cookie, Map.of()));
     }
 
     public boolean isPost() {

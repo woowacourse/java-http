@@ -9,7 +9,7 @@ import org.apache.coyote.http11.ResponseBody;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
+import static java.util.Objects.requireNonNullElse;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;
 
 public class HttpResponse {
@@ -28,7 +28,7 @@ public class HttpResponse {
     }
 
     public HttpResponse(final HttpVersion httpVersion) {
-        this.httpVersion = ofNullable(httpVersion).orElse(HTTP_1_1);
+        this.httpVersion = requireNonNullElse(httpVersion, HTTP_1_1);
         this.headers = new Headers();
     }
 
@@ -48,7 +48,7 @@ public class HttpResponse {
 
     public String buildResponse() {
         httpStatus = requireNonNull(httpStatus);
-        body = ofNullable(body).orElse(ResponseBody.EMPTY);
+        body = requireNonNullElse(body, ResponseBody.EMPTY);
         StringBuilder stringBuilder = new StringBuilder();
 
         String startLine = buildStartLine();

@@ -76,7 +76,10 @@ public class LoginController extends AbstractController {
 
     private boolean isAlreadyLoggedIn(final HttpRequest request) {
         String sessionId = request.getCookie("JSESSIONID");
-        return SessionManager.findSession(sessionId) != null;
+        if (sessionId == null) {
+            return false;
+        }
+        return SessionManager.findSession(sessionId).isPresent();
     }
 
 }

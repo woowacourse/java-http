@@ -1,7 +1,11 @@
 package org.apache.catalina;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 
 public class SessionManager {
 
@@ -14,11 +18,9 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Session findSession(final String id) {
-        if (id == null) {
-            return null;
-        }
-        return SESSIONS.get(id);
+    public static Optional<Session> findSession(final String id) {
+        requireNonNull(id, "세션 아이디가 null 입니다.");
+        return ofNullable(SESSIONS.get(id));
     }
 
 }

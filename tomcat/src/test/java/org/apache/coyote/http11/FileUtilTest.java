@@ -17,13 +17,13 @@ class FileUtilTest {
         final PathUrl pathUrl = PathUrl.from("/hi.html");
         final String resource = FileUtil.getResource(HttpResponse.create(HttpVersion.HTTP11), pathUrl);
 
-        final String expect = "<!DOCTYPE html>\n" +
-                "<html lang=\"en\">\n" +
-                "    <head>\n" +
-                "    </head>\n" +
-                "    <body>\n" +
-                "    </body>\n" +
-                "</html>\n";
+        final String expect = "<!DOCTYPE html>\r\n" +
+                "<html lang=\"en\">\r\n" +
+                "    <head>\r\n" +
+                "    </head>\r\n" +
+                "    <body>\r\n" +
+                "    </body>\r\n" +
+                "</html>\r\n";
 
         assertThat(resource).isEqualTo(expect);
     }

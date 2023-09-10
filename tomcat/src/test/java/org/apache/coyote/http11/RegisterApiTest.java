@@ -22,7 +22,7 @@ class RegisterApiTest {
 
     @Test
     void 회원가입_페이지_정적_요청_확인() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /register.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -39,7 +39,7 @@ class RegisterApiTest {
 
     @Test
     void 회원가입_페이지_viewName_요청_확인() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

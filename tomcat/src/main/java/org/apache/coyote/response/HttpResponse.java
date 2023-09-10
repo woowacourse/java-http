@@ -64,7 +64,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return String.join(System.lineSeparator(),
+        return String.join("\r\n",
                 responseStartLine + " ",
                 responseHeader + " ",
                 "",

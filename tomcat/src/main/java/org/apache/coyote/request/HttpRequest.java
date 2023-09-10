@@ -92,8 +92,8 @@ public class HttpRequest {
 
     @Override
     public String toString() {
-        return requestStartLine + System.lineSeparator() +
-                requestHeader + System.lineSeparator() + System.lineSeparator() +
+        return requestStartLine + "\r\n" +
+                requestHeader + "\r\n" + "\r\n" +
                 requestBody;
     }
 }

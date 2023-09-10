@@ -10,11 +10,11 @@ import java.io.InputStreamReader;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
-class HttpHttpRequestTest {
+class HttpRequestTest {
     @Test
     void requestBody가_없을때_파싱_확인() throws IOException {
         // given
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
-class HttpHttpRequestStartLineTest {
+class RequestStartLineTest {
 
     @Test
     void 리퀘스트_첫째줄이_정확하게_파싱되는지_확인한다() {

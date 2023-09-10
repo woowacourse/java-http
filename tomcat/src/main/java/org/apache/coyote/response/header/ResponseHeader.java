@@ -29,7 +29,6 @@ public class ResponseHeader {
 
     @Override
     public String toString() {
-        return headers.stream()
-                .collect(Collectors.joining(" " + System.lineSeparator()));
+        return String.join(" \r\n", headers);
     }
 }

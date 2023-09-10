@@ -45,8 +45,8 @@ public class FileUtil {
         final Path path = Paths.get(resource.getPath());
         try (final BufferedReader fileReader = new BufferedReader(new FileReader(path.toFile()))) {
             return fileReader.lines()
-                    .collect(Collectors.joining(System.lineSeparator()))
-                    + System.lineSeparator();
+                    .collect(Collectors.joining("\r\n"))
+                    + "\r\n";
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

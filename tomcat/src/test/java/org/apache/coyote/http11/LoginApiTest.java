@@ -26,7 +26,7 @@ class LoginApiTest {
 
     @Test
     void 정적_로그인_페이지_요청_성공() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -43,7 +43,7 @@ class LoginApiTest {
 
     @Test
     void 쿼리_로그인_요청_성공() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -60,7 +60,7 @@ class LoginApiTest {
 
     @Test
     void 존재하지_않는_확장자명으로_요청이_온다면_예외가_발생한다() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login.ht HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -76,7 +76,7 @@ class LoginApiTest {
 
     @Test
     void 존재하지_않는_url로_요청시_404로_연결된다() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /loginn HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -93,7 +93,7 @@ class LoginApiTest {
 
     @Test
     void 쿼리_스트링을_통한_로그인_요청시_필수_쿼리파라미터가_없다면_예외_발생() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login?name=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -109,7 +109,7 @@ class LoginApiTest {
 
     @Test
     void post_메서드와_requestBody요청시_리퀘스트바디에_필수key가_들어있지_않다면_예외발생() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Content-Type: application/x-www-form-urlencoded ",
@@ -178,13 +178,13 @@ class LoginApiTest {
         final HttpResponse httpResponse = HttpResponse.create(request.httpVersion());
         loginController.service(request, httpResponse);
 
-        final String jSessionid = Arrays.stream(httpResponse.toString().split(System.lineSeparator()))
+        final String jSessionid = Arrays.stream(httpResponse.toString().split("\r\n"))
                 .filter(line -> line.contains("Set-Cookie"))
                 .findFirst()
                 .orElse("")
                 .split(": ")[1];
 
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

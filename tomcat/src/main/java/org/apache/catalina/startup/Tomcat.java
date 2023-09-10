@@ -1,21 +1,19 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import org.apache.catalina.controller.RequestMapper;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.controller.RequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
-    private final RequestMapper requestMapper;
 
-    public Tomcat(final RequestMapper requestMapper) {
-        this.requestMapper = requestMapper;
+    public Tomcat() {
     }
 
-    public void start() {
+    public void start(final RequestMapper requestMapper) {
         var connector = new Connector(requestMapper);
         connector.start();
 

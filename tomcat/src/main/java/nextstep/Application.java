@@ -22,7 +22,7 @@ public class Application {
                 controllers,
                 defaultController
         );
-        final var tomcat = new Tomcat(requestMapping);
-        tomcat.start();
+        final var tomcat = new Tomcat();
+        tomcat.start(requestMapping);
     }
 }

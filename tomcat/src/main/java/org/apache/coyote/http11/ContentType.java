@@ -10,6 +10,7 @@ public enum ContentType {
     private static final String CSS = "css";
     private static final String HTML = "html";
     private static final String JS = "js";
+    private static final String ENCODING = ";charset=utf-8";
 
     private String value;
 
@@ -18,7 +19,7 @@ public enum ContentType {
     }
 
     public String getValue() {
-        return value;
+        return value + ENCODING;
     }
 
     public static ContentType from(String extension) {

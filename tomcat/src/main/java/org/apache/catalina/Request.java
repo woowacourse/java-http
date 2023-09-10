@@ -12,13 +12,13 @@ import org.apache.coyote.http11.request.HttpRequestHeaders;
 
 public class Request {
 
-    private final HttpRequest request;
+    private final HttpRequest httpRequest;
     private final HttpRequestCookies httpRequestCookies;
     private final Session session;
 
-    public Request(HttpRequest request) throws IOException {
-        this.request = request;
-        this.httpRequestCookies = generateHttpCookies(request.getHttpRequestHeaders());
+    public Request(HttpRequest httpRequest) throws IOException {
+        this.httpRequest = httpRequest;
+        this.httpRequestCookies = generateHttpCookies(httpRequest.getHttpRequestHeaders());
         this.session = generateSession();
     }
 
@@ -42,11 +42,11 @@ public class Request {
     }
 
     public String getRequestBody() {
-        return request.getRequestBody();
+        return httpRequest.getRequestBody();
     }
 
     public String getPath() {
-        return request.getHttpRequestStartLine()
+        return httpRequest.getHttpRequestStartLine()
                 .getUri()
                 .getPath();
     }

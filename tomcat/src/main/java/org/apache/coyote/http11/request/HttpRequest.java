@@ -6,20 +6,20 @@ import java.io.IOException;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeaders requestHeaders;
+    private final HttpRequestHeaders httpRequestHeaders;
     private final RequestBody requestBody;
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpRequestHeaders httpRequestHeaders, RequestBody requestBody) {
         this.requestLine = requestLine;
-        this.requestHeaders = requestHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
         this.requestBody = requestBody;
     }
 
     public static HttpRequest makeRequest(BufferedReader inputReader) {
         RequestLine requestLine = new RequestLine(readRequestLine(inputReader));
-        RequestHeaders requestHeaders = new RequestHeaders(readHeaders(inputReader));
-        RequestBody requestBody = new RequestBody(readBody(inputReader, requestHeaders));
-        return new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpRequestHeaders httpRequestHeaders = new HttpRequestHeaders(readHeaders(inputReader));
+        RequestBody requestBody = new RequestBody(readBody(inputReader, httpRequestHeaders));
+        return new HttpRequest(requestLine, httpRequestHeaders, requestBody);
     }
 
     private static String readRequestLine(BufferedReader inputReader) {
@@ -45,9 +45,9 @@ public class HttpRequest {
         }
     }
 
-    private static String readBody(BufferedReader inputReader, RequestHeaders requestHeaders) {
+    private static String readBody(BufferedReader inputReader, HttpRequestHeaders httpRequestHeaders) {
         try {
-            String s = requestHeaders.getHeaders().get("Content-Length");
+            String s = httpRequestHeaders.getHeaders().get("Content-Length");
             if (s == null) {
                 return null;
             }
@@ -64,8 +64,8 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public RequestHeaders getRequestHeaders() {
-        return requestHeaders;
+    public HttpRequestHeaders getRequestHeaders() {
+        return httpRequestHeaders;
     }
 
     public RequestBody getResponseBody() {

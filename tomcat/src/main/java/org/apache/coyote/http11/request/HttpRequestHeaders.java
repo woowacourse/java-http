@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class RequestHeaders {
+public class HttpRequestHeaders {
 
     private static final String HEADER_SEPARATOR = System.lineSeparator();
     private static final String HEADER_KEY_VALUE_SPLIT = ":";
@@ -14,7 +14,7 @@ public class RequestHeaders {
     private final Map<String, String> headers;
     private final Optional<Cookies> cookies;
 
-    public RequestHeaders(String headers) {
+    public HttpRequestHeaders(String headers) {
         Map<String, String> headerValues = extractHeader(headers);
         this.headers = headerValues;
         this.cookies = extractCookie(headerValues);

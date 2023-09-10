@@ -8,10 +8,10 @@ public class HttpResponse {
 
     private static final ResourceProvider resourceProvider = new ResourceProvider();
     private final StatusLine statusLine;
-    private final ResponseHeaders headers;
+    private final HttpResponseHeaders headers;
     private final String body;
 
-    private HttpResponse(StatusLine statusLine, ResponseHeaders headers, String body) {
+    private HttpResponse(StatusLine statusLine, HttpResponseHeaders headers, String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
@@ -21,7 +21,7 @@ public class HttpResponse {
         Optional<String> extractBody = extractBody(responseEntity);
         return new HttpResponse(
             makeStatusLine(responseEntity),
-            ResponseHeaders.from(responseEntity, extractBody),
+            HttpResponseHeaders.from(responseEntity, extractBody),
             extractBody.isPresent() ? extractBody.get() : null
         );
     }
@@ -62,7 +62,7 @@ public class HttpResponse {
         return statusLine;
     }
 
-    public ResponseHeaders getHeaders() {
+    public HttpResponseHeaders getHeaders() {
         return headers;
     }
 

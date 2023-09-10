@@ -6,23 +6,23 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.ResourceProvider;
 
-public class ResponseHeaders {
+public class HttpResponseHeaders {
 
     private static final ResourceProvider resourceProvider = new ResourceProvider();
     private final Map<String, String> headers;
 
-    private ResponseHeaders(Map<String, String> headers) {
+    private HttpResponseHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static ResponseHeaders from(ResponseEntity<Object> responseEntity, Optional<String> body) {
+    public static HttpResponseHeaders from(ResponseEntity<Object> responseEntity, Optional<String> body) {
         Map<String, String> headers = new HashMap<>();
         headers.putAll(responseEntity.getHeaders());
         if (body.isPresent()) {
             headers.put("Content-Type: ", typeOf(responseEntity));
             headers.put("Content-Length: ", body.get().getBytes().length + " ");
         }
-        return new ResponseHeaders(headers);
+        return new HttpResponseHeaders(headers);
     }
 
     private static String typeOf(ResponseEntity<Object> responseEntity) {

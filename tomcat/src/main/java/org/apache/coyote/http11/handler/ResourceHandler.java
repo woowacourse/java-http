@@ -8,5 +8,5 @@ public interface ResourceHandler {
 
     boolean supports(final HttpRequest httpRequest);
 
-    HttpResponse handle(final HttpRequest httpRequest) throws IOException;
+    void service(HttpRequest request, HttpResponse response) throws IOException;
 }

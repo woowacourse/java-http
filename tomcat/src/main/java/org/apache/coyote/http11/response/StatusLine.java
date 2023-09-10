@@ -5,16 +5,19 @@ public class StatusLine {
     private static final String SP = " ";
 
     private final String httpVersion;
-    private final StatusCode statusCode;
+    private StatusCode statusCode;
 
-    public StatusLine(final String httpVersion, final StatusCode statusCode) {
+    public StatusLine(final String httpVersion) {
         this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
     }
 
     public String getStatusLine() {
         return httpVersion + SP
                 + statusCode.getCode() + SP
                 + statusCode.getText() + SP;
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 }

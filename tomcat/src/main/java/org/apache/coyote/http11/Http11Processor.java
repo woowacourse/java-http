@@ -54,11 +54,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(final HttpRequest request) throws IOException {
+        HttpResponse response = HttpResponse.create();
+
         final Controller controller = ControllerMapper.findController(request);
         if (controller != null) {
-            return controller.handle(request);
+            controller.service(request, response);
+            return response;
         }
+
         final ResourceHandler resourceHandler = ResourceHandlerMapper.findHandler(request);
-        return resourceHandler.handle(request);
+        resourceHandler.service(request,response);
+        return response;
     }
 }

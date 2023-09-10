@@ -18,16 +18,12 @@ public class HttpResponse {
         this.httpRequest = httpRequest;
     }
 
-    public static HttpResponse from(final HttpRequest httpRequest) {
-        return new HttpResponse(httpRequest);
-    }
-
     public static HttpResponse empty() {
         return new HttpResponse(null);
     }
 
     public String getResponse() throws IOException {
-        final RequestLine requestLine = httpRequest.requestLine();
+        final var requestLine = httpRequest.requestLine();
         final var uri = requestLine.getUri();
         final var uuid = UUID.randomUUID();
         final var responseHeader = HttpResponseHeader.from(httpRequest);
@@ -39,7 +35,13 @@ public class HttpResponse {
 
         if (requestLine.isLoginSuccess() && httpRequest.cookie().noneJSessionId()) {
             body.append(parseCookieLine(uuid)).append(CRLF);
+            body.append("Location: /index.html");
         }
+
+        if (uri.startsWith("/login") && !httpRequest.cookie().noneJSessionId()) {
+            body.append("Location: /index.html");
+        }
+
         body.append(EMPTY).append(CRLF).append(responseBody.body());
 
         return body.toString();

@@ -22,7 +22,11 @@ public class HttpResponseHeader {
         }
 
         if (uri.startsWith("/401")) {
-            return new HttpResponseHeader(HttpStatus.UNAUTHORIZED);
+            return new HttpResponseHeader(HttpStatus.FOUND);
+        }
+
+        if (uri.startsWith("/login") && !httpRequest.cookie().noneJSessionId()) {
+            return new HttpResponseHeader(HttpStatus.FOUND);
         }
 
         return new HttpResponseHeader(HttpStatus.OK);

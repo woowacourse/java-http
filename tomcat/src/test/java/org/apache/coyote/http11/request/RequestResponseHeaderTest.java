@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-class RequestHeaderTest {
+class RequestResponseHeaderTest {
 
     @Test
     void from() {

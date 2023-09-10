@@ -5,8 +5,8 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
-import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.response.StartLine;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.StatusLine;
 import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
@@ -40,31 +40,31 @@ public class ResponseGenerator {
 
     public static String generate(final HttpRequest httpRequest) throws IOException {
         if (ROOT_PATH.equals(httpRequest.getPath())) {
-            final Response response = getDefaultResponse();
-            return response.toMessage();
+            final HttpResponse httpResponse = getDefaultResponse();
+            return httpResponse.toMessage();
         }
         if (LOGIN_PATH.equals(httpRequest.getPath())) {
-            final Response response = getLoginResponse(httpRequest);
-            return response.toMessage();
+            final HttpResponse httpResponse = getLoginResponse(httpRequest);
+            return httpResponse.toMessage();
         }
         if (REGISTER_PATH.equals(httpRequest.getPath())) {
-            final Response response = getRegisterResponse(httpRequest);
-            return response.toMessage();
+            final HttpResponse httpResponse = getRegisterResponse(httpRequest);
+            return httpResponse.toMessage();
         }
 
-        final Response response = getFileResponse(httpRequest);
-        return response.toMessage();
+        final HttpResponse httpResponse = getFileResponse(httpRequest);
+        return httpResponse.toMessage();
     }
 
-    private static Response getDefaultResponse() {
-        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+    private static HttpResponse getDefaultResponse() {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
         final ContentType contentType = ContentType.HTML;
         final String responseBody = "Hello world!";
 
-        return Response.of(startLine, contentType, responseBody);
+        return HttpResponse.of(statusLine, contentType, responseBody);
     }
 
-    private static Response getLoginResponse(final HttpRequest httpRequest) throws IOException {
+    private static HttpResponse getLoginResponse(final HttpRequest httpRequest) throws IOException {
         if (Method.GET.equals(httpRequest.getMethod())) {
             return getLoginResponseGetMethod(httpRequest);
         }
@@ -72,7 +72,7 @@ public class ResponseGenerator {
         return getLoginResponsePostMethod(httpRequest);
     }
 
-    private static Response getLoginResponseGetMethod(final HttpRequest httpRequest) throws IOException {
+    private static HttpResponse getLoginResponseGetMethod(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.hasHeaderBy("Cookie") && httpRequest.hasCookieKey(JSESSIONID)) {
             final String jsessionid = httpRequest.getCookieValue(JSESSIONID);
             final Session session = SessionManager.findSession(jsessionid);
@@ -85,39 +85,39 @@ public class ResponseGenerator {
             return getLoginResponse(httpRequest.getQueryValue(ACCOUNT_KEY), httpRequest.getQueryValue(PASSWORD_KEY));
         }
 
-        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
         final ContentType contentType = ContentType.HTML;
         final String responseBody = getFileToResponseBody("/login.html");
 
-        return Response.of(startLine, contentType, responseBody);
+        return HttpResponse.of(statusLine, contentType, responseBody);
     }
 
-    private static Response getLoginResponse(final String account, final String password) {
+    private static HttpResponse getLoginResponse(final String account, final String password) {
         return InMemoryUserRepository.findByAccount(account)
                                      .filter(user -> user.checkPassword(password))
                                      .map(ResponseGenerator::loginSuccess)
                                      .orElseGet(() -> getRedirectResponse("/401.html"));
     }
 
-    private static Response getRedirectResponse(final String location) {
-        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
+    private static HttpResponse getRedirectResponse(final String location) {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.FOUND);
 
-        return Response.ofRedirect(startLine, location);
+        return HttpResponse.ofRedirect(statusLine, location);
     }
 
-    private static Response getLoginResponsePostMethod(final HttpRequest httpRequest) {
+    private static HttpResponse getLoginResponsePostMethod(final HttpRequest httpRequest) {
         return getLoginResponse(httpRequest.getBodyValue(ACCOUNT_KEY), httpRequest.getBodyValue(PASSWORD_KEY));
     }
 
-    private static Response loginSuccess(final User user) {
+    private static HttpResponse loginSuccess(final User user) {
         log.info(user.toString());
 
-        final Response response = getRedirectResponse("/index.html");
+        final HttpResponse httpResponse = getRedirectResponse("/index.html");
 
         final Session session = generateJsession(user);
-        response.setCookie(session.getId());
+        httpResponse.setCookie(session.getId());
 
-        return response;
+        return httpResponse;
     }
 
     private static Session generateJsession(final User user) {
@@ -128,7 +128,7 @@ public class ResponseGenerator {
         return session;
     }
 
-    private static Response getRegisterResponse(final HttpRequest httpRequest) throws IOException {
+    private static HttpResponse getRegisterResponse(final HttpRequest httpRequest) throws IOException {
         if (Method.GET.equals(httpRequest.getMethod())) {
             return getRegisterResponseGetMethod();
         }
@@ -136,15 +136,15 @@ public class ResponseGenerator {
         return getRegisterResponsePostMethod(httpRequest);
     }
 
-    private static Response getRegisterResponseGetMethod() throws IOException {
-        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+    private static HttpResponse getRegisterResponseGetMethod() throws IOException {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
         final ContentType contentType = ContentType.HTML;
         final String responseBody = getFileToResponseBody("/register.html");
 
-        return Response.of(startLine, contentType, responseBody);
+        return HttpResponse.of(statusLine, contentType, responseBody);
     }
 
-    private static Response getRegisterResponsePostMethod(final HttpRequest httpRequest) {
+    private static HttpResponse getRegisterResponsePostMethod(final HttpRequest httpRequest) {
         final String account = httpRequest.getBodyValue(ACCOUNT_KEY);
         final String password = httpRequest.getBodyValue(PASSWORD_KEY);
         final String email = httpRequest.getBodyValue(EMAIL_KEY);
@@ -153,12 +153,12 @@ public class ResponseGenerator {
         return getRedirectResponse("/index.html");
     }
 
-    private static Response getFileResponse(final HttpRequest httpRequest) throws IOException {
-        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+    private static HttpResponse getFileResponse(final HttpRequest httpRequest) throws IOException {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
         final ContentType contentType = ContentType.findBy(httpRequest.getPath());
         final String responseBody = getFileToResponseBody(httpRequest.getPath());
 
-        return Response.of(startLine, contentType, responseBody);
+        return HttpResponse.of(statusLine, contentType, responseBody);
     }
 
     private static String getFileToResponseBody(final String fileName) throws IOException {

@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.response;
 
-public class Body {
+public class ResponseBody {
 
-    public static final Body EMPTY_BODY = new Body("");
+    public static final ResponseBody EMPTY_RESPONSE_BODY = new ResponseBody("");
 
     private final String value;
 
-    public Body(final String value) {
+    public ResponseBody(final String value) {
         this.value = value;
     }
 

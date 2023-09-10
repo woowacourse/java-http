@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.response;
 
-public class Header {
+public class ResponseHeader {
 
     private final String name;
     private final String value;
 
-    public Header(final String name, final String value) {
+    public ResponseHeader(final String name, final String value) {
         this.name = name;
         this.value = value;
     }

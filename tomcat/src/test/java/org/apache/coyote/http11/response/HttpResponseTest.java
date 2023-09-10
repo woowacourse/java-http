@@ -5,16 +5,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ResponseTest {
+class HttpResponseTest {
 
     @Test
     void toMessage() {
         // given
-        final StartLine startLine = new StartLine(HttpVersion.HTTP_1_1, StatusCode.OK);
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, StatusCode.OK);
         final ContentType contentType = ContentType.HTML;
         final String responseBody = "Hello World!";
 
-        final Response response = Response.of(startLine, contentType, responseBody);
+        final HttpResponse httpResponse = HttpResponse.of(statusLine, contentType, responseBody);
 
         final String expectMessage = String.join(System.lineSeparator(),
                 "HTTP/1.1 200 OK ",
@@ -25,7 +25,7 @@ class ResponseTest {
         );
 
         // when
-        final String actual = response.toMessage();
+        final String actual = httpResponse.toMessage();
 
         // then
         assertThat(actual).isEqualTo(expectMessage);

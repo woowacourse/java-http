@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import org.assertj.core.api.*;
 import org.junit.jupiter.api.Test;
 
-class RequestBodyTest {
+class RequestResponseBodyTest {
 
     @Test
     void from() {

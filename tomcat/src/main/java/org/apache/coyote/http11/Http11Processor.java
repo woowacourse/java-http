@@ -6,8 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.Controller;
-import org.apache.coyote.handler.RequestHandler;
-import org.apache.coyote.handler.RequestHandlerMapping;
+import org.apache.coyote.handler.FrontController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +16,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
-    private static final RequestHandler requestHandler = new RequestHandlerMapping();
     private static final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
 
     private final Socket connection;
+    private final FrontController frontController;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final FrontController frontController) {
         this.connection = connection;
+        this.frontController = frontController;
     }
 
     @Override
@@ -34,8 +34,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-             final var outputStream = connection.getOutputStream()) {
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             final HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
@@ -58,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
             readFile(requestUri, response);
             return;
         }
-        final Controller controller = requestHandler.getHandler(requestUri);
+        final Controller controller = frontController.getHandler(requestUri);
         controller.service(request, response);
     }
 

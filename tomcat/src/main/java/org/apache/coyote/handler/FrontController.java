@@ -1,6 +1,6 @@
 package org.apache.coyote.handler;
 
-public interface RequestHandler {
+public interface FrontController {
 
     Controller getHandler(final String requestUri);
 }

@@ -1,16 +1,28 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
+import java.util.Set;
+import nextstep.jwp.controller.HelloController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.LoginPageController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RegisterPageController;
+import nextstep.jwp.controller.ResourceController;
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.adaptor.ControllerAdaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private static final ControllerAdaptor CONTROLLER_ADAPTOR = new ControllerAdaptor(Set.of(
+            new HelloController(), new ResourceController(), new LoginPageController(), new LoginController(),
+            new RegisterPageController(), new RegisterController())
+    );
 
     public void start() {
-        var connector = new Connector();
+        var connector = new Connector(CONTROLLER_ADAPTOR);
         connector.start();
 
         try {

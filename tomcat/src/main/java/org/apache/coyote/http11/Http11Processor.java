@@ -8,13 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Set;
-import nextstep.jwp.controller.HelloController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.LoginPageController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.RegisterPageController;
-import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -31,13 +24,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ControllerAdaptor controllerAdaptor = new ControllerAdaptor(Set.of(
-            new HelloController(), new ResourceController(), new LoginPageController(), new LoginController(),
-            new RegisterPageController(), new RegisterController())
-    );
+    private final ControllerAdaptor controllerAdaptor;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, ControllerAdaptor controllerAdaptor) {
         this.connection = connection;
+        this.controllerAdaptor = controllerAdaptor;
     }
 
     @Override
@@ -47,9 +38,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-             final var writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
+    public void process(Socket connection) {
+        try (var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             var writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
             String[] rawStartLine = reader.readLine().split(" ");
             HttpMethod method = HttpMethod.from(rawStartLine[0]);

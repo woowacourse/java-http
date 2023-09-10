@@ -34,8 +34,7 @@ public class LoginController implements Controller {
     }
 
     private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        Map<String, String> cookies = httpRequest.findCookies();
-        if (cookies.containsKey(SESSION_ID) && SessionManager.isAlreadyLogin(cookies.get(SESSION_ID))) {
+        if (httpRequest.containsCookie(SESSION_ID) && SessionManager.isAlreadyLogin(httpRequest.getCookie(SESSION_ID))) {
             HttpResponseBuilder.buildStaticFileRedirectResponse(httpRequest, httpResponse, "/index.html");
             return;
         }
@@ -56,9 +55,8 @@ public class LoginController implements Controller {
     }
 
     private void addSession(User user, HttpRequest httpRequest, HttpResponse httpResponse) {
-        Map<String, String> cookies = httpRequest.findCookies();
         String jSessionId = UUID.randomUUID().toString();
-        if (!cookies.containsKey(SESSION_ID)) {
+        if (!httpRequest.containsCookie(SESSION_ID)) {
             httpResponse.addCookie(SESSION_ID, jSessionId);
         }
         SessionManager.add(jSessionId, user);

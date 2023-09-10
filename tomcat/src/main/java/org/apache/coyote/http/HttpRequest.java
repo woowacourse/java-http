@@ -12,21 +12,31 @@ public class HttpRequest {
 
     private StartLine startLine;
     private Map<String, String> header;
+    private Map<String, String> cookies;
     private String messageBody;
 
     public HttpRequest(StartLine startLine, Map<String, String> header, String messageBody) {
         this.startLine = startLine;
         this.header = header;
+        cookies = findCookies();
         this.messageBody = messageBody;
     }
 
-    public Map<String, String> findCookies() {
+    private Map<String, String> findCookies() {
         return header.entrySet().stream()
                 .filter(entry -> entry.getKey().equals("Cookie"))
                 .map(entry -> entry.getValue().split("; "))
                 .flatMap(Arrays::stream)
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
                 .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
+    }
+
+    public boolean containsCookie(String key) {
+        return cookies.containsKey(key);
+    }
+
+    public String getCookie(String key) {
+        return cookies.get(key);
     }
 
     public void addHeader(String key, String value) {

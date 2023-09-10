@@ -50,15 +50,13 @@ class LoginControllerTest {
     @Test
     void processGetIfAlreadyLoginGetMapping() throws IOException {
         //given
-        InputStream inputStream = new ByteArrayInputStream(RequestFixture.GET_LOGIN_REQUEST.getBytes());
+        InputStream inputStream = new ByteArrayInputStream(RequestFixture.GET_LOGIN_REDIRECT_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
         HttpRequest httpRequest = httpRequestParser.convertToHttpRequest(inputStream);
 
         LoginController loginController = new LoginController();
 
-        String sessionId = UUID.randomUUID().toString();
-        httpRequest.addHeader("Cookie", "JSESSIONID=" + sessionId);
-        SessionManager.add(sessionId, new User("test", "test", "test"));
+        SessionManager.add("656cef62-e3c4-40bc-a8df-94732920ed46", new User("test", "test", "test"));
 
         //when
         loginController.process(httpRequest, httpResponse);

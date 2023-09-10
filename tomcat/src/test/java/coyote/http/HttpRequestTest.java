@@ -59,21 +59,6 @@ class HttpRequestTest {
     }
 
     @Test
-    void findCookies() throws IOException {
-        //given
-        HttpRequest httpRequest = createHttpRequest(RequestFixture.REQUEST);
-
-        //when
-        Map<String, String> cookies = httpRequest.findCookies();
-
-        //then
-        assertAll(
-                () -> assertEquals("test", cookies.get("test")),
-                () -> assertEquals("656cef62-e3c4-40bc-a8df-94732920ed46", cookies.get("JSESSIONID"))
-        );
-    }
-
-    @Test
     void getQueryStrings() throws IOException {
         //given
         HttpRequest httpRequest = createHttpRequest(RequestFixture.REQUEST_WITH_QUERY_STRING);

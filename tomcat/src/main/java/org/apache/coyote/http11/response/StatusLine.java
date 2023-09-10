@@ -7,7 +7,7 @@ public class StatusLine {
     public static final StatusLine DEFAULT_STATUS_LINE = new StatusLine(StatusCode.OK);
 
     private final Protocol protocol;
-    private final StatusCode statusCode;
+    private StatusCode statusCode;
 
     public StatusLine(final StatusCode statusCode) {
         this(Protocol.HTTP11, statusCode);
@@ -24,6 +24,10 @@ public class StatusLine {
 
     public StatusCode getStatusCode() {
         return statusCode;
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String parseResponse() {

@@ -1,22 +1,33 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.header.EntityHeader;
+import org.apache.coyote.http11.header.Header;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.RequestHeader;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.Session;
-import org.apache.coyote.http11.request.SessionManager;
 
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Objects;
+
+import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.header.ResponseHeader.LOCATION;
 import static org.apache.coyote.http11.header.ResponseHeader.SET_COOKIE;
-import static org.apache.coyote.http11.response.StatusCode.FOUND;
+import static org.apache.coyote.http11.response.StatusCode.*;
 
 public class Response {
 
     private final StatusLine statusLine;
     private final Headers headers;
-    private final String body;
+    private String body;
+
+    public Response() {
+        this(StatusLine.DEFAULT_STATUS_LINE, new Headers(), "");
+    }
 
     public Response(final String body) {
         this(StatusLine.DEFAULT_STATUS_LINE, new Headers(), body);
@@ -37,15 +48,11 @@ public class Response {
     }
 
     public static Response getNotFoundResponse() {
-        final Headers notFoundHeaders = new Headers();
-        notFoundHeaders.addHeader(LOCATION, "/404.html");
-        return new Response(new StatusLine(FOUND), notFoundHeaders, "");
+        return new Response(new StatusLine(NOT_FOUND), new Headers(), "");
     }
 
     public static Response getUnauthorizedResponse() {
-        final Headers unauthorizedHeaders = new Headers();
-        unauthorizedHeaders.addHeader(LOCATION, "/401.html");
-        return new Response(new StatusLine(FOUND), unauthorizedHeaders, "");
+        return new Response(new StatusLine(UNAUTHORIZED), new Headers(), "");
     }
 
     public String parseString() {
@@ -56,22 +63,66 @@ public class Response {
                 body);
     }
 
-    public void decideHeaders(final Request request) {
-        decideSetSession(request);
-        decideContentType(request);
+    public void writeBody(final String content) {
+        final String contentLength = String.valueOf(content.length());
+        headers.addHeader(CONTENT_LENGTH, contentLength);
+
+        this.body = content;
+    }
+
+    public void writeStaticResource(final String path) {
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final String name = "static" + path;
+        final URL fileURL = classLoader.getResource(name);
+
+        if (fileURL == null) {
+            throw new IllegalStateException("정적 파일이 존재하지 않습니다");
+        }
+
+        final URI fileURI;
+        try {
+            fileURI = fileURL.toURI();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("경로 문제가 발생했습니다");
+        }
+
+        final StringBuilder stringBuilder = new StringBuilder();
+        try (final InputStream inputStream = new FileInputStream(Paths.get(fileURI).toFile());
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+            String nextLine;
+            while ((nextLine = bufferedReader.readLine()) != null) {
+                stringBuilder.append(nextLine)
+                        .append(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("파일을 읽는 중 문제가 발생했습니다.");
+        }
+
+        this.body = stringBuilder.toString();
         decideContentLength();
     }
 
-    private void decideSetSession(final Request request) {
-        final Session session = request.getSession();
-        if (session.isAvailable()) {
-            headers.addHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
-            return;
-        }
-        SessionManager.remove(session);
+    public void addHeader(final Header header, final String value) {
+        headers.addHeader(header, value);
     }
 
-    private void decideContentType(final Request request) {
+    public void decideHeaders(final Request request) {
+        addJSessionId(request);
+        decideContentLength();
+    }
+
+    public void addJSessionId(final Request request) {
+        final Session session = request.getSession();
+        final String sessionId = session.getId();
+        final String sessionIdCookie = request.getHttpCookie().findCookie("JSESSIONID");
+        if (!Objects.equals(sessionIdCookie, sessionId)) {
+            headers.addHeader(SET_COOKIE, "JSESSIONID=" + sessionId);
+        }
+    }
+
+    public void init(final Request request) {
         final String acceptHeaderValue = request.getHeaders().getValue(RequestHeader.ACCEPT);
         final String requestPath = request.getRequestLine().getRequestPath();
         final String contentTypeValue = decideResponseContentType(acceptHeaderValue, requestPath);
@@ -92,7 +143,7 @@ public class Response {
 
     private void decideContentLength() {
         final byte[] bytes = body.getBytes();
-        headers.addHeader(EntityHeader.CONTENT_LENGTH, String.valueOf(bytes.length));
+        headers.addHeader(CONTENT_LENGTH, String.valueOf(bytes.length));
     }
 
     public StatusLine getStatusLine() {
@@ -105,6 +156,10 @@ public class Response {
 
     public String getBody() {
         return body;
+    }
+
+    public void setStatusCode(final StatusCode statusCode) {
+        statusLine.setStatusCode(statusCode);
     }
 
     @Override

@@ -3,8 +3,8 @@ package org.apache.coyote.http11.request;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.request.line.Protocol;
-import org.apache.coyote.http11.response.Location;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.Location;
 
 import static org.apache.coyote.http11.response.HttpStatus.OK;
 

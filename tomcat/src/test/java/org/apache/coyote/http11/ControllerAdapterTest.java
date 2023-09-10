@@ -4,6 +4,7 @@ import org.apache.coyote.http11.controller.ErrorController;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.StaticController;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

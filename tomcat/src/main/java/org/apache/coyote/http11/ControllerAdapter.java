@@ -6,6 +6,7 @@ import org.apache.coyote.http11.controller.ErrorController;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.StaticController;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class ControllerAdapter {
 

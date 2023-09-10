@@ -16,6 +16,7 @@ import java.util.UUID;
 import static org.apache.coyote.http11.common.ContentType.HTML;
 import static org.apache.coyote.http11.request.RequestMethod.GET;
 import static org.apache.coyote.http11.request.RequestMethod.POST;
+import static org.apache.coyote.http11.response.ResponseHeaderKey.JSESSION;
 
 public class LoginHandler implements Handler {
 
@@ -44,7 +45,7 @@ public class LoginHandler implements Handler {
 
     private void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
         Cookie cookie = request.parseCookie();
-        String jsessionid = cookie.findByKey("JSESSIONID");
+        String jsessionid = cookie.findByKey(JSESSION.getResponseHeaderName());
 
         if (isLoginUser(jsessionid)) {
             httpResponse.redirect("index.html");
@@ -66,7 +67,7 @@ public class LoginHandler implements Handler {
     private void loginSuccessResponse(User user, HttpResponse httpResponse) {
         httpResponse.redirect("index.html");
         UUID uuid = createSession(user);
-        httpResponse.addCookie("JSESSIONID", uuid.toString());
+        httpResponse.addCookie(JSESSION.getResponseHeaderName(), uuid.toString());
     }
 
     private static Optional<User> findUser(HttpRequest request) {

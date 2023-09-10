@@ -6,6 +6,9 @@ import org.apache.coyote.http11.common.Cookie;
 import java.util.StringJoiner;
 
 import static org.apache.coyote.http11.request.HttpVersion.HTTP_1_1;
+import static org.apache.coyote.http11.response.ResponseHeaderKey.CONTENT_LENGTH;
+import static org.apache.coyote.http11.response.ResponseHeaderKey.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.ResponseHeaderKey.LOCATION;
 
 public class HttpResponse {
 
@@ -24,13 +27,13 @@ public class HttpResponse {
 
     public void redirect(String redirectionFile) {
         this.responseLine.redirect(HTTP_1_1);
-        this.responseHeaders.addHeader("Location", redirectionFile);
+        this.responseHeaders.addHeader(LOCATION.getResponseHeaderName(), redirectionFile);
         this.responseBody = "";
     }
 
     public void ok(String fileData, ContentType contentType) {
-        this.responseHeaders.addHeader("Content-Type", contentType.getHttpContentType());
-        this.responseHeaders.addHeader("Content-Length", String.valueOf(fileData.getBytes().length));
+        this.responseHeaders.addHeader(CONTENT_TYPE.getResponseHeaderName(), contentType.getHttpContentType());
+        this.responseHeaders.addHeader(CONTENT_LENGTH.getResponseHeaderName(), String.valueOf(fileData.getBytes().length));
         this.responseBody = fileData;
     }
 
@@ -53,7 +56,7 @@ public class HttpResponse {
     }
 
     private String generateHeader() {
-        StringJoiner headers = new StringJoiner("\r\n");
+        StringJoiner headers = new StringJoiner(CRLF);
         headers.add(responseHeaders.generateMessage());
         headers.add(responseHeaders.generateCookieMessage());
         return headers.toString();

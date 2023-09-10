@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import static org.apache.coyote.http11.response.ResponseHeaderKey.JSESSION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -55,7 +56,7 @@ class RequestHeaderTest {
         RequestHeader header = RequestHeader.from(input);
         Cookie cookie = header.parseCookie();
 
-        assertThat(cookie.findByKey("JSESSIONID")).isNotNull();
+        assertThat(cookie.findByKey(JSESSION.getResponseHeaderName())).isNotNull();
     }
 
 }

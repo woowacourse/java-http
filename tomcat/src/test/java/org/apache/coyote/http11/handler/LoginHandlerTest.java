@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.util.UUID;
 
+import static org.apache.coyote.http11.response.ResponseHeaderKey.JSESSION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -64,7 +65,7 @@ class LoginHandlerTest {
         HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         Cookie cookie = httpResponse.getCookie();
-        String jsessionid = cookie.findByKey("JSESSIONID");
+        String jsessionid = cookie.findByKey(JSESSION.getResponseHeaderName());
         Session session = SessionManager.findSession(UUID.fromString(jsessionid));
 
         // then

@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.response.ResponseHeaderKey.SET_COOKIE;
+
 public class Cookie {
 
     private static final String COOKIE_DELIMITER = ";";
@@ -48,6 +50,6 @@ public class Cookie {
                 .map(cookieEntry -> cookieEntry.getKey() + COOKIE_VALUE_DELIMITER + cookieEntry.getValue())
                 .forEach(cookieHeader::add);
 
-        return String.format("Set-Cookie: %s ", cookieHeader.toString());
+        return String.format("%s: %s ", SET_COOKIE.getResponseHeaderName(), cookieHeader);
     }
 }

@@ -12,7 +12,7 @@ import org.apache.catalina.session.HttpSession;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.RequestMapping;
-import org.apache.coyote.http11.controller.ExceptionHandler;
+import org.apache.coyote.http11.ExceptionHandler;
 import org.apache.coyote.http11.controller.IndexController;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.MethodNotAllowedController;

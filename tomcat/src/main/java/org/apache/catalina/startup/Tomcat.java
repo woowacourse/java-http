@@ -2,7 +2,7 @@ package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
 import org.apache.coyote.http11.RequestMapping;
-import org.apache.coyote.http11.controller.ExceptionHandler;
+import org.apache.coyote.http11.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

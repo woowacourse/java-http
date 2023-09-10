@@ -15,7 +15,6 @@ import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.RequestUri;
 import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.ExceptionHandler;
 import org.apache.coyote.util.CookieParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

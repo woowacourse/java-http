@@ -2,7 +2,7 @@ package nextstep;
 
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.RequestMapping;
-import org.apache.coyote.http11.controller.ExceptionHandler;
+import org.apache.coyote.http11.ExceptionHandler;
 import org.apache.coyote.http11.controller.IndexController;
 import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.MethodNotAllowedController;

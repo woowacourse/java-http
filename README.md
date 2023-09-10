@@ -25,6 +25,5 @@
 - [x] Controller 인터페이스를 추가하여 요청 URL에 따라 로직을 처리하는 Handler 를 분리한다.
 
 ### 4단계
-- [ ] `ThreadPoolExecutors` 를 사용해 스레드 풀을 사용한다.
-- [ ] 동시성 컬렉션 (SessionManager) 을 적용한다.
-- 
+- [x] `ThreadPoolExecutors` 를 사용해 스레드 풀을 사용한다.
+- [x] 동시성 컬렉션 (SessionManager) 을 적용한다.

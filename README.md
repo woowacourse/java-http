@@ -25,3 +25,10 @@
   - [x] 로그인시 쿠키 생성해주기
 - [x] Session 구현하기
   - [x] 로그인시 세션저장하기
+## 3단계
+- [ ] 전반적인 코드 리팩토링 하기
+  - [ ] HttpRequest 및 HttpResponse 도입하기
+  - [ ] controller 도입하기
+## 4단계
+- [ ] Executors로 Thread Pool 적용
+- [ ] 동시성 컬렉션 사용하기

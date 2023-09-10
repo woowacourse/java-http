@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.request.line.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -42,7 +41,7 @@ class HttpRequestTest {
             );
         });
     }
-    
+
     @Nested
     class 요청에_body가_있는지_확인한다 {
         @Test
@@ -114,7 +113,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void Request_Line의_구성을_Http_Method와_URI로_확인한다() {
+    void Request_Line의_구성을_URI로_확인한다() {
         // given
         String requestLine = "POST /login HTTP/1.1 ";
         String requestHeader = String.join(System.lineSeparator(),
@@ -124,7 +123,7 @@ class HttpRequestTest {
         HttpRequest request = HttpRequest.of(requestLine, requestHeader);
 
         // when
-        boolean actual = request.consistsOf(POST, "/login", "/login.html");
+        boolean actual = request.consistsOf("/login");
 
         // then
         assertThat(actual).isTrue();

@@ -15,7 +15,7 @@ public class RequestHeader {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE = "Cookie";
-    private static final String MINIMUM_LENGTH = "0";
+    private static final int EMPTY_CONTENT_LENGTH = 0;
 
     private final Map<String, String> headersMap;
     private final HttpCookie httpCookie;
@@ -44,25 +44,25 @@ public class RequestHeader {
     }
 
     public boolean hasContent() {
-        return contentLength() > 0;
+        return contentLength() > EMPTY_CONTENT_LENGTH;
     }
 
     public int contentLength() {
-        String contentLength = Objects.requireNonNullElse(headersMap.get(CONTENT_LENGTH), MINIMUM_LENGTH);
+        String contentLength = Objects.requireNonNullElse(
+                headersMap.get(CONTENT_LENGTH),
+                String.valueOf(EMPTY_CONTENT_LENGTH)
+        );
         return Integer.parseInt(contentLength);
     }
 
     public boolean hasSessionId() {
         if (httpCookie != null) {
-            return httpCookie.containsCookie(JSESSIONID);
+            return httpCookie.contains(JSESSIONID);
         }
         return false;
     }
 
     public String sessionId() {
-//        if (!hasSessionId()) {
-//            throw new IllegalArgumentException("세션 Id가 존재하지 않습니다.");
-//        }
         return httpCookie.get(JSESSIONID);
     }
 

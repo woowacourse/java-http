@@ -57,7 +57,7 @@ public class RequestUri {
     }
 
     public Map<String, String> queryStringsMap() {
-        return queryStringsMap;
+        return new HashMap<>(queryStringsMap);
     }
 
     @Override

@@ -37,7 +37,7 @@ class HttpCookieTest {
         HttpCookie cookie = HttpCookie.from(httpCookie);
 
         // when
-        boolean actual = cookie.containsCookie("JSESSIONID");
+        boolean actual = cookie.contains("JSESSIONID");
 
         // then
         assertThat(actual).isTrue();

@@ -77,12 +77,4 @@ public class HttpResponse {
     public void setResponseHeader(HttpHeader field, String value) {
         responseHeader.put(field, value);
     }
-
-    public void setResponseBody(String responseBody) {
-        this.responseBody = new ResponseBody(responseBody);
-    }
-
-    public void setResponseStatus(ResponseStatus responseStatus) {
-        responseLine.setResponseStatus(responseStatus);
-    }
 }

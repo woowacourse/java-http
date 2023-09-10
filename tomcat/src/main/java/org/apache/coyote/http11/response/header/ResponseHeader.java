@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response.header;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +25,6 @@ public class ResponseHeader {
     }
 
     public Map<HttpHeader, String> headersMap() {
-        return headersMap;
+        return new HashMap<>(headersMap);
     }
 }

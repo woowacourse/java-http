@@ -107,7 +107,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 회원가입_요청을_처리한다() throws IOException {
+    void 회원가입_요청을_처리한다() {
         // given
         String httpRequest = String.join(
                 System.lineSeparator(),
@@ -132,7 +132,7 @@ class Http11ProcessorTest {
                 "sec-ch-ua-mobile: ?0",
                 "sec-ch-ua-platform: \"macOS\"",
                 "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com"
+                "account=huchu&password=huchu123&email=huchu@naver.com"
         );
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket, RequestMapping.init(new SessionManager()));
@@ -141,15 +141,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).containsAnyOf(
+        assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html",
-                "Set-Cookie: JESSIONID="
+                "Set-Cookie: JSESSIONID="
         );
     }
 
     @Test
-    void 로그인_POST_요청을_처리한다() throws IOException {
+    void 로그인_POST_요청을_처리한다() {
         // given
         String httpRequest = String.join(
                 System.lineSeparator(),
@@ -184,10 +184,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).containsAnyOf(
+        assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html",
-                "Set-Cookie: JESSIONID="
+                "Set-Cookie: JSESSIONID="
         );
     }
 
@@ -263,7 +263,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).containsAnyOf(
+        assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html"
         );

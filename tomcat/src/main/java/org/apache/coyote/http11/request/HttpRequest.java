@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
 import java.util.Objects;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeader;
@@ -32,11 +31,6 @@ public class HttpRequest {
 
     public boolean hasBody() {
         return requestHeader.hasContent();
-    }
-
-    public boolean consistsOf(HttpMethod httpMethod, String... requestUris) {
-        return Arrays.stream(requestUris)
-                .anyMatch(requestUri -> requestLine.consistsOf(httpMethod, requestUri));
     }
 
     public boolean consistsOf(HttpMethod httpMethod) {

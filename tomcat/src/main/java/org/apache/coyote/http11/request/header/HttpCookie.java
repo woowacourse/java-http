@@ -33,7 +33,7 @@ public class HttpCookie {
         return new HttpCookie(parametersMap);
     }
 
-    public boolean containsCookie(String field) {
+    public boolean contains(String field) {
         return parametersMap.containsKey(field);
     }
 

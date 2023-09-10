@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class ResponseEntity<T> {
     }
 
     public static ResponseEntity<Object> notAllowed() {
-        return new ResponseEntity<>(405, null, null);
+        return new ResponseEntity<>(405, Collections.emptyMap(), null);
     }
 
     public void responseView(String viewPath) {

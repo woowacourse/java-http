@@ -4,17 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import nextstep.jwp.common.HttpMethod;
 import nextstep.jwp.common.HttpVersion;
-import nextstep.jwp.model.HttpCookie;
+import nextstep.jwp.model.HttpCookies;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final HttpCookie cookies;
+    private final HttpCookies cookies;
     private final RequestBody requestBody;
 
     private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders,
-                        final HttpCookie cookies, final RequestBody requestBody) {
+                        final HttpCookies cookies, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.cookies = cookies;
@@ -24,7 +24,7 @@ public class HttpRequest {
     public static HttpRequest from(final BufferedReader reader) throws IOException {
         final RequestLine requestLine = RequestLine.from(reader.readLine());
         final RequestHeaders requestHeader = RequestHeaders.from(reader);
-        final HttpCookie cookies = HttpCookie.from(requestHeader.getHeaderValue("Cookie"));
+        final HttpCookies cookies = HttpCookies.from(requestHeader.getHeaderValue("Cookie"));
         final RequestBody requestBody = readRequestBody(reader, requestHeader);
 
         return new HttpRequest(requestLine, requestHeader, cookies, requestBody);
@@ -55,7 +55,7 @@ public class HttpRequest {
         return requestHeaders.getHeaderValue(header);
     }
 
-    public HttpCookie getCookies() {
+    public HttpCookies getCookies() {
         return cookies;
     }
 

@@ -2,27 +2,31 @@ package nextstep.jwp.model;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpCookie {
+public class HttpCookies {
 
-    private final Map<String, String> cookies;
+    private final Map<String, String> cookies = new LinkedHashMap<>();
 
-    private HttpCookie(final Map<String, String> cookies) {
-        this.cookies = cookies;
+    public HttpCookies() {
     }
 
-    public static HttpCookie from(final String cookieHeader) {
+    public HttpCookies(final Map<String, String> cookies) {
+        this.cookies.putAll(cookies);
+    }
+
+    public static HttpCookies from(final String cookieHeader) {
         if (cookieHeader == null) {
-            return new HttpCookie(Collections.emptyMap());
+            return new HttpCookies(Collections.emptyMap());
         }
 
         final Map<String, String> cookieMap = Arrays.stream(cookieHeader.split(";"))
                 .map(cookie -> cookie.split("="))
                 .collect(Collectors.toMap(cookie -> cookie[0].trim(), cookie -> cookie[1].trim()));
 
-        return new HttpCookie(cookieMap);
+        return new HttpCookies(cookieMap);
     }
 
     public void save(final String cookie, final String value) {

@@ -9,14 +9,14 @@ public class ResponseHeaders {
 
     private static final String DELIMITER = "\r\n";
 
-    private final LinkedHashMap<String, String> headers;
+    private final Map<String, String> headers;
 
-    private ResponseHeaders(final LinkedHashMap<String, String> headers) {
-        this.headers = headers;
+    public ResponseHeaders() {
+        this.headers = new LinkedHashMap<>();
     }
 
-    public static ResponseHeaders from(final LinkedHashMap<String, String> headers) {
-        return new ResponseHeaders(headers);
+    public void save(final String name, final String value) {
+        headers.put(name, value);
     }
 
     public Map<String, String> getHeaders() {

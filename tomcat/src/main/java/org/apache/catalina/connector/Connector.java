@@ -1,5 +1,7 @@
 package org.apache.catalina.connector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.catalina.startup.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -16,18 +18,21 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 250;
 
     private final Container container;
     private final ServerSocket serverSocket;
+    private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector(final Container container) {
-        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(container, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final Container container, final int port, final int acceptCount) {
+    public Connector(final Container container, final int port, final int acceptCount, final int maxThreads) {
         this.container = container;
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.stopped = false;
     }
 
@@ -35,7 +40,7 @@ public class Connector implements Runnable {
         try {
             final int checkedPort = checkPort(port);
             final int checkedAcceptCount = checkAcceptCount(acceptCount);
-            return new ServerSocket(checkedPort, checkedAcceptCount);
+            return new ServerSocket(checkedPort, checkedAcceptCount); //acceptCount -> 서버 소켓에서 연결되길 기다릴 수 있는 최대 요청 수?
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -70,7 +75,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(container, connection);
-        new Thread(processor).start();
+        executorService.execute(processor);
     }
 
     public void stop() {

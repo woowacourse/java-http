@@ -4,9 +4,9 @@ import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

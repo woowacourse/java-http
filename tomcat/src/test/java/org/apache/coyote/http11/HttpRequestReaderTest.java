@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.request.HttpRequestReader;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,13 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class HttpRequestReaderTest {
+
+    private HttpRequestReader httpRequestReader;
+
+    @BeforeEach
+    void setUp() {
+        httpRequestReader = new HttpRequestReader();
+    }
 
     @Test
     void 줄을_읽는다() {
@@ -28,7 +37,7 @@ class HttpRequestReaderTest {
         ) {
 
             // when
-            String requestLine = HttpRequestReader.readLine(reader);
+            String requestLine = httpRequestReader.readLine(reader);
 
             // then
             assertThat(requestLine).isEqualTo("GET /index.html HTTP/1.1 ");
@@ -52,7 +61,7 @@ class HttpRequestReaderTest {
         ) {
 
             // when
-            String requestLineAndHeader = HttpRequestReader.readHeader(reader);
+            String requestLineAndHeader = httpRequestReader.readHeader(reader);
 
             // then
             assertThat(requestLineAndHeader).isEqualTo(String.join(System.lineSeparator(),
@@ -79,9 +88,9 @@ class HttpRequestReaderTest {
         ) {
 
             // when
-            String requestLine = HttpRequestReader.readLine(reader);
-            String requestHeader = HttpRequestReader.readHeader(reader);
-            String requestBody = HttpRequestReader.readHeader(reader);
+            String requestLine = httpRequestReader.readLine(reader);
+            String requestHeader = httpRequestReader.readHeader(reader);
+            String requestBody = httpRequestReader.readHeader(reader);
 
             // then
             assertSoftly(softly -> {
@@ -105,10 +114,10 @@ class HttpRequestReaderTest {
                 InputStream inputStream = new ByteArrayInputStream(request.getBytes());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         ) {
-            HttpRequestReader.readLine(reader);
+            httpRequestReader.readLine(reader);
 
             // when
-            String paragraph = HttpRequestReader.readHeader(reader);
+            String paragraph = httpRequestReader.readHeader(reader);
 
             // then
             assertThat(paragraph).isEqualTo("");

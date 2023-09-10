@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.catalina.RequestMapping;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

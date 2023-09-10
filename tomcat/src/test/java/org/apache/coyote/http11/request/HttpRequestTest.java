@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.http11.request.line.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.apache.coyote.http11.request.header.RequestHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
@@ -29,16 +30,19 @@ class HttpRequestTest {
         HttpRequest request = HttpRequest.of(requestLine, requestHeader);
 
         // then
-        assertThat(request).isEqualTo(new HttpRequest
-                (
-                        RequestLine.from("GET /index.html HTTP/1.1 "),
-                        RequestHeader.from(String.join(System.lineSeparator(),
-                                "Host: localhost:8080 ",
-                                "Connection: keep-alive "))
-                )
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(request.requestHeader()).isEqualTo(RequestHeader.from(
+                    String.join(
+                            System.lineSeparator(),
+                            "Host: localhost:8080 ",
+                            "Connection: keep-alive ")
+            ));
+            softly.assertThat(request.requestLine()).isEqualTo(
+                    RequestLine.from("GET /index.html HTTP/1.1 ")
+            );
+        });
     }
-
+    
     @Nested
     class 요청에_body가_있는지_확인한다 {
         @Test

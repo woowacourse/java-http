@@ -2,10 +2,10 @@ package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.http11.request.line.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
-import org.apache.coyote.http11.request.line.RequestUri;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,11 @@ class RequestLineTest {
         RequestLine line = RequestLine.from(requestLine);
 
         // then
-        assertThat(line).isEqualTo(
-                new RequestLine(GET, RequestUri.from("/index.html"), "HTTP/1.1")
-        );
+        assertSoftly(softly -> {
+            softly.assertThat(line.requestUri()).isEqualTo("/index.html");
+            softly.assertThat(line.httpMethod()).isEqualTo(GET);
+            softly.assertThat(line.httpVersion()).isEqualTo("HTTP/1.1");
+        });
     }
 
     @Test

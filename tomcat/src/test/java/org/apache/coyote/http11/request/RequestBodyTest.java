@@ -22,13 +22,13 @@ class RequestBodyTest {
         RequestBody body = RequestBody.from(requestBody);
 
         // then
-        assertThat(body).isEqualTo(new RequestBody(
+        assertThat(body.parametersMap()).isEqualTo(
                 Map.of(
                         "account", "gugu",
                         "password", "password",
                         "email", "hkkang@woowahan.com"
                 )
-        ));
+        );
     }
 
     @Test

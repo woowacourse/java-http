@@ -17,7 +17,7 @@ public class RequestLine {
     private final RequestUri requestUri;
     private final String httpVersion;
 
-    public RequestLine(
+    private RequestLine(
             HttpMethod httpMethod,
             RequestUri requestUri,
             String httpVersion

@@ -15,7 +15,7 @@ public class RequestBody {
 
     private final Map<String, String> parametersMap;
 
-    public RequestBody(Map<String, String> parametersMap) {
+    private RequestBody(Map<String, String> parametersMap) {
         this.parametersMap = parametersMap;
     }
 

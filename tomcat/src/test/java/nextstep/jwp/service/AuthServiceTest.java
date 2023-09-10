@@ -3,8 +3,8 @@ package nextstep.jwp.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -84,7 +84,7 @@ class AuthServiceTest {
         AuthService authService = new AuthService(sessionManager);
         String duplicateAccount = "duplicateAccount";
         authService.register(duplicateAccount, "password", "account@email.com");
-        
+
         // expect
         assertThatThrownBy(() -> authService.register(duplicateAccount, "password", "account@emali.com"))
                 .isInstanceOf(IllegalArgumentException.class)

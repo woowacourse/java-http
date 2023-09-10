@@ -17,7 +17,7 @@ public class RequestUri {
     private final String uri;
     private final Map<String, String> queryStringsMap;
 
-    public RequestUri(String uri, Map<String, String> queryStringsMap) {
+    private RequestUri(String uri, Map<String, String> queryStringsMap) {
         this.uri = uri;
         this.queryStringsMap = queryStringsMap;
     }

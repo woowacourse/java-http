@@ -20,7 +20,7 @@ public class RequestHeader {
     private final Map<String, String> headersMap;
     private final HttpCookie httpCookie;
 
-    public RequestHeader(Map<String, String> headersMap) {
+    private RequestHeader(Map<String, String> headersMap) {
         this(headersMap, new HttpCookie());
     }
 

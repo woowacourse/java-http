@@ -7,7 +7,6 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.service.AuthService;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -15,7 +14,7 @@ public class RequestMapping {
 
     private final List<Controller> controllers;
 
-    public RequestMapping(List<Controller> controllers) {
+    RequestMapping(List<Controller> controllers) {
         this.controllers = controllers;
     }
 

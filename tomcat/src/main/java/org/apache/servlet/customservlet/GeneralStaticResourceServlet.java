@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.servlet.customservlet;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -6,29 +6,29 @@ import java.net.URL;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseUtil;
+import org.apache.servlet.ServletException;
+import org.apache.servlet.SimpleHttpServlet;
+import org.apache.servlet.SimpleWebServlet;
 
-public class StaticResourceHandler implements Handler {
+// file uri regex
+@SimpleWebServlet("^\\/(?:[a-zA-Z0-9_-]+\\/)*[a-zA-Z0-9_-]+\\.[a-zA-Z0-9]+$")
+public class GeneralStaticResourceServlet extends SimpleHttpServlet {
 
     private static final ClassLoader SYSTEM_CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
     @Override
-    public boolean supports(HttpRequest request) {
-        return doesStaticFileExists(request.getUrl());
+    public void doGet(HttpRequest request, HttpResponse response) throws ServletException, IOException {
+        String url = request.getUrl();
+        validateStaticFileExists(url);
+        ResponseUtil.buildStaticFileResponse(response, url);
     }
 
-    private boolean doesStaticFileExists(String url) {
+    private void validateStaticFileExists(String url) {
         try (final FileInputStream fileStream = new FileInputStream(
                 findStaticResourceURL(url).getFile())) {
-            return true;
         } catch (IOException | NullPointerException e) {
-            return false;
+            throw new ServletException();
         }
-    }
-
-    @Override
-    public HttpResponse handle(HttpRequest request) {
-        String url = request.getUrl();
-        return ResponseUtil.buildStaticFileResponse(url);
     }
 
     private URL findStaticResourceURL(String url) {

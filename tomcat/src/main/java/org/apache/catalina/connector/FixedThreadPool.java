@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina.connector;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

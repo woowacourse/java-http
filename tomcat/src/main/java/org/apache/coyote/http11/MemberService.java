@@ -23,7 +23,7 @@ public class MemberService {
     private MemberService() {
     }
 
-    public static HttpResponse login(HttpRequest request) {
+    public static void login(HttpRequest request, HttpResponse response) {
         String body = request.getBody();
         Map<String, String> requestBody = parseRequestParams(body);
         if (doesParamContainsAccountAndPassword(requestBody)) {
@@ -33,20 +33,18 @@ public class MemberService {
             Session session = addSession(foundMember);
             if (isValidMember(password, foundMember)) {
                 log.info("account: {} logged in", foundMember.getAccount());
-                return new HttpResponse.Builder()
-                        .setHttpStatusCode(HttpStatusCode.FOUND)
-                        .setLocation("/index.html")
-                        .setCookie("JSESSIONID=" + session.getId())
-                        .build();
+                response.setHttpStatusCode(HttpStatusCode.FOUND);
+                response.setLocation("/index.html");
+                response.setCookie("JSESSIONID=" + session.getId());
+                return;
             }
         }
-        return new HttpResponse.Builder()
-                .setHttpStatusCode(HttpStatusCode.FOUND)
-                .setLocation("/401.html").build();
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
+        response.setLocation("/401.html");
     }
 
-    public static HttpResponse register(HttpRequest httpRequest) {
-        String body = httpRequest.getBody();
+    public static void register(HttpRequest request, HttpResponse response) {
+        String body = request.getBody();
         Map<String, String> requestBody = parseRequestParams(body);
         if (doesParamContainsAccountPasswordAndEmail(requestBody)) {
             Member member = new Member(requestBody.get(ACCOUNT), requestBody.get(PASSWORD),
@@ -55,14 +53,13 @@ public class MemberService {
                 MemberRepository.register(member);
                 Session session = addSession(member);
                 log.info("account: {} registered", member.getAccount());
-                return new HttpResponse.Builder()
-                        .setHttpStatusCode(HttpStatusCode.FOUND)
-                        .setLocation("/index.html")
-                        .setCookie("JSESSIONID=" + session.getId())
-                        .build();
+                response.setHttpStatusCode(HttpStatusCode.FOUND);
+                response.setLocation("/index.html");
+                response.setCookie("JSESSIONID=" + session.getId());
+                return;
             }
         }
-        return ResponseUtil.buildBadRequest();
+        ResponseUtil.setBadRequest(response);
     }
 
     private static Session addSession(Member foundMember) {

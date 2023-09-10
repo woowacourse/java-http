@@ -8,27 +8,23 @@ public class ResponseUtil {
 
     private static final ClassLoader SYSTEM_CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
-    public static HttpResponse buildStaticFileResponse(String url) {
+    public static void buildStaticFileResponse(HttpResponse response, String url) {
         try (
                 FileInputStream fileStream = new FileInputStream(
                         findStaticResourceURL(url).getFile())
         ) {
             String path = findStaticResourceURL(url).getFile();
             String extension = getResourceExtension(path);
-            return new HttpResponse.Builder()
-                    .setHttpStatusCode(HttpStatusCode.OK)
-                    .setContentType(toTextContentType(extension))
-                    .setBody(fileStream.readAllBytes())
-                    .build();
+            response.setHttpStatusCode(HttpStatusCode.OK);
+            response.setContentType(toTextContentType(extension));
+            response.setBody(fileStream.readAllBytes());
         } catch (IOException | NullPointerException e) {
-            return buildBadRequest();
+            setBadRequest(response);
         }
     }
 
-    public static HttpResponse buildBadRequest() {
-        return new HttpResponse.Builder()
-                .setHttpStatusCode(HttpStatusCode.BAD_REQUEST)
-                .build();
+    public static void setBadRequest(HttpResponse response) {
+        response.setHttpStatusCode(HttpStatusCode.BAD_REQUEST);
     }
 
     private static URL findStaticResourceURL(String url) {

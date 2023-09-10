@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-public class HttpRequest {
+public class HttpRequest implements SimpleServletRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final HttpRequestHeaders httpRequestHeaders;

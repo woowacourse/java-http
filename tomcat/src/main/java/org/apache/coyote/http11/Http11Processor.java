@@ -3,9 +3,10 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.servlet.ServletContainer;
+import org.apache.servlet.SimpleServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +33,9 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = new HttpRequest(inputStream);
-            Handler handler = new HandlerMapper().find(request);
-            HttpResponse response = handler.handle(request);
+            HttpResponse response = new HttpResponse();
+            SimpleServlet servlet = ServletContainer.find(request);
+            servlet.service(request, response);
             response.addToOutputStream(outputStream);
             outputStream.flush();
         } catch (IOException | RuntimeException e) {

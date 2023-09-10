@@ -5,28 +5,22 @@ import java.io.OutputStream;
 import java.util.Objects;
 import org.apache.coyote.http11.request.HttpVersion;
 
-public class HttpResponse {
+public class HttpResponse implements SimpleServletResponse {
 
-    private final HttpVersion httpVersion;
-    private final HttpStatusCode httpStatusCode;
-    private final String location;
-    private final String cookie;
-    private final String contentType;
-    private final String charset;
-    private final int contentLength;
-    private final byte[] body;
+    private static final HttpVersion HTTP_VERSION_DEFAULT = HttpVersion.V1_1;
+    private static final HttpStatusCode HTTP_STATUS_CODE_DEFAULT = HttpStatusCode.OK;
 
-    public HttpResponse(HttpVersion httpVersion, HttpStatusCode httpStatusCode, String location,
-            String cookie, String contentType,
-            String charset, byte[] body) {
-        this.httpVersion = httpVersion;
-        this.httpStatusCode = httpStatusCode;
-        this.location = location;
-        this.cookie = cookie;
-        this.contentType = contentType;
-        this.charset = charset;
-        this.contentLength = body.length;
-        this.body = body;
+    private HttpVersion httpVersion = HTTP_VERSION_DEFAULT;
+    private HttpStatusCode httpStatusCode = HTTP_STATUS_CODE_DEFAULT;
+    private String location = "";
+    private String cookie;
+
+    private String contentType = "";
+    private String charset = "utf-8";
+    private int contentLength;
+    private byte[] body = {};
+
+    public HttpResponse() {
     }
 
     public void addToOutputStream(OutputStream outputStream) throws IOException {
@@ -66,63 +60,32 @@ public class HttpResponse {
         }
     }
 
-    public static class Builder {
+    public void setHttpVersion(HttpVersion httpVersion) {
+        this.httpVersion = httpVersion;
+    }
 
-        private static final HttpVersion HTTP_VERSION_DEFAULT = HttpVersion.V1_1;
-        private static final HttpStatusCode HTTP_STATUS_CODE_DEFAULT = HttpStatusCode.OK;
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
 
-        private HttpVersion httpVersion = HTTP_VERSION_DEFAULT;
-        private HttpStatusCode httpStatusCode = HTTP_STATUS_CODE_DEFAULT;
-        private String location = "";
-        private String cookie;
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
-        private String contentType = "";
-        private String charset = "utf-8";
-        private byte[] body = {};
+    public void setCookie(String cookie) {
+        this.cookie = cookie;
+    }
 
-        public Builder setHttpVersion(HttpVersion httpVersion) {
-            this.httpVersion = httpVersion;
-            return this;
-        }
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
-        public Builder setHttpStatusCode(HttpStatusCode httpStatusCode) {
-            this.httpStatusCode = httpStatusCode;
-            return this;
-        }
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
 
-        public Builder setLocation(String location) {
-            this.location = location;
-            return this;
-        }
-
-        public Builder setCookie(String cookie) {
-            this.cookie = cookie;
-            return this;
-        }
-
-        public Builder setContentType(String contentType) {
-            this.contentType = contentType;
-            return this;
-        }
-
-        public Builder setCharset(String charset) {
-            this.charset = charset;
-            return this;
-        }
-
-        public Builder setBody(byte[] body) {
-            this.body = body;
-            return this;
-        }
-
-        public Builder setBody(String body) {
-            this.body = body.getBytes();
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(httpVersion, httpStatusCode, location, cookie, contentType, charset,
-                    body);
-        }
+    public void setBody(byte[] body) {
+        this.contentLength = body.length;
+        this.body = body;
     }
 }

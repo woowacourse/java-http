@@ -53,7 +53,7 @@ public class HttpResponseHeaders {
     }
 
     public HttpResponseHeaders contentType(ContentType contentType) {
-        setHeader("Content-Type", contentType.getName() + ";charset=utf-8");
+        setHeader("Content-Type", String.format("%s;charset=utf-8", contentType.getName()));
         return this;
     }
 

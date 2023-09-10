@@ -22,23 +22,24 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Optional<String> jsessionid = request.getCookie(JSESSIONID);
         if (jsessionid.isPresent()) {
-            return loginService.loginWithSession(jsessionid.get());
+            loginService.loginWithSession(jsessionid.get(), response);
+            return;
         }
-        return loginService.login(request);
+        loginService.login(request, response);
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         Optional<String> jsessionid = request.getCookie(JSESSIONID);
         if (jsessionid.isPresent()) {
-            return loginService.loginWithSession(jsessionid.get());
+            loginService.loginWithSession(jsessionid.get(), response);
+            return;
         }
-        return HttpResponse.status(OK)
-                .body(resourceLoader.load("static/login.html"))
-                .contentType(TEXT_HTML)
-                .build();
+        response.setStatus(OK);
+        response.setContentType(TEXT_HTML);
+        response.setBody(resourceLoader.load("static/login.html"));
     }
 }

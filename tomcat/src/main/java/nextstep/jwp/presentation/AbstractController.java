@@ -11,21 +11,21 @@ import org.apache.coyote.http11.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (request.method() == POST) {
-            return doPost(request);
+            doPost(request, response);
+            return;
         }
         if (request.method() == GET) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
         throw new ControllerException(UNSUPPORTED_REQUEST);
     }
 
-    protected HttpResponse doPost(HttpRequest request) {
-        throw new ControllerException(UNSUPPORTED_REQUEST);
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
     }
 
-    protected HttpResponse doGet(HttpRequest request) {
-        throw new ControllerException(UNSUPPORTED_REQUEST);
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
     }
 }

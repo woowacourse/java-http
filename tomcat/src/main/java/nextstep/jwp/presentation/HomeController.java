@@ -9,10 +9,9 @@ import org.apache.coyote.http11.HttpResponse;
 public class HomeController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.status(OK)
-                .body("Hello world!")
-                .contentType(TEXT_HTML)
-                .build();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(OK);
+        response.setContentType(TEXT_HTML);
+        response.setBody("Hello world!");
     }
 }

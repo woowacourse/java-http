@@ -27,18 +27,17 @@ public class LoginService {
         this.sessionManager = sessionManager;
     }
 
-    public HttpResponse loginWithSession(String jsessionid) {
+    public void loginWithSession(String jsessionid, HttpResponse response) {
         Session session = sessionManager.findSession(jsessionid)
                 .orElseThrow(() -> new AuthException(INVALID_SESSION_ID));
         if (session.getAttribute("user").isEmpty()) {
             throw new AuthException(USER_NO_EXIST_IN_SESSION);
         }
-        return HttpResponse.status(FOUND)
-                .redirectUri(INDEX_HTML)
-                .build();
+        response.setStatus(FOUND);
+        response.sendRedirect(INDEX_HTML);
     }
 
-    public HttpResponse login(HttpRequest httpRequest) {
+    public void login(HttpRequest httpRequest, HttpResponse response) {
         FormData formData = FormData.from(httpRequest.getBody());
         String account = formData.get("account");
         String password = formData.get("password");
@@ -48,10 +47,10 @@ public class LoginService {
             Session session = new Session(jsessionid);
             session.setAttribute("user", user.get());
             sessionManager.add(session);
-            return HttpResponse.status(FOUND)
-                    .redirectUri(INDEX_HTML)
-                    .cookie(JSESSIONID, jsessionid)
-                    .build();
+            response.setStatus(FOUND);
+            response.sendRedirect(INDEX_HTML);
+            response.addCookie(JSESSIONID, jsessionid);
+            return;
         }
         throw new AuthException(INVALID_ID_OR_PASSWORD);
     }

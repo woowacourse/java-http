@@ -18,17 +18,15 @@ public class ResourceController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(OK);
         Optional<String> acceptHeader = request.getHeader("Accept");
         if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
-            return HttpResponse.status(OK)
-                    .body(resourceLoader.load("static" + request.uri()))
-                    .contentType(TEXT_CSS)
-                    .build();
+            response.setContentType(TEXT_CSS);
+            response.setBody(resourceLoader.load("static" + request.uri()));
+            return;
         }
-        return HttpResponse.status(OK)
-                .body(resourceLoader.load("static" + request.uri()))
-                .contentType(TEXT_HTML)
-                .build();
+        response.setContentType(TEXT_HTML);
+        response.setBody(resourceLoader.load("static" + request.uri()));
     }
 }

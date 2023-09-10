@@ -14,12 +14,12 @@ public class FrontController {
         this.exceptionControllerAdvice = exceptionControllerAdvice;
     }
 
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         try {
             Controller controller = requestMapping.getController(request);
-            return controller.service(request);
+            controller.service(request, response);
         } catch (BaseException e) {
-            return exceptionControllerAdvice.handleException(e);
+            exceptionControllerAdvice.handleException(e, response);
         }
     }
 }

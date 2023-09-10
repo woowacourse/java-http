@@ -24,19 +24,18 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) {
-        return register(request);
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        register(request, response);
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.status(OK)
-                .body(resourceLoader.load("static/register.html"))
-                .contentType(TEXT_HTML)
-                .build();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(OK);
+        response.setBody(resourceLoader.load("static/register.html"));
+        response.setContentType(TEXT_HTML);
     }
 
-    private HttpResponse register(HttpRequest request) {
+    private void register(HttpRequest request, HttpResponse response) {
         FormData formData = FormData.from(request.getBody());
         String account = formData.get("account");
         String password = formData.get("password");
@@ -47,8 +46,7 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.status(FOUND)
-                .redirectUri(INDEX_HTML)
-                .build();
+        response.setStatus(FOUND);
+        response.sendRedirect(INDEX_HTML);
     }
 }

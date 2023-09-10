@@ -6,6 +6,7 @@ public enum HttpStatus {
     FOUND(302),
     UNAUTHORIZED(401),
     BAD_REQUEST(404),
+    INTERNAL_SERVER_ERROR(500),
     ;
 
     private final int statusCode;

@@ -49,7 +49,9 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (request.hasJSessionId()) {
             final Session session = SESSION_MANAGER.findSession(request.getJSessionId());
-            final User user = (User) session.getAttribute("user");
+            if (session == null) {
+                throw new IllegalArgumentException("존재하지 않는 세션입니다.");
+            }
             response.setHttpStatus(HttpStatus.FOUND);
             response.sendRedirect(MAIN_PAGE);
             return;

@@ -4,16 +4,17 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
-    private final String responseBody;
+    private final ResponseBody responseBody;
 
-    private HttpResponse(final StatusLine statusLine, final ResponseHeader responseHeader, final String responseBody) {
+    private HttpResponse(final StatusLine statusLine, final ResponseHeader responseHeader,
+                         final ResponseBody responseBody) {
         this.statusLine = statusLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
     public static HttpResponse createGetResponse(final StatusLine statusLine, final ResponseHeader responseHeader,
-                                                 final String responseBody) {
+                                                 final ResponseBody responseBody) {
         return new HttpResponse(statusLine, responseHeader, responseBody);
     }
 
@@ -29,7 +30,7 @@ public class HttpResponse {
         return responseHeader;
     }
 
-    public String getResponseBody() {
+    public ResponseBody getResponseBody() {
         return responseBody;
     }
 
@@ -44,6 +45,6 @@ public class HttpResponse {
                 statusLine.toString(),
                 responseHeader.toString(),
                 "",
-                responseBody);
+                responseBody.getBody());
     }
 }

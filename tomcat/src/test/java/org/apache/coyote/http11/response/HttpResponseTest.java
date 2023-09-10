@@ -21,7 +21,7 @@ class HttpResponseTest {
             final var responseHeader = ResponseHeader.createEmpty();
             responseHeader.addHeader("Content-Type", "text/html");
             responseHeader.addHeader("Content-Length", "12");
-            final var responseBody = "Hello World!";
+            final var responseBody = ResponseBody.fromText("Hello World!");
 
             // when
             final var actual = HttpResponse.createGetResponse(statusLine, responseHeader, responseBody);
@@ -35,6 +35,7 @@ class HttpResponseTest {
                         .usingRecursiveComparison()
                         .isEqualTo(responseHeader);
                 softAssertions.assertThat(actual.getResponseBody())
+                        .usingRecursiveComparison()
                         .isEqualTo(responseBody);
             });
         }

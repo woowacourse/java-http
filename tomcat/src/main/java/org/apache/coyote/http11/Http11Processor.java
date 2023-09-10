@@ -5,28 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.RequestUri;
-import org.apache.coyote.exception.MethodNotAllowedException;
-import org.apache.coyote.exception.ResourceNotFoundException;
-import org.apache.coyote.http11.controller.IndexController;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.MethodNotAllowedController;
-import org.apache.coyote.http11.controller.NotFoundController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.StaticResourceController;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.ExceptionHandler;
 import org.apache.coyote.util.CookieParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,21 +23,15 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, Controller> CONTROLLER_MAP = new HashMap<>();
-    private static final Controller STATIC_RESOURCE_CONTROLLER = new StaticResourceController();
-    private static final Controller METHOD_NOT_ALLOWED_CONTROLLER = new MethodNotAllowedController();
-    private static final Controller NOT_FOUND_CONTROLLER = new NotFoundController();
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
+    private final ExceptionHandler exceptionHandler;
 
-    static {
-        CONTROLLER_MAP.put("/", new IndexController());
-        CONTROLLER_MAP.put("/login", new LoginController());
-        CONTROLLER_MAP.put("/register", new RegisterController());
-    }
-
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, RequestMapping requestMapping, ExceptionHandler exceptionHandler) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -66,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             handle(request, response);
             outputStream.write(response.toBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedIOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -115,16 +98,12 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private void handle(HttpRequest request, HttpResponse response) throws IOException {
-        Controller controller = CONTROLLER_MAP.getOrDefault(request.getPath(), STATIC_RESOURCE_CONTROLLER);
+    private void handle(HttpRequest request, HttpResponse response) throws Exception {
+        Controller controller = requestMapping.getController(request);
         try {
             controller.service(request, response);
-        } catch (MethodNotAllowedException e) {
-            METHOD_NOT_ALLOWED_CONTROLLER.service(request, response);
-            List<String> allowedMethods = e.getAllowedMethods();
-            response.setHeader("Allow", allowedMethods);
-        } catch (ResourceNotFoundException e) {
-            NOT_FOUND_CONTROLLER.service(request, response);
+        } catch (Exception e) {
+            exceptionHandler.handle(request, response, e);
         }
     }
 }

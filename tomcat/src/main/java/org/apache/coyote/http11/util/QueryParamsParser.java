@@ -21,8 +21,9 @@ public class QueryParamsParser {
 
     private static void initData(final Map<String, String> data, final String[] params) {
         for (final String param : params) {
-            final String paramInfo = param.split("=")[PARAM_INFO_INDEX];
-            final String paramValue = param.split("=")[PARAM_VALUE_INDEX];
+            String[] split = param.split("=");
+            final String paramInfo = split[PARAM_INFO_INDEX];
+            final String paramValue = split[PARAM_VALUE_INDEX];
             data.put(paramInfo, paramValue);
         }
     }

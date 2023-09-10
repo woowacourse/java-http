@@ -7,21 +7,30 @@ import nextstep.jwp.controller.RootController;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestUri;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class RequestMapping {
+
+    private static Map<String, Controller> mappers = new LinkedHashMap<>();
+
+    static {
+        mappers.put("/", new RootController());
+        mappers.put("/login", new LoginController());
+        mappers.put("/register", new RegisterController());
+    }
+
 
     public Controller getController(HttpRequest request) {
         RequestUri requestUri = request.getRequestLine().getRequestUri();
 
         String path = requestUri.getPath();
-        if (path.equals("/")) {
-            return new RootController();
-        }
-        if (path.equals("/login")) {
-            return new LoginController();
-        }
-        if (path.equals("/register")) {
-            return new RegisterController();
-        }
-        return new DefaultController();
+
+        return mappers.entrySet()
+                .stream()
+                .filter(entry -> path.equals(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(new DefaultController());
     }
 }

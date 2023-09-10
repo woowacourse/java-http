@@ -9,14 +9,21 @@ public class HttpResponse {
     private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
 
-    private final StatusLine statusLine;
-    private final ResponseHeaders responseHeaders;
-    private final ResponseBody responseBody;
+    private StatusLine statusLine;
+    private ResponseHeaders responseHeaders;
+    private ResponseBody responseBody;
+
+    private HttpResponse() {
+    }
 
     private HttpResponse(final StatusLine statusLine, final ResponseHeaders responseHeaders, final ResponseBody responseBody) {
         this.statusLine = statusLine;
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
+    }
+
+    public static HttpResponse create() {
+        return new HttpResponse();
     }
 
     public static HttpResponse of(final StatusLine statusLine, final ContentType contentType, final String responseBody) {
@@ -41,6 +48,12 @@ public class HttpResponse {
         responseHeaders.add(CONTENT_LENGTH, "0");
 
         return new HttpResponse(statusLine, responseHeaders, EMPTY_RESPONSE_BODY);
+    }
+
+    public void copy(final HttpResponse httpResponse) {
+        this.statusLine = httpResponse.statusLine;
+        this.responseHeaders = httpResponse.responseHeaders;
+        this.responseBody = httpResponse.responseBody;
     }
 
     public void setCookie(final String jsessionId) {

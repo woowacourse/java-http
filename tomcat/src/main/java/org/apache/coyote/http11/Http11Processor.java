@@ -9,6 +9,7 @@ import java.net.Socket;
 
 import org.apache.catalina.HandlerMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,12 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputBuffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			 final var outputBuffer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 			final var requestReader = new Http11RequestReader(inputBuffer);
-			final var requestWriter = new Http11ResponseWriter(outputBuffer);
+			final var responseWriter = new Http11ResponseWriter(outputBuffer);
 
 			final var request = requestReader.read();
-			requestWriter.write(handlerMapping.handle(request));
+			Response response = new Response();
+			handlerMapping.service(request, response);
+			responseWriter.write(response);
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
 		}

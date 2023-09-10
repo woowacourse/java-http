@@ -1,19 +1,22 @@
 package nextstep.jwp.handler;
 
-import org.apache.catalina.RequestHandler;
+import static org.apache.coyote.response.StatusCode.*;
+
+import org.apache.catalina.AbstractHandler;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Cookie;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class LoginRequestHandler extends RequestHandler {
+public class LoginRequestHandler extends AbstractHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginRequestHandler.class);
 
@@ -26,11 +29,13 @@ public class LoginRequestHandler extends RequestHandler {
 	}
 
 	@Override
-	protected Response doGet(final Request request) {
+	protected void doGet(final Request request, final Response response) {
 		if (isSessionExist(request)) {
-			return Response.redirect(REDIRECT_LOCATION);
+			response.redirect(REDIRECT_LOCATION);
+			return;
 		}
-		return Response.ok(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
+		response.setStatusCode(StatusCode.OK);
+		response.setResponseBody(ResourceProvider.provide(LOGIN_PAGE_PATH), MimeType.fromPath(LOGIN_PAGE_PATH));
 	}
 
 	private boolean isSessionExist(final Request request) {
@@ -42,28 +47,30 @@ public class LoginRequestHandler extends RequestHandler {
 	}
 
 	@Override
-	protected Response doPost(final Request request) {
+	protected void doPost(final Request request, final Response response) {
 		final var account = request.findBodyField("account");
 		final var password = request.findBodyField("password");
-		return login(account, password);
+		login(response, account, password);
 	}
 
-	private Response login(final String account, final String password) {
+	private void login(final Response response, final String account, final String password) {
 		if (isInvalidInput(account, password)) {
-			return Response.badRequest();
+			response.redirect(BAD_REQUEST.getResourcePath());
+			return;
 		}
 
 		final var user = InMemoryUserRepository.findByAccount(account);
 		if (user.isEmpty() || !user.get().checkPassword(password)) {
-			return Response.unauthorized();
+			response.redirect(UNAUTHORIZED.getResourcePath());
+			return;
 		}
 
 		final var session = createSession(user.get());
 		final var cookie = Cookie.session(session.getId());
 
 		log.info("[LOGIN SUCCESS] account: {}", account);
-		return Response.redirect(REDIRECT_LOCATION)
-			.addCookie(cookie);
+		response.redirect(REDIRECT_LOCATION);
+		response.addCookie(cookie);
 	}
 
 	private boolean isInvalidInput(final String account, final String password) {

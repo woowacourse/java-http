@@ -1,11 +1,12 @@
 package nextstep.jwp.handler;
 
-import org.apache.catalina.RequestHandler;
+import org.apache.catalina.AbstractHandler;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.response.StatusCode;
 
-public class BaseRequestHandler extends RequestHandler {
+public class BaseRequestHandler extends AbstractHandler {
 
 	private static final String REQUEST_PATH = "/";
 	private static final String RESPONSE_BODY = "Hello world!";
@@ -15,7 +16,8 @@ public class BaseRequestHandler extends RequestHandler {
 	}
 
 	@Override
-	protected Response doGet(final Request request) {
-		return Response.ok(RESPONSE_BODY, MimeType.HTML);
+	protected void doGet(final Request request, final Response response) {
+		response.setStatusCode(StatusCode.OK);
+		response.setResponseBody(RESPONSE_BODY, MimeType.HTML);
 	}
 }

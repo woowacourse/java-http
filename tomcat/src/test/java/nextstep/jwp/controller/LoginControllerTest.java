@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
 import nextstep.jwp.FileFinder;
+import org.apache.coyote.http11.DashboardException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestLine;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.MyException;
 import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -55,7 +55,7 @@ class LoginControllerTest {
 
             // when & then
             assertThatThrownBy(() -> loginController.doPost(request, response))
-                .isInstanceOf(MyException.class);
+                .isInstanceOf(DashboardException.class);
         }
 
         @Test
@@ -66,7 +66,7 @@ class LoginControllerTest {
 
             // when & then
             assertThatThrownBy(() -> loginController.doPost(request, response))
-                .isInstanceOf(MyException.class);
+                .isInstanceOf(DashboardException.class);
         }
     }
 

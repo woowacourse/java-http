@@ -8,7 +8,7 @@ public class HttpResponse {
 
     private Map<String, String> headers = new LinkedHashMap<>();
     private HttpStatus httpStatus;
-    private String body = "";
+    private String body;
     private Map<String, String> cookies = new ConcurrentHashMap<>();
 
     public HttpResponse() {
@@ -21,17 +21,12 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
         this.body = body;
     }
+
     public static HttpResponse ok(String responseBody, ContentType contentType) {
         Map<String, String> headers = new LinkedHashMap<>();
         headers.put(HttpHeaders.CONTENT_TYPE, contentType.value + ";charset=utf-8");
         headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
         return new HttpResponse(headers, HttpStatus.OK, responseBody);
-    }
-
-    public static HttpResponse found(String location) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(HttpHeaders.LOCATION, location);
-        return new HttpResponse(headers, HttpStatus.FOUND, "");
     }
 
     public Map<String, String> getHeaders() {
@@ -53,6 +48,13 @@ public class HttpResponse {
     public void setBody(String body) {
         this.body = body;
         headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        headers.put(HttpHeaders.CONTENT_TYPE, ContentType.HTML.value + ";charset=utf-8");
+    }
+
+    public void setBody(String body, ContentType contentType) {
+        this.body = body;
+        headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        headers.put(HttpHeaders.CONTENT_TYPE, contentType.value + ";charset=utf-8");
     }
 
     public void toRedirect(String redirectUrl) {
@@ -64,7 +66,7 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
     }
 
-    public void setHeader(String key, String value) {
+    public void setHeaderAttribute(String key, String value) {
         headers.put(key, value);
     }
 }

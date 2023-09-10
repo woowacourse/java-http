@@ -11,10 +11,10 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.DashboardException;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.MyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class LoginController extends AbstractController {
             }
         }
 
-        throw new MyException(HttpStatus.UNAUTHORIZED.code);
+        throw new DashboardException(HttpStatus.UNAUTHORIZED.code);
     }
 
     private void addCookieAndSession(HttpRequest request, HttpResponse response, User user) {

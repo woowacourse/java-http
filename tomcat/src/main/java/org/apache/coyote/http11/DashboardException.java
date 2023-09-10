@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-public class MyException extends RuntimeException {
+public class DashboardException extends RuntimeException {
 
     private final int statusCode;
 
-    public MyException(int statusCode) {
+    public DashboardException(int statusCode) {
         this.statusCode = statusCode;
     }
 

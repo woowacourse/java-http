@@ -2,13 +2,13 @@ package nextstep.jwp.handler;
 
 import com.sun.jdi.InternalException;
 import java.util.Arrays;
+import org.apache.coyote.http11.DashboardException;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.MyException;
 
 public class ExceptionHandler {
 
-    public HttpResponse handle(MyException exception) {
+    public HttpResponse handle(DashboardException exception) {
         HttpStatus httpStatus = Arrays.stream(HttpStatus.values())
             .filter(it -> it.code == exception.getStatusCode())
             .findFirst()

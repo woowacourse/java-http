@@ -1,9 +1,9 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.controller.Controller;
+import org.apache.coyote.http11.DashboardException;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.MyException;
 
 public class Handler {
 
@@ -15,7 +15,7 @@ public class Handler {
         try {
             controller.service(request, response);
             return response;
-        } catch (MyException e) {
+        } catch (DashboardException e) {
             return exceptionHandler.handle(e);
         } catch (Exception e){
             return exceptionHandler.handleInternalServerError();

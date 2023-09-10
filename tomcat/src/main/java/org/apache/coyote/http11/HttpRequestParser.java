@@ -23,7 +23,7 @@ public class HttpRequestParser {
         String body = getBody(headers, bufferedReader);
         Map<String, String> cookie = getCookie(headers);
         Map<String, String> queryStrings = getQueryString(requestLine.getPath());
-        return new HttpRequest(requestLine, headers, cookie, queryStrings,body);
+        return new HttpRequest(requestLine, headers, cookie, queryStrings, body);
     }
 
     private static HttpRequestLine getRequestLine(BufferedReader bufferedReader) throws IOException {

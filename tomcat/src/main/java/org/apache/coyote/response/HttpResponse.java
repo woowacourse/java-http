@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.response;
 
-import static org.apache.coyote.http11.response.ResponseHeader.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.ResponseHeader.CONTENT_TYPE;
-import static org.apache.coyote.http11.utils.Constant.EMPTY;
-import static org.apache.coyote.http11.utils.Constant.HEADER_DELIMITER;
-import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
+import static org.apache.coyote.response.ResponseHeader.CONTENT_LENGTH;
+import static org.apache.coyote.response.ResponseHeader.CONTENT_TYPE;
+import static org.apache.coyote.utils.Constant.EMPTY;
+import static org.apache.coyote.utils.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.exception.PageNotFoundException;
+import org.apache.coyote.exception.PageNotFoundException;
 
 public class HttpResponse {
 

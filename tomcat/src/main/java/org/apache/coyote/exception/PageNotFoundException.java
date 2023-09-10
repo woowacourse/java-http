@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception;
+package org.apache.coyote.exception;
 
 public class PageNotFoundException extends RuntimeException {
     private final String message;

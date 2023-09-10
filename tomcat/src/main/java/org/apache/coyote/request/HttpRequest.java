@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.request;
 
-import static org.apache.coyote.http11.utils.Constant.COOKIES_DELIMITER;
-import static org.apache.coyote.http11.utils.Constant.COOKIE_DELIMITER;
-import static org.apache.coyote.http11.utils.Constant.EMPTY;
-import static org.apache.coyote.http11.utils.Constant.HEADER_DELIMITER;
-import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
-import static org.apache.coyote.http11.utils.Parser.parseFormData;
+import static org.apache.coyote.utils.Constant.COOKIES_DELIMITER;
+import static org.apache.coyote.utils.Constant.COOKIE_DELIMITER;
+import static org.apache.coyote.utils.Constant.EMPTY;
+import static org.apache.coyote.utils.Constant.HEADER_DELIMITER;
+import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
+import static org.apache.coyote.utils.Parser.parseFormData;
 
 import java.util.ArrayList;
 import java.util.HashMap;

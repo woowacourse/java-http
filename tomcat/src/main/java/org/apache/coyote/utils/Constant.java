@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.utils;
+package org.apache.coyote.utils;
 
 public class Constant {
     public static final String LINE_SEPARATOR = "\r\n";

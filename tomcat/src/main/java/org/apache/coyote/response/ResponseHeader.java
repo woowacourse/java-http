@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.response;
 
 public enum ResponseHeader {
     CONTENT_LENGTH("Content-Length"),

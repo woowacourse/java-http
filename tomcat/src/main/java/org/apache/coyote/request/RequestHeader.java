@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.request;
 
 public enum RequestHeader {
     CONTENT_LENGTH("Content-Length"),

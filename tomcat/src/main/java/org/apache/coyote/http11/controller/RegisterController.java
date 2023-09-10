@@ -24,7 +24,7 @@ public class RegisterController extends AbstractController {
             register(httpRequest);
         } catch (MemberExistException e) {
             httpResponse.setHttpStatus(HttpStatus.CONFLICT);
-            httpResponse.setBody(fileReader.readStaticFile("/login.html"),
+            httpResponse.setBody(fileReader.readStaticFile("/401.html"),
                 ContentType.findResponseContentTypeFromRequest(httpRequest));
             return;
         }

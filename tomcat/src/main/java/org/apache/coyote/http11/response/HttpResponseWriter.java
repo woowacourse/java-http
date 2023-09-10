@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 
 public class HttpResponseWriter {
 
-    private final static String LINE_DELIMITER = " ";
+    private static final String LINE_DELIMITER = " ";
 
     private final String response;
 

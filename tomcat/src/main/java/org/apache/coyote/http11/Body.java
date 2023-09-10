@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public class Body {
 
-    public static Body EMPTY = new Body("");
+    public static final Body EMPTY = new Body("");
 
     private final String message;
 

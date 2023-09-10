@@ -39,7 +39,7 @@ public class HttpRequestParser {
         final HttpHeaders httpHeaders = parseHttpHeaders(reader);
         final HttpCookies httpCookies = parseHttpCookies(httpHeaders.get(HttpHeaders.COOKIE));
 
-        final Map<String, String> requestBody = parseRequestBody(reader, httpHeaders.get(HttpHeaders.CONTENT_LENGTH),
+        final Map<String, Object> requestBody = parseRequestBody(reader, httpHeaders.get(HttpHeaders.CONTENT_LENGTH),
                 bodyParsers.get(httpHeaders.getContentType()));
 
         return new HttpRequest(httpRequestLine, queryStrings, httpHeaders, httpCookies, requestBody);
@@ -100,7 +100,7 @@ public class HttpRequestParser {
         return httpCookies;
     }
 
-    private Map<String, String> parseRequestBody(final BufferedReader reader, final String contentLength,
+    private Map<String, Object> parseRequestBody(final BufferedReader reader, final String contentLength,
                                                  final BodyParser bodyParser) {
         if (contentLength.isEmpty()) {
             return new HashMap<>();

@@ -36,9 +36,9 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doPost(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> requestBody = request.getRequestBody();
-        final String account = requestBody.get("account");
-        final String password = requestBody.get("password");
+        final Map<String, Object> requestBody = request.getRequestBody();
+        final String account = (String) requestBody.get("account");
+        final String password = (String) requestBody.get("password");
         final Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
         final boolean isSuccess = findUser.filter(user -> user.checkPassword(password))
                 .isPresent();

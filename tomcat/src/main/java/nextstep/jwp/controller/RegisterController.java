@@ -20,10 +20,10 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doPost(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> requestBody = request.getRequestBody();
-        final String account = requestBody.get("account");
-        final String password = requestBody.get("password");
-        final String email = requestBody.get("email");
+        final Map<String, Object> requestBody = request.getRequestBody();
+        final String account = (String) requestBody.get("account");
+        final String password = (String) requestBody.get("password");
+        final String email = (String) requestBody.get("email");
         InMemoryUserRepository.save(new User(account, password, email));
         response.setStatusCode(HttpStatusCode.FOUND);
         response.setLocation("/index.html");

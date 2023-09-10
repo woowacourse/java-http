@@ -10,10 +10,10 @@ public class HttpRequest {
     private final QueryStrings queryStrings;
     private final HttpHeaders headers;
     private final HttpCookies cookies;
-    private final Map<String, String> requestBody;
+    private final Map<String, Object> requestBody;
 
     public HttpRequest(final HttpRequestLine requestLine, final QueryStrings queryStrings, final HttpHeaders headers,
-                       final HttpCookies cookies, final Map<String, String> requestBody) {
+                       final HttpCookies cookies, final Map<String, Object> requestBody) {
         this.requestLine = requestLine;
         this.queryStrings = queryStrings;
         this.headers = headers;
@@ -42,7 +42,7 @@ public class HttpRequest {
         return values.getOrDefault(key, EMPTY_VALUE);
     }
 
-    public Map<String, String> getRequestBody() {
+    public Map<String, Object> getRequestBody() {
         return requestBody;
     }
 

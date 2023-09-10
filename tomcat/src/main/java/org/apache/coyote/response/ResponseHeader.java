@@ -23,10 +23,6 @@ public class ResponseHeader {
 	public ResponseHeader() {
 	}
 
-	public ResponseHeader(final Map<HeaderType, String> headers) {
-		this.headers.putAll(headers);
-	}
-
 	public void addContentType(final MimeType mimeType) {
 		headers.put(HeaderType.CONTENT_LENGTH, mimeType.getValue());
 	}

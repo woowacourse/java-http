@@ -29,7 +29,6 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatus(OK);
         response.setContentType("text/html");
-        response.setRedirectUrl("/index.html");
         response.setBody(Utils.readFile("static", "register.html"));
     }
 }

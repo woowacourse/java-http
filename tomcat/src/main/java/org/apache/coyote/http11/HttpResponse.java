@@ -42,4 +42,15 @@ public class HttpResponse {
         headers.put("Location", value);
     }
 
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public StringBuilder getBody() {
+        return body;
+    }
 }

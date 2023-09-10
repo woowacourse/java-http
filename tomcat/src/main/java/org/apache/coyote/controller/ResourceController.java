@@ -47,7 +47,6 @@ public class ResourceController extends AbstractController {
 
         response.setStatus(FOUND);
         response.setRedirectUrl("404.html");
-
     }
 
 

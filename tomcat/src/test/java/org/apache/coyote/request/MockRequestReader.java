@@ -1,9 +1,8 @@
 package org.apache.coyote.request;
 
-import java.io.IOException;
 import java.util.List;
 
-public class MockRequestReader implements Reader{
+public class MockRequestReader implements Reader {
 
     private final List<String> lines;
 

@@ -140,7 +140,7 @@ public class LoginApiTest {
         final LoginController loginController = new LoginController();
         final ResponseEntity responseEntity = loginController.handle(request);
 
-        assertThat(responseEntity.toString()).contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
+        assertThat(responseEntity.toString()).contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html", "Set-Cookie: ");
     }
 
     @Test

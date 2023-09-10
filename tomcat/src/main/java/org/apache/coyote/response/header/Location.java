@@ -1,9 +1,9 @@
-package org.apache.coyote.response;
+package org.apache.coyote.response.header;
 
-public class ResponseLocation {
+public class Location {
     private final String redirectPath;
 
-    public ResponseLocation(final String redirectPath) {
+    public Location(final String redirectPath) {
         this.redirectPath = redirectPath;
     }
 

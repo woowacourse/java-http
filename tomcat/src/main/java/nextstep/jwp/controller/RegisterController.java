@@ -38,7 +38,7 @@ public class RegisterController implements Controller {
         }
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
-        return ResponseEntity.fromViewPathWithRedirect(request.httpVersion(), request.getPath(), ResponseStatus.MOVED_TEMP, "/index.html");
+        return ResponseEntity.fromViewPathWithRedirect(request, ResponseStatus.MOVED_TEMP, "/index.html");
     }
 
     private ResponseEntity joinPage(final Request request) {

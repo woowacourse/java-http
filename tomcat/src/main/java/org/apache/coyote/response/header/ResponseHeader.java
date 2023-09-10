@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package org.apache.coyote.response.header;
 
 import java.util.List;
 import java.util.stream.Collectors;

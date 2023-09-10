@@ -74,4 +74,8 @@ public class Request {
                 requestHeader + System.lineSeparator() + System.lineSeparator() +
                 requestBody;
     }
+
+    public boolean hasJsessionid() {
+        return requestHeader.hasJsessionid();
+    }
 }

@@ -11,7 +11,8 @@ public enum FileType {
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css;charset=utf-8"),
     JS(".js", "application/x-javascript;charset=utf-8"),
-    SVG(".svg", "image/svg+xml");
+    SVG(".svg", "image/svg+xml"),
+    ICO(".ico", "image/x-icon");
 
     private static final Map<String, FileType> map = new HashMap<>();
 

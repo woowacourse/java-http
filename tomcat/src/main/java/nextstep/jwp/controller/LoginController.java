@@ -22,10 +22,10 @@ public class LoginController implements Controller {
         if (request.isPost()) {
             return login(request);
         }
-        if(request.isGet() && request.hasQueryString()){
+        if (request.isGet() && request.hasQueryString()) {
             return loginInConsole(request);
         }
-        if(request.isGet()){
+        if (request.isGet()) {
             return loginPage(request);
         }
         throw new MethodMappingFailException();
@@ -48,10 +48,10 @@ public class LoginController implements Controller {
         final String password = request.getBodyValue(PASSWORD_KEY);
 
         final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(()-> new PageRedirectException.Unauthorized(request.httpVersion()));
+                .orElseThrow(() -> new PageRedirectException.Unauthorized(request.httpVersion()));
 
         if (user.checkPassword(password)) {
-            return ResponseEntity.fromViewPathWithRedirect(request.httpVersion(), request.getPath(), ResponseStatus.MOVED_TEMP, "/index.html");
+            return ResponseEntity.fromViewPathWithRedirectSetCookie(request, ResponseStatus.MOVED_TEMP, "/index.html");
         }
         throw new PageRedirectException.Unauthorized(request.httpVersion());
     }

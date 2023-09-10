@@ -62,7 +62,8 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
             OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = createHttpRequest(inputStream);
-            HttpResponse response = handle(request);
+            HttpResponse response = new HttpResponse();
+            handle(request, response);
             outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedIOException | UncheckedServletException e) {
@@ -114,17 +115,16 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private HttpResponse handle(HttpRequest request) throws IOException {
+    private void handle(HttpRequest request, HttpResponse response) throws IOException {
         Handler handler = HANDLER_MAP.getOrDefault(request.getPath(), STATIC_RESOURCE_HANDLER);
         try {
-            return handler.handle(request);
+            handler.handle(request, response);
         } catch (MethodNotAllowedException e) {
-            HttpResponse response = METHOD_NOT_ALLOWED_HANDLER.handle(request);
+            METHOD_NOT_ALLOWED_HANDLER.handle(request, response);
             List<String> allowedMethods = e.getAllowedMethods();
             response.setHeader("Allow", allowedMethods);
-            return response;
         } catch (ResourceNotFoundException e) {
-            return NOT_FOUND_HANDLER.handle(request);
+            NOT_FOUND_HANDLER.handle(request, response);
         }
     }
 }

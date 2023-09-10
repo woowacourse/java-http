@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.handler;
 
-import java.io.IOException;
-import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.HttpSession;
-import org.apache.coyote.Handler;
+import org.apache.coyote.HttpMethodHandler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpCookieResponse;
 import org.apache.coyote.common.HttpMethod;
@@ -13,68 +11,54 @@ import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.HttpStatus;
 import org.apache.coyote.common.QueryString;
-import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.util.QueryParser;
 import org.apache.coyote.util.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements Handler {
+public class LoginHandler extends HttpMethodHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
-    private static final List<HttpMethod> ALLOWED_METHOD = List.of(HttpMethod.GET, HttpMethod.POST);
 
-    @Override
-    public HttpResponse handle(HttpRequest request) throws IOException {
-        HttpMethod httpMethod = request.getHttpMethod();
-        if (httpMethod == HttpMethod.GET) {
-            return doGet(request);
-        }
-        if (httpMethod == HttpMethod.POST) {
-            return doPost(request);
-        }
-        throw new MethodNotAllowedException(ALLOWED_METHOD);
+    public LoginHandler() {
+        actions.put(HttpMethod.GET, this::doGet);
+        actions.put(HttpMethod.POST, this::doPost);
     }
 
-    private HttpResponse doGet(HttpRequest request) throws IOException {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user != null) {
-            HttpResponse response = new HttpResponse();
             response.sendRedirect("/index.html");
-            return response;
+            return;
         }
-        HttpResponse response = new HttpResponse();
         response.setContentBody(ResourceResolver.resolve("/login.html"));
         response.setContentType(HttpContentType.TEXT_HTML);
         response.setHttpStatus(HttpStatus.OK);
-        return response;
     }
 
-    private HttpResponse doPost(HttpRequest request) {
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
         String requestBody = request.getRequestBody();
         QueryString query = QueryParser.parse(requestBody);
         String account = query.get("account");
         String password = query.get("password");
-        return InMemoryUserRepository.findByAccount(account)
+
+        InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password))
-            .map(user -> loginSuccess(request, user))
-            .orElseGet(this::loginFail);
+            .ifPresentOrElse(user -> loginSuccess(request, response, user), () -> loginFail(response));
     }
 
-    private HttpResponse loginSuccess(HttpRequest request, User user) {
+    private void loginSuccess(HttpRequest request, HttpResponse response, User user) {
         log.info("로그인 성공! 아이디 : {}", user.getAccount());
         HttpSession session = request.getFreshSession();
         session.setAttribute("user", user);
-        HttpResponse response = new HttpResponse();
         response.sendRedirect("/index.html");
         response.setCookie(new HttpCookieResponse("JSESSIONID", session.getId()));
-        return response;
     }
 
-    private HttpResponse loginFail() {
-        HttpResponse response = new HttpResponse();
+    private void loginFail(HttpResponse response) {
         response.sendRedirect("/401.html");
-        return response;
     }
 }

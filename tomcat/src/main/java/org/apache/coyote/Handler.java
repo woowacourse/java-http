@@ -6,5 +6,5 @@ import org.apache.coyote.common.HttpResponse;
 
 public interface Handler {
 
-    HttpResponse handle(HttpRequest request) throws IOException;
+    void handle(HttpRequest request, HttpResponse response) throws IOException;
 }

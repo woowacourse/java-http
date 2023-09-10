@@ -1,6 +1,7 @@
-package org.apache.catalina.controller;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

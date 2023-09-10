@@ -7,7 +7,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
-class RequestHeaderTest {
+class HttpHttpRequestHeaderTest {
 
     @Test
     void 헤더에_컨텐트_타입이_없는경우_컨텐트길이는_0이다() {

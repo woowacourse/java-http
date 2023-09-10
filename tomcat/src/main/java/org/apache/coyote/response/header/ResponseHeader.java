@@ -1,5 +1,6 @@
 package org.apache.coyote.response.header;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,10 @@ public class ResponseHeader {
         this.headers = headers;
     }
 
+    public static ResponseHeader create() {
+        return new ResponseHeader(new ArrayList<>());
+    }
+
     public static ResponseHeader from(final List<Object> responseHeader) {
         final List<String> headers = responseHeader.stream()
                 .map(String::valueOf)
@@ -18,7 +23,7 @@ public class ResponseHeader {
         return new ResponseHeader(headers);
     }
 
-    public void add(Object object){
+    public void add(Object object) {
         headers.add(String.valueOf(object));
     }
 

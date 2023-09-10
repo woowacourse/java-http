@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
-class RequestTest {
+class HttpHttpRequestTest {
     @Test
     void requestBody가_없을때_파싱_확인() throws IOException {
         // given
@@ -28,7 +28,7 @@ class RequestTest {
         try (connection;
              final var inputStream = connection.getInputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final Request request = Request.from(RequestReader.from(bufferedReader));
+            final HttpRequest request = HttpRequest.from(RequestReader.from(bufferedReader));
 
             // then
             assertThat(request.toString()).contains(httpRequest);

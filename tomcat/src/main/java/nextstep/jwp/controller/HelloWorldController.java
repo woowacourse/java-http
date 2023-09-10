@@ -1,13 +1,13 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.ResponseEntity;
-import org.apache.coyote.response.ResponseStatus;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.front.AbstractController;
 
-public class HelloWorldController implements Controller{
+public class HelloWorldController extends AbstractController {
 
     @Override
-    public ResponseEntity handle(final Request request) {
-        return ResponseEntity.fromString(request, "Hello world!", ResponseStatus.OK);
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setStringAsBody("Hello world!");
     }
 }

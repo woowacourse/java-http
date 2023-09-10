@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.Request;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestReader;
-import org.apache.coyote.response.ResponseEntity;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.front.Proxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,16 +40,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final Request request = Request.from(RequestReader.from(bufferedReader));
-            final ResponseEntity responseEntity = proxy.process(request);
-            writeResponse(outputStream, responseEntity);
+            final HttpRequest httpRequest = HttpRequest.from(RequestReader.from(bufferedReader));
+            final HttpResponse httpResponse = HttpResponse.create(httpRequest.httpVersion());
+            proxy.process(httpRequest, httpResponse);
+            writeResponse(outputStream, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void writeResponse(final OutputStream outputStream, final ResponseEntity responseEntity) throws IOException {
-        outputStream.write(responseEntity.toString().getBytes());
+    private void writeResponse(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
+        outputStream.write(httpResponse.toString().getBytes());
         outputStream.flush();
     }
 }

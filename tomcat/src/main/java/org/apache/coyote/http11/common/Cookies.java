@@ -33,8 +33,8 @@ public class Cookies {
         return new Cookies(values);
     }
 
-    public static String ofJSessionId(final String id) {
-        return "JSESSIONID=" + id;
+    public static String ofSingleHeader(final String name, final String value) {
+        return String.join("=", name, value);
     }
 
     public String findByName(final String name) {

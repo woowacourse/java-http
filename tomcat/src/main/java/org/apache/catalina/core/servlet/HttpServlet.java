@@ -6,7 +6,6 @@ import static org.apache.coyote.http11.common.Method.POST;
 import static org.apache.coyote.http11.common.Status.METHOD_NOT_ALLOWED;
 
 import org.apache.catalina.core.RequestHandler;
-import org.apache.coyote.http11.request.Request;
 
 public abstract class HttpServlet implements RequestHandler {
 
@@ -17,27 +16,28 @@ public abstract class HttpServlet implements RequestHandler {
     }
 
     @Override
-    public void service(final Request request, final HttpServletResponse response) throws Exception {
-        if (request.getMethod() == GET) {
-            doGet(request, response);
+    public void service(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+            throws Exception {
+        if (httpServletRequest.getMethod() == GET) {
+            doGet(httpServletRequest, httpServletResponse);
             return;
         }
-        if (request.getMethod() == POST) {
-            doPost(request, response);
+        if (httpServletRequest.getMethod() == POST) {
+            doPost(httpServletRequest, httpServletResponse);
             return;
         }
-        response.set(methodNotAllowed());
+        httpServletResponse.set(methodNotAllowed());
     }
 
     public String getMappingPath() {
         return mappingPath;
     }
 
-    protected void doGet(final Request request, final HttpServletResponse response) throws Exception {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
         response.setStatus(METHOD_NOT_ALLOWED);
     }
 
-    protected void doPost(final Request request, final HttpServletResponse response) {
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
         response.setStatus(METHOD_NOT_ALLOWED);
     }
 

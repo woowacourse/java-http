@@ -3,6 +3,7 @@ package org.apache.catalina.core;
 import java.util.Set;
 import org.apache.catalina.core.servlet.DefaultServlet;
 import org.apache.catalina.core.servlet.HttpServlet;
+import org.apache.catalina.core.servlet.HttpServletRequest;
 import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
@@ -19,8 +20,10 @@ public class Container {
     }
 
     public Response handle(final Request request) {
-        /// TODO: 2023/09/10  request에 sessionManager 담기 
-        return requestHandlerAdaptor.service(request, new HttpServletResponse());
+        final var httpServletRequest = new HttpServletRequest(request, sessionManager);
+        final var httpServletResponse = new HttpServletResponse();
+
+        return requestHandlerAdaptor.service(httpServletRequest, httpServletResponse);
     }
 
 }

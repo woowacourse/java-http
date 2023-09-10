@@ -3,9 +3,9 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.util.Objects;
 import javassist.NotFoundException;
+import org.apache.catalina.core.servlet.HttpServletRequest;
 import org.apache.catalina.core.servlet.HttpServletResponse;
 import org.apache.catalina.core.util.ResourceReader;
-import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.session.SessionManager.Session;
 
 public class ViewController implements Controller {
@@ -13,11 +13,11 @@ public class ViewController implements Controller {
     private ViewController() {
     }
 
-    public static HttpServletResponse login(final Request request) throws NotFoundException, IOException {
+    public static HttpServletResponse login(final HttpServletRequest request) throws NotFoundException, IOException {
         return responseByLogin(request.getSession(), "/login.html");
     }
 
-    public static HttpServletResponse register(final Request request) throws NotFoundException, IOException {
+    public static HttpServletResponse register(final HttpServletRequest request) throws NotFoundException, IOException {
         return responseByLogin(request.getSession(), "/register.html");
     }
 

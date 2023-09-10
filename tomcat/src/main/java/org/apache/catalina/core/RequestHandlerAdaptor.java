@@ -4,8 +4,8 @@ import static org.apache.catalina.core.servlet.HttpServletResponse.internalSever
 import static org.apache.catalina.core.servlet.HttpServletResponse.notFound;
 
 import javassist.NotFoundException;
+import org.apache.catalina.core.servlet.HttpServletRequest;
 import org.apache.catalina.core.servlet.HttpServletResponse;
-import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
 public class RequestHandlerAdaptor {
@@ -16,17 +16,19 @@ public class RequestHandlerAdaptor {
         handlerMapping = requestMapping;
     }
 
-    public Response service(final Request request, final HttpServletResponse response) {
-        final var handler = handlerMapping.getHandler(request);
+    public Response service(
+            final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse
+    ) {
+        final var handler = handlerMapping.getHandler(httpServletRequest);
         try {
-            handler.service(request, response);
+            handler.service(httpServletRequest, httpServletResponse);
         } catch (final NotFoundException exception) {
-            response.set(notFound().body(exception.getMessage()));
+            httpServletResponse.set(notFound().body(exception.getMessage()));
         } catch (final Exception exception) {
-            response.set(internalSeverError().body(exception.getMessage()));
+            httpServletResponse.set(internalSeverError().body(exception.getMessage()));
         }
 
-        return response.build();
+        return httpServletResponse.build();
     }
 
 }

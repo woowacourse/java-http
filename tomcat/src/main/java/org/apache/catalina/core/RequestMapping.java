@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.catalina.core.servlet.HttpServlet;
-import org.apache.coyote.http11.request.Request;
+import org.apache.catalina.core.servlet.HttpServletRequest;
 
-public class RequestMapping implements RequestMapping {
+public class RequestMapping {
 
     private final Map<String, HttpServlet> servlets;
     private final RequestHandler defaultHandler;
@@ -20,7 +20,7 @@ public class RequestMapping implements RequestMapping {
         this.defaultHandler = defaultHandler;
     }
 
-    public RequestHandler getHandler(final Request request) {
+    public RequestHandler getHandler(final HttpServletRequest request) {
         final var httpServlet = servlets.get(request.getPath());
         if (httpServlet == null) {
             return defaultHandler;

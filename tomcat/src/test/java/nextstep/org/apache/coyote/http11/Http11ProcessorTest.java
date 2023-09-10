@@ -1,27 +1,34 @@
 package nextstep.org.apache.coyote.http11;
 
-import static nextstep.org.apache.coyote.http11.DispatcherServletFixture.REQUEST_HANDLER_ADAPTOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Set;
 import javassist.NotFoundException;
+import nextstep.jwp.servlet.LoginRequestServlet;
+import nextstep.jwp.servlet.RegisterRequestServlet;
+import org.apache.catalina.core.Container;
 import org.apache.catalina.core.util.ResourceReader;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    private static final Container TOMCAT_CONTAINER = new Container(
+            Set.of(new LoginRequestServlet(), new RegisterRequestServlet()), new SessionManager());
+
     @DisplayName("소켓으로 들어온 요청을 처리한다.")
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
+        final var processor = new Http11Processor(socket, TOMCAT_CONTAINER);
 
         // when
         processor.process(socket);
@@ -48,7 +55,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
+        final Http11Processor processor = new Http11Processor(socket, TOMCAT_CONTAINER);
 
         // when
         processor.process(socket);
@@ -77,7 +84,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
+        final Http11Processor processor = new Http11Processor(socket, TOMCAT_CONTAINER);
 
         // when
         processor.process(socket);
@@ -103,7 +110,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
+        final Http11Processor processor = new Http11Processor(socket, TOMCAT_CONTAINER);
 
         // when
         processor.process(socket);
@@ -129,7 +136,7 @@ class Http11ProcessorTest {
         );
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, REQUEST_HANDLER_ADAPTOR);
+        final Http11Processor processor = new Http11Processor(socket, TOMCAT_CONTAINER);
 
         // when
         processor.process(socket);

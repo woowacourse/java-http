@@ -8,6 +8,7 @@ import static org.apache.coyote.http11.common.Status.NOT_FOUND;
 import static org.apache.coyote.http11.common.Status.OK;
 
 import org.apache.catalina.core.util.StaticResource;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Status;
 import org.apache.coyote.http11.common.header.EntityHeaders;
 import org.apache.coyote.http11.common.header.GeneralHeaders;
@@ -65,8 +66,8 @@ public class HttpServletResponse {
         this.body = response.body;
     }
 
-    public HttpServletResponse addSetCookie(final String cookie) {
-        this.responseHeaders.addSetCookie(cookie);
+    public HttpServletResponse addSetCookie(final String name, final String value) {
+        this.responseHeaders.addSetCookie(Cookies.ofSingleHeader(name, value));
         return this;
     }
 

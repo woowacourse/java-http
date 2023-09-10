@@ -1,19 +1,14 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.session.SessionManager.SESSION_ID_COOKIE_NAME;
-
 import java.util.Map;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.Method;
 import org.apache.coyote.http11.common.header.EntityHeaders;
 import org.apache.coyote.http11.common.header.GeneralHeaders;
 import org.apache.coyote.http11.common.header.RequestHeaders;
-import org.apache.coyote.http11.session.SessionManager;
-import org.apache.coyote.http11.session.SessionManager.Session;
 
 public class Request {
 
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
     private final RequestLine requestLine;
     private final GeneralHeaders generalHeaders;
     private final RequestHeaders requestHeaders;
@@ -64,14 +59,8 @@ public class Request {
         return requestLine.getUri().toString();
     }
 
-    public Session getSession() {
-        return SESSION_MANAGER.findOrCreate(findSessionId());
-    }
-
-    private String findSessionId() {
-        final var cookies = Cookies.from(requestHeaders.getCookie());
-
-        return cookies.findByName(SESSION_ID_COOKIE_NAME);
+    public Cookies getCookies() {
+        return Cookies.from(requestHeaders.getCookie());
     }
 
     public String getBody() {

@@ -5,7 +5,6 @@ import static org.apache.coyote.http11.common.MimeType.HTML;
 
 import org.apache.catalina.core.util.ResourceReader;
 import org.apache.catalina.core.util.StaticResource;
-import org.apache.coyote.http11.request.Request;
 
 public class DefaultServlet extends HttpServlet {
 
@@ -17,14 +16,15 @@ public class DefaultServlet extends HttpServlet {
     }
 
     @Override
-    public void service(final Request request, final HttpServletResponse response) throws Exception {
-        if ("/".equals(request.getUri())) {
-            response.set(staticResource(DEFAULT_RESPONSE));
+    public void service(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+            throws Exception {
+        if ("/".equals(httpServletRequest.getUri())) {
+            httpServletResponse.set(staticResource(DEFAULT_RESPONSE));
             return;
         }
 
-        final var resource = ResourceReader.read(request.getUri());
-        response.set(staticResource(resource));
+        final var resource = ResourceReader.read(httpServletRequest.getUri());
+        httpServletResponse.set(staticResource(resource));
     }
 
 }

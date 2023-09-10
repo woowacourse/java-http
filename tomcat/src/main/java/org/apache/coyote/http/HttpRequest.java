@@ -52,7 +52,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryStrings() {
-        return startLine.getQueryString();
+        return startLine.getQueryStrings();
     }
 
     public HttpProtocol getProtocol() {

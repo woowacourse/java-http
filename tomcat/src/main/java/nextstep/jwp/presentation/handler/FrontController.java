@@ -8,7 +8,6 @@ import nextstep.jwp.presentation.RootController;
 import nextstep.jwp.presentation.StaticController;
 import org.apache.coyote.http.HttpRequest;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class FrontController {
         mappingControllers.put("/register", new RegisterController());
     }
 
-    public Controller handle(HttpRequest httpRequest) throws IOException {
+    public Controller handle(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
         if (isStaticPath(path)) {
             return STATIC_CONTROLLER;

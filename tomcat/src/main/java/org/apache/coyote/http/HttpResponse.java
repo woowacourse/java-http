@@ -57,12 +57,12 @@ public class HttpResponse {
     }
 
     private String joinHeaderWithoutCookie() {
-        String headers = this.headers.entrySet().stream()
+        String headersWithoutCookie = this.headers.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(HttpHeader.COOKIE.getName()))
                 .map(entry -> entry.getKey() + ": " + entry.getValue().getValues())
                 .reduce((header1, header2) -> header1 + SPACE + LINE_FEED + header2)
                 .orElse("");
-        return headers + SPACE + LINE_FEED;
+        return headersWithoutCookie + SPACE + LINE_FEED;
     }
 
     private String joinCookie() {

@@ -16,14 +16,14 @@ public class StartLine {
 
     private final HttpMethod method;
     private final String path;
-    private final Map<String, String> queryString;
+    private final Map<String, String> queryStrings;
     private final HttpProtocol protocol;
 
     public StartLine(String startLine) {
         this.method = HttpMethod.from(divideMethod(startLine));
         String pathWithQueryString = dividePathWithQueryString(startLine);
         this.path = dividePath(pathWithQueryString);
-        this.queryString = divideQueryString(pathWithQueryString);
+        this.queryStrings = divideQueryString(pathWithQueryString);
         this.protocol = HttpProtocol.from(divideProtocol(startLine));
     }
 
@@ -64,8 +64,8 @@ public class StartLine {
         return path;
     }
 
-    public Map<String, String> getQueryString() {
-        return queryString;
+    public Map<String, String> getQueryStrings() {
+        return queryStrings;
     }
 
     public HttpProtocol getProtocol() {

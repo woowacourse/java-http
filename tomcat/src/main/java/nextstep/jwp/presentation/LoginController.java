@@ -9,7 +9,6 @@ import org.apache.coyote.http.HttpResponseBuilder;
 import org.apache.coyote.http.SessionManager;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.coyote.http.HttpMethod.GET;

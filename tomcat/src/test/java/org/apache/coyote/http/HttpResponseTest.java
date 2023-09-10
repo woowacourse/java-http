@@ -51,7 +51,7 @@ class HttpResponseTest {
         httpResponse.updateFileMessageBody("/index.html");
 
         //then
-        assertThat(httpResponse.getMessageBody().getBytes().length).isEqualTo(expect);
+        assertThat(httpResponse.getMessageBody().getBytes()).hasSize(expect);
     }
 
     @Test

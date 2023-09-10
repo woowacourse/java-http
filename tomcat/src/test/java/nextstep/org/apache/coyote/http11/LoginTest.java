@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.org.apache.coyote.http11;
 
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.common.SessionManager;
@@ -14,7 +14,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 
-class LoginStep1ControllerTest {
+class LoginTest {
 
     @BeforeEach
     void beforeEach() {

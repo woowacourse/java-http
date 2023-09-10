@@ -74,6 +74,10 @@ public class HttpRequest {
         return this.requestLine.isSameMethod(method);
     }
 
+    public boolean isSameUri(final String uri) {
+        return this.requestLine.isSameUri(uri);
+    }
+
     public boolean hasHeaderBy(final String name) {
         return requestHeaders.getHeaders().stream()
                              .anyMatch(requestHeader -> requestHeader.getName().equals(name));
@@ -81,10 +85,6 @@ public class HttpRequest {
 
     public boolean hasQueryString() {
         return requestLine.getQueryString().isPresent();
-    }
-
-    public Method getMethod() {
-        return requestLine.getMethod();
     }
 
     public String getPath() {

@@ -27,8 +27,8 @@ public class ResponseGenerator {
     private static final Logger log = LoggerFactory.getLogger(ResponseGenerator.class);
     public static final String ROOT_PATH = "/";
     private static final String STATIC_PATH = "static";
-    private static final String LOGIN_PATH = "/login";
-    private static final String REGISTER_PATH = "/register";
+    private static final String LOGIN_URI = "/login";
+    private static final String REGISTER_URI = "/register";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String EMAIL_KEY = "email";
@@ -39,15 +39,15 @@ public class ResponseGenerator {
     }
 
     public static String generate(final HttpRequest httpRequest) throws IOException {
-        if (ROOT_PATH.equals(httpRequest.getPath())) {
+        if (httpRequest.isSameUri(ROOT_PATH)) {
             final HttpResponse httpResponse = getDefaultResponse();
             return httpResponse.toMessage();
         }
-        if (LOGIN_PATH.equals(httpRequest.getPath())) {
+        if (httpRequest.isSameUri(LOGIN_URI)) {
             final HttpResponse httpResponse = getLoginResponse(httpRequest);
             return httpResponse.toMessage();
         }
-        if (REGISTER_PATH.equals(httpRequest.getPath())) {
+        if (httpRequest.isSameUri(REGISTER_URI)) {
             final HttpResponse httpResponse = getRegisterResponse(httpRequest);
             return httpResponse.toMessage();
         }

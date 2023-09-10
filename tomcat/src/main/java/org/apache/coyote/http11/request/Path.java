@@ -38,6 +38,9 @@ public class Path {
         return QueryString.from(queryString);
     }
 
+    public boolean isSameUri(final String uri) {
+        return this.uri.equals(uri);
+    }
 
     public String getUri() {
         return uri;

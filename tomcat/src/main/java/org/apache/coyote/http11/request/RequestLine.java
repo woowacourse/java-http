@@ -34,6 +34,10 @@ public class RequestLine {
         return this.method.equals(method);
     }
 
+    public boolean isSameUri(final String uri) {
+        return this.path.isSameUri(uri);
+    }
+
     public Method getMethod() {
         return method;
     }

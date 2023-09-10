@@ -6,9 +6,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
-    private final String startLine;
-    private final String headers;
-    private final String body;
+    public static final String HEADER_END_POINT = " \r\n";
+    public static final String END_POINT = "\r\n";
+    private String startLine;
+    private String headers;
+    private String body;
 
     private HttpResponse(final String startLine, final String headers, final String body) {
         this.startLine = startLine;
@@ -16,52 +18,37 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(
-            final HttpVersion httpVersion,
-            final HttpStatus httpStatus,
-            final Map<String, String> headers,
-            final String responseBody
-    ) {
-        return new HttpResponse(
-                httpVersion.getVersion() + " " + httpStatus.getStatusName() + " \r\n",
-                makeHeader(headers) +
-                        "Content-Length: " + responseBody.getBytes().length + " \r\n",
-                responseBody);
+    public static HttpResponse init() {
+        return new HttpResponse(null, null, "");
     }
 
-    public static HttpResponse resourceOf(
-            final HttpVersion httpVersion,
-            final HttpStatus httpStatus,
-            final Map<String, String> headers,
-            final String responseBody
-    ) {
-        return new HttpResponse(
-                httpVersion.getVersion() + " " + httpStatus.getStatusName() + " \r\n",
-                makeHeader(headers) + " \r\n",
-                responseBody);
-    }
-
-    public static HttpResponse redirectOf(
-            final HttpVersion httpVersion,
-            final HttpStatus httpStatus,
-            final Map<String, String> headers,
-            final String responseBody
-    ) {
-        return new HttpResponse(
-                httpVersion.getVersion() + " " + httpStatus.getStatusName() + " \r\n",
-                makeHeader(headers) +
-                        "Content-Length: " + responseBody.getBytes().length + " \r\n",
-                responseBody);
-    }
-
-    private static String makeHeader(final Map<String, String> body) {
-        return body.entrySet()
+    private static String makeHeader(final Map<String, String> header) {
+        return header.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " \r\n")
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + HEADER_END_POINT)
                 .collect(Collectors.joining());
     }
 
-    public String getResponse() {
-        return startLine + headers + "\r\n" + body;
+    public void setHeader(final HttpVersion httpVersion, final HttpStatus httpStatus, final Map<String, String> header) {
+        this.startLine = httpVersion.getVersion() + " " + httpStatus.getStatusName() + HEADER_END_POINT;
+        this.headers = makeHeader(header);
+    }
+
+    public void setHttpStatus(final HttpVersion httpVersion, final HttpStatus httpStatus) {
+        this.startLine = httpVersion.getVersion() + " " + httpStatus.getStatusName() + END_POINT;
+        this.headers = "";
+    }
+
+    public void setBody(final String responseBody) {
+        this.headers += HEADER_END_POINT + "Content-Length: " + responseBody.getBytes().length + HEADER_END_POINT;
+        this.body = END_POINT + responseBody;
+    }
+
+    public void setRedirect(final String redirectUri) {
+        this.headers += "Location: " + redirectUri + HEADER_END_POINT;
+    }
+
+    public byte[] getBytes() {
+        return (startLine + headers + body).getBytes();
     }
 }

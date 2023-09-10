@@ -3,17 +3,13 @@ package org.apache.catalina.servlet;
 import org.apache.catalina.servlet.adapter.Handler;
 import org.apache.catalina.servlet.adapter.HandlerAdapter;
 import org.apache.catalina.servlet.filter.Interceptor;
-import org.apache.coyote.ResponseEntity;
 import org.apache.catalina.servlet.filter.SessionInterceptor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DispatcherServlet implements Servlet {
@@ -21,28 +17,14 @@ public class DispatcherServlet implements Servlet {
     private final Map<String, Interceptor> interceptors = Map.of("/login", new SessionInterceptor());
 
     @Override
-    public HttpResponse service(final HttpRequest request) throws IOException {
+    public void service(final HttpRequest request, final HttpResponse response) {
         if (handleInternal(request)) {
-            return HttpResponse.of(
-                    request.getHttpStartLine().getHttpVersion(),
-                    HttpStatus.OK,
-                    Map.of("Content-Type: ", HttpContentType.from(request.getHttpExtension()).getContentType()),
-                    makeResponseBody("index.html"));
+            response.setHeader(request.getHttpVersion(), HttpStatus.FOUND, makeResponseHeader(request));
+            response.setRedirect("index.html");
+            return;
         }
         final Handler handler = HandlerAdapter.getHandler(request);
-        final ResponseEntity responseEntity = handler.service(request);
-        if (responseEntity.isRestResponse()) {
-            return HttpResponse.resourceOf(
-                    request.getHttpStartLine().getHttpVersion(),
-                    responseEntity.getStatusCode(),
-                    responseEntity.getHeaders(),
-                    responseEntity.getBody());
-        }
-        return HttpResponse.redirectOf(
-                request.getHttpStartLine().getHttpVersion(),
-                responseEntity.getStatusCode(),
-                responseEntity.getHeaders(),
-                makeResponseBody(responseEntity.getBody()));
+        handler.service(request, response);
     }
 
     private boolean handleInternal(HttpRequest request) {
@@ -51,9 +33,9 @@ public class DispatcherServlet implements Servlet {
                 .anyMatch(interceptorEntry -> interceptorEntry.getValue().preHandle(request));
     }
 
-    private String makeResponseBody(final String path) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(
-                "static/" + path);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    private Map<String, String> makeResponseHeader(final HttpRequest request) {
+        Map<String, String> header = new HashMap<>();
+        header.put("Content-Type", HttpContentType.from(request.getHttpExtension()).getContentType());
+        return header;
     }
 }

@@ -17,9 +17,8 @@ public class StandardWrapper {
     }
 
 
-    public static HttpResponse invoke(final HttpRequest request) throws IOException {
+    public static void invoke(final HttpRequest request, final HttpResponse response) throws IOException {
         final Servlet servlet = servlets.get(request.getHttpExtension().getServletType());
-        final HttpResponse service = servlet.service(request);
-        return service;
+        servlet.service(request,response);
     }
 }

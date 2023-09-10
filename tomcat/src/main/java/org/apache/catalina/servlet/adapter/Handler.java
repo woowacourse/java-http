@@ -1,8 +1,8 @@
 package org.apache.catalina.servlet.adapter;
 
-import org.apache.coyote.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Handler {
-     ResponseEntity service(HttpRequest request);
+     void service(HttpRequest request, HttpResponse response);
 }

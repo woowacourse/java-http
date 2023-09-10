@@ -33,11 +33,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = HttpRequestExtractor.extract(inputStream);
-            final HttpResponse httpResponses = StandardWrapper.invoke(request);
+            final HttpResponse response = HttpResponse.init();
+            StandardWrapper.invoke(request, response);
 
-            outputStream.write(httpResponses.getResponse().getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException |RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             log.error(e.getMessage(), e);
         }
     }

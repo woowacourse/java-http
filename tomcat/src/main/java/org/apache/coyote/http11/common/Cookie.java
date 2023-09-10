@@ -3,6 +3,7 @@ package org.apache.coyote.http11.common;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class Cookie {
@@ -18,6 +19,10 @@ public class Cookie {
         this.cookies = cookies;
     }
 
+    public Cookie() {
+        this.cookies = new HashMap<>();
+    }
+
     public static Cookie from(String cookieValue) {
         if (cookieValue.isBlank()) {
             return new Cookie(new HashMap<>());
@@ -29,15 +34,20 @@ public class Cookie {
         return new Cookie(cookies);
     }
 
-    public boolean containsKey(String key) {
-        return cookies.containsKey(key);
-    }
-
     public String findByKey(String key) {
         return cookies.get(key);
     }
 
     public void addCookie(String key, String value) {
         cookies.put(key, value);
+    }
+
+    public String generateResponseMessage() {
+        StringJoiner cookieHeader = new StringJoiner(COOKIE_DELIMITER);
+        cookies.entrySet().stream()
+                .map(cookieEntry -> cookieEntry.getKey() + COOKIE_VALUE_DELIMITER + cookieEntry.getValue())
+                .forEach(cookieHeader::add);
+
+        return String.format("Set-Cookie: %s ", cookieHeader.toString());
     }
 }

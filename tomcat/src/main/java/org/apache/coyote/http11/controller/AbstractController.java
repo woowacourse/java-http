@@ -11,9 +11,11 @@ public abstract class AbstractController implements Controller {
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.matchesMethod(HttpMethod.GET)) {
             doGet(request, response);
+            return;
         }
         if (request.matchesMethod(HttpMethod.POST)) {
             doPost(request, response);
+            return;
         }
         response.setHttpStatus(HttpStatus.FOUND);
         response.sendRedirect("/404.html");

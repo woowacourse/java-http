@@ -10,7 +10,7 @@ import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.session.SessionManager.Session;
 
-public class ViewController implements HandlerAdaptor {
+public class ViewController implements Controller {
 
     private ViewController() {
     }

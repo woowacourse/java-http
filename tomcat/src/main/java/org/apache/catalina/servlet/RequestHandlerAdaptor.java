@@ -1,16 +1,16 @@
 package org.apache.catalina.servlet;
 
 import java.util.Set;
-import org.apache.catalina.servlet.handler.RequestHandler;
+import org.apache.catalina.servlet.handler.Servlet;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
-public class DispatcherServlet {
+public class RequestHandlerAdaptor {
 
-    private final RequestHandlerMapping handlerMapping;
+    private final RequestMapping handlerMapping;
 
-    public DispatcherServlet(final Set<RequestHandler> handlers) {
-        handlerMapping = new RequestHandlerMapping(handlers);
+    public RequestHandlerAdaptor(final Set<Servlet> handlers) {
+        handlerMapping = new RequestMapping(handlers);
     }
 
     public Response service(final Request request) {

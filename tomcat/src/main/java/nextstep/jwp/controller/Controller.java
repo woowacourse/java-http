@@ -1,5 +1,5 @@
 package nextstep.jwp.controller;
 
-public interface HandlerAdaptor {
+public interface Controller {
 
 }

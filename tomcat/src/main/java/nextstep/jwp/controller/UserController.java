@@ -9,7 +9,7 @@ import org.apache.coyote.http11.common.QueryParameters;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
-public class UserController implements HandlerAdaptor {
+public class UserController implements Controller {
 
     private UserController() {
     }

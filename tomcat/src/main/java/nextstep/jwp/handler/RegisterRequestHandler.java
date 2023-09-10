@@ -2,11 +2,11 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.controller.ViewController;
-import org.apache.catalina.servlet.handler.AbstractRequestHandler;
+import org.apache.catalina.servlet.handler.Servlet;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
-public class RegisterRequestHandler extends AbstractRequestHandler {
+public class RegisterRequestHandler extends Servlet {
 
     public RegisterRequestHandler() {
         super("/register");

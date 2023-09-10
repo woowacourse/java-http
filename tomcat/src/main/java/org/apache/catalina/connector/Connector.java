@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.catalina.servlet.DispatcherServlet;
+import org.apache.catalina.servlet.RequestHandlerAdaptor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,23 +23,23 @@ public class Connector implements Runnable {
     private static final int DEFAULT_MAX_THREADS = 200;
     private static final long DEFAULT_KEEP_ALIVE_TIME_MILLISECONDS = 60000L;
 
-    private final DispatcherServlet dispatcherServlet;
+    private final RequestHandlerAdaptor requestHandlerAdaptor;
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
-    public Connector(final DispatcherServlet dispatcherServlet) {
-        this(dispatcherServlet, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
+    public Connector(final RequestHandlerAdaptor requestHandlerAdaptor) {
+        this(requestHandlerAdaptor, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
     // TODO Container를 통해 jwp 패키지의 빈 전달하기
     public Connector(
-            final DispatcherServlet dispatcherServlet,
+            final RequestHandlerAdaptor requestHandlerAdaptor,
             final int port,
             final int acceptCount,
             final int maxThreads
     ) {
-        this.dispatcherServlet = dispatcherServlet;
+        this.requestHandlerAdaptor = requestHandlerAdaptor;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = createExecutorService(acceptCount, maxThreads);
@@ -97,7 +97,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, dispatcherServlet);
+        final var processor = new Http11Processor(connection, requestHandlerAdaptor);
         executorService.submit(processor);
         log.info("thread start");
     }

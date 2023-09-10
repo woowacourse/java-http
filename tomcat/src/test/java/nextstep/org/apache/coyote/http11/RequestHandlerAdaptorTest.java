@@ -17,7 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 
-class DispatcherServletTest {
+class RequestHandlerAdaptorTest {
 
 
     @DisplayName("/로 GET 요청을 보내면 Hello world!를 반환한다.")

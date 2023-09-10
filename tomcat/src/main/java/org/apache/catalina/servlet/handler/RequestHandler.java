@@ -6,7 +6,5 @@ import org.apache.coyote.http11.response.Response;
 public interface RequestHandler {
 
     Response service(Request request);
-
-    String getMappingPath();
-
+    
 }

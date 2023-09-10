@@ -2,11 +2,11 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.controller.ViewController;
-import org.apache.catalina.servlet.handler.AbstractRequestHandler;
+import org.apache.catalina.servlet.handler.Servlet;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 
-public class LoginRequestHandler extends AbstractRequestHandler {
+public class LoginRequestHandler extends Servlet {
 
     public LoginRequestHandler() {
         super("/login");

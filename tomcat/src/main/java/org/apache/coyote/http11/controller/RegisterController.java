@@ -1,8 +1,7 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.HttpMethodHandler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpMethod;
 import org.apache.coyote.common.HttpRequest;
@@ -12,11 +11,11 @@ import org.apache.coyote.common.QueryString;
 import org.apache.coyote.util.QueryParser;
 import org.apache.coyote.util.ResourceResolver;
 
-public class RegisterHandler extends HttpMethodHandler {
+public class RegisterController extends HttpMethodController {
 
-    public RegisterHandler() {
-        actions.put(HttpMethod.GET, this::doGet);
-        actions.put(HttpMethod.POST, this::doPost);
+    public RegisterController() {
+        handlers.put(HttpMethod.GET, this::doGet);
+        handlers.put(HttpMethod.POST, this::doPost);
     }
 
     @Override

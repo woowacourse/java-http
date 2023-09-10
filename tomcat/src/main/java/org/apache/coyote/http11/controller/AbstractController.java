@@ -1,12 +1,12 @@
-package org.apache.coyote;
+package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 
-public class AbstractHandler implements Handler {
+public class AbstractController implements Controller {
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) {
         /* NOOP */
     }
 

@@ -1,9 +1,8 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.HttpSession;
-import org.apache.coyote.HttpMethodHandler;
 import org.apache.coyote.common.HttpContentType;
 import org.apache.coyote.common.HttpCookieResponse;
 import org.apache.coyote.common.HttpMethod;
@@ -16,13 +15,13 @@ import org.apache.coyote.util.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler extends HttpMethodHandler {
+public class LoginController extends HttpMethodController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    public LoginHandler() {
-        actions.put(HttpMethod.GET, this::doGet);
-        actions.put(HttpMethod.POST, this::doPost);
+    public LoginController() {
+        handlers.put(HttpMethod.GET, this::doGet);
+        handlers.put(HttpMethod.POST, this::doPost);
     }
 
     @Override

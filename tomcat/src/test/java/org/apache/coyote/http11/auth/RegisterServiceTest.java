@@ -5,6 +5,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.line.HttpMethod;
+import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -46,10 +47,14 @@ public class RegisterServiceTest {
 
                 RequestLine requestLine = requestLine_생성(POST, "/register");
                 RequestBody requestBody = requestBody_생성();
-                HttpRequest request = HttpRequest.of(requestLine, null, requestBody);
+
+                final String account = requestBody.getBy("account");
+                final String password = requestBody.getBy("password");
+                final String email = requestBody.getBy("email");
+                final Protocol protocol = requestLine.protocol();
 
                 // when
-                HttpResponse response = registerService.getIndexOrConflictResponse(request, null);
+                HttpResponse response = registerService.getIndexOrConflictResponse(account, password, email, protocol);
 
                 // then
                 assertAll(
@@ -65,10 +70,14 @@ public class RegisterServiceTest {
                 InMemoryUserRepository.deleteAll();
                 RequestLine requestLine = requestLine_생성(POST, "/register");
                 RequestBody requestBody = requestBody_생성();
-                HttpRequest request = HttpRequest.of(requestLine, null, requestBody);
+
+                final String account = requestBody.getBy("account");
+                final String password = requestBody.getBy("password");
+                final String email = requestBody.getBy("email");
+                final Protocol protocol = requestLine.protocol();
 
                 // when
-                HttpResponse response = registerService.getIndexOrConflictResponse(request, null);
+                HttpResponse response = registerService.getIndexOrConflictResponse(account, password, email, protocol);
 
                 // then
                 assertAll(

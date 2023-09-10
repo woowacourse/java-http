@@ -3,7 +3,6 @@ package org.apache.coyote.http11.auth;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -17,13 +16,12 @@ public class LoginService {
 
     private final SessionRepository sessionRepository = new SessionRepository();
 
-    public HttpResponse getLoginViewResponse(HttpRequest request, HttpResponse response) {
-        final Cookie cookie = request.requestHeader().getCookie();
+    public HttpResponse getLoginViewResponse(Cookie cookie, Protocol protocol) {
         final Session session = sessionRepository.getSession(cookie.get(COOKIE_KEY));
         if (session == null) {
-            return HttpResponse.getCookieNullResponseEntity(request.getProtocol(), LOGIN_PAGE);
+            return HttpResponse.getCookieNullResponseEntity(protocol, LOGIN_PAGE);
         }
-        return HttpResponse.getCookieNullResponseEntity(request.getProtocol(), INDEX_PAGE);
+        return HttpResponse.getCookieNullResponseEntity(protocol, INDEX_PAGE);
     }
 
     public HttpResponse getLoginOrElseUnAuthorizedResponse(Protocol protocol, String account, String password) {

@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.http11.auth.Cookie;
 import org.apache.coyote.http11.auth.LoginService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.line.HttpMethod;
+import org.apache.coyote.http11.request.line.Protocol;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
@@ -32,7 +34,9 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) {
-        return loginService.getLoginViewResponse(request, response);
+        Cookie cookie = request.requestHeader().getCookie();
+        Protocol protocol = request.getProtocol();
+        return loginService.getLoginViewResponse(cookie, protocol);
     }
 
 }

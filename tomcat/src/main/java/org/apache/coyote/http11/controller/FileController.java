@@ -1,6 +1,5 @@
-package org.apache;
+package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.exception.FileNotReadableException;
 import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpStatus;

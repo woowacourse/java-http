@@ -2,10 +2,10 @@ package org.apache.coyote;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.FileController;
-import org.apache.HelloController;
-import org.apache.LoginController;
-import org.apache.RegisterController;
+import org.apache.coyote.http11.controller.FileController;
+import org.apache.coyote.http11.controller.HelloController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class UrlHandlerMapping {

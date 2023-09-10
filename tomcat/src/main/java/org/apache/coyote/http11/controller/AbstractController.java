@@ -1,5 +1,7 @@
-package org.apache.coyote;
+package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.FileReader;
+import org.apache.coyote.Controller;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;

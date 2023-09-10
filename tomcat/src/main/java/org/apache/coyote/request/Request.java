@@ -1,10 +1,15 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
+import java.util.UUID;
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpMethod;
 
 public class Request {
+
+    private static final SessionManager sessionManager = SessionManager.getInstance();
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
@@ -31,7 +36,16 @@ public class Request {
     }
 
     public Session getSession(boolean isCreate) {
-        return requestHeader.getSession(isCreate);
+        String sessionId = requestHeader.getCookie().getValue(JSESSIONID);
+        if (sessionId == null && isCreate) {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
+        }
+        if (sessionId == null) {
+            return null;
+        }
+        return sessionManager.findSession(sessionId);
     }
 
     public boolean isSamePath(String urlPath) {

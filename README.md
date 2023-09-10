@@ -78,8 +78,11 @@
 # 3. 리팩토링
 ## 리팩토링 사항
 - [x] 각 레이어별 커스텀 예외 구현
-- [ ] response, request header view mapper 구현
 - [x] response resolver에 request가 안넘어가도록 구현
 - [x] controller, adapter 구조 분리
   - [x] controller, adapter 추상화 및 역할 구분
 - [x] request, response 객체 내 map에서 key에 해당하는 value가 없더라도 null 반환하도록 모두 변경 
+
+# 4. 동시성 확장하기
+## 1. Executors로 Thread Pool 적용
+- [x] Executors 클래스를 활용해 ExecutorService 객체 구현

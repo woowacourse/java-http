@@ -17,7 +17,7 @@ public class HttpResponse {
     }
 
     public HttpResponse(final HttpResponseStatusLine responseLine, final String body) {
-        this(responseLine, new HttpHeaders(), body);
+        this(responseLine, HttpHeaders.empty(), body);
     }
 
     public static HttpResponse createBasicResponse() {

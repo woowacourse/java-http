@@ -15,7 +15,7 @@ public class HttpHeaders {
 
     private final Map<HttpHeaderName, String> headers;
 
-    public HttpHeaders() {
+    private HttpHeaders() {
         this.headers = new EnumMap<>(HttpHeaderName.class);
     }
 
@@ -60,6 +60,10 @@ public class HttpHeaders {
         );
 
         return new HttpHeaders(headers);
+    }
+
+    public static HttpHeaders empty() {
+        return new HttpHeaders();
     }
 
     public boolean containsHeader(final HttpHeaderName headerName) {

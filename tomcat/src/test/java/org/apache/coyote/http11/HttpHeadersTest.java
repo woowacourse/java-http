@@ -98,7 +98,7 @@ class HttpHeadersTest {
         ) {
             // when
             final HttpHeaders headers = HttpHeaders.from(bufferedReader);
-            final HttpHeaders emptyHeaders = new HttpHeaders();
+            final HttpHeaders emptyHeaders = HttpHeaders.empty();
 
             // then
             assertAll(
@@ -125,7 +125,7 @@ class HttpHeadersTest {
         ) {
             // when
             final HttpHeaders headers = HttpHeaders.from(bufferedReader);
-            final HttpHeaders emptyHeaders = new HttpHeaders();
+            final HttpHeaders emptyHeaders = HttpHeaders.empty();
             final HttpCookie httpCookie = headers.getCookie();
 
             // then

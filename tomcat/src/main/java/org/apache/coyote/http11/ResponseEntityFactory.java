@@ -27,7 +27,7 @@ public class ResponseEntityFactory {
         final HttpResponseStatusLine statusLine,
         final StaticPages location
     ) {
-        final HttpHeaders httpHeaders = new HttpHeaders();
+        final HttpHeaders httpHeaders = HttpHeaders.empty();
         httpHeaders.addHeader(HttpHeaderName.LOCATION, location.getFileName());
 
         return new ResponseEntity(statusLine, httpHeaders, EMPTY_BODY);
@@ -38,7 +38,7 @@ public class ResponseEntityFactory {
         final StaticPages location,
         final HttpCookie httpCookie
     ) {
-        final HttpHeaders httpHeaders = new HttpHeaders();
+        final HttpHeaders httpHeaders = HttpHeaders.empty();
         httpHeaders.addHeader(HttpHeaderName.LOCATION, location.getFileName());
         httpHeaders.addHeader(HttpHeaderName.SET_COOKIE, httpCookie.toString());
 

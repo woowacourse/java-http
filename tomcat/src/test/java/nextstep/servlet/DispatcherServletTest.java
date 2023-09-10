@@ -17,7 +17,7 @@ class DispatcherServletTest {
     void findControllerThrowException() {
         // given
         final DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        final HttpRequest httpRequest = new HttpRequest(new HttpHeaders(), HttpMethod.POST,
+        final HttpRequest httpRequest = new HttpRequest(HttpHeaders.empty(), HttpMethod.POST,
             HttpRequestURI.from("/not-found"), "HTTP/1.1", null);
         final HttpResponse basicResponse = HttpResponse.createBasicResponse();
 

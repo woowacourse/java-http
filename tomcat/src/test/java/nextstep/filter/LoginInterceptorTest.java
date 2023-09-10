@@ -32,7 +32,7 @@ class LoginInterceptorTest {
             "account", "gugu",
             "password", "password"
         );
-        final HttpRequest loginHttpRequest = new HttpRequest(new HttpHeaders(), HttpMethod.GET,
+        final HttpRequest loginHttpRequest = new HttpRequest(HttpHeaders.empty(), HttpMethod.GET,
             HttpRequestURI.from("/login"), "HTTP/1.1", requestBody);
 
         // then
@@ -50,7 +50,7 @@ class LoginInterceptorTest {
             "account", "gugu",
             "password", "password"
         );
-        final HttpRequest loginHttpRequest = new HttpRequest(new HttpHeaders(), HttpMethod.GET,
+        final HttpRequest loginHttpRequest = new HttpRequest(HttpHeaders.empty(), HttpMethod.GET,
             HttpRequestURI.from("/log"), "HTTP/1.1", requestBody);
 
         // then
@@ -67,7 +67,7 @@ class LoginInterceptorTest {
             "account", "gugu",
             "password", "password"
         );
-        final HttpHeaders httpHeaders = new HttpHeaders();
+        final HttpHeaders httpHeaders = HttpHeaders.empty();
         httpHeaders.addHeader(HttpHeaderName.COOKIE, "JSESSIONID=1234");
 
         final HttpRequest loginHttpRequest = new HttpRequest(httpHeaders, HttpMethod.GET,
@@ -105,7 +105,7 @@ class LoginInterceptorTest {
             "account", "gugu",
             "password", "password"
         );
-        final HttpRequest loginHttpRequest = new HttpRequest(new HttpHeaders(), HttpMethod.GET,
+        final HttpRequest loginHttpRequest = new HttpRequest(HttpHeaders.empty(), HttpMethod.GET,
             HttpRequestURI.from("/login"), "HTTP/1.1", requestBody);
 
         // then

@@ -22,7 +22,7 @@ class HttpRequestTest {
             HttpRequestURI.from("/"), "HTTP/1.1",
             Map.of());
 
-        final HttpRequest httpRequestNotContainsAccept = new HttpRequest(new HttpHeaders(), HttpMethod.GET,
+        final HttpRequest httpRequestNotContainsAccept = new HttpRequest(HttpHeaders.empty(), HttpMethod.GET,
             HttpRequestURI.from("/"), "HTTP/1.1",
             Map.of());
 
@@ -38,11 +38,11 @@ class HttpRequestTest {
     @Test
     void hasQueryString() {
         // given
-        final HttpRequest httpRequestContainsQueryString = new HttpRequest(new HttpHeaders(), HttpMethod.GET,
+        final HttpRequest httpRequestContainsQueryString = new HttpRequest(HttpHeaders.empty(), HttpMethod.GET,
             HttpRequestURI.from("/login?account=gugu&password=password"), "HTTP/1.1",
             Map.of());
 
-        final HttpRequest httpRequestNotContainsQueryString = new HttpRequest(new HttpHeaders(), HttpMethod.GET,
+        final HttpRequest httpRequestNotContainsQueryString = new HttpRequest(HttpHeaders.empty(), HttpMethod.GET,
             HttpRequestURI.from("/"), "HTTP/1.1",
             Map.of());
 

@@ -136,7 +136,8 @@ class ResourceControllerTest {
         Stream.of("/index.html", "/css/styles.css", "/js/scripts.js", "/401.html", "/favicon.ico", "/login",
                 "/register")
             .map(
-                path -> new HttpRequest(new HttpHeaders(), HttpMethod.GET, HttpRequestURI.from(path), "HTTP/1.1", null)
+                path -> new HttpRequest(HttpHeaders.empty(), HttpMethod.GET, HttpRequestURI.from(path), "HTTP/1.1",
+                    null)
             ).forEach(path -> assertTrue(resourceController.canHandle(path)));
     }
 
@@ -152,7 +153,7 @@ class ResourceControllerTest {
         // when
         final ResourceController resourceController = new ResourceController();
         final ResponseEntity responseEntity = resourceController.service(
-            new HttpRequest(new HttpHeaders(), HttpMethod.GET, HttpRequestURI.from("/index.html"),
+            new HttpRequest(HttpHeaders.empty(), HttpMethod.GET, HttpRequestURI.from("/index.html"),
                 "HTTP/1.1", null));
 
         // then

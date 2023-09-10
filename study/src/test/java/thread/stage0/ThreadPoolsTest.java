@@ -91,17 +91,17 @@ class ThreadPoolsTest {
             TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(3)
         );
-        threadPoolExecutor.execute(logWithSleep("core job")); // core thread
-        threadPoolExecutor.execute(logWithSleep("core job")); // core thread
-        threadPoolExecutor.execute(logWithSleep("core job")); // queue
-        threadPoolExecutor.execute(logWithSleep("core job")); // queue
-        threadPoolExecutor.execute(logWithSleep("core job")); // queue
+        threadPoolExecutor.execute(logWithSleep("core job")); // new thread
+        threadPoolExecutor.execute(logWithSleep("core job")); // new thread
+        threadPoolExecutor.execute(logWithSleep("core job")); // new thread
+        threadPoolExecutor.execute(logWithSleep("core job")); // new thread
+        threadPoolExecutor.execute(logWithSleep("core job")); // new thread
         threadPoolExecutor.execute(logWithSleep("core job")); // new thread
         threadPoolExecutor.execute(logWithSleep("core job")); // new thread
 
-        threadPoolExecutor.execute(logWithSleep("queue job")); // new thread
-        threadPoolExecutor.execute(logWithSleep("queue job")); // new thread
-        threadPoolExecutor.execute(logWithSleep("queue job")); // new thread
+        threadPoolExecutor.execute(logWithSleep("queue job")); // queue
+        threadPoolExecutor.execute(logWithSleep("queue job")); // queue
+        threadPoolExecutor.execute(logWithSleep("queue job")); // queue
 
         Thread.sleep(1000);
     }

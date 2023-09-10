@@ -10,17 +10,19 @@ import org.apache.coyote.http11.response.HttpStatus;
 public abstract class AbstractHandler implements Handler {
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        if(HttpMethod.GET == httpRequest.httpMethod()) {
-            return doGet(httpRequest);
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (HttpMethod.GET == httpRequest.httpMethod()) {
+            doGet(httpRequest, httpResponse);
+            return;
         }
-        if(HttpMethod.POST == httpRequest.httpMethod()) {
-            return doPost(httpRequest);
+        if (HttpMethod.POST == httpRequest.httpMethod()) {
+            doPost(httpRequest, httpResponse);
+            return;
         }
-        return new ExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR).handle(httpRequest);
+        new ExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR).service(httpRequest, httpResponse);
     }
 
-    abstract HttpResponse doGet(HttpRequest httpRequest);
+    abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse);
 
-    abstract HttpResponse doPost(HttpRequest httpRequest);
+    abstract void doPost(HttpRequest httpRequest, HttpResponse httpResponse);
 }

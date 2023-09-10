@@ -19,7 +19,7 @@ public class HandlerAdapter {
         addController(HttpMethod.POST, "/login", new LoginController());
         addController(HttpMethod.POST, "/register", new RegisterController());
         addController(HttpMethod.GET, "/login", new LoginController());
-        addController(HttpMethod.GET, "/register", new LoginController());
+        addController(HttpMethod.GET, "/register", new RegisterController());
         addController(HttpMethod.GET, "/", new HelloWorldController());
     }
 

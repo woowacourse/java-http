@@ -9,22 +9,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Request {
-    private final HttpMethod method;
-    private final String path;
-    private final Map<String, String> query;
+    private final RequestLine requestLine;
     private final Map<String, String> header;
     private final Map<String, String> body;
 
     private Request(
-            HttpMethod method,
-            String path,
-            Map<String, String> query,
+            RequestLine requestLine,
             Map<String, String> header,
             Map<String, String> body
     ) {
-        this.method = method;
-        this.path = path;
-        this.query = query;
+        this.requestLine = requestLine;
         this.header = header;
         this.body = body;
     }
@@ -33,32 +27,16 @@ public class Request {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = bufferedReader.readLine();
         valid(line);
-        final String[] methodUri = line.split(" ");
-        final HttpMethod method = HttpMethod.mapping(methodUri[0]);
-        final String uri = methodUri[1];
+        final RequestLine requestLine = RequestLine.from(line);
         final Map<String, String> header = readHeader(bufferedReader);
-        final Map<String, String> query = readQueries(uri);
         final Map<String, String> body = readBody(header, bufferedReader);
-        return new Request(method, uri, query, header, body);
+        return new Request(requestLine, header, body);
     }
 
     private static void valid(String line) {
         if (line == null) {
             throw new UncheckedIOException(new IOException());
         }
-    }
-
-    private static Map<String, String> readQueries(String uri) {
-        if (!uri.contains("?")) {
-            return new HashMap<>();
-        }
-        final Map<String, String> queriesMap = new HashMap<>();
-        String[] queries = uri.split("\\?")[1].split("&");
-        for (String query : queries) {
-            String[] q = query.split("=");
-            queriesMap.put(q[0], q[1]);
-        }
-        return queriesMap;
     }
 
     private static Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {
@@ -90,11 +68,11 @@ public class Request {
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public Map<String, String> getCookie() {

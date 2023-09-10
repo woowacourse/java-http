@@ -22,10 +22,10 @@ public class RequestLine {
     }
 
     public static RequestLine from(final String request) {
-        final String[] startLine = request.split(SEPARATOR);
-        final Method method = Method.findBy(startLine[METHOD_INDEX]);
-        final Path path = Path.from(startLine[PATH_INDEX]);
-        final HttpVersion httpVersion = HttpVersion.findBy(startLine[VERSION_INDEX]);
+        final String[] requestLine = request.split(SEPARATOR);
+        final Method method = Method.findBy(requestLine[METHOD_INDEX]);
+        final Path path = Path.from(requestLine[PATH_INDEX]);
+        final HttpVersion httpVersion = HttpVersion.findBy(requestLine[VERSION_INDEX]);
 
         return new RequestLine(method, path, httpVersion);
     }

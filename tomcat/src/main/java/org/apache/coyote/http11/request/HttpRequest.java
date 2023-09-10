@@ -87,7 +87,7 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
-    public RequestLine getStartLine() {
+    public RequestLine getRequestLine() {
         return requestLine;
     }
 
@@ -110,10 +110,6 @@ public class HttpRequest {
 
     public String getBodyValue(final String key) {
         return requestBody.getValues().get(key);
-    }
-
-    public RequestBody getBody() {
-        return requestBody;
     }
 
     public RequestHeaders getHeaders() {

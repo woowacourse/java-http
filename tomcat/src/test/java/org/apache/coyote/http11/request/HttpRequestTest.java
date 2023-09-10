@@ -24,7 +24,7 @@ class HttpRequestTest {
 
         // then
         SoftAssertions.assertSoftly(softAssertions -> {
-            final RequestLine requestLine = actual.getStartLine();
+            final RequestLine requestLine = actual.getRequestLine();
             final RequestHeaders requestHeaders = actual.getHeaders();
 
             softAssertions.assertThat(requestLine.getMethod()).isEqualTo(Method.GET);

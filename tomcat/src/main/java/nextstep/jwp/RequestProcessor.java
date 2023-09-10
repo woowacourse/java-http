@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,15 +50,15 @@ public class RequestProcessor {
             if (requestUri.isEmpty()) {
                 final String content = "Hello world!";
                 return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+                        new LinkedHashMap<>(Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length))));
             }
 
             if (requestUri.equals("register")) {
                 final String content = makeResponseBody(requestUri);
                 return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+                        new LinkedHashMap<>(Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length))));
             }
 
             if (requestUri.equals("login")) {
@@ -65,19 +66,19 @@ public class RequestProcessor {
                 final Session session = SessionManager.findSession(sessionId);
                 if (session != null) {
                     return HttpResponse.of(version, HttpStatus.FOUND, null,
-                            Map.of(LOCATION_HEADER, INDEX_PAGE));
+                            new LinkedHashMap<>(Map.of(LOCATION_HEADER, INDEX_PAGE)));
                 }
                 final String content = makeResponseBody(requestUri);
                 return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+                        new LinkedHashMap<>(Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length))));
             }
 
             if (ContentType.isSupportedType(requestUri)) {
                 final String content = makeResponseBody(requestUri);
                 return HttpResponse.of(version, HttpStatus.OK, content,
-                        Map.of(CONTENT_TYPE_HEADER, ContentType.getTypeByExtension(requestUri),
-                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+                        new LinkedHashMap<>(Map.of(CONTENT_TYPE_HEADER, ContentType.getTypeByExtension(requestUri),
+                                CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length))));
             }
         }
 
@@ -91,13 +92,14 @@ public class RequestProcessor {
 
                 if (InMemoryUserRepository.findByAccount(registerInfo.get("account")).isPresent()) {
                     return HttpResponse.of(version, HttpStatus.FOUND, null,
-                            Map.of(LOCATION_HEADER, REGISTER_PAGE));
+                            new LinkedHashMap<>(Map.of(LOCATION_HEADER, REGISTER_PAGE)));
                 }
 
                 final User newUser = new User(registerInfo.get("account"), registerInfo.get("password"),
                         registerInfo.get("email"));
                 InMemoryUserRepository.save(newUser);
-                return HttpResponse.of(version, HttpStatus.FOUND, null, Map.of(LOCATION_HEADER, INDEX_PAGE));
+                return HttpResponse.of(version, HttpStatus.FOUND, null,
+                        new LinkedHashMap<>(Map.of(LOCATION_HEADER, INDEX_PAGE)));
             }
 
             if (requestUri.equals("login")) {
@@ -116,20 +118,20 @@ public class RequestProcessor {
                         cookies.save(JAVA_SESSION_NAME, session.getId());
                         final String cookieInfo = cookies.cookieInfo(JAVA_SESSION_NAME);
                         return HttpResponse.of(version, HttpStatus.FOUND, null,
-                                Map.of(LOCATION_HEADER, INDEX_PAGE,
-                                        "Set-Cookie", cookieInfo));
+                                new LinkedHashMap<>(Map.of(LOCATION_HEADER, INDEX_PAGE,
+                                        "Set-Cookie", cookieInfo)));
                     }
                 }
 
                 return HttpResponse.of(version, HttpStatus.FOUND, null,
-                        Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE));
+                        new LinkedHashMap<>(Map.of(LOCATION_HEADER, UNAUTHORIZED_PAGE)));
             }
         }
 
         final String content = SERVER_ERROR_PAGE;
         return HttpResponse.of(version, HttpStatus.NOT_FOUND, content,
-                Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
-                        CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length)));
+                new LinkedHashMap<>(Map.of(CONTENT_TYPE_HEADER, ContentType.HTML.getType(),
+                        CONTENT_LENGTH_HEADER, String.valueOf(content.getBytes().length))));
     }
 
     private String makeResponseBody(String requestUri) throws URISyntaxException, IOException {

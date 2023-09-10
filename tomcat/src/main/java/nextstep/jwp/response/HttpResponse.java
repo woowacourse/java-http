@@ -1,6 +1,6 @@
 package nextstep.jwp.response;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 import nextstep.jwp.common.HttpStatus;
 import nextstep.jwp.common.HttpVersion;
 
@@ -21,7 +21,7 @@ public class HttpResponse {
 
     public static HttpResponse of(final HttpVersion httpVersion, final HttpStatus httpStatus,
                                   final String responseBody,
-                                  final Map<String, String> headers) {
+                                  final LinkedHashMap<String, String> headers) {
         final StatusLine statusLine = StatusLine.of(httpVersion, httpStatus);
         final ResponseHeaders responseHeaders = ResponseHeaders.from(headers);
         return new HttpResponse(statusLine, responseHeaders, responseBody);

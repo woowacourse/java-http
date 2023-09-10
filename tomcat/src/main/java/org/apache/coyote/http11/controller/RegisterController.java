@@ -1,14 +1,14 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Controller;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.ViewLoader;
+import org.apache.coyote.http11.request.RequestBody;
 
 public class RegisterController implements Controller {
 
@@ -21,19 +21,27 @@ public class RegisterController implements Controller {
     }
 
     private HttpResponse handleGetMethod() {
-        return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML, ViewLoader.from("/register.html"));
+        return HttpResponse.builder()
+                .statusCode(StatusCode.OK)
+                .contentType(ContentType.TEXT_HTML)
+                .responseBody(ViewLoader.from("/register.html"))
+                .build();
     }
 
     private HttpResponse handlePostMethod(final HttpRequest request) {
         if (request.hasRequestBody()) {
-            final Map<String, String> requestBody = request.getRequestBody();
+            final RequestBody requestBody = request.getRequestBody();
             register(requestBody);
-            return new HttpResponse(StatusCode.CREATED, ContentType.TEXT_HTML, ViewLoader.toIndex());
+            return HttpResponse.builder()
+                    .statusCode(StatusCode.CREATED)
+                    .contentType(ContentType.TEXT_HTML)
+                    .responseBody(ViewLoader.toIndex())
+                    .build();
         }
         return HttpResponse.toNotFound();
     }
 
-    private void register(final Map<String, String> requestBody) {
+    private void register(final RequestBody requestBody) {
         try {
             final String account = requestBody.get("account");
             final String password = requestBody.get("password");

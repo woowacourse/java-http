@@ -2,8 +2,8 @@ package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Controller;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.ViewLoader;
 
@@ -14,10 +14,17 @@ public class StaticController implements Controller {
     @Override
     public HttpResponse handle(HttpRequest request) {
         if (request.getUri().equals(INDEX_URI)) {
-            return new HttpResponse(StatusCode.OK, ContentType.TEXT_HTML, "Hello world!");
+            return HttpResponse.builder()
+                    .statusCode(StatusCode.OK)
+                    .contentType(ContentType.TEXT_HTML)
+                    .responseBody("Hello world!")
+                    .build();
         }
 
-        return new HttpResponse(StatusCode.OK, ContentType.from(request.getExtension()),
-                ViewLoader.from(request.getUri()));
+        return HttpResponse.builder()
+                .statusCode(StatusCode.OK)
+                .contentType(ContentType.from(request.getExtension()))
+                .responseBody(ViewLoader.from(request.getUri()))
+                .build();
     }
 }

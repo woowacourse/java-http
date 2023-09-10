@@ -12,24 +12,24 @@ import nextstep.jwp.http.request.HttpRequest;
 
 public class RequestMapping {
 
-    private static final Map<String, Controller> CONTROLLERS = new ConcurrentHashMap<>();
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     static {
-        CONTROLLERS.put("/", new HomeController());
-        CONTROLLERS.put("/index", new IndexController());
-        CONTROLLERS.put("/login", new LoginController());
-        CONTROLLERS.put("/register", new RegisterController());
+        controllers.put("/", new HomeController());
+        controllers.put("/index", new IndexController());
+        controllers.put("/login", new LoginController());
+        controllers.put("/register", new RegisterController());
     }
 
     private RequestMapping() {
     }
 
     public static Controller getController(HttpRequest request) {
-        return CONTROLLERS.keySet()
+        return controllers.keySet()
                 .stream()
                 .filter(key -> key.equals(request.getNativePath()))
                 .findAny()
-                .map(CONTROLLERS::get)
+                .map(controllers::get)
                 .orElseGet(ResourceController::getInstance);
     }
 

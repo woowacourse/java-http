@@ -29,8 +29,8 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String JSESSIONID = "JSESSIONID";
-    private static final Manager SESSION_MANAGER = SessionManager.getInstance();
-    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
+    private static final Manager sessionManager = SessionManager.getInstance();
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
@@ -50,7 +50,7 @@ public class LoginController extends AbstractController {
         if (request.hasCookie()) {
             User user = loginForCookie(request);
 
-            LOG.info("로그인 성공 ! 아이디 : {}", user.getAccount());
+            log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
 
             response.setStatus(HttpStatus.FOUND);
             response.setLocation(INDEX_URI);
@@ -80,12 +80,12 @@ public class LoginController extends AbstractController {
 
     private void updateSession(User user, Session session) {
         session.setAttribute("user", user);
-        SESSION_MANAGER.add(session);
+        sessionManager.add(session);
     }
 
     private User loginForCookie(HttpRequest request) {
         Cookie jSessionCookie = request.getCookie(JSESSIONID);
-        Session session = SESSION_MANAGER.findSession(jSessionCookie.getValue());
+        Session session = sessionManager.findSession(jSessionCookie.getValue());
 
         if (session == null) {
             throw new UnauthorizedException("로그인에 실패했습니다. 유효하지 않은 세션입니다.");
@@ -100,7 +100,7 @@ public class LoginController extends AbstractController {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.checkPassword(password)) {
-                LOG.info("로그인 성공 ! 아이디 : {}", user.getAccount());
+                log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
                 return user;
             }
         }

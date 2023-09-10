@@ -6,29 +6,29 @@ import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Manager SESSION_MANAGER = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Manager sessionManager = new SessionManager();
+    private static final Map<String, Session> sessions = new HashMap<>();
 
     private SessionManager() {
     }
 
     public static Manager getInstance() {
-        return SESSION_MANAGER;
+        return sessionManager;
     }
 
     @Override
     public void add(Session session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(Session session) {
-        SESSIONS.remove(session.getId());
+        sessions.remove(session.getId());
     }
 
 }

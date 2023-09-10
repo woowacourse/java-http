@@ -4,6 +4,8 @@ import nextstep.jwp.exception.BadRequestException;
 
 public class HttpBody {
 
+    private static final String EMPTY = "";
+
     private String body;
 
     private HttpBody(String body) {
@@ -19,11 +21,11 @@ public class HttpBody {
     }
 
     public static HttpBody createEmptyHttpBody() {
-        return new HttpBody("");
+        return new HttpBody(EMPTY);
     }
 
     public void clear() {
-        this.body = "";
+        this.body = EMPTY;
     }
 
     public void setBody(String body) {

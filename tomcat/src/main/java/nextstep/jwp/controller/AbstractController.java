@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractController.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     protected AbstractController() {
     }
@@ -38,7 +38,7 @@ public abstract class AbstractController implements Controller {
         } catch (HttpGlobalException e) {
             ExceptionHandler.handle(response, e.getHttpStatus());
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             ExceptionHandler.handle(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

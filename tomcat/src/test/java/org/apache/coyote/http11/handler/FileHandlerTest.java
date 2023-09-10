@@ -32,7 +32,7 @@ class FileHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         fileHandler.handle(HttpRequest.from(request), httpResponse);
         String response = httpResponse.generateResponseMessage();
 
@@ -61,7 +61,7 @@ class FileHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         fileHandler.handle(HttpRequest.from(request), httpResponse);
         String response = httpResponse.generateResponseMessage();
 

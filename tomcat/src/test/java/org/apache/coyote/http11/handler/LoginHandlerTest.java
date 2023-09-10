@@ -32,7 +32,7 @@ class LoginHandlerTest {
                 "account=" + validAccount + "&password=" + validPassword);
 
         BufferedReader input = RequestParser.requestToInput(httpRequest);
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         String response = httpResponse.generateResponseMessage();
         System.out.println(response);
@@ -61,7 +61,7 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         Cookie cookie = httpResponse.getCookie();
         String jsessionid = cookie.findByKey("JSESSIONID");
@@ -89,7 +89,7 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         String response = httpResponse.generateResponseMessage();
 
@@ -119,7 +119,7 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         String response = httpResponse.generateResponseMessage();
 
@@ -146,7 +146,7 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         String response = httpResponse.generateResponseMessage();
         // then
@@ -172,7 +172,7 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         String response = httpResponse.generateResponseMessage();
         // then
@@ -199,7 +199,7 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         loginHandler.handle(HttpRequest.from(input), httpResponse);
         String response = httpResponse.generateResponseMessage();
 

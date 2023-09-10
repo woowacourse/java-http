@@ -31,7 +31,7 @@ class RegisterHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         registerHandler.handle(HttpRequest.from(request), httpResponse);
         String response = httpResponse.generateResponseMessage();
 
@@ -57,7 +57,7 @@ class RegisterHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        HttpResponse httpResponse = HttpResponse.create();
+        HttpResponse httpResponse = new HttpResponse();
         registerHandler.handle(HttpRequest.from(request), httpResponse);
         String response = httpResponse.generateResponseMessage();
 

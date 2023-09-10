@@ -26,7 +26,7 @@ public class RequestHeader {
     }
 
     private static void addHeaders(final Map<String, Object> headers, final String line) {
-        final String[] header = line.split(":", 2);
+        final String[] header = line.split(": ", 2);
         if (COOKIE.equals(header[0])) {
             final Cookie cookie = Cookie.from(header[1]);
             headers.put(header[0], cookie);
@@ -73,7 +73,7 @@ public class RequestHeader {
     public String toString() {
         return headers.keySet()
                 .stream()
-                .map(key -> key + ":" + headers.get(key))
+                .map(key -> key + ": " + headers.get(key))
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 }

@@ -160,4 +160,42 @@ public class LoginApiTest {
         assertThatThrownBy(() -> loginController.handle(request))
                 .isExactlyInstanceOf(PageRedirectException.Unauthorized.class);
     }
+
+    @Test
+    void 로그인_이후_다시_로그인_페이지로_요청을_보내면_리다이렉트_된다() throws IOException {
+        final List<String> requestLines = new ArrayList<>(Arrays.asList(
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Connection: keep-alive ",
+                "Content-Length: 24 ",
+                ""));
+
+        final String requestBody = "account=gugu&password=password";
+        final Request request = Request.from(new MockRequestReader(requestLines, requestBody));
+        final LoginController loginController = new LoginController();
+        final ResponseEntity responseEntity = loginController.handle(request);
+
+        final String jSessionid = Arrays.stream(responseEntity.toString().split(System.lineSeparator()))
+                .filter(line -> line.contains("Set-Cookie"))
+                .findFirst()
+                .orElse("")
+                .split(": ")[1];
+
+        final String httpRequest = String.join(System.lineSeparator(),
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: " + jSessionid,
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+        assertThat(socket.output())
+                .contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
+
+    }
 }

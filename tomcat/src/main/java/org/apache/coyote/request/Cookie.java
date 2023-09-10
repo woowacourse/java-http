@@ -13,7 +13,7 @@ public class Cookie {
     }
 
     public static Cookie from(String requestCookie) {
-        for (final String oneCookie : requestCookie.split(" ")) {
+        for (final String oneCookie : requestCookie.split("; ")) {
             if (!oneCookie.contains("=")) {
                 continue;
             }
@@ -24,9 +24,9 @@ public class Cookie {
     }
 
     public static String ofJSessionId(final String key) {
-        if (cookies.containsKey(JSESSIONID)) {
+        if (cookies.containsKey(JSESSIONID) && "null".equals(cookies.get(key))) {
             final String cookie = cookies.get(key);
-            return JSESSIONID + "=" + cookie;
+            return JSESSIONID + "=" + cookie.strip();
         }
         return JSESSIONID + "=" + key;
     }
@@ -36,12 +36,12 @@ public class Cookie {
     }
 
     public String getJsessionid() {
-        return cookies.get(JSESSIONID);
+        return cookies.get(JSESSIONID).strip();
     }
 
     @Override
     public String toString() {
-        return "Cookie: " + cookies.keySet()
+        return cookies.keySet()
                 .stream()
                 .map(key -> key + "=" + cookies.get(key))
                 .collect(Collectors.joining("; "));

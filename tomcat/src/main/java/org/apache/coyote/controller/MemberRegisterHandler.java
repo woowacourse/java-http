@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MemberRegisterHandler extends RequestHandler {
+public class MemberRegisterHandler extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(MemberRegisterHandler.class);
     public static final String ACCOUNT = "account";
@@ -20,7 +20,7 @@ public class MemberRegisterHandler extends RequestHandler {
     }
 
     @Override
-    public Http11Response doService(HttpRequest httpRequest) {
+    public Http11Response service(final HttpRequest httpRequest) {
         final String httpMethod = httpRequest.getRequestLine().getHttpMethod();
 
         if (httpMethod.equals("POST")) {

@@ -1,9 +1,9 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.Http11Response;
 
-public abstract class RequestHandler {
+public abstract class AbstractController implements Controller {
 
     final ClassLoader classLoader = getClass().getClassLoader();
     String mappingUri;
@@ -18,8 +18,6 @@ public abstract class RequestHandler {
         final String requestURI = httpRequest.getRequestLine().getRequestURI();
         return mappingUri.equals(requestURI);
     }
-
-    public abstract Http11Response doService(HttpRequest httpRequest);
 
     abstract Http11Response doGet(HttpRequest httpRequest);
 

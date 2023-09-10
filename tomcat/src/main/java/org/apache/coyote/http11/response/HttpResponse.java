@@ -53,10 +53,10 @@ public class HttpResponse {
     }
 
     public Header header() {
-        return this.header;
+        return header;
     }
 
     public Body body() {
-        return this.body;
+        return body;
     }
 }

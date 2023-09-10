@@ -21,13 +21,6 @@ import java.nio.file.Path;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String ACCOUNT_KEY = "account";
-    private static final String PASSWORD_KEY = "password";
-    private static final String EMAIL_KEY = "email";
-    private static final String INDEX_PAGE = "/index.html";
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String REGISTER_PAGE = "/register.html";
 
     private final Socket connection;
 

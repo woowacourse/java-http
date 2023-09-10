@@ -1,30 +1,41 @@
 package nextstep.jwp.response;
 
-import java.util.LinkedHashMap;
-import nextstep.jwp.common.HttpStatus;
-import nextstep.jwp.common.HttpVersion;
+import nextstep.jwp.model.HttpCookies;
 
 public class HttpResponse {
 
     private static final String DELIMITER = "\r\n";
 
-    private final StatusLine statusLine;
-    private final ResponseHeaders responseHeaders;
-    private final String responseBody;
+    private final ResponseHeaders responseHeaders = new ResponseHeaders();
+    private final HttpCookies cookies = new HttpCookies();
+    private StatusLine statusLine;
+    private String responseBody;
 
-    private HttpResponse(final StatusLine statusLine, final ResponseHeaders responseHeaders,
-                         final String responseBody) {
-        this.statusLine = statusLine;
-        this.responseHeaders = responseHeaders;
-        this.responseBody = responseBody;
+    public HttpResponse() {
     }
 
-    public static HttpResponse of(final HttpVersion httpVersion, final HttpStatus httpStatus,
-                                  final String responseBody,
-                                  final LinkedHashMap<String, String> headers) {
-        final StatusLine statusLine = StatusLine.of(httpVersion, httpStatus);
-        final ResponseHeaders responseHeaders = ResponseHeaders.from(headers);
-        return new HttpResponse(statusLine, responseHeaders, responseBody);
+    public void setStatusLine(final StatusLine statusLine) {
+        this.statusLine = statusLine;
+    }
+
+    public void setResponseBody(final String body) {
+        this.responseBody = body;
+        setContentLengthHeader(body);
+    }
+
+    private void setContentLengthHeader(final String content) {
+        if (content == null) {
+            return;
+        }
+        responseHeaders.save("Content-Length", String.valueOf(content.getBytes().length));
+    }
+
+    public void addHeader(final String name, final String value) {
+        responseHeaders.save(name, value);
+    }
+
+    public void addCookie(final String name, final String value) {
+        cookies.save(name, value);
     }
 
     public String toResponse() {

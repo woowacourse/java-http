@@ -7,6 +7,9 @@ public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
+    private SessionManager() {
+    }
+
     public static void add(Session session) {
         SESSIONS.put(session.id(), session);
     }

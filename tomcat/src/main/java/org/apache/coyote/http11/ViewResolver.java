@@ -10,9 +10,12 @@ import java.util.List;
 
 public class ViewResolver {
 
-    private final ClassLoader classLoader = getClass().getClassLoader();
+    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
-    public String read(final String fileResource) {
+    private ViewResolver() {
+    }
+
+    public static String read(final String fileResource) {
         final URL resource = classLoader.getResource("static" + fileResource);
         final String resourceFile = getFile(resource);
         final Path path = Paths.get(resourceFile);
@@ -20,14 +23,14 @@ public class ViewResolver {
         return String.join(System.lineSeparator(), fileLines);
     }
 
-    private String getFile(final URL resource) {
+    private static String getFile(final URL resource) {
         if (resource == null) {
             throw new IllegalArgumentException("경로가 올바르지 않습니다.");
         }
         return resource.getFile();
     }
 
-    private List<String> readFileLines(final Path path) {
+    private static List<String> readFileLines(final Path path) {
         try {
             return Files.readAllLines(path);
         } catch (final IOException e) {

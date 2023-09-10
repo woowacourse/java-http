@@ -41,4 +41,11 @@ public class HttpResponse {
     public void setResponseBody(final String responseBody) {
         this.responseBody = responseBody;
     }
+
+    public int getContentLength() {
+        if (responseBody == null) {
+            return 0;
+        }
+        return responseBody.getBytes().length;
+    }
 }

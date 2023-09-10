@@ -1,15 +1,17 @@
 package nextstep.jwp.controller;
 
-import handler.Controller;
+import org.apache.coyote.handler.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.ViewResolver;
 
-public class IndexController implements Controller {
+public class IndexController extends AbstractController {
 
     @Override
-    public String run(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        httpResponse.setStatusCode(HttpStatusCode.OK);
-        return "/index.html";
+    public void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setStatusCode(HttpStatusCode.OK);
+        final String responseBody = ViewResolver.read("/index.html");
+        response.setResponseBody(responseBody);
     }
 }

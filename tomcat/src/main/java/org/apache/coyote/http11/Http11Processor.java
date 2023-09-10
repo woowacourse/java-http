@@ -2,15 +2,15 @@ package org.apache.coyote.http11;
 
 import static java.util.stream.Collectors.joining;
 
-import handler.Controller;
-import handler.RequestHandler;
-import handler.RequestHandlerMapping;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.Controller;
+import org.apache.coyote.handler.RequestHandler;
+import org.apache.coyote.handler.RequestHandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private static final RequestHandler requestHandler = new RequestHandlerMapping();
-    private static final ViewResolver viewResolver = new ViewResolver();
 
     private final Socket connection;
 
@@ -42,12 +41,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
-            final String viewName = getViewName(httpRequest, httpResponse);
-            final String responseBody = viewResolver.read(viewName);
+            doService(httpRequest, httpResponse);
 
             httpResponse.setHeader("Content-Type", httpRequest.getContentType());
-            httpResponse.setHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
-            httpResponse.setResponseBody(responseBody);
+            httpResponse.setHeader("Content-Length", String.valueOf(httpResponse.getContentLength()));
             final String response = makeResponseString(httpResponse);
 
             outputStream.write(response.getBytes());
@@ -57,19 +54,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getViewName(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final String requestUri = httpRequest.getRequestUri();
+    private void doService(final HttpRequest request, final HttpResponse response) {
+        final String requestUri = request.getRequestUri();
 
         if (isFileRequest(requestUri)) {
-            httpResponse.setStatusCode(HttpStatusCode.OK);
-            return requestUri;
+            readFile(requestUri, response);
+            return;
         }
         final Controller controller = requestHandler.getHandler(requestUri);
-        return controller.run(httpRequest, httpResponse);
+        controller.service(request, response);
     }
 
     private boolean isFileRequest(final String requestUri) {
         return requestUri.contains(EXTENSION_DELIMITER);
+    }
+
+    private void readFile(final String requestUri, final HttpResponse httpResponse) {
+        httpResponse.setStatusCode(HttpStatusCode.OK);
+        final String responseBody = ViewResolver.read(requestUri);
+        httpResponse.setResponseBody(responseBody);
     }
 
     private String makeResponseString(final HttpResponse httpResponse) {

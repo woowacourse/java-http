@@ -7,9 +7,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,115 +37,22 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            HttpRequest request = new HttpRequest(bufferedReader);
+            HttpResponse response = new HttpResponse();
 
-            HttpMethod requestMethod = httpRequest.getMethod();
-            String requestPath = httpRequest.getPath();
-            String requestFileName = httpRequest.getFileName();
-            String requestBody = httpRequest.getBody();
-            Map<String, String> headers = httpRequest.getHeaders();
+            RequestMapping requestMapping = new RequestMapping();
 
-            String response = null;
-            HttpResponse httpResponse = new HttpResponse();
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
 
-//            if (requestMethod.equals(HttpMethod.POST.name()) && requestPath.equals("/login")) {
-//                Map<String, String> queryParms = parseToQueryParms(requestBody);
-//
-//                try {
-//                    User user = InMemoryUserRepository.findByAccount(queryParms.get("account"))
-//                            .orElseThrow(() -> new IllegalArgumentException("해당 사용자 없음"));
-//
-//                    if (!user.checkPassword(queryParms.get("password"))) {
-//                        throw new IllegalArgumentException("비밀번호 불일치");
-//                    }
-//                    log.info("user: {}", user);
-//
-//                    Session session = new Session(UUID.randomUUID().toString());
-//                    session.setAttribute("user", user);
-//                    sessionManager.add(session);
-//                    httpResponse.setStatus(HttpStatus.FOUND);
-//                    httpResponse.setRedirectUrl("/index.html");
-//                    httpResponse.setCookie("JSESSIONID=" + session.getId());
-//
-//                    response = httpResponse.createResponse();
-//                } catch (IllegalArgumentException e) {
-//                    log.error("error : {}", e);
-//                    response = createRedirectResponse("/401.html");
-//                }
-//            }
-
-//            if (requestMethod.equals(HttpMethod.POST.name()) && requestPath.equals("/register")) {
-//                Map<String, String> queryParms = parseToQueryParms(requestBody);
-//
-//                User user = new User(queryParms.get("account"), queryParms.get("password"),
-//                        queryParms.get("email"));
-//                InMemoryUserRepository.save(user);
-//
-//                response = createRedirectResponse("/index.html");
-//                log.info(response);
-//            }
-
-//            if (requestMethod.equals(HttpMethod.GET.name()) && requestPath.equals("/login")) {
-//                HttpCookie cookie = new HttpCookie(headers.get("Cookie"));
-//
-//                String sessionId = cookie.findValue("JSESSIONID");
-//                if (sessionManager.isExist(sessionId)) {
-//                    response = createRedirectResponse("/index.html");
-//                } else {
-//                    response = createResponse("text/html", readFile("static", "login.html"));
-//                }
-//            }
-
-//            if (requestMethod.equals(HttpMethod.GET.name()) && requestPath.equals("/register")) {
-//                response = createResponse("text/html", readFile("static", "register.html"));
-//            }
-
-            if (requestMethod.equals(HttpMethod.GET.name()) && requestPath.equals("/")) {
-                response = createResponse("text/html", "Hello world!");
-            }
-
-            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.endsWith(".html")) {
-                response = createResponse("text/html", readFile("static", requestFileName));
-            }
-
-            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.equals("styles.css")) {
-                response = createResponse("text/css", readFile("static/css", requestFileName));
-            }
-
-            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.endsWith(".js")
-                    && !requestFileName.equals(
-                    "scripts.js")) {
-                response = createResponse("text/javascript", readFile("static/assets", requestFileName));
-            }
-
-            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.equals("scripts.js")) {
-                response = createResponse("text/javascript", readFile("static/js", requestFileName));
-            }
-
-            if (requestMethod.equals(HttpMethod.GET.name()) && requestFileName.equals("favicon.ico")) {
-                response = createResponse("text/javascript", "Hello world!");
-            }
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.createResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
-    }
-
-    private String createResponse(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String readFile(String directory, String fileName) throws IOException {
-        URL resource = getClass().getClassLoader().getResource(directory + "/" + fileName);
-        Path path = Path.of(resource.getPath());
-        return Files.readString(path);
     }
 
 }

@@ -36,7 +36,7 @@ public class HttpRequestHeader {
     }
 
     public HttpCookie getCookie() {
-        return HttpCookie.from(headers.get(COOKIE_REQUEST_HEADER));
+        return HttpCookie.from(find(COOKIE_REQUEST_HEADER));
     }
 
     public String contentLength() {

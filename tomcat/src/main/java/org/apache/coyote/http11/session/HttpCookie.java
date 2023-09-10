@@ -25,7 +25,7 @@ public class HttpCookie {
     }
 
     public static HttpCookie from(String cookies) {
-        if (cookies.isEmpty()) {
+        if (cookies == null) {
             return HttpCookie.empty();
         }
         return Arrays.stream(cookies.split(SEPARATOR))

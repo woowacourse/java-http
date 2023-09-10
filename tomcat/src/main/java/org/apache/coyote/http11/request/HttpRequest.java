@@ -20,7 +20,7 @@ public class HttpRequest {
 
     public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
         HttpRequestStartLine httpRequestStartLine = parseRequestStartLine(bufferedReader);
-        HttpRequestHeader httpRequestHeader = parseRequestHeader(bufferedReader);
+        HttpRequestHeader httpRequestHeader = parseRequestHeaders(bufferedReader);
         HttpRequestBody httpRequestBody = parseRequestBody(httpRequestHeader.contentLength(), bufferedReader);
         return new HttpRequest(httpRequestStartLine, httpRequestHeader, httpRequestBody);
     }
@@ -34,7 +34,7 @@ public class HttpRequest {
         return HttpRequestStartLine.from(requestStartLine);
     }
 
-    private static HttpRequestHeader parseRequestHeader(BufferedReader bufferedReader) throws IOException {
+    private static HttpRequestHeader parseRequestHeaders(BufferedReader bufferedReader) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {

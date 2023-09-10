@@ -40,7 +40,7 @@ public class HttpResponse {
     }
 
     public void setBody(final String responseBody) {
-        this.headers += HEADER_END_POINT + "Content-Length: " + responseBody.getBytes().length + HEADER_END_POINT;
+        this.headers += "Content-Length: " + responseBody.getBytes().length + HEADER_END_POINT;
         this.body = END_POINT + responseBody;
     }
 

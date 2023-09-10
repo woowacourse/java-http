@@ -1,8 +1,8 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * 스레드를 다룰 때 어떤 상황을 조심해야 할까?
@@ -20,9 +20,6 @@ class ConcurrencyTest {
     @Test
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();
-
-        // 웹서버로 동시에 2명의 유저가 gugu라는 이름으로 가입을 시도했다.
-        // UserServlet의 users에 이미 가입된 회원이 있으면 중복 가입할 수 없도록 코드를 작성했다.
         final var firstThread = new Thread(new HttpProcessor(new User("gugu"), userServlet));
         final var secondThread = new Thread(new HttpProcessor(new User("gugu"), userServlet));
 

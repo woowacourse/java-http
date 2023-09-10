@@ -94,6 +94,11 @@ public class HttpResponse {
         this.httpResponseHeader.setCookie(cookie);
     }
 
+    public void sendRedirect(final String path) {
+        this.path = path;
+        this.isRedirect = true;
+    }
+
     public void setHttpStatus(final HttpStatus httpStatus) {
         this.httpStatusLine = HttpStatusLine.from(httpStatus);
     }
@@ -104,9 +109,5 @@ public class HttpResponse {
 
     public void setBody(final String body) {
         this.body = body;
-    }
-
-    public void setRedirect() {
-        isRedirect = true;
     }
 }

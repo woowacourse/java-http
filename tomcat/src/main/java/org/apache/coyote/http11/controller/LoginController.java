@@ -37,14 +37,12 @@ public class LoginController extends AbstractController {
 
             log.info("로그인 성공! 아이디: {}", account);
             response.setHttpStatus(HttpStatus.FOUND);
-            response.setPath(MAIN_PAGE);
-            response.setRedirect();
+            response.sendRedirect(MAIN_PAGE);
             response.addCookie(HttpCookie.ofJSessionId(session.getId()));
             return;
         }
         response.setHttpStatus(HttpStatus.FOUND);
-        response.setPath(UNAUTHORIZED_PAGE);
-        response.setRedirect();
+        response.sendRedirect(UNAUTHORIZED_PAGE);
     }
 
     @Override
@@ -53,8 +51,7 @@ public class LoginController extends AbstractController {
             final Session session = SESSION_MANAGER.findSession(request.getJSessionId());
             final User user = (User) session.getAttribute("user");
             response.setHttpStatus(HttpStatus.FOUND);
-            response.setPath(MAIN_PAGE);
-            response.setRedirect();
+            response.sendRedirect(MAIN_PAGE);
             return;
         }
         response.setHttpStatus(HttpStatus.OK);

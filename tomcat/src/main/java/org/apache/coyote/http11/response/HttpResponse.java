@@ -8,9 +8,13 @@ import org.apache.coyote.http11.ViewLoader;
 
 public class HttpResponse {
 
-    private static final String DELIMITER = "\r\n";
+    private static final String CRLF = "\r\n";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String HTTP_VERSION = "HTTP/1.1 ";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SP = " ";
+    private static final String HEADER_DELIMITER = ": ";
 
     private final StatusCode statusCode;
     private final ContentType contentType;
@@ -25,14 +29,17 @@ public class HttpResponse {
     }
 
     public byte[] toBytes() {
-        String responseHeader = String.join(DELIMITER, HTTP_VERSION + statusCode.getValue() + " ");
+        String responseHeader = String.join(CRLF,
+                HTTP_VERSION + statusCode.getValue() + SP,
+                CONTENT_TYPE + HEADER_DELIMITER + contentType.getValue() + SP,
+                CONTENT_LENGTH + HEADER_DELIMITER + responseBody.getBytes().length + SP);
 
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            String headerInfo = entry.getKey() + ": " + entry.getValue() + " ";
-            responseHeader = String.join(DELIMITER, responseHeader, headerInfo);
+            String headerInfo = entry.getKey() + HEADER_DELIMITER + entry.getValue() + SP;
+            responseHeader = String.join(CRLF, responseHeader, headerInfo);
         }
 
-        return String.join(DELIMITER, responseHeader, "", responseBody).getBytes();
+        return String.join(CRLF, responseHeader, "", responseBody).getBytes();
     }
 
     public static HttpResponse toNotFound() {
@@ -49,9 +56,8 @@ public class HttpResponse {
 
     public static final class Builder {
 
-        private static final String CONTENT_TYPE = "Content-Type";
-        private static final String CONTENT_LENGTH = "Content-Length";
-
+        private static final String LOCATION = "Location";
+        private static final String JSESSIONID = "JSESSIONID=";
         private StatusCode statusCode = StatusCode.OK;
         private ContentType contentType = ContentType.WILD_CARD;
         private String responseBody = "";
@@ -67,23 +73,21 @@ public class HttpResponse {
 
         public Builder contentType(final ContentType contentType) {
             this.contentType = contentType;
-            headers.put(CONTENT_TYPE, contentType.getValue());
             return this;
         }
 
         public Builder responseBody(final String responseBody) {
             this.responseBody = responseBody;
-            headers.put(CONTENT_LENGTH, Integer.toString(responseBody.getBytes().length));
             return this;
         }
 
         public Builder redirect(final String redirectUrl) {
-            headers.put("Location", redirectUrl);
+            headers.put(LOCATION, redirectUrl);
             return this;
         }
 
         public Builder addCookie(String sessionId) {
-            headers.put(SET_COOKIE, "JSESSIONID=" + sessionId);
+            headers.put(SET_COOKIE, JSESSIONID + sessionId);
             return this;
         }
 

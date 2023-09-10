@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handlers;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -16,9 +15,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Container container;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Container container) {
         this.connection = connection;
+        this.container = container;
     }
 
     @Override
@@ -35,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
-            Handlers.handle(httpRequest, httpResponse);
+            container.handle(httpRequest, httpResponse);
             String response = httpResponse.generateResponseMessage();
 
             outputStream.write(response.getBytes());

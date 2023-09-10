@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.servletcontainer.Handler;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -34,7 +35,7 @@ public class RegisterHandler implements Handler {
         httpResponse.redirect("index.html");
     }
 
-    private void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception {
+    private void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String fileData = FileReader.readFile("/register.html");
         httpResponse.ok(fileData, ContentType.HTML);
     }

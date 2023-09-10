@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.servletcontainer.HandlerContainer;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +78,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, new HandlerContainer());
         executorService.execute(processor);
     }
 

@@ -1,11 +1,16 @@
-package org.apache.coyote.http11.handler;
+package org.apache.catalina.servletcontainer;
 
+import nextstep.jwp.handler.FileHandler;
+import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.handler.RegisterHandler;
+import nextstep.jwp.handler.RootHandler;
+import org.apache.coyote.http11.Container;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 import java.util.Map;
 
-public class Handlers {
+public class HandlerContainer implements Container {
 
     private static final Handler fileHandler = new FileHandler();
 
@@ -16,17 +21,14 @@ public class Handlers {
                     "/register", new RegisterHandler()
             );
 
-    private Handlers() {
-
-    }
-
-    public static void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    @Override
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         String requestUri = httpRequest.getEndPoint();
         Handler handler = findHandler(requestUri);
         handler.handle(httpRequest, httpResponse);
     }
 
-    private static Handler findHandler(String requestUri) {
+    private Handler findHandler(String requestUri) {
         return myHandlers.getOrDefault(requestUri, fileHandler);
     }
 }

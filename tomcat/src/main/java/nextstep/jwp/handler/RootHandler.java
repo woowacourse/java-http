@@ -1,5 +1,6 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
+import org.apache.catalina.servletcontainer.Handler;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

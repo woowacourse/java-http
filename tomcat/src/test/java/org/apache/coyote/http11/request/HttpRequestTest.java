@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.handler.RequestParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;

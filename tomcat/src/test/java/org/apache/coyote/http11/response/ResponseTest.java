@@ -20,9 +20,10 @@ class ResponseTest {
     void 리다이렉트_응답을_생성한다() {
         //given
         final String path = "/abc";
+        final Response redirectResponse = new Response();
 
         //when
-        final Response redirectResponse = Response.getRedirectResponse(path);
+        redirectResponse.redirect(path);
 
         //then
         assertAll(() -> {
@@ -33,8 +34,11 @@ class ResponseTest {
 
     @Test
     void NOT_FOUND_응답을_생성한다() {
-        //given & when
-        final Response notFoundResponse = Response.getNotFoundResponse();
+        //given
+        final Response notFoundResponse = new Response();
+
+        //when
+        notFoundResponse.responseNotFound();
 
         //then
         assertThat(notFoundResponse.getStatusLine().getStatusCode()).isEqualTo(StatusCode.NOT_FOUND);
@@ -42,8 +46,11 @@ class ResponseTest {
 
     @Test
     void UNAUTHORIZED_응답을_생성한다() {
-        //given & when
-        final Response unauthorizedResponse = Response.getUnauthorizedResponse();
+        //given
+        final Response unauthorizedResponse = new Response();
+
+        //when
+        unauthorizedResponse.responseUnauthorized();
 
         //then
         assertThat(unauthorizedResponse.getStatusLine().getStatusCode()).isEqualTo(UNAUTHORIZED);
@@ -154,7 +161,7 @@ class ResponseTest {
         final Response response = new Response();
 
         //when
-        response.init(request);
+        response.preprocess(request);
 
         //then
         final String actual = response.parseString();
@@ -177,7 +184,7 @@ class ResponseTest {
         final Response response = new Response();
 
         //when
-        response.addJSessionId(request);
+        response.postprocess(request);
 
         //then
         final String actual = response.parseString();

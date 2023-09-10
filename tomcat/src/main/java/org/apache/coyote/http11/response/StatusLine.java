@@ -4,10 +4,12 @@ import org.apache.coyote.protocol.Protocol;
 
 public class StatusLine {
 
-    public static final StatusLine DEFAULT_STATUS_LINE = new StatusLine(StatusCode.OK);
-
     private final Protocol protocol;
     private StatusCode statusCode;
+
+    public StatusLine() {
+        this(Protocol.HTTP11, StatusCode.OK);
+    }
 
     public StatusLine(final StatusCode statusCode) {
         this(Protocol.HTTP11, statusCode);

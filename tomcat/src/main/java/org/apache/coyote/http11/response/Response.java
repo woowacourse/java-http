@@ -28,18 +28,18 @@ public class Response {
 
     private final StatusLine statusLine;
 
-    private final Headers headers;
+    private Headers headers;
 
     private final Map<String, Cookie> cookies;
 
     private String body;
 
     public Response() {
-        this(StatusLine.DEFAULT_STATUS_LINE, new Headers(), "");
+        this(new StatusLine(), new Headers(), "");
     }
 
     public Response(final String body) {
-        this(StatusLine.DEFAULT_STATUS_LINE, new Headers(), body);
+        this(new StatusLine(), new Headers(), body);
     }
 
     public Response(final StatusLine statusLine,
@@ -56,20 +56,6 @@ public class Response {
         this.headers = headers;
         this.cookies = cookies;
         this.body = body;
-    }
-
-    public static Response getRedirectResponse(final String path) {
-        final Headers redirectHeaders = new Headers();
-        redirectHeaders.addHeader(LOCATION, path);
-        return new Response(new StatusLine(FOUND), redirectHeaders, "");
-    }
-
-    public static Response getNotFoundResponse() {
-        return new Response(new StatusLine(NOT_FOUND), new Headers(), "");
-    }
-
-    public static Response getUnauthorizedResponse() {
-        return new Response(new StatusLine(UNAUTHORIZED), new Headers(), "");
     }
 
     public String parseString() {
@@ -131,11 +117,16 @@ public class Response {
         decideContentLength();
     }
 
+    private void decideContentLength() {
+        final byte[] bytes = body.getBytes();
+        headers.addHeader(CONTENT_LENGTH, String.valueOf(bytes.length));
+    }
+
     public void addHeader(final Header header, final String value) {
         headers.addHeader(header, value);
     }
 
-    public void addJSessionId(final Request request) {
+    public void postprocess(final Request request) {
         final Session session = request.getSession();
         final String sessionId = session.getId();
         final Optional<Cookie> sessionIdCookie = request.getCookie("JSESSIONID");
@@ -145,15 +136,11 @@ public class Response {
         }
     }
 
-    public void init(final Request request) {
+    public void preprocess(final Request request) {
         final String acceptHeaderValue = request.getHeaders().getValue(RequestHeader.ACCEPT);
         final String requestPath = request.getRequestLine().getRequestPath();
         final String contentTypeValue = decideResponseContentType(acceptHeaderValue, requestPath);
         headers.addHeader(CONTENT_TYPE, contentTypeValue);
-    }
-
-    public void decideHeaders(final Request request) {
-        addJSessionId(request);
     }
 
 
@@ -169,9 +156,23 @@ public class Response {
         return "text/html;charset=utf-8";
     }
 
-    private void decideContentLength() {
-        final byte[] bytes = body.getBytes();
-        headers.addHeader(CONTENT_LENGTH, String.valueOf(bytes.length));
+    public void redirect(final String path) {
+        this.statusLine.setStatusCode(FOUND);
+        final Headers redirectHeaders = new Headers();
+        redirectHeaders.addHeader(LOCATION, path);
+        this.headers = redirectHeaders;
+    }
+
+    public void responseUnauthorized() {
+        this.statusLine.setStatusCode(UNAUTHORIZED);
+        this.headers = new Headers();
+        this.body = "";
+    }
+
+    public void responseNotFound() {
+        this.statusLine.setStatusCode(NOT_FOUND);
+        this.headers = new Headers();
+        this.body = "";
     }
 
     public StatusLine getStatusLine() {

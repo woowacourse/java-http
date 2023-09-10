@@ -1,5 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.controller.HomeController;
+import org.apache.coyote.controller.ControllerMapper;
 import org.apache.coyote.http11.Http11Processor;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
+        ControllerMapper.register("/", new HomeController());
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
 

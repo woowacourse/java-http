@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,8 +10,8 @@ public class HttpRequest {
     private final HttpRequestBody body;
 
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        final String firstLine = bufferedReader.readLine();
-        final HttpRequestLine httpRequestLine = HttpRequestLine.from(firstLine);
+        final String requestLine = bufferedReader.readLine();
+        final HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
         final HttpRequestHeader headers = HttpRequestHeader.from(bufferedReader);
         final HttpRequestBody httpRequestBody = HttpRequestBody.of(bufferedReader, headers);
 
@@ -28,17 +28,7 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public boolean isLogin() {
-        final Uri uri = requestLine.getUri();
-        return uri.isLogin();
-    }
-
-    public boolean isRegister() {
-        final Uri uri = requestLine.getUri();
-        return uri.isRegister();
-    }
-
-    public boolean isCorrectMethod(final HttpMethod method) {
+    public boolean matchesMethod(final HttpMethod method) {
         return requestLine.getHttpMethod() == method;
     }
 
@@ -50,11 +40,7 @@ public class HttpRequest {
         return headers.getJSessionId();
     }
 
-    public HttpRequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public Uri getPath() {
+    public Uri getUri() {
         return requestLine.getUri();
     }
 

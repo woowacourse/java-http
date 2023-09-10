@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.List;
+import org.apache.coyote.http11.HttpVersion;
 
 public class HttpRequestLine {
 
@@ -23,7 +24,7 @@ public class HttpRequestLine {
     ) {
         this.httpMethod = HttpMethod.valueOf(httpMethod);
         this.uri = Uri.from(uri);
-        this.httpVersion = HttpVersion.valueOf(httpVersion);
+        this.httpVersion = HttpVersion.findVersion(httpVersion);
     }
 
     public HttpMethod getHttpMethod() {
@@ -32,9 +33,5 @@ public class HttpRequestLine {
 
     public Uri getUri() {
         return uri;
-    }
-
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
     }
 }

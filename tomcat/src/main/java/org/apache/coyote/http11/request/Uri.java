@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class Uri {
 
@@ -18,14 +18,6 @@ public class Uri {
     private Uri(final String path, final String queryString) {
         this.path = path;
         this.queryString = QueryString.from(queryString);
-    }
-
-    public boolean isLogin() {
-        return path.equals("/login");
-    }
-
-    public boolean isRegister() {
-        return path.equals("/register");
     }
 
     public String getPath() {

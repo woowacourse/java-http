@@ -23,7 +23,7 @@ class AppTest {
      */
     @Test
     void test() throws Exception {
-        final var NUMBER_OF_THREAD = 10;
+        final var NUMBER_OF_THREAD = 250;
         var threads = new Thread[NUMBER_OF_THREAD];
 
         for (int i = 0; i < NUMBER_OF_THREAD; i++) {

@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.Map;
 import nextstep.jwp.FileFinder;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -56,8 +57,9 @@ class RegisterControllerTest {
     private HttpRequest createRequest(HttpMethod method, String body) {
         return new HttpRequest(
             new HttpRequestLine(method, "/register", "version"),
-            null,
-            null,
+            Map.of(),
+            Map.of(),
+            Map.of(),
             body
         );
     }

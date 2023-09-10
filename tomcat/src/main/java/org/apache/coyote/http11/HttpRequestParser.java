@@ -18,14 +18,15 @@ public class HttpRequestParser {
 
     public static HttpRequest create(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        HttpRequestLine startLine = getStartLine(bufferedReader);
+        HttpRequestLine requestLine = getRequestLine(bufferedReader);
         Map<String, String> headers = getHeaders(bufferedReader);
         String body = getBody(headers, bufferedReader);
         Map<String, String> cookie = getCookie(headers);
-        return new HttpRequest(startLine, headers, cookie, body);
+        Map<String, String> queryStrings = getQueryString(requestLine.getPath());
+        return new HttpRequest(requestLine, headers, cookie, queryStrings,body);
     }
 
-    private static HttpRequestLine getStartLine(BufferedReader bufferedReader) throws IOException {
+    private static HttpRequestLine getRequestLine(BufferedReader bufferedReader) throws IOException {
         String[] lines = bufferedReader.readLine().split(" ");
         return new HttpRequestLine(lines[0], lines[1], lines[2]);
     }
@@ -61,5 +62,19 @@ public class HttpRequestParser {
                     keyAndValue -> keyAndValue[0],
                     keyAndValue -> keyAndValue[1])))
             .orElse(Collections.emptyMap());
+    }
+
+    private static Map<String, String> getQueryString(String path) {
+        int queryStringIdx = path.indexOf("?");
+        if (queryStringIdx == -1) {
+            return Collections.emptyMap();
+        }
+
+        String queryStrings = path.substring(queryStringIdx + 1);
+        return Arrays.stream(queryStrings.split("&"))
+            .map(it -> it.split("="))
+            .collect(Collectors.toMap(
+                keyAndValue -> keyAndValue[0],
+                keyAndValue -> keyAndValue[1]));
     }
 }

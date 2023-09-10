@@ -4,6 +4,7 @@ import static nextstep.jwp.FileFinder.getFileContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestLine;
@@ -24,9 +25,10 @@ class IndexControllerTest {
         // given
         HttpRequest request = new HttpRequest(
             new HttpRequestLine(HttpMethod.GET, "/index.html", "version"),
-            null,
-            null,
-            null
+            Map.of(),
+            Map.of(),
+            Map.of(),
+            ""
         );
         HttpResponse response = new HttpResponse();
 

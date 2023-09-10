@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestLine;
@@ -54,9 +55,10 @@ class StaticFileControllerTest {
     private HttpRequest createGetRequestByPath(String path) {
         return new HttpRequest(
             new HttpRequestLine(HttpMethod.GET, path, "version"),
-            null,
-            null,
-            null
+            Map.of(),
+            Map.of(),
+            Map.of(),
+            ""
         );
     }
 }

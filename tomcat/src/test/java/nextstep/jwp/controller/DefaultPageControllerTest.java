@@ -38,7 +38,8 @@ class DefaultPageControllerTest {
     private HttpRequest createRequest() {
         return new HttpRequest(
             new HttpRequestLine(HttpMethod.GET, "/", "version"),
-            null,
+            Map.of(),
+            Map.of(),
             Map.of(),
             ""
         );

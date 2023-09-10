@@ -90,7 +90,8 @@ class LoginControllerTest {
     private HttpRequest createRequest(HttpMethod method, String body) {
         return new HttpRequest(
             new HttpRequestLine(method, "/register", "version"),
-            null,
+            Map.of(),
+            Map.of(),
             Map.of(),
             body
         );

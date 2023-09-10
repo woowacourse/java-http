@@ -17,6 +17,7 @@ public class HttpRequest {
     private static final String QUERY_STRING_SYMBOL = "?";
 
     private static final String DOT = ".";
+    private static final int START_LINE_SIZE = 3;
 
     private final HttpMethod method;
     private final String uri;
@@ -25,23 +26,11 @@ public class HttpRequest {
     private RequestBody requestBody;
     private QueryString queryString;
 
-    public HttpRequest(String requestApi) {
-        final String[] apiInfo = requestApi.split(REQUEST_API_DELIMITER);
-
-        if (apiInfo.length != 3) {
-            throw new IllegalArgumentException("잘못된 http 요청 입니다.");
-        }
-
-        this.method = HttpMethod.valueOf(apiInfo[HTTP_METHOD_INDEX]);
-        this.uri = apiInfo[REQUEST_URI_INDEX];
-        this.version = apiInfo[HTTP_VERSION_INDEX];
-    }
-
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         final String requestApi = bufferedReader.readLine();
         final String[] apiInfo = requestApi.split(REQUEST_API_DELIMITER);
 
-        if (apiInfo.length != 3) {
+        if (apiInfo.length != START_LINE_SIZE) {
             throw new IllegalArgumentException("잘못된 http 요청 입니다.");
         }
 

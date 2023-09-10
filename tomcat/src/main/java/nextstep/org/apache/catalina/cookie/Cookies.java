@@ -5,10 +5,11 @@ import static nextstep.org.apache.coyote.http11.HttpUtil.parseMultipleValues;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.org.apache.coyote.http11.HttpHeader;
 
 public class Cookies {
 
-    private static final String SET_COOKIE_HEADER = "Set-Cookie: %s \r\n";
+    private static final String SET_COOKIE_HEADER_FORMAT = "%s: %s \r\n";
     private static final String COOKIE_VALUES_DELIMITER = "; ";
     private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
 
@@ -38,7 +39,9 @@ public class Cookies {
     public String createSetCookieHeader() {
         return cookie.entrySet().stream()
                 .map(entry -> entry.getKey() + COOKIE_KEY_VALUE_DELIMITER + entry.getValue())
-                .map(value -> String.format(SET_COOKIE_HEADER, value))
+                .map(value -> String.format(
+                        SET_COOKIE_HEADER_FORMAT, HttpHeader.SET_COOKIE.getValue(), value)
+                )
                 .collect(Collectors.joining());
     }
 

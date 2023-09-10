@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
+import nextstep.org.apache.coyote.http11.HttpHeader;
 import nextstep.org.apache.coyote.http11.request.Http11Request;
 import nextstep.org.apache.coyote.http11.response.Http11Response;
 import nextstep.org.apache.coyote.http11.Status;
@@ -54,7 +55,7 @@ public abstract class AbstractServlet implements Servlet{
 
     protected void responseWithBody(Http11Request request, Http11Response response) throws IOException {
         Optional<String> responseBody = createResponseBody(request.getPathInfo());
-        String contentType = selectFirstContentTypeOrDefault(request.getHeader("Accept"));
+        String contentType = selectFirstContentTypeOrDefault(request.getHeader(HttpHeader.ACCEPT));
 
         if (responseBody.isEmpty()) {
             responseWithNotFound(request, response);
@@ -62,8 +63,8 @@ public abstract class AbstractServlet implements Servlet{
         }
 
         response.setStatus(Status.OK)
-                .setHeader("Content-Type", contentType + ";charset=utf-8")
-                .setHeader("Content-Length", String.valueOf(
+                .setHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8")
+                .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(
                         responseBody.get().getBytes(StandardCharsets.UTF_8).length))
                 .setBody(responseBody.get());
     }
@@ -71,11 +72,11 @@ public abstract class AbstractServlet implements Servlet{
     private void responseWithNotFound(Http11Request request, Http11Response response) throws IOException {
         String notFoundPageBody = createResponseBody("/404.html")
                 .orElse(NOT_FOUND_DEFAULT_MESSAGE);
-        String contentType = selectFirstContentTypeOrDefault(request.getHeader("Accept"));
+        String contentType = selectFirstContentTypeOrDefault(request.getHeader(HttpHeader.ACCEPT));
 
         response.setStatus(Status.NOT_FOUND)
-                .setHeader("Content-Type", contentType + ";charset=utf-8")
-                .setHeader("Content-Length", String.valueOf(
+                .setHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8")
+                .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(
                         notFoundPageBody.getBytes(StandardCharsets.UTF_8).length))
                 .setBody(notFoundPageBody);
     }

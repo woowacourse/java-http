@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import nextstep.org.apache.catalina.cookie.Cookies;
+import nextstep.org.apache.coyote.http11.HttpHeader;
 import nextstep.org.apache.coyote.http11.Status;
 
 public class Http11Response {
@@ -15,7 +16,7 @@ public class Http11Response {
     private static final String LINEBREAK_DELIMITER = "\r\n";
 
     private StatusLine statusLine;
-    private Map<String, String> headers = new LinkedHashMap<>();
+    private Map<HttpHeader, String> headers = new LinkedHashMap<>();
     private Cookies cookies = null;
     private String body = null;
 
@@ -41,7 +42,7 @@ public class Http11Response {
 
     private String createHeadersResponse() {
         String headersResponse = this.headers.entrySet().stream()
-                .map(entry -> String.format(HEADER_FORMAT, entry.getKey(), entry.getValue()))
+                .map(entry -> String.format(HEADER_FORMAT, entry.getKey().getValue(), entry.getValue()))
                 .collect(Collectors.joining(LINEBREAK_DELIMITER));
         if (Objects.nonNull(cookies) && !cookies.isEmpty()) {
             headersResponse += LINEBREAK_DELIMITER + cookies.createSetCookieHeader();
@@ -54,8 +55,8 @@ public class Http11Response {
         return this;
     }
 
-    public Http11Response setHeader(String key, String value) {
-        this.headers.put(key, value);
+    public Http11Response setHeader(HttpHeader httpHeader, String value) {
+        this.headers.put(httpHeader, value);
         return this;
     }
 

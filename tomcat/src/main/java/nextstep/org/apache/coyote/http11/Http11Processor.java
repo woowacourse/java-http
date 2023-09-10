@@ -60,10 +60,10 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         String internalServerErrorPageBody = createResponseBody("/500.html")
                 .orElse(Status.INTERNAL_SERVER_ERROR.getCodeMessage());
-        String contentType = selectFirstContentTypeOrDefault(request.getHeader("Accept"));
+        String contentType = selectFirstContentTypeOrDefault(request.getHeader(HttpHeader.ACCEPT));
         response.setStatus(Status.INTERNAL_SERVER_ERROR)
-                .setHeader("Content-Type", contentType + ";charset=utf-8")
-                .setHeader("Content-Length", String.valueOf(
+                .setHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8")
+                .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(
                         internalServerErrorPageBody.getBytes(
                                 StandardCharsets.UTF_8).length))
                 .setBody(internalServerErrorPageBody);

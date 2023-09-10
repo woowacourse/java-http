@@ -6,6 +6,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidLoginInfoException;
 import nextstep.jwp.model.User;
 import nextstep.org.apache.catalina.cookie.Cookies;
+import nextstep.org.apache.coyote.http11.HttpHeader;
 import nextstep.org.apache.coyote.http11.request.Http11Request;
 import nextstep.org.apache.coyote.http11.response.Http11Response;
 import nextstep.org.apache.catalina.session.Session;
@@ -29,11 +30,11 @@ public class LoginServlet extends AbstractServlet {
             cookies.set("JSESSIONID", loginSession.getId());
 
             response.setStatus(Status.FOUND)
-                    .setHeader("Location", "/index.html")
+                    .setHeader(HttpHeader.LOCATION, "/index.html")
                     .setCookies(cookies);
         } catch (NoSuchElementException | InvalidLoginInfoException | NullPointerException e) {
             response.setStatus(Status.FOUND)
-                    .setHeader("Location", "/401.html")
+                    .setHeader(HttpHeader.LOCATION, "/401.html")
                     .setCookies(cookies);
         }
     }
@@ -62,7 +63,7 @@ public class LoginServlet extends AbstractServlet {
         Cookies cookies = request.getCookies();
         if (cookies.hasCookie("JSESSIONID")) {
             response.setStatus(Status.FOUND)
-                    .setHeader("Location", "/index.html");
+                    .setHeader(HttpHeader.LOCATION, "/index.html");
             return;
         }
         responseWithBody(request, response);

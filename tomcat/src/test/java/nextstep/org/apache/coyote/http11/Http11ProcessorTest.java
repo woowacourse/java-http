@@ -175,8 +175,6 @@ class Http11ProcessorTest {
                 "Location: /index.html \r\n" +
                 "Set-Cookie: ";
 
-        System.out.println(socket.output());
-
         assertThat(socket.output()).contains(expected);
     }
 

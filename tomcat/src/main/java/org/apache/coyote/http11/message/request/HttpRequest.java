@@ -64,8 +64,8 @@ public class HttpRequest {
         return RequestBody.from(new String(buffer));
     }
 
-    public Optional<String> findFirstHeaderValue(final String field) {
-        return headers.findFirstValueOfField(field);
+    public Optional<String> getHeaderValues(final String field) {
+        return headers.getValuesOfField(field);
     }
 
     public Session getSession(final boolean createIfNotExist) {

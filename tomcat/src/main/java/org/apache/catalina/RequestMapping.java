@@ -1,14 +1,13 @@
-package nextstep.jwp.mapping;
+package org.apache.catalina;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
-import nextstep.jwp.http.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 

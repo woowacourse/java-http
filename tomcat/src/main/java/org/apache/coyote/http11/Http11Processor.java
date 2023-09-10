@@ -6,12 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.HttpRequestParser;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.mapping.RequestMapping;
+import org.apache.catalina.Controller;
+import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

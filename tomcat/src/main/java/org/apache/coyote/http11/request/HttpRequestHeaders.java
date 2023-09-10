@@ -1,11 +1,11 @@
-package nextstep.jwp.http.request;
+package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.BadRequestException;
-import nextstep.jwp.http.common.Cookie;
-import nextstep.jwp.http.common.HttpCookies;
+import org.apache.coyote.http11.common.Cookie;
+import org.apache.coyote.http11.common.HttpCookies;
 
 public class HttpRequestHeaders {
 

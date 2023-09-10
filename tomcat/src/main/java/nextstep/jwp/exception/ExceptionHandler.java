@@ -1,7 +1,7 @@
 package nextstep.jwp.exception;
 
-import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.response.HttpResponse;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class ExceptionHandler {
 

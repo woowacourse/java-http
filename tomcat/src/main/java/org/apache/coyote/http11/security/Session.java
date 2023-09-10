@@ -1,9 +1,10 @@
-package nextstep.jwp.security;
+package org.apache.coyote.http11.security;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Session {
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
@@ -27,7 +28,7 @@ public class Session {
         values.remove(key);
     }
 
-    public void invalidate(){
+    public void invalidate() {
         values.clear();
     }
 }

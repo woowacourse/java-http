@@ -1,7 +1,7 @@
-package nextstep.jwp.http.request;
+package org.apache.coyote.http11.request;
 
-import nextstep.jwp.http.common.HttpUri;
-import nextstep.jwp.http.common.HttpVersion;
+import org.apache.coyote.http11.common.HttpUri;
+import org.apache.coyote.http11.common.HttpVersion;
 
 public class HttpStartLine {
 

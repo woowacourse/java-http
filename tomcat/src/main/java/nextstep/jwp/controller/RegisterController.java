@@ -5,13 +5,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.common.ContentType;
-import nextstep.jwp.http.common.HttpBody;
-import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.response.FormData;
-import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
+import org.apache.catalina.AbstractController;
+import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.HttpBody;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.FormData;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 

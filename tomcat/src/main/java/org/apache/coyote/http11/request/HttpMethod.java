@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import nextstep.jwp.exception.InvalidRequestMethodException;

@@ -1,12 +1,12 @@
-package nextstep.jwp.controller;
+package org.apache.catalina;
 
 import java.io.IOException;
 import nextstep.jwp.exception.ExceptionHandler;
 import nextstep.jwp.exception.HttpGlobalException;
 import nextstep.jwp.exception.InvalidRequestMethodException;
-import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

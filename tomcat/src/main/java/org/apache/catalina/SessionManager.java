@@ -1,8 +1,8 @@
-package nextstep.jwp.security;
+package org.apache.catalina;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.catalina.Manager;
+import org.apache.coyote.http11.security.Session;
 
 public class SessionManager implements Manager {
 

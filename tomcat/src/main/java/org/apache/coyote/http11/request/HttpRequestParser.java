@@ -1,14 +1,14 @@
-package nextstep.jwp.http.request;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.BadRequestException;
-import nextstep.jwp.http.common.HeaderType;
-import nextstep.jwp.http.common.HttpBody;
-import nextstep.jwp.http.common.HttpUri;
-import nextstep.jwp.http.common.HttpVersion;
+import org.apache.coyote.http11.common.HeaderType;
+import org.apache.coyote.http11.common.HttpBody;
+import org.apache.coyote.http11.common.HttpUri;
+import org.apache.coyote.http11.common.HttpVersion;
 
 public class HttpRequestParser {
 

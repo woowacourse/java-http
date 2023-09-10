@@ -1,9 +1,10 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.InvalidRequestMethodException;
-import nextstep.jwp.http.common.ContentType;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
+import org.apache.catalina.AbstractController;
+import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class HomeController extends AbstractController {
 

@@ -1,8 +1,8 @@
-package nextstep.jwp.controller;
+package org.apache.catalina;
 
 import java.io.IOException;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 

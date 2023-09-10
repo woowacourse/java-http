@@ -1,10 +1,10 @@
-package nextstep.jwp.http.response;
+package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.BadRequestException;
-import nextstep.jwp.http.common.HeaderType;
+import org.apache.coyote.http11.common.HeaderType;
 
 public class HttpResponseHeaders {
 

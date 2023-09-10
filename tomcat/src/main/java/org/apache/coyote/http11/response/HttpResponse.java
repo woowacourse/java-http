@@ -1,9 +1,9 @@
-package nextstep.jwp.http.response;
+package org.apache.coyote.http11.response;
 
-import nextstep.jwp.http.common.Cookie;
-import nextstep.jwp.http.common.HttpBody;
-import nextstep.jwp.http.common.HttpCookies;
-import nextstep.jwp.http.common.HttpStatus;
+import org.apache.coyote.http11.common.Cookie;
+import org.apache.coyote.http11.common.HttpBody;
+import org.apache.coyote.http11.common.HttpCookies;
+import org.apache.coyote.http11.common.HttpStatus;
 
 public class HttpResponse {
 

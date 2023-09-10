@@ -9,7 +9,9 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -17,19 +19,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_ACCEPT_MAX_THREADS = 50;
+    private static final int DEFAULT_ACCEPT_MAX_THREADS = 250;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_ACCEPT_MAX_THREADS);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
-        executorService = Executors.newFixedThreadPool(maxThreads);
+        executorService = new ThreadPoolExecutor(
+                DEFAULT_ACCEPT_MAX_THREADS,
+                DEFAULT_ACCEPT_MAX_THREADS,
+                0,
+                TimeUnit.MINUTES, new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT));
         this.stopped = false;
     }
 

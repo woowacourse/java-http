@@ -37,15 +37,6 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    protected HttpResponse(OutputStream outputStream, String responseStatus, String contentType, String charSet, String responseBody) {
-        this.outputStream = outputStream;
-        this.responseStatus = responseStatus;
-        this.contentType = contentType;
-        this.charSet = charSet;
-        this.responseBody = responseBody;
-        this.contentLength = this.responseBody != null ? this.responseBody.getBytes().length : 0;
-    }
-
     public void flush() throws IOException {
         outputStream.write(HttpResponseParser.parseToBytes(this));
         outputStream.flush();

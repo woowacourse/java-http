@@ -7,10 +7,7 @@ import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.exception.MissMatchPasswordException;
 import org.apache.coyote.http11.exception.NotExistAccountException;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestHeader;
-import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.*;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
 import org.slf4j.Logger;
@@ -18,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.coyote.http11.common.HttpStatus.FOUND;
 import static org.apache.coyote.http11.common.constant.SessionConstant.SESSION_COOKIE_NAME;
+import static org.apache.coyote.http11.request.RequestMethod.GET;
 
 public class LoginHandler {
 
@@ -30,7 +28,7 @@ public class LoginHandler {
         RequestLine requestLine = request.getRequestLine();
         RequestHeader requestHeader = request.getRequestHeader();
         RequestBody requestBody = request.getRequestBody();
-        if (requestLine.getRequestMethod().isSameRequestMethod("GET")) {
+        if (requestLine.getRequestMethod()== GET) {
             if (isAuthenticated(requestHeader)) {
                 return new HttpResponseBuilder().init()
                         .httpStatus(FOUND)

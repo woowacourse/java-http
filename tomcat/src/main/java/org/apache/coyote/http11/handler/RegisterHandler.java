@@ -5,10 +5,12 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBuilder;
 
 import static org.apache.coyote.http11.common.HttpStatus.FOUND;
+import static org.apache.coyote.http11.request.RequestMethod.GET;
 
 public class RegisterHandler {
 
@@ -18,7 +20,7 @@ public class RegisterHandler {
     public static HttpResponse handle(final HttpRequest request) {
         RequestLine requestLine = request.getRequestLine();
         RequestBody requestBody = request.getRequestBody();
-        if (requestLine.getRequestMethod().isSameRequestMethod("GET")) {
+        if (requestLine.getRequestMethod()== GET) {
             return StaticFileHandler.handle("/register.html", request);
         }
         return register(requestBody);

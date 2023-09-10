@@ -5,7 +5,8 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -17,20 +18,26 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int DEFAULT_THREAD = 1;
+    private static final int DEFAULT_MAX_THREAD = 250;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD);
     }
 
     public Connector(final int port, final int acceptCount, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.executorService = Executors.newFixedThreadPool(checkMaxThread(maxThread));
+        this.executorService = new ThreadPoolExecutor(
+            checkMaxThread(maxThread),
+            checkMaxThread(maxThread),
+            0,
+            TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(acceptCount)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -58,7 +65,7 @@ public class Connector implements Runnable {
     }
 
     private int checkMaxThread(int maxThread) {
-        return Math.max(maxThread, DEFAULT_THREAD);
+        return Math.max(maxThread, DEFAULT_MAX_THREAD);
     }
 
     public void start() {

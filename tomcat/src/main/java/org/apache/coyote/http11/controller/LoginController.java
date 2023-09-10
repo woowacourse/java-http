@@ -8,11 +8,12 @@ import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.service.LoginService;
 import org.apache.coyote.http11.session.SessionManager;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String LOCATION_HEADER = "Location";
+    private static final String INDEX_PAGE = "/index.html";
 
     private final LoginService loginService;
 
@@ -21,17 +22,29 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public ResponseEntity<String> handle(HttpRequest httpRequest) {
+    public ResponseEntity<? extends Object> doGet(HttpRequest httpRequest) {
         if (SessionManager.loggedIn(httpRequest)) {
             return ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, "/index.html")
+                .addHeader(LOCATION_HEADER, INDEX_PAGE)
+                .build();
+        }
+        ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
+        responseEntity.responseView("/login.html");
+        return responseEntity;
+    }
+
+    @Override
+    public ResponseEntity<? extends Object> doPost(HttpRequest httpRequest) {
+        if (SessionManager.loggedIn(httpRequest)) {
+            return ResponseEntity.status(302)
+                .addHeader(LOCATION_HEADER, INDEX_PAGE)
                 .build();
         }
 
         Optional<String> loginSession = login(httpRequest);
         if (loginSession.isPresent()) {
             return ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, "/index.html")
+                .addHeader(LOCATION_HEADER, INDEX_PAGE)
                 .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession.get())
                 .build();
         }
@@ -49,5 +62,17 @@ public class LoginController implements Controller {
             return loginService.login(account, password);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public ResponseEntity<? extends Object> doPut(HttpRequest httpRequest) {
+        return ResponseEntity.status(405)
+            .build();
+    }
+
+    @Override
+    public ResponseEntity<? extends Object> doDelete(HttpRequest httpRequest) {
+        return ResponseEntity.status(405)
+            .build();
     }
 }

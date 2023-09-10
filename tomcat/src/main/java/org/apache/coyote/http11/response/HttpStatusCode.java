@@ -4,7 +4,8 @@ import java.util.stream.Stream;
 
 public enum HttpStatusCode {
     OK(200),
-    FOUND(302);
+    FOUND(302),
+    METHOD_NOT_ALLOWED(405);
 
     private final int statusCode;
 

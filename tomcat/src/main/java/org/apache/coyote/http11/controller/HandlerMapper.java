@@ -18,19 +18,13 @@ public class HandlerMapper {
 
     private void enrollHandler() {
         controllerByMapper.put(
-            request -> "/login".equals(request.getRequestLine().getPath()) &&
-                HttpMethod.POST.equals(request.getRequestLine().getMethod()),
+            request -> "/login".equals(request.getRequestLine().getPath()),
             new LoginController(new LoginService()));
 
         controllerByMapper.put(
             request -> "/register".equals(request.getRequestLine().getPath()) &&
                 HttpMethod.POST.equals(request.getRequestLine().getMethod()),
             new SignUpController(new LoginService()));
-
-        controllerByMapper.put(
-            request -> "/login".equals(request.getRequestLine().getPath()) &&
-                HttpMethod.GET.equals(request.getRequestLine().getMethod()),
-            new LoginViewController());
 
         controllerByMapper.put(
             request -> "/register".equals(request.getRequestLine().getPath()) &&

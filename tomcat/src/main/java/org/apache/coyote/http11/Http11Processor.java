@@ -44,9 +44,10 @@ public class Http11Processor implements Runnable, Processor {
                     httpRequestReader.header(),
                     httpRequestReader.body()
             );
+            HttpResponse httpResponse = new HttpResponse();
 
             Handler handler = HandlerMapping.getHandler(httpRequest.path());
-            HttpResponse httpResponse = handler.handle(httpRequest);
+            handler.service(httpRequest, httpResponse);
 
             HttpResponseWriter httpResponseWriter = HttpResponseWriter.create(httpResponse);
             String response = httpResponseWriter.response();

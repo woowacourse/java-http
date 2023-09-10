@@ -47,9 +47,8 @@ public class ControllerMatcher {
                 })
                 .collect(Collectors.toList());
 
-        Optional<Controller> controller;
         for (ControllerMatchingStrategy matchStrategy : MATCH_STRATEGIES) {
-            controller = matchStrategy.findController(httpPath, controllerClasses);
+            Optional<Controller> controller = matchStrategy.findController(httpPath, controllerClasses);
             if (controller.isPresent()) {
                 return controller.get();
             }

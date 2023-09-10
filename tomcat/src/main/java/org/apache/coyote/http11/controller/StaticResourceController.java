@@ -11,7 +11,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 @RequestMapping(regex = ".*\\.(html|css|js)$")
 public class StaticResourceController extends AbstractController {
 
-    public static final String RESOURCE_PATH_PREFIX = "static/";
 
     private final FileHandler fileHandler = new FileHandler();
 
@@ -22,7 +21,7 @@ public class StaticResourceController extends AbstractController {
                 response.setCharSet(CharSet.UTF_8);
                 response.setContentType(contentType);
                 response.setResponseStatus(ResponseStatus.OK);
-                response.setResponseBody(fileHandler.readFromResourcePath(RESOURCE_PATH_PREFIX + request.getFullUri()));
+                response.setResponseBody(fileHandler.readFromResourcePath(request.getFullUri()));
                 response.flush();
 
                 return;

@@ -6,10 +6,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class FileHandler {
+
+    public static final String RESOURCE_PATH_PREFIX = "static/";
+
     public String readFromResourcePath(String path) throws IOException {
         final var responseBody = new StringBuilder();
 
-        final URL indexPageURL = this.getClass().getClassLoader().getResource(path);
+        final URL indexPageURL = this.getClass().getClassLoader().getResource(RESOURCE_PATH_PREFIX + path);
         final File indexFile;
         try {
             indexFile = new File(indexPageURL.toURI());

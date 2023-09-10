@@ -50,7 +50,7 @@ public class LoginController extends AbstractController {
         response.setCharSet(CharSet.UTF_8);
         response.setContentType(ContentType.TEXT_HTML);
         response.setResponseStatus(ResponseStatus.UNAUTHORIZED);
-        response.setResponseBody(new FileHandler().readFromResourcePath("static/401.html"));
+        response.setResponseBody(new FileHandler().readFromResourcePath("401.html"));
         response.flush();
     }
 
@@ -82,7 +82,7 @@ public class LoginController extends AbstractController {
         response.setCharSet(CharSet.UTF_8);
         response.setContentType(ContentType.TEXT_HTML);
         response.setResponseStatus(ResponseStatus.OK);
-        response.setResponseBody(new FileHandler().readFromResourcePath("static/login.html"));
+        response.setResponseBody(new FileHandler().readFromResourcePath("login.html"));
         response.flush();
     }
 }

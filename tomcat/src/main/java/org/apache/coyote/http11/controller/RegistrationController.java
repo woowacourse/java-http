@@ -27,7 +27,7 @@ public class RegistrationController extends AbstractController {
         response.setCharSet(CharSet.UTF_8);
         response.setContentType(ContentType.TEXT_HTML);
         response.setResponseStatus(ResponseStatus.OK);
-        response.setResponseBody(new FileHandler().readFromResourcePath("static/register.html"));
+        response.setResponseBody(new FileHandler().readFromResourcePath("register.html"));
         response.flush();
     }
 }

@@ -15,9 +15,10 @@ public class RequestMapping {
     private static Map<String, Controller> mappers = new LinkedHashMap<>();
 
     static {
-        mappers.put("/", new RootController());
-        mappers.put("/login", new LoginController());
-        mappers.put("/register", new RegisterController());
+        mappers = Map.of(
+                "/", RootController.getInstance(),
+                "/login", LoginController.getInstance(),
+                "/register", RegisterController.getInstance());
     }
 
 
@@ -31,6 +32,6 @@ public class RequestMapping {
                 .filter(entry -> path.equals(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .findFirst()
-                .orElse(new DefaultController());
+                .orElse(DefaultController.getInstance());
     }
 }

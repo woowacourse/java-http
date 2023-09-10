@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.manager.SessionManager;
+import org.apache.coyote.Controller;
 import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.Session;
 import org.apache.coyote.request.HttpRequest;
@@ -17,6 +18,12 @@ import static org.apache.coyote.response.HttpStatus.FOUND;
 import static org.apache.coyote.response.HttpStatus.OK;
 
 public class LoginController extends AbstractController {
+
+    private static final Controller INSTANCE = new LoginController();
+
+    public static Controller getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

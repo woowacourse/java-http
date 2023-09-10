@@ -12,7 +12,7 @@ public class HttpCookie {
             this.cookies = new HashMap<>();
             return;
         }
-        
+
         Map<String, String> cookies = new HashMap<>();
         String[] values = rawValue.split("; ");
         for (String value : values) {
@@ -35,6 +35,6 @@ public class HttpCookie {
     }
 
     public String getValue(String key) {
-        return cookies.getOrDefault(key, null);
+        return cookies.get(key);
     }
 }

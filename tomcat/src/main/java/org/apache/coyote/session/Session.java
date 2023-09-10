@@ -26,7 +26,7 @@ public class Session {
     }
 
     public String getAttribute(String key) {
-        return attributes.getOrDefault(key, null);
+        return attributes.get(key);
     }
 
     public String id() {

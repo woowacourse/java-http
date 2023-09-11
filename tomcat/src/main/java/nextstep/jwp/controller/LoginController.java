@@ -6,7 +6,11 @@ import static org.apache.coyote.utils.Converter.parseFormData;
 
 import java.net.URL;
 import java.util.Map;
+import java.util.UUID;
+import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -17,7 +21,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Map<String, String> bodyFields = parseFormData(request.getBody());
-        final String sessionId = userService.logIn(bodyFields);
+        final User user = userService.logIn(bodyFields);
+        final String sessionId = setSession(user);
 
         makeAuthorizedResponse(response, sessionId);
     }
@@ -41,5 +46,13 @@ public class LoginController extends AbstractController {
     private void makeAuthorizedResponse(final HttpResponse response) {
         response.setStatus(FOUND);
         response.setRedirectUri("/index.html");
+    }
+
+    private String setSession(final User user) {
+        final String id = UUID.randomUUID().toString();
+        final Session session = new Session(id);
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        return id;
     }
 }

@@ -15,10 +15,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final RequestMapping mapping;
+
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestMapping mapping) {
         this.connection = connection;
+        this.mapping = mapping;
     }
 
     @Override
@@ -34,8 +37,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
-            final RequestMapping requestMapping = new RequestMapping();
-            final Controller controller = requestMapping.getController(httpRequest);
+            final Controller controller = mapping.getController(httpRequest);
             final HttpResponse httpResponse = new HttpResponse();
 
             controller.service(httpRequest, httpResponse);

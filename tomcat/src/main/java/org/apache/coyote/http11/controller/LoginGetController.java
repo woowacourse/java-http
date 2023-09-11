@@ -39,6 +39,6 @@ public class LoginGetController extends AbstractController {
 
     private boolean isLogin(HttpCookie cookie) {
         return cookie.isExist(JSESSIONID)
-                && SessionManager.InstanceOf().findSession(cookie.findCookie(JSESSIONID)) != null;
+                && SessionManager.instanceOf().findSession(cookie.findCookie(JSESSIONID)) != null;
     }
 }

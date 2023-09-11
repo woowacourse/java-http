@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager implements Manager {
 
-    private static final SessionManager INSTANCE = new SessionManager();
+    private static final SessionManager instance = new SessionManager();
     private static final ConcurrentMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    public static SessionManager InstanceOf() {
-        return INSTANCE;
+    public static SessionManager instanceOf() {
+        return instance;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class SessionManager implements Manager {
     public void addLoginSession(final String jSessionId, final User user) {
         Session session = new Session(jSessionId);
         session.setAttribute("user", user);
-        INSTANCE.add(session); //세션 매니저에 세션을 추가한다.
+        instance.add(session); //세션 매니저에 세션을 추가한다.
     }
 
     @Override

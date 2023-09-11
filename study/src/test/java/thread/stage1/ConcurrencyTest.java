@@ -1,6 +1,6 @@
 package thread.stage1;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConcurrencyTest {
 
-    @Test
+    @RepeatedTest(1000)
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();
 

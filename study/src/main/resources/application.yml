@@ -3,7 +3,7 @@ handlebars:
 
 server:
   tomcat:
-    accept-count: 1
-    max-connections: 1
+    accept-count: 6 # 연결이 max-connections 값까지 다 차있을 때 연결을 대기할 수 있는 요청의 수. 여기에 못들면 버려지는 요청임
+    max-connections: 3 # 요청이 연결될 수 있는 최대 개수
     threads:
-      max: 2
+      max: 5 #nio-8080-exec- 뒤에 붙는 숫자중 가장 큰거. 동시에 실행될 수 있는 최대 스레드의 수. 연결된 요청들을 처리하는데 이만큼의 스레드 동원이 가능하다

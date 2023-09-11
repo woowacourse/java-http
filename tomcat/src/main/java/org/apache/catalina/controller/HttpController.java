@@ -10,8 +10,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
-import static org.apache.coyote.http11.common.HttpHeaderType.LOCATION;
+import static org.apache.coyote.http11.common.HttpHeaderType.*;
 import static org.apache.coyote.http11.response.HttpStatusCode.*;
 
 public abstract class HttpController implements Controller {
@@ -56,11 +55,7 @@ public abstract class HttpController implements Controller {
             throw new HttpException(NOT_FOUND, "The resource corresponding to the request does not exist");
         }
 
-        final String contentType = ResourceContentTypeResolver.getContentType(httpRequest.getHeaders(), resourceName);
-        if (contentType == null) {
-            throw new HttpException(BAD_REQUEST, "Content type is not supported.");
-        }
-
+        final String contentType = ResourceContentTypeResolver.getResourceContentType(httpRequest.getHeaders().getHeaderValue(ACCEPT), resourceName);
         final String responseBody = ResourceReader.read(resourceUrl);
         httpResponse.setStatusCode(OK);
         httpResponse.addHeader(CONTENT_TYPE, contentType);

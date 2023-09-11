@@ -2,8 +2,6 @@ package nextstep.jwp.controller;
 
 import static common.ResponseStatus.FOUND;
 import static common.ResponseStatus.OK;
-import static org.apache.coyote.request.line.HttpMethod.GET;
-import static org.apache.coyote.request.line.HttpMethod.POST;
 import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
 
 import nextstep.jwp.service.AuthService;
@@ -31,18 +29,6 @@ public class RegisterController extends AbstractController {
         return httpRequest.consistsOf(URL);
     }
 
-    @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.consistsOf(POST)) {
-            doPost(httpRequest, httpResponse);
-            return;
-        }
-        if (httpRequest.consistsOf(GET)) {
-            doGet(httpRequest, httpResponse);
-            return;
-        }
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {

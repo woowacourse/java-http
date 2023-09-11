@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import static org.apache.coyote.request.line.HttpMethod.GET;
-
 import common.ResponseStatus;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
@@ -14,15 +12,6 @@ public class HomeController extends AbstractController {
     @Override
     public boolean canProcess(HttpRequest httpRequest) {
         return httpRequest.consistsOf(URL);
-    }
-
-    @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.consistsOf(GET)) {
-            doGet(httpRequest, httpResponse);
-            return;
-        }
-        throw new UnsupportedOperationException();
     }
 
     @Override

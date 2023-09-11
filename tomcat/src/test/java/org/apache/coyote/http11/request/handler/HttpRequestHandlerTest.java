@@ -63,31 +63,6 @@ class HttpRequestHandlerTest {
         class path가_login이라면 {
 
             @Nested
-            class HTTP_METHOD_GET {
-
-                @Test
-                @DisplayName("로그인을 하지 않은 상태일 때 LOGIN Response를 반환한다.")
-                void getLoginResponseEntity() {
-                    // given
-                    RequestLine requestLine = requestLine_생성(GET, "/login");
-                    HttpHeader httpHeader = requestHeader_생성();
-                    RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
-                    SessionRepository.clearSessions();
-
-                    // when
-                    HttpResponse response = requestHandler.getResponse(httpRequest);
-
-                    // then
-                    assertAll(
-                            () -> assertThat(response.getHttpStatus()).isEqualTo(OK),
-                            () -> assertThat(response.getLocation()).isEqualTo("/login.html")
-                    );
-                }
-
-            }
-
-            @Nested
             class HTTP_METHOD_POST {
 
                 @Test

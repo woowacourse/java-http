@@ -33,7 +33,7 @@ public class HttpHeader {
             String key = keyAndValue.get(KEY_INDEX);
             String value = keyAndValue.get(VALUE_INDEX);
 
-            List<String> values = removalSpace(asList(value.split(";")));
+            List<String> values = removalSpace(asList(value.split(",")));
             keyAndValues.put(key, values);
         }
         return keyAndValues;

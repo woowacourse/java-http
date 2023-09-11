@@ -34,6 +34,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(final HttpRequest request, final HttpResponse response) {
+        System.out.println("실행");
         Cookie cookie = request.requestHeader().getCookie();
         Protocol protocol = request.getProtocol();
         return loginService.getLoginViewResponse(cookie, protocol);

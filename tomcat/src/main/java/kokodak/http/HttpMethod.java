@@ -7,7 +7,7 @@ import java.util.Arrays;
 public enum HttpMethod {
 
     GET,
-    POST,
+    POST
     ;
 
     public static HttpMethod from(final String startLine) {

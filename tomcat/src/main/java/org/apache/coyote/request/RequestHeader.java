@@ -1,5 +1,6 @@
 package org.apache.coyote.request;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,11 +12,18 @@ import org.apache.coyote.Cookie;
 public class RequestHeader {
 
 	private final Map<String, String> headers = new HashMap<>();
-	private final List<Cookie> cookies;
+	private final List<Cookie> cookies = new ArrayList<>();
+
+	private RequestHeader() {
+	}
 
 	public RequestHeader(Map<String, String> headers, final List<Cookie> cookies) {
 		this.headers.putAll(headers);
-		this.cookies = cookies;
+		this.cookies.addAll(cookies);
+	}
+
+	public static RequestHeader empty() {
+		return new RequestHeader();
 	}
 
 	public String find(final String key) {

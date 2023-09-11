@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.body.Body;
 import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.HttpMethod;
 import org.apache.coyote.http11.header.RequestLine;
 
 import java.io.BufferedReader;
@@ -25,5 +26,17 @@ public record HttpRequest(
         return bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
                 .toList();
+    }
+
+    public boolean isGet() {
+        return requestLine.method() == HttpMethod.GET;
+    }
+
+    public boolean isPost() {
+        return requestLine.method() == HttpMethod.POST;
+    }
+
+    public String getPath() {
+        return requestLine.uri().getPath();
     }
 }

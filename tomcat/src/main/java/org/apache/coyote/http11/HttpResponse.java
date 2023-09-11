@@ -12,20 +12,17 @@ import java.util.Map;
 
 public class HttpResponse {
     private static final String HEADER_SEPARATOR = ": ";
-    private final HttpStatus status;
     private final Map<String, String> headers = new LinkedHashMap<>();
+    private HttpStatus status;
+    private String body;
 
-    public HttpResponse(final HttpStatus status) {
+    public HttpResponse addStatus(final HttpStatus status) {
         this.status = status;
+        return this;
     }
 
     public HttpResponse addContentType(final ContentType contentType) {
         headers.put("Content-Type", contentType.getType());
-        return this;
-    }
-
-    public HttpResponse addContentLength(final int length) {
-        headers.put("Content-Length", String.valueOf(length));
         return this;
     }
 
@@ -35,12 +32,8 @@ public class HttpResponse {
     }
 
     public String build() {
-        return build("");
-    }
-
-    public String build(final String body) {
         List<String> response = new ArrayList<>();
-        response.add(HttpVersion.HTTP_1_1.getVersion() + status.getStatusResponse() + " ");
+        response.add(HttpVersion.HTTP_1_1.getVersion() + " " + status.getStatusResponse() + " ");
         headers.forEach((key, value) -> response.add(key + HEADER_SEPARATOR + value + " "));
         response.add("");
         response.add(body);
@@ -50,5 +43,20 @@ public class HttpResponse {
     public HttpResponse addSetCookie(final Cookie cookie) {
         headers.put("Set-Cookie", cookie.getName() + "=" + cookie.getValue());
         return this;
+    }
+
+    public HttpResponse addBody(final String responseBody) {
+        addContentLength(responseBody.getBytes().length);
+        this.body = responseBody;
+        return this;
+    }
+
+    public HttpResponse addContentLength(final int length) {
+        headers.put("Content-Length", String.valueOf(length));
+        return this;
+    }
+
+    public int getStatus() {
+        return status.getCode();
     }
 }

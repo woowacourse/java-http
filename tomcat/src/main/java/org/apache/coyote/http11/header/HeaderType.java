@@ -15,7 +15,8 @@ public enum HeaderType {
     DATE("Date"),
     HOST("Host"),
     CONNECTION("Connection"),
-    ACCEPT_RANGES("Accept-Ranges");
+    ACCEPT_RANGES("Accept-Ranges"),
+    ANY("");
 
     private final String header;
 
@@ -29,8 +30,7 @@ public enum HeaderType {
                 return headerType;
             }
         }
-        System.out.println("header = " + header);
-        throw new IllegalArgumentException("지원하지 않는 헤더입니다.");
+        return ANY;
     }
 
     public String getHeader() {

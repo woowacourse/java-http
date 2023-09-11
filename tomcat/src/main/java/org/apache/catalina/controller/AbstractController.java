@@ -10,7 +10,7 @@ public abstract class AbstractController implements Controller {
     private static final String NOT_FOUND_PAGE = "/404.html";
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(final HttpRequest request, final HttpResponse response) {
         try {
             routing(request, response);
         } catch (final IllegalArgumentException e) {

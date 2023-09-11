@@ -23,7 +23,7 @@ public class Headers {
         this.items.putAll(items);
     }
 
-    public void addHeader(String line) {
+    public void addHeader(final String line) {
         if (line == null || line.isBlank()) {
             return;
         }

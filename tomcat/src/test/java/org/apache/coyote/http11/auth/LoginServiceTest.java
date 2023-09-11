@@ -3,9 +3,8 @@ package org.apache.coyote.http11.auth;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.request.HttpHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -36,7 +35,7 @@ class LoginServiceTest {
             return RequestLine.from(httpMethod.name() + " " + defaultPath + " " + "HTTP/1.1");
         }
 
-        public RequestHeader requestHeader_생성() {
+        public HttpHeader requestHeader_생성() {
             List<String> requests = List.of(
                     "Host: www.test01.com",
                     "Accept: image/gif, image/jpeg, */*",
@@ -46,7 +45,7 @@ class LoginServiceTest {
                     "Content-Length: 35"
             );
 
-            return RequestHeader.from(requests);
+            return HttpHeader.from(requests);
         }
 
         public RequestBody requestBody_생성() {
@@ -89,7 +88,7 @@ class LoginServiceTest {
                     InMemoryUserRepository.save(new User(1L, "페페", "password", "rltgjqmduftlagl@gmail.com"));
 
                     RequestLine requestLine = requestLine_생성(POST, "/login");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
 
                     RequestBody requestBody = requestBody_생성();
                     String account = requestBody.getBy("account");

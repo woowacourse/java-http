@@ -9,7 +9,7 @@ import org.apache.coyote.http11.auth.Cookie;
 import static java.util.Arrays.asList;
 import static java.util.Collections.EMPTY_LIST;
 
-public class RequestHeader {
+public class HttpHeader {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -17,12 +17,12 @@ public class RequestHeader {
 
     private final Map<String, List<String>> headers;
 
-    private RequestHeader(Map<String, List<String>> headers) {
+    private HttpHeader(Map<String, List<String>> headers) {
         this.headers = headers;
     }
 
-    public static RequestHeader from(List<String> headers) {
-        return new RequestHeader(convertKeyAndValue(headers));
+    public static HttpHeader from(List<String> headers) {
+        return new HttpHeader(convertKeyAndValue(headers));
     }
 
     private static Map<String, List<String>> convertKeyAndValue(List<String> headers) {

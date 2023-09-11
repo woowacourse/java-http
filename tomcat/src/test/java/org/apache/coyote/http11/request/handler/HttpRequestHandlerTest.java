@@ -7,7 +7,7 @@ import org.apache.coyote.http11.auth.SessionRepository;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHandler;
-import org.apache.coyote.http11.request.RequestHeader;
+import org.apache.coyote.http11.request.HttpHeader;
 import org.apache.coyote.http11.request.line.HttpMethod;
 import org.apache.coyote.http11.request.line.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -41,7 +41,7 @@ class HttpRequestHandlerTest {
             return RequestLine.from(httpMethod.name() + " " + defaultPath + " " + "HTTP/1.1");
         }
 
-        public RequestHeader requestHeader_생성() {
+        public HttpHeader requestHeader_생성() {
             List<String> requests = List.of(
                     "Host: www.test01.com",
                     "Accept: image/gif, image/jpeg, */*",
@@ -51,7 +51,7 @@ class HttpRequestHandlerTest {
                     "Content-Length: 35"
             );
 
-            return RequestHeader.from(requests);
+            return HttpHeader.from(requests);
         }
 
         public RequestBody requestBody_생성() {
@@ -70,9 +70,9 @@ class HttpRequestHandlerTest {
                 void getLoginResponseEntity() {
                     // given
                     RequestLine requestLine = requestLine_생성(GET, "/login");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
                     SessionRepository.clearSessions();
 
                     // when
@@ -97,9 +97,9 @@ class HttpRequestHandlerTest {
                     InMemoryUserRepository.save(new User(1L, "베베", "password", "rltgjqmduftlagl@gmail.com"));
 
                     RequestLine requestLine = requestLine_생성(POST, "/login");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
 
                     // when
                     HttpResponse response = requestHandler.getResponse(httpRequest);
@@ -118,9 +118,9 @@ class HttpRequestHandlerTest {
                     InMemoryUserRepository.save(new User(1L, "페페", "password", "rltgjqmduftlagl@gmail.com"));
 
                     RequestLine requestLine = requestLine_생성(POST, "/login");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
 
                     // when
                     HttpResponse response = requestHandler.getResponse(httpRequest);
@@ -147,9 +147,9 @@ class HttpRequestHandlerTest {
                 void getRegisterResponseEntity() {
                     // given
                     RequestLine requestLine = requestLine_생성(GET, "/register");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
 
                     // when
                     HttpResponse response = requestHandler.getResponse(httpRequest);
@@ -173,9 +173,9 @@ class HttpRequestHandlerTest {
                     InMemoryUserRepository.save(new User(1L, "베베", "password", "rltgjqmduftlagl@gmail.com"));
 
                     RequestLine requestLine = requestLine_생성(POST, "/register");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
 
                     // when
                     HttpResponse response = requestHandler.getResponse(httpRequest);
@@ -192,9 +192,9 @@ class HttpRequestHandlerTest {
                 void getFoundResponseEntity() {
                     // given
                     RequestLine requestLine = requestLine_생성(POST, "/register");
-                    RequestHeader requestHeader = requestHeader_생성();
+                    HttpHeader httpHeader = requestHeader_생성();
                     RequestBody requestBody = requestBody_생성();
-                    HttpRequest httpRequest = HttpRequest.of(requestLine, requestHeader, requestBody);
+                    HttpRequest httpRequest = HttpRequest.of(requestLine, httpHeader, requestBody);
 
                     // when
                     HttpResponse response = requestHandler.getResponse(httpRequest);

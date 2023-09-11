@@ -14,22 +14,22 @@ public class HttpRequestGenerator {
             return null;
         }
         final RequestLine requestLine = RequestLine.from(firstLine);
-        final RequestHeader requestHeader = getHeader(bufferedReader);
-        final RequestBody requestBody = getBody(bufferedReader, requestHeader);
-        return HttpRequest.of(requestLine, requestHeader, requestBody);
+        final HttpHeader httpHeader = getHeader(bufferedReader);
+        final RequestBody requestBody = getBody(bufferedReader, httpHeader);
+        return HttpRequest.of(requestLine, httpHeader, requestBody);
     }
 
-    private static RequestHeader getHeader(final BufferedReader bufferedReader) throws IOException {
+    private static HttpHeader getHeader(final BufferedReader bufferedReader) throws IOException {
         List<String> requestHeaders = new ArrayList<>();
         for (String line = bufferedReader.readLine(); !"".equals(line); line = bufferedReader.readLine()) {
             requestHeaders.add(line);
         }
-        return RequestHeader.from(requestHeaders);
+        return HttpHeader.from(requestHeaders);
     }
 
-    private static RequestBody getBody(final BufferedReader bufferedReader, final RequestHeader requestHeader)
+    private static RequestBody getBody(final BufferedReader bufferedReader, final HttpHeader httpHeader)
             throws IOException {
-        List<String> contentLengths = requestHeader.headers().get("Content-Length");
+        List<String> contentLengths = httpHeader.headers().get("Content-Length");
         if (contentLengths == null) {
             return RequestBody.from(null);
         }

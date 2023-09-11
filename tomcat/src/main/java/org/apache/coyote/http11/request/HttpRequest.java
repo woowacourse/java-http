@@ -7,25 +7,25 @@ import org.apache.coyote.http11.request.line.RequestLine;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeader requestHeader;
+    private final HttpHeader httpHeader;
     private final RequestBody requestBody;
 
-    private HttpRequest(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+    private HttpRequest(RequestLine requestLine, HttpHeader httpHeader, RequestBody requestBody) {
         this.requestLine = requestLine;
-        this.requestHeader = requestHeader;
+        this.httpHeader = httpHeader;
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
-        return new HttpRequest(requestLine, requestHeader, requestBody);
+    public static HttpRequest of(RequestLine requestLine, HttpHeader httpHeader, RequestBody requestBody) {
+        return new HttpRequest(requestLine, httpHeader, requestBody);
     }
 
     public RequestLine requestLine() {
         return requestLine;
     }
 
-    public RequestHeader requestHeader() {
-        return requestHeader;
+    public HttpHeader requestHeader() {
+        return httpHeader;
     }
 
     public RequestBody requestBody() {

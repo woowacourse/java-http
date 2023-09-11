@@ -15,19 +15,19 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class HttpRequestBodyTest {
+class FormUrlEncodedBodyTest {
     @Test
     void 폼_데이터_파싱() throws IOException {
         //given
         final byte[] bytes = "userId=echo&password=password&name=ddd".getBytes();
         InputStream inputStream = new ByteArrayInputStream(bytes);
-        HttpRequestHeader httpRequestHeader = new HttpRequestHeader(List.of("POST /user/create HTTP/1.1", "Host: localhost:8080", "Connection: keep-alive", "Content-Length: " + bytes.length, "Content-Type: application/x-www-form-urlencoded", "", ""));
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final Headers httpRequestHeader = Headers.parse(List.of("Content-Length: 38", "Content-Type: application/x-www-form-urlencoded"));
         //when
-        final HttpRequestBody httpRequestBody = HttpRequestBody.parseBody(httpRequestHeader, bufferedReader);
-        final String userId = httpRequestBody.get("userId");
-        final String password = httpRequestBody.get("password");
-        final String name = httpRequestBody.get("name");
+        final Body formUrlEncodedBody = Body.parse(httpRequestHeader.getContentLength(), httpRequestHeader.getContentType(), bufferedReader);
+        final String userId = formUrlEncodedBody.getValue("userId");
+        final String password = formUrlEncodedBody.getValue("password");
+        final String name = formUrlEncodedBody.getValue("name");
 
         //then
         assertSoftly(softly -> {

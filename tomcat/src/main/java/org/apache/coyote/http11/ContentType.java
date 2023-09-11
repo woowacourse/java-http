@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 public enum ContentType {
-    HTML("text/html"),
+    HTML("text/html;charset=utf-8"),
     CSS("text/css"),
     JS("application/javascript"),
     FORM_URLENCODED("application/x-www-form-urlencoded"),
@@ -9,7 +9,8 @@ public enum ContentType {
     SVG("image/svg+xml"),
     PNG("image/png"),
     WOFF("font/woff"),
-    WOFF2("font/woff2");
+    WOFF2("font/woff2"),
+    NONE("");
 
     private final String type;
 
@@ -23,6 +24,7 @@ public enum ContentType {
                 return contentType;
             }
         }
+        System.out.println("extension = " + extension);
         throw new IllegalArgumentException("지원하지 않는 확장자입니다.");
     }
 
@@ -32,6 +34,7 @@ public enum ContentType {
                 return contentType;
             }
         }
+        System.out.println("type = " + type);
         throw new IllegalArgumentException("지원하지 않는 Content-Type입니다.");
     }
 

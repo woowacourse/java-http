@@ -11,16 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,33 +39,31 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            handleRequst(inputStream, outputStream);
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            handleRequst(bufferedReader, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handleRequst(final InputStream inputStream, final OutputStream outputStream) throws IOException {
+    private void handleRequst(final BufferedReader bufferedReader, final OutputStream outputStream) throws IOException {
         try {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final List<String> request = bufferedReader
-                    .lines()
-                    .takeWhile(line -> !line.isEmpty())
-                    .collect(Collectors.toList());
+            HttpRequest request = HttpRequest.parse(bufferedReader);
 
-            final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(request);
-            log.info(httpRequestHeader.getMethod().name() + " " + httpRequestHeader.getRequestUri());
+            final HttpMethod method = request.requestLine().method();
+            final URI uri = request.requestLine().uri();
+            final String path = uri.getPath();
+            log.info(method.name() + " " + uri);
 
-            final String path = httpRequestHeader.getPath();
 
-            if (httpRequestHeader.isGet()) {
+            if (method == HttpMethod.GET) {
                 if (path.equals("/index.html")) {
-                    writeResourceResponse(httpRequestHeader, outputStream);
+                    writeResourceResponse(outputStream, path);
                     return;
                 }
                 if (path.equals("/login")) {
-                    if (httpRequestHeader.hasCookie()) {
+                    if (request.headers().getCookies().containsKey("JSESSIONID")) {
                         writeRedirectResponse(outputStream, "/index.html");
                         return;
                     }
@@ -78,8 +74,8 @@ public class Http11Processor implements Runnable, Processor {
                     writeRedirectResponse(outputStream, "/register.html");
                     return;
                 }
-                if (httpRequestHeader.getRequestUri().contains(".")) {
-                    writeResourceResponse(httpRequestHeader, outputStream);
+                if (path.lastIndexOf(".") != -1) {
+                    writeResourceResponse(outputStream, path);
                     return;
                 }
                 if (path.equals("/")) {
@@ -89,15 +85,13 @@ public class Http11Processor implements Runnable, Processor {
                 writeRedirectResponse(outputStream, "/404.html");
             }
 
-            if (httpRequestHeader.isPost()) {
+            if (method == HttpMethod.POST) {
                 if (path.equals("/login")) {
-                    final HttpRequestBody httpRequestBody = HttpRequestBody.parseBody(httpRequestHeader, bufferedReader);
-                    writeLoginResponse(httpRequestBody, outputStream);
+                    writeLoginResponse(outputStream, request.body());
                     return;
                 }
                 if (path.equals("/register")) {
-                    final HttpRequestBody httpRequestBody = HttpRequestBody.parseBody(httpRequestHeader, bufferedReader);
-                    writeRegisterResponse(httpRequestBody, outputStream);
+                    writeRegisterResponse(outputStream, request.body());
                 }
             }
         } catch (AuthenticationException e) {
@@ -120,22 +114,23 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private void writeRegisterResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
-        final String account = body.get("account");
+    private void writeRegisterResponse(final OutputStream outputStream, final Body body) throws IOException {
+        final String account = body.getValue("account");
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(user -> {
                     throw new AuthenticationException("이미 존재하는 계정입니다.");
                 });
-        final String password = body.get("password");
-        final String email = body.get("email");
+        final String password = body.getValue("password");
+        final String email = body.getValue("email");
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         writeResponse(outputStream, getLoginResponse(user));
     }
 
-    private void writeLoginResponse(final HttpRequestBody body, final OutputStream outputStream) throws IOException {
-        final String account = body.get("account");
-        final String password = body.get("password");
+    private void writeLoginResponse(final OutputStream outputStream, final Body body) throws IOException {
+        System.out.println("body = " + body);
+        final String account = body.getValue("account");
+        final String password = body.getValue("password");
         final User loginUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .orElseThrow(() -> new AuthenticationException("아이디 또는 비밀번호가 틀립니다."));
@@ -157,21 +152,18 @@ public class Http11Processor implements Runnable, Processor {
 
         final var response = new HttpResponse(HttpStatus.OK)
                 .addContentType(ContentType.HTML)
-                .addCharset("utf-8")
                 .addContentLength(responseBody.length())
                 .build(responseBody);
 
         writeResponse(outputStream, response);
     }
 
-    private void writeResourceResponse(final HttpRequestHeader request, final OutputStream outputStream) throws IOException {
-        final String requestUri = request.getRequestUri();
+    private void writeResourceResponse(final OutputStream outputStream, final String requestUri) throws IOException {
         final String extension = requestUri.substring(requestUri.lastIndexOf(".") + 1);
         final ContentType contentType = ContentType.from(extension);
         final String content = getResourceContent(requestUri);
         final String response = new HttpResponse(HttpStatus.OK)
                 .addContentType(contentType)
-                .addCharset("utf-8")
                 .addContentLength(content.getBytes().length)
                 .build(content);
         writeResponse(outputStream, response);

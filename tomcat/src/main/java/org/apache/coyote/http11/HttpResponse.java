@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.HttpHeader.SET_COOKIE;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,42 +11,32 @@ public class HttpResponse {
 
     private static final String PROTOCOL = "HTTP/1.1";
     private final Map<String, String> attribute = new LinkedHashMap<>();
-    private final Integer status;
-    private final String code;
-    private final String responseBody;
+    private HttpStatus status;
+    private String responseBody;
 
-    public HttpResponse(
-            Integer status,
-            String code
-    ) {
-        this(status, code, "");
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 
-    public HttpResponse(
-            Integer status,
-            String code,
-            String responseBody
-    ) {
-        this.status = status;
-        this.code = code;
+    public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
 
     public void sendRedirect(String redirectionUrl) {
-        attribute.put("Location", redirectionUrl);
+        attribute.put(LOCATION.getValue(), redirectionUrl);
     }
 
     public void addCookie(String cookie) {
-        attribute.put("Set-Cookie", cookie);
+        attribute.put(SET_COOKIE.getValue(), cookie);
     }
 
-    public void setAttribute(String key, String value) {
+    public void setHeader(String key, String value) {
         attribute.put(key, value);
     }
 
     public String toString() {
         return String.join("\r\n",
-                PROTOCOL + " " + status + " " + code + " ",
+                PROTOCOL + " " + status.getValue() + " " + status.name() + " ",
                 attribute.entrySet()
                         .stream()
                         .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")

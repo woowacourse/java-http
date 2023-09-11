@@ -35,7 +35,7 @@ public class HttpRequestBody {
     }
 
     public String get(String key) {
-        return requestBody.get(key);
+        return requestBody.getOrDefault(key, "");
     }
 
     public Map<String, String> getRequestBody() {

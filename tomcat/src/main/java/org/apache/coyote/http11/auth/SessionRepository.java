@@ -9,9 +9,6 @@ public class SessionRepository {
     private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public static void create(Session session) {
-        if (session.getId() == null) {
-            return;
-        }
         SESSIONS.put(session.getId(), session);
     }
 

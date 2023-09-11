@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.response.StatusLine;
 
-public class Http11StatusLineGenerate {
+public class Http11StatusLineGenerator {
 
 	private static final String STATUS_LINE_DELIMITER = " ";
 	private static final String LINE_END = " ";

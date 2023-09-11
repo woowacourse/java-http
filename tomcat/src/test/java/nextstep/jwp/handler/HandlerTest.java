@@ -35,7 +35,7 @@ class HandlerTest {
                 .build();
 
         // when
-        boolean supported = new DefaultPageHandler().isSupported(request);
+        boolean supported = new DefaultPageController().isSupported(request);
 
         // then
         assertThat(supported).isTrue();
@@ -53,7 +53,7 @@ class HandlerTest {
         String urlPath = request.getUrl().getUrlPath();
         System.out.println(urlPath);
         // when
-        boolean supported = new DefaultPageHandler().isSupported(request);
+        boolean supported = new DefaultPageController().isSupported(request);
 
         // then
         assertThat(supported).isFalse();
@@ -69,14 +69,15 @@ class HandlerTest {
                 .build();
 
         // when
-        HttpResponse response = new DefaultPageHandler().handle(request);
+        HttpResponse response = new HttpResponse();
+        new DefaultPageController().service(request, response);
 
         // then
         assertThat(response.getRawResponse()).contains("Hello world");
     }
 
     @Test
-    void 로그인_페이지_요청_핸들러는_GET_요청시_로그인_페이지를_반환한다() throws IOException {
+    void 로그인_컨트롤러는_GET_요청시_로그인_페이지를_반환한다() throws IOException {
         // given
         HttpRequest request = new HttpRequest.Builder()
                 .httpMethod(GET)
@@ -85,21 +86,19 @@ class HandlerTest {
                 .build();
 
         // when
-        HttpResponse response = new LoginPageHandler().handle(request);
+        HttpResponse response = new HttpResponse();
+        new LoginController().service(request, response);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-        headers.put(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType());
 
         assertThat(response)
                 .usingRecursiveComparison()
-                .isEqualTo(new HttpResponse.Builder()
-                        .status(HttpStatus.OK)
-                        .headers(headers)
-                        .body(expectedBody)
-                        .build()
+                .isEqualTo(new HttpResponse()
+                        .setStatus(HttpStatus.OK)
+                        .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
+                        .setBody(expectedBody)
                 );
     }
 
@@ -120,10 +119,10 @@ class HandlerTest {
                 .build();
 
         // when
-        final LoginHandler loginHandler = new LoginHandler();
+        final LoginController loginController = new LoginController();
 
         // then
-        assertThat(loginHandler.isSupported(request)).isTrue();
+        assertThat(loginController.isSupported(request)).isTrue();
     }
 
     @Test
@@ -143,25 +142,23 @@ class HandlerTest {
                 .build();
 
         // when
-        final LoginHandler loginHandler = new LoginHandler();
-        HttpResponse response = loginHandler.handle(request);
+        HttpResponse response = new HttpResponse();
+        new LoginController().service(request, response);
 
         // then
-        final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
-        expectedHeaders.put(HttpHeader.LOCATION, "/index.html");
         assertAll(
                 () -> assertThat(response).usingRecursiveComparison()
                         .ignoringFields("cookie")
-                        .isEqualTo(new HttpResponse.Builder()
-                                .status(HttpStatus.REDIRECT)
-                                .headers(expectedHeaders)
+                        .isEqualTo(new HttpResponse()
+                                .setStatus(HttpStatus.REDIRECT)
+                                .setHeader(HttpHeader.LOCATION, "/index.html")
                         ),
                 () -> assertThat(response.getRawResponse()).contains("JSESSIONID")
         );
     }
 
     @Test
-    void 로그인_요청_핸들러는_계정과_패스워드가_틀리면_401_리다이렉트를_반환한다() {
+    void 로그인_요청_핸들러는_계정과_패스워드가_틀리면_401_리다이렉트를_반환한다() throws IOException {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -177,21 +174,22 @@ class HandlerTest {
                 .build();
 
         // when
-        final LoginHandler loginHandler = new LoginHandler();
-        HttpResponse response = loginHandler.handle(request);
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        HttpResponse response = new HttpResponse();
+        new LoginController().service(request, response);
 
         // then
-        final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
-        expectedHeaders.put(HttpHeader.LOCATION, "/401.html");
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse.Builder()
-                        .status(HttpStatus.REDIRECT)
-                        .headers(expectedHeaders)
+                .isEqualTo(new HttpResponse()
+                        .setStatus(HttpStatus.UNAUTHORIZED)
+                        .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
+                        .setBody(expectedBody)
                 );
     }
 
     @Test
-    void 회원가입_페이지_요청_핸들러는_GET_요청과_register_경로를_지원한다() {
+    void 회원가입_컨트롤러는_GET_요청과_register_경로를_지원한다() {
         // given
         HttpRequest request = new HttpRequest.Builder()
                 .httpMethod(HttpMethod.GET)
@@ -200,8 +198,7 @@ class HandlerTest {
                 .build();
 
         // when
-        RegisterPageHandler registerPageHandler = new RegisterPageHandler();
-        boolean supported = registerPageHandler.isSupported(request);
+        boolean supported = new RegisterController().isSupported(request);
 
         //then
         assertThat(supported).isTrue();
@@ -217,23 +214,19 @@ class HandlerTest {
                 .build();
 
         // when
-        RegisterPageHandler registerPageHandler = new RegisterPageHandler();
-        HttpResponse response = registerPageHandler.handle(request);
+        HttpResponse response = new HttpResponse();
+        new RegisterController().service(request, response);
 
         //then
-
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-        headers.put(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType());
 
         assertThat(response)
                 .usingRecursiveComparison()
-                .isEqualTo(new HttpResponse.Builder()
-                        .status(HttpStatus.OK)
-                        .headers(headers)
-                        .body(expectedBody)
-                        .build()
+                .isEqualTo(new HttpResponse()
+                        .setStatus(HttpStatus.OK)
+                        .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
+                        .setBody(expectedBody)
                 );
     }
 
@@ -256,14 +249,14 @@ class HandlerTest {
                 .build();
 
         // when
-        final RegisterHandler registerHandler = new RegisterHandler();
+        final RegisterController registerController = new RegisterController();
 
         // then
-        assertThat(registerHandler.isSupported(request)).isTrue();
+        assertThat(registerController.isSupported(request)).isTrue();
     }
 
     @Test
-    void 유저_생성_요청_핸들러는_성공시_index_페이지를_반환한다() {
+    void 유저_생성_요청_핸들러는_성공시_로그인_페이지를_반환한다() {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -281,22 +274,19 @@ class HandlerTest {
                 .build();
 
         // when
-        final RegisterHandler registerHandler = new RegisterHandler();
-        HttpResponse response = registerHandler.handle(request);
+        HttpResponse response = new HttpResponse();
+        new RegisterController().service(request, response);
 
         // then
-        final HttpHeaders expectedHeaders = HttpHeaders.getEmptyHeaders();
-        expectedHeaders.put(HttpHeader.LOCATION, "/index.html");
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse.Builder()
-                        .status(HttpStatus.REDIRECT)
-                        .headers(expectedHeaders)
-                        .build()
+                .isEqualTo(new HttpResponse()
+                        .setStatus(HttpStatus.REDIRECT)
+                        .setHeader(HttpHeader.LOCATION, "/login")
                 );
     }
 
     @Test
-    void 유저_생성_요청_핸들러는_실패시_Bad_Request_를_반환한다() {
+    void 유저_생성_요청_핸들러는_실패시_Bad_Request_를_반환한다() throws IOException {
         // given
         HttpHeaders headers = HttpHeaders.getEmptyHeaders();
         HttpBody body = HttpBody.getEmptyBody();
@@ -314,16 +304,17 @@ class HandlerTest {
                 .build();
 
         // when
-        final RegisterHandler registerHandler = new RegisterHandler();
-        HttpResponse response = registerHandler.handle(request);
+        final URL resource = getClass().getClassLoader().getResource("static/400.html");
+        final String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        HttpResponse response = new HttpResponse();
+        new RegisterController().service(request, response);
 
         // then
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new HttpResponse.Builder()
-                        .status(HttpStatus.BAD_REQUEST)
-                        .headers(HttpHeaders.getEmptyHeaders())
-                        .body("중복된 계정입니다.")
-                        .build()
+                .isEqualTo(new HttpResponse()
+                        .setStatus(HttpStatus.BAD_REQUEST)
+                        .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
+                        .setBody(expectedBody)
                 );
     }
 }

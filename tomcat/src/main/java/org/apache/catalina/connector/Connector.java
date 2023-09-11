@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +60,6 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             process(serverSocket.accept());
-            new ThreadPoolExecutor().execute();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

@@ -7,17 +7,35 @@ public class HttpResponse {
 
     private static final String SUPPORT_HTTP_VERSION = "HTTP/1.1 ";
 
-    private final HttpStatus status;
-    private final HttpHeaders headers;
-    private final String body;
-    private final Cookie cookie;
+    private HttpHeaders headers;
+    private Cookie cookie;
+    private HttpStatus status;
+    private String body;
 
-    private HttpResponse(final HttpStatus status, final HttpHeaders headers, final String body, final Cookie cookie) {
+    public HttpResponse() {
+        this.headers = HttpHeaders.getEmptyHeaders();
+        this.cookie = Cookie.emptyCookie();
+    }
+
+    public HttpResponse setStatus(final HttpStatus status) {
         this.status = status;
-        this.headers = headers;
-        this.body = body;
+        return this;
+    }
+
+    public HttpResponse setHeader(final HttpHeader header, final String value) {
+        this.headers.put(header, value);
+        return this;
+    }
+
+    public HttpResponse setCookie(final Cookie cookie) {
         this.cookie = cookie;
+        return this;
+    }
+
+    public HttpResponse setBody(final String body) {
+        this.body = body;
         setContentLength();
+        return this;
     }
 
     private void setContentLength() {
@@ -28,7 +46,7 @@ public class HttpResponse {
     }
 
     public String getRawResponse() {
-        if(cookie.isPresent()){
+        if (cookie.isPresent()) {
             return String.join(System.lineSeparator(),
                     SUPPORT_HTTP_VERSION + status.getStatus(),
                     headers.getRawHeaders(),
@@ -42,37 +60,5 @@ public class HttpResponse {
                 headers.getRawHeaders(),
                 System.lineSeparator() + body
         );
-    }
-
-    public static class Builder {
-
-        private HttpStatus status;
-        private HttpHeaders headers;
-        private String body = "";
-        private Cookie cookie = Cookie.emptyCookie();
-
-        public Builder status(final HttpStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        public Builder headers(final HttpHeaders headers) {
-            this.headers = headers;
-            return this;
-        }
-
-        public Builder body(final String body) {
-            this.body = body;
-            return this;
-        }
-
-        public Builder cookie(final Cookie cookie) {
-            this.cookie = cookie;
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(status, headers, body, cookie);
-        }
     }
 }

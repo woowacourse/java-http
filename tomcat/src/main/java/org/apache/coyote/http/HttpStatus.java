@@ -6,7 +6,8 @@ public enum HttpStatus {
     REDIRECT("302 Redirect"),
     NOT_FOUND("404 Not Found"),
     BAD_REQUEST("400 Bad Request"),
-    INTERNAL_SERVER_ERROR("500 Internal Server Error");
+    INTERNAL_SERVER_ERROR("500 Internal Server Error"),
+    UNAUTHORIZED("Unauthorized 401");
 
     private final String status;
 

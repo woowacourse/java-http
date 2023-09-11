@@ -7,7 +7,7 @@ import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.exception.UncheckedServletException;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.vo.HttpBody;

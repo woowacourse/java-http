@@ -3,7 +3,7 @@ package org.apache.catalina.util;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.exception.UncheckedServletException;
 
 public class ResourceFileReader {
 

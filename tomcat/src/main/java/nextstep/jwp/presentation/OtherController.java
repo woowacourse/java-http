@@ -1,6 +1,6 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.request.FileReader;
+import org.apache.coyote.http11.response.FileReader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

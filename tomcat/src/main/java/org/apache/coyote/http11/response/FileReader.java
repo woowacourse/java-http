@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.response;
 
 import nextstep.jwp.exception.ResourceNotFoundException;
 

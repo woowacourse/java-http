@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.handler.mapper;
 
-import org.apache.coyote.http11.controller.LoginController;
+import nextstep.jwp.controller.LoginController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

@@ -74,7 +74,7 @@ public class LoginHandler extends AbstractHandler {
 
         if (user.isPresent() && user.get().checkPassword(password)) {
             HttpSession httpSession = httpRequest.getHttpSession(true);
-            httpResponse.addCookie("JSESSIONID=" + httpSession.getId());
+            httpResponse.addCookie("JSESSIONID", httpSession.getId());
             httpResponse.sendRedirect("/index.html");
             httpSession.add("user", user.get());
             log.info("로그인 성공! 아이디 : {}", account);

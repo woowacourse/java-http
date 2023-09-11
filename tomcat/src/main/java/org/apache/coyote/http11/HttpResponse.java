@@ -5,6 +5,7 @@ import static org.apache.coyote.http11.HttpHeader.SET_COOKIE;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
@@ -13,9 +14,11 @@ public class HttpResponse {
     private final Map<String, String> attribute = new LinkedHashMap<>();
     private HttpStatus status;
     private String responseBody;
+    private Cookie cookie;
 
     public void setStatus(HttpStatus status) {
         this.status = status;
+        cookie = new Cookie();
     }
 
     public void setResponseBody(String responseBody) {
@@ -26,22 +29,40 @@ public class HttpResponse {
         attribute.put(LOCATION.getValue(), redirectionUrl);
     }
 
-    public void addCookie(String cookie) {
-        attribute.put(SET_COOKIE.getValue(), cookie);
+    public void addCookie(String key, String value) {
+        cookie.put(key, value);
     }
 
     public void setHeader(String key, String value) {
         attribute.put(key, value);
     }
 
+    private String getAttributeString() {
+        return String.join("\r\n",
+                attribute.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
+                .collect(Collectors.joining("\r\n")),
+                getCookieString());
+    }
+
+    private String getCookieString() {
+        Map<String, String> values = cookie.getValues();
+
+        if (values.isEmpty()) {
+            return "";
+        }
+
+        StringJoiner cookieString = new StringJoiner(";");
+        values.forEach((key, value) -> cookieString.add(String.format("%s=%s", key, value)));
+
+        return SET_COOKIE.getValue() + ": " + cookieString;
+    }
+
     public String toString() {
         return String.join("\r\n",
                 PROTOCOL + " " + status.getValue() + " " + status.name() + " ",
-                attribute.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                        .collect(Collectors.joining("\r\n")),
-                "",
+                getAttributeString(),
                 responseBody
         );
     }

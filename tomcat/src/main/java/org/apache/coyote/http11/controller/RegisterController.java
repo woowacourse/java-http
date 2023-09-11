@@ -27,20 +27,23 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final StaticResource staticResource = StaticResource.from(REGISTER_URI.getFullPath());
         final ResponseBody responseBody = ResponseBody.from(staticResource);
-        return HttpResponse.of(HttpStatus.OK, responseBody);
+        response.setHttpStatus(HttpStatus.OK);
+        response.setResponseBody(responseBody);
+        response.setResponseHeaders(responseBody);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         final RequestBody requestBody = request.getRequestBody();
         final String accountValue = requestBody.getParamValue("account");
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(accountValue);
         if (userOptional.isPresent()) {
             log.error("중복 사용자 등록 : ", new MemberAlreadyExistException(accountValue));
-            return redirect(INDEX_URI.getFullPath());
+            response.redirect(INDEX_URI.getFullPath());
+            return;
         }
         InMemoryUserRepository.save(
                 new User(
@@ -50,10 +53,6 @@ public class RegisterController extends AbstractController {
                 )
         );
 
-        return redirect(INDEX_URI.getFullPath());
-    }
-
-    private HttpResponse redirect(final String path) {
-        return HttpResponse.redirect(HttpStatus.FOUND, path);
+        response.redirect(INDEX_URI.getFullPath());
     }
 }

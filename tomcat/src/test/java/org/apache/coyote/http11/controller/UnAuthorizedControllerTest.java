@@ -53,7 +53,7 @@ class UnAuthorizedControllerTest {
         request = HttpRequest.from(new BufferedReader(stringReader));
 
         //when, then
-        assertThatThrownBy(() -> unAuthorizedController.service(request))
+        assertThatThrownBy(() -> unAuthorizedController.service(request, HttpResponse.create()))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -61,7 +61,8 @@ class UnAuthorizedControllerTest {
     @DisplayName("401.html을 응답할 수 있다.")
     void requestTest() throws Exception {
         //when
-        final HttpResponse response = unAuthorizedController.service(request);
+        final HttpResponse response = HttpResponse.create();
+        unAuthorizedController.service(request, response);
 
         //then
         final StaticResource staticResource = StaticResource.from("/401.html");

@@ -2,10 +2,12 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.cookie.Cookie;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseHeaders {
+    public static final ResponseHeaders EMPTY = new ResponseHeaders(new HashMap<>());
     private final Map<String, String> header;
 
     private ResponseHeaders(final Map<String, String> header) {

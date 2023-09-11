@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.response;
 
 public class ResponseBody {
+    public static final ResponseBody EMPTY = new ResponseBody(new byte[]{}, ContentType.EMPTY);
+
     private final byte[] content;
     private final ContentType contentType;
 

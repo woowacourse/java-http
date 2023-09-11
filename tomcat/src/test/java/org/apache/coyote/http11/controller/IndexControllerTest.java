@@ -52,7 +52,7 @@ class IndexControllerTest {
         request = HttpRequest.from(new BufferedReader(stringReader));
 
         //when, then
-        assertThatThrownBy(() -> indexController.service(request))
+        assertThatThrownBy(() -> indexController.service(request, HttpResponse.create()))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -60,7 +60,8 @@ class IndexControllerTest {
     @DisplayName("index.html을 응답할 수 있다.")
     void requestTest() throws Exception {
         //when
-        final HttpResponse response = indexController.service(request);
+        HttpResponse response = HttpResponse.create();
+        indexController.service(request, response);
 
         //then
         final StaticResource staticResource = StaticResource.from("/index.html");

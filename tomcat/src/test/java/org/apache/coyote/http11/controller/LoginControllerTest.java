@@ -66,7 +66,7 @@ class LoginControllerTest {
         final HttpRequest getRequest = HttpRequest.from(new BufferedReader(stringReader));
 
         //when, then
-        assertThatThrownBy(() -> loginController.service(getRequest))
+        assertThatThrownBy(() -> loginController.service(getRequest, HttpResponse.create()))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -83,7 +83,8 @@ class LoginControllerTest {
         final HttpRequest getRequest = HttpRequest.from(new BufferedReader(getStringReader));
 
         //when
-        final HttpResponse response = loginController.service(getRequest);
+        HttpResponse response = HttpResponse.create();
+        loginController.service(getRequest, response);
 
         //then
         final StaticResource staticResource = StaticResource.from("/login.html");
@@ -110,7 +111,8 @@ class LoginControllerTest {
                 requestBody);
         final StringReader postStringReader = new StringReader(postRawRequest);
         final HttpRequest postRequest = HttpRequest.from(new BufferedReader(postStringReader));
-        final HttpResponse postResponse = loginController.service(postRequest);
+        final HttpResponse postResponse = HttpResponse.create();
+        loginController.service(postRequest, postResponse);
 
         //when
         final String getRawRequest = String.join("\r\n",
@@ -121,7 +123,8 @@ class LoginControllerTest {
                 "");
         final StringReader getStringReader = new StringReader(getRawRequest);
         final HttpRequest getRequest = HttpRequest.from(new BufferedReader(getStringReader));
-        final HttpResponse getResponse = loginController.service(getRequest);
+        HttpResponse getResponse = HttpResponse.create();
+        loginController.service(getRequest, getResponse);
 
         //then
         String expected = String.join("\r\n",
@@ -147,7 +150,8 @@ class LoginControllerTest {
         final HttpRequest postRequest = HttpRequest.from(new BufferedReader(postStringReader));
 
         //when
-        final HttpResponse response = loginController.service(postRequest);
+        HttpResponse response = HttpResponse.create();
+        loginController.service(postRequest, response);
 
         // then
         String expected = String.join("\r\n",
@@ -173,7 +177,8 @@ class LoginControllerTest {
         final HttpRequest postRequest = HttpRequest.from(new BufferedReader(postStringReader));
 
         //when
-        final HttpResponse response = loginController.service(postRequest);
+        final HttpResponse response = HttpResponse.create();
+        loginController.service(postRequest, response);
         final String cookieValue = response.getCookieValue();
 
         // then

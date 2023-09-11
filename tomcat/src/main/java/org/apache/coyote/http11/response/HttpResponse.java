@@ -3,9 +3,9 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.cookie.Cookie;
 
 public class HttpResponse {
-    private final StatusLine statusLine;
-    private final ResponseHeaders responseHeaders;
-    private final ResponseBody responseBody;
+    private StatusLine statusLine;
+    private ResponseHeaders responseHeaders;
+    private ResponseBody responseBody;
 
     private HttpResponse(final StatusLine statusLine,
                          final ResponseHeaders responseHeaders,
@@ -15,22 +15,17 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(final HttpStatus httpStatus,
-                                  final ResponseBody responseBody) {
+    public static HttpResponse create() {
         return new HttpResponse(
-                StatusLine.from(httpStatus),
-                ResponseHeaders.from(responseBody),
-                responseBody
+                StatusLine.EMPTY,
+                ResponseHeaders.EMPTY,
+                ResponseBody.EMPTY
         );
     }
 
-    public static HttpResponse redirect(final HttpStatus httpStatus,
-                                        final String redirectPath) {
-        return new HttpResponse(
-                StatusLine.from(httpStatus),
-                ResponseHeaders.redirect(redirectPath),
-                ResponseBody.noContent()
-        );
+    public void redirect(final String redirectPath) {
+        this.statusLine.setHttpStatusLine(HttpStatus.FOUND);
+        this.responseHeaders = ResponseHeaders.redirect(redirectPath);
     }
 
     public void addSession(final String sessionId) {
@@ -39,6 +34,18 @@ public class HttpResponse {
 
     public String getCookieValue() {
         return responseHeaders.getCookieValues();
+    }
+
+    public void setHttpStatus(final HttpStatus httpStatus) {
+        this.statusLine.setHttpStatusLine(httpStatus);
+    }
+
+    public void setResponseBody(final ResponseBody responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setResponseHeaders(final ResponseBody responseBody) {
+        this.responseHeaders = ResponseHeaders.from(responseBody);
     }
 
     @Override

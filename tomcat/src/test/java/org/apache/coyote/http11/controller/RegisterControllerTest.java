@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,7 +63,7 @@ class RegisterControllerTest {
         getRequest = HttpRequest.from(new BufferedReader(stringReader));
 
         //when, then
-        assertThatThrownBy(() -> registerController.service(getRequest))
+        assertThatThrownBy(() -> registerController.service(getRequest, HttpResponse.create()))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -72,18 +71,19 @@ class RegisterControllerTest {
     @DisplayName("register.html을 응답할 수 있다.")
     void requestTest() throws Exception {
         //when
-        final HttpResponse response = registerController.service(getRequest);
+        final HttpResponse response = HttpResponse.create();
+        registerController.service(getRequest, response);
 
         //then
         final StaticResource staticResource = StaticResource.from("/register.html");
         final byte[] content = staticResource.getContent();
-        String expected = String.join("\r\n",
+        final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + content.length + " ",
                 "",
-                new String(content, StandardCharsets.UTF_8));
-        assertThat(expected).isEqualTo(response.toString());
+                new String(content));
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
     @Test
@@ -101,7 +101,8 @@ class RegisterControllerTest {
         final HttpRequest postRequest = HttpRequest.from(new BufferedReader(postReader));
 
         //when
-        HttpResponse httpResponse = registerController.service(postRequest);
+        final HttpResponse response = HttpResponse.create();
+        registerController.service(postRequest, response);
 
         //then
         String expected = String.join("\r\n",
@@ -109,6 +110,6 @@ class RegisterControllerTest {
                 "Location: /index.html ",
                 "",
                 "");
-        assertThat(httpResponse.toString()).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 }

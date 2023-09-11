@@ -50,7 +50,7 @@ class RootControllerTest {
         request = HttpRequest.from(new BufferedReader(stringReader));
 
         //when, then
-        assertThatThrownBy(() -> rootController.service(request))
+        assertThatThrownBy(() -> rootController.service(request, HttpResponse.create()))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
@@ -58,7 +58,8 @@ class RootControllerTest {
     @DisplayName("기본 메시지를 응답할 수 있다.")
     void requestTest() throws Exception {
         //when
-        final HttpResponse response = rootController.service(request);
+        final HttpResponse response = HttpResponse.create();
+        rootController.service(request, response);
 
         //then
         final String content = "Hello world!";

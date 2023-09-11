@@ -14,7 +14,6 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Optional;
 
 public class LoginController extends AbstractController {
@@ -30,9 +29,28 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoggedIn(request)) {
-            return redirect(INDEX_URI.getFullPath());
+            final Session session = request.getSession(false);
+            final User user = (User) session.getAttribute("user");
+            log.info("user = {}", user);
+
+            response.redirect(INDEX_URI.getFullPath());
+            return;
+        }
+        final String path = request.getRequestLine().getPath();
+        final StaticResource staticResource = StaticResource.from(path);
+        final ResponseBody responseBody = ResponseBody.from(staticResource);
+        response.setHttpStatus(HttpStatus.OK);
+        response.setResponseBody(responseBody);
+        response.setResponseHeaders(responseBody);
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        if (isLoggedIn(request)) {
+            response.redirect(INDEX_URI.getFullPath());
+            return;
         }
         final RequestBody requestBody = request.getRequestBody();
         final String account = requestBody.getParamValue("account");
@@ -44,24 +62,11 @@ public class LoginController extends AbstractController {
             log.info("user = {}", user);
             final Session session = request.getSession(true);
             session.setAttribute("user", user);
-            return redirectWithSession(INDEX_URI.getFullPath(), session.getId());
+            response.redirect(INDEX_URI.getFullPath());
+            response.addSession(session.getId());
+            return;
         }
-        return redirect(UNAUTHORIZED_URI.getFullPath());
-    }
-
-    @Override
-    protected HttpResponse doGet(final HttpRequest request) throws Exception {
-        if (isLoggedIn(request)) {
-            final Session session = request.getSession(false);
-            final User user = (User) session.getAttribute("user");
-            log.info("user = {}", user);
-
-            return HttpResponse.redirect(HttpStatus.FOUND, INDEX_URI.getFullPath());
-        }
-        final String path = request.getRequestLine().getPath();
-        final StaticResource staticResource = StaticResource.from(path);
-        final ResponseBody responseBody = ResponseBody.from(staticResource);
-        return HttpResponse.of(HttpStatus.OK, responseBody);
+        response.redirect(UNAUTHORIZED_URI.getFullPath());
     }
 
     private boolean isLoggedIn(final HttpRequest httpRequest) {
@@ -72,15 +77,5 @@ public class LoginController extends AbstractController {
             return session.getId().equals(cookieJsessionId);
         }
         return false;
-    }
-
-    private HttpResponse redirect(final String path) {
-        return HttpResponse.redirect(HttpStatus.FOUND, path);
-    }
-
-    private HttpResponse redirectWithSession(final String path, final String sessionId) throws IOException {
-        final HttpResponse httpResponse = redirect(path);
-        httpResponse.addSession(sessionId);
-        return httpResponse;
     }
 }

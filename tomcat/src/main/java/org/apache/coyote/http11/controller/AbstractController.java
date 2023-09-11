@@ -7,22 +7,24 @@ import org.apache.coyote.http11.response.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         final HttpMethod httpMethod = request.getRequestLine().getHttpMethod();
         if (httpMethod == HttpMethod.GET) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
         if (httpMethod == HttpMethod.POST) {
-            return doPost(request);
+            doPost(request, response);
+            return;
         }
         throw new UnsupportedOperationException();
     }
 
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         throw new UnsupportedOperationException();
     }
 
-    protected HttpResponse doPost(HttpRequest request) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         throw new UnsupportedOperationException();
     }
 }

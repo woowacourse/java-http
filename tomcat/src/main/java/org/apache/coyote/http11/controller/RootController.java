@@ -15,12 +15,10 @@ public class RootController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) {
-        return HttpResponse.of(HttpStatus.OK, ResponseBody.rootContent());
-    }
-
-    @Override
-    protected HttpResponse doPost(final HttpRequest request) {
-        throw new UnsupportedOperationException();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        final ResponseBody responseBody = ResponseBody.rootContent();
+        response.setHttpStatus(HttpStatus.OK);
+        response.setResponseBody(responseBody);
+        response.setResponseHeaders(responseBody);
     }
 }

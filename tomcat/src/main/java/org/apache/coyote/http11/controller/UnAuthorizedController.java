@@ -16,14 +16,11 @@ public class UnAuthorizedController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final StaticResource staticResource = StaticResource.from(UNAUTHORIZED_URI.getFullPath());
         final ResponseBody responseBody = ResponseBody.from(staticResource);
-        return HttpResponse.of(HttpStatus.OK, responseBody);
-    }
-
-    @Override
-    protected HttpResponse doPost(final HttpRequest request) {
-        throw new UnsupportedOperationException();
+        response.setHttpStatus(HttpStatus.OK);
+        response.setResponseBody(responseBody);
+        response.setResponseHeaders(responseBody);
     }
 }

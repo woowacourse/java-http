@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static HttpResponse initNotSupportedResponse() {
-        return getResponseOf(HttpStatus.BAD_REQUEST, "/404.html");
+        return getResponseOf(HttpStatus.NOT_FOUND, "/404.html");
     }
 
     private static HttpResponse getResponseOf(final HttpStatus status, final String bodyPath) {

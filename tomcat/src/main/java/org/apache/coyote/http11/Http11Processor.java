@@ -41,18 +41,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest request = HttpRequest.parse(bufferedReader);
             final HttpResponse response = HttpResponse.create();
-
-            try {
-                final Controller controller = ControllerMapping.find(request);
-                controller.service(request, response);
-            } catch (final Exception e) {
-                InternalServerErrorController.create(request, response);
-            }
+            executeController(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void executeController(final HttpRequest request, final HttpResponse response) throws IOException {
+        try {
+            final Controller controller = ControllerMapping.find(request);
+            controller.service(request, response);
+        } catch (final IllegalArgumentException e) {
+            InternalServerErrorController.create(request, response);
         }
     }
 }

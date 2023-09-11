@@ -9,6 +9,9 @@ public class FileUtils {
 
     private static final String STATIC_DIRECTORY = "static";
 
+    private FileUtils() {
+    }
+
     public static String readFile(String path) throws IOException {
         URL resource = FileUtils.class
                 .getClassLoader()

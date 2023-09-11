@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.coyote.common.Headers.CONTENT_LENGTH;
+import static org.apache.coyote.common.Headers.COOKIE;
+
 public class HttpRequestHeader {
 
     private static final String SEPERATOR = "\r\n";
@@ -35,16 +38,16 @@ public class HttpRequestHeader {
     }
 
     public int getContentLength() {
-        String contentLength = headers.get("Content-Length");
+        String contentLength = headers.get(CONTENT_LENGTH);
         try {
             return Integer.parseInt(contentLength);
         } catch (NumberFormatException e) {
+            return 0;
         }
-        return 0;
     }
 
     public HttpCookie getCookie() {
-        String cookie = headers.get("Cookie");
+        String cookie = headers.get(COOKIE);
         return HttpCookie.of(cookie);
     }
 }

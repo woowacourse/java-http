@@ -206,7 +206,7 @@ class IOStreamTest {
          */
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
-            final String emoji = String.join("\r\n",
+            final String emoji = String.join(System.lineSeparator(),
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
@@ -219,7 +219,7 @@ class IOStreamTest {
                 String line;
 
                 while ((line = br.readLine()) != null) {
-                    actual.append(line).append("\r\n");
+                    actual.append(line).append(System.lineSeparator());
                 }
 
             } catch (IOException e) {

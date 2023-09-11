@@ -65,7 +65,7 @@ public class HttpResponseHeaders {
         return headers.keySet()
                 .stream()
                 .map(key -> String.format(HEADER_FORMAT, key, headers.get(key)))
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 
     public String get(String key) {

@@ -82,7 +82,7 @@ public class HttpResponse {
         String httpStatusCode = httpStatusLine.getHttpStatus().getCode();
         String httpStatusMessage = httpStatusLine.getHttpStatus().getMessage();
 
-        return String.join("\r\n",
+        return String.join(System.lineSeparator(),
                 String.format(RESPONSE_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusMessage),
                 httpResponseHeaders.getHeaders(),
                 String.format(COOKIE_HEADER_FORMAT, httpCookies.getCookies()),
@@ -95,7 +95,7 @@ public class HttpResponse {
         String httpStatusCode = httpStatusLine.getHttpStatus().getCode();
         String httpStatusMessage = httpStatusLine.getHttpStatus().getMessage();
 
-        return String.join("\r\n",
+        return String.join(System.lineSeparator(),
                 String.format(RESPONSE_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusMessage),
                 httpResponseHeaders.getHeaders(),
                 "",

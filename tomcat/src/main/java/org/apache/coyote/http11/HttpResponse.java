@@ -18,7 +18,7 @@ public class HttpResponse {
     private String responseBody;
 
     public HttpResponse() {
-        this.cookie = new Cookie(new HashMap<>());
+        this.cookie = Cookie.empty();
     }
 
     public void setStatus(HttpStatus status) {

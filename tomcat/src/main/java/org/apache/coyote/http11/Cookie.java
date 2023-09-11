@@ -26,6 +26,9 @@ public class Cookie {
         return new Cookie(parseResultOfCookies);
     }
 
+    public static Cookie empty() {
+        return new Cookie(new HashMap<>());
+    }
     private static void putParseResultOfComponent(
             Map<String, String> parseResultOfRequestBody,
             String component

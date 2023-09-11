@@ -11,8 +11,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpMethod;
-import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.HttpStatusCode;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class LoginController implements Controller {
 
@@ -24,12 +24,12 @@ public class LoginController implements Controller {
     @Override
     public ResponseEntity handle(HttpRequest request) {
         if (request.getMethod() == HttpMethod.GET) {
-            return doGet(request);
+            return doGet();
         }
         return doPost(request);
     }
 
-    private ResponseEntity doGet(HttpRequest request) {
+    private ResponseEntity doGet() {
         return ResponseEntity.forward(HttpStatusCode.OK, LOGIN_PAGE);
     }
 

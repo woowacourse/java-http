@@ -15,13 +15,11 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private final String body;
     private final JsonProperties jsonProperties;
 
-    private HttpRequest(RequestLine requestLine, HttpHeaders headers, String body, JsonProperties jsonProperties) {
+    private HttpRequest(RequestLine requestLine, HttpHeaders headers, JsonProperties jsonProperties) {
         this.requestLine = requestLine;
         this.headers = headers;
-        this.body = body;
         this.jsonProperties = jsonProperties;
     }
 
@@ -46,7 +44,7 @@ public class HttpRequest {
         final String[] uri = request.get(URI_INDEX).split(" ");
         var requestLine = RequestLine.from(uri);
 
-        return new HttpRequest(requestLine, header, body, properties);
+        return new HttpRequest(requestLine, header, properties);
     }
 
     public boolean hasCookie(String key) {

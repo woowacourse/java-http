@@ -41,9 +41,13 @@ class ConnectorTest {
         latch.await();
 
         // then
+        final var completedTasks = StubServletContainer.map.values()
+                                                           .stream()
+                                                           .mapToInt(Integer::intValue)
+                                                           .sum();
         assertAll(
-                () -> assertThat(StubServletContainer.map.size()).isEqualTo(2),
-                () -> assertThat(StubServletContainer.map.values().stream().mapToInt(Integer::intValue).sum()).isEqualTo(4)
+                () -> assertThat(StubServletContainer.map).hasSize(2),
+                () -> assertThat(completedTasks).isEqualTo(4)
         );
     }
 
@@ -59,7 +63,7 @@ class ConnectorTest {
                 1
         );
         connector.start();
-        final var latch = new CountDownLatch(1);
+        final var latch = new CountDownLatch(10);
         final var testHttpUtils2 = new TestHttpUtils(latch, port);
 
         // when
@@ -68,7 +72,7 @@ class ConnectorTest {
             final var thread = new Thread(() -> testHttpUtils.send("/index.html"));
             thread.start();
         }
-        Thread.sleep(100);
+        Thread.sleep(300);
         final var completedTasks = StubServletContainerWaitForever.map.values()
                                                                       .stream()
                                                                       .mapToInt(Integer::valueOf)

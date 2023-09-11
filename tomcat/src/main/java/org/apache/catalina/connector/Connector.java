@@ -80,15 +80,19 @@ public class Connector implements Runnable {
         try {
             waitUntilThreadAvailable();
             process(serverSocket.accept());
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void waitUntilThreadAvailable() throws InterruptedException {
+    private void waitUntilThreadAvailable() {
         if (workingThreadCount.get() >= maxThreadNumber) {
             synchronized (lock) {
-                lock.wait();
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
     }
@@ -114,7 +118,7 @@ public class Connector implements Runnable {
     private synchronized void releaseLockIfThreadAvailable() {
         if (workingThreadCount.get() < maxThreadNumber) {
             synchronized (lock) {
-                lock.notify();
+                lock.notifyAll();
             }
         }
     }

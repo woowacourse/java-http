@@ -20,7 +20,7 @@ class ResponseBodyTest {
         //then
         assertAll(
                 () -> assertThat(body).isEqualTo(responseBody.getBody()),
-                () -> assertThat(responseBody.getContentLength()).hasToString("Content-Length: 12")
+                () -> assertThat(responseBody.getContentLength().getLength()).isEqualTo(12)
         );
     }
 

@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 import java.util.Objects;
 
-public class HttpUri {
+public class HttpPath {
 
     private String uri;
 
-    public HttpUri(String uri) {
+    public HttpPath(String uri) {
         this.uri = uri;
     }
 
@@ -22,8 +22,8 @@ public class HttpUri {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final HttpUri httpUri = (HttpUri) o;
-        return Objects.equals(uri, httpUri.uri);
+        final HttpPath httpPath = (HttpPath) o;
+        return Objects.equals(uri, httpPath.uri);
     }
 
     @Override

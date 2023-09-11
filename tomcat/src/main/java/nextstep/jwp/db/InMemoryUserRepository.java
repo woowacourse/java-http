@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
 
+import static java.util.Optional.ofNullable;
+
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
@@ -19,7 +21,7 @@ public class InMemoryUserRepository {
     }
 
     public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+        return ofNullable(database.get(account));
     }
 
     private InMemoryUserRepository() {

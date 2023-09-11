@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class HttpRequestParser {
 
@@ -23,14 +24,26 @@ public class HttpRequestParser {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         final var startLine = bufferedReader.readLine();
-        final var method = HttpMethod.valueOf(startLine.split(START_LINE_DELIMITER)[0]);
-        final var path = getPath(startLine);
-        final var queryParameters = findQueryStrings(startLine);
-        final var headers = readHeader(bufferedReader);
-        final var body = readMessageBody(bufferedReader, headers);
-        final var cookies = findCookies(headers);
 
-        return new HttpRequest(method, new HttpUri(path), queryParameters, headers, body, cookies);
+        Map<String, String> headers = readHeader(bufferedReader);
+        return HttpRequest.builder()
+                .method(getMethod(startLine))
+                .path(getPath(startLine))
+                .version(getVersion(startLine))
+                .queryParameters(findQueryStrings(startLine))
+                .headers(headers)
+                .messageBody(readMessageBody(bufferedReader, headers))
+                .cookie(findCookies(headers))
+                .build();
+    }
+
+    private HttpMethod getMethod(final String startLine) {
+        return HttpMethod.valueOf(startLine.split(START_LINE_DELIMITER)[0]);
+    }
+
+    private HttpVersion getVersion(String startLine) {
+        String version = startLine.split(START_LINE_DELIMITER)[2];
+        return HttpVersion.from(version);
     }
 
     private Map<String, String> readHeader(BufferedReader bufferedReader) throws IOException {
@@ -74,12 +87,13 @@ public class HttpRequestParser {
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
     }
 
-    public String getPath(String startLine) {
+    public HttpPath getPath(String startLine) {
         String url = startLine.split(START_LINE_DELIMITER)[1];
         if (!startLine.contains(QUERY_PARAMETER_DELIMITER)) {
-            return url;
+            return new HttpPath(url);
         }
-        return url.split(QUERY_PARAMETER_DELIMITER_REGEX)[0];
+        String withOutQuery = url.split(QUERY_PARAMETER_DELIMITER_REGEX)[0];
+        return new HttpPath(withOutQuery);
     }
 
 

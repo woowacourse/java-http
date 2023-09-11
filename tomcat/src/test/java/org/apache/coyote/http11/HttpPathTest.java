@@ -4,17 +4,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class HttpUriTest {
+class HttpPathTest {
 
     @Test
     void equals() {
         //given
         final var uri = "/index.html";
         //when
-        final var httpUri = new HttpUri(uri);
+        final var httpUri = new HttpPath(uri);
 
         //then
-        assertEquals(new HttpUri(uri), httpUri);
+        assertEquals(new HttpPath(uri), httpUri);
     }
 
 }

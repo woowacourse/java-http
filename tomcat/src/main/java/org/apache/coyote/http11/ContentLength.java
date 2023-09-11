@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class ContentLength {
 
+    public static final ContentLength EMPTY = new ContentLength(0);
+
     private final int length;
 
     private ContentLength(final int length) {
@@ -13,9 +15,8 @@ public class ContentLength {
         return new ContentLength(bodyLength);
     }
 
-    @Override
-    public String toString() {
-        return "Content-Length: " + length;
+    public int getLength() {
+        return length;
     }
 
 }

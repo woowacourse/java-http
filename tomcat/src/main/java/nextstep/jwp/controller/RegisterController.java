@@ -2,14 +2,14 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.http.ContentType;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.ViewResolver;
-import org.apache.http.annotation.Controller;
-import org.apache.http.annotation.RequestMapping;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.ViewResolver;
+import org.apache.coyote.http11.annotation.Controller;
+import org.apache.coyote.http11.annotation.RequestMapping;
 
 import java.io.IOException;
 import java.nio.file.Files;

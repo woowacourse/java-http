@@ -1,4 +1,4 @@
-package org.apache.session;
+package org.apache.coyote.http11.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

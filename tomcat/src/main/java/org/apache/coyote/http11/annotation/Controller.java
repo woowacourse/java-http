@@ -1,4 +1,4 @@
-package org.apache.http.annotation;
+package org.apache.coyote.http11.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -23,6 +23,7 @@ public class LoginController extends AbstractController {
 
         if (account.isEmpty()) {
             response.redirect("/login.html");
+            return;
         }
 
         final Optional<User> maybeUser = InMemoryUserRepository.findByAccount(account.get());

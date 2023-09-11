@@ -12,7 +12,7 @@ public class LoginGetController implements Controller {
         final String resourcePath = request.getRequestLine().getRequestUrl() + ".html";
         final String responseBody = ResourceResolver.resolve(resourcePath);
 
-        if (request.hasJSessionId() && (SessionManager.isExist(request.getJSessionId()))) {
+        if (request.hasJSessionId() && SessionManager.isExist(request.getJSessionId())) {
             response.setStatusCode(StatusCode.OK);
             response.setResponseBody(ResourceResolver.resolve("/index.html"));
             response.addHeader("Content-Type", ContentType.from("/index.html").getContentType() + ";charset=utf-8");

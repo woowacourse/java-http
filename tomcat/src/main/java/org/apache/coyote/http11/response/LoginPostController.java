@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.response;
 
 import nextstep.jwp.LoginHandler;
+import nextstep.jwp.model.User;
 import org.apache.catalina.session.HttpSession;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -20,16 +22,17 @@ public class LoginPostController implements Controller {
 
     private void successLoginResponse(final HttpRequest request,
                                       final HttpResponse response) {
-        response.setStatusCode(StatusCode.FOUND);
-
+        final SessionManager sessionManager = new SessionManager();
         if (!request.hasJSessionId()) {
-            final HttpSession httpSession = new HttpSession();
             final LoginHandler loginHandler = new LoginHandler();
-            httpSession.addAttribute("user", loginHandler.getUser(request.getRequestBody()));
-            httpSession.addAttribute(httpSession.getId(), httpSession);
+            final User user = loginHandler.getUser(request.getRequestBody());
+            final HttpSession httpSession = new HttpSession("user", user);
+            sessionManager.add(httpSession);
 
-            response.addJSessionId(httpSession.getId());
+            final HttpSession session = sessionManager.findSession(httpSession.getId());
+            response.addJSessionId(session.getId());
         }
+        response.setStatusCode(StatusCode.FOUND);
         response.addHeader("Location", "/index.html");
     }
 

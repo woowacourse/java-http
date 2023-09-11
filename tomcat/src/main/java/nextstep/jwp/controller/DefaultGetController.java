@@ -15,7 +15,7 @@ public class DefaultGetController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String responseBody = "Hello world!";
 
         HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(

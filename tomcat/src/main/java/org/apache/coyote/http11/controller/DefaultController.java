@@ -16,7 +16,7 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         URL filePathUrl = getClass().getResource("/static" + request.getPath());
         if (filePathUrl == null) {
             handle404(response);

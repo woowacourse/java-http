@@ -19,7 +19,7 @@ public abstract class AbstractController implements Controller {
     public static final int EXTENSION_TOKENS_MIN_SIZE = 1;
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         try {
             handleRequest(request, response);
         } catch (UnauthorizeException e) {
@@ -29,7 +29,7 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    private void handleRequest(HttpRequest request, HttpResponse response) throws Exception {
+    private void handleRequest(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         if (request.isGET()) {
             doGet(request, response);
         }
@@ -38,10 +38,10 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
     }
 
     protected String readHtmlFile(URL filePathUrl) throws URISyntaxException, IOException {

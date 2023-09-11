@@ -8,6 +8,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpResponseStatus;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class LoginGetController extends AbstractController {
@@ -20,7 +22,7 @@ public class LoginGetController extends AbstractController {
 
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         final HttpCookie cookie = request.getCookie();
         URL filePathUrl;
         if (isLogin(cookie)) {
@@ -44,6 +46,6 @@ public class LoginGetController extends AbstractController {
 
     private boolean isLogin(HttpCookie cookie) {
         return cookie.isExist(JSESSIONID)
-                && SessionManager.instanceOf().findSession(cookie.findCookie(JSESSIONID)) != null;
+                && SessionManager.getInstance().findSession(cookie.findCookie(JSESSIONID)) != null;
     }
 }

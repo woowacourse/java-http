@@ -37,7 +37,7 @@ public class LoginPostController extends AbstractController {
         if (!cookie.isExist(JSESSIONID)) {
             String jSessionId = String.valueOf(UUID.randomUUID());
             String setCookie = JSESSIONID + "=" + jSessionId;
-            SessionManager.instanceOf().addLoginSession(jSessionId, user);
+            SessionManager.getInstance().addLoginSession(jSessionId, user);
             HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                     readContentType(request.getAccept(), request.getPath()), String.valueOf(0))
                     .addLocation("/index.html")

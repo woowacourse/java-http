@@ -6,6 +6,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpResponseStatus;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class RegisterGetController extends AbstractController {
@@ -17,7 +19,7 @@ public class RegisterGetController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         URL filePathUrl = getClass().getResource("/static/register.html");
         String responseBody = readHtmlFile(filePathUrl);
 

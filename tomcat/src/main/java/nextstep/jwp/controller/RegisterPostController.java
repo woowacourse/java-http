@@ -19,7 +19,7 @@ public class RegisterPostController extends AbstractController {
 
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         if (request.isNotExistBody()) {
             throw new IllegalArgumentException("회원가입 정보가 입력되지 않았습니다.");
         }

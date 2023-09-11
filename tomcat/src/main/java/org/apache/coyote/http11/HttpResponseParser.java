@@ -16,7 +16,7 @@ public class HttpResponseParser {
 
     private static final String BLANK_DELIMITER = " ";
     private static final String HEADER_DELIMITER = ": ";
-    private static final String LINE_DELIMITER = " \r\n";
+    private static final String LINE_DELIMITER = "\r\n";
     private static final String HTTP11_PROTOCOL = "HTTP/1.1";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
@@ -29,7 +29,7 @@ public class HttpResponseParser {
         String responseHeader = findResponseHeader(httpResponse, responseBody);
         return String.join(LINE_DELIMITER, responseLine,
                 responseHeader,
-                "\r\n",
+                "",
                 responseBody);
     }
 

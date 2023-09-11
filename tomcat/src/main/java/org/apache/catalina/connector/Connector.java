@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -20,16 +24,25 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private final Servlet servlet;
 
+    private final ExecutorService executorService;
+
     private boolean stopped;
 
     public Connector(final Servlet servlet) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, servlet);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, servlet, 250);
     }
 
-    public Connector(final int port, final int acceptCount, final Servlet servlet) {
+    public Connector(final int port, final int acceptCount, final Servlet servlet, final int maxThread) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.servlet = servlet;
         this.stopped = false;
+        this.executorService = new ThreadPoolExecutor(
+                maxThread,
+                maxThread,
+                0,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingDeque<>(acceptCount)
+        );
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -71,7 +84,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection, servlet);
-        new Thread(processor).start();
+        executorService.submit(processor);
     }
 
     public void stop() {
@@ -81,6 +94,7 @@ public class Connector implements Runnable {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        executorService.shutdown();
     }
 
     private int checkPort(final int port) {

@@ -11,8 +11,6 @@ import org.apache.coyote.http11.message.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String HEADER_BODY_DELIMITER = "";
-    private static final String INDEX_HTML = "/index.html";
     private static final int URI_INDEX = 0;
 
     private final RequestLine requestLine;
@@ -38,7 +36,6 @@ public class HttpRequest {
         }
         final var header = HttpHeaders.createBasicRequestHeadersFrom(request);
 
-        request.add(HEADER_BODY_DELIMITER);
         if (header.getContentLength() > 0) {
             var bodyChars = new char[header.getContentLength()];
             reader.read(bodyChars, 0, bodyChars.length);
@@ -50,10 +47,6 @@ public class HttpRequest {
         var requestLine = RequestLine.from(uri);
 
         return new HttpRequest(requestLine, header, body, properties);
-    }
-
-    public boolean hasQueryStrings() {
-        return requestLine.hasQueryStrings();
     }
 
     public boolean hasCookie(String key) {
@@ -83,10 +76,6 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public String getQueryString(String key) {
-        return requestLine.getQueryStrings().getValue(key);
-    }
-
     public String getJsonProperty(String key) {
         return jsonProperties.getValue(key);
     }
@@ -94,5 +83,4 @@ public class HttpRequest {
     public String getPath() {
         return requestLine.getPath();
     }
-
 }

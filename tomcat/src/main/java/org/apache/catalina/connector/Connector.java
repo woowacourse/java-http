@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.catalina.servlet.ServletManger;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -19,14 +20,14 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_THREAD_MAX_NUMBER = 250;
-    private static final int CORE_POOL_SIZE = 10;
-    private static final long IDLE_THREAD_ALIVE_TIME = 60L;
-    private static final int SOCKET_BUFFER_SIZE = 10;
 
     private final ServerSocket serverSocket;
     private final ServletManger servletManger;
-    private final ThreadPoolExecutor threadPool;
+    private final ExecutorService threadPool;
+    private final int maxThreadNumber;
+    private final AtomicInteger workingThreadCount = new AtomicInteger(0);
     private boolean stopped;
+    private final Object lock = new Object();
 
     public Connector(ServletManger servletManger) {
         this(
@@ -41,18 +42,13 @@ public class Connector implements Runnable {
             final int port,
             final int acceptCount,
             final ServletManger servletManger,
-            final int threadMaxNumber
+            final int maxThreadNumber
     ) {
         this.servletManger = servletManger;
-        this.serverSocket = createServerSocket(port, SOCKET_BUFFER_SIZE);
+        this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.threadPool = new ThreadPoolExecutor(
-                CORE_POOL_SIZE,
-                threadMaxNumber,
-                IDLE_THREAD_ALIVE_TIME,
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(acceptCount)
-        );
+        this.threadPool = Executors.newFixedThreadPool(maxThreadNumber);
+        this.maxThreadNumber = maxThreadNumber;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -75,7 +71,6 @@ public class Connector implements Runnable {
 
     @Override
     public void run() {
-        // 클라이언트가 연결될때까지 대기한다.
         while (!stopped) {
             connect();
         }
@@ -83,9 +78,18 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
+            waitUntilThreadAvailable();
             process(serverSocket.accept());
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void waitUntilThreadAvailable() throws InterruptedException {
+        if (workingThreadCount.get() >= maxThreadNumber) {
+            synchronized (lock) {
+                lock.wait();
+            }
         }
     }
 
@@ -93,8 +97,26 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, servletManger);
-        threadPool.execute(processor);
+        workingThreadCount.incrementAndGet();
+        final var processor = new Http11Processor(connection, servletManger);
+        final var task = CompletableFuture.runAsync(processor, threadPool);
+        decrementWorkingThreadCountIfComplete(task);
+    }
+
+    private void decrementWorkingThreadCountIfComplete(CompletableFuture<Void> task) {
+        task.whenCompleteAsync((result, throwable) -> {
+                    workingThreadCount.decrementAndGet();
+                    releaseLockIfThreadAvailable();
+                }
+        );
+    }
+
+    private synchronized void releaseLockIfThreadAvailable() {
+        if (workingThreadCount.get() < maxThreadNumber) {
+            synchronized (lock) {
+                lock.notify();
+            }
+        }
     }
 
     public void stop() {

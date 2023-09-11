@@ -2,13 +2,12 @@ package org.apache.catalina;
 
 import nextstep.jwp.model.User;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
     private static final SessionManager INSTANCE = new SessionManager();
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final ConcurrentHashMap<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -18,7 +17,7 @@ public class SessionManager implements Manager {
         final String id = uuid.toString();
         final Session session = new Session(id);
         session.setAttribute("user", user);
-        SESSIONS.put(id, session);
+        SESSIONS.putIfAbsent(id, session);
         return id;
     }
 
@@ -29,7 +28,7 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        SESSIONS.putIfAbsent(session.getId(), session);
     }
 
     @Override

@@ -73,6 +73,8 @@ public class Http11Processor implements Runnable, Processor {
             sendResponse(bufferedWriter, response);
         } catch (NotSupportedRequestException e) {
             sendResponse(bufferedWriter, NOT_SUPPORTED_REQUEST_RESPONSE);
+        } catch (UncheckedServletException e) {
+            sendResponse(bufferedWriter, INTERNAL_SERVER_ERROR_RESPONSE);
         }
     }
 

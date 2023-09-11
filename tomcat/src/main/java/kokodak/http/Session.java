@@ -2,9 +2,8 @@ package kokodak.http;
 
 import java.util.HashMap;
 import java.util.Map;
-import kokodak.handler.Argument;
 
-public class Session implements Argument {
+public class Session {
 
     private String id;
     private Map<String, Object> values;
@@ -32,10 +31,5 @@ public class Session implements Argument {
 
     public String getId() {
         return id;
-    }
-
-    @Override
-    public Class<? extends Argument> getImlClass() {
-        return getClass();
     }
 }

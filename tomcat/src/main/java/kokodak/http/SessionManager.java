@@ -12,7 +12,7 @@ public class SessionManager {
     }
 
     public static Session findSession(final String id) {
-        return SESSIONS.getOrDefault(id, new Session(null));
+        return SESSIONS.get(id);
     }
 
     public static void removeSession(final String id) {

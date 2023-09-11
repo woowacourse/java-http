@@ -1,31 +1,38 @@
 package org.apache.catalina.connector;
 
-import java.net.SocketException;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
 
     private static final int DEFAULT_PORT = 8080;
-    private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_ACCEPT_COUNT = 100; // 모든 쓰레드가 사용중일 때 들어오는 연결에 대한 대기열의 길이
+    private static final int MAX_THREADS = 250; // 동시에 연결 후 처리 가능한 요청의 최대 개수
+    // 최대 ThradPool의 크기는 250, 모든 Thread가 사용 중인(Busy) 상태이면 100명까지 대기 상태로 만들려면 어떻게 할까?
+    // acceptCount를 100으로 한다
+    // 처리중인 연결이 250개 이므로 나머지는 OS 큐에서 대기하게 된다.
     private static final int SOCKET_TIMEOUT_SECONDS = 10;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ExecutorService pool;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
+        this.pool = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
     }
@@ -60,6 +67,7 @@ public class Connector implements Runnable {
         try {
             process(serverSocket.accept());
         } catch (IOException e) {
+            pool.shutdown();
             log.error(e.getMessage(), e);
         }
     }
@@ -70,7 +78,7 @@ public class Connector implements Runnable {
         }
         connection.setSoTimeout(SOCKET_TIMEOUT_SECONDS * 1000);
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        pool.execute(processor);
     }
 
     public void stop() {

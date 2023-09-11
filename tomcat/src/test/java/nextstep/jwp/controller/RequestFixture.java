@@ -23,4 +23,11 @@ public class RequestFixture {
             HttpBody.createEmptyHttpBody()
     );
 
+    public static final HttpRequest REGISTER_REQUEST = new HttpRequest(
+            HttpRequestHeaders.from(List.of("")),
+            new HttpStartLine(HttpMethod.POST, HttpUri.from("/test"), HttpVersion.V1_1),
+            HttpBody.from("account=test&email=test@email.com&password=password")
+    );
+
+
 }

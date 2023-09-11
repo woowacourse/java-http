@@ -1,31 +1,28 @@
 package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.ExtensionType;
+import org.apache.coyote.http11.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpResponseTest {
 
-    @DisplayName("HttpStatusCode와 ResponseBody로 HttpResponse를 만들 수 있다.")
+    @DisplayName("Response에 Cookie를 추가할 수 있다.")
     @Test
-    void of() {
+    void setCookie() {
         // given
-        final ResponseBody responseBody = ResponseBody.of("index.html", "/index.html");
-        final HttpStatusCode httpStatusCode = HttpStatusCode.OK;
+        final HttpResponse httpResponse = new HttpResponse();
+        final ResponseBody responseBody = ResponseBody.of(ExtensionType.HTML.getExtension(), "test");
+        httpResponse.setResponseHeader(ResponseHeader.from(responseBody));
+
+        final HttpCookie httpCookie = new HttpCookie();
 
         // when
-        final HttpResponse httpResponse = HttpResponse.of(httpStatusCode, responseBody);
+        httpResponse.setCookie(httpCookie);
 
         // then
-        assertAll(
-                () -> assertThat(httpResponse.getStatusLine()).usingRecursiveComparison()
-                        .isEqualTo(new StatusLine(httpStatusCode)),
-                () -> assertThat(httpResponse.getResponseHeaders()).usingRecursiveComparison()
-                        .isEqualTo(ResponseHeader.from(responseBody)),
-                () -> assertThat(httpResponse.getResponseBody()).isEqualTo(responseBody)
-        );
+        assertThat(httpResponse.getResponseHeaders().getValue("Set-Cookie")).isNotNull();
     }
 }

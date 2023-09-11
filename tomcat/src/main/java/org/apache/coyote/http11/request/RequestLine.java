@@ -5,6 +5,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class RequestLine {
 
     private static final String BLANK_REGEX = " ";
+    private static final int METHOD_INDEX = 0;
+    private static final int PATH_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final RequestPath requestPath;
@@ -22,7 +25,11 @@ public class RequestLine {
         }
 
         final String[] split = line.split(BLANK_REGEX);
-        return new RequestLine(HttpMethod.from(split[0]), RequestPath.from(split[1]), split[2]);
+        return new RequestLine(
+                HttpMethod.from(split[METHOD_INDEX]),
+                RequestPath.from(split[PATH_INDEX]),
+                split[VERSION_INDEX]
+        );
     }
 
     public HttpMethod getHttpMethod() {

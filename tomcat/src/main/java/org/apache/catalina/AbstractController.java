@@ -8,22 +8,22 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(final HttpRequest request) throws IOException {
+    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
         if (request.getHttpMethod().equals(HttpMethod.GET)) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
         if (request.getHttpMethod().equals(HttpMethod.POST)) {
-            return doPost(request);
+            doPost(request, response);
+            return;
         }
         throw new UnsupportedOperationException();
     }
 
 
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
-        return null;
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
     }
 
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        return null;
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
     }
 }

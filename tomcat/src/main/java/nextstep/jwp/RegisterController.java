@@ -10,6 +10,8 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
+import org.apache.coyote.http11.response.ResponseHeader;
+import org.apache.coyote.http11.response.StatusLine;
 
 public class RegisterController extends AbstractController {
 
@@ -22,7 +24,7 @@ public class RegisterController extends AbstractController {
     private static final String EMAIL = "email";
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final Map<String, String> requestBody = request.getRequestBody();
 
         final String account = requestBody.get(ACCOUNT);
@@ -31,22 +33,40 @@ public class RegisterController extends AbstractController {
 
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
             final ResponseBody responseBody = FileExtractor.extractFile(BAD_REQUEST);
-            return HttpResponse.of(HttpStatusCode.BAD_REQUEST, responseBody);
+            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+            response.setStatusLine(new StatusLine(HttpStatusCode.BAD_REQUEST));
+            response.setResponseHeader(responseHeader);
+            response.setResponseBody(responseBody);
+            return;
         }
 
         if (InMemoryUserRepository.checkExistingId(account)) {
             final ResponseBody responseBody = FileExtractor.extractFile(CONFLICT);
-            return HttpResponse.of(HttpStatusCode.OK, responseBody);
+            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+            response.setStatusLine(new StatusLine(HttpStatusCode.CONFLICT));
+            response.setResponseHeader(responseHeader);
+            response.setResponseBody(responseBody);
+            return;
         }
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         final ResponseBody responseBody = FileExtractor.extractFile(INDEX);
-        return HttpResponse.of(HttpStatusCode.OK, responseBody);
+        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+        response.setStatusLine(new StatusLine(HttpStatusCode.OK));
+        response.setResponseHeader(responseHeader);
+        response.setResponseBody(responseBody);
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final ResponseBody responseBody = FileExtractor.extractFile(REGISTER);
-        return HttpResponse.of(HttpStatusCode.OK, responseBody);
+        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+        response.setStatusLine(new StatusLine(HttpStatusCode.OK));
+        response.setResponseHeader(responseHeader);
+        response.setResponseBody(responseBody);
     }
 }

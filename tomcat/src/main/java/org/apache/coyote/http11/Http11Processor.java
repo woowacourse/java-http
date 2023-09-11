@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.catalina.Controller;
 import org.apache.catalina.RequestMapping;
 import org.apache.coyote.Processor;
@@ -38,12 +36,14 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
             final RequestMapping requestMapping = new RequestMapping();
             final Controller controller = requestMapping.getController(httpRequest);
-            final HttpResponse httpResponse = controller.service(httpRequest);
-            final String response = httpResponse.toString();
+            final HttpResponse httpResponse = new HttpResponse();
 
+            controller.service(httpRequest, httpResponse);
+
+            final String response = httpResponse.toString();
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

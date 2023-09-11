@@ -1,34 +1,29 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
 
-    private final StatusLine statusLine;
-    private final ResponseHeader responseHeader;
-    private final ResponseBody responseBody;
+    private StatusLine statusLine;
+    private ResponseHeader responseHeader;
+    private ResponseBody responseBody;
 
-    private HttpResponse(
-            final StatusLine statusLine,
-            final ResponseHeader responseHeader,
-            final ResponseBody responseBody
-    ) {
+    public void setStatusLine(final StatusLine statusLine) {
         this.statusLine = statusLine;
+    }
+
+    public void setResponseHeader(final ResponseHeader responseHeader) {
         this.responseHeader = responseHeader;
+    }
+
+    public void setResponseBody(final ResponseBody responseBody) {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(final HttpStatusCode httpStatusCode, final ResponseBody responseBody) {
-        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-        final StatusLine statusLine = new StatusLine(httpStatusCode);
-        return new HttpResponse(statusLine, responseHeader, responseBody);
-    }
-
-    public void addCookie(final HttpCookie httpCookie) {
-        responseHeader.addCookie(httpCookie);
+    public void setCookie(final HttpCookie httpCookie) {
+        this.responseHeader.addCookie(httpCookie);
     }
 
     public StatusLine getStatusLine() {

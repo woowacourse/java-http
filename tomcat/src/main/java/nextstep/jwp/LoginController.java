@@ -16,6 +16,8 @@ import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
+import org.apache.coyote.http11.response.ResponseHeader;
+import org.apache.coyote.http11.response.StatusLine;
 
 public class LoginController extends AbstractController {
 
@@ -30,7 +32,7 @@ public class LoginController extends AbstractController {
     private static final String UNAUTHORIZED = "/401";
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         try {
             final String userName = request.getRequestBody().get(ACCOUNT);
             final String password = request.getRequestBody().get(PASSWORD);
@@ -43,14 +45,22 @@ public class LoginController extends AbstractController {
                 final HttpCookie cookie = HttpCookie.from(request.getRequestHeaders().geHeaderValue(COOKIE));
                 checkSession(user, cookie);
                 final ResponseBody responseBody = FileExtractor.extractFile(INDEX);
-                final HttpResponse httpResponse = HttpResponse.of(HttpStatusCode.FOUND, responseBody);
-                httpResponse.addCookie(cookie);
-                return httpResponse;
+                final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+                response.setStatusLine(new StatusLine(HttpStatusCode.FOUND));
+                response.setResponseHeader(responseHeader);
+                response.setResponseBody(responseBody);
+                response.setCookie(cookie);
+                return;
             }
             throw new LoginException();
         } catch (LoginException exception) {
             final ResponseBody responseBody = FileExtractor.extractFile(UNAUTHORIZED);
-            return HttpResponse.of(HttpStatusCode.UNAUTHORIZED, responseBody);
+            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+            response.setStatusLine(new StatusLine(HttpStatusCode.UNAUTHORIZED));
+            response.setResponseHeader(responseHeader);
+            response.setResponseBody(responseBody);
         }
     }
 
@@ -64,17 +74,25 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final HttpCookie cookie = HttpCookie.from(request.getRequestHeaders().geHeaderValue(COOKIE));
         final String requestResource = request.getRequestPath().getResource();
 
         if (cookie.contains(JSESSIONID)) {
             final ResponseBody responseBody = FileExtractor.extractFile(INDEX);
-            final HttpResponse httpResponse = HttpResponse.of(HttpStatusCode.FOUND, responseBody);
-            httpResponse.addCookie(cookie);
-            return httpResponse;
+            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+            response.setStatusLine(new StatusLine(HttpStatusCode.FOUND));
+            response.setResponseHeader(responseHeader);
+            response.setResponseBody(responseBody);
+            response.setCookie(cookie);
+            return;
         }
         final ResponseBody responseBody = FileExtractor.extractFile(requestResource);
-        return HttpResponse.of(HttpStatusCode.OK, responseBody);
+        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
+
+        response.setStatusLine(new StatusLine(HttpStatusCode.OK));
+        response.setResponseHeader(responseHeader);
+        response.setResponseBody(responseBody);
     }
 }

@@ -10,7 +10,7 @@ public class StringReader {
     public static List<String> readAll(final BufferedReader bufferedReader) throws IOException {
         final List<String> result = new ArrayList<>();
         String readLine = bufferedReader.readLine();
-        while (!"".equals(readLine)) {
+        while (!"".equals(readLine) && readLine != null) {
             result.add(readLine);
             readLine = bufferedReader.readLine();
         }

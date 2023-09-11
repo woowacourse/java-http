@@ -3,7 +3,15 @@ package kokodak.http;
 import static kokodak.Constants.BLANK;
 import static kokodak.Constants.COLON;
 import static kokodak.Constants.CRLF;
+import static kokodak.http.HeaderConstants.CONTENT_LENGTH;
+import static kokodak.http.HeaderConstants.CONTENT_TYPE;
+import static kokodak.http.HeaderConstants.LOCATION;
+import static kokodak.http.HeaderConstants.SET_COOKIE;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,14 +25,21 @@ public class HttpResponse {
 
     private String body;
 
-    private HttpResponse() {
+    public HttpResponse() {
+        this(HttpVersion.HTTP11,
+             HttpStatusCode.OK,
+             new HashMap<>(),
+             "");
     }
 
-    private HttpResponse(final HttpResponseMessageBuilder builder) {
-        this.httpVersion = builder.httpVersion;
-        this.httpStatusCode = builder.httpStatusCode;
-        this.header = builder.header;
-        this.body = builder.body;
+    public HttpResponse(final HttpVersion httpVersion,
+                        final HttpStatusCode httpStatusCode,
+                        final Map<String, String> header,
+                        final String body) {
+        this.httpVersion = httpVersion;
+        this.httpStatusCode = httpStatusCode;
+        this.header = header;
+        this.body = body;
     }
 
     public String generateResponseMessage() {
@@ -59,56 +74,45 @@ public class HttpResponse {
         stringBuilder.append(body);
     }
 
-    public static HttpResponseMessageBuilder builder() {
-        return new HttpResponseMessageBuilder();
+    public void header(final String key, final String value) {
+        header.put(key, value);
     }
 
-    public static class HttpResponseMessageBuilder {
+    public void redirect(final String redirectPath) {
+        setHttpStatusCode(HttpStatusCode.FOUND);
+        header(LOCATION, redirectPath);
+    }
 
-        private HttpVersion httpVersion = HttpVersion.HTTP11;
+    public void cookie(final String value) {
+        header(SET_COOKIE, value);
+    }
 
-        private HttpStatusCode httpStatusCode = HttpStatusCode.OK;
+    public void notFound() throws IOException {
+        final String fileName = "static/404.html";
+        setBody(fileName, "");
+    }
 
-        private Map<String, String> header = new HashMap<>();
+    public void setHttpVersion(final HttpVersion httpVersion) {
+        this.httpVersion = httpVersion;
+    }
 
-        private String body = "";
+    public void setHttpStatusCode(final HttpStatusCode httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
 
-        private HttpResponseMessageBuilder() {
-        }
+    public void setBody(final String fileName, final String acceptHeader) throws IOException {
+        final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+        final File file = new File(resourceUrl.getPath());
+        final String responseBody = new String(Files.readAllBytes(file.toPath()));
+        final String contentType = ContentType.from(fileName, acceptHeader);
+        header(CONTENT_TYPE, contentType);
+        header(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+        this.body = responseBody;
+    }
 
-        public HttpResponseMessageBuilder httpVersion(final HttpVersion httpVersion) {
-            this.httpVersion = httpVersion;
-            return this;
-        }
-
-        public HttpResponseMessageBuilder httpStatusCode(final HttpStatusCode httpStatusCode) {
-            this.httpStatusCode = httpStatusCode;
-            return this;
-        }
-
-        public HttpResponseMessageBuilder header(final String key, final String value) {
-            header.put(key, value);
-            return this;
-        }
-
-        public HttpResponseMessageBuilder body(final String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpResponseMessageBuilder redirect(final String redirectUrl) {
-            this.httpStatusCode = HttpStatusCode.FOUND;
-            header.put("Location", redirectUrl);
-            return this;
-        }
-
-        public HttpResponseMessageBuilder cookie(final String cookieValue) {
-            header.put("Set-Cookie", cookieValue);
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(this);
-        }
+    public void setBody(final String body) {
+        header(CONTENT_TYPE, ContentType.TEXT_HTML.getContentType());
+        header(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        this.body = body;
     }
 }

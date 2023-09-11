@@ -1,15 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.List;
+import kokodak.RequestMapper;
+import kokodak.StringReader;
+import kokodak.controller.Controller;
 import kokodak.http.HttpRequest;
 import kokodak.http.HttpResponse;
-import kokodak.handler.MappingHandler;
-import kokodak.StringReader;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +37,19 @@ public class Http11Processor implements Runnable, Processor {
 
             final List<String> primitiveRequest = StringReader.readAll(bufferedReader);
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader, primitiveRequest);
-            final HttpResponse httpResponse = new MappingHandler().handle(httpRequest);
+
+            final RequestMapper requestMapper = new RequestMapper();
+            final Controller controller = requestMapper.mappingController(httpRequest);
+            final HttpResponse httpResponse = new HttpResponse();
+            if (controller == null) {
+                httpResponse.notFound();
+            } else {
+                controller.service(httpRequest, httpResponse);
+            }
             final String responseMessage = httpResponse.generateResponseMessage();
             outputStream.write(responseMessage.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

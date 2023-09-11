@@ -3,6 +3,7 @@ package kokodak.http;
 import static kokodak.Constants.BLANK;
 import static kokodak.Constants.COLON;
 import static kokodak.Constants.CRLF;
+import static kokodak.http.HeaderConstants.CONTENT_LENGTH;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,11 +28,11 @@ public class HttpRequest {
     private String body;
 
     private HttpRequest(final HttpMethod httpMethod,
-                       final RequestTarget requestTarget,
-                       final HttpVersion httpVersion,
-                       final HttpCookie httpCookie,
-                       final Map<String, String> header,
-                       final String body) {
+                        final RequestTarget requestTarget,
+                        final HttpVersion httpVersion,
+                        final HttpCookie httpCookie,
+                        final Map<String, String> header,
+                        final String body) {
         this.httpMethod = httpMethod;
         this.requestTarget = requestTarget;
         this.httpVersion = httpVersion;
@@ -72,14 +73,21 @@ public class HttpRequest {
                 break;
             }
             final String[] headerKeyValue = request.split(COLON.getValue() + BLANK.getValue());
+            validateHeader(headerKeyValue);
             header.put(headerKeyValue[0], headerKeyValue[1]);
         }
         return header;
     }
 
+    private static void validateHeader(final String[] headerKeyValue) {
+        if (headerKeyValue.length != 2) {
+            throw new IllegalArgumentException("Invalid Header");
+        }
+    }
+
     private static String getBody(final BufferedReader bufferedReader, final Map<String, String> header) throws IOException {
-        if (header.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(header.get("Content-Length"));
+        if (header.containsKey(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(header.get(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             return new String(buffer);

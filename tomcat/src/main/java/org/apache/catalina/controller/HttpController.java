@@ -56,9 +56,7 @@ public abstract class HttpController implements Controller {
             throw new HttpException(NOT_FOUND, "The resource corresponding to the request does not exist");
         }
 
-        final ResourceContentTypeResolver resourceContentTypeResolver = new ResourceContentTypeResolver();
-        final String contentType = resourceContentTypeResolver.getContentType(httpRequest.getHeaders(), resourceName);
-
+        final String contentType = ResourceContentTypeResolver.getContentType(httpRequest.getHeaders(), resourceName);
         if (contentType == null) {
             throw new HttpException(BAD_REQUEST, "Content type is not supported.");
         }

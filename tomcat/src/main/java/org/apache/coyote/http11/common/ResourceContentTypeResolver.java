@@ -5,7 +5,7 @@ import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
 
 public class ResourceContentTypeResolver {
 
-    public String getContentType(final HttpHeaders headers, final String resourceName) {
+    public static String getContentType(final HttpHeaders headers, final String resourceName) {
         final String contentType = getFirstSupportedMediaType(headers.getHeaderValue(CONTENT_TYPE));
         if (contentType != null) {
             return contentType;
@@ -19,7 +19,7 @@ public class ResourceContentTypeResolver {
         return getFileExtension(resourceName);
     }
 
-    private String getFirstSupportedMediaType(String headerValue) {
+    private static String getFirstSupportedMediaType(String headerValue) {
         if (headerValue != null) {
             String[] mediaTypes = headerValue.split(",");
             for (String mediaTypeStr : mediaTypes) {
@@ -32,7 +32,7 @@ public class ResourceContentTypeResolver {
         return null;
     }
 
-    private String getFileExtension(final String fileName) {
+    private static String getFileExtension(final String fileName) {
         final int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex >= 0) {
             final String fileExtension = fileName.substring(lastDotIndex + 1);

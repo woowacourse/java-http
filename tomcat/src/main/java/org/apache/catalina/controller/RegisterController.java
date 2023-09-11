@@ -9,6 +9,8 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 import org.apache.coyote.http11.response.StatusLine;
 
+import javax.security.auth.login.LoginException;
+
 public class RegisterController extends AbstractController {
 
     private static final String ACCOUNT_KEY = "account";
@@ -17,13 +19,18 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final String account = request.getBodyValue(ACCOUNT_KEY);
-        final String password = request.getBodyValue(PASSWORD_KEY);
-        final String email = request.getBodyValue(EMAIL_KEY);
-        InMemoryUserRepository.save(new User(account, password, email));
+        try {
+            final String account = request.getBodyValue(ACCOUNT_KEY);
+            final String password = request.getBodyValue(PASSWORD_KEY);
+            final String email = request.getBodyValue(EMAIL_KEY);
+            InMemoryUserRepository.save(new User(account, password, email));
 
-        final HttpResponse registerResponse = getRedirectResponse("/index.html");
-        response.copy(registerResponse);
+            final HttpResponse registerResponse = getRedirectResponse("/index.html");
+            response.copy(registerResponse);
+        } catch (LoginException e) {
+            final HttpResponse registerResponse = getRedirectResponse("/500.html");
+            response.copy(registerResponse);
+        }
     }
 
     @Override

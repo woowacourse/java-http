@@ -2,6 +2,7 @@ package org.apache.catalina.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpVersion;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
@@ -13,6 +14,7 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.security.auth.login.LoginException;
 import java.util.UUID;
 
 public class LoginController extends AbstractController {
@@ -26,14 +28,21 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final String account = request.getBodyValue(ACCOUNT_KEY);
-        final String password = request.getBodyValue(PASSWORD_KEY);
+        try {
+            final String account = request.getBodyValue(ACCOUNT_KEY);
+            final String password = request.getBodyValue(PASSWORD_KEY);
 
-        final HttpResponse loginResponse = InMemoryUserRepository.findByAccount(account)
-                                                                 .filter(user -> user.checkPassword(password))
-                                                                 .map(LoginController::loginSuccess)
-                                                                 .orElseGet(() -> getRedirectResponse("/401.html"));
-        response.copy(loginResponse);
+            validAccount(account, password);
+
+            final HttpResponse loginResponse = InMemoryUserRepository.findByAccount(account)
+                                                                     .filter(user -> user.checkPassword(password))
+                                                                     .map(LoginController::loginSuccess)
+                                                                     .orElseGet(() -> getRedirectResponse("/401.html"));
+            response.copy(loginResponse);
+        } catch (LoginException e) {
+            final HttpResponse loginResponse = getRedirectResponse("/401.html");
+            response.copy(loginResponse);
+        }
     }
 
     @Override
@@ -50,10 +59,12 @@ public class LoginController extends AbstractController {
         }
 
         if (request.hasQueryString()) {
-            final HttpResponse loginResponse = getLoginResponse(
-                    request.getQueryValue(ACCOUNT_KEY),
-                    request.getQueryValue(PASSWORD_KEY)
-            );
+            final String account = request.getQueryValue(ACCOUNT_KEY);
+            final String password = request.getQueryValue(PASSWORD_KEY);
+
+            validAccount(account, password);
+
+            final HttpResponse loginResponse = getLoginResponse(account, password);
             response.copy(loginResponse);
 
             return;
@@ -64,6 +75,12 @@ public class LoginController extends AbstractController {
         final String responseBody = getFileToResponseBody("/login.html");
 
         response.copy(HttpResponse.of(statusLine, contentType, responseBody));
+    }
+
+    private void validAccount(final String account, final String password) throws LoginException {
+        if (StringUtils.isEmpty(account) || StringUtils.isEmpty(password)) {
+            throw new LoginException("아이디 혹은 비밀번호를 입력하지 않았습니다.");
+        }
     }
 
     private static HttpResponse getLoginResponse(final String account, final String password) {

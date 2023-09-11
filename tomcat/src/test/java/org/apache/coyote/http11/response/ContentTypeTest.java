@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import javassist.NotFoundException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -7,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ContentTypeTest {
 
     @Test
-    void findBy() {
+    void findBy() throws NotFoundException {
         // given
         final String content = "index.html";
 
@@ -19,7 +20,7 @@ class ContentTypeTest {
     }
 
     @Test
-    void findByElseContent() {
+    void findByElseContent() throws NotFoundException {
         // given
         final String elseContent = "index.else";
 

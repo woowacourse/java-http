@@ -21,17 +21,22 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.isSameMethod(Method.POST)) {
-            doPost(request, response);
-            return;
-        }
-        if (request.isSameMethod(Method.GET)) {
-            doGet(request, response);
-            return;
-        }
+        try {
+            if (request.isSameMethod(Method.POST)) {
+                doPost(request, response);
+                return;
+            }
+            if (request.isSameMethod(Method.GET)) {
+                doGet(request, response);
+                return;
+            }
 
-        final HttpResponse httpResponse = getRedirectResponse("/404.html");
-        response.copy(httpResponse);
+            final HttpResponse httpResponse = getRedirectResponse("/404.html");
+            response.copy(httpResponse);
+        } catch (NullPointerException e) {
+            final HttpResponse httpResponse = getRedirectResponse("/404.html");
+            response.copy(httpResponse);
+        }
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

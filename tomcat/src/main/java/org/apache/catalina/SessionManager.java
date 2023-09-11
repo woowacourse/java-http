@@ -22,15 +22,12 @@ public class SessionManager implements Manager {
     public void addLoginSession(final String jSessionId, final User user) {
         Session session = new Session(jSessionId);
         session.setAttribute("user", user);
-        instance.add(session); //세션 매니저에 세션을 추가한다.
+        instance.add(session);
     }
 
     @Override
     public Session findSession(final String id) {
-        if (id == null) {
-            return null;
-        }
-        return SESSIONS.get(id);
+        return SESSIONS.getOrDefault(id, null);
     }
 
     @Override

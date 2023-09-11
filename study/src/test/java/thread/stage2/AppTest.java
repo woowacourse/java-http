@@ -24,7 +24,7 @@ class AppTest {
     @Test
     void test() throws Exception {
         final var NUMBER_OF_THREAD = 10;
-        var threads = new Thread[NUMBER_OF_THREAD];
+        Thread[] threads = new Thread[NUMBER_OF_THREAD];
 
         for (int i = 0; i < NUMBER_OF_THREAD; i++) {
             threads[i] = new Thread(() -> incrementIfOk(TestHttpUtils.send("/test")));

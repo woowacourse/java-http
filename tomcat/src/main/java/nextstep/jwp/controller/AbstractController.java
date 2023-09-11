@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.coyote.common.ContentType.HTML;
+import static org.apache.coyote.common.Headers.LOCATION;
 import static org.apache.coyote.response.HttpStatus.FOUND;
 
 public class AbstractController implements Controller {
@@ -27,7 +28,7 @@ public class AbstractController implements Controller {
         } catch (Exception e) {
             response.setStatus(FOUND);
             response.setContentType(HTML);
-            response.addHeader("Location", "/500.html");
+            response.addHeader(LOCATION, "/500.html");
         }
     }
 

@@ -11,6 +11,7 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.utils.FileUtils;
 
 import static org.apache.coyote.common.ContentType.HTML;
+import static org.apache.coyote.common.Headers.LOCATION;
 import static org.apache.coyote.response.HttpStatus.FOUND;
 
 public class RegisterController extends AbstractController {
@@ -37,7 +38,7 @@ public class RegisterController extends AbstractController {
 
         response.setStatus(FOUND);
         response.setContentType(HTML);
-        response.addHeader("Location", "/index.html");
+        response.addHeader(LOCATION, "/index.html");
     }
 
     @Override

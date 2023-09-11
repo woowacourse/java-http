@@ -7,12 +7,11 @@ import nextstep.jwp.controller.RootController;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestUri;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RequestMapping {
 
-    private static Map<String, Controller> mappers = new LinkedHashMap<>();
+    private static final Map<String, Controller> mappers;
 
     static {
         mappers = Map.of(

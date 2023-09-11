@@ -14,6 +14,8 @@ import org.apache.coyote.utils.FileUtils;
 import java.util.Optional;
 
 import static org.apache.coyote.common.ContentType.HTML;
+import static org.apache.coyote.common.Headers.JSESSIONID;
+import static org.apache.coyote.common.Headers.LOCATION;
 import static org.apache.coyote.response.HttpStatus.FOUND;
 import static org.apache.coyote.response.HttpStatus.OK;
 
@@ -55,18 +57,18 @@ public class LoginController extends AbstractController {
         session.setAttribute("user", user);
         SessionManager.add(session);
 
-        HttpCookie cookie = HttpCookie.of("JSESSIONID=" + session.getId());
+        HttpCookie cookie = HttpCookie.of(JSESSIONID + "=" + session.getId());
 
         response.setStatus(FOUND);
         response.setContentType(HTML);
-        response.addHeader("Location", "/index.html");
+        response.addHeader(LOCATION, "/index.html");
         response.setCookie(cookie);
     }
 
     private void loginFail(HttpResponse response) {
         response.setStatus(FOUND);
         response.setContentType(HTML);
-        response.addHeader("Location", "/401.html");
+        response.addHeader(LOCATION, "/401.html");
     }
 
 
@@ -74,12 +76,12 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         HttpCookie cookie = request.getRequestHeader().getCookie();
 
-        String jsessionid = cookie.getValue("JSESSIONID");
+        String jsessionid = cookie.getValue(JSESSIONID);
         Optional<Session> session = SessionManager.findSession(jsessionid);
 
         if (session.isPresent()) {
             response.setStatus(FOUND);
-            response.addHeader("Location", "/index.html");
+            response.addHeader(LOCATION, "/index.html");
             response.setContentType(HTML);
             return;
         }

@@ -6,6 +6,8 @@ import org.apache.coyote.common.HttpCookie;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.apache.coyote.common.Headers.*;
+
 public class HttpResponse {
 
     private static final String DEFAULT_VERSION = "HTTP/1.1";
@@ -22,12 +24,11 @@ public class HttpResponse {
     }
 
     public static HttpResponse createDefaultResponse() {
-        String version = DEFAULT_VERSION;
         HttpStatus httpStatus = HttpStatus.OK;
         Map<String, String> headers = new LinkedHashMap<>();
         String body = "";
 
-        return new HttpResponse(new StatusLine(version, httpStatus), new HttpResponseHeader(headers), body);
+        return new HttpResponse(new StatusLine(DEFAULT_VERSION, httpStatus), new HttpResponseHeader(headers), body);
     }
 
     public String getResponse() {
@@ -35,11 +36,11 @@ public class HttpResponse {
     }
 
     public void setContentType(ContentType contentType) {
-        this.headers.add("Content-Type", contentType.getType() + ";charset=utf-8");
+        this.headers.add(CONTENT_TYPE, contentType.getType() + CHARSET_UTF8);
     }
 
     public void setBody(String body) {
-        addHeader("Content-Length", String.valueOf(body.length()));
+        addHeader(CONTENT_LENGTH, String.valueOf(body.length()));
         this.body = body;
     }
 
@@ -52,6 +53,6 @@ public class HttpResponse {
     }
 
     public void setCookie(HttpCookie cookie) {
-        this.headers.add("Set-Cookie", cookie.convertToHeader());
+        this.headers.add(SET_COOKIE, cookie.convertToHeader());
     }
 }

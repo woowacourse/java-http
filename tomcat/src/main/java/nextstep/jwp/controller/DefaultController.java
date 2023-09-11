@@ -8,6 +8,7 @@ import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.utils.FileUtils;
 
 import static org.apache.coyote.common.ContentType.HTML;
+import static org.apache.coyote.common.Headers.LOCATION;
 import static org.apache.coyote.response.HttpStatus.FOUND;
 
 public class DefaultController extends AbstractController {
@@ -30,7 +31,7 @@ public class DefaultController extends AbstractController {
         } catch (NullPointerException e) {
             response.setStatus(FOUND);
             response.setContentType(HTML);
-            response.addHeader("Location", "/404.html");
+            response.addHeader(LOCATION, "/404.html");
         }
     }
 }

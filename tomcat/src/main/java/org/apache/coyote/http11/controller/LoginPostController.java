@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class LoginPostController extends AbstractController {
@@ -31,39 +30,51 @@ public class LoginPostController extends AbstractController {
         }
         final HttpCookie cookie = request.getCookie();
         Map<String, String> parsedRequestBody = parseRequestBody(request);
-        Optional<User> userOptional = InMemoryUserRepository.findByAccount(
-                parsedRequestBody.get("account"));
-        if (userOptional.isPresent()
-                && userOptional.get().checkPassword(parsedRequestBody.get("password"))) {
-            String setCookie = null;
-            if (!cookie.isExist(JSESSIONID)) {
-                String jSessionId = String.valueOf(UUID.randomUUID());
-                setCookie = JSESSIONID + "=" + jSessionId;
-                SessionManager.instanceOf().addLoginSession(jSessionId, userOptional.get());
-            }
+        User user = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("입력한 회원 ID가 존재하지 않습니다."));
+        if (isLoginFail(user, parsedRequestBody)) {
+            handle401(request, response);
+            return;
+        }
+        if (!cookie.isExist(JSESSIONID)) {
+            String jSessionId = String.valueOf(UUID.randomUUID());
+            String setCookie = JSESSIONID + "=" + jSessionId;
+            SessionManager.instanceOf().addLoginSession(jSessionId, user);
             HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
-                    readContentType(request.getAccept(), request.getPath()),
-                    String.valueOf(0))
+                    readContentType(request.getAccept(), request.getPath()), String.valueOf(0))
                     .addLocation("/index.html")
                     .addSetCookie(setCookie)
                     .build();
             response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
+            return;
         }
-        handle401(request, response);
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
+                readContentType(request.getAccept(), request.getPath()), String.valueOf(0))
+                .addLocation("/index.html")
+                .build();
+        response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
+
+    }
+
+    private boolean isLoginFail(User user, Map<String, String> parsedRequestBody) {
+        return !user.checkPassword(parsedRequestBody.get("password"));
     }
 
     private Map<String, String> parseRequestBody(HttpRequest request) {
         Map<String, String> parsedRequestBody = new HashMap<>();
         String[] queryTokens = request.getBody().split("&");
         for (String queryToken : queryTokens) {
-            int equalSeparatorIndex = queryToken.indexOf("=");
-            if (equalSeparatorIndex != -1) {
-                parsedRequestBody.put(queryToken.substring(0, equalSeparatorIndex),
-                        queryToken.substring(equalSeparatorIndex + 1));
-
-            }
+            putRequestBodyToken(queryToken, parsedRequestBody);
         }
         return parsedRequestBody;
+    }
+
+    private void putRequestBodyToken(String queryToken, Map<String, String> parsedRequestBody) {
+        int equalSeparatorIndex = queryToken.indexOf("=");
+        if (equalSeparatorIndex != -1) {
+            parsedRequestBody.put(queryToken.substring(0, equalSeparatorIndex),
+                    queryToken.substring(equalSeparatorIndex + 1));
+        }
     }
 
     private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {

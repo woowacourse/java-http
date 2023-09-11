@@ -1,41 +1,54 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.temp.Session;
 
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class HttpResponse {
 
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
 
-    private final List<String> headers;
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
-    private final String body;
+    private String redirectUri;
 
-    public HttpResponse(final HttpStatus httpStatus, final List<String> headers, final String body) {
+    private Session session;
+
+    public HttpResponse httpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-        this.headers = headers;
-        this.body = body;
+        return this;
     }
 
-    public String toString() {
-        String responseLine = String.join(" ", "HTTP/1.1", String.valueOf(httpStatus.getCode()), httpStatus.getMessage());
-        String responseHeader = convertHeaderToString();
-
-        if (body == null) {
-            return String.join("\r\n", responseLine,
-                    responseHeader);
-        }
-        return String.join("\r\n", responseLine,
-                responseHeader,
-                body);
+    public HttpResponse redirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+        return this;
     }
 
-    private String convertHeaderToString() {
-        StringBuilder sb = new StringBuilder();
-        for (String header : headers) {
-            sb.append(header + "\r\n");
-        }
-        return sb.toString();
+    public HttpResponse header(String key, String value) {
+        headers.put(key, value);
+        return this;
     }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(final Session session) {
+        this.session = session;
+    }
+
 }

@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.coyote.http11.common.constant.Constants.EMPTY;
+
 public class HttpCookie {
 
     private static final String COOKIES_DELIMITER = "; ";
@@ -15,15 +17,18 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public static HttpCookie from(String cookieHeader) {
+    public static HttpCookie from(String cookieString) {
         Map<String, String> cookies = new HashMap<>();
-        Arrays.stream(cookieHeader.split(COOKIES_DELIMITER))
+        if(cookieString.isEmpty()) {
+            return new HttpCookie(cookies);
+        }
+        Arrays.stream(cookieString.split(COOKIES_DELIMITER))
                 .map(cookie -> cookie.split(COOKIE_DELIMITER))
                 .forEach(cookie -> cookies.put(cookie[0], cookie[1]));
         return new HttpCookie(cookies);
     }
 
     public String getCookieValue(String name) {
-        return cookies.getOrDefault(name, null);
+        return cookies.getOrDefault(name, EMPTY);
     }
 }

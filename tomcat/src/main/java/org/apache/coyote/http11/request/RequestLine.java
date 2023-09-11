@@ -17,10 +17,10 @@ public class RequestLine {
     }
 
     public static RequestLine from(String requestLine) {
-        String[] splitStatusLine = Objects.requireNonNull(requestLine.trim()).split(REQUEST_LINE_DELIMITER);
-        String httpMethod = splitStatusLine[0];
-        String path = splitStatusLine[1];
-        String httpVersion = splitStatusLine[2];
+        String[] splitRequestLine = Objects.requireNonNull(requestLine.trim()).split(REQUEST_LINE_DELIMITER);
+        String httpMethod = splitRequestLine[0];
+        String path = splitRequestLine[1];
+        String httpVersion = splitRequestLine[2];
         return new RequestLine(httpMethod, path, httpVersion);
     }
 

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.controller;
 
+import javassist.NotFoundException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Session;
@@ -33,8 +34,11 @@ public class AuthController extends AbstractController {
         }
 
         Optional<User> findUser = InMemoryUserRepository.findByAccount(account.get());
-        if (findUser.isPresent() && findUser.get().checkPassword(password.get())) {
-            User user = findUser.get();
+        if (findUser.isEmpty()) {
+            throw new NotFoundException("존재하지 않는 계정입니다.");
+        }
+        User user = findUser.get();
+        if (user.checkPassword(password.get())) {
             log.info(user.toString());
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);

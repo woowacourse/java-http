@@ -1,12 +1,12 @@
 package org.apache.coyote;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
     private static SessionManager sessionManager;
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public static SessionManager getInstance() {
         if (sessionManager == null) {
@@ -27,5 +27,6 @@ public class SessionManager {
         SESSIONS.remove(id);
     }
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 }

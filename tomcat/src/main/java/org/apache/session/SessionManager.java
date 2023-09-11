@@ -5,17 +5,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     public void remove(final String id) {
-        SESSIONS.remove(id);
+        sessions.remove(id);
     }
 }

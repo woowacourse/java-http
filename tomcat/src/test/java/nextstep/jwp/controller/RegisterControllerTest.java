@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.line.HttpMethod;
@@ -104,6 +105,6 @@ class RegisterControllerTest {
 
         // when
         assertThatThrownBy(() -> registerController.service(mockHttpRequest, mockHttpResponse))
-                .isInstanceOf(UnsupportedOperationException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 }

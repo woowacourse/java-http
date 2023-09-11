@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import static common.ResponseStatus.FOUND;
 import static common.ResponseStatus.OK;
-import static common.ResponseStatus.UNAUTHORIZED;
 import static org.apache.coyote.request.line.HttpMethod.GET;
 import static org.apache.coyote.request.line.HttpMethod.POST;
 import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
@@ -14,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.line.HttpMethod;
@@ -87,22 +87,6 @@ class LoginControllerTest {
             inOrder.verify(mockHttpResponse, times(1)).setResponseRedirect(FOUND, "/index.html");
             inOrder.verify(mockHttpResponse, times(1)).setResponseHeader(SET_COOKIE, "JSESSIONID=sessionId");
         }
-
-        @Test
-        void 로그인_중_예외가_발생하면_Unauthorized로_응답한다() {
-            // given
-            when(mockHttpRequest.consistsOf(POST))
-                    .thenReturn(true);
-            when(authService.login(any(), any()))
-                    .thenThrow(IllegalArgumentException.class);
-
-            // when
-            loginController.service(mockHttpRequest, mockHttpResponse);
-
-            // then
-            verify(authService, times(1)).login(any(), any());
-            verify(mockHttpResponse, times(1)).setResponseResource(UNAUTHORIZED, "/401.html");
-        }
     }
 
     @Nested
@@ -126,24 +110,6 @@ class LoginControllerTest {
             InOrder inOrder = Mockito.inOrder(mockHttpResponse);
             inOrder.verify(mockHttpResponse, times(1)).setResponseRedirect(FOUND, "/index.html");
             inOrder.verify(mockHttpResponse, times(1)).setResponseHeader(SET_COOKIE, "JSESSIONID=sessionId");
-        }
-
-        @Test
-        void query_String_으로_로그인_중_예외가_발생하면_Unauthorized로_응답한다() {
-            // given
-            when(mockHttpRequest.consistsOf(GET))
-                    .thenReturn(true);
-            when(mockHttpRequest.hasQueryString())
-                    .thenReturn(true);
-            when(authService.login(any(), any()))
-                    .thenThrow(IllegalArgumentException.class);
-
-            // when
-            loginController.service(mockHttpRequest, mockHttpResponse);
-
-            // then
-            verify(authService, times(1)).login(any(), any());
-            verify(mockHttpResponse, times(1)).setResponseResource(UNAUTHORIZED, "/401.html");
         }
 
         @Test
@@ -185,6 +151,6 @@ class LoginControllerTest {
 
         // when
         assertThatThrownBy(() -> loginController.service(mockHttpRequest, mockHttpResponse))
-                .isInstanceOf(UnsupportedOperationException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AuthException;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,7 @@ class AuthServiceTest {
 
         // expect
         assertThatThrownBy(() -> authService.login(wrongAccount, password))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AuthException.class)
                 .hasMessage("존재하지 않는 계정이거나 비밀번호가 틀렸습니다.");
     }
 
@@ -64,7 +65,7 @@ class AuthServiceTest {
 
         // expect
         assertThatThrownBy(() -> authService.login(account, wrongPassword))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AuthException.class)
                 .hasMessage("존재하지 않는 계정이거나 비밀번호가 틀렸습니다.");
     }
 
@@ -92,7 +93,7 @@ class AuthServiceTest {
 
         // expect
         assertThatThrownBy(() -> authService.register(duplicateAccount, "password", "account@emali.com"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AuthException.class)
                 .hasMessage("중복된 계정 입니다.");
     }
 

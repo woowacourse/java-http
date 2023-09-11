@@ -268,4 +268,64 @@ class Http11ProcessorTest {
                 "Location: /index.html"
         );
     }
+
+    @Test
+    void 지원하지_않는_Http_Method_인_경우_404를_반환한다() throws IOException {
+        String wrongHttpMethod = "DELETE";
+        String httpRequest = String.join(
+                System.lineSeparator(),
+                wrongHttpMethod + " /login HTTP/1.1",
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                "Accept-Encoding: gzip, deflate, br",
+                "Accept-Language: ko-KR,ko;q=0.9",
+                "Cache-Control: max-age=0",
+                "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded"
+        );
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, RequestMapping.init());
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        var expected = "HTTP/1.1 404 Not Found " + System.lineSeparator() +
+                "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
+                "Content-Length: 2426 " + System.lineSeparator() +
+                System.lineSeparator() +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void 지원하지_않는_uri_인_경우_404를_반환한다() throws IOException {
+        String wrongUri = "/huchu";
+        String httpRequest = String.join(
+                System.lineSeparator(),
+                "GET " + wrongUri + " HTTP/1.1",
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                "Accept-Encoding: gzip, deflate, br",
+                "Accept-Language: ko-KR,ko;q=0.9",
+                "Cache-Control: max-age=0",
+                "Connection: keep-alive",
+                "Content-Type: application/x-www-form-urlencoded"
+        );
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket, RequestMapping.init());
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        var expected = "HTTP/1.1 404 Not Found " + System.lineSeparator() +
+                "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
+                "Content-Length: 2426 " + System.lineSeparator() +
+                System.lineSeparator() +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

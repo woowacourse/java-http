@@ -1,5 +1,7 @@
 package org.apache.coyote.response.line;
 
+import static common.ResponseStatus.EMPTY_RESPONSE_STATUS;
+
 import common.ResponseStatus;
 import java.util.Objects;
 
@@ -13,6 +15,10 @@ public class ResponseLine {
     public ResponseLine(String httpVersion, ResponseStatus responseStatus) {
         this.httpVersion = httpVersion;
         this.responseStatus = responseStatus;
+    }
+
+    public boolean hasEmptyResponseStatus() {
+        return responseStatus == EMPTY_RESPONSE_STATUS;
     }
 
     public String responseLineMessage() {

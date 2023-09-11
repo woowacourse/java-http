@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-import static common.ResponseStatus.INTERNAL_SERVER_ERROR;
+import static common.ResponseStatus.EMPTY_RESPONSE_STATUS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.coyote.response.header.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.response.header.HttpHeader.CONTENT_TYPE;
@@ -23,8 +23,12 @@ public class HttpResponse {
     private ResponseBody responseBody;
 
     public HttpResponse(String httpVersion) {
-        this.responseLine = new ResponseLine(httpVersion, INTERNAL_SERVER_ERROR);
+        this.responseLine = new ResponseLine(httpVersion, EMPTY_RESPONSE_STATUS);
         this.responseHeader = new ResponseHeader(new LinkedHashMap<>());
+    }
+
+    public boolean isDetermined() {
+        return !responseLine.hasEmptyResponseStatus();
     }
 
     public String responseMessage() {

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -31,5 +32,34 @@ class HttpResponseTest {
                         "Hello world!"
                 )
         );
+    }
+
+    @Nested
+    class Http_Response가_결정되었는지_확인한다 {
+
+        @Test
+        void 결정되지_않았을_때() {
+            // given
+            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+
+            // when
+            boolean actual = httpResponse.isDetermined();
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+        @Test
+        void 결정되었을_때() {
+            // given
+            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+            httpResponse.setResponseMessage(OK, "Hello world!");
+
+            // when
+            boolean actual = httpResponse.isDetermined();
+
+            // then
+            assertThat(actual).isTrue();
+        }
     }
 }

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.line.HttpMethod;
 import org.apache.coyote.response.HttpResponse;
@@ -69,6 +70,6 @@ class ResourceControllerTest {
 
         // expect
         assertThatThrownBy(() -> resourceController.service(mockHttpRequest, mockHttpResponse))
-                .isInstanceOf(UnsupportedOperationException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 }

@@ -3,6 +3,7 @@ package nextstep.jwp.service;
 import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AuthException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -28,7 +29,7 @@ public class AuthService {
 
     public String login(String account, String password) {
         User user = inMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다."));
+                .orElseThrow(() -> new AuthException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다."));
         validatePassword(password, user);
 
         log.info(user.toString());
@@ -40,7 +41,7 @@ public class AuthService {
 
     private void validatePassword(String password, User user) {
         if (!user.isSamePassword(password)) {
-            throw new IllegalArgumentException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다.");
+            throw new AuthException("존재하지 않는 계정이거나 비밀번호가 틀렸습니다.");
         }
     }
 
@@ -58,7 +59,7 @@ public class AuthService {
         if (inMemoryUserRepository.findByAccount(account)
                 .isPresent()) {
             log.info("중복된 계정");
-            throw new IllegalArgumentException("중복된 계정 입니다.");
+            throw new AuthException("중복된 계정 입니다.");
         }
     }
 }

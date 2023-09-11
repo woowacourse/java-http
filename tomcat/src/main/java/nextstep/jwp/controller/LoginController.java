@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import static common.ResponseStatus.FOUND;
 import static common.ResponseStatus.OK;
-import static common.ResponseStatus.UNAUTHORIZED;
 import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
 
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -17,7 +16,6 @@ public class LoginController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String REDIRECT_URL = "/index.html";
     private static final String JSESSIONID_COOKIE = "JSESSIONID=";
-    private static final String UNAUTHORIZED_URL = "/401.html";
     private static final String RESOURCE_URL = "/login.html";
     private static final String URL = "/login";
 
@@ -43,13 +41,9 @@ public class LoginController extends AbstractController {
     }
 
     private void doLogin(HttpResponse httpResponse, String account, String password) {
-        try {
-            String sessionId = authService.login(account, password);
-            httpResponse.setResponseRedirect(FOUND, REDIRECT_URL);
-            httpResponse.setResponseHeader(SET_COOKIE, JSESSIONID_COOKIE + sessionId);
-        } catch (IllegalArgumentException e) {
-            httpResponse.setResponseResource(UNAUTHORIZED, UNAUTHORIZED_URL);
-        }
+        String sessionId = authService.login(account, password);
+        httpResponse.setResponseRedirect(FOUND, REDIRECT_URL);
+        httpResponse.setResponseHeader(SET_COOKIE, JSESSIONID_COOKIE + sessionId);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package nextstep.jwp.controller;
 
-import common.ResponseStatus;
+import static common.ResponseStatus.NOT_FOUND;
+import static common.ResponseStatus.UNAUTHORIZED;
+
 import nextstep.jwp.exception.AuthException;
 import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.response.HttpResponse;
@@ -12,11 +14,21 @@ public class ExceptionHandler {
 
     public void handle(HttpResponse httpResponse, Exception e) {
         if (e instanceof AuthException) {
-            httpResponse.setResponseResource(ResponseStatus.UNAUTHORIZED, UNAUTHORIZED_URL);
+            ResourceManager manager = ResourceManager.from(UNAUTHORIZED_URL);
+            httpResponse.setResponseResource(
+                    UNAUTHORIZED,
+                    manager.extractResourceType(),
+                    manager.readResourceContent()
+            );
             return;
         }
         if (e instanceof NotFoundException) {
-            httpResponse.setResponseResource(ResponseStatus.NOT_FOUND, NOT_FOUND_URL);
+            ResourceManager manager = ResourceManager.from(NOT_FOUND_URL);
+            httpResponse.setResponseResource(
+                    NOT_FOUND,
+                    manager.extractResourceType(),
+                    manager.readResourceContent()
+            );
         }
     }
 }

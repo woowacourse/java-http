@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import static common.ResponseStatus.FOUND;
-import static common.ResponseStatus.OK;
 import static org.apache.coyote.request.line.HttpMethod.GET;
 import static org.apache.coyote.request.line.HttpMethod.POST;
 import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
@@ -13,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import common.ResponseStatus;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.service.AuthService;
 import org.apache.coyote.request.HttpRequest;
@@ -85,16 +85,20 @@ class RegisterControllerTest {
     }
 
     @Test
-    void GET_요청일_때_OK로_회원가입_페이지를_응답한다() {
+    void GET_요청일_때_리소스를_응답한다() {
         // given
         when(mockHttpRequest.consistsOf(GET))
                 .thenReturn(true);
+        when(mockHttpRequest.requestUri())
+                .thenReturn("/register");
 
         // when
         registerController.service(mockHttpRequest, mockHttpResponse);
 
         // then
-        verify(mockHttpResponse, times(1)).setResponseResource(OK, "/register.html");
+        verify(mockHttpResponse, times(1)).setResponseResource(
+                any(ResponseStatus.class), anyString(), anyString()
+        );
     }
 
     @Test

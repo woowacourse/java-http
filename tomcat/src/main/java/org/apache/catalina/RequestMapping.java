@@ -4,6 +4,7 @@ import java.util.List;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ExceptionHandler;
 import nextstep.jwp.controller.HomeController;
+import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
@@ -26,6 +27,7 @@ public class RequestMapping {
         return new RequestMapping(
                 List.of(
                         new HomeController(),
+                        new IndexController(),
                         new LoginController(),
                         new RegisterController(),
                         new ResourceController()

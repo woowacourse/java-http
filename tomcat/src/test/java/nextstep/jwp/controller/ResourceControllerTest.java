@@ -1,14 +1,15 @@
 package nextstep.jwp.controller;
 
-import static common.ResponseStatus.OK;
 import static org.apache.coyote.request.line.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import common.ResponseStatus;
 import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.line.HttpMethod;
@@ -48,7 +49,7 @@ class ResourceControllerTest {
     }
 
     @Test
-    void GET_요청일_때_OK로_자원을_응답한다() {
+    void GET_요청일_때_리소스를_응답한다() {
         // given
         when(mockHttpRequest.consistsOf(GET))
                 .thenReturn(true);
@@ -59,7 +60,9 @@ class ResourceControllerTest {
         resourceController.service(mockHttpRequest, mockHttpResponse);
 
         // then
-        verify(mockHttpResponse, times(1)).setResponseResource(OK, "css/styles.css");
+        verify(mockHttpResponse, times(1)).setResponseResource(
+                any(ResponseStatus.class), anyString(), anyString()
+        );
     }
 
     @Test

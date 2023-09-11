@@ -17,8 +17,8 @@ public class RegisterController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
-    private static final String RESOURCE_URL = "/register.html";
     private static final String URL = "/register";
+    private static final String EXTENSION = ".html";
 
     private final AuthService authService;
 
@@ -49,6 +49,16 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setResponseResource(OK, RESOURCE_URL);
+        String resourceUrl = toResourceUrl(httpRequest);
+        ResourceManager manager = ResourceManager.from(resourceUrl);
+        httpResponse.setResponseResource(
+                OK,
+                manager.extractResourceType(),
+                manager.readResourceContent()
+        );
+    }
+
+    private String toResourceUrl(HttpRequest httpRequest) {
+        return httpRequest.requestUri() + EXTENSION;
     }
 }

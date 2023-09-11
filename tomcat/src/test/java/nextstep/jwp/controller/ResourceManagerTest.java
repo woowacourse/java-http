@@ -1,65 +1,52 @@
-package org.apache.coyote.response;
+package nextstep.jwp.controller;
 
-import static org.apache.coyote.response.FileManager.from;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.File;
+import nextstep.jwp.exception.FileNotFoundException;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class FileManagerTest {
+class ResourceManagerTest {
 
     @Test
-    void location으로_생성한다() {
+    void 존재하지_않는_자원의_location_으로_생성할_경우_예외를_던진다() {
         // given
-        String location = "css/styles.css";
-
-        // when
-        FileManager fileManager = from(location);
-
-        // then
-        assertThat(fileManager.file()).hasName("styles.css");
-    }
-
-    @Test
-    void 존재하지_않는_파일의_location_으로_생성할_경우_예외를_던진다() {
-        // given
-        String location = "wrong.file";
+        String wrongLocation = "/wrong.file";
 
         // expect
-        assertThatThrownBy(() -> from(location))
-                .isInstanceOf(IllegalArgumentException.class)
+        assertThatThrownBy(() -> ResourceManager.from(wrongLocation))
+                .isInstanceOf(FileNotFoundException.class)
                 .hasMessage("존재하지 않는 파일의 경로입니다.");
     }
 
     @Test
-    void 파일_확장자를_반환한다() {
+    void 자원_타입을_반환한다() {
         // given
         String location = "css/styles.css";
-        FileManager fileManager = from(location);
+        ResourceManager manager = ResourceManager.from(location);
 
         // when
-        String fileExtension = fileManager.extractFileExtension();
+        String resourceType = manager.extractResourceType();
 
         // then
-        assertThat(fileExtension).isEqualTo("css");
+        assertThat(resourceType).isEqualTo("css");
     }
 
     @Test
-    void file의_내용을_반환한다() {
+    void resource의_내용을_읽는다() {
         // given
         String location = "js/scripts.js";
-        FileManager fileManager = from(location);
+        ResourceManager manager = ResourceManager.from(location);
 
         // when
-        String fileContent = fileManager.readFileContent();
+        String resourceContent = manager.readResourceContent();
 
         // then
-        assertThat(fileContent).isEqualTo(
+        assertThat(resourceContent).isEqualTo(
                 "/*!\n"
                         + "    * Start Bootstrap - SB Admin v7.0.2 (https://startbootstrap.com/template/sb-admin)\n"
                         + "    * Copyright 2013-2021 Start Bootstrap\n"
@@ -86,16 +73,5 @@ class FileManagerTest {
                         + "    }\n"
                         + "\n"
                         + "});\n");
-    }
-
-    @Test
-    void file의_내용을_반환할_수_없는_경우_예외를_던진다() {
-        // given
-        FileManager fileManager = new FileManager(new File("wrong.file"));
-
-        // when
-        assertThatThrownBy(fileManager::readFileContent)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("파일을 불러올 수 없습니다.");
     }
 }

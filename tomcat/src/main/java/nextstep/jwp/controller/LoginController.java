@@ -16,8 +16,8 @@ public class LoginController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final String REDIRECT_URL = "/index.html";
     private static final String JSESSIONID_COOKIE = "JSESSIONID=";
-    private static final String RESOURCE_URL = "/login.html";
     private static final String URL = "/login";
+    private static final String EXTENSION = ".html";
 
     private final AuthService authService;
 
@@ -56,6 +56,16 @@ public class LoginController extends AbstractController {
             httpResponse.setResponseRedirect(FOUND, REDIRECT_URL);
             return;
         }
-        httpResponse.setResponseResource(OK, RESOURCE_URL);
+        String resourceUrl = toResourceUrl(httpRequest);
+        ResourceManager manager = ResourceManager.from(resourceUrl);
+        httpResponse.setResponseResource(
+                OK,
+                manager.extractResourceType(),
+                manager.readResourceContent()
+        );
+    }
+
+    private String toResourceUrl(HttpRequest httpRequest) {
+        return httpRequest.requestUri() + EXTENSION;
     }
 }

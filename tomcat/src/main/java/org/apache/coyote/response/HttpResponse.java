@@ -57,18 +57,10 @@ public class HttpResponse {
         responseHeader.put(CONTENT_LENGTH, String.valueOf(responseBody.measureContentLength()));
     }
 
-    public void setResponseResource(ResponseStatus responseStatus, String resourceUri) {
+    public void setResponseResource(ResponseStatus responseStatus, String resourceType, String resourceMessage) {
         responseLine.setResponseStatus(responseStatus);
-        setBodyAndHeaderByResource(resourceUri);
-    }
-
-    private void setBodyAndHeaderByResource(String uri) {
-        FileManager fileManager = FileManager.from(uri);
-        String fileContent = fileManager.readFileContent();
-        String fileExtension = fileManager.extractFileExtension();
-
-        responseBody = new ResponseBody(fileContent);
-        responseHeader.put(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(fileExtension, UTF_8));
+        responseBody = new ResponseBody(resourceMessage);
+        responseHeader.put(CONTENT_TYPE, HttpContentType.mimeTypeWithCharset(resourceType, UTF_8));
         responseHeader.put(CONTENT_LENGTH, String.valueOf(responseBody.measureContentLength()));
     }
 

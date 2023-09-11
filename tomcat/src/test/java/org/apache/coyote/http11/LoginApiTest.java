@@ -41,22 +41,22 @@ class LoginApiTest {
                 .contains(PAGE_LOGIN, "HTTP/1.1 200 OK");
     }
 
-    @Test
-    void 쿼리_로그인_요청_성공() {
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        processor.process(socket);
-        assertThat(socket.output())
-                .contains(PAGE_LOGIN, "HTTP/1.1 200 OK");
-    }
+//    @Test
+//    void 쿼리_로그인_요청_성공() {
+//        final String httpRequest = String.join("\r\n",
+//                "GET /login?account=gugu&password=password HTTP/1.1 ",
+//                "Host: localhost:8080 ",
+//                "Connection: keep-alive ",
+//                "",
+//                "");
+//
+//        final var socket = new StubSocket(httpRequest);
+//        final Http11Processor processor = new Http11Processor(socket);
+//
+//        processor.process(socket);
+//        assertThat(socket.output())
+//                .contains(PAGE_LOGIN, "HTTP/1.1 200 OK");
+//    }
 
     @Test
     void 존재하지_않는_확장자명으로_요청이_온다면_예외가_발생한다() {

@@ -31,7 +31,7 @@ class HttpRequestTest {
             final HttpRequest request = HttpRequest.from(RequestReader.from(bufferedReader));
 
             // then
-            assertThat(request.toString()).contains(httpRequest);
+            assertThat(request).hasToString(httpRequest);
         }
     }
 }

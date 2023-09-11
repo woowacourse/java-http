@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.HttpHeaderType.COOKIE;
+
 public class HttpHeaders {
 
     private static final char KEY_VALUE_DELIMITER = ':';
@@ -42,7 +45,7 @@ public class HttpHeaders {
     }
 
     public int contentLength() {
-        List<String> contentLength = headers.getOrDefault("Content-Length", HeaderValue.empty()).getValues();
+        List<String> contentLength = headers.getOrDefault(CONTENT_LENGTH.getValue(), HeaderValue.empty()).getValues();
         if (contentLength.isEmpty()) {
             return 0;
         }
@@ -50,7 +53,7 @@ public class HttpHeaders {
     }
 
     public Optional<String> sessionId() {
-        List<String> cookies = headers.getOrDefault("Cookie", HeaderValue.empty()).getValues();
+        List<String> cookies = headers.getOrDefault(COOKIE.getValue(), HeaderValue.empty()).getValues();
         return cookies.stream()
                       .filter(cookie -> cookie.startsWith("JSESSIONID="))
                       .map(jsessionid -> jsessionid.substring(jsessionid.indexOf('=') + 1))

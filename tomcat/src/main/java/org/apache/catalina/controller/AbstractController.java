@@ -31,10 +31,8 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.NOT_FOUND).sendRedirect(NOT_FOUND_PAGE);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.setHttpStatus(HttpStatus.NOT_FOUND).sendRedirect(NOT_FOUND_PAGE);
     }
 }

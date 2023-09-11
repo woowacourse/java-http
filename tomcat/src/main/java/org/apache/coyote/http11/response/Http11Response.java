@@ -12,10 +12,11 @@ public class Http11Response {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
     public static final String CRLF = "\r\n";
-    private final URL resource;
-    private final int httpStatusCode;
-    private final String statusMessage;
+
     private final Map<String, String> cookieValues = new HashMap<>();
+    private URL resource;
+    private int httpStatusCode;
+    private String statusMessage;
 
     public Http11Response(URL resource, int httpStatusCode, String statusMessage) {
         this.resource = resource;
@@ -23,32 +24,11 @@ public class Http11Response {
         this.statusMessage = statusMessage;
     }
 
+    public Http11Response() {
+    }
+
     public void addCookie(final String key, final String value) {
         cookieValues.put(key, value);
-    }
-
-    public String getVersion() {
-        return HTTP_VERSION;
-    }
-
-    public URL getResource() {
-        return resource;
-    }
-
-    public int getHttpStatusCode() {
-        return httpStatusCode;
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
-    }
-
-    public Map<String, String> getCookieValues() {
-        return Collections.unmodifiableMap(cookieValues);
-    }
-
-    public String getResponse() throws IOException {
-        return buildResponse();
     }
 
     private String buildResponse() throws IOException {
@@ -91,5 +71,41 @@ public class Http11Response {
             return "text/css";
         }
         return "text/html";
+    }
+
+    public String getVersion() {
+        return HTTP_VERSION;
+    }
+
+    public URL getResource() {
+        return resource;
+    }
+
+    public int getHttpStatusCode() {
+        return httpStatusCode;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    public Map<String, String> getCookieValues() {
+        return Collections.unmodifiableMap(cookieValues);
+    }
+
+    public String getResponse() throws IOException {
+        return buildResponse();
+    }
+
+    public void setResource(URL resource) {
+        this.resource = resource;
+    }
+
+    public void setHttpStatusCode(int httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+    }
+
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
     }
 }

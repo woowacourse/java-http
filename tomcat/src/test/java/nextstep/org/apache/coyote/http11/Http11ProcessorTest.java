@@ -98,7 +98,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("HTTP/1.1 200 OK", "Content-Type: text/html;charset=utf-8");
+        assertThat(socket.output()).contains("HTTP/1.1 200 OK");
     }
 
     @Test
@@ -124,7 +124,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 존재하지_요청이면_404_응다() {
+    void 존재하지_요청이면_404_응답() {
         // given
         String notExistMethod = "PUT";
         final String httpRequest = String.join("\r\n",

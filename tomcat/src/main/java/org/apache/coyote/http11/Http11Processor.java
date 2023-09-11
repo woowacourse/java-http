@@ -19,10 +19,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final Socket connection;
     private final RequestMapping requestMapping;
+    private final Http11Response httpResponse;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestMapping = RequestMapping.getInstance();
+        this.httpResponse = new Http11Response();
     }
 
     @Override
@@ -52,7 +54,8 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response handleRequest(final HttpRequest httpRequest) {
         try {
             final Controller controller = requestMapping.getController(httpRequest);
-            return controller.service(httpRequest);
+            controller.service(httpRequest, httpResponse);
+            return httpResponse;
         } catch (Exception e) {
             throw new UncheckedServletException(e);
         }

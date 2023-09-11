@@ -19,7 +19,7 @@ public abstract class AbstractController implements Controller {
         return mappingUri.equals(requestURI);
     }
 
-    abstract Http11Response doGet(HttpRequest httpRequest);
+    abstract void doGet(HttpRequest request, Http11Response response);
 
-    abstract Http11Response doPost(HttpRequest httpRequest);
+    abstract void doPost(HttpRequest request, Http11Response response);
 }

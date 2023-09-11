@@ -11,36 +11,35 @@ import org.slf4j.LoggerFactory;
 public class MemberRegisterHandler extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(MemberRegisterHandler.class);
-    public static final String ACCOUNT = "account";
-    public static final String PASSWORD = "password";
-    public static final String EMAIL = "email";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+    private static final String NOT_FOUND = "NotFound";
 
     public MemberRegisterHandler(String mappingUri) {
         this.mappingUri = mappingUri;
     }
 
     @Override
-    public Http11Response service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest, final Http11Response httpResponse) {
         final String httpMethod = httpRequest.getRequestLine().getHttpMethod();
 
         if (httpMethod.equals("POST")) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+        } else if (httpMethod.equals("GET")) {
+            doGet(httpRequest, httpResponse);
+        } else {
+            redirectNotFoundPage(httpResponse);
         }
-
-        if (httpMethod.equals("GET")) {
-            return doGet(httpRequest);
-        }
-
-        return redirectNotFoundPage();
     }
 
     @Override
-    Http11Response doGet(HttpRequest httpRequest) {
-        return registerPage();
+    void doGet(final HttpRequest httpRequest, final Http11Response httpResponse) {
+        registerPage(httpResponse);
     }
 
     @Override
-    Http11Response doPost(final HttpRequest httpRequest) {
+    void doPost(final HttpRequest httpRequest, final Http11Response httpResponse) {
         final RequestBody body = httpRequest.getRequestBody();
 
         final String account = body.getByKey(ACCOUNT);
@@ -50,21 +49,27 @@ public class MemberRegisterHandler extends AbstractController {
         InMemoryUserRepository.save(user);
         log.info("User create - {}", user);
 
-        return redirectIndexPage();
+        redirectIndexPage(httpResponse);
     }
 
-    private Http11Response redirectNotFoundPage() {
+    private void redirectNotFoundPage(final Http11Response httpResponse) {
         final String resourcePath = RESOURCE_PATH + NOT_FOUND_PAGE;
-        return new Http11Response(classLoader.getResource(resourcePath), 404, "NotFound");
+        httpResponse.setResource(classLoader.getResource(resourcePath));
+        httpResponse.setHttpStatusCode(404);
+        httpResponse.setStatusMessage(NOT_FOUND);
     }
 
-    private Http11Response redirectIndexPage() {
-        String resourcePath = RESOURCE_PATH + INDEX_PAGE;
-        return new Http11Response(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
+    private void redirectIndexPage(final Http11Response httpResponse) {
+        final String resourcePath = RESOURCE_PATH + INDEX_PAGE;
+        httpResponse.setResource(classLoader.getResource(resourcePath));
+        httpResponse.setHttpStatusCode(302);
+        httpResponse.setStatusMessage(HTTP_FOUND);
     }
 
-    private Http11Response registerPage() {
+    private void registerPage(final Http11Response httpResponse) {
         final String resourcePath = RESOURCE_PATH + "/register.html";
-        return new Http11Response(classLoader.getResource(resourcePath), 200, "OK");
+        httpResponse.setResource(classLoader.getResource(resourcePath));
+        httpResponse.setHttpStatusCode(200);
+        httpResponse.setStatusMessage("OK");
     }
 }

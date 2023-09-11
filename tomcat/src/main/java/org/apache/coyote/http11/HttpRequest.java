@@ -49,23 +49,19 @@ public class HttpRequest {
             // ignored
         }
 
-        if (create && Objects.isNull(session)) {
-            String uuid = UUID.randomUUID()
-                    .toString();
-            session = new HttpSession(uuid);
-            manager.add(session);
+        if (!create) {
             return session;
         }
 
-        if (create) {
+        if (!Objects.isNull(session)) {
             session.invalidate();
             manager.remove(session);
-            String uuid = UUID.randomUUID()
-                    .toString();
-            session = new HttpSession(uuid);
-            manager.add(session);
         }
 
+        String uuid = UUID.randomUUID()
+                .toString();
+        session = new HttpSession(uuid);
+        manager.add(session);
         return session;
     }
 

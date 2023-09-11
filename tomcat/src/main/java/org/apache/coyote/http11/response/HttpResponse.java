@@ -8,7 +8,7 @@ import org.apache.coyote.http11.common.HttpStatus;
 public class HttpResponse {
 
     private static final String RESPONSE_LINE_FORMAT = "%s %s %s ";
-    private static final String COOKIE_HEADER_FORMAT = "Set-Cookie: %s";
+    private static final String COOKIE_HEADER_FORMAT = "Set-Cookie: %s ";
 
     private final HttpStatusLine httpStatusLine;
     private final HttpResponseHeaders httpResponseHeaders;

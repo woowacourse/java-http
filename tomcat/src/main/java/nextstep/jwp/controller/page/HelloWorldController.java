@@ -2,11 +2,9 @@ package nextstep.jwp.controller.page;
 
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
-import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseStatusLine;
 
 public class HelloWorldController extends AbstractController {
 
@@ -20,9 +18,9 @@ public class HelloWorldController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) {
-        return new HttpResponse(ResponseStatusLine.create(HttpStatus.OK),
-                HttpHeaders.createSimpleText(),
-                HELLO_WORLD);
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setStatusLine(HttpStatus.OK);
+        response.setHeadersSimpleText();
+        response.setResponseBody(HELLO_WORLD);
     }
 }

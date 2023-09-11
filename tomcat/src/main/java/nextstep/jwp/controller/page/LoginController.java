@@ -11,9 +11,9 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.PathUtil;
+import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -40,41 +40,51 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final String uri = request.getUri()
                 .split(COMMA_REGEX)[FILENAME_INDEX];
         final Path loginPath = PathUtil.findPathWithExtension(uri, HTML);
 
         final Session session = SessionManager.findSession(request.getHeaders().getCookie(COOKIE_NAME));
         if (Objects.isNull(session)) {
-            return HttpResponse.create(HttpStatus.OK, loginPath);
+            response.setStatusLine(HttpStatus.OK);
+            response.setHeaders(loginPath);
+            response.setResponseBody(ResponseBodyUtil.alter(loginPath));
+            return;
         }
 
         final Path indexPath = PathUtil.findPathWithExtension(INDEX_URI, HTML);
-        return HttpResponse.createRedirect(indexPath, INDEX_URI + HTML);
+
+        response.setStatusLine(HttpStatus.FOUND);
+        response.setHeaders(indexPath);
+        response.setLocation(INDEX_URI + HTML);
+        response.setResponseBody(ResponseBodyUtil.alter(indexPath));
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final String body = request.getRequestBody();
         final String username = getBodyValue(body, FIRST);
         final String password = getBodyValue(body, SECOND);
 
         if (InMemoryUserRepository.findByAccountAndPassword(username, password).isEmpty()) {
             final Path path = PathUtil.findPathWithExtension(UNAUTHORIZED_URI, HTML);
-            return HttpResponse.create(HttpStatus.UNAUTHORIZED, path);
+
+            response.setStatusLine(HttpStatus.UNAUTHORIZED);
+            response.setHeaders(path);
+            response.setResponseBody(ResponseBodyUtil.alter(path));
         }
         final User user = InMemoryUserRepository.findByAccountAndPassword(username, password)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         log.info(user.toString());
 
+        final String uuid = saveSession(user);
         final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
 
-        final HttpHeaders headers = HttpHeaders.createResponse(path);
-        final String uuid = saveSession(user);
-        headers.setCookie(COOKIE_NAME, uuid);
-
-        return HttpResponse.createRedirectWithHeaders(headers, path, INDEX_URI + HTML);
+        response.setStatusLine(HttpStatus.FOUND);
+        response.setLocation(INDEX_URI + HTML);
+        response.setCookie(COOKIE_NAME, uuid);
+        response.setResponseBody(ResponseBodyUtil.alter(path));
     }
 
     private String saveSession(final User user) {

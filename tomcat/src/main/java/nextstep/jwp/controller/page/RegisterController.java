@@ -7,6 +7,7 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.PathUtil;
+import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -25,19 +26,24 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final String uri = request.getUri();
         final Path path = PathUtil.findPathWithExtension(uri, HTML);
-        return HttpResponse.create(HttpStatus.OK, path);
+
+        response.setStatusLine(HttpStatus.OK);
+        response.setHeaders(path);
+        response.setResponseBody(ResponseBodyUtil.alter(path));
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         final Path path = PathUtil.findPathWithExtension(INDEX_URI, HTML);
         final String requestBody = request.getRequestBody();
         saveUser(requestBody);
 
-        return HttpResponse.createRedirect(path, INDEX_URI + HTML);
+        response.setStatusLine(HttpStatus.FOUND);
+        response.setHeaders(path);
+        response.setLocation(INDEX_URI + HTML);
     }
 
     private void saveUser(final String requestBody) {

@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.util.PathUtil;
+import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -19,10 +20,12 @@ public class OtherController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        final String uri = request.getUri();
-        final Path path = PathUtil.findPath(uri);
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        final Path path = PathUtil.findPath(request.getUri());
+        final String responseBody = ResponseBodyUtil.alter(path);
 
-        return HttpResponse.create(HttpStatus.OK, path);
+        response.setStatusLine(HttpStatus.OK);
+        response.setHeaders(path);
+        response.setResponseBody(responseBody);
     }
 }

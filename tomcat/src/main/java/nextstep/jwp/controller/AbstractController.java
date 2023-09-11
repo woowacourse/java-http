@@ -13,22 +13,24 @@ public abstract class AbstractController implements Controller {
     protected static final String HTML = ".html";
 
     private static final String POST = "POST";
+    private static final String METHOD_NOT_ALLOWED = "지원하지 않는 메서드입니다.";
 
     @Override
-    public HttpResponse process(final HttpRequest request) throws IOException {
+    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
         final String requestMethod = request.getMethod();
 
         if (POST.equals(requestMethod)) {
-            return doPost(request);
+            doPost(request, response);
+            return;
         }
-        return doGet(request);
+        doGet(request, response);
     }
 
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
-        throw new IllegalArgumentException("지원하지 않는 메서드입니다.");
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+        throw new IllegalArgumentException(METHOD_NOT_ALLOWED);
     }
 
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
-        throw new IllegalArgumentException("지원하지 않는 메서드입니다.");
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        throw new IllegalArgumentException(METHOD_NOT_ALLOWED);
     }
 }

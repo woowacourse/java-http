@@ -39,6 +39,10 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
+    public static HttpHeaders create() {
+        return new HttpHeaders(new LinkedHashMap<>());
+    }
+
     public static HttpHeaders createSimpleText() {
         final Map<String, String> headers = new LinkedHashMap<>();
 

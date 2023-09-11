@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerMapping;
+import nextstep.jwp.controller.page.InternalServerErrorController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -37,7 +40,14 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest request = HttpRequest.parse(bufferedReader);
-            final HttpResponse response = HttpResponse.parse(request);
+            final HttpResponse response = HttpResponse.create();
+
+            try {
+                final Controller controller = ControllerMapping.find(request);
+                controller.service(request, response);
+            } catch (final Exception e) {
+                InternalServerErrorController.create(request, response);
+            }
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();

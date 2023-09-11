@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.util.PathUtil;
+import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -19,8 +20,11 @@ public class NotFoundController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) throws IOException {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final Path path = PathUtil.findPathWithExtension(NOT_FOUND_URI, HTML);
-        return HttpResponse.create(HttpStatus.NOT_FOUND, path);
+
+        response.setStatusLine(HttpStatus.NOT_FOUND);
+        response.setHeaders(path);
+        response.setResponseBody(ResponseBodyUtil.alter(path));
     }
 }

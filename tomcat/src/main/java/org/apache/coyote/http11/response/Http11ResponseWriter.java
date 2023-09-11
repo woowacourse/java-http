@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
@@ -33,7 +33,7 @@ public class Http11ResponseWriter {
 		if (!response.isCommitted()) {
 			throw new IllegalArgumentException("올바르지 않은 Response 입니다.");
 		}
-		
+
 		final var statusLine = response.getStatusLine();
 		final var header = response.getHeader();
 		final var responseBody = response.getResponseBody();

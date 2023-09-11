@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionException;
 import org.apache.coyote.session.SessionManager;
 import org.apache.coyote.FixtureFactory;
 import org.assertj.core.api.Assertions;
@@ -101,7 +102,7 @@ class RequestTest {
         Request request = FixtureFactory.getGetRequest("/login", header);
 
         assertThatThrownBy(() -> request.getSession(true))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(SessionException.class);
     }
 
     @Test
@@ -116,6 +117,6 @@ class RequestTest {
         Request request = FixtureFactory.getGetRequest("/login", header);
 
         assertThatThrownBy(() -> request.getSession(false))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(SessionException.class);
     }
 }

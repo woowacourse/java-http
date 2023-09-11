@@ -43,6 +43,6 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
+        redirectPage(response, INDEX_PATH);
     }
 }

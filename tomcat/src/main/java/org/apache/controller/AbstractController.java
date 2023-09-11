@@ -66,8 +66,8 @@ public abstract class AbstractController implements Controller {
         return request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8;
     }
 
-    protected void redirectPage(Response response, HttpStatus httpStatus, String path) {
-        response.setHttpStatus(httpStatus);
+    protected void redirectPage(Response response, String path) {
+        response.setHttpStatus(HttpStatus.FOUND);
         response.redirectLocation(path);
     }
 

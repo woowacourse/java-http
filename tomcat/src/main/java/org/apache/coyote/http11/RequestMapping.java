@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.controller.Controller;
 import org.apache.controller.DefaultController;
@@ -11,12 +10,13 @@ import org.apache.coyote.request.Request;
 
 public class RequestMapping {
 
-    private static final List<Controller> controllers = new ArrayList<>() {{
-        add(new DefaultController());
-        add(new LoginController());
-        add(new RegisterController());
-    }};
+    private static final List<Controller> controllers = List.of(
+            new DefaultController(),
+            new LoginController(),
+            new RegisterController());
     private static final Controller resourceController = new ResourceController();
+
+    private RequestMapping() {}
 
     public static Controller getController(Request request) {
         return controllers.stream()

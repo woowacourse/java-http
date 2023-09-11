@@ -29,7 +29,7 @@ public class LoginController extends AbstractController {
     protected void doGet(Request request, Response response) {
         Session session = request.getSession(false);
         if (hasUserSession(session)) {
-            redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
+            redirectPage(response, INDEX_PATH);
             return;
         }
         getLoginPage(request, response);
@@ -60,7 +60,7 @@ public class LoginController extends AbstractController {
         User user = (User) session.getAttribute(USER_SESSION_KEY);
         System.out.println(user);
 
-        redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
+        redirectPage(response, INDEX_PATH);
     }
 
     private void doLogin(Request request, Response response) {
@@ -70,14 +70,14 @@ public class LoginController extends AbstractController {
 
         Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
         if (isInvalidLogin(password, loginUser)) {
-            redirectPage(response, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_PATH);
+            redirectPage(response, UNAUTHORIZED_PATH);
             return;
         }
         User user = loginUser.get();
         System.out.println(user);
 
         registerSession(request, response, user);
-        redirectPage(response, HttpStatus.FOUND, INDEX_PATH);
+        redirectPage(response, INDEX_PATH);
     }
 
     private boolean isInvalidLogin(String password, Optional<User> loginUser) {

@@ -4,8 +4,6 @@ import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -54,7 +52,7 @@ class LoginControllerTest {
         LoginController loginController = new LoginController();
         loginController.service(request, response);
 
-        String expectedLine = "HTTP/1.1 401 UNAUTHORIZED";
+        String expectedLine = "HTTP/1.1 302 FOUND";
         String expectedHeader = "Location: /401.html";
 
         assertAll(

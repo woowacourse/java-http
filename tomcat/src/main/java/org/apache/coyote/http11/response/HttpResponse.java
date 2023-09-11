@@ -6,7 +6,7 @@ public class HttpResponse {
 
     private final String httpVersion;
     private HttpStatus httpStatus;
-    private HttpHeaders headers = HttpHeaders.empty();
+    private final HttpHeaders headers = HttpHeaders.empty();
     private String body;
     private String responseFileName;
 
@@ -55,7 +55,7 @@ public class HttpResponse {
                 " ",
                 httpVersion,
                 httpStatus.getCode(),
-                httpStatus.name(),
+                httpStatus.getMessage(),
                 "\r\n"
         );
     }

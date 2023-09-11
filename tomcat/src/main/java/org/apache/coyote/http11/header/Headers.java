@@ -7,17 +7,19 @@ import java.util.Map;
 
 public class Headers {
 
-    private final Map<Header, String> value = new LinkedHashMap<>();
+    private final Map<Header, String> values = new LinkedHashMap<>();
 
     public void addHeader(final Header header,
                           final String value) {
-        this.value.put(header, value);
+        this.values.put(header, value);
     }
 
     public String parseResponse() {
         final List<String> stringHeaders = new ArrayList<>();
-        for (Header header : value.keySet()) {
-            final String format = String.format("%s: %s ", header.getValue(), value.get(header));
+        for (Map.Entry<Header, String> headerStringEntry : values.entrySet()) {
+            final Header key = headerStringEntry.getKey();
+            final String value = headerStringEntry.getValue();
+            final String format = String.format("%s: %s ", key.getValue(), value);
             stringHeaders.add(format);
         }
         return String.join("\r\n", stringHeaders);
@@ -36,7 +38,7 @@ public class Headers {
     private void addRequestHeader(final String requestHeaderName,
                                   final String requestHeaderValue) {
         try {
-            value.put(RequestHeader.from(requestHeaderName), requestHeaderValue);
+            values.put(RequestHeader.from(requestHeaderName), requestHeaderValue);
         } catch (RuntimeException e) {
             addEntityHeader(requestHeaderName, requestHeaderValue);
         }
@@ -45,20 +47,20 @@ public class Headers {
     private void addEntityHeader(final String requestHeaderName,
                                  final String requestHeaderValue) {
         try {
-            value.put(EntityHeader.from(requestHeaderName), requestHeaderValue);
+            values.put(EntityHeader.from(requestHeaderName), requestHeaderValue);
         } catch (RuntimeException ignored) {
 
         }
     }
 
     public String getValue(final Header header) {
-        return value.getOrDefault(header, "");
+        return values.getOrDefault(header, "");
     }
 
     @Override
     public String toString() {
         return "Headers{" +
-                "headers=" + value +
+                "headers=" + values +
                 '}';
     }
 }

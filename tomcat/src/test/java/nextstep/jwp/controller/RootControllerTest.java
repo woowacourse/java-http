@@ -42,7 +42,7 @@ class RootControllerTest {
     @DisplayName("RootController는 정해진 request 외의 요청을 핸들링할 수 없다.")
     @ParameterizedTest(name = "method: {0}, target: {1}")
     @CsvSource({
-            "POST, /",
+            "POST, /register",
             "GET, /login"
     })
     void canHandle_fail(String method, String target) {

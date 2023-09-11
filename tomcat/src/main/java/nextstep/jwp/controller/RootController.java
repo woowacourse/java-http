@@ -14,15 +14,8 @@ public class RootController extends HttpController {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        final Map<String, Set<String>> requestType = new HashMap<>(Map.of(
-                "/", new HashSet<>(Set.of("GET"))
-        ));
-
-        if (requestType.containsKey(httpRequest.getTarget())) {
-            final Set<String> methodType = requestType.get(httpRequest.getTarget());
-            return methodType.contains(httpRequest.getMethod());
-        }
-        return false;
+        final Set<String> requestType = Set.of("/");
+        return requestType.contains(httpRequest.getTarget());
     }
 
     @Override

@@ -7,9 +7,6 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static org.apache.coyote.http11.common.HttpHeaderType.LOCATION;
@@ -19,15 +16,8 @@ public class RegisterController extends HttpController {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        final Map<String, Set<String>> requestType = new HashMap<>(Map.of(
-                "/register", new HashSet<>(Set.of("GET", "POST"))
-        ));
-
-        if (requestType.containsKey(httpRequest.getTarget())) {
-            final Set<String> methodType = requestType.get(httpRequest.getTarget());
-            return methodType.contains(httpRequest.getMethod());
-        }
-        return false;
+        final Set<String> requestType = Set.of("/register");
+        return requestType.contains(httpRequest.getTarget());
     }
 
     @Override

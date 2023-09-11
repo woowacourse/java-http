@@ -20,15 +20,8 @@ public class LoginController extends HttpController {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        final Map<String, Set<String>> requestType = new HashMap<>(Map.of(
-                "/login", new HashSet<>(Set.of("GET", "POST"))
-        ));
-
-        if (requestType.containsKey(httpRequest.getTarget())) {
-            final Set<String> methodType = requestType.get(httpRequest.getTarget());
-            return methodType.contains(httpRequest.getMethod());
-        }
-        return false;
+        final Set<String> requestType = Set.of("/login");
+        return requestType.contains(httpRequest.getTarget());
     }
 
     @Override

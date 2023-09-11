@@ -15,7 +15,10 @@ public class HttpResponseHeader {
   }
 
   public HttpResponseHeader addContentType(final ContentType contentType, final Charset charset) {
-    values.put("Content-Type", contentType.getValue() + ";" + charset.getValue());
+    values.put(
+        "Content-Type", contentType.getValue() + ";" +
+        "charset=" + charset.getValue()
+    );
     return this;
   }
 
@@ -27,7 +30,7 @@ public class HttpResponseHeader {
   public String read() {
     return values.entrySet()
         .stream()
-        .map(it -> it.getKey() + ": " + it.getValue())
+        .map(it -> it.getKey() + ": " + it.getValue() + " ")
         .collect(Collectors.joining("\r\n"));
   }
 

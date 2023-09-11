@@ -29,7 +29,7 @@ public class HttpResponse {
     responseParts.add(httpResponseHeader.read());
 
     if (responseBody != null && responseBody.isNotEmpty()) {
-      responseParts.add("Content-Length: " + responseBody.calculateContentLength());
+      responseParts.add("Content-Length: " + responseBody.calculateContentLength() + " ");
       responseParts.add("");
       responseParts.add(responseBody.read());
     }

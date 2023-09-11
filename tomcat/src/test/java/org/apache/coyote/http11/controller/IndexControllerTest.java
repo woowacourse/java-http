@@ -32,14 +32,6 @@ class IndexControllerTest {
     }
 
     @Test
-    @DisplayName("Reqeust를 해당 컨트롤러가 처리할 수 있다.")
-    void handleTest() {
-
-        //when, then
-        assertThat(indexController.canHandle(request)).isTrue();
-    }
-
-    @Test
     @DisplayName("지원하지 않는 HttpMethod는 해당 컨트롤러가 처리할 수 없다.")
     void handleExceptionTest() throws IOException {
         // given

@@ -7,10 +7,6 @@ import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StaticResource;
 
 public class DefaultController extends AbstractController {
-    @Override
-    public boolean canHandle(final HttpRequest request) {
-        return true;
-    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

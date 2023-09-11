@@ -17,18 +17,9 @@ import java.util.Optional;
 public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
-    private static final Uri INDEX_URI = Uri.INDEX;
-    private static final Uri REGISTER_URI = Uri.REGISTER;
-
-    @Override
-    public boolean canHandle(final HttpRequest request) {
-        final String path = request.getRequestLine().getPath();
-        return path.startsWith(REGISTER_URI.getSimplePath());
-    }
-
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final StaticResource staticResource = StaticResource.from(REGISTER_URI.getFullPath());
+        final StaticResource staticResource = StaticResource.from(Uri.REGISTER.getFullPath());
         final ResponseBody responseBody = ResponseBody.from(staticResource);
         response.setHttpStatus(HttpStatus.OK);
         response.setResponseBody(responseBody);
@@ -42,7 +33,7 @@ public class RegisterController extends AbstractController {
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(accountValue);
         if (userOptional.isPresent()) {
             log.error("중복 사용자 등록 : ", new MemberAlreadyExistException(accountValue));
-            response.redirect(INDEX_URI.getFullPath());
+            response.redirect(Uri.INDEX.getFullPath());
             return;
         }
         InMemoryUserRepository.save(
@@ -52,7 +43,6 @@ public class RegisterController extends AbstractController {
                         requestBody.getParamValue("email")
                 )
         );
-
-        response.redirect(INDEX_URI.getFullPath());
+        response.redirect(Uri.INDEX.getFullPath());
     }
 }

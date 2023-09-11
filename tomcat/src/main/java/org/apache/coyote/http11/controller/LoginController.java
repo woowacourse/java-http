@@ -19,14 +19,6 @@ import java.util.Optional;
 public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final Uri INDEX_URI = Uri.INDEX;
-    private static final Uri LOGIN_URI = Uri.LOGIN;
-    private static final Uri UNAUTHORIZED_URI = Uri.UNAUTHORIZED;
-
-    @Override
-    public boolean canHandle(final HttpRequest request) {
-        final String path = request.getRequestLine().getPath();
-        return path.startsWith(LOGIN_URI.getSimplePath());
-    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
@@ -66,7 +58,7 @@ public class LoginController extends AbstractController {
             response.addSession(session.getId());
             return;
         }
-        response.redirect(UNAUTHORIZED_URI.getFullPath());
+        response.redirect(Uri.UNAUTHORIZED.getFullPath());
     }
 
     private boolean isLoggedIn(final HttpRequest httpRequest) {

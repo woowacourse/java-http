@@ -7,27 +7,29 @@ import org.apache.coyote.http11.controller.LoginController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.RootController;
 import org.apache.coyote.http11.controller.UnAuthorizedController;
+import org.apache.coyote.http11.controller.Uri;
 import org.apache.coyote.http11.request.HttpRequest;
 
-import java.util.List;
+import java.util.EnumMap;
+import java.util.Map;
+
 
 public class RequestMapping {
-    private final List<Controller> controllers;
+    private final Map<Uri, Controller> controllerMap;
 
     public RequestMapping() {
-        this.controllers = List.of(
-                new IndexController(),
-                new LoginController(),
-                new UnAuthorizedController(),
-                new RegisterController(),
-                new RootController()
-        );
+        this.controllerMap = new EnumMap<>(Uri.class);
+        controllerMap.put(Uri.ROOT, new RootController());
+        controllerMap.put(Uri.INDEX, new IndexController());
+        controllerMap.put(Uri.LOGIN, new LoginController());
+        controllerMap.put(Uri.UNAUTHORIZED, new UnAuthorizedController());
+        controllerMap.put(Uri.REGISTER, new RegisterController());
+        controllerMap.put(Uri.DEFAULT, new DefaultController());
     }
 
     public Controller getController(final HttpRequest httpRequest) {
-        return controllers.stream()
-                .filter(controller -> controller.canHandle(httpRequest))
-                .findFirst()
-                .orElseGet(DefaultController::new);
+        final String path = httpRequest.getRequestLine().getPath();
+        final Uri uri = Uri.from(path);
+        return controllerMap.get(uri);
     }
 }

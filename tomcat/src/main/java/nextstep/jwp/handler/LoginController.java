@@ -31,18 +31,26 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (AuthenticationUser(request)) {
-            response.setStatus(HttpStatus.REDIRECT)
-                    .setHeader(HttpHeader.LOCATION, "/index.html");
+            setIndexPageRedirect(response);
             return;
         }
-
-        response.setStatus(HttpStatus.OK)
-                .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
-                .setBody(ResourceFileReader.readFile("/login.html"));
+        setResponse(response, HttpStatus.OK, "/login.html");
     }
 
     private boolean AuthenticationUser(final HttpRequest request) {
         return request.hasCookie("JSESSIONID") && SessionManager.findSession(request.getCookie("JSESSIONID")) != null;
+    }
+
+    private void setIndexPageRedirect(final HttpResponse response) {
+        response.setStatus(HttpStatus.REDIRECT)
+                .setHeader(HttpHeader.LOCATION, "/index.html");
+    }
+
+    private void setResponse(final HttpResponse response, final HttpStatus status, final String bodyPath) {
+        final String body = ResourceFileReader.readFile(bodyPath);
+        response.setStatus(status)
+                .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
+                .setBody(body);
     }
 
     @Override
@@ -52,24 +60,16 @@ public class LoginController extends AbstractController {
             final String password = request.getBodyValueOf(PASSWORD_QUERY_KEY);
             final User user = authService.login(account, password);
             log.info("User ={}", user);
-            response.setStatus(HttpStatus.REDIRECT)
-                    .setHeader(HttpHeader.LOCATION, "/index.html");
+
+            setIndexPageRedirect(response);
 
             if (!request.hasCookie("JSESSIONID")) {
                 response.setCookie(createJsessionIdCookie(user));
             }
-
         } catch (UnAuthorizationException | UnRegisteredUserException e) {
-            final String body = ResourceFileReader.readFile("/401.html");
-            response.setStatus(HttpStatus.UNAUTHORIZED)
-                    .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
-                    .setBody(body);
-
+            setResponse(response, HttpStatus.UNAUTHORIZED, "/401.html");
         } catch (NoSuchBodyValueException e) {
-            final String body = ResourceFileReader.readFile("/400.html");
-            response.setStatus(HttpStatus.BAD_REQUEST)
-                    .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
-                    .setBody(body);
+            setResponse(response, HttpStatus.BAD_REQUEST, "/400.html");
         }
     }
 

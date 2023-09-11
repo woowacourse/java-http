@@ -21,9 +21,4 @@ class CookieTest {
         // then
         assertThat(cookie.hasCookie("JSESSIONID")).isTrue();
     }
-
-    @Test
-    void 쿠기는_raw_string_형식으로_반환할_수_있다() {
-
-    }
 }

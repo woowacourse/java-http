@@ -22,9 +22,12 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        final String body = ResourceFileReader.readFile("/register.html");
+        setResponse(response, HttpStatus.OK, "/register.html");
+    }
 
-        response.setStatus(HttpStatus.OK)
+    private void setResponse(final HttpResponse response, final HttpStatus status, final String bodyPath) {
+        final String body = ResourceFileReader.readFile(bodyPath);
+        response.setStatus(status)
                 .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
                 .setBody(body);
     }
@@ -42,9 +45,7 @@ public class RegisterController extends AbstractController {
                     .setHeader(HttpHeader.LOCATION, "/login");
 
         } catch (AlreadyRegisteredUserException | NoSuchBodyValueException e) {
-            response.setStatus(HttpStatus.BAD_REQUEST)
-                    .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.HTML.getContentType())
-                    .setBody(ResourceFileReader.readFile("/400.html"));
+            setResponse(response, HttpStatus.BAD_REQUEST, "/400.html");
         }
     }
 

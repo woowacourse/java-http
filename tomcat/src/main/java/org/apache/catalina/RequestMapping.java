@@ -2,7 +2,6 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Controller.DefaultController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

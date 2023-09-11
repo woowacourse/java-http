@@ -48,19 +48,11 @@ public class Location {
         return Paths.get(resource.getPath());
     }
 
-    public boolean is(final String path) {
-        return this.path.endsWith(path);
-    }
-
-    public boolean isRoot() {
-        return is(ROOT);
-    }
-
     public Path getPath() {
         return path;
     }
 
-    public String contentTypeHeader() {
-        return contentType.toHeader();
+    public String contentType() {
+        return contentType.toHeaderValue();
     }
 }

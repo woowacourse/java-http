@@ -1,9 +1,7 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.request.body.Parameters;
-import org.apache.coyote.http11.request.header.Cookies;
-import org.apache.coyote.http11.request.header.Location;
-import org.apache.coyote.http11.request.header.Method;
+import org.apache.coyote.http11.request.header.Headers;
+import org.apache.coyote.http11.request.header.RequestLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,8 +15,6 @@ import static java.util.Objects.isNull;
 public class RequestMapper {
 
     private static final String END_OF_HEADERS = "";
-    private static final int REQUEST_INDEX = 0;
-    private static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length: ";
     private static final String EMPTY = "";
     private static final int ZERO = 0;
@@ -26,18 +22,16 @@ public class RequestMapper {
     private RequestMapper() {
     }
 
-    public static Request toRequest(final InputStream inputStream) {
-
+    public static HttpRequest toRequest(final InputStream inputStream) {
         try {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final List<String> headerLines = readHeaderLines(bufferedReader);
 
-            final Method method = method(headerLines);
-            final Location location = location(headerLines);
-            final Cookies cookies = cookies(headerLines);
+            final RequestLine requestLine = RequestLine.from(headerLines);
+            final Headers headers = Headers.of(headerLines);
             final Parameters parameters = parameters(headerLines, bufferedReader);
 
-            return new Request(location, method, parameters, cookies);
+            return new HttpRequest(requestLine, headers, parameters);
         } catch (Exception e) {
             throw new IllegalArgumentException("잘못된 요청입니다.", e);
         }
@@ -51,21 +45,6 @@ public class RequestMapper {
         }
 
         return headerLines;
-    }
-
-    private static Method method(final List<String> headerLines) {
-        final String requestLine = headerLines.get(REQUEST_INDEX);
-        return Method.from(requestLine);
-    }
-
-    private static Location location(final List<String> headerLines) {
-        final String requestLine = headerLines.get(REQUEST_INDEX);
-        return Location.from(requestLine);
-    }
-
-    private static Cookies cookies(final List<String> headerLines) {
-        final String cookieLine = find(headerLines, COOKIE);
-        return Cookies.from(cookieLine);
     }
 
     private static String find(final List<String> headerLines, final String key) {

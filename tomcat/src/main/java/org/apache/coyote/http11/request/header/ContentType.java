@@ -27,8 +27,8 @@ public enum ContentType {
                 .orElse(HTML);
     }
 
-    public String toHeader() {
-        return "Content-Type: " + type + ";charset=utf-8 ";
+    public String toHeaderValue() {
+        return type + ";charset=utf-8 ";
     }
 
     public String getExtension() {

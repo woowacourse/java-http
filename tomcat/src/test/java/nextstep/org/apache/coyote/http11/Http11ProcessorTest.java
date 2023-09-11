@@ -7,6 +7,7 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -215,7 +216,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void autoLoginWithCookie() {
+    void autoLoginWithCookie() throws LoginException {
         // given
         final String httpRequest = String.join(System.lineSeparator(),
                 "POST /login HTTP/1.1 ",

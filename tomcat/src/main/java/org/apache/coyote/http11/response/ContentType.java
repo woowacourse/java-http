@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import javassist.NotFoundException;
+
 import java.util.Arrays;
 
 public enum ContentType {
@@ -16,13 +18,19 @@ public enum ContentType {
         this.value = value + ";charset=utf-8";
     }
 
-    public static ContentType findBy(final String content) {
-        final String extension = content.split(SEPARATOR)[EXTENSION_INDEX].toUpperCase();
+    public static ContentType findBy(final String content) throws NotFoundException {
+        final String[] fileInfo = content.split(SEPARATOR);
 
-        return Arrays.stream(values())
-                     .filter(type -> type.name().equals(extension))
-                     .findFirst()
-                     .orElse(HTML);
+        if (fileInfo.length > EXTENSION_INDEX) {
+            final String extension = fileInfo[EXTENSION_INDEX].toUpperCase();
+
+            return Arrays.stream(values())
+                         .filter(type -> type.name().equals(extension))
+                         .findFirst()
+                         .orElse(HTML);
+        }
+
+        throw new NotFoundException("찾을 수 없습니다.");
     }
 
     public String getValue() {

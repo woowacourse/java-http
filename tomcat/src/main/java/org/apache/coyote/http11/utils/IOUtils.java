@@ -21,14 +21,18 @@ public class IOUtils {
   private IOUtils() {
   }
 
-  public static String readContentsFromFile(final String url) throws IOException {
+  public static String readContentsFromFile(final String url) {
     final URL resource = CLASS_LOADER.getResource(PREFIX_STATIC_PATH + url);
     if (isInvalidFile(resource)) {
       return "Hello world!";
     }
 
     final File file = new File(resource.getFile());
-    return new String(Files.readAllBytes(file.toPath()));
+    try {
+      return new String(Files.readAllBytes(file.toPath()));
+    } catch (final IOException e) {
+      throw new IllegalArgumentException("File not found: " + url, e);
+    }
   }
 
   private static boolean isInvalidFile(final URL resource) {

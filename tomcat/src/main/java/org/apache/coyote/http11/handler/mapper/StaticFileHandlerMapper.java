@@ -1,12 +1,10 @@
 package org.apache.coyote.http11.handler.mapper;
 
-import nextstep.jwp.controller.StaticFileController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class StaticFileHandlerMapper implements HandlerMapper {
 
-  private static final StaticFileController STATIC_FILE_CONTROLLER = new StaticFileController();
 
   @Override
   public boolean isSupport(final HttpRequest request) {

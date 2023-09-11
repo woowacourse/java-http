@@ -58,18 +58,10 @@ public class RequestLine {
   }
 
   public boolean isGetMethod() {
-    return this.method.equals(HttpMethod.GET);
+    return method.isGetMethod();
   }
 
   public boolean isPostMethod() {
-    return this.method.equals(HttpMethod.POST);
-  }
-
-  public boolean isSameUrl(final String url) {
-    return this.url.equals(url);
-  }
-
-  public boolean isEndWith(final String filenameExtension) {
-    return this.url.endsWith(filenameExtension);
+    return method.isPostMethod();
   }
 }

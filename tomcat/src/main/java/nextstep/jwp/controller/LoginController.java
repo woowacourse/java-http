@@ -1,19 +1,19 @@
 package nextstep.jwp.controller;
 
 import static org.apache.coyote.http11.ParseUtils.parseParam;
+import static org.apache.coyote.http11.header.HeaderType.COOKIE;
+import static org.apache.coyote.http11.header.HeaderType.LOCATION;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HeaderType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.responseline.HttpStatus;
-import org.apache.coyote.http11.responseline.ResponseLine;
 
 public class LoginController extends AbstractController {
 
@@ -22,44 +22,52 @@ public class LoginController extends AbstractController {
   private static final String UNAUTHORIZED_PAGE = "/401.html";
   private static final String JSESSIONID = "JSESSIONID";
 
+  private static boolean isInvalidAccountOrPassword(final String account, final String password) {
+    if (account == null || account.isBlank() || password == null || password.isBlank()) {
+      return true;
+    }
+    final Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+    return optionalUser.isEmpty() || !optionalUser.get().checkPassword(password);
+  }
+
+  private static boolean isNotExistSession(final HttpRequest request) {
+    final String cookie = request.getHeader(COOKIE);
+    if (cookie == null) {
+      return true;
+    }
+
+    final String sessionId = cookie.split(";")[0].split("=")[1];
+    return request.findSession(sessionId).isEmpty();
+  }
+
   @Override
-  protected HttpResponse doPost(final HttpRequest request) {
+  protected void doPost(final HttpRequest request, final HttpResponse response) {
     final String body = request.getBody();
     final Map<String, String> params = parseParam(body);
     final String account = params.get("account");
     final String password = params.get("password");
 
-    if (account == null || password == null) {
-      final HttpHeader header = new HttpHeader();
-      header.setHeaderLocation(INDEX_PAGE);
-      return responseFoundRedirect(header);
+    if (isInvalidAccountOrPassword(account, password)) {
+      response.setStatus(HttpStatus.FOUND);
+      response.setHeader(LOCATION, UNAUTHORIZED_PAGE);
+      return;
     }
 
-    final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-    if (user.isPresent() && user.get().checkPassword(password)) {
-      final Session session = Session.generateSession();
-      request.addSession(session);
-
-      final HttpHeader header = new HttpHeader();
-      header.setHeaderLocation(INDEX_PAGE);
-      header.setCookie(JSESSIONID + "=" + session.getId());
-      return responseFoundRedirect(header);
-    }
-
-    final ResponseLine responseLine = new ResponseLine(HttpStatus.FOUND);
-    final HttpHeader header = new HttpHeader();
-    header.setHeaderLocation(UNAUTHORIZED_PAGE);
-    return new HttpResponse(responseLine, header);
+    final Session session = Session.generateSession();
+    request.addSession(session);
+    response.setStatus(HttpStatus.FOUND);
+    response.setHeader(LOCATION, INDEX_PAGE);
+    response.setHeader(HeaderType.SET_COOKIE, JSESSIONID + "=" + session.getId());
   }
 
   @Override
-  protected HttpResponse doGet(final HttpRequest request) throws IOException {
-    final String sessionId = request.getCookie(JSESSIONID);
-    if (request.getSession(sessionId) == null) {
-      return responseStaticFile(request, LOGIN_PAGE);
+  protected void doGet(final HttpRequest request, final HttpResponse response) {
+    if (isNotExistSession(request)) {
+      response.setBodyAsStaticFile(LOGIN_PAGE);
+      return;
     }
-    final HttpHeader header = new HttpHeader();
-    header.setHeaderLocation(INDEX_PAGE);
-    return responseFoundRedirect(header);
+
+    response.setStatus(HttpStatus.FOUND);
+    response.setHeader(LOCATION, INDEX_PAGE);
   }
 }

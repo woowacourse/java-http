@@ -5,7 +5,7 @@ public class ResponseLine {
   private static final String HTTP_1_1 = "HTTP/1.1";
 
   private final String version;
-  private final HttpStatus status;
+  private HttpStatus status;
 
   public ResponseLine(final String version, final HttpStatus status) {
     this.version = version;
@@ -18,5 +18,9 @@ public class ResponseLine {
 
   public String build() {
     return this.version + " " + this.status.build();
+  }
+
+  public void setStatus(final HttpStatus status) {
+    this.status = status;
   }
 }

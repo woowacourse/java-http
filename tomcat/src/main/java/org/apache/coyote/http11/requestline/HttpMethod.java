@@ -17,4 +17,12 @@ public enum HttpMethod {
         .findAny()
         .orElseThrow();
   }
+
+  public boolean isGetMethod() {
+    return this.equals(GET);
+  }
+
+  public boolean isPostMethod() {
+    return this.equals(POST);
+  }
 }

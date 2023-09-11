@@ -15,6 +15,7 @@ public class RequestBody {
     private static final String DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int FIELD_COUNT = 2;
 
     private final Map<String, String> items = new HashMap<>();
 
@@ -28,7 +29,7 @@ public class RequestBody {
 
     public static RequestBody from(final String body) {
         return Arrays.stream(body.split(SEPARATOR))
-                .map(field -> field.split(DELIMITER))
+                .map(field -> field.split(DELIMITER, FIELD_COUNT))
                 .collect(collectingAndThen(
                         toMap(field -> field[KEY_INDEX].strip(), field -> field[VALUE_INDEX].strip()),
                         RequestBody::new

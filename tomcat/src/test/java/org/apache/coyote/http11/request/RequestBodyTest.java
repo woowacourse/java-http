@@ -28,6 +28,22 @@ class RequestBodyTest {
     }
 
     @Test
+    void body_문자열을_입력받을_때_빈_값이_들어오는_경우_빈_문자열이_들어간다() {
+        // given
+        final String body = "account=gugu&password=&email=hkkang@woowahan.com";
+
+        // when
+        final RequestBody requestBody = RequestBody.from(body);
+
+        // then
+        assertThat(requestBody.getItems()).contains(
+                entry("account", "gugu"),
+                entry("password", ""),
+                entry("email", "hkkang@woowahan.com")
+        );
+    }
+
+    @Test
     void key를_입력받아_값을_반환한다() {
         // given
         final String body = "account=gugu&password=password&email=hkkang@woowahan.com";

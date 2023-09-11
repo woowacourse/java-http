@@ -18,16 +18,12 @@ public class RegisterController extends AbstractController {
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final RequestBody requestBody = request.getRequestBody();
         final String account = requestBody.get("account");
-
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             response.setHttpStatus(HttpStatus.CONFLICT)
                     .sendRedirect(CONFLICT_PAGE);
             return;
         }
-
-        final String password = requestBody.get("password");
-        final String email = requestBody.get("email");
-        InMemoryUserRepository.save(new User(account, password, email));
+        InMemoryUserRepository.save(new User(account, requestBody.get("password"), requestBody.get("email")));
         response.setHttpStatus(HttpStatus.FOUND)
                 .addHeader("Location", INDEX_PAGE)
                 .sendRedirect(INDEX_PAGE);

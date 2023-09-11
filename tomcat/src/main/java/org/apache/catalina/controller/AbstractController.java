@@ -6,10 +6,19 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String NOT_FOUND_PAGE = "/404.html";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
+        try {
+            routing(request, response);
+        } catch (final IllegalArgumentException e) {
+            response.setHttpStatus(HttpStatus.BAD_REQUEST).sendRedirect(BAD_REQUEST_PAGE);
+        }
+    }
+
+    private void routing(final HttpRequest request, final HttpResponse response) {
         if (request.isGet()) {
             doGet(request, response);
             return;
@@ -22,8 +31,10 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
+        response.setHttpStatus(HttpStatus.NOT_FOUND).sendRedirect(NOT_FOUND_PAGE);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setHttpStatus(HttpStatus.NOT_FOUND).sendRedirect(NOT_FOUND_PAGE);
     }
 }

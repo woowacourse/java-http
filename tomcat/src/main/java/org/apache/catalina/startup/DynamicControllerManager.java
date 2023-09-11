@@ -24,11 +24,7 @@ public class DynamicControllerManager implements ControllerManager {
 
     @Override
     public void service(Request request, Response response) {
-        String cookieHeader = request.getCookie();
-        if (cookieHeader != null) {
-            Session session = sessionManager.findSession(Cookies.getJsessionid(Cookie.from(cookieHeader)));
-            request.addSession(session);
-        }
+        findSessionByCookie(request);
 
         Controller controller = mapper.get(request.getPath());
         if (controller == null) {
@@ -37,6 +33,20 @@ public class DynamicControllerManager implements ControllerManager {
 
         controller.service(request, response);
 
+        saveNewSession(request);
+    }
+
+    private void findSessionByCookie(Request request) {
+        String cookieHeader = request.getCookie();
+        if (cookieHeader != null) {
+            Cookie cookie = Cookie.from(cookieHeader);
+            String jsessionid = Cookies.getJsessionid(cookie);
+            Session session = sessionManager.findSession(jsessionid);
+            request.addSession(session);
+        }
+    }
+
+    private void saveNewSession(Request request) {
         Session session = request.getSession();
         if (session != null && !sessionManager.hasSession(session)) {
             sessionManager.add(session);

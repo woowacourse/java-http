@@ -9,15 +9,11 @@ import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.AbstractController;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.FileExtractor;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBody;
-import org.apache.coyote.http11.response.ResponseHeader;
-import org.apache.coyote.http11.response.StatusLine;
 
 public class LoginController extends AbstractController {
 
@@ -44,23 +40,13 @@ public class LoginController extends AbstractController {
                 log.info("user : " + user);
                 final HttpCookie cookie = HttpCookie.from(request.getRequestHeaders().geHeaderValue(COOKIE));
                 checkSession(user, cookie);
-                final ResponseBody responseBody = FileExtractor.extractFile(INDEX);
-                final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-                response.setStatusLine(new StatusLine(HttpStatusCode.FOUND));
-                response.setResponseHeader(responseHeader);
-                response.setResponseBody(responseBody);
+                setResponse(response, INDEX, HttpStatusCode.FOUND);
                 response.setCookie(cookie);
                 return;
             }
             throw new LoginException();
         } catch (LoginException exception) {
-            final ResponseBody responseBody = FileExtractor.extractFile(UNAUTHORIZED);
-            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-            response.setStatusLine(new StatusLine(HttpStatusCode.UNAUTHORIZED));
-            response.setResponseHeader(responseHeader);
-            response.setResponseBody(responseBody);
+            setResponse(response, UNAUTHORIZED, HttpStatusCode.UNAUTHORIZED);
         }
     }
 
@@ -79,20 +65,10 @@ public class LoginController extends AbstractController {
         final String requestResource = request.getRequestPath().getResource();
 
         if (cookie.contains(JSESSIONID)) {
-            final ResponseBody responseBody = FileExtractor.extractFile(INDEX);
-            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-            response.setStatusLine(new StatusLine(HttpStatusCode.FOUND));
-            response.setResponseHeader(responseHeader);
-            response.setResponseBody(responseBody);
+            setResponse(response, INDEX, HttpStatusCode.FOUND);
             response.setCookie(cookie);
             return;
         }
-        final ResponseBody responseBody = FileExtractor.extractFile(requestResource);
-        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-        response.setStatusLine(new StatusLine(HttpStatusCode.OK));
-        response.setResponseHeader(responseHeader);
-        response.setResponseBody(responseBody);
+        setResponse(response, requestResource, HttpStatusCode.OK);
     }
 }

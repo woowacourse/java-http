@@ -5,13 +5,9 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.AbstractController;
-import org.apache.coyote.http11.FileExtractor;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBody;
-import org.apache.coyote.http11.response.ResponseHeader;
-import org.apache.coyote.http11.response.StatusLine;
 
 public class RegisterController extends AbstractController {
 
@@ -32,41 +28,21 @@ public class RegisterController extends AbstractController {
         final String email = requestBody.get(EMAIL);
 
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
-            final ResponseBody responseBody = FileExtractor.extractFile(BAD_REQUEST);
-            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-            response.setStatusLine(new StatusLine(HttpStatusCode.BAD_REQUEST));
-            response.setResponseHeader(responseHeader);
-            response.setResponseBody(responseBody);
+            setResponse(response, BAD_REQUEST, HttpStatusCode.BAD_REQUEST);
             return;
         }
 
         if (InMemoryUserRepository.checkExistingId(account)) {
-            final ResponseBody responseBody = FileExtractor.extractFile(CONFLICT);
-            final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-            response.setStatusLine(new StatusLine(HttpStatusCode.CONFLICT));
-            response.setResponseHeader(responseHeader);
-            response.setResponseBody(responseBody);
+            setResponse(response, CONFLICT, HttpStatusCode.CONFLICT);
             return;
         }
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        final ResponseBody responseBody = FileExtractor.extractFile(INDEX);
-        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-        response.setStatusLine(new StatusLine(HttpStatusCode.OK));
-        response.setResponseHeader(responseHeader);
-        response.setResponseBody(responseBody);
+        setResponse(response, INDEX, HttpStatusCode.OK);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
-        final ResponseBody responseBody = FileExtractor.extractFile(REGISTER);
-        final ResponseHeader responseHeader = ResponseHeader.from(responseBody);
-
-        response.setStatusLine(new StatusLine(HttpStatusCode.OK));
-        response.setResponseHeader(responseHeader);
-        response.setResponseBody(responseBody);
+        setResponse(response, REGISTER, HttpStatusCode.OK);
     }
 }

@@ -15,6 +15,11 @@ public class HomeController extends AbstractController {
     private static final String DEFAULT_CONTENT = "Hello world!";
 
     @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+        setResponse(response, "/500", HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final ResponseBody responseBody = ResponseBody.of(ExtensionType.HTML.getExtension(), DEFAULT_CONTENT);
         final ResponseHeader responseHeader = ResponseHeader.from(responseBody);

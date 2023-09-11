@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.common;
+package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,14 +9,20 @@ public class Session {
 
     private final String id;
     private final Map<String, Object> attributes = new HashMap<>();
+    private boolean isFirstSent;
 
 
     public Session() {
         this(UUID.randomUUID().toString());
     }
 
-    public Session(final String id) {
+    private Session(final String id) {
         this.id = id;
+        this.isFirstSent = true;
+    }
+
+    public boolean isFirstSent() {
+        return isFirstSent;
     }
 
     public String getId() {
@@ -24,11 +30,15 @@ public class Session {
     }
 
     public Object getAttribute(String name) {
-        return attributes.get(name);
+        return attributes.getOrDefault(name, null);
     }
 
     public void setAttribute(String name, Object value) {
         attributes.put(name, value);
+    }
+
+    public void setFirstSent(final boolean isFirstSent) {
+        this.isFirstSent = isFirstSent;
     }
 
     public void removeAttribute(String name) {

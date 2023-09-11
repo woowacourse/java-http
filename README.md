@@ -8,7 +8,7 @@
 - [x] HttpRequest에 세션 추가 
 - [x] HttpResponse 변경 및 수정
 - [x] Servlet, DispatcherServlet 구현
-- [ ] HttpRequest와 세션 생명 주기 수정
+- [x] HttpRequest와 세션 생명 주기 수정
 - [ ] RequestMapping 클래스 생성
 - [ ] 패키지 분리 및 핸들러 인터페이스와 컨트롤러 추상클래스 생성
 - [ ] 패키지 분리 및 컨트롤러 클래스 수정

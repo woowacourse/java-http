@@ -8,12 +8,15 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.headers.MimeType;
 
 public class HttpResponse {
+
+	private static final String EMPTY_BODY = "";
+
 	private HttpStatusCode statusCode;
 	private String body;
 	private final HttpHeaders headers;
 
 	public HttpResponse() {
-		this(null, "", new HttpHeaders());
+		this(null, EMPTY_BODY, new HttpHeaders());
 	}
 
 	public HttpResponse(final HttpStatusCode statusCode, final String body, final HttpHeaders headers) {
@@ -23,8 +26,7 @@ public class HttpResponse {
 	}
 
 	public void redirect(final String location) {
-		final String body = "";
-		setResponse(TEMPORARILY_MOVED_302, body, HTML);
+		setResponse(TEMPORARILY_MOVED_302, EMPTY_BODY, HTML);
 		headers.addLocation(location);
 	}
 

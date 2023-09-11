@@ -25,13 +25,13 @@ public class Http11Processor implements Runnable, Processor {
             .sendRedirect("/500.html");
 
     private final Socket connection;
-    private final Mapper mapper;
+    private final Adapter adapter;
     private final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
 
-    public Http11Processor(final Socket connection, final Mapper mapper) {
+    public Http11Processor(final Socket connection, final Adapter adapter) {
         this.connection = connection;
-        this.mapper = mapper;
+        this.adapter = adapter;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse(httpRequest.getHttpVersion());
 
-            mapper.service(httpRequest, httpResponse);
+            adapter.service(httpRequest, httpResponse);
             write(outputStream, httpResponse);
         } catch (final Exception e) {
             log.error(e.getMessage(), e);

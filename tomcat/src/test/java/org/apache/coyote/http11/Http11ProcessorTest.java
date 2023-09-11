@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.catalina.RequestMapper;
+import org.apache.catalina.RequestAdapter;
 import org.apache.catalina.controller.StaticController;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -28,8 +28,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final RequestMapper requestMapper = new RequestMapper(new StaticController());
-        final Http11Processor processor = new Http11Processor(socket, requestMapper);
+        final RequestAdapter requestAdapter = new RequestAdapter(new StaticController());
+        final Http11Processor processor = new Http11Processor(socket, requestAdapter);
 
         // when
         processor.process(socket);

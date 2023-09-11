@@ -6,8 +6,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.coyote.http11.Adapter;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,17 +19,17 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final Mapper mapper;
+    private final Adapter adapter;
     private final ExecutorService executorService;
 
-    public Connector(final Mapper mapper, final int threadCount) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, mapper, threadCount);
+    public Connector(final Adapter adapter, final int threadCount) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, adapter, threadCount);
     }
 
-    public Connector(final int port, final int acceptCount, final Mapper mapper, final int threadCount) {
+    public Connector(final int port, final int acceptCount, final Adapter adapter, final int threadCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.mapper = mapper;
+        this.adapter = adapter;
         this.executorService = Executors.newFixedThreadPool(threadCount);
     }
 
@@ -71,7 +71,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final Http11Processor processor = new Http11Processor(connection, mapper);
+        final Http11Processor processor = new Http11Processor(connection, adapter);
         executorService.execute(processor);
     }
 

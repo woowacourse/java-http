@@ -28,7 +28,7 @@ public class RegisterController extends AbstrcatController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        final Session session = SessionManager.findSession(request.getCookie(JSESSIONID_COOKIE_NAME));
+        final Session session = getSession(request, response);
 
         if (session != null && session.getUser() instanceof User) {
             response.redirectTo(LOGIN_USER_REDIRECT_PAGE);

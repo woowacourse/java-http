@@ -37,7 +37,7 @@ public class LoginController extends AbstrcatController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Session session = SessionManager.findSession(request.getCookie(JSESSIONID_COOKIE_NAME));
+        final Session session = getSession(request, response);
 
         if (processLogin(request)) {
             final User user = InMemoryUserRepository.findByAccount(request.getBody(ACCOUNT_KEY)).get();

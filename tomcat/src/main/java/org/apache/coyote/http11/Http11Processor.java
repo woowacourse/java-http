@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
@@ -15,9 +13,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.UUID;
-
-import static org.apache.catalina.session.Session.JSESSIONID_COOKIE_NAME;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,8 +43,6 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final HttpRequest request = HttpRequestFactory.readFrom(bufferedReader);
 
-            makeSessionIfNotExist(request, response);
-
             final Controller controller = requestMapper.getController(request);
             controller.service(request, response);
 
@@ -60,16 +53,6 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private void makeSessionIfNotExist(final HttpRequest request, final HttpResponse response) {
-        final String sessionId = request.getCookie(JSESSIONID_COOKIE_NAME);
-        if (SessionManager.findSession(sessionId) == null) {
-            final UUID generatedSessionId = UUID.randomUUID();
-            final Session session = new Session(generatedSessionId.toString());
-            SessionManager.addSession(session);
-            response.setCookie(JSESSIONID_COOKIE_NAME, session.getId());
         }
     }
 }

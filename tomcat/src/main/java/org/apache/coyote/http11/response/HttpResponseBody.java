@@ -28,7 +28,7 @@ public class HttpResponseBody {
             final String filePath = classLoader.getResource(STATIC + path).getPath();
             final String fileContent = new String(Files.readAllBytes(Path.of(filePath)));
             return new HttpResponseBody(HttpContentType.from(filePath), String.join(CRLF, fileContent));
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             throw new IllegalArgumentException("해당 경로에 파일이 존재하지 않습니다.");
         }
     }

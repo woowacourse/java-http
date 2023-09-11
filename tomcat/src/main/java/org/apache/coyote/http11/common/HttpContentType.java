@@ -6,6 +6,8 @@ public enum HttpContentType {
     TEXT_HTML("text/html", ".html"),
     CSS("text/css", ".css"),
     APPLICATION_JSON("application/json", ".json"),
+    JAVASCRIPT("application/javascript", ".js"),
+    FAVICON("image/x-icon", ".ico"),
     ;
 
     private static final String DEFAULT_UTF8 = "charset=utf-8";

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.Cookie;
 import org.apache.coyote.HttpMethod;
@@ -25,6 +26,9 @@ public class Http11RequestReader {
 	private static final String HEADER_SEPARATOR = ": ";
 	private static final String COOKIE_DELIMITER = "; ";
 	private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
+	private static final String QUERY_STRING_SEPARATOR = "?";
+	private static final String QUERY_PARAM_DELIMITER = "&";
+	private static final String KEY_VALUE_SEPARATOR = "=";
 
 	private final BufferedReader reader;
 
@@ -43,9 +47,34 @@ public class Http11RequestReader {
 		final var requestLine = reader.readLine();
 		final var parts = requestLine.split(REQUEST_LINE_DELIMITER);
 		final var method = HttpMethod.from(parts[0]);
-		final var uri = RequestUri.from(parts[1]);
+		final var uri = readRequestUri(parts[1]);
 		final var version = HttpProtocolVersion.from(parts[2]);
 		return new RequestLine(method, uri, version);
+	}
+
+	private RequestUri readRequestUri(String uri) {
+		final var queryStringIndex = uri.indexOf(QUERY_STRING_SEPARATOR);
+
+		if (hasNoQuery(queryStringIndex)) {
+			return new RequestUri(uri);
+		}
+
+		final var path = uri.substring(0, queryStringIndex);
+		final var queryString = uri.substring(queryStringIndex + 1);
+		final var queryParams = parseQueryString(queryString);
+
+		return new RequestUri(path, queryParams);
+	}
+
+	private boolean hasNoQuery(final int index) {
+		return index == -1;
+	}
+
+	private Map<String, String> parseQueryString(final String queryString) {
+		return Arrays.stream(queryString.split(QUERY_PARAM_DELIMITER))
+			.map(queryParam -> queryParam.split(KEY_VALUE_SEPARATOR, 2))
+			.filter(parts -> parts.length == 2)
+			.collect(toMap(parts -> parts[0], parts -> parts[1]));
 	}
 
 	private RequestHeader readRequestHeader() throws IOException {

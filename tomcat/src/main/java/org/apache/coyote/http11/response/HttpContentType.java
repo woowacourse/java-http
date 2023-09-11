@@ -20,6 +20,14 @@ public enum HttpContentType {
                         httpContentType -> httpContentType));
     }
 
+    private final String headerString;
+    private final String fileExtension;
+
+    HttpContentType(String headerString, String fileExtension) {
+        this.headerString = headerString;
+        this.fileExtension = fileExtension;
+    }
+
     public static HttpContentType getByFilePath(final String filePath) {
         final String[] fileNameSplit = filePath.split("\\.");
         final String fileType = fileNameSplit[fileNameSplit.length - 1];
@@ -28,14 +36,6 @@ public enum HttpContentType {
                 fileType,
                 PLAIN_TEXT
         );
-    }
-
-    private final String headerString;
-    private final String fileExtension;
-
-    HttpContentType(String headerString, String fileExtension) {
-        this.headerString = headerString;
-        this.fileExtension = fileExtension;
     }
 
     public String getHeaderString() {

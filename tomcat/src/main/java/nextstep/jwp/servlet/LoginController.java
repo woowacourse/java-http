@@ -1,9 +1,10 @@
-package nextstep.jwp.presentation;
+package nextstep.jwp.servlet;
 
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.FileIOReader;
+import org.apache.catalina.AbstractController;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.Session;
@@ -11,11 +12,11 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
+    private static final String URL = "/login";
     private static final String INDEX = "/index.html";
     private static final String JSESSIONID = "JSESSIONID";
-
     private static final LoginController instance = new LoginController();
     private static final String UNAUTHORIZED = "/401.html";
 
@@ -27,39 +28,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse service(HttpRequest request, HttpResponse response) {
-        if (request.getMethod().equalsIgnoreCase("POST") && request.getRequestUrl().equals("/login")) {
-            return tryLogin(request, response);
-        }
-        if (request.getMethod().equalsIgnoreCase("GET") && request.getRequestUrl().equals("/login")) {
-            return loginPage(request, response);
-        }
-        if (request.getMethod().equalsIgnoreCase("GET") && request.getRequestUrl().equals("/register")) {
-            return registerPage(request, response);
-        }
-        if (request.getMethod().equalsIgnoreCase("POST") && request.getRequestUrl().equals("/register")) {
-            return register(request, response);
-        }
-        return null;
-    }
-
-    private HttpResponse register(HttpRequest request, HttpResponse response) {
-        InMemoryUserRepository.save(new User(
-                request.getBodyValue("account"),
-                request.getBodyValue("password"),
-                request.getBodyValue("email")
-        ));
-        return response.contentType(request.getAccept())
-                       .redirect(INDEX);
-    }
-
-    private HttpResponse registerPage(HttpRequest request, HttpResponse response) {
-        String responseBody = FileIOReader.readFile(request.getRequestUrl());
-        return response.contentType(request.getAccept())
-                       .body(responseBody);
-    }
-
-    private HttpResponse loginPage(HttpRequest request, HttpResponse response) {
+    public HttpResponse doGet(HttpRequest request, HttpResponse response) {
         if (request.getSession().getAttribute("user") != null) {
             return response.contentType(request.getAccept())
                            .redirect(INDEX);
@@ -69,7 +38,8 @@ public class LoginController implements Controller {
                        .body(responseBody);
     }
 
-    private HttpResponse tryLogin(HttpRequest request, HttpResponse response) {
+    @Override
+    public HttpResponse doPost(HttpRequest request, HttpResponse response) {
         try {
             login(request, response);
             return response.contentType(request.getAccept())

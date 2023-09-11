@@ -9,17 +9,32 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.servlet.LoginController;
+import nextstep.jwp.servlet.MainPageController;
+import nextstep.jwp.servlet.RegisterController;
+import nextstep.jwp.servlet.ResourceController;
+import org.apache.catalina.FrontController;
+import org.apache.coyote.http11.Adaptor;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    public static final Adaptor adaptor = new FrontController();
+
+    private Http11ProcessorTest() {
+        adaptor.addController("/", MainPageController.getInstance());
+        adaptor.addController("/login", LoginController.getInstance());
+        adaptor.addController("/register", RegisterController.getInstance());
+        adaptor.setResourceHandler(ResourceController.getInstance());
+    }
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, adaptor);
 
         // when
         processor.process(socket);
@@ -46,7 +61,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, adaptor);
 
         // when
         processor.process(socket);
@@ -73,7 +88,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(HttpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, adaptor);
 
         //when
         processor.process(socket);
@@ -103,7 +118,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(request);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, adaptor);
 
         //when
         processor.process(socket);
@@ -132,7 +147,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(request);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, adaptor);
 
         //when
         processor.process(socket);
@@ -157,7 +172,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(HttpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, adaptor);
 
         //when
         processor.process(socket);
@@ -187,7 +202,7 @@ class Http11ProcessorTest {
                 body);
 
         final var socket = new StubSocket(request);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, adaptor);
 
         //when
         processor.process(socket);

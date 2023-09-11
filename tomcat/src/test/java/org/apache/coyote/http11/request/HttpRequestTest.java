@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

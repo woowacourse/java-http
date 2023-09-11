@@ -1,15 +1,14 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import jakarta.servlet.http.HttpSession;
-import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Manager;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
     private static final SessionManager instance = new SessionManager();
 
-    private final Map<String, HttpSession> sessions = new HashMap<>();
+    private final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -25,6 +24,9 @@ public class SessionManager implements Manager {
 
     @Override
     public HttpSession findSession(String id) {
+        if (id == null) {
+            return null;
+        }
         return sessions.get(id);
     }
 

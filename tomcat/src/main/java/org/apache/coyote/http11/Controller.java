@@ -1,4 +1,4 @@
-package nextstep.jwp.presentation;
+package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

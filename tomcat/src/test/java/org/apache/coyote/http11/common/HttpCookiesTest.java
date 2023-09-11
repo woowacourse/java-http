@@ -55,17 +55,4 @@ class HttpCookiesTest {
                 .containsExactlyInAnyOrder("charset=UTF-8", "");
     }
 
-    @Test
-    @DisplayName("저장된 쿠키의 정보를 모두 조회할 수 있다.")
-    void getCookies() {
-        //given
-        String cookieInformation = "JSESSIONID=testJSessionId; charset=UTF-8, TESTCOOKIE=NewJeans";
-
-        //when
-        HttpCookies httpCookies = HttpCookies.from(cookieInformation);
-
-        //then
-        assertThat(httpCookies.getCookies()).isEqualTo(cookieInformation);
-    }
-
 }

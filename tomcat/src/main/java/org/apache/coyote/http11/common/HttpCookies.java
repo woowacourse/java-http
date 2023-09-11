@@ -1,15 +1,14 @@
 package org.apache.coyote.http11.common;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.coyote.http11.exception.BadRequestException;
 
 public class HttpCookies {
 
     private static final String COOKIE_DELIMITER = ", ";
-    private static final String ATTRIBUTE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int COOKIE_KEY_INDEX = 0;
 
@@ -46,20 +45,8 @@ public class HttpCookies {
         return cookies.isEmpty();
     }
 
-    public String getCookies() {
-        return cookies.keySet()
-                .stream()
-                .map(key -> {
-                    Cookie cookie = cookies.get(key);
-
-                    if (cookie.hasAttribute()) {
-                        return key + KEY_VALUE_DELIMITER + cookie.getValue() + ATTRIBUTE_DELIMITER
-                                + cookie.getAttribute();
-                    }
-
-                    return key + KEY_VALUE_DELIMITER + cookie.getValue();
-                })
-                .collect(Collectors.joining(COOKIE_DELIMITER));
+    public Map<String, Cookie> getCookies() {
+        return Collections.unmodifiableMap(cookies);
     }
 
     public Cookie get(String key) {

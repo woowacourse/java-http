@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpBody;
 import org.apache.coyote.http11.common.HttpCookies;
@@ -9,6 +10,9 @@ public class HttpResponse {
 
     private static final String RESPONSE_LINE_FORMAT = "%s %s %s ";
     private static final String COOKIE_HEADER_FORMAT = "Set-Cookie: %s ";
+    private static final String COOKIE_DELIMITER = ", ";
+    private static final String ATTRIBUTE_DELIMITER = "; ";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final HttpStatusLine httpStatusLine;
     private final HttpResponseHeaders httpResponseHeaders;
@@ -85,9 +89,26 @@ public class HttpResponse {
         return String.join(System.lineSeparator(),
                 String.format(RESPONSE_LINE_FORMAT, httpVersion, httpStatusCode, httpStatusMessage),
                 httpResponseHeaders.getHeaders(),
-                String.format(COOKIE_HEADER_FORMAT, httpCookies.getCookies()),
+                String.format(COOKIE_HEADER_FORMAT, extractCookie()),
                 "",
                 httpBody.getBody());
+    }
+
+    private String extractCookie() {
+        return httpCookies.getCookies()
+                .keySet()
+                .stream()
+                .map(key -> {
+                    Cookie cookie = httpCookies.get(key);
+
+                    if (cookie.hasAttribute()) {
+                        return key + KEY_VALUE_DELIMITER + cookie.getValue() + ATTRIBUTE_DELIMITER
+                                + cookie.getAttribute();
+                    }
+
+                    return key + KEY_VALUE_DELIMITER + cookie.getValue();
+                })
+                .collect(Collectors.joining(COOKIE_DELIMITER));
     }
 
     private String extractResponseWithoutCookie() {

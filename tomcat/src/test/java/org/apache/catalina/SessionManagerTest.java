@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.common.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -53,7 +54,8 @@ class SessionManagerTest {
         sessionManager.remove("helloworld");
 
         // then
-        assertThat(sessionManager.findSession("helloworld")).isNull();
+        final Session findSession = sessionManager.findSession("helloworld");
+        assertThat(findSession).isNotEqualTo(session);
     }
 
     @Test

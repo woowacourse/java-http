@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.common.Session;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

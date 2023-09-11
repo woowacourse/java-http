@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestLine;
@@ -39,6 +39,7 @@ class LoginControllerTest {
         // given
         final RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
         final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), new RequestBody());
+        httpRequest.setSession(new Session());
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
 
         // when
@@ -57,9 +58,11 @@ class LoginControllerTest {
         final RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
         final String uuid = UUID.randomUUID().toString();
         final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), new RequestBody());
-        httpRequest.setSession(new Session(uuid));
+        final Session session = new Session(uuid);
+        session.setAttribute("user", new User("gugu", "password", "gugu@naver.com"));
+        httpRequest.setSession(session);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
-        sessionManager.add(new Session(uuid));
+        sessionManager.add(session);
 
         // when
         controller.service(httpRequest, httpResponse);

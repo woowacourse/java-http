@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.catalina.Session;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpStatus;

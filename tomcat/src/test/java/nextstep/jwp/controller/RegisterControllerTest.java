@@ -66,7 +66,8 @@ class RegisterControllerTest {
     void POST_요청_시_회원가입에_성공하는_경우_index_페이지를_반환하도록_설정한다() {
         // given
         final RequestLine requestLine = RequestLine.from("POST /register HTTP/1.1");
-        final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), new RequestBody());
+        final RequestBody requestBody = RequestBody.from("account=gugu&password=password&email=hkkang@woowahan.com");
+        final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), requestBody);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
 
         // when

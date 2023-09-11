@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.Mapper;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -34,18 +35,12 @@ public class RequestMapper implements Mapper {
 
     private void setSessionToHttpRequest(final HttpRequest httpRequest) {
         final String sessionId = httpRequest.parseSessionId();
-        if (sessionId == null) {
-            return;
-        }
         final Session session = sessionManager.findSession(sessionId);
         httpRequest.setSession(session);
     }
 
     private void addSession(final HttpResponse httpResponse) {
         final Session session = httpResponse.getSession();
-        if (session == null) {
-            return;
-        }
         sessionManager.add(session);
     }
 }

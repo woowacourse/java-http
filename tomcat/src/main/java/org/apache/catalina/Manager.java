@@ -1,5 +1,7 @@
 package org.apache.catalina;
 
+import org.apache.coyote.http11.common.Session;
+
 public interface Manager {
 
     void add(final Session session);

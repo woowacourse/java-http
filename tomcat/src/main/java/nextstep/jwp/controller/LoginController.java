@@ -1,12 +1,10 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -29,17 +27,19 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        final String uuid = UUID.randomUUID().toString();
+        final Session session = request.getSession();
+        session.setAttribute("user", user);
         response.setHttpStatus(HttpStatus.FOUND)
-                .setCookie("JSESSIONID", uuid)
-                .setSession(new Session(uuid, Map.of("user", user)))
+                .setCookie("JSESSIONID", session.getId())
+                .setSession(session)
                 .addHeader("Location", INDEX_PAGE)
                 .sendRedirect(INDEX_PAGE);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        if (request.getSession() == null) {
+        final Session session = request.getSession();
+        if (session.getAttribute("user") == null) {
             response.setHttpStatus(HttpStatus.OK).sendRedirect(LOGIN_PAGE);
             return;
         }

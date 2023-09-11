@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.catalina.Session;
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.common.Session;
 
 public class HttpRequest {
 

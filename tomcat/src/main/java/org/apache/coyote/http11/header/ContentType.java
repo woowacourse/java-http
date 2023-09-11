@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 public enum ContentType {
     HTML("text/html;charset=utf-8"),
@@ -24,7 +24,6 @@ public enum ContentType {
                 return contentType;
             }
         }
-        System.out.println("extension = " + extension);
         throw new IllegalArgumentException("지원하지 않는 확장자입니다.");
     }
 
@@ -34,7 +33,6 @@ public enum ContentType {
                 return contentType;
             }
         }
-        System.out.println("type = " + type);
         throw new IllegalArgumentException("지원하지 않는 Content-Type입니다.");
     }
 

@@ -6,6 +6,11 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.body.Body;
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.Cookie;
+import org.apache.coyote.http11.header.HttpMethod;
+import org.apache.coyote.http11.header.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +133,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeLoginResponse(final OutputStream outputStream, final Body body) throws IOException {
-        System.out.println("body = " + body);
         final String account = body.getValue("account");
         final String password = body.getValue("password");
         final User loginUser = InMemoryUserRepository.findByAccount(account)

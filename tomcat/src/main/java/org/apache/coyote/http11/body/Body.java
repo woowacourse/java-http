@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.body;
+
+import org.apache.coyote.http11.header.ContentType;
 
 import java.io.BufferedReader;
 import java.io.IOException;

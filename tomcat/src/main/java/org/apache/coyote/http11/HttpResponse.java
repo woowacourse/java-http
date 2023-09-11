@@ -1,5 +1,10 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.Cookie;
+import org.apache.coyote.http11.header.HttpStatus;
+import org.apache.coyote.http11.header.HttpVersion;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,11 +19,6 @@ public class HttpResponse {
         this.status = status;
     }
 
-    public HttpResponse addHeader(final String key, final String value) {
-        headers.put(key, value);
-        return this;
-    }
-
     public HttpResponse addContentType(final ContentType contentType) {
         headers.put("Content-Type", contentType.getType());
         return this;
@@ -26,12 +26,6 @@ public class HttpResponse {
 
     public HttpResponse addContentLength(final int length) {
         headers.put("Content-Length", String.valueOf(length));
-        return this;
-    }
-
-    public HttpResponse addCharset(final String charset) {
-        final String type = headers.get("Content-Type") + ";charset=" + charset;
-        headers.put("Content-Type", type);
         return this;
     }
 
@@ -46,7 +40,7 @@ public class HttpResponse {
 
     public String build(final String body) {
         List<String> response = new ArrayList<>();
-        response.add("HTTP/1.1 " + status.getStatusResponse() + " ");
+        response.add(HttpVersion.HTTP_1_1.getVersion() + status.getStatusResponse() + " ");
         headers.forEach((key, value) -> response.add(key + HEADER_SEPARATOR + value + " "));
         response.add("");
         response.add(body);

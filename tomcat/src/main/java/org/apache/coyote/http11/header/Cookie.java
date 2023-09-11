@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 public class Cookie {
     private static final String COOKIE_SEPARATOR = "=";

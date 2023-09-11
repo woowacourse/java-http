@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.body.Body;
+import org.apache.coyote.http11.header.Headers;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;

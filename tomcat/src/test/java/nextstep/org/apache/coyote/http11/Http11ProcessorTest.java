@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import nextstep.jwp.controller.RootController;
+import org.apache.catalina.controller.ControllerStatus;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.catalina.controller.ControllerMapper;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var handlerMapper = new ControllerMapper();
+        handlerMapper.addController(new ControllerStatus("/"), new RootController());
         final var processor = new Http11Processor(socket, handlerMapper);
 
         // when

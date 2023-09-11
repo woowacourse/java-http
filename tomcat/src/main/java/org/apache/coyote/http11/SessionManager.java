@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;

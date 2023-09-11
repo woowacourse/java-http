@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpRequest {
+
     private HttpMethod method;
     private String path;
     private Map<String, String> headers = new HashMap<>();

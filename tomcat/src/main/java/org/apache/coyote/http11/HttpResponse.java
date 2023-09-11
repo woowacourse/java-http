@@ -53,4 +53,5 @@ public class HttpResponse {
     public StringBuilder getBody() {
         return body;
     }
+
 }

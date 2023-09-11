@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import nextstep.jwp.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
+import org.apache.coyote.http11.header.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +35,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             final HttpRequest request = HttpRequest.parse(bufferedReader);
-            log.info("{} {}", request.requestLine().method(), request.requestLine().uri());
+            final RequestLine requestLine = request.getRequestLine();
+            log.info("{} {}", requestLine.getMethod(), requestLine.getUri());
             final Controller controller = RequestMapping.getController(request);
             final HttpResponse response = new HttpResponse();
             controller.service(request, response);
-            log.info("{} {} {}", response.getStatus(), request.requestLine().method(), request.getPath());
+            log.info("{} {} {}", response.getStatus(), requestLine.getMethod(), request.getPath());
             writeResponse(outputStream, response.build());
         } catch (Exception e) {
             log.error(e.getMessage(), e);

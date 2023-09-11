@@ -15,7 +15,7 @@ import org.apache.coyote.http11.header.HttpStatus;
 public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Body body = request.body();
+        final Body body = request.getBody();
         final String account = body.getValue("account");
         final String password = body.getValue("password");
         final User loginUser = InMemoryUserRepository.findByAccount(account)
@@ -30,7 +30,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (request.headers().getCookies().containsKey("JSESSIONID")) {
+        if (request.getHeaders().getCookies().containsKey("JSESSIONID")) {
             response.addStatus(HttpStatus.FOUND)
                     .addLocation("/index.html");
             return;

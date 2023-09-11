@@ -14,7 +14,7 @@ import org.apache.coyote.http11.header.HttpStatus;
 public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
-        final var body = request.body();
+        final var body = request.getBody();
         final String account = body.getValue("account");
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(user -> {

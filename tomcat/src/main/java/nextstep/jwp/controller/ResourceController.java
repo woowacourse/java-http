@@ -17,7 +17,7 @@ public class ResourceController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final String resourcePath = request.requestLine().uri().getPath();
+        final String resourcePath = request.getRequestLine().getUri().getPath();
         final String extension = resourcePath.substring(resourcePath.lastIndexOf(".") + 1);
         final ContentType contentType = ContentType.from(extension);
         final String content = getResourceContent(resourcePath);

@@ -4,9 +4,13 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public record Headers(
-        Map<HeaderType, String> headers
-) {
+public class Headers {
+    private final Map<HeaderType, String> headers;
+
+    public Headers(final Map<HeaderType, String> headers) {
+        this.headers = headers;
+    }
+
     public static Headers parse(final List<String> headerLines) {
         final var headers = new EnumMap<HeaderType, String>(HeaderType.class);
         headerLines.stream()

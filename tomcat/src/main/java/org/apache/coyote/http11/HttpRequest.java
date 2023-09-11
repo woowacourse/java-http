@@ -8,12 +8,19 @@ import org.apache.coyote.http11.header.RequestLine;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public record HttpRequest(
-        RequestLine requestLine,
-        Headers headers,
-        Body body
-) {
+public class HttpRequest {
+    private final RequestLine requestLine;
+    private final Headers headers;
+    private final Body body;
+
+    public HttpRequest(final RequestLine requestLine, final Headers headers, final Body body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
     public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
         final var lines = read(bufferedReader);
         final var requestLine = RequestLine.parse(lines.get(0));
@@ -25,18 +32,30 @@ public record HttpRequest(
     private static List<String> read(final BufferedReader bufferedReader) {
         return bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public Body getBody() {
+        return body;
     }
 
     public boolean isGet() {
-        return requestLine.method() == HttpMethod.GET;
+        return requestLine.getMethod() == HttpMethod.GET;
     }
 
     public boolean isPost() {
-        return requestLine.method() == HttpMethod.POST;
+        return requestLine.getMethod() == HttpMethod.POST;
     }
 
     public String getPath() {
-        return requestLine.uri().getPath();
+        return requestLine.getUri().getPath();
     }
 }

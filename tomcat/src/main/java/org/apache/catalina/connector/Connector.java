@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -15,17 +18,27 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_MAX_THREADS = 10;
+    private static final int DEFAULT_CORE_THREADS = 0;
+    private static final int DEFAULT_THREAD_ALIVE_SECONDS = 10;
 
     private final ServerSocket serverSocket;
+    private final ThreadPoolExecutor threadPoolExecutor;
+
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREADS);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.threadPoolExecutor = new ThreadPoolExecutor(DEFAULT_CORE_THREADS,
+                maxThreads,
+                DEFAULT_THREAD_ALIVE_SECONDS,
+                TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(maxThreads));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -67,7 +80,7 @@ public class Connector implements Runnable {
             return;
         }
         var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        threadPoolExecutor.execute(processor);
     }
 
     public void stop() {

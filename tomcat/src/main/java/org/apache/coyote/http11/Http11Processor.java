@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.controller.AuthController;
 import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -11,14 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -59,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse.setHttpStatus(HttpStatus.OK).setResponseFileName(httpRequest.path());
             }
 
-            httpResponse.setBody(readFile(httpResponse.getResponseFileName()));
+            httpResponse.setBody(FileReader.readFile(httpResponse.getResponseFileName()));
             httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getBody().getBytes().length));
             httpResponse.addHeader("Content-Type", httpRequest.getContentTypeByAcceptHeader());
 
@@ -68,15 +63,6 @@ public class Http11Processor implements Runnable, Processor {
             bufferedOutputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private String readFile(String fileName) {
-        String filePath = this.getClass().getClassLoader().getResource("static" + fileName).getPath();
-        try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-            return lines.collect(Collectors.joining("\n", "", "\n"));
-        } catch (IOException | UncheckedIOException e) {
-            return "Hello world!";
         }
     }
 }

@@ -3,6 +3,9 @@ package nextstep.jwp.handler;
 import static org.apache.coyote.response.StatusCode.*;
 
 import org.apache.catalina.AbstractHandler;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.Cookie;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;
@@ -46,9 +49,22 @@ public class RegisterRequestHandler extends AbstractHandler {
 			return;
 		}
 
-		InMemoryUserRepository.save(new User(account, password, email));
+		final var user = new User(account, password, email);
+		InMemoryUserRepository.save(user);
+
+		final var session = createSession(user);
+		final var cookie = Cookie.session(session.getId());
+
 		log.info("[REGISTER SUCCESS] account: {}", account);
 		response.redirect("/index.html");
+		response.addCookie(cookie);
+	}
+
+	private Session createSession(final User user) {
+		final var session = Session.create();
+		session.setAttribute("account", user.getAccount());
+		SessionManager.add(session);
+		return session;
 	}
 
 	private boolean isInvalidInput(final String account, final String password, final String email) {

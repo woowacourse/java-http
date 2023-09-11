@@ -37,9 +37,9 @@ public class HttpRequest {
               }
             },
             () -> {
-              final Session session = new Session(UUID.randomUUID().toString());
-              sessionManager.add(session);
-              addSession(session);
+              final Session newSession = new Session(UUID.randomUUID().toString());
+              sessionManager.add(newSession);
+              addSession(newSession);
             }
         );
   }

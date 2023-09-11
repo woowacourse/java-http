@@ -2,15 +2,16 @@ package org.apache.coyote.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.request.Cookie;
 import org.apache.coyote.request.HttpRequestLine;
 import org.apache.coyote.request.QueryString;
 import org.apache.coyote.request.RequestBody;
 
 public class HttpRequestReader {
+
+  private HttpRequestReader() {
+  }
 
   public static HttpRequestLine parseHttpRequestLine(final List<String> headers) {
     final String requestLine = headers.get(0);

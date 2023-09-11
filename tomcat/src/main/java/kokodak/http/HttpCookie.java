@@ -32,9 +32,6 @@ public class HttpCookie {
     }
 
     public String cookie(final String key) {
-        if (cookie.containsKey(key)) {
-            return cookie.get(key);
-        }
-        return "";
+        return cookie.getOrDefault(key, "");
     }
 }

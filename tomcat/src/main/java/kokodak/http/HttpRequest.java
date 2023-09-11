@@ -72,9 +72,16 @@ public class HttpRequest {
                 break;
             }
             final String[] headerKeyValue = request.split(COLON.getValue() + BLANK.getValue());
+            validateHeader(headerKeyValue);
             header.put(headerKeyValue[0], headerKeyValue[1]);
         }
         return header;
+    }
+
+    private static void validateHeader(final String[] headerKeyValue) {
+        if (headerKeyValue.length != 2) {
+            throw new IllegalArgumentException("Invalid Header");
+        }
     }
 
     private static String getBody(final BufferedReader bufferedReader, final Map<String, String> header) throws IOException {

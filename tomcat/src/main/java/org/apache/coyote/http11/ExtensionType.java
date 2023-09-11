@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import nextstep.jwp.exception.NotAllowedMethodException;
+import nextstep.jwp.exception.NotAllowedExtensionException;
 
 public enum ExtensionType {
 
@@ -23,7 +23,7 @@ public enum ExtensionType {
         return Arrays.stream(values())
                 .filter(it -> extension.contains(it.extension))
                 .findAny()
-                .orElseThrow(NotAllowedMethodException::new);
+                .orElseThrow(NotAllowedExtensionException::new);
     }
 
     public String getExtension() {

@@ -25,8 +25,9 @@ public class HttpRequestParser {
         try {
             final HttpRequestLine requestLine = parseRequestLine();
             final HttpHeaders requestHeaders = parseRequestHeader();
-            if (requestHeaders.getHeaderValue(CONTENT_LENGTH) != null) {
-                final Map<String, String> body = parseRequestBody(requestHeaders.getHeaderValue(CONTENT_LENGTH));
+            final String contentLength = requestHeaders.getHeaderValue(CONTENT_LENGTH);
+            if (contentLength != null) {
+                final Map<String, String> body = parseRequestBody(contentLength);
                 return HttpRequest.from(requestLine, requestHeaders, body);
             }
             return HttpRequest.from(requestLine, requestHeaders, new HashMap<>());

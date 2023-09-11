@@ -1,26 +1,24 @@
 package org.apache.coyote.http11.common;
 
+import java.util.Optional;
+
 public class ResourceContentTypeResolver {
 
     public static String getResourceContentType(final String acceptValue, final String resourceName) {
-        final String acceptHeader = getFirstSupportedMediaType(acceptValue);
-        if (acceptHeader != null) {
-            return acceptHeader;
-        }
-        return getFileExtension(resourceName);
+        return getFirstSupportedMediaType(acceptValue).orElse(getFileExtension(resourceName));
     }
 
-    private static String getFirstSupportedMediaType(final String acceptValue) {
+    private static Optional<String> getFirstSupportedMediaType(final String acceptValue) {
         if (acceptValue != null) {
             String[] mediaTypes = acceptValue.split(",");
             for (String mediaTypeStr : mediaTypes) {
                 final MediaType mediaType = MediaType.getMediaType(mediaTypeStr.trim());
                 if (MediaType.isSupported(mediaType)) {
-                    return mediaType.stringifyWithUtf();
+                    return Optional.of(mediaType.stringifyWithUtf());
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     private static String getFileExtension(final String fileName) {

@@ -16,8 +16,12 @@ public class ResponseLine {
     this(HTTP_1_1, status);
   }
 
+  public ResponseLine() {
+    this(HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
   public String build() {
-    return this.version + " " + this.status.build();
+    return version + " " + status.build();
   }
 
   public void setStatus(final HttpStatus status) {

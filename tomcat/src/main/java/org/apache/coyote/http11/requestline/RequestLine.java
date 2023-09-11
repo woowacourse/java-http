@@ -42,19 +42,19 @@ public class RequestLine {
   }
 
   public HttpMethod getMethod() {
-    return this.method;
+    return method;
   }
 
   public String getUrl() {
-    return this.url;
+    return url;
   }
 
   public String getVersion() {
-    return this.version;
+    return version;
   }
 
-  public String getParam(final String key) {
-    return this.params.get(key);
+  public HttpParam getParams() {
+    return params;
   }
 
   public boolean isGetMethod() {
@@ -63,5 +63,9 @@ public class RequestLine {
 
   public boolean isPostMethod() {
     return method.isPostMethod();
+  }
+
+  public boolean isUrlEndWith(final String url) {
+    return this.url.endsWith(url);
   }
 }

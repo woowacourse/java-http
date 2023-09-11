@@ -7,5 +7,5 @@ public interface HandlerMapper {
 
   boolean isSupport(HttpRequest request);
 
-  HttpResponse handle(HttpRequest request) throws Exception;
+  void handle(HttpRequest request, HttpResponse response);
 }

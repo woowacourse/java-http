@@ -1,25 +1,22 @@
 package org.apache.coyote.http11.handler.mapper;
 
 import nextstep.jwp.controller.LoginController;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginHandlerMapper implements HandlerMapper {
 
-  private static final LoginController LOGIN_CONTROLLER = new LoginController();
-  private static final String LOGIN_URL = "/login";
-
-  private static boolean isSupportMethod(final HttpRequest request) {
-    return request.isGetMethod() || request.isPostMethod();
-  }
+  private static final String URL = "/login";
+  private static final Controller controller = new LoginController();
 
   @Override
   public boolean isSupport(final HttpRequest request) {
-    return isSupportMethod(request) && request.isSameUrl(LOGIN_URL);
+    return request.isUrlEndWith(URL) && (request.isGetMethod() || request.isPostMethod());
   }
 
   @Override
-  public HttpResponse handle(final HttpRequest request) throws Exception {
-    return LOGIN_CONTROLLER.service(request);
+  public void handle(final HttpRequest request, final HttpResponse response) {
+    controller.service(request, response);
   }
 }

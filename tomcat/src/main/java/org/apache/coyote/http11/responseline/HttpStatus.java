@@ -3,7 +3,9 @@ package org.apache.coyote.http11.responseline;
 public enum HttpStatus {
   OK(200, "OK"),
   FOUND(302, "FOUND"),
-  UNAUTHORIZED(401, "UNAUTHORIZED");
+  UNAUTHORIZED(401, "UNAUTHORIZED"),
+  INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR"),
+  NOT_FOUND(404, "NOT FOUND");
 
   private final int statusCode;
   private final String message;
@@ -13,15 +15,7 @@ public enum HttpStatus {
     this.message = message;
   }
 
-  public int getStatusCode() {
-    return this.statusCode;
-  }
-
-  public String getMessage() {
-    return this.message;
-  }
-
   public String build() {
-    return this.statusCode + " " + this.message;
+    return statusCode + " " + message;
   }
 }

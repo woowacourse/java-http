@@ -1,20 +1,18 @@
 package org.apache.controller;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import nextstep.jwp.common.HttpHeader;
 import nextstep.jwp.common.HttpRequest;
 import nextstep.jwp.common.HttpResponse;
+import nextstep.jwp.common.Reader;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static nextstep.jwp.common.StatusCode.FOUND;
 import static nextstep.jwp.common.StatusCode.OK;
@@ -24,7 +22,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        Map<String, String> userInfo = readUserInfo(httpRequest.getRequestBody());
+        Map<String, String> userInfo = Reader.readUserInfo(httpRequest.getRequestBody());
         User user = new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
         InMemoryUserRepository.save(user);
         log.info("등록 성공 : user = {}", user);
@@ -37,9 +35,9 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException {
         Path path = readPath(httpRequest.getHttpLine().getUrl());
-        byte[] bytes = readBytes(path);
+        byte[] bytes = Reader.readBytes(path);
         String responseBody = new String(bytes);
         HttpHeader httpResponseHeader = HttpHeader.from(List.of(
                 "Content-Type: text/html;charset=utf-8",
@@ -56,13 +54,4 @@ public class RegisterController extends AbstractController {
         return Path.of(resourcePath.toURI());
     }
 
-    private byte[] readBytes(Path path) throws IOException {
-        return Files.readAllBytes(path);
-    }
-
-    private Map<String, String> readUserInfo(String body) {
-        return Arrays.stream(body.split("&"))
-                .map(value -> value.split("="))
-                .collect(Collectors.toMap(value -> value[0], value -> value[1]));
-    }
 }

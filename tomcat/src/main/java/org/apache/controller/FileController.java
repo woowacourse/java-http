@@ -4,6 +4,7 @@ import nextstep.jwp.common.ContentType;
 import nextstep.jwp.common.HttpHeader;
 import nextstep.jwp.common.HttpRequest;
 import nextstep.jwp.common.HttpResponse;
+import nextstep.jwp.common.Reader;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -18,10 +19,10 @@ import static nextstep.jwp.common.StatusCode.OK;
 public class FileController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException {
         Path path = readPath(httpRequest.getHttpLine().getUrl());
-        byte[] bytes = readBytes(path);
-        if (bytes == null){
+        byte[] bytes = Reader.readBytes(path);
+        if (bytes == null) {
             httpResponse.setVersion("HTTP/1.1");
             httpResponse.setStatusCode(NOT_FOUND);
             return;
@@ -51,8 +52,8 @@ public class FileController extends AbstractController {
         try {
             byte[] bytes = Files.readAllBytes(path);
             return bytes;
-        }catch (IOException e){
-
-        }   return null;
+        } catch (IOException e) {
+        }
+        return null;
     }
 }

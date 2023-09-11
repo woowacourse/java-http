@@ -20,6 +20,8 @@ import org.apache.coyote.http11.message.response.ResponseBody;
 
 public class LoginServlet extends Servlet {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         HttpMethod httpMethod = httpRequest.getMethod();
@@ -36,7 +38,7 @@ public class LoginServlet extends Servlet {
         Headers requestHeaders = httpRequest.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
 
-        if (cookie.hasKey("JSESSIONID")) {
+        if (cookie.hasKey(JSESSIONID)) {
             responseForLoggedIn(httpRequest, httpResponse);
             return;
         }

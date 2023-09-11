@@ -1,5 +1,9 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.Charset;
+import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.MediaType;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +25,10 @@ public class HttpRequest {
 
     public String getContentTypeByAcceptHeader() {
         List<String> acceptHeaderValues = httpHeaders.get("Accept");
-        if (acceptHeaderValues != null && acceptHeaderValues.contains("text/css")) {
-            return "text/css;charset=utf-8";
+        if (acceptHeaderValues != null && acceptHeaderValues.contains(MediaType.TEXT_CSS.getValue())) {
+            return ContentType.of(MediaType.TEXT_CSS, Charset.UTF_8).format();
         }
-        return "text/html;charset=utf-8";
+        return ContentType.of(MediaType.TEXT_HTML, Charset.UTF_8).format();
     }
 
     public String method() {

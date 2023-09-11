@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Connector implements Runnable {
 
@@ -22,7 +20,7 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final ThreadPoolExecutor threadPool;
+    private final ExecutorService threadPool;
 
     public Connector() {
         this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD);
@@ -31,7 +29,8 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.threadPool = new ThreadPoolExecutor(acceptCount, maxThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(100));
+        this.threadPool = Executors.newCachedThreadPool();
+        new ThreadPoolExecutor(acceptCount, maxThreads, 300L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(100));
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

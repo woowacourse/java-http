@@ -39,8 +39,4 @@ public class HttpRequestBody {
     private HttpRequestBody(final String body) {
         this.body = body;
     }
-
-    public String[] split(final String regex) {
-        return body.split(regex);
-    }
 }

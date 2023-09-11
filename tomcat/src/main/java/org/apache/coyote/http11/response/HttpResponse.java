@@ -13,34 +13,41 @@ public class HttpResponse {
     private final Map<String, String> headers;
     private final String responseBody;
 
-    public HttpResponse(HttpStatus httpStatus, String responseBody,
-                        ContentType contentType, String redirectUrl) {
-        this.startLine = new ResponseLine(httpStatus);
-        this.headers = new LinkedHashMap<>();
-        initHeader(contentType, responseBody, redirectUrl);
-        this.responseBody = responseBody;
+    private HttpResponse(Builder builder) {
+        this.startLine = builder.startLine;
+        this.headers = builder.headers;
+        this.responseBody = builder.responseBody;
     }
 
+    public static class Builder {
+        private ResponseLine startLine;
+        private Map<String, String> headers = new LinkedHashMap<>();
+        private String responseBody;
 
-    public HttpResponse(final HttpStatus httpStatus, final String responseBody, final ContentType contentType) {
-        this.startLine = new ResponseLine(httpStatus);
-        this.headers = new LinkedHashMap<>();
-        initHeader(contentType, responseBody);
-        this.responseBody = responseBody;
-    }
+        public Builder(HttpStatus httpStatus, String responseBody, ContentType contentType) {
+            this.startLine = new ResponseLine(httpStatus);
+            this.responseBody = responseBody;
+            initHeader(contentType, responseBody);
+        }
 
-    private void initHeader(final ContentType contentType, final String responseBody, final String redirectUrl) {
-        initHeader(contentType, responseBody);
-        headers.put("Location", redirectUrl);
-    }
+        public Builder redirect(String redirectUrl) {
+            headers.put("Location", redirectUrl);
+            return this;
+        }
 
-    private void initHeader(ContentType contentType, String responseBody) {
-        headers.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
-    }
+        public Builder addJSessionId(Session session) {
+            headers.put("Set-Cookie", "JSESSIONID=" + session.getId());
+            return this;
+        }
 
-    public void addJSessionId(final Session session) {
-        headers.put("Set-Cookie", "JSESSIONID=" + session.getId());
+        public HttpResponse build() {
+            return new HttpResponse(this);
+        }
+
+        private void initHeader(ContentType contentType, String responseBody) {
+            headers.put("Content-Type", contentType.getContentType() + ";charset=utf-8");
+            headers.put("Content-Length", String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
+        }
     }
 
     @Override

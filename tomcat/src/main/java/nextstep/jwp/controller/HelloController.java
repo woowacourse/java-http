@@ -10,6 +10,6 @@ public class HelloController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         String responseBody = "Hello world!";
-        return new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
+        return new HttpResponse.Builder(HttpStatus.OK, responseBody, ContentType.HTML).build();
     }
 }

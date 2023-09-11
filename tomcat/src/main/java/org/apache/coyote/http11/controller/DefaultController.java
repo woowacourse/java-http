@@ -10,6 +10,8 @@ import static org.apache.coyote.http11.types.HttpStatus.OK;
 
 public class DefaultController extends AbstractController {
 
+    private static final String DEFAULT_MESSAGE = "Hello world!";
+
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         throw new UnsupportedOperationException();
@@ -18,7 +20,7 @@ public class DefaultController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (DEFAULT_URI.equals(request.getPath())) {
-            response.setBody("Hello world!", TEXT_HTML);
+            response.setBody(DEFAULT_MESSAGE, TEXT_HTML);
             response.setHttpStatus(OK);
             return;
         }

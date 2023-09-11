@@ -22,7 +22,7 @@ public abstract class AbstractController implements Controller {
         }
 
         response.setHttpProtocol(HTTP_1_1);
-        if (Objects.requireNonNull(request.getMethod()) == HttpMethod.GET) {
+        if (request.getMethod() == HttpMethod.GET) {
             this.doGet(request, response);
             return;
         }

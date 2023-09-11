@@ -7,33 +7,26 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final String path;
-    private final HttpMethod method;
-    private final HttpProtocol protocol;
+    private final RequestLine requestLine;
     private final String body;
     private final Map<String, String> headers;
 
-    private HttpRequest(String path, HttpMethod method, HttpProtocol protocol, Map<String, String> headers, String body) {
-        this.path = path;
-        this.method = method;
-        this.protocol = protocol;
+    private HttpRequest(RequestLine requestLine, Map<String, String> headers, String body) {
+        this.requestLine = requestLine;
         this.body = body;
         this.headers = headers;
     }
 
     public static HttpRequest of(RequestLine requestLine, Map<String, String> headers, String body) {
-        String path = requestLine.getPath();
-        HttpMethod method = requestLine.getMethod();
-        HttpProtocol protocol = requestLine.getProtocol();
-        return new HttpRequest(path, method, protocol, headers, body);
+        return new HttpRequest(requestLine, headers, body);
     }
 
     public String getPath() {
-        return path;
+        return this.requestLine.getPath();
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return this.requestLine.getMethod();
     }
 
     public String getHeader(String name) {
@@ -45,6 +38,6 @@ public class HttpRequest {
     }
 
     public HttpProtocol getProtocol() {
-        return protocol;
+        return this.requestLine.getProtocol();
     }
 }

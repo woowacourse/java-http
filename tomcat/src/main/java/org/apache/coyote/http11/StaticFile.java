@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.exception.file.FileReadException;
+import org.apache.coyote.http11.exception.file.NoExistFileException;
+import org.apache.coyote.http11.exception.file.NoExistFileExtensionException;
 
 public class StaticFile {
 
@@ -28,9 +31,9 @@ public class StaticFile {
         try {
             return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
         } catch (final NullPointerException e) {
-            throw new IllegalArgumentException("파일이 존재하지 않습니다.");
+            throw new NoExistFileException();
         } catch (final IOException e) {
-            throw new IllegalArgumentException("파일을 읽을 수 없습니다.");
+            throw new FileReadException();
         }
     }
 
@@ -39,7 +42,7 @@ public class StaticFile {
         if (lastDotIndex > 0) {
             return path.substring(lastDotIndex);
         }
-        throw new IllegalArgumentException("파일 확장자가 존재하지 않습니다.");
+        throw new NoExistFileExtensionException();
     }
 
     public String getExtension() {

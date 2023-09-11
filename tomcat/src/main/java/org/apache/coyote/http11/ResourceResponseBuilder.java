@@ -7,9 +7,13 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.exception.ResourceIOException;
 import org.apache.coyote.exception.ResourceNotFoundException;
 
 public class ResourceResponseBuilder {
+
+    private ResourceResponseBuilder() {
+    }
 
     public static ResponseBody build(URL resourceUrl) {
         File page = getFile(resourceUrl);
@@ -36,7 +40,7 @@ public class ResourceResponseBuilder {
             final URLConnection urlConnection = uri.toURL().openConnection();
             return urlConnection.getContentType();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ResourceIOException(e);
         }
     }
 
@@ -46,7 +50,7 @@ public class ResourceResponseBuilder {
             final byte[] bytes = Files.readAllBytes(path);
             return new String(bytes);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ResourceIOException(e);
         }
     }
 

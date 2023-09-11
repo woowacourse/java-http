@@ -2,8 +2,6 @@ package org.apache.coyote.http11.httprequest;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import org.apache.coyote.http11.Headers;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
@@ -11,7 +9,6 @@ import org.apache.coyote.http11.HttpPath;
 import org.apache.coyote.http11.HttpVersion;
 
 import static java.util.Objects.requireNonNullElse;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpVersion.HTTP_1_1;

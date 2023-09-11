@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import org.apache.coyote.http11.exception.RequestBodyNotProvidedException;
 import org.apache.coyote.http11.message.Headers;
+import org.apache.coyote.http11.message.HttpHeaders;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpVersion;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -60,7 +61,7 @@ public class RequestExtractor {
 
     private static RequestBody extractBodyIfExists(BufferedReader reader,
                                                    Headers headers) throws IOException {
-        String contentLength = headers.get("Content-Length");
+        String contentLength = headers.get(HttpHeaders.CONTENT_LENGTH.value());
         if (Objects.nonNull(contentLength)) {
             return extractBody(reader, Integer.parseInt(contentLength));
         }

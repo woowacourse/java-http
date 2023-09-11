@@ -39,6 +39,7 @@ public class HttpResponse {
     }
 
     public void setBody(String body) {
+        addHeader("Content-Length", String.valueOf(body.length()));
         this.body = body;
     }
 

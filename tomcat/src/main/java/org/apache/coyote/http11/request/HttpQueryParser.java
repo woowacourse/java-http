@@ -12,9 +12,9 @@ public class HttpQueryParser {
         String query = getQuery(path);
 
         Map<String, String> queries = new HashMap<>();
-            for (String parameter : query.split("&")) {
-                int idx = parameter.indexOf("=");
-                String key = parameter.substring(0, idx);
+        for (String parameter : query.split("&")) {
+            int idx = parameter.indexOf("=");
+            String key = parameter.substring(0, idx);
             String value = parameter.substring(idx + 1);
             queries.put(key, value);
         }

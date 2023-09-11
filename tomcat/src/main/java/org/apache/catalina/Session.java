@@ -29,7 +29,7 @@ public class Session {
         return values;
     }
 
-    public synchronized Object getValue(String key) {
+    public Object getValue(String key) {
         return values.get(key);
     }
 

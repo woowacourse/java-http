@@ -10,9 +10,7 @@ import org.apache.coyote.http.vo.HttpResponse;
 import org.apache.coyote.http.vo.Url;
 
 public class DefaultPageController extends AbstractController {
-
-    private static final String supportUrl = "/";
-
+    
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setStatus(HttpStatus.OK)
@@ -23,6 +21,6 @@ public class DefaultPageController extends AbstractController {
     @Override
     public boolean isSupported(final HttpRequest request) {
         return request.isRequestMethodOf(HttpMethod.GET) &&
-                request.isUrl(Url.from(supportUrl));
+                request.isUrl(Url.from("/"));
     }
 }

@@ -13,6 +13,9 @@ public class ControllerMapping {
             new RegisterController()
     );
 
+    private ControllerMapping() {
+    }
+
     public static boolean hasSupportedController(final HttpRequest request) {
         return controllers.stream()
                 .anyMatch(it -> it.isSupported(request));

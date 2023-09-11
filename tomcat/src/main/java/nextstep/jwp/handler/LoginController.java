@@ -25,19 +25,20 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String ACCOUNT_QUERY_KEY = "account";
     private static final String PASSWORD_QUERY_KEY = "password";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final AuthService authService = new AuthService();
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        if (AuthenticationUser(request)) {
+        if (authenticateUser(request)) {
             setIndexPageRedirect(response);
             return;
         }
         setResponse(response, HttpStatus.OK, "/login.html");
     }
 
-    private boolean AuthenticationUser(final HttpRequest request) {
+    private boolean authenticateUser(final HttpRequest request) {
         return request.hasCookie("JSESSIONID") && SessionManager.findSession(request.getCookie("JSESSIONID")) != null;
     }
 
@@ -78,7 +79,7 @@ public class LoginController extends AbstractController {
         Session session = new Session(UUID.randomUUID().toString());
         session.setAttribute("user", user);
         SessionManager.add(session.getId(), session);
-        cookie.put("JSESSIONID", session.getId());
+        cookie.put(JSESSIONID, session.getId());
         return cookie;
     }
 

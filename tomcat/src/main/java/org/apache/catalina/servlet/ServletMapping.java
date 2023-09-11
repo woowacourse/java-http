@@ -12,8 +12,12 @@ public class ServletMapping {
             new DispatcherServlet()
     );
 
+    private ServletMapping() {
+    }
+
     public static Controller getSupportedServlet(final HttpRequest request) {
-        return servlets.stream().filter(it -> it.isSupported(request))
+        return servlets.stream()
+                .filter(it -> it.isSupported(request))
                 .findFirst()
                 .orElseThrow(NotSupportedRequestException::new);
     }

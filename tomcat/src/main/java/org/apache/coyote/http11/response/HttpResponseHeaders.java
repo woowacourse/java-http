@@ -30,7 +30,7 @@ public class HttpResponseHeaders {
     }
 
     public void setCookie(final String cookie) {
-        headers.put(HttpHeaders.SET_COOKIE.getMessage(), cookie);
+        headers.put(HttpHeaders.SET_COOKIE.getMessage(), "JSESSIONID=" + cookie);
     }
 
     public Map<String, String> getHeaders() {

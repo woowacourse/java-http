@@ -22,8 +22,8 @@ public class LoginController extends AbstractController {
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final Map<String, String> loginData = request.getBody();
         final User user = InMemoryUserRepository.findByAccount(loginData.get("account"))
-                .orElseThrow();
-        if (user.checkPassword(loginData.get(PASSWORD))) {
+                .orElse(null);
+        if (!Objects.isNull(user) && user.checkPassword(loginData.get(PASSWORD))) {
             final HttpCookie newCookie = HttpCookie.create();
             saveSession(newCookie, user);
             response.found(HttpUri.INDEX_HTML.getUri());
@@ -44,6 +44,7 @@ public class LoginController extends AbstractController {
                 return;
             }
             response.found(HttpUri.INDEX_HTML.getUri());
+            return;
         }
         response.ok(HttpUri.LOGIN_HTML.getUri());
     }

@@ -10,7 +10,7 @@ public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String EMPTY_LINE = "";
-    
+
     private HttpStatusLine statusLine;
     private final HttpResponseHeaders headers;
     private HttpResponseBody body;

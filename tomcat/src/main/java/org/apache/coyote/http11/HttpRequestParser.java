@@ -88,14 +88,15 @@ public class HttpRequestParser {
 
     private HttpCookies parseHttpCookies(final String cookieValue) {
         final HttpCookies httpCookies = new HttpCookies();
-        if (!cookieValue.isEmpty()) {
-            final String[] cookies = cookieValue.split(COOKIE_DELIMITER);
-            for (final String cookie : cookies) {
-                final String[] splitKeyValue = cookie.split(KEY_AND_VALUE_DELIMITER);
-                final String key = splitKeyValue[KEY_INDEX];
-                final String value = splitKeyValue[VALUE_INDEX];
-                httpCookies.add(key, value);
-            }
+        if (cookieValue.isEmpty()) {
+            return httpCookies;
+        }
+        final String[] cookies = cookieValue.split(COOKIE_DELIMITER);
+        for (final String cookie : cookies) {
+            final String[] splitKeyValue = cookie.split(KEY_AND_VALUE_DELIMITER);
+            final String key = splitKeyValue[KEY_INDEX];
+            final String value = splitKeyValue[VALUE_INDEX];
+            httpCookies.add(key, value);
         }
         return httpCookies;
     }

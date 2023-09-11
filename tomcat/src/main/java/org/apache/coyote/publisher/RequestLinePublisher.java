@@ -13,6 +13,9 @@ public class RequestLinePublisher {
     private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("^[^?]*\\?[^?]*$");
     private static final String QUERY_PARAM_START_DELIMITER = "?";
 
+    private static final int NO_REQUEST_LINE = 0;
+    private static final int NO_URI_AND_HTTP_VERSION = 1;
+    private static final int NO_HTTP_VERSION = 2;
     private static final int REQUEST_LINE_LENGTH = 3;
 
     private static final int HTTP_METHOD_INDEX = 0;
@@ -41,9 +44,7 @@ public class RequestLinePublisher {
         }
         
         final String[] requestLineValues = requestLine.split(REQUEST_LINE_DELIMITER);
-        if (requestLineValues.length != REQUEST_LINE_LENGTH) {
-            throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 Http Method, URI, Http Version 정보가 존재해야 합니다.");
-        }
+        validateRequestLine(requestLineValues);
 
         final String httpMethodValue = requestLineValues[HTTP_METHOD_INDEX];
         final String httpVersionValue = requestLineValues[HTTP_VERSION_INDEX];
@@ -58,6 +59,21 @@ public class RequestLinePublisher {
         }
 
         return new RequestLinePublisher(httpMethodValue, httpVersionValue, requestPathValue, queryParamNamesAndValues);
+    }
+
+    private static void validateRequestLine(final String[] requestLineValues) {
+        if (requestLineValues.length == NO_REQUEST_LINE) {
+            throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 Http Method, URI, Http Version 정보가 존재해야 합니다.");
+        }
+        if (requestLineValues.length == NO_URI_AND_HTTP_VERSION) {
+            throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 URI, Http Version 정보가 존재해야 합니다.");
+        }
+        if (requestLineValues.length == NO_HTTP_VERSION) {
+            throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 Http Version 정보가 존재해야 합니다.");
+        }
+        if (requestLineValues.length > REQUEST_LINE_LENGTH) {
+            throw new CoyoteHttpException("HTTP 요청으로 들어온 값의 첫 번째 라인에 오직 Http Method, URI, Http Version 만 존재해야 합니다.");
+        }
     }
 
     public RequestLine toRequestLine() {

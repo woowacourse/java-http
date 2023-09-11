@@ -1,6 +1,7 @@
 package org.apache.coyote.publisher;
 
 import org.apache.coyote.common.HttpVersion;
+import org.apache.coyote.exception.CoyoteHttpException;
 import org.apache.coyote.request.HttpMethod;
 import org.apache.coyote.request.QueryParams;
 import org.apache.coyote.request.RequestLine;
@@ -8,9 +9,12 @@ import org.apache.coyote.request.RequestPath;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -65,5 +69,17 @@ class RequestLinePublisherTest {
                 () -> assertThat(actual.requestPath()).isEqualTo(expectedRequestPath),
                 () -> assertThat(actual.queryParams()).isEqualTo(expectedQueryParams)
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "",
+            "GET",
+            "GET /index.html",
+            "GET /index.html HTTP/1.1 hello"
+    })
+    void 잘못된_요청_라인_값이_들어왔을_경우_예외가_발생한다(final String expect) {
+        assertThatThrownBy(() -> RequestLinePublisher.read(expect))
+                .isInstanceOf(CoyoteHttpException.class);
     }
 }

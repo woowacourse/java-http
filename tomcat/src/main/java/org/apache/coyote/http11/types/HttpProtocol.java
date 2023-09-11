@@ -15,7 +15,7 @@ public enum HttpProtocol {
     public static HttpProtocol from(String protocol) {
         return Arrays.stream(values()).filter(it -> it.protocol.equalsIgnoreCase(protocol))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 메소드입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 프로토콜입니다."));
     }
 
     public String getProtocol() {

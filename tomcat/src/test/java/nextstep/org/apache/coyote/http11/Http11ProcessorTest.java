@@ -169,7 +169,6 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String output = socket.output();
         String expectBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        System.out.println(output);
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(output).contains("HTTP/1.1 200 OK ");
             softly.assertThat(output).contains("Content-Type: text/html;charset=utf-8 ");

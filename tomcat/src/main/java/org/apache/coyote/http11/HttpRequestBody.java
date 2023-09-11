@@ -25,7 +25,10 @@ public class HttpRequestBody {
         return parseResultOfRequestBody;
     }
 
-    private static void putParseResultOfComponent(Map<String, String> parseResultOfRequestBody, String component) {
+    private static void putParseResultOfComponent(
+            Map<String, String> parseResultOfRequestBody,
+            String component
+    ) {
         if (component.length() < 2) {
             return;
         }
@@ -36,10 +39,6 @@ public class HttpRequestBody {
 
     public String get(String key) {
         return requestBody.getOrDefault(key, "");
-    }
-
-    public Map<String, String> getRequestBody() {
-        return requestBody;
     }
 
 }

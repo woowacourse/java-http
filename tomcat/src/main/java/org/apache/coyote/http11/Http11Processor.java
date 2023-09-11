@@ -37,20 +37,28 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequestHeader httpRequestHeader = getHttpRequestHeader(bufferedReader);
-            HttpRequestBody httpRequestBody = getHttpRequestBody(httpRequestHeader, bufferedReader);
-            HttpRequest httpRequest = new HttpRequest(httpRequestHeader, httpRequestBody);
-            Handler handler = HandlerMapper.getHandle(httpRequest);
-            HttpResponse httpResponse = new HttpResponse();
-            handler.service(httpRequest, httpResponse);
-            outputStream.write(httpResponse.toString().getBytes());
-            outputStream.flush();
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            HttpRequest httpRequest = getHttpRequest(bufferedReader);
+            HttpResponse httpResponse = execute(httpRequest);
+            sendResponse(outputStream, httpResponse);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse execute(final HttpRequest httpRequest) {
+        Handler handler = HandlerMapper.getHandle(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        handler.service(httpRequest, httpResponse);
+        return httpResponse;
+    }
+
+    private HttpRequest getHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        HttpRequestHeader httpRequestHeader = getHttpRequestHeader(bufferedReader);
+        HttpRequestBody httpRequestBody = getHttpRequestBody(httpRequestHeader, bufferedReader);
+        return new HttpRequest(httpRequestHeader, httpRequestBody);
     }
 
     private HttpRequestHeader getHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
@@ -82,6 +90,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequestBody getHttpRequestBody(HttpRequestHeader httpRequestHeader, BufferedReader bufferedReader) throws IOException {
         String header = httpRequestHeader.get(CONTENT_LENGTH.getValue());
+
         if (header.isBlank()) {
             return HttpRequestBody.from("");
         }
@@ -92,6 +101,11 @@ public class Http11Processor implements Runnable, Processor {
         String requestBody = new String(buffer);
 
         return HttpRequestBody.from(requestBody);
+    }
+
+    private void sendResponse(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
+        outputStream.write(httpResponse.toString().getBytes());
+        outputStream.flush();
     }
 
 }

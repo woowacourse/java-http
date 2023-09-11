@@ -14,7 +14,6 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.HttpSession;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -43,6 +42,7 @@ public class LoginHandler extends AbstractHandler {
 
         try {
             String body = findPage(httpRequest.getPath());
+
             httpResponse.setStatus(OK);
             httpResponse.setHeader(CONTENT_TYPE.getValue(), HTML.getValue());
             httpResponse.setHeader(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));

@@ -29,14 +29,6 @@ public class HttpRequest {
         return httpRequestHeader.getPath();
     }
 
-    public String getFilePath() {
-        return httpRequestHeader.getFilePath();
-    }
-
-    public String getContentType() {
-        return httpRequestHeader.getContentType();
-    }
-
     public String getBodyAttribute(String key) {
         return httpRequestBody.get(key);
     }

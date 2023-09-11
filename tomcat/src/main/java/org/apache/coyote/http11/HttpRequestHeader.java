@@ -6,16 +6,11 @@ import java.util.Map;
 
 public class HttpRequestHeader {
 
-    private static final Map<String, String> requestUrlToFilePath = Map.of(
-            "/login", "/login.html",
-            "/register", "/register.html"
-    );
-
-    private HttpMethod method;
-    private String path;
-    private Map<String, String> extraContents;
-    private Map<String, String> queryStrings;
-    private Map<String, String> cookies;
+    private final HttpMethod method;
+    private final String path;
+    private final Map<String, String> extraContents;
+    private final Map<String, String> queryStrings;
+    private final Map<String, String> cookies;
 
     private HttpRequestHeader(
             HttpMethod method,
@@ -40,6 +35,29 @@ public class HttpRequestHeader {
                 parseQueryStrings(path),
                 parseCookies(parseExtraContents.get("Cookie"))
         );
+    }
+
+    private static Map<String, String> parseExtraContents(String[] extraContents) {
+        Map<String, String> parseResultOfExtraContents = new HashMap<>();
+
+        for (String component : extraContents) {
+            putParseResultOfComponent(parseResultOfExtraContents, component, ":");
+        }
+
+        return parseResultOfExtraContents;
+    }
+
+    private static void putParseResultOfComponent(
+            Map<String, String> parseResultOfRequestBody,
+            String component,
+            String delimiter
+    ) {
+        if (component.length() < 2) {
+            return;
+        }
+
+        String[] keyAndValue = component.split(delimiter);
+        parseResultOfRequestBody.put(keyAndValue[0].trim(), keyAndValue[1].trim());
     }
 
     private static String getUrlRemovedQueryString(String path) {
@@ -70,16 +88,6 @@ public class HttpRequestHeader {
         return parseResultOfQueryStrings;
     }
 
-    private static Map<String, String> parseExtraContents(String[] extraContents) {
-        Map<String, String> parseResultOfExtraContents = new HashMap<>();
-
-        for (String component : extraContents) {
-            putParseResultOfComponent(parseResultOfExtraContents, component, ":");
-        }
-
-        return parseResultOfExtraContents;
-    }
-
     private static Map<String, String> parseCookies(String cookies) {
         if (cookies == null) {
             return Collections.emptyMap();
@@ -92,37 +100,6 @@ public class HttpRequestHeader {
         }
 
         return parseResultOfCookies;
-    }
-
-    private static void putParseResultOfComponent(
-            Map<String, String> parseResultOfRequestBody,
-            String component,
-            String delimiter
-    ) {
-        if (component.length() < 2) {
-            return;
-        }
-
-        String[] keyAndValue = component.split(delimiter);
-        parseResultOfRequestBody.put(keyAndValue[0].trim(), keyAndValue[1].trim());
-    }
-
-    public String getContentType() {
-        return "text/" + extractExtension();
-    }
-
-    public String getFilePath() {
-        return requestUrlToFilePath.getOrDefault(path, path);
-    }
-
-    public String extractExtension() {
-        int lastIndexOfComma = path.lastIndexOf(".");
-
-        if (lastIndexOfComma == -1) {
-            return "html";
-        }
-
-        return path.substring(lastIndexOfComma + 1);
     }
 
     public String get(String key) {
@@ -143,14 +120,6 @@ public class HttpRequestHeader {
 
     public String getPath() {
         return path;
-    }
-
-    public Map<String, String> getExtraContents() {
-        return extraContents;
-    }
-
-    public Map<String, String> getQueryStrings() {
-        return queryStrings;
     }
 
 }

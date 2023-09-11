@@ -48,14 +48,7 @@ public class HttpRequestParser {
 
     private Map<String, String> parseQueryString(final String queryStrings) {
         final Map<String, String> queries = new HashMap<>();
-        final String[] keyValuePairs = queryStrings.split("&");
-        for (String keyValuePair : keyValuePairs) {
-            String[] keyValue = keyValuePair.split("=");
-            if (keyValue.length >= 2) {
-                queries.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
-            }
-        }
-        return queries;
+        return parseUrlEncoded(queryStrings, queries);
     }
 
     private HttpHeaders parseRequestHeader() throws IOException {
@@ -78,13 +71,16 @@ public class HttpRequestParser {
         int contentLength = Integer.parseInt(contentLengthHeader);
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
+        return parseUrlEncoded(new String(buffer), body);
+    }
 
-        for (String temp : new String(buffer).split("&")) {
-            String[] value = temp.split("=");
-            if (value.length >= 2) {
-                body.put(value[0], URLDecoder.decode(value[1], StandardCharsets.UTF_8));
+    private Map<String, String> parseUrlEncoded(final String queryStrings, final Map<String, String> queries) {
+        for (String keyValuePair : queryStrings.split("&")) {
+            String[] keyValue = keyValuePair.split("=");
+            if (keyValue.length >= 2) {
+                queries.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
             }
         }
-        return body;
+        return queries;
     }
 }

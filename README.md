@@ -5,7 +5,7 @@
 - coyote -> catalina -> jwp 의존 관계
 
 ### 기능구현 목록
-- [ ] HttpRequest에 세션 추가하기
+- [x] HttpRequest에 세션 추가 
 - [ ] HttpRequest와 세션 생명 주기 수정
 - [ ] Servlet, DispatcherServlet 생성
 - [ ] RequestMapping 클래스 생성

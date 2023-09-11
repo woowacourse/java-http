@@ -1,96 +1,41 @@
 package org.apache.coyote;
 
+import nextstep.jwp.controller.HelloController;
+import nextstep.jwp.controller.IndexController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.ViewResolver;
-import org.apache.coyote.http11.annotation.Controller;
-import org.apache.coyote.http11.annotation.RequestMapping;
+import org.apache.coyote.http11.controller.Controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class RequestRouter {
 
-    private static final Map<String, Map<String, Method>> mappingMethods;
+    private static final Map<String, Controller> mappingMethods;
 
     static {
-        final String basePackageName = "nextstep.jwp.controller";
-        final String packagePath = basePackageName.replace('.', '/');
-        final List<Class<?>> classes = new ArrayList<>();
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final URL packageUrl = classLoader.getResource(packagePath);
-        final File packageDir = new File(packageUrl.getFile());
-
-        if (packageDir.exists() && packageDir.isDirectory()) {
-            for (final File file : packageDir.listFiles()) {
-                if (file.isFile() && file.getName().endsWith(".class")) {
-                    final String className = basePackageName + "." + file.getName().replace(".class", "");
-                    try {
-                        final Class<?> clazz = Class.forName(className);
-                        if (clazz.isAnnotationPresent(Controller.class)) {
-                            classes.add(clazz);
-                        }
-                    } catch (ClassNotFoundException e) {
-                        throw new IllegalStateException("클래스를 찾을 수 없습니다.");
-                    }
-                }
-            }
-        }
-
-        final Map<String, Map<String, Method>> methods = new HashMap<>();
-        for (final Class<?> controllerClass : classes) {
-            for (final Method method : controllerClass.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(RequestMapping.class)) {
-                    final RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-                    validateParameters(method);
-                    insertMethod(method, methods, requestMapping);
-                }
-            }
-        }
+        final Map<String, Controller> methods = new HashMap<>();
+        methods.put("/", new HelloController());
+        methods.put("/index.html", new IndexController());
+        methods.put("/login", new LoginController());
+        methods.put("/register", new RegisterController());
 
         mappingMethods = Collections.unmodifiableMap(methods);
     }
 
-    private static void validateParameters(final Method method) {
-        if (method.getParameterCount() == 2 &&
-                method.getParameterTypes()[0] == HttpRequest.class &&
-                method.getParameterTypes()[1] == HttpResponse.class) {
-            return;
-        }
-
-        throw new IllegalStateException("메서드의 파라미터는 (HttpRequest, HttpResponse)여야 합니다.");
-    }
-
-    private static void insertMethod(final Method method, final Map<String, Map<String, Method>> methods, final RequestMapping requestMapping) {
-        final String path = requestMapping.path();
-        final String methodType = requestMapping.method();
-        if (!methods.containsKey(methodType)) {
-            methods.put(methodType, new HashMap<>());
-        }
-        if (methods.get(methodType).containsKey(path)) {
-            throw new IllegalStateException("중복된 api에 대한 메서드가 존재합니다.");
-        }
-        methods.get(methodType).put(path, method);
-    }
-
-    public void route(final HttpRequest request, final HttpResponse response) throws InvocationTargetException, IllegalAccessException, IOException, NoSuchMethodException, InstantiationException {
-        if (mappingMethods.containsKey(request.getHttpMethod()) && mappingMethods.get(request.getHttpMethod()).containsKey(request.getRequestURI())) {
-            final Method method = mappingMethods.get(request.getHttpMethod()).get(request.getRequestURI());
-            final Class<?> declaringClass = method.getDeclaringClass();
-            method.invoke(declaringClass.getConstructor().newInstance(), request, response);
+    public void route(final HttpRequest request, final HttpResponse response) throws Exception {
+        if (mappingMethods.containsKey(request.getRequestURI())) {
+            final Controller controller = mappingMethods.get(request.getRequestURI());
+            controller.service(request, response);
             return;
         }
 

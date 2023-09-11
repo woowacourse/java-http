@@ -2,68 +2,74 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.ViewResolver;
-import org.apache.coyote.http11.annotation.Controller;
-import org.apache.coyote.http11.annotation.RequestMapping;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 
-@Controller
-public final class LoginController {
+public final class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private final SessionManager sessionManager = new SessionManager();
 
-    @RequestMapping(method = "POST", path = "/login")
-    public void login(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getRequestBody().get("account"));
-        if (user.isEmpty()) {
-            httpResponse.sendRedirect("/401.html");
+    @Override
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        if ("GET".equals(request.getHttpMethod())) {
+            doGet(request, response);
             return;
         }
-        if (user.get().checkPassword(httpRequest.getRequestBody().get("password"))) {
+        doPost(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(request.getRequestBody().get("account"));
+        if (user.isEmpty()) {
+            response.sendRedirect("/401.html");
+            return;
+        }
+        if (user.get().checkPassword(request.getRequestBody().get("password"))) {
             log.info("user : {}", user);
             final String sessionId = UUID.randomUUID().toString();
             final Session session = new Session(sessionId);
             session.setAttribute("user", user);
             sessionManager.add(session);
 
-            httpResponse.addCookie("JSESSIONID", sessionId);
-            httpResponse.sendRedirect("/index.html");
+            response.addCookie("JSESSIONID", sessionId);
+            response.sendRedirect("/index.html");
             return;
         }
-        httpResponse.sendRedirect("/401.html");
+        response.sendRedirect("/401.html");
     }
 
-    @RequestMapping(method = "GET", path = "/login")
-    public void loginView(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Cookie cookie = Cookie.empty();
-        if (httpRequest.getHttpHeaders().containsHeader("Cookie")) {
-            cookie = Cookie.parse(httpRequest.getHttpHeaders().getHeaderValue("Cookie"));
+        if (request.getHttpHeaders().containsHeader("Cookie")) {
+            cookie = Cookie.parse(request.getHttpHeaders().getHeaderValue("Cookie"));
         }
         if (cookie.containsKey("JSESSIONID")) {
-            httpResponse.sendRedirect("/index.html");
+            response.sendRedirect("/index.html");
             return;
         }
 
-        httpResponse.setHttpStatus(HttpStatus.OK);
-        final ViewResolver viewResolver = new ViewResolver(Path.of(httpRequest.getRequestURI()));
-        httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.of(viewResolver.getFileExtension()).getValue());
-        httpResponse.write(Files.readString(viewResolver.getResourcePath()));
+        response.setHttpStatus(HttpStatus.OK);
+        final ViewResolver viewResolver = new ViewResolver(Path.of(request.getRequestURI()));
+        response.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.of(viewResolver.getFileExtension()).getValue());
+        response.write(Files.readString(viewResolver.getResourcePath()));
     }
 }

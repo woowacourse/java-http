@@ -6,6 +6,7 @@ public enum ContentType {
     TEXT_PLAIN("", "text/plain;charset=utf-8"),
     TEXT_HTML(".html", "text/html;charset=utf-8"),
     TEXT_CSS(".css", "text/css"),
+    IMAGE_SVG(".svg", "image/svg+xml"),
     APPLICATION_JAVASCRIPT(".js", "application/javascript");
 
     private String extension;

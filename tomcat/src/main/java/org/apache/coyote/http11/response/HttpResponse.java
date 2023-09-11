@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.StatusCode;
-import org.apache.coyote.http11.ViewLoader;
 
 public class HttpResponse {
 
@@ -16,16 +15,12 @@ public class HttpResponse {
     private static final String SP = " ";
     private static final String HEADER_DELIMITER = ": ";
 
-    private final StatusCode statusCode;
-    private final ContentType contentType;
-    private final String responseBody;
-    private final Map<String, String> headers;
+    private StatusCode statusCode;
+    private ContentType contentType;
+    private String responseBody;
+    private Map<String, String> headers = new HashMap<>();
 
-    private HttpResponse(final StatusCode statusCode, final ContentType contentType, final String responseBody, final Map<String, String> headers) {
-        this.statusCode = statusCode;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
-        this.headers = headers;
+    public HttpResponse() {
     }
 
     public byte[] toBytes() {
@@ -42,57 +37,31 @@ public class HttpResponse {
         return String.join(CRLF, responseHeader, "", responseBody).getBytes();
     }
 
-    public static HttpResponse toNotFound() {
-        return new HttpResponse(StatusCode.NOT_FOUND, ContentType.TEXT_HTML, ViewLoader.toNotFound(), null);
+    private static final String LOCATION = "Location";
+    private static final String JSESSIONID = "JSESSIONID=";
+
+    public HttpResponse statusCode(final StatusCode statusCode) {
+        this.statusCode = statusCode;
+        return this;
     }
 
-    public static HttpResponse toUnauthorized() {
-        return new HttpResponse(StatusCode.UNAUTHORIZED, ContentType.TEXT_HTML, ViewLoader.toUnauthorized(), null);
+    public HttpResponse contentType(final ContentType contentType) {
+        this.contentType = contentType;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public HttpResponse responseBody(final String responseBody) {
+        this.responseBody = responseBody;
+        return this;
     }
 
-    public static final class Builder {
+    public HttpResponse redirect(final String redirectUrl) {
+        headers.put(LOCATION, redirectUrl);
+        return this;
+    }
 
-        private static final String LOCATION = "Location";
-        private static final String JSESSIONID = "JSESSIONID=";
-        private StatusCode statusCode = StatusCode.OK;
-        private ContentType contentType = ContentType.WILD_CARD;
-        private String responseBody = "";
-        private Map<String, String> headers = new HashMap<>();
-
-        private Builder() {
-        }
-
-        public Builder statusCode(final StatusCode statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public Builder contentType(final ContentType contentType) {
-            this.contentType = contentType;
-            return this;
-        }
-
-        public Builder responseBody(final String responseBody) {
-            this.responseBody = responseBody;
-            return this;
-        }
-
-        public Builder redirect(final String redirectUrl) {
-            headers.put(LOCATION, redirectUrl);
-            return this;
-        }
-
-        public Builder addCookie(String sessionId) {
-            headers.put(SET_COOKIE, JSESSIONID + sessionId);
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(statusCode, contentType, responseBody, headers);
-        }
+    public HttpResponse addCookie(String sessionId) {
+        headers.put(SET_COOKIE, JSESSIONID + sessionId);
+        return this;
     }
 }

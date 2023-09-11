@@ -10,35 +10,31 @@ import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.ViewLoader;
 import org.apache.coyote.http11.request.RequestBody;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        if (request.isGetRequest()) {
-            return handleGetMethod();
-        }
-        return handlePostMethod(request);
-    }
-
-    private HttpResponse handleGetMethod() {
-        return HttpResponse.builder()
-                .statusCode(StatusCode.OK)
-                .contentType(ContentType.TEXT_HTML)
-                .responseBody(ViewLoader.from("/register.html"))
-                .build();
-    }
-
-    private HttpResponse handlePostMethod(final HttpRequest request) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         if (request.hasRequestBody()) {
             final RequestBody requestBody = request.getRequestBody();
             register(requestBody);
-            return HttpResponse.builder()
-                    .statusCode(StatusCode.CREATED)
-                    .contentType(ContentType.TEXT_HTML)
-                    .responseBody(ViewLoader.toIndex())
-                    .build();
+            response
+                .statusCode(StatusCode.CREATED)
+                .contentType(ContentType.TEXT_HTML)
+                .responseBody(ViewLoader.toIndex());
+            return;
         }
-        return HttpResponse.toNotFound();
+        response
+            .statusCode(StatusCode.NOT_FOUND)
+            .contentType(ContentType.TEXT_HTML)
+            .responseBody(ViewLoader.toNotFound());
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        response
+            .statusCode(StatusCode.OK)
+            .contentType(ContentType.TEXT_HTML)
+            .responseBody(ViewLoader.from("/register.html"));
     }
 
     private void register(final RequestBody requestBody) {

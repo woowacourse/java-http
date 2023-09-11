@@ -14,43 +14,20 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final int LOGIN_PARAMETER_SIZE = 2;
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        if (request.isGetRequest()) {
-            return handleGetMethod(request);
-        }
-        return handlePostMethod(request);
-    }
-
-    private HttpResponse handleGetMethod(final HttpRequest request) {
-        if (request.hasJSessionId() && Objects.nonNull(request.getSession(false))) {
-            final Session session = request.getSession(false);
-            final User user = (User) session.getAttribute("user");
-            if (Objects.nonNull(user)) {
-                return HttpResponse.builder()
-                        .statusCode(StatusCode.FOUND)
-                        .contentType(ContentType.TEXT_HTML)
-                        .responseBody(ViewLoader.toIndex())
-                        .redirect("/index.html")
-                        .build();
-            }
-        }
-        return HttpResponse.builder()
-                .statusCode(StatusCode.OK)
-                .contentType(ContentType.TEXT_HTML)
-                .responseBody(ViewLoader.from("/login.html"))
-                .build();
-    }
-
-    private HttpResponse handlePostMethod(final HttpRequest request) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final RequestBody requestBody = request.getRequestBody();
         if (Objects.isNull(requestBody) || requestBody.size() != LOGIN_PARAMETER_SIZE) {
-            return HttpResponse.toUnauthorized();
+            response
+                .statusCode(StatusCode.UNAUTHORIZED)
+                .contentType(ContentType.TEXT_HTML)
+                .responseBody(ViewLoader.toUnauthorized());
+            return;
         }
         final String account = requestBody.get("account");
         final String password = requestBody.get("password");
@@ -59,13 +36,12 @@ public class LoginController implements Controller {
         final Session session = request.getSession(true);
         session.setAttribute("user", user);
 
-        return HttpResponse.builder()
-                .statusCode(StatusCode.FOUND)
-                .contentType(ContentType.TEXT_HTML)
-                .responseBody(ViewLoader.toIndex())
-                .addCookie(session.getId())
-                .redirect("/index.html")
-                .build();
+        response
+            .statusCode(StatusCode.FOUND)
+            .contentType(ContentType.TEXT_HTML)
+            .responseBody(ViewLoader.toIndex())
+            .addCookie(session.getId())
+            .redirect("/index.html");
     }
 
     private User login(final String account, final String password) {
@@ -80,5 +56,25 @@ public class LoginController implements Controller {
             return;
         }
         throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+    }
+
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        if (request.hasJSessionId() && Objects.nonNull(request.getSession(false))) {
+            final Session session = request.getSession(false);
+            final User user = (User) session.getAttribute("user");
+            if (Objects.nonNull(user)) {
+                response
+                    .statusCode(StatusCode.FOUND)
+                    .contentType(ContentType.TEXT_HTML)
+                    .responseBody(ViewLoader.toIndex())
+                    .redirect("/index.html");
+                return;
+            }
+        }
+        response
+            .statusCode(StatusCode.OK)
+            .contentType(ContentType.TEXT_HTML)
+            .responseBody(ViewLoader.from("/login.html"));
     }
 }

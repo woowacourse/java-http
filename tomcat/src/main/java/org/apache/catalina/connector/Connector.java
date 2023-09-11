@@ -1,17 +1,17 @@
 package org.apache.catalina.connector;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Function;
-import org.apache.coyote.RunnableProcessor;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.function.BiFunction;
+import org.apache.coyote.RunnableProcessor;
+import org.apache.coyote.http11.Http11Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 
@@ -23,7 +23,8 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
-    private final Function<Socket, RunnableProcessor> runnableProcessorGenerator;
+    private final BiFunction<Socket, Semaphore, RunnableProcessor> runnableProcessorGenerator;
+    private final Semaphore semaphore;
     private boolean stopped;
 
     public Connector() {
@@ -35,9 +36,10 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads,
-        Function<Socket, RunnableProcessor> runnableProcessorGenerator) {
+        BiFunction<Socket, Semaphore, RunnableProcessor> runnableProcessorGenerator) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.semaphore = new Semaphore(maxThreads);
         this.runnableProcessorGenerator = runnableProcessorGenerator;
         this.stopped = false;
     }
@@ -70,8 +72,10 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
+            semaphore.acquire();
+
             process(serverSocket.accept());
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -80,7 +84,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        RunnableProcessor runnableProcessor = runnableProcessorGenerator.apply(connection);
+        RunnableProcessor runnableProcessor = runnableProcessorGenerator.apply(connection, semaphore);
 
         executorService.execute(runnableProcessor);
     }
@@ -105,7 +109,7 @@ public class Connector implements Runnable {
     }
 
     private int checkAcceptCount(final int acceptCount) {
-        return Math.max(acceptCount, DEFAULT_ACCEPT_COUNT);
+        return Math.min(acceptCount, DEFAULT_ACCEPT_COUNT);
     }
 
     public int getLocalPort() {

@@ -2,9 +2,16 @@ package org.apache.catalina.connector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketImpl;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import support.HttpClient;
 
 class ConnectorTest {
-
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectorTest.class);
 
@@ -28,11 +34,11 @@ class ConnectorTest {
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failCount = new AtomicInteger(0);
 
-        Connector connector = getConnector(acceptCount, maxThreadsCount, 600);
+        Connector connector = getConnector(acceptCount, maxThreadsCount, 100);
         for (int i = 0; i < requestsCount; i++) {
             new Thread(() -> {
                 try {
-                    HttpClient.send(connector.getLocalPort(),  "", 1000);
+                    HttpClient.send(8080, "/index.html", 150);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -54,7 +60,7 @@ class ConnectorTest {
 
     private static Connector getConnector(int acceptCount, int maxThreadsCount, int sleepTime) {
         Connector connector = new Connector(8080, acceptCount, maxThreadsCount,
-            socket -> new RunnableProcessor() {
+            (socket, sem) -> new RunnableProcessor() {
                 @Override
                 public void process(Socket socket) {
                 }
@@ -72,8 +78,11 @@ class ConnectorTest {
                             "",
                             "Hello world!").getBytes(StandardCharsets.UTF_8));
                         outputStream.flush();
+                        outputStream.close();
                     } catch (InterruptedException | IOException e) {
                         logger.error(e.getMessage(), e);
+                    } finally {
+                        sem.release();
                     }
                 }
             });

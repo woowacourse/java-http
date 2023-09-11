@@ -24,7 +24,7 @@ public class Headers {
     }
 
     public void addHeader(String line) {
-        if (line == null || line.isEmpty()) {
+        if (line == null || line.isBlank()) {
             return;
         }
         final String[] header = line.split(DELIMITER);

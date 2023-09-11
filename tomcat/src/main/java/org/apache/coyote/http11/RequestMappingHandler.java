@@ -10,24 +10,24 @@ import java.util.regex.Pattern;
 
 public enum RequestMappingHandler {
 
-    STRING(RequestMappingHandler::isStringGetUrl, new HelloResponseMaker()),
-    FILE(RequestMappingHandler::isFileGetUrl, new FileGetResponseMaker()),
-    LOGIN_GET(RequestMappingHandler::isLoginGetUrl, new LoginGetResponseMaker()),
-    LOGIN_POST(RequestMappingHandler::isLoginPostUrl, new LoginPostResponseMaker()),
-    REGISTER_GET(RequestMappingHandler::isRegisterGetUrl, new RegisterGetResponseMaker()),
-    REGISTER_POST(RequestMappingHandler::isRegisterPostUrl, new RegisterPostResponseMaker());
+    STRING(RequestMappingHandler::isStringGetUrl, new HelloController()),
+    FILE(RequestMappingHandler::isFileGetUrl, new FileGetController()),
+    LOGIN_GET(RequestMappingHandler::isLoginGetUrl, new LoginGetController()),
+    LOGIN_POST(RequestMappingHandler::isLoginPostUrl, new LoginPostController()),
+    REGISTER_GET(RequestMappingHandler::isRegisterGetUrl, new RegisterGetController()),
+    REGISTER_POST(RequestMappingHandler::isRegisterPostUrl, new RegisterPostController());
 
     private static final Pattern FILE_REGEX = Pattern.compile(".+\\.(html|css|js|ico)");
 
     private final BiPredicate<String, HttpMethod> condition;
-    private final ResponseMaker responseMaker;
+    private final Controller controller;
 
-    RequestMappingHandler(final BiPredicate<String, HttpMethod> condition, final ResponseMaker responseMaker) {
+    RequestMappingHandler(final BiPredicate<String, HttpMethod> condition, final Controller controller) {
         this.condition = condition;
-        this.responseMaker = responseMaker;
+        this.controller = controller;
     }
 
-    public static ResponseMaker findResponseMaker(final HttpRequest request) {
+    public static Controller findController(final HttpRequest request) {
         String resourcePath = request.getRequestLine().getRequestUrl();
         HttpMethod requestMethod = request.getRequestLine().getHttpMethod();
 
@@ -35,7 +35,7 @@ public enum RequestMappingHandler {
                 .filter(value -> value.condition.test(resourcePath, requestMethod))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 url 요청입니다."))
-                .getResponseMaker();
+                .getController();
     }
 
     public static boolean isFileGetUrl(final String resourcePath, final HttpMethod requestMethod) {
@@ -62,8 +62,8 @@ public enum RequestMappingHandler {
         return requestUrl.startsWith("/register") && requestMethod == HttpMethod.POST;
     }
 
-    public ResponseMaker getResponseMaker() {
-        return responseMaker;
+    public Controller getController() {
+        return controller;
     }
 
 }

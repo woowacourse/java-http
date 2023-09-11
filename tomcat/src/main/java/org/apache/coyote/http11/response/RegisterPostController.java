@@ -5,14 +5,15 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.QueryParams;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class RegisterPostResponseMaker extends ResponseMaker {
+public class RegisterPostController implements Controller {
 
     @Override
-    public String createResponse(final HttpRequest request) {
+    public void service(final HttpRequest request,
+                        final HttpResponse response) {
         saveMemberFromQuery(request);
 
-        final HttpResponse httpResponse = new HttpResponse(StatusCode.FOUND);
-        return httpResponse.getRedirectResponse("/index.html");
+        response.setStatusCode(StatusCode.FOUND);
+        response.addHeader("Location", "/index.html");
     }
 
     private void saveMemberFromQuery(final HttpRequest request) {

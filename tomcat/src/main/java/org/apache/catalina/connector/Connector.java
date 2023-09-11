@@ -19,6 +19,7 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREAD = 250;
+    private static final int CORE_POOL_SIZE = 200;
 
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
@@ -30,9 +31,10 @@ public class Connector implements Runnable {
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
+
         this.executorService = new ThreadPoolExecutor(
-            Math.max(DEFAULT_MAX_THREAD, maxThreads),
-            Math.max(DEFAULT_MAX_THREAD, maxThreads),
+            CORE_POOL_SIZE,
+            maxThreads,
             0,
             TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(acceptCount)

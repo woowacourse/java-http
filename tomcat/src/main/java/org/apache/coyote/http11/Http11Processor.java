@@ -3,19 +3,13 @@ package org.apache.coyote.http11;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestBody;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -38,7 +32,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final HttpRequest httpRequest = parseHttpRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final Controller controller = RequestMapping.getController(httpRequest);
             final HttpResponse response = controller.service(httpRequest);
             outputStream.write(
@@ -48,50 +42,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private HttpRequest parseHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final HttpRequestStartLine startLine = extractStartLine(bufferedReader);
-        final HttpRequestHeader httpRequestHeaders = extractHeader(bufferedReader);
-        final HttpRequestBody httpRequestBody = extractBody(httpRequestHeaders.getContentLength(), bufferedReader);
-        return new HttpRequest(startLine, httpRequestHeaders, httpRequestBody);
-    }
-
-    private HttpRequestStartLine extractStartLine(final BufferedReader bufferedReader) throws IOException {
-        return HttpRequestStartLine.from(bufferedReader.readLine());
-    }
-
-    private HttpRequestHeader extractHeader(final BufferedReader bufferedReader)
-            throws IOException {
-        Map<String, String> parsedHeaders = new HashMap<>();
-        String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
-            String[] headerTokens = line.split(": ");
-            parsedHeaders.put(headerTokens[0], headerTokens[1]);
-            line = bufferedReader.readLine();
-        }
-        return new HttpRequestHeader(parsedHeaders);
-    }
-
-    private HttpRequestBody extractBody(String contentLength, BufferedReader bufferedReader)
-            throws IOException {
-        if (contentLength == null) {
-            return null;
-        }
-        int length = Integer.parseInt(contentLength.trim());
-        char[] buffer = new char[length];
-        bufferedReader.read(buffer, 0, length);
-        return new HttpRequestBody(new String(buffer));
-    }
-
-    private HttpResponse handleRequest(final HttpRequest request) {
-        final Controller controller = RequestMapping.getController(request);
-        try {
-            return controller.service(request);
-        } catch (Exception exception) {
-            log.error(exception.getMessage());
-            return null;
         }
     }
 }

@@ -81,7 +81,7 @@ class LoginControllerTest {
     }
 
     @Test
-    void postUnauthorized() throws IOException {
+    void postUnauthorized() throws Exception {
         //given
         final var request = HttpRequest.builder()
                 .method(HttpMethod.POST)

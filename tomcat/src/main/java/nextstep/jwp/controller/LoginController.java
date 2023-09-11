@@ -21,15 +21,6 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) {
-        if (request.isPost()) {
-            doPost(request, response);
-            return;
-        }
-        doGet(request, response);
-    }
-
-    @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Optional<User> optionalUser = extractUser(request);
 

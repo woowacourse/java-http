@@ -10,15 +10,6 @@ import org.apache.coyote.http11.httpresponse.HttpResponse;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 
 public class RegisterController extends AbstractController {
-    @Override
-    public void service(final HttpRequest request, final HttpResponse response) {
-        if (request.isPost()) {
-            doPost(request, response);
-            return;
-        }
-        doGet(request, response);
-
-    }
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {

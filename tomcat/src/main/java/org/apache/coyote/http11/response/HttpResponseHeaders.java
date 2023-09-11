@@ -49,7 +49,7 @@ public class HttpResponseHeaders {
         if (jSessionId.isEmpty()) {
             return this;
         }
-        setHeader("Set-Cookie", String.format("JSESSIONID=%s", jSessionId));
+        setHeader("Set-Cookie", String.format("JSESSIONID=%s", jSessionId.get()));
         return this;
     }
 

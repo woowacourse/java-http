@@ -45,11 +45,11 @@ public class HttpCookie {
         cookies.put(key, value);
     }
 
-    public String find(String key) {
-        return cookies.get(key);
+    public Optional<String> find(String key) {
+        return Optional.ofNullable(cookies.get(key));
     }
 
     public Optional<String> findJSessionId() {
-        return Optional.ofNullable(cookies.get("JSESSIONID"));
+        return find("JSESSIONID");
     }
 }

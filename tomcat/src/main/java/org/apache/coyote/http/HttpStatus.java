@@ -7,7 +7,7 @@ public enum HttpStatus {
     NOT_FOUND("404 Not Found"),
     BAD_REQUEST("400 Bad Request"),
     INTERNAL_SERVER_ERROR("500 Internal Server Error"),
-    UNAUTHORIZED("Unauthorized 401");
+    UNAUTHORIZED("401 Unauthorized");
 
     private final String status;
 

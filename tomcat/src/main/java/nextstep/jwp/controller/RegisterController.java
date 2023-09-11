@@ -30,7 +30,7 @@ public class RegisterController extends AbstractController {
         User user = new User(request.getAccount(), request.getPassword(), request.getEmail());
         InMemoryUserRepository.save(user);
 
-        final Session session = request.getSession(true);
+        Session session = request.getSession(true);
         session.setAttribute("user", user);
         response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
         response.addHttpStatus(FOUND);

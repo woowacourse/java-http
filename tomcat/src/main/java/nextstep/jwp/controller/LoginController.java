@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import common.http.AbstractController;
 import common.http.Cookies;
+import common.http.HttpStatus;
 import common.http.Request;
 import common.http.Response;
 import common.http.Session;
@@ -21,17 +22,12 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(Request request, Response response) {
         if (!request.hasValidSession()) {
-            response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
-            response.addHttpStatus(OK);
-            response.addStaticResourcePath("/login.html");
+            buildStaticResourceResponse(request, response, OK, "/login.html");
             return;
         }
 
         Session session = request.getSession();
-        response.addCookie(Cookies.ofJSessionId(session.getId()));
-        response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
-        response.addHttpStatus(FOUND);
-        response.sendRedirect("/index.html");
+        buildRedirectResponse(request, response, session);
     }
 
     @Override
@@ -40,15 +36,23 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
 
         if (!user.checkPassword(request.getPassword())) {
-            response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
-            response.addHttpStatus(UNAUTHORIZED);
-            response.addStaticResourcePath("/401.html");
+            buildStaticResourceResponse(request, response, UNAUTHORIZED, "/401.html");
             return;
         }
 
         log.info("user: {}", user);
-        final Session session = request.getSession(true);
+        Session session = request.getSession(true);
         session.setAttribute("user", user);
+        buildRedirectResponse(request, response, session);
+    }
+
+    private void buildStaticResourceResponse(Request request, Response response, HttpStatus httpStatus, String path) {
+        response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
+        response.addHttpStatus(httpStatus);
+        response.addStaticResourcePath(path);
+    }
+
+    private void buildRedirectResponse(Request request, Response response, Session session) {
         response.addCookie(Cookies.ofJSessionId(session.getId()));
         response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
         response.addHttpStatus(FOUND);

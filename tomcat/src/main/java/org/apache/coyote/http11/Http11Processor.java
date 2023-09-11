@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final Controller controller = requestMapper.mappingController(httpRequest);
             final HttpResponse httpResponse = new HttpResponse();
             if (controller == null) {
-                httpResponse.notFound(httpRequest);
+                httpResponse.notFound();
             } else {
                 controller.service(httpRequest, httpResponse);
             }

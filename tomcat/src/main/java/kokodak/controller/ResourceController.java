@@ -19,7 +19,7 @@ public class ResourceController extends AbstractController {
         final String fileName = "static" + path;
         final URL resourceUrl = getClass().getClassLoader().getResource(fileName);
         if (resourceUrl == null) {
-            httpResponse.notFound(httpRequest);
+            httpResponse.notFound();
         }
         httpResponse.setBody(fileName, httpRequest.header(ACCEPT));
     }

@@ -87,7 +87,7 @@ public class HttpResponse {
         header(SET_COOKIE, value);
     }
 
-    public void notFound(final HttpRequest httpRequest) throws IOException {
+    public void notFound() throws IOException {
         final String fileName = "static/404.html";
         setBody(fileName, "");
     }

@@ -5,6 +5,7 @@ import org.apache.coyote.http11.session.HttpCookie;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter
 public class HttpResponseHeaders {
@@ -44,8 +45,8 @@ public class HttpResponseHeaders {
         if (httpCookie == null) {
             return this;
         }
-        String jSessionId = httpCookie.findJSessionId();
-        if (jSessionId == null) {
+        Optional<String> jSessionId = httpCookie.findJSessionId();
+        if (jSessionId.isEmpty()) {
             return this;
         }
         setHeader("Set-Cookie", String.format("JSESSIONID=%s", jSessionId));

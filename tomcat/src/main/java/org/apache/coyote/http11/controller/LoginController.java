@@ -41,10 +41,10 @@ public class LoginController implements Controller {
 
         if (httpMethod == HttpMethod.GET) {
             HttpCookie httpCookie = httpRequestHeader.getCookie();
-            String jSessionId = httpCookie.findJSessionId();
-            if (jSessionId != null) {
-                Session session = sessionManager.findSession(jSessionId);
-                if (session != null) {
+            Optional<String> jSessionId = httpCookie.findJSessionId();
+            if (jSessionId.isPresent()) {
+                Optional<Session> session = sessionManager.findSession(jSessionId.get());
+                if (session.isPresent()) {
                     return ResponseEntity.builder()
                             .httpStatus(HttpStatus.FOUND)
                             .contentType(ContentType.HTML)

@@ -1,8 +1,7 @@
 package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
+import org.apache.catalina.session.HttpSession;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -27,9 +26,9 @@ public interface Manager {
     /**
      * Add this Session to the set of active Sessions for this Manager.
      *
-     * @param session Session to be added
+     * @param httpSession Session to be added
      */
-    void add(HttpSession session);
+    void add(HttpSession httpSession);
 
     /**
      * Return the active Session, associated with this Manager, with the
@@ -50,7 +49,7 @@ public interface Manager {
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
-     * @param session Session to be removed
+     * @param httpSession Session to be removed
      */
-    void remove(HttpSession session);
+    void remove(HttpSession httpSession);
 }

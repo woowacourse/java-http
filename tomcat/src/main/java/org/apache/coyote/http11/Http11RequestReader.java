@@ -44,7 +44,7 @@ public class Http11RequestReader {
 		final var parts = requestLine.split(REQUEST_LINE_DELIMITER);
 		final var method = HttpMethod.from(parts[0]);
 		final var uri = RequestUri.from(parts[1]);
-		final var version = HttpProtocolVersion.version(parts[2]);
+		final var version = HttpProtocolVersion.from(parts[2]);
 		return new RequestLine(method, uri, version);
 	}
 

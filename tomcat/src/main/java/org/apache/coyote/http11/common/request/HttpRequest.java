@@ -31,13 +31,13 @@ public class HttpRequest {
     }
 
     public static HttpRequest create(BufferedReader br) throws IOException {
-        RequestLine requestLine = findStartLine(br);
+        RequestLine requestLine = findRequestLine(br);
         RequestHeaders headers = findHeaders(br);
         MessageBody body = findBody(headers, br);
         return new HttpRequest(requestLine, headers, body);
     }
 
-    private static RequestLine findStartLine(BufferedReader br) throws IOException {
+    private static RequestLine findRequestLine(BufferedReader br) throws IOException {
         String firstLine = br.readLine();
         return RequestLine.create(firstLine);
     }

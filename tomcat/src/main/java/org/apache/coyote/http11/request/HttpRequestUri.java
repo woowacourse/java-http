@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 public class HttpRequestUri {
 
     private static final String URI_DELIMITER = "\\?";
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
-    public static final String QUERY_ENTRY_DELIMITER = "&";
-    public static final String KEY_VALUE_DELIMITER = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final String QUERY_ENTRY_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final String path;
     private final Map<String, String> queryString;

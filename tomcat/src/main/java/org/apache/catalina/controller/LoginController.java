@@ -16,10 +16,13 @@ import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    public static final String USER_ATTRIBUTE_KEY = "user";
+    private static final String USER_ATTRIBUTE_KEY = "user";
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
@@ -63,6 +66,7 @@ public class LoginController extends AbstractController {
         Session newSession = new Session();
         newSession.setAttribute(USER_ATTRIBUTE_KEY, user);
         Authorizer.addSession(newSession);
+        log.info("로그인 성공! 아이디: {}", user.getAccount());
         return newSession;
     }
 

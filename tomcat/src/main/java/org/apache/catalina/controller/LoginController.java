@@ -5,7 +5,6 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 import static org.apache.coyote.http11.response.ResponseHeaderType.SET_COOKIE;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -22,6 +21,8 @@ import org.apache.coyote.http11.response.ResponseContentType;
 
 public class LoginController extends AbstractController {
 
+    public static final String USER_ATTRIBUTE_KEY = "user";
+
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Session session = Authorizer.findSession(request);
@@ -34,14 +35,14 @@ public class LoginController extends AbstractController {
         }
 
         final HttpRequestBody requestBody = request.getBody();
-        final Map<String, String> body = requestBody.parse();
+        final User reqeustUser = new User(requestBody.parse());
 
-        final User user = InMemoryUserRepository.findByAccount(body.get("account"))
+        final User user = InMemoryUserRepository.findByAccount(reqeustUser.getAccount())
                 .orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
 
-        if (user.checkPassword(body.get("password"))) {
+        if (user.checkPassword(reqeustUser)) {
             Session newSession = new Session();
-            newSession.setAttribute("user", user);
+            newSession.setAttribute(USER_ATTRIBUTE_KEY, user);
             Authorizer.addSession(newSession);
 
             response.setStatusCode(HttpStatusCode.FOUND)

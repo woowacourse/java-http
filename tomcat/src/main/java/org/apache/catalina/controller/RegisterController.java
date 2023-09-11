@@ -4,7 +4,6 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGT
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 
-import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -24,10 +23,7 @@ public class RegisterController extends AbstractController {
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Session session = Authorizer.findSession(request);
         final HttpRequestBody requestBody = request.getBody();
-        final Map<String, String> body = requestBody.parse();
-        final User user = new User(body.get("account"),
-                body.get("password"),
-                body.get("email"));
+        final User user = new User(requestBody.parse());
 
         if (session != null || InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
             response.setStatusCode(HttpStatusCode.FOUND)

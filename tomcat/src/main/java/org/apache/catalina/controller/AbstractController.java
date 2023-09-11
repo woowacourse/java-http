@@ -27,7 +27,7 @@ public abstract class AbstractController implements Controller {
 
         response.setStatusCode(HttpStatusCode.FOUND)
                 .addHeader(ResponseHeaderType.CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                .addHeader(ResponseHeaderType.LOCATION, "/404.html");
+                .addHeader(ResponseHeaderType.LOCATION, StaticResourceUri.NOT_FOUND_PAGE.getUri());
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {}

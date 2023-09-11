@@ -10,7 +10,7 @@ public class Response {
 	private String responseBody;
 
 	public Response() {
-		this(null, new ResponseHeader(), null);
+		this(null, ResponseHeader.create(), null);
 	}
 
 	public Response(final StatusLine statusLine, final ResponseHeader header, final String responseBody) {

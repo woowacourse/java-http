@@ -20,7 +20,11 @@ public class ResponseHeader {
 	private final Map<HeaderType, String> headers = new HashMap<>();
 	private final List<Cookie> cookies = new ArrayList<>();
 
-	public ResponseHeader() {
+	private ResponseHeader() {
+	}
+
+	public static ResponseHeader create() {
+		return new ResponseHeader();
 	}
 
 	public void addContentType(final MimeType mimeType) {

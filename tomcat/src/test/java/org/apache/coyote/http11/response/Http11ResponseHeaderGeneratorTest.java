@@ -15,7 +15,7 @@ class Http11ResponseHeaderGeneratorTest {
 
 	@Test
 	void ResponseHeader를_생성한다() {
-		final var responseHeader = new ResponseHeader();
+		final var responseHeader = ResponseHeader.create();
 		responseHeader.addContentType(MimeType.HTML);
 		responseHeader.addContentLength("abc");
 		responseHeader.addCookie(new Cookie("cookie1", "abc"));

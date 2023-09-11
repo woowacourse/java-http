@@ -13,7 +13,6 @@ public class HttpRequest {
     private final HttpRequestBody httpRequestBody;
     private static final Manager manager = new SessionManager();
 
-
     public HttpRequest(
             HttpRequestHeader httpRequestHeader,
             HttpRequestBody httpRequestBody
@@ -22,12 +21,16 @@ public class HttpRequest {
         this.httpRequestBody = httpRequestBody;
     }
 
-    public HttpRequestHeader getHttpRequestHeader() {
-        return httpRequestHeader;
+    public HttpMethod getMethod() {
+        return httpRequestHeader.getMethod();
     }
 
-    public HttpRequestBody getHttpRequestBody() {
-        return httpRequestBody;
+    public String getPath() {
+        return httpRequestHeader.getPath();
+    }
+
+    public String getBodyAttribute(String key) {
+        return httpRequestBody.get(key);
     }
 
     public HttpSession getHttpSession() {
@@ -36,7 +39,7 @@ public class HttpRequest {
 
     public HttpSession getHttpSession(boolean create) {
         String jsessionId = httpRequestHeader.getCookies()
-                .getOrDefault("JSESSIONID", "");
+                .get("JSESSIONID");
 
         HttpSession session = null;
 
@@ -46,23 +49,19 @@ public class HttpRequest {
             // ignored
         }
 
-        if (Objects.isNull(session)) {
-            String uuid = UUID.randomUUID()
-                    .toString();
-            session = new HttpSession(uuid);
-            manager.add(session);
+        if (!create) {
             return session;
         }
 
-        if (create) {
+        if (!Objects.isNull(session)) {
             session.invalidate();
             manager.remove(session);
-            String uuid = UUID.randomUUID()
-                    .toString();
-            session = new HttpSession(uuid);
-            manager.add(session);
         }
 
+        String uuid = UUID.randomUUID()
+                .toString();
+        session = new HttpSession(uuid);
+        manager.add(session);
         return session;
     }
 

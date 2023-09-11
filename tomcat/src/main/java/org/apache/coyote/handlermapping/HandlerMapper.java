@@ -31,14 +31,14 @@ public class HandlerMapper {
             return handlers.get(httpRequest.getPath());
         }
 
-        if (canHandleStaticPath(httpRequest.getPath())) {
+        if (canHandleStaticHandler(httpRequest.getPath())) {
             return new StaticHandler();
         }
 
         return new ExceptionHandler(HttpStatus.NOT_FOUND);
     }
 
-    private static boolean canHandleStaticPath(String path) {
+    private static boolean canHandleStaticHandler(String path) {
         return ContentType.isExistsExtension(path);
     }
 

@@ -40,8 +40,6 @@ class DefaultPageControllerTest {
                 .headers(HttpHeaders.getEmptyHeaders())
                 .build();
 
-        String urlPath = request.getUrl().getUrlPath();
-        System.out.println(urlPath);
         // when
         boolean supported = new DefaultPageController().isSupported(request);
 

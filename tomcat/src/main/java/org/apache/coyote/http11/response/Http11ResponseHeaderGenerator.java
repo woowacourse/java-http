@@ -9,7 +9,7 @@ import org.apache.coyote.Cookie;
 import org.apache.coyote.response.HeaderType;
 import org.apache.coyote.response.ResponseHeader;
 
-public class Http11ResponseHeaderFormatter {
+public class Http11ResponseHeaderGenerator {
 
 	private static final String CRLF = "\r\n";
 	private static final String HEADER_SEPARATOR = ": ";
@@ -17,11 +17,11 @@ public class Http11ResponseHeaderFormatter {
 	private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
 	private static final String LINE_END = " ";
 
-	public static String format(final ResponseHeader responseHeader) {
+	public static String generate(final ResponseHeader responseHeader) {
 		final var headers = responseHeader.getHeaders();
 		final var cookies = responseHeader.getCookies();
 		if (!cookies.isEmpty()) {
-			headers.put(HeaderType.SET_COOKIE, format(cookies));
+			headers.put(HeaderType.SET_COOKIE, generate(cookies));
 		}
 		return headers.entrySet().stream()
 			.sorted(comparingInt(e -> e.getKey().ordinal()))
@@ -29,7 +29,7 @@ public class Http11ResponseHeaderFormatter {
 			.collect(joining(CRLF));
 	}
 
-	private static String format(final List<Cookie> cookies) {
+	private static String generate(final List<Cookie> cookies) {
 		return cookies.stream()
 			.map(cookie -> cookie.getKey() + COOKIE_KEY_VALUE_SEPARATOR + cookie.getValue() + COOKIE_DELIMITER)
 			.collect(joining());

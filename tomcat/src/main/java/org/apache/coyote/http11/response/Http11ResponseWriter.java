@@ -26,8 +26,8 @@ public class Http11ResponseWriter {
 		final var responseBody = response.getResponseBody();
 
 		writer.write(String.join(CRLF,
-			Http11StatusLineFormatter.format(statusLine),
-			Http11ResponseHeaderFormatter.format(header),
+			Http11StatusLineGenerate.generate(statusLine),
+			Http11ResponseHeaderGenerator.generate(header),
 			HEADER_BODY_SEPARATOR,
 			responseBody));
 

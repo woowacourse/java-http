@@ -9,12 +9,15 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
 import static common.http.HttpStatus.FOUND;
+import static common.http.HttpStatus.OK;
 
 public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(Request request, Response response) {
         // 로그아웃이 없으므로 모든 요청에 대해 진행합니다.
+        response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
+        response.addHttpStatus(OK);
         response.addStaticResourcePath("/register.html");
     }
 

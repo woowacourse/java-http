@@ -20,17 +20,16 @@ public class StaticResourceController implements Controller {
     @Override
     public void service(Request request, Response response) {
         if (response.hasStaticResourcePath()) {
-            buildResponse(response.getStaticResourcePath(), request, response);
+            buildResponse(response.getStaticResourcePath(), response);
             return;
         }
 
-        buildResponse(request.getPath(), request, response);
-    }
-
-    private void buildResponse(String path, Request request, Response response) {
         response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
         response.addHttpStatus(OK);
+        buildResponse(request.getPath(), response);
+    }
 
+    private void buildResponse(String path, Response response) {
         try {
             URL resource = getResource(path);
             String fileContent = readFileContent(resource);

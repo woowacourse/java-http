@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static common.http.HttpStatus.FOUND;
+import static common.http.HttpStatus.OK;
 import static common.http.HttpStatus.UNAUTHORIZED;
 
 public class LoginController extends AbstractController {
@@ -19,16 +20,18 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(Request request, Response response) {
-        if (request.hasValidSession()) {
-            Session session = request.getSession();
+        if (!request.hasValidSession()) {
             response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
-            response.addHttpStatus(FOUND);
-            response.addCookie(Cookies.ofJSessionId(session.getId()));
-            response.sendRedirect("/index.html");
+            response.addHttpStatus(OK);
+            response.addStaticResourcePath("/login.html");
             return;
         }
 
-        response.addStaticResourcePath("/login.html");
+        Session session = request.getSession();
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
+        response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
+        response.addHttpStatus(FOUND);
+        response.sendRedirect("/index.html");
     }
 
     @Override
@@ -39,16 +42,16 @@ public class LoginController extends AbstractController {
         if (!user.checkPassword(request.getPassword())) {
             response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
             response.addHttpStatus(UNAUTHORIZED);
-            response.sendRedirect("/401.html");
+            response.addStaticResourcePath("/401.html");
             return;
         }
 
         log.info("user: {}", user);
         final Session session = request.getSession(true);
         session.setAttribute("user", user);
+        response.addCookie(Cookies.ofJSessionId(session.getId()));
         response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
         response.addHttpStatus(FOUND);
-        response.addCookie(Cookies.ofJSessionId(session.getId()));
         response.sendRedirect("/index.html");
     }
 }

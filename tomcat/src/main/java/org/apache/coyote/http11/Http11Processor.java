@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 			final var requestReader = new Http11RequestReader(inputBuffer);
 			final var responseWriter = new Http11ResponseWriter(outputBuffer);
 			final var request = requestReader.read();
-			Response response = new Response();
+			final var response = new Response();
 			handlerMapping.service(request, response);
 			responseWriter.write(response);
 		} catch (IOException | UncheckedServletException e) {

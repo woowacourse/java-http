@@ -12,6 +12,7 @@ public class IndexController extends AbstractController {
     public void doGet(final HttpRequest request, final HttpResponse response) {
         final String responseBody = ViewResolver.read("/index.html");
         response.setResponseBody(responseBody);
+        response.setContentLength();
         response.setStatusCode(HttpStatusCode.OK);
     }
 }

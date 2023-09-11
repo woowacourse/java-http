@@ -28,6 +28,7 @@ public class LoginController extends AbstractController {
             final String responseBody = ViewResolver.read("/login.html");
             response.setResponseBody(responseBody);
             response.setStatusCode(HttpStatusCode.OK);
+            response.setContentLength();
             return;
         }
         response.setStatusCode(HttpStatusCode.FOUND);

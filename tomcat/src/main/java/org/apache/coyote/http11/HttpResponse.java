@@ -5,7 +5,7 @@ import java.util.Map;
 public class HttpResponse {
 
     private static final String COOKIE_KEY_VALUE_DELIMITER = "=";
-    
+
     private HttpStatusCode statusCode;
     private String protocol;
     private final HttpHeaders headers;
@@ -68,5 +68,9 @@ public class HttpResponse {
 
     public void setCookie(final String key, final String value) {
         headers.add(HttpHeaders.SET_COOKIE, String.join(COOKIE_KEY_VALUE_DELIMITER, key, value));
+    }
+
+    public void setContentLength() {
+        headers.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(getContentLength()));
     }
 }

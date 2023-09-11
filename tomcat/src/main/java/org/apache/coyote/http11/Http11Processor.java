@@ -43,7 +43,8 @@ public class Http11Processor implements Runnable, Processor {
 
             doService(httpRequest, httpResponse);
 
-            setGeneralResponse(httpRequest, httpResponse);
+            httpResponse.setProtocol(httpRequest.getProtocol());
+            httpResponse.setHeader(HttpHeaders.CONTENT_TYPE, httpRequest.getContentType());
             final String response = httpResponseGenerator.generate(httpResponse);
 
             outputStream.write(response.getBytes());
@@ -57,7 +58,10 @@ public class Http11Processor implements Runnable, Processor {
         final String requestUri = request.getRequestUri();
 
         if (isFileRequest(requestUri)) {
-            readFile(requestUri, response);
+            final String responseBody = ViewResolver.read(requestUri);
+            response.setResponseBody(responseBody);
+            response.setContentLength();
+            response.setStatusCode(HttpStatusCode.OK);
             return;
         }
         final Controller controller = frontController.getHandler(requestUri);
@@ -66,17 +70,5 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isFileRequest(final String requestUri) {
         return requestUri.contains(EXTENSION_DELIMITER);
-    }
-
-    private void readFile(final String requestUri, final HttpResponse response) {
-        final String responseBody = ViewResolver.read(requestUri);
-        response.setResponseBody(responseBody);
-        response.setStatusCode(HttpStatusCode.OK);
-    }
-
-    private void setGeneralResponse(final HttpRequest request, final HttpResponse response) {
-        response.setProtocol(request.getProtocol());
-        response.setHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
-        response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(response.getContentLength()));
     }
 }

@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import nextstep.jwp.exception.NotAllowedMethodException;
+import nextstep.jwp.exception.NotAllowedExtensionException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ class ExtensionTypeTest {
 
         // when & then
         assertThatThrownBy(() -> ExtensionType.from(extension))
-                .isInstanceOf(NotAllowedMethodException.class)
-                .hasMessage("해당하는 Method가 존재하지 않습니다.");
+                .isInstanceOf(NotAllowedExtensionException.class)
+                .hasMessage("해당하는 Extension이 존재하지 않습니다.");
     }
 }

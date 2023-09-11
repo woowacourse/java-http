@@ -26,6 +26,9 @@ public class FileExtractor {
 
     private static ResponseBody extractHtmlFile(final String resource) throws IOException {
         final URL url = CLASSLOADER.getResource(STATIC + resource + ExtensionType.HTML.getExtension());
+        if (url == null) {
+            return ResponseBody.html("Hello world!");
+        }
         return ResponseBody.of(ExtensionType.HTML.getExtension(), makeBodyContent(url));
     }
 

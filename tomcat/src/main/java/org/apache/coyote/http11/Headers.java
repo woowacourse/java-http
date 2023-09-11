@@ -61,10 +61,7 @@ public class Headers {
     }
 
     public String get(String key) {
-        if (keyValues.isEmpty()) {
-            return null;
-        }
-        return keyValues.get(key);
+        return keyValues.getOrDefault(key, null);
     }
 
     public void remove(String key) {

@@ -17,9 +17,10 @@ public class DefaultGetController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String responseBody = "Hello world!";
 
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 readContentType(request.getAccept(), request.getPath()),
-                String.valueOf(responseBody.getBytes().length), null, null);
+                String.valueOf(responseBody.getBytes().length))
+                .build();
         response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }
 }

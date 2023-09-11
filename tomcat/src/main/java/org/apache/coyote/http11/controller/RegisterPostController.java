@@ -30,9 +30,11 @@ public class RegisterPostController extends AbstractController {
                 parsedRequestBody.get("password"),
                 parsedRequestBody.get("email")
         ));
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 readContentType(request.getAccept(), request.getPath()),
-                String.valueOf(0), "/index.html", null);
+                String.valueOf(0))
+                .addLocation("/index.html")
+                .build();
         response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
     }
 

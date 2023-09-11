@@ -14,17 +14,24 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public abstract class AbstractController implements Controller {
+
+    public static final int EXTENSION_TOKENS_MIN_SIZE = 1;
+
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         try {
-            if (request.isGET()) {
-                doGet(request, response);
-            }
-            if (request.isPOST()) {
-                doPost(request, response);
-            }
+            handleRequest(request, response);
         } catch (Exception e) {
             handle500(response);
+        }
+    }
+
+    private void handleRequest(HttpRequest request, HttpResponse response) throws Exception {
+        if (request.isGET()) {
+            doGet(request, response);
+        }
+        if (request.isPOST()) {
+            doPost(request, response);
         }
     }
 
@@ -41,18 +48,26 @@ public abstract class AbstractController implements Controller {
 
     protected String readContentType(final String accept, final String uri) {
         final String[] tokens = uri.split("\\.");
-        if ((tokens.length >= 1 && tokens[tokens.length - 1].equals("css")) || (accept != null && accept
-                .contains("text/css"))) {
+        if (isExtensionCss(tokens) || isAcceptCss(accept)) {
             return HttpResponseHeader.TEXT_CSS_CHARSET_UTF_8;
         }
         return HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8;
     }
 
+    private boolean isExtensionCss(String[] tokens) {
+        return tokens.length >= EXTENSION_TOKENS_MIN_SIZE && tokens[tokens.length - 1].equals("css");
+    }
+
+    private boolean isAcceptCss(String accept) {
+        return accept != null && accept.contains("text/css");
+    }
+
     private void handle500(HttpResponse response) throws IOException, URISyntaxException {
         String responseBody = readHtmlFile(getClass().getResource("/static/500.html"));
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
-                String.valueOf(responseBody.getBytes().length), null, null);
+                String.valueOf(responseBody.getBytes().length))
+                .build();
         response.updateResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, responseHeader, responseBody);
     }
 }

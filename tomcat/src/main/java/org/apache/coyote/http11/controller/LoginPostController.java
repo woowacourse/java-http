@@ -41,9 +41,12 @@ public class LoginPostController extends AbstractController {
                 setCookie = JSESSIONID + "=" + jSessionId;
                 SessionManager.instanceOf().addLoginSession(jSessionId, userOptional.get());
             }
-            HttpResponseHeader responseHeader = new HttpResponseHeader(
+            HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                     readContentType(request.getAccept(), request.getPath()),
-                    String.valueOf(0), "/index.html", setCookie);
+                    String.valueOf(0))
+                    .addLocation("/index.html")
+                    .addSetCookie(setCookie)
+                    .build();
             response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
         }
         handle401(request, response);
@@ -65,9 +68,10 @@ public class LoginPostController extends AbstractController {
 
     private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         String responseBody = readHtmlFile(getClass().getResource("/static/401.html"));
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 readContentType(request.getAccept(), request.getPath()),
-                String.valueOf(responseBody.getBytes().length), null, null);
+                String.valueOf(responseBody.getBytes().length))
+                .build();
         response.updateResponse(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
     }
 }

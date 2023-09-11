@@ -23,9 +23,10 @@ public class DefaultController extends AbstractController {
         }
         String responseBody = readHtmlFile(filePathUrl);
 
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 readContentType(request.getAccept(), request.getPath()),
-                String.valueOf(responseBody.getBytes().length), null, null);
+                String.valueOf(responseBody.getBytes().length))
+                .build();
         response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }
 
@@ -34,9 +35,10 @@ public class DefaultController extends AbstractController {
 
         String responseBody = readHtmlFile(filePathUrl);
 
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
-                String.valueOf(responseBody.getBytes().length), null, null);
+                String.valueOf(responseBody.getBytes().length))
+                .build();
         response.updateResponse(HttpResponseStatus.NOT_FOUND, responseHeader, responseBody);
     }
 }

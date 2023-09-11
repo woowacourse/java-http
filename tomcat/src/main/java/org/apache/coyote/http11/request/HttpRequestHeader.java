@@ -34,5 +34,4 @@ public class HttpRequestHeader {
     public String getContentLength() {
         return this.headers.get("Content-Length");
     }
-
 }

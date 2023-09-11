@@ -20,9 +20,10 @@ public class RegisterGetController extends AbstractController {
         URL filePathUrl = getClass().getResource("/static/register.html");
         String responseBody = readHtmlFile(filePathUrl);
 
-        HttpResponseHeader responseHeader = new HttpResponseHeader(
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
                 readContentType(request.getAccept(), request.getPath()),
-                String.valueOf(responseBody.getBytes().length), null, null);
+                String.valueOf(responseBody.getBytes().length))
+                .build();
         response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }
 }

@@ -9,11 +9,7 @@ import org.apache.coyote.http11.response.ResponseBody;
 
 public class Renderer {
 
-    public static final Renderer EMPTY = new Renderer(
-            MimeType.HTML.getContentType(),
-            "0",
-            new ResponseBody("")
-    );
+    public static final Renderer EMPTY = Renderer.from("/404");
 
     private final String mimeType;
     private final String contentLength;

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.auth;
 
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,10 +28,10 @@ class SessionRepositoryTest {
         sessionRepository.create(Session.from(sessionId));
 
         // when
-        Session session = sessionRepository.getSession(sessionId);
+        Optional<Session> session = sessionRepository.getSession(sessionId);
 
         // then
-        Assertions.assertThat(session.getId()).isEqualTo(sessionId);
+        Assertions.assertThat(session.get().getId()).isEqualTo(sessionId);
     }
 
 }

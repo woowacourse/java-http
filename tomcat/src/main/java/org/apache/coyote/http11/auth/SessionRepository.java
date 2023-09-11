@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.auth;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionRepository {
@@ -14,11 +15,8 @@ public class SessionRepository {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session getSession(String id) {
-        if (id == null) {
-            return null;
-        }
-        return SESSIONS.get(id);
+    public Optional<Session> getSession(String id) {
+        return Optional.ofNullable(SESSIONS.get(id));
     }
 
     public static void clearSessions() {

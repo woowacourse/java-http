@@ -1,8 +1,12 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.handler.FrontController;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +16,8 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
-    private static final HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
-    private static final FrontController frontController = new FrontController();
-
+    private static final FrontController FRONT_CONTROLLER = new FrontController();
+    private static final HttpRequestParser HTTP_REQUEST_PARSER = new HttpRequestParser();
 
     private final Socket connection;
 
@@ -33,10 +35,13 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            httpRequestParser.accept(inputStream);
-            String response = frontController.process(httpRequestParser, httpResponseBuilder);
+            HttpRequest httpRequest = HTTP_REQUEST_PARSER.convertToHttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
 
-            outputStream.write(response.getBytes());
+            Controller controller = FRONT_CONTROLLER.handle(httpRequest);
+            controller.process(httpRequest, httpResponse);
+
+            outputStream.write(httpResponse.joinResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

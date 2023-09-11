@@ -1,98 +1,116 @@
 package nextstep.jwp.presentation.handler;
 
+import coyote.http.RequestFixture;
 import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.presentation.GetLoginController;
-import nextstep.jwp.presentation.GetRegisterController;
-import nextstep.jwp.presentation.PostLoginController;
-import nextstep.jwp.presentation.PostRegisterController;
+import nextstep.jwp.presentation.LoginController;
+import nextstep.jwp.presentation.RegisterController;
 import nextstep.jwp.presentation.RootController;
 import nextstep.jwp.presentation.StaticController;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 class FrontControllerTest {
 
     @Test
-    void findRootController() {
+    void findRootController() throws IOException {
         //given
         FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.ROOT_REQUEST);
 
         //when
-        Controller controller = frontController.findController("GET", "/");
+        Controller controller = frontController.handle(httpRequest);
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(RootController.class);
     }
 
-    @Test
-    void findGetLoginController() {
-        //given
-        FrontController frontController = new FrontController();
-
-        //when
-        Controller controller = frontController.findController("GET", "/login");
-
-        //then
-        Assertions.assertThat(controller.getClass()).isEqualTo(GetLoginController.class);
+    private HttpRequest createHttpRequest(String request) throws IOException {
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        HttpRequestParser httpRequestParser = new HttpRequestParser();
+        return httpRequestParser.convertToHttpRequest(inputStream);
     }
 
     @Test
-    void findGetRegisterController() {
+    void findGetLoginController() throws IOException {
         //given
         FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.GET_LOGIN_REQUEST);
 
         //when
-        Controller controller = frontController.findController("GET", "/register");
+        Controller controller = frontController.handle(httpRequest);
 
         //then
-        Assertions.assertThat(controller.getClass()).isEqualTo(GetRegisterController.class);
+        Assertions.assertThat(controller.getClass()).isEqualTo(LoginController.class);
     }
 
     @Test
-    void findStaticControllerWithCss() {
+    void findGetRegisterController() throws IOException {
         //given
         FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.GET_REGISTER_REQUEST);
 
         //when
-        Controller controller = frontController.findController("GET", "/css/styles.css");
+        Controller controller = frontController.handle(httpRequest);
+
+        //then
+        Assertions.assertThat(controller.getClass()).isEqualTo(RegisterController.class);
+    }
+
+    @Test
+    void findStaticControllerWithCss() throws IOException {
+        //given
+        FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.CSS_REQUEST);
+
+        //when
+        Controller controller = frontController.handle(httpRequest);
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(StaticController.class);
     }
 
     @Test
-    void findStaticControllerWithHTML() {
+    void findStaticControllerWithHTML() throws IOException {
         //given
         FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.HTML_REQUEST);
 
         //when
-        Controller controller = frontController.findController("GET", "/index.html");
+        Controller controller = frontController.handle(httpRequest);
 
         //then
         Assertions.assertThat(controller.getClass()).isEqualTo(StaticController.class);
     }
 
     @Test
-    void findPostLoginController() {
+    void findPostLoginController() throws IOException {
         //given
         FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.POST_SUCCESS_LOGIN_REQUEST);
 
         //when
-        Controller controller = frontController.findController("POST", "/login");
+        Controller controller = frontController.handle(httpRequest);
 
         //then
-        Assertions.assertThat(controller.getClass()).isEqualTo(PostLoginController.class);
+        Assertions.assertThat(controller.getClass()).isEqualTo(LoginController.class);
     }
 
     @Test
-    void findPostRegisterController() {
+    void findPostRegisterController() throws IOException {
         //given
         FrontController frontController = new FrontController();
+        HttpRequest httpRequest = createHttpRequest(RequestFixture.POST_REGISTER_LOGIN_REQUEST);
 
         //when
-        Controller controller = frontController.findController("POST", "/register");
+        Controller controller = frontController.handle(httpRequest);
 
         //then
-        Assertions.assertThat(controller.getClass()).isEqualTo(PostRegisterController.class);
+        Assertions.assertThat(controller.getClass()).isEqualTo(RegisterController.class);
     }
 }

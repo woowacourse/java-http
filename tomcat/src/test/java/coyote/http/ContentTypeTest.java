@@ -1,10 +1,11 @@
-package org.apache.coyote.http11;
+package coyote.http;
 
+import org.apache.coyote.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ContentTypeTest {
 
@@ -12,7 +13,7 @@ class ContentTypeTest {
     void findType() {
         //given
         List<String> path = List.of("/css/style.css", "/favicon.ico", "/js/index.js", "/index.html");
-        List<String> contentType = List.of("text/css", "text/css", "text/javascript", "text/html");
+        List<String> contentType = List.of("text/css", "text/css", "text/javascript", "text/html; charset=utf-8");
 
         //when
         String type = ContentType.findType(path.get(0));

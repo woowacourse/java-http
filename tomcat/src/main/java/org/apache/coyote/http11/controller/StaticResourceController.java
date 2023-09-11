@@ -5,13 +5,13 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ResourceController implements Controller {
+public class StaticResourceController implements Controller {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
         httpResponse.setHttpStatus(HttpStatus.OK)
-                .setRedirect(requestLine.getPath());
+                .setPath(requestLine.getPath());
     }
 }

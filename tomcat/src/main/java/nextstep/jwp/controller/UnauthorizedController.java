@@ -10,7 +10,7 @@ public class UnauthorizedController implements Controller {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED)
-                .setRedirect("401");
+                .setPath("/401");
     }
 
 }

@@ -19,7 +19,7 @@ public class RegisterController extends AbstractController<UserService> {
         RequestLine requestLine = httpRequest.getRequestLine();
 
         httpResponse.setHttpStatus(HttpStatus.OK)
-                .setRedirect(requestLine.getPath());
+                .setPath(requestLine.getPath());
     }
 
     @Override

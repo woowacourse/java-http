@@ -24,7 +24,7 @@ public abstract class AbstractController<T> implements Controller {
             return;
         }
         httpResponse.setHttpStatus(HttpStatus.NOT_FOUND)
-                .setRedirect("/404.html");
+                .setPath("/404.html");
     }
 
     protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse);

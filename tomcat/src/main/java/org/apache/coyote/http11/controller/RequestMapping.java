@@ -24,7 +24,7 @@ public enum RequestMapping {
 
     static {
         controllers.put("/", new DefaultController());
-        controllers.put("/index", new ResourceController());
+        controllers.put("/index", new StaticResourceController());
         controllers.put("/login", new LoginController(new UserService()));
         controllers.put("/register", new RegisterController(new UserService()));
         controllers.put("/401", new UnauthorizedController());
@@ -38,7 +38,7 @@ public enum RequestMapping {
             controller.service(request, response);
         } catch (RuntimeException e) {
             response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .setRedirect("/500");
+                    .setPath("/500");
         }
 
         render(response);
@@ -46,22 +46,22 @@ public enum RequestMapping {
 
     private Controller getController(String path) {
         if (path.contains(".")) {
-            return new ResourceController();
+            return new StaticResourceController();
         }
         return controllers.getOrDefault(path, new NotFoundController());
     }
 
     private void render(HttpResponse response) {
-        String redirect = response.getRedirect();
+        String path = response.getPath();
 
         if (response.isFound()) {
             response.addHeader("Content-Type", MimeType.HTML.getContentType())
-                    .addHeader("Location", redirect)
+                    .addHeader("Location", path)
                     .setResponseBody(ResponseBody.empty());
             return;
         }
 
-        Renderer renderer = Renderer.from(redirect);
+        Renderer renderer = Renderer.from(path);
         response.addHeader("Content-Type", renderer.getMimeType())
                 .addHeader("Content-Length", renderer.getContentLength())
                 .setResponseBody(renderer.getResponseBody());

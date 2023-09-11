@@ -13,7 +13,7 @@ public class HttpResponse {
     private final HttpHeaders responseHeaders;
     private HttpStatus httpStatus;
     private ResponseBody responseBody;
-    private String redirect;
+    private String path;
 
     public HttpResponse(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
@@ -41,8 +41,8 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setRedirect(String redirect) {
-        this.redirect = redirect;
+    public HttpResponse setPath(String path) {
+        this.path = path;
         return this;
     }
 
@@ -50,8 +50,8 @@ public class HttpResponse {
         responseHeaders.addCookies(httpCookie);
     }
 
-    public String getRedirect() {
-        return redirect;
+    public String getPath() {
+        return path;
     }
 
     public HttpResponse addHeader(String key, String value) {

@@ -10,6 +10,6 @@ public class NotFoundController implements Controller {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setHttpStatus(HttpStatus.NOT_FOUND)
-                .setRedirect("/404");
+                .setPath("/404");
     }
 }

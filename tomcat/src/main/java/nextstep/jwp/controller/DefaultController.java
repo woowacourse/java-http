@@ -10,7 +10,7 @@ public class DefaultController implements Controller {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setHttpStatus(HttpStatus.OK)
-                .setRedirect("/default");
+                .setPath("/default");
     }
 
 }

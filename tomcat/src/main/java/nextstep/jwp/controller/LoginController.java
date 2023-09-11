@@ -24,12 +24,12 @@ public class LoginController extends AbstractController<UserService> {
 
         if (session != null && session.getAttribute("user") != null) {
             httpResponse.setHttpStatus(HttpStatus.FOUND)
-                    .setRedirect("/index");
+                    .setPath("/index");
             return;
         }
 
         httpResponse.setHttpStatus(HttpStatus.OK)
-                .setRedirect(requestLine.getPath());
+                .setPath(requestLine.getPath());
     }
 
     @Override
@@ -51,11 +51,11 @@ public class LoginController extends AbstractController<UserService> {
             httpCookie.putJSessionId(httpSession.getId());
 
             httpResponse.setHttpStatus(HttpStatus.FOUND)
-                    .setRedirect("/index")
+                    .setPath("/index")
                     .setCookie(httpCookie);
         } catch (IllegalArgumentException e) {
             httpResponse.setHttpStatus(HttpStatus.FOUND)
-                    .setRedirect("/401");
+                    .setPath("/401");
         }
     }
 

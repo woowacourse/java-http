@@ -19,7 +19,7 @@ public class HttpCookie {
     private final Map<String, String> cookies = new HashMap<>();
 
     public HttpCookie(Map<String, String> cookies) {
-        cookies.putAll(cookies);
+        this.cookies.putAll(cookies);
     }
 
     private HttpCookie() {

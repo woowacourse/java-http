@@ -2,12 +2,12 @@ package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestMapping {
 
-    private static final Map<String, Controller> controllers = new HashMap<>();
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     private RequestMapping() {
     }

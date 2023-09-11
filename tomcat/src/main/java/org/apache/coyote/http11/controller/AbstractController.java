@@ -15,27 +15,23 @@ import java.util.Objects;
 
 public abstract class AbstractController implements Controller {
     @Override
-    public HttpResponse service(HttpRequest request) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         try {
             if (request.isGET()) {
-                return doGet(request);
-
+                doGet(request, response);
             }
             if (request.isPOST()) {
-                return doPost(request);
+                doPost(request, response);
             }
-            return null;
         } catch (Exception e) {
-            return handle500();
+            handle500(response);
         }
     }
 
-    protected HttpResponse doPost(HttpRequest request) throws Exception {
-        return null;
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
     }
 
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
-        return null;
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
     }
 
     protected String getHtmlFile(URL filePathUrl) throws URISyntaxException, IOException {
@@ -52,12 +48,12 @@ public abstract class AbstractController implements Controller {
         return HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8;
     }
 
-    private HttpResponse handle500() throws IOException, URISyntaxException {
+    private void handle500(HttpResponse response) throws IOException, URISyntaxException {
         String responseBody = getHtmlFile(getClass().getResource("/static/500.html"));
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
                 String.valueOf(responseBody.getBytes().length), null, null);
-        return HttpResponse.of(HttpResponseStatus.INTERNAL_SERVER_ERROR, responseHeader, responseBody);
+        response.updateResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, responseHeader, responseBody);
     }
 }
 

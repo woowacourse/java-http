@@ -8,7 +8,7 @@ public class HttpRequestBody {
 
     public static HttpRequestBody from(final String contentLength, final BufferedReader bufferedReader) throws IOException {
         if (contentLength == null) {
-            throw new IllegalArgumentException("Content-Length 값이 올바르지 않습니다.");
+            return new HttpRequestBody("");
         }
         int length = Integer.parseInt(contentLength.trim());
         char[] buffer = new char[length];

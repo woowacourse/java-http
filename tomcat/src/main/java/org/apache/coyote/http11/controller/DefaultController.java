@@ -16,20 +16,20 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    public HttpResponse service(HttpRequest request) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
         URL filePathUrl = getClass().getResource("/static" + request.getPath());
         if (filePathUrl == null) {
-            return handle404();
+            handle404(response);
         }
         String responseBody = getHtmlFile(filePathUrl);
 
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 getContentType(request.getAccept(), request.getPath()),
                 String.valueOf(responseBody.getBytes().length), null, null);
-        return HttpResponse.of(HttpResponseStatus.OK, responseHeader, responseBody);
+        response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }
 
-    private HttpResponse handle404() throws IOException, URISyntaxException {
+    private void handle404(HttpResponse response) throws IOException, URISyntaxException {
         URL filePathUrl = getClass().getResource("/static/404.html");
 
         String responseBody = getHtmlFile(filePathUrl);
@@ -37,6 +37,6 @@ public class DefaultController extends AbstractController {
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
                 String.valueOf(responseBody.getBytes().length), null, null);
-        return HttpResponse.of(HttpResponseStatus.NOT_FOUND, responseHeader, responseBody);
+        response.updateResponse(HttpResponseStatus.NOT_FOUND, responseHeader, responseBody);
     }
 }

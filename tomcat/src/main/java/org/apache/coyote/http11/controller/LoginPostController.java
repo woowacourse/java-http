@@ -25,7 +25,7 @@ public class LoginPostController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isNotExistBody()) {
             throw new IllegalArgumentException("로그인 정보가 입력되지 않았습니다.");
         }
@@ -44,9 +44,9 @@ public class LoginPostController extends AbstractController {
             HttpResponseHeader responseHeader = new HttpResponseHeader(
                     getContentType(request.getAccept(), request.getPath()),
                     String.valueOf(0), "/index.html", setCookie);
-            return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, "");
+            response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
         }
-        return handle401(request);
+        handle401(request, response);
     }
 
     private Map<String, String> parseRequestBody(HttpRequest request) {
@@ -63,11 +63,11 @@ public class LoginPostController extends AbstractController {
         return parsedRequestBody;
     }
 
-    private HttpResponse handle401(HttpRequest request) throws URISyntaxException, IOException {
+    private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
         String responseBody = getHtmlFile(getClass().getResource("/static/401.html"));
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 getContentType(request.getAccept(), request.getPath()),
                 String.valueOf(responseBody.getBytes().length), null, null);
-        return HttpResponse.of(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
+        response.updateResponse(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
     }
 }

@@ -6,6 +6,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 public interface Controller {
     boolean isSupported(HttpRequest request);
 
-    HttpResponse service(HttpRequest request) throws Exception;
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }
 

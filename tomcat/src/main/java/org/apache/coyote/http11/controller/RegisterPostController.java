@@ -19,7 +19,7 @@ public class RegisterPostController extends AbstractController {
 
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         if (request.isNotExistBody()) {
             throw new IllegalArgumentException("회원가입 정보가 입력되지 않았습니다.");
         }
@@ -33,7 +33,7 @@ public class RegisterPostController extends AbstractController {
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 getContentType(request.getAccept(), request.getPath()),
                 String.valueOf(0), "/index.html", null);
-        return HttpResponse.of(HttpResponseStatus.FOUND, responseHeader, "");
+        response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
     }
 
     private Map<String, String> parseRequestBody(HttpRequest request) {

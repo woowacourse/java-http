@@ -14,12 +14,12 @@ public class DefaultGetController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String responseBody = "Hello world!";
 
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 getContentType(request.getAccept(), request.getPath()),
                 String.valueOf(responseBody.getBytes().length), null, null);
-        return HttpResponse.of(HttpResponseStatus.OK, responseHeader, responseBody);
+        response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }
 }

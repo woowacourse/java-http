@@ -1,6 +1,6 @@
 package org.apache.catalina.connector;
 
-import org.apache.catalina.servletcontainer.HandlerContainer;
+import org.apache.coyote.http11.Container;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +25,13 @@ public class Connector implements Runnable {
     private final ServerSocket serverSocket;
     private final ExecutorService executorService;
     private boolean stopped;
+    private Container container;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(Container container) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, container);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final Container container) {
         this.serverSocket = createServerSocket(port, acceptCount);
         executorService = new ThreadPoolExecutor(
                 DEFAULT_ACCEPT_MAX_THREADS,
@@ -38,6 +39,7 @@ public class Connector implements Runnable {
                 0,
                 TimeUnit.MINUTES, new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT));
         this.stopped = false;
+        this.container = container;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -78,7 +80,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, new HandlerContainer());
+        var processor = new Http11Processor(connection, container);
         executorService.execute(processor);
     }
 

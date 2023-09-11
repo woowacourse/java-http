@@ -1,33 +1,20 @@
 package org.apache.coyote.http11;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Handler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.HttpCookie;
 import org.apache.coyote.common.HttpHeaders;
 import org.apache.coyote.common.HttpRequest;
 import org.apache.coyote.common.HttpResponse;
 import org.apache.coyote.common.RequestUri;
-import org.apache.coyote.exception.MethodNotAllowedException;
-import org.apache.coyote.http11.handler.IndexHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.MethodNotAllowedHandler;
-import org.apache.coyote.http11.handler.NotFoundHandler;
-import org.apache.coyote.http11.handler.RegisterHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.util.CookieParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,21 +22,15 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, Handler> HANDLER_MAP = new HashMap<>();
-    private static final Handler STATIC_RESOURCE_HANDLER = new StaticResourceHandler();
-    private static final Handler METHOD_NOT_ALLOWED_HANDLER = new MethodNotAllowedHandler();
-    private static final Handler NOT_FOUND_HANDLER = new NotFoundHandler();
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
+    private final ExceptionHandler exceptionHandler;
 
-    static {
-        HANDLER_MAP.put("/", new IndexHandler());
-        HANDLER_MAP.put("/login", new LoginHandler());
-        HANDLER_MAP.put("/register", new RegisterHandler());
-    }
-
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, RequestMapping requestMapping, ExceptionHandler exceptionHandler) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -63,10 +44,11 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
             OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = createHttpRequest(inputStream);
-            HttpResponse response = handle(request);
+            HttpResponse response = new HttpResponse();
+            handle(request, response);
             outputStream.write(response.toBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -115,19 +97,12 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private HttpResponse handle(HttpRequest request) throws IOException {
-        Handler handler = HANDLER_MAP.getOrDefault(request.getPath(), STATIC_RESOURCE_HANDLER);
+    private void handle(HttpRequest request, HttpResponse response) throws Exception {
+        Controller controller = requestMapping.getController(request);
         try {
-            return handler.handle(request);
-        } catch (MethodNotAllowedException e) {
-            HttpResponse response = METHOD_NOT_ALLOWED_HANDLER.handle(request);
-            List<String> allowedMethods = e.getAllowedMethods().stream()
-                .map(Enum::name)
-                .collect(toList());
-            response.setHeader("Allow", allowedMethods);
-            return response;
-        } catch (NoSuchFileException e) {
-            return NOT_FOUND_HANDLER.handle(request);
+            controller.service(request, response);
+        } catch (Exception e) {
+            exceptionHandler.handle(request, response, e);
         }
     }
 }

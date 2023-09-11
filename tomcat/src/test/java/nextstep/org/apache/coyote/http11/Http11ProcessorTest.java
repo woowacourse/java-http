@@ -11,16 +11,40 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.session.HttpSession;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.http11.ExceptionHandler;
+import org.apache.coyote.http11.controller.IndexController;
+import org.apache.coyote.http11.controller.LoginController;
+import org.apache.coyote.http11.controller.MethodNotAllowedController;
+import org.apache.coyote.http11.controller.NotFoundController;
+import org.apache.coyote.http11.controller.RegisterController;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    RequestMapping requestMapping;
+    ExceptionHandler exceptionHandler;
+
+    @BeforeEach
+    void setUp() {
+        requestMapping = new RequestMapping();
+        requestMapping.addController("/", new IndexController());
+        requestMapping.addController("/login", new LoginController());
+        requestMapping.addController("/register", new RegisterController());
+        
+        exceptionHandler = ExceptionHandler.builder()
+            .methodNotAllowedController(new MethodNotAllowedController())
+            .notFoundController(new NotFoundController())
+            .build();
+    }
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -46,7 +70,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -73,7 +97,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -97,7 +121,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -121,7 +145,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -145,7 +169,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -169,7 +193,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -195,7 +219,7 @@ class Http11ProcessorTest {
             requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -219,7 +243,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -250,7 +274,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -273,7 +297,7 @@ class Http11ProcessorTest {
             "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);
@@ -300,7 +324,7 @@ class Http11ProcessorTest {
             requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping, exceptionHandler);
 
         // when
         processor.process(socket);

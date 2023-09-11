@@ -1,8 +1,8 @@
 package org.apache.coyote.common;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Nested;
@@ -36,11 +36,9 @@ class RequestUriTest {
             RequestUri requestUri = RequestUri.from("GET /index.html HTTP/1.1");
 
             // when & then
-            SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(requestUri.getHttpMethod()).isEqualTo(HttpMethod.GET);
-                softly.assertThat(requestUri.getHttpPath().getPath()).isEqualTo("/index.html");
-                softly.assertThat(requestUri.getHttpProtocol()).isEqualTo(HttpProtocol.HTTP11);
-            });
+            assertThat(requestUri.getHttpMethod()).isEqualTo(HttpMethod.GET);
+            assertThat(requestUri.getHttpPath().getPath()).isEqualTo("/index.html");
+            assertThat(requestUri.getHttpProtocol()).isEqualTo(HttpProtocol.HTTP11);
         }
     }
 }

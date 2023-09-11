@@ -18,21 +18,24 @@ import org.junit.jupiter.params.provider.CsvSource;
 class AuthServiceTest {
 
     private SessionManager sessionManager;
+    private InMemoryUserRepository inMemoryUserRepository;
 
     @BeforeEach
     void setUp() {
-        sessionManager = new SessionManager();
+        inMemoryUserRepository = InMemoryUserRepository.getInstance();
+        inMemoryUserRepository.deleteAll();
+        sessionManager = SessionManager.getInstance();
+        sessionManager.deleteAll();
     }
 
     @Test
     void 로그인한다() {
         // given
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
-        String account = "gugu";
-        String password = "password";
+        AuthService authService = new AuthService(sessionManager, inMemoryUserRepository);
+        authService.register("gugu", "password", "hkkang@woowahan.com");
 
         // when
-        String sessionId = authService.login(account, password);
+        String sessionId = authService.login("gugu", "password");
 
         // then
         assertThat(sessionId).isNotEmpty();
@@ -41,7 +44,7 @@ class AuthServiceTest {
     @Test
     void 존재하지_않는_계정으로_로그인을_할_경우_예외를_던진다() {
         // given
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
+        AuthService authService = new AuthService(sessionManager, inMemoryUserRepository);
         String wrongAccount = "wrongAccount";
         String password = "password";
 
@@ -54,7 +57,8 @@ class AuthServiceTest {
     @Test
     void 틀린_비밀번호로_로그인_할_경우_예외를_던진다() {
         // given
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
+        AuthService authService = new AuthService(sessionManager, inMemoryUserRepository);
+        authService.register("gugu", "password", "hkkang@woowahan.com");
         String account = "gugu";
         String wrongPassword = "wrongPassword";
 
@@ -67,7 +71,7 @@ class AuthServiceTest {
     @Test
     void 회원가입한다() {
         // given
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
+        AuthService authService = new AuthService(sessionManager, inMemoryUserRepository);
         String account = "account";
         String password = "password";
         String email = "account@email.com";
@@ -82,7 +86,7 @@ class AuthServiceTest {
     @Test
     void 회원가입할_때_계정이_중복될_경우_예외를_던진다() {
         // given
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
+        AuthService authService = new AuthService(sessionManager, inMemoryUserRepository);
         String duplicateAccount = "duplicateAccount";
         authService.register(duplicateAccount, "password", "account@email.com");
 
@@ -96,7 +100,7 @@ class AuthServiceTest {
     @CsvSource({"notLoggedInId, false", "loggedInId, true"})
     void session_Id로_이미_로그인이_되었는지_확인한다(String sessionId, boolean expected) {
         // given
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
+        AuthService authService = new AuthService(sessionManager, inMemoryUserRepository);
         Session session = new Session("loggedInId");
         sessionManager.add(session);
 

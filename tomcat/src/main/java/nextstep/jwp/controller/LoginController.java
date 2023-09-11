@@ -5,7 +5,9 @@ import static common.ResponseStatus.OK;
 import static common.ResponseStatus.UNAUTHORIZED;
 import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.service.AuthService;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -21,8 +23,12 @@ public class LoginController extends AbstractController {
 
     private final AuthService authService;
 
-    public LoginController(AuthService authService) {
+    LoginController(AuthService authService) {
         this.authService = authService;
+    }
+
+    public LoginController() {
+        this(new AuthService(SessionManager.getInstance(), InMemoryUserRepository.getInstance()));
     }
 
     @Override

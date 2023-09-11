@@ -6,8 +6,6 @@ import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.service.AuthService;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -19,13 +17,12 @@ public class RequestMapping {
         this.controllers = controllers;
     }
 
-    public static RequestMapping init(SessionManager sessionManager) {
-        AuthService authService = new AuthService(sessionManager, InMemoryUserRepository.init());
+    public static RequestMapping init() {
         return new RequestMapping(
                 List.of(
                         new HomeController(),
-                        new LoginController(authService),
-                        new RegisterController(authService),
+                        new LoginController(),
+                        new RegisterController(),
                         new ResourceController()
                 )
         );

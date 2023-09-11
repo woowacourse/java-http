@@ -4,7 +4,9 @@ import static common.ResponseStatus.FOUND;
 import static common.ResponseStatus.OK;
 import static org.apache.coyote.response.header.HttpHeader.SET_COOKIE;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.service.AuthService;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -22,6 +24,10 @@ public class RegisterController extends AbstractController {
 
     public RegisterController(AuthService authService) {
         this.authService = authService;
+    }
+
+    public RegisterController() {
+        this(new AuthService(SessionManager.getInstance(), InMemoryUserRepository.getInstance()));
     }
 
     @Override

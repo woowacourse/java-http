@@ -20,9 +20,9 @@ public class HttpResponse {
     private ResponseBody responseBody;
 
     public HttpResponse() {
-        this.responseLine = new ResponseLine();
-        this.responseHeaders = new ResponseHeaders();
-        this.responseBody = new ResponseBody();
+        this.responseLine = ResponseLine.init();
+        this.responseHeaders = ResponseHeaders.init();
+        this.responseBody = ResponseBody.init();
     }
 
     public void redirect(String redirectionFile) {

@@ -4,8 +4,12 @@ public class ResponseBody {
 
     private String responseBody;
 
-    public ResponseBody() {
+    private ResponseBody(String responseBody) {
         this.responseBody = "";
+    }
+
+    protected static ResponseBody init() {
+        return new ResponseBody("");
     }
 
     public String getResponseBody() {

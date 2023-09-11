@@ -12,9 +12,13 @@ public class ResponseLine {
     private ResponseStatus responseStatus;
     private HttpVersion httpVersion;
 
-    protected ResponseLine() {
-        this.responseStatus = OK;
-        this.httpVersion = HTTP_1_1;
+    private ResponseLine(ResponseStatus responseStatus, HttpVersion httpVersion) {
+        this.responseStatus = responseStatus;
+        this.httpVersion = httpVersion;
+    }
+
+    protected static ResponseLine init() {
+        return new ResponseLine(OK, HTTP_1_1);
     }
 
     public void redirect(HttpVersion httpVersion) {

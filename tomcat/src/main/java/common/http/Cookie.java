@@ -6,7 +6,7 @@ import java.util.Map;
 public class Cookie {
 
     private static final String SEPARATOR = "; ";
-    private static final String DELIMITER = "=";
+    public static final String DELIMITER = "=";
 
     private static final int ATTRIBUTE_INDEX = 0;
     private static final int VALUE_INDEX = 1;

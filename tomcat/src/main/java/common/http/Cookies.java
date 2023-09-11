@@ -7,7 +7,7 @@ public class Cookies {
     private Cookies() {}
 
     public static Cookie ofJSessionId(String id) {
-        return Cookie.from(JSESSIONID + "=" + id);
+        return Cookie.from(JSESSIONID + Cookie.DELIMITER + id);
     }
 
     public static String getJsessionid(Cookie cookie) {

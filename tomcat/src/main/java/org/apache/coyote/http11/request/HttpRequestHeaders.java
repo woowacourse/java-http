@@ -13,6 +13,7 @@ public class HttpRequestHeaders {
     private static final String KET_VALUE_DELIMITER = ": ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+
     private final Map<String, String> headers;
     private final HttpCookies cookies;
 

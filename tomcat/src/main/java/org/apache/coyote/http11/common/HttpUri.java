@@ -7,6 +7,7 @@ public class HttpUri {
 
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final int QUERY_STRING_NOT_EXIST_INDEX = -1;
+
     private final String nativePath;
     private final QueryString queryString;
 

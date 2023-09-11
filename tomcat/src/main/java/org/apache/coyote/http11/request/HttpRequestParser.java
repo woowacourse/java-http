@@ -48,7 +48,7 @@ public class HttpRequestParser {
         List<String> lines = new ArrayList<>();
         String line;
 
-        while (!"".equals(line = br.readLine())) {
+        while (!"".equals(line = br.readLine()) && line != null) {
             lines.add(line);
         }
 

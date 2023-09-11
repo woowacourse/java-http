@@ -40,6 +40,14 @@ public class HttpRequest {
         return httpStartLine.getHttpMethod() == HttpMethod.POST;
     }
 
+    public HttpStartLine getHttpStartLine() {
+        return httpStartLine;
+    }
+
+    public HttpRequestHeaders getHttpRequestHeaders() {
+        return httpRequestHeaders;
+    }
+
     public HttpVersion getHttpVersion() {
         return httpStartLine.getHttpVersion();
     }

@@ -34,7 +34,7 @@ public class HttpRequestParser {
 
     private static Optional<Integer> parseContentLength(final HttpHeaders httpHeaders) {
         final Optional<String> rawContentLength = httpHeaders.getRecentHeaderValue(HttpHeader.CONTENT_LENGTH);
-        return rawContentLength.map(Integer::parseInt);
+        return rawContentLength.map(Integer::parseInt).filter(it -> it != 0);
     }
 
     private static HttpHeaders parseHeader(final BufferedReader bufferedReader) {

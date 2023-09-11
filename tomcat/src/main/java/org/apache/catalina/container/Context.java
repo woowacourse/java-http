@@ -12,12 +12,16 @@ public class Context {
 
     private static final Map<String, Servlet> mappings;
 
+    private static final StaticResourceServlet staticResourceServlet;
+
     static {
         mappings = new HashMap<>();
         mappings.put("/", new RootServlet());
         mappings.put("/index", new IndexServlet());
         mappings.put("/login", new LoginServlet());
         mappings.put("/register", new RegisterServlet());
+
+        staticResourceServlet = new StaticResourceServlet();
     }
 
     private Context() {
@@ -35,10 +39,6 @@ public class Context {
     }
 
     private static Servlet findServlet(String absolutePath) {
-        return mappings.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(absolutePath))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseGet(StaticResourceServlet::new);
+        return mappings.getOrDefault(absolutePath, staticResourceServlet);
     }
 }

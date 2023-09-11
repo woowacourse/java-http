@@ -91,6 +91,7 @@ public class Connector implements Runnable {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     log.error(e.getMessage(), e);
                 }
             }

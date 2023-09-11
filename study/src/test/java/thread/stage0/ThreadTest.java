@@ -36,6 +36,20 @@ class ThreadTest {
          thread.join();
     }
 
+    private static final class ExtendedThread extends Thread {
+
+        private String message;
+
+        public ExtendedThread(final String message) {
+            this.message = message;
+        }
+
+        @Override
+        public void run() {
+            log.info(message);
+        }
+    }
+
     /**
      * Runnable 인터페이스를 사용하는 방법도 있다.
      * 주석을 참고하여 테스트 코드를 작성하고, 테스트를 실행시켜서 메시지가 잘 나오는지 확인한다.
@@ -50,20 +64,6 @@ class ThreadTest {
 
         // thread의 작업이 완료될 때까지 기다린다.
          thread.join();
-    }
-
-    private static final class ExtendedThread extends Thread {
-
-        private String message;
-
-        public ExtendedThread(final String message) {
-            this.message = message;
-        }
-
-        @Override
-        public void run() {
-            log.info(message);
-        }
     }
 
     private static final class RunnableThread implements Runnable {

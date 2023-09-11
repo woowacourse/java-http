@@ -17,9 +17,8 @@ public class ContentType {
         this.charset = charset;
     }
 
-    @Override
-    public String toString() {
-        return "Content-Type: " + mimeType + ";charset=" + charset + " ";
+    public String convertToString() {
+        return mimeType + ";charset=" + charset;
     }
 
 }

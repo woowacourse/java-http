@@ -15,7 +15,7 @@ class ContentLengthTest {
         final var contentLength = ContentLength.from(body);
 
         //then
-        assertThat(contentLength).hasToString("Content-Length: 12");
+        assertThat(contentLength.getLength()).isEqualTo(12);
     }
 
 }

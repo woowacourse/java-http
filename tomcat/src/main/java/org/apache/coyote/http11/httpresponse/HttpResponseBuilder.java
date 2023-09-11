@@ -5,6 +5,9 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.HttpVersion;
 import org.apache.coyote.http11.ResponseBody;
 
+import static org.apache.coyote.ResponseHeader.CONTENT_LENGTH;
+import static org.apache.coyote.ResponseHeader.CONTENT_TYPE;
+
 public class HttpResponseBuilder {
 
     private HttpVersion httpVersion;
@@ -27,16 +30,13 @@ public class HttpResponseBuilder {
 
     public HttpResponseBuilder body(ResponseBody body) {
         this.body = body;
+        headers.put(CONTENT_LENGTH.getName(), String.valueOf(body.getContentLength().getLength()));
+        headers.put(CONTENT_TYPE.getName(), body.getContentType().convertToString());
         return this;
     }
 
     public HttpResponseBuilder header(String key, String value) {
         headers.put(key, value);
-        return this;
-    }
-
-    public HttpResponseBuilder headers(Headers headers) {
-        this.headers = headers;
         return this;
     }
 

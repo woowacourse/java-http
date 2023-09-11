@@ -15,9 +15,8 @@ public class ContentLength {
         return new ContentLength(bodyLength);
     }
 
-    @Override
-    public String toString() {
-        return "Content-Length: " + length;
+    public int getLength() {
+        return length;
     }
 
 }

@@ -9,9 +9,9 @@ import java.util.Objects;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final ResponseHeaders responseHeaders;
-    private final ResponseBody responseBody;
+    private StatusLine statusLine;
+    private ResponseHeaders responseHeaders;
+    private ResponseBody responseBody;
 
     private HttpResponse(final StatusLine statusLine, final ResponseHeaders responseHeaders, final ResponseBody responseBody) {
         this.statusLine = statusLine;
@@ -33,6 +33,12 @@ public class HttpResponse {
                 responseHeaders.convertToString(),
                 "",
                 responseBody.getContent());
+    }
+
+    public void setResponse(final HttpResponse response) {
+        this.statusLine = response.statusLine;
+        this.responseHeaders = response.responseHeaders;
+        this.responseBody = response.responseBody;
     }
 
     @Override

@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.common.header;
 
-public class SetCookie extends HeaderValue {
+public class SetCookie extends Header {
 
     private final HttpCookie httpCookie;
 
     public SetCookie(final HttpCookie httpCookie) {
-        super(HeaderProperty.SET_COOKIE);
+        super(HeaderName.SET_COOKIE);
         this.httpCookie = httpCookie;
     }
 

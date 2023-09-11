@@ -13,7 +13,6 @@ import java.nio.file.Path;
 public class ResponseEntity {
 
     public static final String STATIC_RESOURCE_DIRECTORY = "static";
-    private static final String BAD_REQUEST_FILE = "/404.html";
 
     private final HttpStatus httpStatus;
     private final HttpCookie httpCookie;
@@ -43,46 +42,8 @@ public class ResponseEntity {
         this.content = content;
     }
 
-    public static ResponseEntity of(final HttpStatus httpStatus, final String resourcePath) {
-        try {
-            final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + resourcePath);
-
-            if (resourceFileUrl == null) {
-                return ResponseEntity.of(HttpStatus.BAD_REQUEST, BAD_REQUEST_FILE);
-            }
-
-            return new ResponseEntity(
-                    httpStatus,
-                    null,
-                    calculateContentType(resourceFileUrl),
-                    new String(Files.readAllBytes(Path.of(resourceFileUrl.toURI())))
-            );
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static ContentTypeValue calculateContentType(final URL resourceFileUrl) {
-        if (resourceFileUrl.toString().endsWith(".css")) {
-            return ContentTypeValue.TEXT_CSS;
-        }
-
-        return ContentTypeValue.TEXT_HTML;
-    }
-
-    public static ResponseEntity of(final HttpStatus httpStatus, final HttpCookie httpCookie, final String resourcePath) {
-        try {
-            final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + resourcePath);
-
-            return new ResponseEntity(
-                    httpStatus,
-                    httpCookie,
-                    calculateContentType(resourceFileUrl),
-                    new String(Files.readAllBytes(Path.of(resourceFileUrl.toURI())))
-            );
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    public static ResponseEntityBuilder builder() {
+        return new ResponseEntityBuilder();
     }
 
     public int calculateContentLength() {
@@ -103,5 +64,52 @@ public class ResponseEntity {
 
     public String getContent() {
         return content;
+    }
+
+    public static class ResponseEntityBuilder {
+
+        private HttpStatus httpStatus;
+        private HttpCookie httpCookie;
+        private String resourcePath;
+
+        public ResponseEntityBuilder httpStatus(final HttpStatus httpStatus) {
+            this.httpStatus = httpStatus;
+            if (this.resourcePath == null) {
+                this.resourcePath(httpStatus.getResourcePath());
+            }
+
+            return this;
+        }
+
+        public ResponseEntityBuilder httpCookie(final HttpCookie httpCookie) {
+            this.httpCookie = httpCookie;
+            return this;
+        }
+
+        public ResponseEntityBuilder resourcePath(final String resourcePath) {
+            this.resourcePath = resourcePath;
+            return this;
+        }
+
+        public ResponseEntity build() {
+            try {
+                final URL resourceFileUrl = ClassLoader.getSystemResource(STATIC_RESOURCE_DIRECTORY + resourcePath);
+
+                final ContentTypeValue contentTypeValue = calculateContentType(resourceFileUrl);
+                final String content = new String(Files.readAllBytes(Path.of(resourceFileUrl.toURI())));
+
+                return new ResponseEntity(httpStatus, httpCookie, contentTypeValue, content);
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private static ContentTypeValue calculateContentType(final URL resourceFileUrl) {
+            if (resourceFileUrl.toString().endsWith(".css")) {
+                return ContentTypeValue.TEXT_CSS;
+            }
+
+            return ContentTypeValue.TEXT_HTML;
+        }
     }
 }

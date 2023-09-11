@@ -1,13 +1,13 @@
 package org.apache.coyote.http11.request.headers;
 
-import org.apache.coyote.http11.common.header.HeaderProperty;
+import org.apache.coyote.http11.common.header.HeaderName;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringTokenizer;
 
-import static org.apache.coyote.http11.common.header.HeaderProperty.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_LENGTH;
 
 public class RequestHeaders {
     private static final String HEADER_VALUE_SEPARATOR = ": ";
@@ -45,11 +45,11 @@ public class RequestHeaders {
         return Integer.parseInt(requestHeader.get(CONTENT_LENGTH.getPropertyName()));
     }
 
-    public String search(final HeaderProperty property) {
+    public String search(final HeaderName property) {
         return requestHeader.get(property.getPropertyName());
     }
 
-    public boolean containsKey(final HeaderProperty property) {
+    public boolean containsKey(final HeaderName property) {
         return requestHeader.containsKey(property.getPropertyName());
     }
 

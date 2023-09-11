@@ -1,12 +1,9 @@
 package org.apache.coyote.http11.controller;
 
-import org.apache.coyote.http11.common.header.ContentTypeValue;
-import org.apache.coyote.http11.response.ResponseEntity;
-import org.apache.coyote.http11.response.statusLine.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-public class Controller {
-
-    public ResponseEntity getIndex() {
-        return new ResponseEntity(HttpStatus.OK, ContentTypeValue.TEXT_HTML, "Hello world!");
-    }
+public interface Controller {
+    void service(HttpRequest request, HttpResponse response) throws Exception;
+    boolean support(final HttpRequest request);
 }

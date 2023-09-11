@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.common.header;
 
-import static org.apache.coyote.http11.common.header.HeaderProperty.CONTENT_LENGTH;
+import static org.apache.coyote.http11.common.header.HeaderName.CONTENT_LENGTH;
 
-public class ContentLength extends HeaderValue {
+public class ContentLength extends Header {
 
     private final int length;
 

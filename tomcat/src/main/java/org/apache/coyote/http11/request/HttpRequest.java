@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.apache.coyote.http11.common.header.HeaderProperty.COOKIE;
+import static org.apache.coyote.http11.common.header.HeaderName.COOKIE;
 
 public class HttpRequest {
 
@@ -65,6 +65,10 @@ public class HttpRequest {
 
     public boolean isRequestOf(final HttpMethod httpMethod) {
         return requestLine.isMethodOf(httpMethod);
+    }
+
+    public boolean isPathOf(final String path) {
+        return requestLine.isPathOf(path);
     }
 
     public boolean hasSessionId() {

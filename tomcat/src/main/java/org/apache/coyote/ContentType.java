@@ -1,10 +1,12 @@
 package org.apache.coyote;
 
 import java.util.Arrays;
+import org.apache.coyote.exception.NotAcceptableException;
 
 public enum ContentType {
     CSS("text/css"),
-    HTML("text/html");
+    HTML("text/html"),
+    ALL("*/*");
 
     private final String value;
 
@@ -20,7 +22,7 @@ public enum ContentType {
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> input.contains(contentType.value))
                 .findFirst()
-                .orElse(HTML);
+                .orElseThrow(() -> new NotAcceptableException(input));
     }
 
     public String getValueWithUTF8() {

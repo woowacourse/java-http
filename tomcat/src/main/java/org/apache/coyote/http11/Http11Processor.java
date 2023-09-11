@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import static org.apache.catalina.RequestMapping.getController;
 import static org.apache.coyote.response.Status.INTERNAL_SERVER_ERROR;
-import static org.apache.coyote.response.Status.NOT_FOUND;
-import static org.apache.coyote.response.Status.UNAUTHORIZED;
 import static org.apache.coyote.utils.Constant.BASE_PATH;
 import static org.apache.coyote.utils.Constant.EMPTY;
 import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
@@ -18,8 +16,7 @@ import java.net.URL;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.exception.PageNotFoundException;
-import org.apache.coyote.exception.UnauthorizedException;
+import org.apache.coyote.exception.HttpException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestHeader;
 import org.apache.coyote.response.HttpResponse;
@@ -107,12 +104,9 @@ public class Http11Processor implements Runnable, Processor {
         try {
             controller.service(request, response);
             return response;
-        } catch (final PageNotFoundException e) {
+        } catch (final HttpException e) {
             log.error(e.getMessage());
-            return handleResponseWithException(response, NOT_FOUND);
-        } catch (final UnauthorizedException e) {
-            log.error(e.getMessage());
-            return handleResponseWithException(response, UNAUTHORIZED);
+            return handleResponseWithException(response, e.getStatus());
         } catch (final Exception e) {
             log.error(e.getMessage());
             return handleResponseWithException(response, INTERNAL_SERVER_ERROR);

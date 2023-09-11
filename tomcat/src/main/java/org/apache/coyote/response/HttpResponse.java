@@ -17,9 +17,11 @@ import org.apache.coyote.ContentType;
 import org.apache.coyote.Cookies;
 import org.apache.coyote.Headers;
 import org.apache.coyote.Protocol;
-import org.apache.coyote.exception.PageNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
     private final StatusLine statusLine;
     private final Headers headers;
@@ -58,18 +60,17 @@ public class HttpResponse {
     }
 
     public void setBody(final URL resource) {
-        this.body = readResource(resource);
-        headers.addHeader(CONTENT_LENGTH, Integer.toString(body.getBytes().length));
+        try {
+            this.body = readResource(resource);
+            headers.addHeader(CONTENT_LENGTH, Integer.toString(body.getBytes().length));
+        } catch (final IOException e) {
+            log.error(e.getMessage());
+        }
     }
 
-    private String readResource(final URL resource) {
-        try {
-            final Path filePath = new File(resource.getFile()).toPath();
-            return new String(Files.readAllBytes(filePath));
-
-        } catch (final NullPointerException | IOException e) {
-            throw new PageNotFoundException(resource.toString());
-        }
+    private String readResource(final URL resource) throws IOException {
+        final Path filePath = new File(resource.getFile()).toPath();
+        return new String(Files.readAllBytes(filePath));
     }
 
     public String stringify() {

@@ -23,7 +23,7 @@ public class HttpCookie {
     }
 
     public String getJsessionid() {
-        if (cookies.containsKey(JSESSIONID)) {
+        if (!cookies.containsKey(JSESSIONID)) {
             throw new IllegalArgumentException("Session이 존재하지 않습니다.");
         }
         return cookies.get(JSESSIONID);

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.HttpCookie;
+import org.apache.coyote.http11.common.HttpVersion;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -68,5 +69,15 @@ class HttpRequestTest {
                 entry("yummy_cookie", "choco"),
                 entry("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46")
         );
+    }
+
+    @Test
+    void httpVersion을_반환한다() {
+        // given
+        final RequestLine requestLine = RequestLine.from("GET /index.html HTTP/1.1 ");
+        final HttpRequest httpRequest = new HttpRequest(requestLine, null, null);
+
+        // expect
+        assertThat(httpRequest.getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
     }
 }

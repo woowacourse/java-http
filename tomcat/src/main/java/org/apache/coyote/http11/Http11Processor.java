@@ -20,6 +20,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HttpResponse INTERNAL_SERVER_ERROR_RESPONSE = new HttpResponse(HttpVersion.HTTP_1_1)
+            .setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+            .sendRedirect("/500.html");
 
     private final Socket connection;
     private final Mapper mapper;
@@ -51,25 +54,19 @@ public class Http11Processor implements Runnable, Processor {
     private void execute(final BufferedReader bufferedReader, final OutputStream outputStream) throws IOException {
         try {
             final HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
-            final HttpResponse httpResponse = new HttpResponse(httpRequest.getRequestLine().getHttpVersion());
+            final HttpResponse httpResponse = new HttpResponse(httpRequest.getHttpVersion());
 
             mapper.service(httpRequest, httpResponse);
-
-            final String generate = httpResponseGenerator.generate(httpResponse);
-            outputStream.write(generate.getBytes());
-            outputStream.flush();
+            write(outputStream, httpResponse);
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
-            internalServerError(outputStream);
+            write(outputStream, INTERNAL_SERVER_ERROR_RESPONSE);
         }
     }
 
-    private void internalServerError(final OutputStream outputStream) throws IOException {
-        final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
-                .setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                .sendRedirect("/500.html");
-        final String response = httpResponseGenerator.generate(httpResponse);
-        outputStream.write(response.getBytes());
+    private void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
+        final String generate = httpResponseGenerator.generate(httpResponse);
+        outputStream.write(generate.getBytes());
         outputStream.flush();
     }
 }

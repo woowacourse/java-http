@@ -31,9 +31,9 @@ public class RequestHeaderPublisher {
 
     public Headers toHeaders() {
         final Headers newHeaders = Headers.empty();
-        headers.entrySet().forEach(entry -> {
-            newHeaders.addHeader(entry.getKey(), entry.getValue());
-        });
+        headers.entrySet().forEach(entry ->
+                newHeaders.addHeader(entry.getKey(), entry.getValue())
+        );
 
         return newHeaders;
     }

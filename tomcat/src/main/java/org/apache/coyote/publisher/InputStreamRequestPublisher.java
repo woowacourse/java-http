@@ -58,8 +58,7 @@ public class InputStreamRequestPublisher {
     }
 
     private static String readRequestLine(final BufferedReader br) throws IOException {
-        final String requestLineValue = br.readLine();
-        return requestLineValue;
+        return br.readLine();
     }
 
     private static List<String> readHeaderValues(final BufferedReader br) throws IOException {

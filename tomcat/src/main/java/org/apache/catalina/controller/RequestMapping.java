@@ -10,9 +10,6 @@ public class RequestMapping {
     private static final Controller DEFAULT_CONTROLLER = new ResourceController();
     private static final Map<ControllerMappingInfo, Controller> CONTROLLERS = new HashMap<>();
 
-    public RequestMapping() {
-    }
-
     public Controller getController(final HttpRequest request) {
         return CONTROLLERS.getOrDefault(ControllerMappingInfo.from(request), DEFAULT_CONTROLLER);
     }

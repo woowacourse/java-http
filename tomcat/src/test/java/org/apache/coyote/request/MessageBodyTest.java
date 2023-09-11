@@ -51,8 +51,8 @@ class MessageBodyTest {
 
         // expect
         assertAll(
-                () -> assertThat(actual.body()).isEqualTo(""),
-                () -> assertThat(actual.bodyLength()).isEqualTo(0)
+                () -> assertThat(actual.body()).isEmpty(),
+                () -> assertThat(actual.bodyLength()).isZero()
         );
     }
 

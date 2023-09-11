@@ -43,19 +43,21 @@ public class HttpResponse {
     }
 
     private String makeRedirectResponse() {
+        final HttpVersion httpVersion = httpStatusLine.getHttpVersion();
         final HttpStatus status = httpStatusLine.getHttpStatus();
         return String.join("\r\n",
-                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                httpVersion.getValue() + BLANK + status.getCode() + BLANK + status.name() + BLANK,
                 "Location: " + path + BLANK,
                 ""
         );
     }
 
     private String makeRedirectResponseWithCookie() {
+        final HttpVersion httpVersion = httpStatusLine.getHttpVersion();
         final HttpStatus status = httpStatusLine.getHttpStatus();
         final HttpCookie cookie = httpResponseHeader.getCookie();
         return String.join("\r\n",
-                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                httpVersion.getValue() + BLANK + status.getCode() + BLANK + status.name() + BLANK,
                 "Set-Cookie: " + cookie.printValues() + BLANK,
                 "Location: " + path + BLANK,
                 ""
@@ -80,9 +82,10 @@ public class HttpResponse {
             final String contentType,
             final String body
     ) {
+        final HttpVersion httpVersion = httpStatusLine.getHttpVersion();
         final HttpStatus status = httpStatusLine.getHttpStatus();
         return String.join("\r\n",
-                "HTTP/1.1" + BLANK + status.getCode() + BLANK + status.name() + BLANK,
+                httpVersion.getValue() + BLANK + status.getCode() + BLANK + status.name() + BLANK,
                 "Content-Type: " + contentType + BLANK,
                 "Content-Length: " + body.getBytes().length + BLANK,
                 "",

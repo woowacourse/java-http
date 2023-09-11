@@ -7,10 +7,12 @@ import java.util.UUID;
 public class HttpSession {
 
     private final String id;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values;
 
-    public HttpSession() {
+    public HttpSession(final String name, final Object value) {
         this.id = UUID.randomUUID().toString();
+        values = new HashMap<>();
+        values.put(name, value);
     }
 
     public String getId() {

@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.jwp.controller;
 
 import java.util.List;
 import org.apache.coyote.http11.common.HttpBody;

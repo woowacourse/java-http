@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import nextstep.org.apache.coyote.http11.RequestFixture;
 import org.apache.catalina.Controller;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;

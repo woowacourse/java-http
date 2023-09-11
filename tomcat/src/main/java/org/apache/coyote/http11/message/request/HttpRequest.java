@@ -68,8 +68,8 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public HttpHeaders getHeaders() {
-        return headers;
+    public String getHeaderValue(String key) {
+        return headers.get(key);
     }
 
     public HttpMethod getMethod() {

@@ -46,7 +46,7 @@ public class HttpHeaders {
 
     public static HttpHeaders createBasicResponseHeadersFrom(HttpRequest request) {
         final var headers = new HashMap<String, String>();
-        headers.put(CONTENT_TYPE, getContentTypeFrom(request.getHeaders().get(ACCEPT)));
+        headers.put(CONTENT_TYPE, getContentTypeFrom(request.getHeaderValue(ACCEPT)));
         headers.put(CONTENT_LENGTH, DEFAULT_CONTENT_LENGTH);
         return new HttpHeaders(headers);
     }
@@ -69,7 +69,7 @@ public class HttpHeaders {
         return headers.containsKey(COOKIE) && headers.get(COOKIE).contains(key);
     }
 
-    private String get(String key) {
+    public String get(String key) {
         return headers.get(key);
     }
 

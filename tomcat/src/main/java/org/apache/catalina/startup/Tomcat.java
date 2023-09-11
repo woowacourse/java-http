@@ -31,7 +31,7 @@ public class Tomcat {
             System.in.read();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-        } finally{
+        } finally {
             log.info("web server stop.");
             connector.stop();
         }

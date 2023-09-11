@@ -7,7 +7,11 @@ import java.util.List;
 
 public class RequestMapping {
     private static final List<Controller> CONTROLLER_INSTANCES = List.of(
-            new LoginGetController(), new LoginPostController(), new RegisterGetController(), new RegisterPostController(), new DefaultGetController()
+            new LoginGetController(),
+            new LoginPostController(),
+            new RegisterGetController(),
+            new RegisterPostController(),
+            new DefaultGetController()
     );
 
     private RequestMapping() {

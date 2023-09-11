@@ -42,7 +42,7 @@ public class LoginPostController extends AbstractController {
                 SessionManager.instanceOf().addLoginSession(jSessionId, userOptional.get());
             }
             HttpResponseHeader responseHeader = new HttpResponseHeader(
-                    getContentType(request.getAccept(), request.getPath()),
+                    readContentType(request.getAccept(), request.getPath()),
                     String.valueOf(0), "/index.html", setCookie);
             response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
         }
@@ -64,9 +64,9 @@ public class LoginPostController extends AbstractController {
     }
 
     private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        String responseBody = getHtmlFile(getClass().getResource("/static/401.html"));
+        String responseBody = readHtmlFile(getClass().getResource("/static/401.html"));
         HttpResponseHeader responseHeader = new HttpResponseHeader(
-                getContentType(request.getAccept(), request.getPath()),
+                readContentType(request.getAccept(), request.getPath()),
                 String.valueOf(responseBody.getBytes().length), null, null);
         response.updateResponse(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
     }

@@ -34,12 +34,12 @@ public abstract class AbstractController implements Controller {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
     }
 
-    protected String getHtmlFile(URL filePathUrl) throws URISyntaxException, IOException {
+    protected String readHtmlFile(URL filePathUrl) throws URISyntaxException, IOException {
         final Path filePath = Paths.get(Objects.requireNonNull(filePathUrl).toURI());
         return new String(Files.readAllBytes(filePath));
     }
 
-    protected String getContentType(final String accept, final String uri) {
+    protected String readContentType(final String accept, final String uri) {
         final String[] tokens = uri.split("\\.");
         if ((tokens.length >= 1 && tokens[tokens.length - 1].equals("css")) || (accept != null && accept
                 .contains("text/css"))) {
@@ -49,7 +49,7 @@ public abstract class AbstractController implements Controller {
     }
 
     private void handle500(HttpResponse response) throws IOException, URISyntaxException {
-        String responseBody = getHtmlFile(getClass().getResource("/static/500.html"));
+        String responseBody = readHtmlFile(getClass().getResource("/static/500.html"));
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,
                 String.valueOf(responseBody.getBytes().length), null, null);

@@ -18,7 +18,7 @@ public class DefaultGetController extends AbstractController {
         String responseBody = "Hello world!";
 
         HttpResponseHeader responseHeader = new HttpResponseHeader(
-                getContentType(request.getAccept(), request.getPath()),
+                readContentType(request.getAccept(), request.getPath()),
                 String.valueOf(responseBody.getBytes().length), null, null);
         response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }

@@ -21,10 +21,10 @@ public class DefaultController extends AbstractController {
         if (filePathUrl == null) {
             handle404(response);
         }
-        String responseBody = getHtmlFile(filePathUrl);
+        String responseBody = readHtmlFile(filePathUrl);
 
         HttpResponseHeader responseHeader = new HttpResponseHeader(
-                getContentType(request.getAccept(), request.getPath()),
+                readContentType(request.getAccept(), request.getPath()),
                 String.valueOf(responseBody.getBytes().length), null, null);
         response.updateResponse(HttpResponseStatus.OK, responseHeader, responseBody);
     }
@@ -32,7 +32,7 @@ public class DefaultController extends AbstractController {
     private void handle404(HttpResponse response) throws IOException, URISyntaxException {
         URL filePathUrl = getClass().getResource("/static/404.html");
 
-        String responseBody = getHtmlFile(filePathUrl);
+        String responseBody = readHtmlFile(filePathUrl);
 
         HttpResponseHeader responseHeader = new HttpResponseHeader(
                 HttpResponseHeader.TEXT_HTML_CHARSET_UTF_8,

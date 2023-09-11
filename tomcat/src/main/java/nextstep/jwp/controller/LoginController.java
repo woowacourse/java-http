@@ -35,24 +35,23 @@ public class LoginController extends AbstractController {
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info(user.toString());
-
-            loginSuccess(user, response);
-
-        } else if (user.isPresent()) {
-            log.warn("비밀번호가 틀렸습니다");
-
-            loginFail(response);
-
-        } else {
-            log.warn("미가입회원입니다");
-
-            loginFail(response);
+        if (user.isPresent()) {
+            user.filter(userInfo -> userInfo.checkPassword(password))
+                    .ifPresentOrElse(registerUser -> {
+                                log.info(registerUser.toString());
+                                loginSuccess(registerUser, response);
+                            }
+                            , () -> {
+                                log.warn("비밀번호가 틀렸습니다");
+                                loginFail(response);
+                            });
+            return;
         }
+        log.warn("미가입회원입니다");
+        loginFail(response);
     }
 
-    private void loginSuccess(Optional<User> user, HttpResponse response) {
+    private void loginSuccess(User user, HttpResponse response) {
         Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session);

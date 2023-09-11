@@ -14,7 +14,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 public class InputStreamRequestPublisher {
 
@@ -75,7 +76,7 @@ public class InputStreamRequestPublisher {
     private static boolean isContentLengthIsNullOrWrong(final Headers headers) {
         final String contentLength = headers.getHeaderValue("Content-Length");
 
-        return Objects.isNull(contentLength) || contentLength.chars().anyMatch(Character::isAlphabetic);
+        return isNull(contentLength) || contentLength.chars().anyMatch(Character::isAlphabetic);
     }
 
     private static InputStreamRequestPublisher createEmptyMessageBody(final RequestLine requestLine, final Headers headers) {

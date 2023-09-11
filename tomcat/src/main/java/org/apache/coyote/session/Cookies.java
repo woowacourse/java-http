@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.*;
+
 public class Cookies {
 
     private static final String COOKIE_HEADER_DELIMITER = ";";
@@ -22,7 +24,7 @@ public class Cookies {
     }
 
     public static Cookies from(final String cookieNamesAndValues) {
-        if (Objects.isNull(cookieNamesAndValues) || cookieNamesAndValues.isBlank()) {
+        if (isNull(cookieNamesAndValues) || cookieNamesAndValues.isBlank()) {
             return empty();
         }
 
@@ -68,7 +70,7 @@ public class Cookies {
 
     @Override
     public int hashCode() {
-        return Objects.hash(cookie);
+        return hash(cookie);
     }
 
     @Override

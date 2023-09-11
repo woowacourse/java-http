@@ -1,7 +1,8 @@
 package org.apache.coyote.session;
 
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.Objects.isNull;
 
 public class SessionManager {
 
@@ -15,7 +16,7 @@ public class SessionManager {
     }
 
     public static Session findSession(final String id) {
-        if (Objects.isNull(id)) {
+        if (isNull(id)) {
             return null;
         }
 

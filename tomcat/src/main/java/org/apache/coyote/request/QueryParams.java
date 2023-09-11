@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.*;
+
 public class QueryParams {
 
     private static final String QUERY_PARAM_START_CONDITION = "?";
@@ -28,7 +30,7 @@ public class QueryParams {
     }
 
     public static QueryParams from(final String queryParamNamesAndValues) {
-        if (Objects.isNull(queryParamNamesAndValues) || queryParamNamesAndValues.isBlank()) {
+        if (isNull(queryParamNamesAndValues) || queryParamNamesAndValues.isBlank()) {
             return empty();
         }
 
@@ -69,7 +71,7 @@ public class QueryParams {
 
     @Override
     public int hashCode() {
-        return Objects.hash(params);
+        return hash(params);
     }
 
     @Override

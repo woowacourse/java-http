@@ -8,8 +8,7 @@ import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 import org.apache.coyote.util.ResourceReader;
 
-import java.util.Objects;
-
+import static java.util.Objects.nonNull;
 import static org.apache.coyote.common.HttpVersion.HTTP_1_1;
 import static org.apache.coyote.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.response.HttpStatus.OK;
@@ -43,6 +42,6 @@ public class LoginPageController extends AbstractController {
         final String jsessionid = httpRequest.getCookieValue("JSESSIONID");
         final Session foundSession = SessionManager.findSession(jsessionid);
 
-        return Objects.nonNull(foundSession);
+        return nonNull(foundSession);
     }
 }

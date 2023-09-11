@@ -3,8 +3,9 @@ package org.apache.coyote.publisher;
 import org.apache.coyote.exception.CoyoteHttpException;
 import org.apache.coyote.request.RequestLine;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
+
+import static java.util.Objects.isNull;
 
 public class RequestLinePublisher {
 
@@ -35,7 +36,7 @@ public class RequestLinePublisher {
     }
 
     public static RequestLinePublisher read(final String requestLine) {
-        if (Objects.isNull(requestLine)) {
+        if (isNull(requestLine)) {
             throw new CoyoteHttpException("HTTP 요청으로 들어온 Request Line은 null일 수 없습니다.");
         }
         

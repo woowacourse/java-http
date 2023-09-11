@@ -7,6 +7,7 @@ import org.apache.coyote.session.SessionManager;
 
 import java.util.Objects;
 
+import static java.util.Objects.*;
 import static org.apache.coyote.common.HeaderType.COOKIE;
 
 public class RequestHeaders {
@@ -30,7 +31,7 @@ public class RequestHeaders {
 
     private static Cookies getCookiesBy(final Headers headers) {
         final String cookieNamesAndValues = headers.getHeaderValue(COOKIE.value());
-        if (Objects.isNull(cookieNamesAndValues)) {
+        if (isNull(cookieNamesAndValues)) {
             return Cookies.empty();
         }
 
@@ -39,7 +40,7 @@ public class RequestHeaders {
 
     private static Session getSessionBy(final Cookies cookies) {
         final String sessionId = cookies.getCookieValue("JSESSIONID");
-        if (Objects.isNull(sessionId)) {
+        if (isNull(sessionId)) {
             return Session.empty();
         }
 
@@ -76,7 +77,7 @@ public class RequestHeaders {
 
     @Override
     public int hashCode() {
-        return Objects.hash(headers, cookies, session);
+        return hash(headers, cookies, session);
     }
 
     @Override

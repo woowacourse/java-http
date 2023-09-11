@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.*;
+
 public class RequestBody {
 
     private static final String REQUEST_DELIMITER = "&";
@@ -26,7 +28,7 @@ public class RequestBody {
 
     public static RequestBody from(final MessageBody messageBody) {
         final String namesAndValues = messageBody.body();
-        if (Objects.isNull(namesAndValues) || namesAndValues.isBlank()) {
+        if (isNull(namesAndValues) || namesAndValues.isBlank()) {
             return new RequestBody(Collections.emptyMap());
         }
 
@@ -61,7 +63,7 @@ public class RequestBody {
 
     @Override
     public int hashCode() {
-        return Objects.hash(body);
+        return hash(body);
     }
 
     @Override

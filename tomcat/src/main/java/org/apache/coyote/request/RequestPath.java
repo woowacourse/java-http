@@ -2,12 +2,14 @@ package org.apache.coyote.request;
 
 import java.util.Objects;
 
+import static java.util.Objects.*;
+
 public class RequestPath {
 
     private final String value;
 
     public RequestPath(final String value) {
-        if (Objects.isNull(value)) {
+        if (isNull(value)) {
             throw new IllegalArgumentException("RequestPath 에 null 이 들어올 수 없습니다.");
         }
 
@@ -32,7 +34,7 @@ public class RequestPath {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return hash(value);
     }
 
     @Override

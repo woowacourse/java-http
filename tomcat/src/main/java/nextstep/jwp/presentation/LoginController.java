@@ -13,10 +13,10 @@ import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static org.apache.coyote.common.HttpVersion.HTTP_1_1;
 
 public class LoginController extends AbstractController {
@@ -61,6 +61,6 @@ public class LoginController extends AbstractController {
     private boolean isAuthenticated(final HttpRequest httpRequest) {
         final Session foundSession = SessionManager.findSession(httpRequest.getCookieValue("JSESSIONID"));
 
-        return Objects.nonNull(foundSession);
+        return nonNull(foundSession);
     }
 }

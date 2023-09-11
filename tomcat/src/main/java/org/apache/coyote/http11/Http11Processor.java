@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String EXTENSION_DELIMITER = ".";
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private static final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
@@ -57,18 +55,7 @@ public class Http11Processor implements Runnable, Processor {
     private void doService(final HttpRequest request, final HttpResponse response) {
         final String requestUri = request.getRequestUri();
 
-        if (isFileRequest(requestUri)) {
-            final String responseBody = ViewResolver.read(requestUri);
-            response.setResponseBody(responseBody);
-            response.setContentLength();
-            response.setStatusCode(HttpStatusCode.OK);
-            return;
-        }
         final Controller controller = frontController.getHandler(requestUri);
         controller.service(request, response);
-    }
-
-    private boolean isFileRequest(final String requestUri) {
-        return requestUri.contains(EXTENSION_DELIMITER);
     }
 }

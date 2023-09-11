@@ -32,9 +32,10 @@ public class HttpRequestHeaders {
         return lines.stream()
                 .filter(line -> !line.startsWith(COOKIE_HEADER_PREFIX))
                 .map(line -> line.split(KET_VALUE_DELIMITER))
+                .filter(line -> line.length == 2)
                 .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
     }
-
+    
     private static HttpCookies createCookieHeader(List<String> lines) {
         if (hasCookie(lines)) {
             String cookieLine = lines.stream()

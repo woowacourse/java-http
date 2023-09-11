@@ -24,6 +24,10 @@ public class ExceptionHandler {
             createRedirectResponse(response, "/404.html");
             return;
         }
+        if (httpStatus == HttpStatus.METHOD_NOT_ALLOWED) {
+            createRedirectResponse(response, "/405.html");
+            return;
+        }
 
         createRedirectResponse(response, "/500.html");
     }

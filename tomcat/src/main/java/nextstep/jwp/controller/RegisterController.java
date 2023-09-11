@@ -7,6 +7,7 @@ import org.apache.coyote.http11.request.HttpQueryParser;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static nextstep.jwp.controller.URIPath.LOGIN_URI;
@@ -17,7 +18,7 @@ import static org.apache.coyote.http11.types.HttpStatus.FOUND;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> queries = HttpQueryParser.parse(request.getPath());
 
         String account = queries.get("account");

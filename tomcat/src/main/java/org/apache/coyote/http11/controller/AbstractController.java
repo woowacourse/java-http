@@ -6,6 +6,8 @@ import org.apache.coyote.http11.types.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 import static org.apache.coyote.http11.ViewResolver.resolveView;
 import static org.apache.coyote.http11.types.HttpProtocol.HTTP_1_1;
 
@@ -14,7 +16,7 @@ public abstract class AbstractController implements Controller {
     protected static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         if (request == null || response == null) {
             throw new IllegalArgumentException();
         }
@@ -33,11 +35,11 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException();
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         /* NOOP */
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         resolveView(request, response);
     }
 }

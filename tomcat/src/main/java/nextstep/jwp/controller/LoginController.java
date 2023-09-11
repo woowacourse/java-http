@@ -10,6 +10,7 @@ import org.apache.coyote.http11.request.HttpQueryParser;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static nextstep.jwp.controller.URIPath.INDEX_URI;
@@ -24,7 +25,7 @@ public class LoginController extends AbstractController {
     private static final SessionManager sessionManager = new SessionManager();
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> queries = HttpQueryParser.parse(request.getBody());
 
         String account = queries.get("account");
@@ -58,7 +59,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         HttpCookie cookie = HttpCookie.from(request.getHeader("Cookie"));
         if (cookie != null && sessionManager.findSession(cookie.getJSessionId(false)) != null) {
             response.addHeader(LOCATION, INDEX_URI);

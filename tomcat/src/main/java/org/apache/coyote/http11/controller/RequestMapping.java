@@ -4,6 +4,7 @@ import org.apache.coyote.Mapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class RequestMapping implements Mapper {
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         String path = request.getPath();
         Controller controller = controllerMapper.get(path);
         if (controller == null) {

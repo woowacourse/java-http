@@ -63,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getHttpResponse(HttpRequest request) throws Exception {
+    private HttpResponse getHttpResponse(HttpRequest request) throws IOException {
         HttpResponse response = HttpResponse.create();
         mapper.service(request, response);
         return response;

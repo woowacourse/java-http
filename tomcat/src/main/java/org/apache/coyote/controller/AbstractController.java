@@ -29,5 +29,4 @@ public abstract class AbstractController implements Controller {
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
     }
-
 }

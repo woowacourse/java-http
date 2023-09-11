@@ -28,7 +28,6 @@ public class FileController extends AbstractController {
     public void doPost(final HttpRequest request, final HttpResponse response) {
     }
 
-
     private String getResponseBody(final String uri) throws IOException {
         if (uri.equals("/")) {
             return "Hello world!";

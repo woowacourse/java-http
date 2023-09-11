@@ -29,5 +29,31 @@ public class RequestFixture {
             HttpBody.from("account=test&email=test@email.com&password=password")
     );
 
+    public static final HttpRequest LOGIN_WTIH_QUERYSTRIING_REQUEST = new HttpRequest(
+            HttpRequestHeaders.from(List.of("")),
+            new HttpStartLine(HttpMethod.GET, HttpUri.from("/login?account=gugu&password=password"), HttpVersion.V1_1),
+            HttpBody.createEmptyHttpBody()
+    );
 
+    public static final HttpRequest LOGIN_WITH_BODY_REQUEST = new HttpRequest(
+            HttpRequestHeaders.from(List.of("")),
+            new HttpStartLine(HttpMethod.POST, HttpUri.from("/login"), HttpVersion.V1_1),
+            HttpBody.from("account=gugu&password=password")
+    );
+
+    public static HttpRequest createLoginRequestWithJSessionId(String jSessionId) {
+        return new HttpRequest(
+                HttpRequestHeaders.from(List.of("Cookie: JSESSIONID=" + jSessionId)),
+                new HttpStartLine(HttpMethod.GET, HttpUri.from("/login"), HttpVersion.V1_1),
+                HttpBody.createEmptyHttpBody()
+        );
+    }
+
+    public static HttpRequest createGetRequestWithURI(String path) {
+        return new HttpRequest(
+                HttpRequestHeaders.from(List.of("")),
+                new HttpStartLine(HttpMethod.GET, HttpUri.from(path), HttpVersion.V1_1),
+                HttpBody.from("account=gugu&password=password")
+        );
+    }
 }

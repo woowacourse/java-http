@@ -35,16 +35,15 @@ class ResourceControllerTest {
     }
 
     @ParameterizedTest(name = "ResourceController는 GET 요청시, 요청 path에 따른 정적 파일을 반환한다.")
-    @ValueSource(strings = {"login.js", "error-404-monochrome.svg"})
+    @ValueSource(strings = {"/css/styles.css", "/js/scripts.js"})
     void resourceControllerSuccessServiceWhenGetMethod(String path) throws IOException {
-
         //given
         HttpResponse response = HttpResponse.createEmptyResponse();
-        URL url = getClass().getClassLoader().getResource("static/" + path);
+        URL url = getClass().getClassLoader().getResource("static" + path);
         String expected = new String(Files.readAllBytes(Path.of(url.getPath())));
 
         //when
-        resourceController.service(RequestFixture.GET_REQUEST, response);
+        resourceController.service(RequestFixture.createGetRequestWithURI(path), response);
 
         //then
         String actual = new String(response.getBytes());

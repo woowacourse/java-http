@@ -54,11 +54,18 @@ public class Http11Processor implements Runnable, Processor {
 
             final Controller controller = requestMapping.findMappedController(httpRequest.getParsedRequestURI());
             controller.service(httpRequest, httpResponse);
-            httpResponse.wrapUp(httpRequest.getParsedRequestURI());
+
+            if (hasNotHeader(httpResponse, "Location")) {
+                httpResponse.wrapUp(httpRequest.getParsedRequestURI());
+            }
             writeMessage(httpResponse, outputStream);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean hasNotHeader(final HttpResponse httpResponse, final String key) {
+        return !httpResponse.hasHeader(key);
     }
 
     private void setCookie(final HttpRequest httpRequest, final HttpResponse httpResponse) {

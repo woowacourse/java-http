@@ -16,7 +16,8 @@ public abstract class AbstractController implements Controller {
             return;
         }
 
-        throw new IllegalArgumentException("지원하지 않는 HttpMethod 입니다.");
+        response.updatePage("/404.html");
+        response.updateStatus(HttpStatus.NOT_FOUND);
     }
 
     protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;

@@ -26,4 +26,8 @@ public class ResponseInfo {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
     }
+
+    public void updateHttpStatus(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
 }

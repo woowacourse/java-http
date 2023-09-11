@@ -69,4 +69,12 @@ public class HttpResponse {
     public void updateBody(final String body) {
         responseBody.changeBody(body);
     }
+
+    public void updateStatus(final HttpStatus httpStatus) {
+        responseInfo.updateHttpStatus(httpStatus);
+    }
+
+    public boolean hasHeader(final String key) {
+        return httpHeader.hasHeader(key);
+    }
 }

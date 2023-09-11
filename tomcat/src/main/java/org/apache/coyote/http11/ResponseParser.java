@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class ResponseParser {
+
     public static String parse(final HttpResponse response) {
         final StringBuilder sb = new StringBuilder();
         addFirstLine(response, sb);

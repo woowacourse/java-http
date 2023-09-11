@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
+import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.request.HttpRequest;
 import org.apache.coyote.http11.common.request.QueryParams;
 import org.apache.coyote.http11.common.response.HttpResponse;
@@ -14,9 +16,14 @@ import org.apache.coyote.http11.util.StaticFileLoader;
 
 public class RegisterServlet extends Servlet {
 
-    public static final String ACCOUNT = "account";
-    public static final String PASSWORD = "password";
-    public static final String EMAIL = "email";
+    private static final List<HttpMethod> METHODS = List.of(HttpMethod.GET, HttpMethod.POST);
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
+
+    public RegisterServlet() {
+        super(METHODS);
+    }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {

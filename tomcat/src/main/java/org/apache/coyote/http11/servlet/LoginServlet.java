@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.servlet;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.request.HttpRequest;
 import org.apache.coyote.http11.common.request.QueryParams;
@@ -18,10 +20,15 @@ import org.slf4j.LoggerFactory;
 
 public class LoginServlet extends Servlet {
 
+    private static final List<HttpMethod> METHODS = List.of(HttpMethod.GET, HttpMethod.POST);
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
-    public static final String ACCOUNT = "account";
-    public static final String PASSWORD = "password";
-    public static final String USER = "user";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String USER = "user";
+
+    public LoginServlet() {
+        super(METHODS);
+    }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {

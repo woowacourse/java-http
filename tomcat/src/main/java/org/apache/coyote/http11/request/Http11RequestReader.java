@@ -40,7 +40,7 @@ public class Http11RequestReader {
 		return requestHeaders;
 	}
 
-	public RequestBody readRequestBody(final RequestHeader header) throws IOException {
+	private RequestBody readRequestBody(final RequestHeader header) throws IOException {
 		final var contentLength = header.find(HeaderType.CONTENT_LENGTH.getName());
 		if (contentLength == null) {
 			return RequestBody.empty();

@@ -49,6 +49,6 @@ public class HttpCookie {
     }
 
     public String findJSessionId() {
-        return cookies.get("JSESSIONID");
+        return cookies.getOrDefault("JSESSIONID", null);
     }
 }

@@ -39,17 +39,18 @@ public class LoginController implements Controller {
 
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();
 
-        String account = httpRequestBody.find("account");
-
-        if (httpMethod == HttpMethod.GET && account == null) {
+        if (httpMethod == HttpMethod.GET) {
             HttpCookie httpCookie = httpRequestHeader.getCookie();
-            Session session = sessionManager.findSession(httpCookie.findJSessionId());
-            if (session != null) {
-                return ResponseEntity.builder()
-                        .httpStatus(HttpStatus.FOUND)
-                        .contentType(ContentType.HTML)
-                        .location(INDEX_PAGE_URI)
-                        .build();
+            String jSessionId = httpCookie.findJSessionId();
+            if (jSessionId != null) {
+                Session session = sessionManager.findSession(jSessionId);
+                if (session != null) {
+                    return ResponseEntity.builder()
+                            .httpStatus(HttpStatus.FOUND)
+                            .contentType(ContentType.HTML)
+                            .location(INDEX_PAGE_URI)
+                            .build();
+                }
             }
 
             return ResponseEntity.builder()
@@ -59,6 +60,7 @@ public class LoginController implements Controller {
                     .build();
         }
 
+        String account = httpRequestBody.find("account");
         String password = httpRequestBody.find("password");
 
         User findAccount = findAccount(account);

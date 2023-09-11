@@ -26,12 +26,18 @@ public class LoginController extends AbstractController {
     private static final String COOKIE = "Cookie";
     private static final String USER = "user";
     private static final String UNAUTHORIZED = "/401";
+    private static final String BAD_REQUEST = "/400";
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
         try {
             final String userName = request.getRequestBody().get(ACCOUNT);
             final String password = request.getRequestBody().get(PASSWORD);
+
+            if (userName.isBlank() || password.isBlank()) {
+                setResponse(response, BAD_REQUEST, HttpStatusCode.BAD_REQUEST);
+                return;
+            }
 
             final User user = InMemoryUserRepository.findByAccount(userName)
                     .orElseThrow(LoginException::new);

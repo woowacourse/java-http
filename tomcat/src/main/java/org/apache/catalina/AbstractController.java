@@ -9,8 +9,12 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.http11.response.StatusLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
+
+    protected static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws IOException {

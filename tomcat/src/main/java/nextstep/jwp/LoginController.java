@@ -1,7 +1,5 @@
 package nextstep.jwp;
 
-import static org.reflections.Reflections.log;
-
 import java.io.IOException;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;

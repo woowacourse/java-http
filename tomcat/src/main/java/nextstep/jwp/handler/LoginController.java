@@ -39,7 +39,8 @@ public class LoginController extends AbstractController {
     }
 
     private boolean authenticateUser(final HttpRequest request) {
-        return request.hasCookie("JSESSIONID") && SessionManager.findSession(request.getCookie("JSESSIONID")) != null;
+        return request.hasCookie(JSESSIONID) &&
+                SessionManager.findSession(request.getCookie(JSESSIONID)) != null;
     }
 
     private void setIndexPageRedirect(final HttpResponse response) {
@@ -64,7 +65,7 @@ public class LoginController extends AbstractController {
 
             setIndexPageRedirect(response);
 
-            if (!request.hasCookie("JSESSIONID")) {
+            if (!request.hasCookie(JSESSIONID)) {
                 response.setCookie(createJsessionIdCookie(user));
             }
         } catch (UnAuthorizationException | UnRegisteredUserException e) {

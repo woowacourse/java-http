@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
                 var bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))
         ) {
             processRequest(bufferedReader, bufferedWriter);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

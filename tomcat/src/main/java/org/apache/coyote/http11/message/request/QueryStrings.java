@@ -21,9 +21,9 @@ public class QueryStrings {
         if (fullPath.contains("?")) {
             var queryParams = fullPath.split(PATH_QUERY_STRING_DELIMITER)[1];
             this.queryStrings = Arrays.stream(queryParams.split(PATH_QUERY_DELIMITER))
-                                      .map(queryString ->
+                                      .map(rawQueryString ->
                                               {
-                                                  final var keyValue = queryString.split(KEY_VALUE_DELIMITER);
+                                                  final var keyValue = rawQueryString.split(KEY_VALUE_DELIMITER);
                                                   return Map.entry(keyValue[0], keyValue[1]);
                                               }
                                       )
@@ -35,9 +35,5 @@ public class QueryStrings {
 
     public boolean hasQueryStrings() {
         return !queryStrings.isEmpty();
-    }
-
-    public String getValue(String key) {
-        return queryStrings.get(key);
     }
 }

@@ -8,12 +8,6 @@ import org.apache.coyote.http11.request.line.RequestLine;
 
 public class HttpRequestGenerator {
 
-    private HttpRequest httpRequest;
-
-    private HttpRequestGenerator(HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
-    }
-
     public static HttpRequest generate(BufferedReader bufferedReader) throws IOException {
         final String firstLine = bufferedReader.readLine();
         if (firstLine == null) {
@@ -23,10 +17,6 @@ public class HttpRequestGenerator {
         final RequestHeader requestHeader = getHeader(bufferedReader);
         final RequestBody requestBody = getBody(bufferedReader, requestHeader);
         return HttpRequest.of(requestLine, requestHeader, requestBody);
-    }
-
-    public HttpRequest request() {
-        return httpRequest;
     }
 
     private static RequestHeader getHeader(final BufferedReader bufferedReader) throws IOException {

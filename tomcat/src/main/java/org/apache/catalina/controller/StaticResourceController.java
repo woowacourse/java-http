@@ -6,12 +6,12 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 
 import java.util.Objects;
 import org.apache.catalina.util.FileLoader;
-import org.apache.coyote.http11.response.ResponseContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestUri;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.ResponseContentType;
 
 public class StaticResourceController extends AbstractController {
 
@@ -24,7 +24,7 @@ public class StaticResourceController extends AbstractController {
             response.setHttpVersion(request.getHttpVersion())
                     .setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, "/404.html");
+                    .addHeader(LOCATION, StaticResourceUri.NOT_FOUND_PAGE.getUri());
             return;
         }
 

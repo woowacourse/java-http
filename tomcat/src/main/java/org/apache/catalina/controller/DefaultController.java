@@ -5,19 +5,17 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 
 import java.util.Objects;
 import org.apache.catalina.util.FileLoader;
-import org.apache.coyote.http11.response.ResponseContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.ResponseContentType;
 
 public class DefaultController extends AbstractController {
 
-    public static final String DEFAULT_PAGE = "/index.html";
-
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final String resource = FileLoader.load(RESOURCE_DIRECTORY + DEFAULT_PAGE);
+        final String resource = FileLoader.load(RESOURCE_DIRECTORY + StaticResourceUri.DEFAULT_PAGE.getUri());
 
         response.setHttpVersion(request.getHttpVersion())
                 .setStatusCode(HttpStatusCode.OK)

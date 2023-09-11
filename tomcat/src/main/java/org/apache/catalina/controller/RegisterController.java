@@ -10,20 +10,17 @@ import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
 import org.apache.catalina.util.Authorizer;
 import org.apache.catalina.util.FileLoader;
-import org.apache.coyote.http11.response.ResponseContentType;
-import org.apache.catalina.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpStatusCode;
+import org.apache.coyote.http11.response.ResponseContentType;
 
 public class RegisterController extends AbstractController {
-
-    public static final String REGISTER_PAGE = "/register.html";
-    public static final String DEFAULT_PAGE = "/index.html";
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
@@ -38,7 +35,7 @@ public class RegisterController extends AbstractController {
             response.setHttpVersion(request.getHttpVersion())
                     .setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, DEFAULT_PAGE);
+                    .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
             return;
         }
 
@@ -47,7 +44,7 @@ public class RegisterController extends AbstractController {
         response.setHttpVersion(request.getHttpVersion())
                 .setStatusCode(HttpStatusCode.FOUND)
                 .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                .addHeader(LOCATION, DEFAULT_PAGE);
+                .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
     }
 
     @Override
@@ -58,11 +55,11 @@ public class RegisterController extends AbstractController {
             response.setHttpVersion(request.getHttpVersion())
                     .setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, DEFAULT_PAGE);
+                    .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
             return;
         }
 
-        final String resource = FileLoader.load(RESOURCE_DIRECTORY + REGISTER_PAGE);
+        final String resource = FileLoader.load(RESOURCE_DIRECTORY + StaticResourceUri.REGISTER_PAGE.getUri());
 
         response.setHttpVersion(request.getHttpVersion())
                 .setStatusCode(HttpStatusCode.OK)

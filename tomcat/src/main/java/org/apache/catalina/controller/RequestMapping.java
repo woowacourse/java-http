@@ -1,18 +1,23 @@
 package org.apache.catalina.controller;
 
+import static org.apache.catalina.controller.StaticResourceUri.DEFAULT_PAGE;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 
+    private static final String ROOT_REQUEST_URL = "/";
+    private static final String LOGIN_REQUEST_URL = "/login";
+    private static final String REGISTER_REQUEST_URL = "/register";
     private static final Map<String, Controller> controllers = new HashMap<>();
 
     static {
-        controllers.put("/", new RootController());
-        controllers.put("/index.html", new DefaultController());
-        controllers.put("/login", new LoginController());
-        controllers.put("/register", new RegisterController());
+        controllers.put(ROOT_REQUEST_URL, new RootController());
+        controllers.put(DEFAULT_PAGE.getUri(), new DefaultController());
+        controllers.put(LOGIN_REQUEST_URL, new LoginController());
+        controllers.put(REGISTER_REQUEST_URL, new RegisterController());
     }
 
     public Controller getController(final HttpRequest request) {

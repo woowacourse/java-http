@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserAlreadyExistException;
-import org.apache.catalina.controller.Controller;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -25,12 +24,13 @@ import static org.apache.catalina.session.Session.JSESSIONID_COOKIE_NAME;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final RequestMapper requestMapper = new RequestMapper();
 
+    private final RequestMapper requestMapper;
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapper requestMapper) {
         this.connection = connection;
+        this.requestMapper = requestMapper;
     }
 
     @Override

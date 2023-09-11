@@ -25,8 +25,7 @@ public abstract class AbstractController implements Controller {
             return;
         }
 
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.FOUND)
+        response.setStatusCode(HttpStatusCode.FOUND)
                 .addHeader(ResponseHeaderType.CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                 .addHeader(ResponseHeaderType.LOCATION, "/404.html");
     }

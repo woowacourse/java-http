@@ -28,8 +28,7 @@ public class StaticResourceController extends AbstractController {
             return;
         }
 
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.OK)
+        response.setStatusCode(HttpStatusCode.OK)
                 .addHeader(CONTENT_TYPE, ResponseContentType.from(requestUri.getPath()).getType())
                 .addHeader(CONTENT_LENGTH, Objects.requireNonNull(resource).getBytes().length)
                 .setResponseBody(new HttpResponseBody(resource));

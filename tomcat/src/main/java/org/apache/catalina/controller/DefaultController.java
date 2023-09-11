@@ -17,8 +17,7 @@ public class DefaultController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final String resource = FileLoader.load(RESOURCE_DIRECTORY + StaticResourceUri.DEFAULT_PAGE.getUri());
 
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.OK)
+        response.setStatusCode(HttpStatusCode.OK)
                 .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                 .addHeader(CONTENT_LENGTH, Objects.requireNonNull(resource).getBytes().length)
                 .setResponseBody(new HttpResponseBody(resource));

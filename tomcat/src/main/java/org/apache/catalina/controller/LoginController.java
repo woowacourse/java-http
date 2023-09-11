@@ -5,8 +5,6 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 import static org.apache.coyote.http11.response.ResponseHeaderType.SET_COOKIE;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -29,15 +27,14 @@ public class LoginController extends AbstractController {
         final Session session = Authorizer.findSession(request);
 
         if (session != null) {
-            response.setHttpVersion(request.getHttpVersion())
-                    .setStatusCode(HttpStatusCode.FOUND)
+            response.setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                     .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
             return;
         }
 
         final HttpRequestBody requestBody = request.getBody();
-        final Map<String, String> body = parse(requestBody.getBody());
+        final Map<String, String> body = requestBody.parse();
 
         final User user = InMemoryUserRepository.findByAccount(body.get("account"))
                 .orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
@@ -47,8 +44,7 @@ public class LoginController extends AbstractController {
             newSession.setAttribute("user", user);
             Authorizer.addSession(newSession);
 
-            response.setHttpVersion(request.getHttpVersion())
-                    .setStatusCode(HttpStatusCode.FOUND)
+            response.setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                     .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri())
                     .addHeader(SET_COOKIE, "JSESSIONID=" + newSession.getId());
@@ -60,8 +56,7 @@ public class LoginController extends AbstractController {
         final Session session = Authorizer.findSession(request);
 
         if (session != null) {
-            response.setHttpVersion(request.getHttpVersion())
-                    .setStatusCode(HttpStatusCode.FOUND)
+            response.setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                     .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
             return;
@@ -69,18 +64,9 @@ public class LoginController extends AbstractController {
 
         final String resource = FileLoader.load(RESOURCE_DIRECTORY + StaticResourceUri.LOGIN_PAGE.getUri());
 
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.OK)
+        response.setStatusCode(HttpStatusCode.OK)
                 .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                 .addHeader(CONTENT_LENGTH, Objects.requireNonNull(resource).getBytes().length)
                 .setResponseBody(new HttpResponseBody(resource));
-    }
-
-    Map<String, String> parse(final String body) {
-        final Map<String, String> requestBody = new HashMap<>();
-        Arrays.stream(body.split("&"))
-                .forEach(value -> requestBody.put(value.split("=")[0],
-                        value.split("=")[1]));
-        return requestBody;
     }
 }

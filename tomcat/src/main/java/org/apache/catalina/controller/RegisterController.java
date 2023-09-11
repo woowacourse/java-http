@@ -4,8 +4,6 @@ import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGT
 import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -26,14 +24,13 @@ public class RegisterController extends AbstractController {
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Session session = Authorizer.findSession(request);
         final HttpRequestBody requestBody = request.getBody();
-        final Map<String, String> body = parse(requestBody.getBody());
+        final Map<String, String> body = requestBody.parse();
         final User user = new User(body.get("account"),
                 body.get("password"),
                 body.get("email"));
 
         if (session != null || InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
-            response.setHttpVersion(request.getHttpVersion())
-                    .setStatusCode(HttpStatusCode.FOUND)
+            response.setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                     .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
             return;
@@ -41,8 +38,7 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(user);
 
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.FOUND)
+        response.setStatusCode(HttpStatusCode.FOUND)
                 .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                 .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
     }
@@ -52,8 +48,7 @@ public class RegisterController extends AbstractController {
         final Session session = Authorizer.findSession(request);
 
         if (session != null) {
-            response.setHttpVersion(request.getHttpVersion())
-                    .setStatusCode(HttpStatusCode.FOUND)
+            response.setStatusCode(HttpStatusCode.FOUND)
                     .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                     .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
             return;
@@ -61,18 +56,9 @@ public class RegisterController extends AbstractController {
 
         final String resource = FileLoader.load(RESOURCE_DIRECTORY + StaticResourceUri.REGISTER_PAGE.getUri());
 
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.OK)
+        response.setStatusCode(HttpStatusCode.OK)
                 .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                 .addHeader(CONTENT_LENGTH, Objects.requireNonNull(resource).getBytes().length)
                 .setResponseBody(new HttpResponseBody(resource));
-    }
-
-    Map<String, String> parse(final String body) {
-        final Map<String, String> requestBody = new HashMap<>();
-        Arrays.stream(body.split("&"))
-                .forEach(value -> requestBody.put(value.split("=")[0],
-                        value.split("=")[1]));
-        return requestBody;
     }
 }

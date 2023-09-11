@@ -15,8 +15,7 @@ public class RootController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-        response.setHttpVersion(request.getHttpVersion())
-                .setStatusCode(HttpStatusCode.OK)
+        response.setStatusCode(HttpStatusCode.OK)
                 .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
                 .addHeader(CONTENT_LENGTH, RESPONSE_BODY.getBytes().length)
                 .setResponseBody(new HttpResponseBody(RESPONSE_BODY));

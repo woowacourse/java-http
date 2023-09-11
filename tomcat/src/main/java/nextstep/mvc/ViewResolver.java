@@ -9,7 +9,7 @@ public class ViewResolver {
     private ViewResolver() {
     }
 
-    public static View resolve(final String viewName) {
+    public static View resolve(String viewName) {
         try {
             return new View(FileReader.readFile(viewName),
                     SupportContentType.getContentType(viewName));

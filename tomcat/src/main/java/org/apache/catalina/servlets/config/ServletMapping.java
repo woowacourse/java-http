@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.Application;
 import org.apache.catalina.servlets.Servlet;
 import org.apache.coyote.http11.HttpRequest;
 import org.reflections.Reflections;
@@ -16,7 +17,7 @@ public class ServletMapping {
     }
 
     public static void initialize() {
-        Reflections reflections = new Reflections("org.apache.catalina.servlets");
+        Reflections reflections = new Reflections(Application.class.getPackage().getName());
         Set<Class<?>> declaredClasses = reflections.getTypesAnnotatedWith(RequestMapping.class);
         for (final Class<?> clazz : declaredClasses) {
             RequestMapping annotation = clazz.getAnnotation(RequestMapping.class);

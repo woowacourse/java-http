@@ -1,8 +1,9 @@
-package org.apache.catalina.servlets;
+package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.service.UserService;
 import nextstep.mvc.ResponseWriter;
+import org.apache.catalina.servlets.HttpServlet;
 import org.apache.catalina.servlets.config.RequestMapping;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;

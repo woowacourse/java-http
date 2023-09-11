@@ -1,12 +1,11 @@
 package org.apache.catalina.controller;
 
-import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
-import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
-import static org.apache.coyote.http11.response.ResponseHeaderType.SET_COOKIE;
+import static java.util.Objects.requireNonNull;
+import static org.apache.catalina.controller.StaticResourceUri.DEFAULT_PAGE;
+import static org.apache.catalina.controller.StaticResourceUri.LOGIN_PAGE;
+import static org.apache.coyote.http11.response.ResponseContentType.TEXT_HTML;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
@@ -17,7 +16,6 @@ import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.HttpStatusCode;
-import org.apache.coyote.http11.response.ResponseContentType;
 
 public class LoginController extends AbstractController {
 
@@ -25,12 +23,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final Session session = Authorizer.findSession(request);
-
-        if (session != null) {
-            response.setStatusCode(HttpStatusCode.FOUND)
-                    .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
+        if (existSession(request)) {
+            redirectToDefaultPage(response);
             return;
         }
 
@@ -38,36 +32,48 @@ public class LoginController extends AbstractController {
         final User reqeustUser = new User(requestBody.parse());
 
         final User user = InMemoryUserRepository.findByAccount(reqeustUser.getAccount())
-                .orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 사용자입니다."));
 
         if (user.checkPassword(reqeustUser)) {
-            Session newSession = new Session();
-            newSession.setAttribute(USER_ATTRIBUTE_KEY, user);
-            Authorizer.addSession(newSession);
+            final Session newSession = createSession(user);
 
             response.setStatusCode(HttpStatusCode.FOUND)
-                    .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri())
-                    .addHeader(SET_COOKIE, "JSESSIONID=" + newSession.getId());
+                    .addContentTypeHeader(TEXT_HTML.getType())
+                    .addLocationHeader(DEFAULT_PAGE.getUri())
+                    .addSetCookieHeader("JSESSIONID=" + newSession.getId());
         }
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Session session = Authorizer.findSession(request);
-
-        if (session != null) {
-            response.setStatusCode(HttpStatusCode.FOUND)
-                    .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, StaticResourceUri.DEFAULT_PAGE.getUri());
+        if (existSession(request)) {
+            redirectToDefaultPage(response);
             return;
         }
 
-        final String resource = FileLoader.load(RESOURCE_DIRECTORY + StaticResourceUri.LOGIN_PAGE.getUri());
+        final String resource = FileLoader.load(RESOURCE_DIRECTORY + LOGIN_PAGE.getUri());
 
         response.setStatusCode(HttpStatusCode.OK)
-                .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                .addHeader(CONTENT_LENGTH, Objects.requireNonNull(resource).getBytes().length)
+                .addContentTypeHeader(TEXT_HTML.getType())
+                .addContentLengthHeader(requireNonNull(resource).getBytes().length)
                 .setResponseBody(new HttpResponseBody(resource));
+    }
+
+    private Session createSession(final User user) {
+        Session newSession = new Session();
+        newSession.setAttribute(USER_ATTRIBUTE_KEY, user);
+        Authorizer.addSession(newSession);
+        return newSession;
+    }
+
+    private boolean existSession(final HttpRequest request) {
+        final Session session = Authorizer.findSession(request);
+        return session != null;
+    }
+
+    private void redirectToDefaultPage(final HttpResponse response) {
+        response.setStatusCode(HttpStatusCode.FOUND)
+                .addContentTypeHeader(TEXT_HTML.getType())
+                .addLocationHeader(DEFAULT_PAGE.getUri());
     }
 }

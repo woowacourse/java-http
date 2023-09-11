@@ -34,6 +34,26 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse addContentTypeHeader(final Object value) {
+        this.header.addContentType(value);
+        return this;
+    }
+
+    public HttpResponse addLocationHeader(final Object value) {
+        this.header.addLocation(value);
+        return this;
+    }
+
+    public HttpResponse addSetCookieHeader(final Object value) {
+        this.header.addCookie(value);
+        return this;
+    }
+
+    public HttpResponse addContentLengthHeader(final Object value) {
+        this.header.addContentLength(value);
+        return this;
+    }
+
     public HttpResponse setResponseBody(final HttpResponseBody httpResponseBody) {
         this.responseBody = httpResponseBody;
         return this;

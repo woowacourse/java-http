@@ -1,11 +1,12 @@
 package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.response.ResponseContentType;
+import static org.apache.catalina.controller.StaticResourceUri.NOT_FOUND_PAGE;
+import static org.apache.coyote.http11.response.ResponseContentType.TEXT_HTML;
+
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestMethod;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatusCode;
-import org.apache.coyote.http11.response.ResponseHeaderType;
 
 public abstract class AbstractController implements Controller {
 
@@ -26,10 +27,13 @@ public abstract class AbstractController implements Controller {
         }
 
         response.setStatusCode(HttpStatusCode.FOUND)
-                .addHeader(ResponseHeaderType.CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                .addHeader(ResponseHeaderType.LOCATION, StaticResourceUri.NOT_FOUND_PAGE.getUri());
+                .addContentTypeHeader(TEXT_HTML.getType())
+                .addLocationHeader(NOT_FOUND_PAGE.getUri());
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {}
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {}
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    }
+
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    }
 }

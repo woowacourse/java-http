@@ -1,9 +1,7 @@
 package org.apache.catalina.controller;
 
-import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.ResponseContentType.TEXT_HTML;
 
-import org.apache.coyote.http11.response.ResponseContentType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
@@ -16,8 +14,8 @@ public class RootController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setStatusCode(HttpStatusCode.OK)
-                .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                .addHeader(CONTENT_LENGTH, RESPONSE_BODY.getBytes().length)
+                .addContentTypeHeader(TEXT_HTML.getType())
+                .addContentLengthHeader(RESPONSE_BODY.getBytes().length)
                 .setResponseBody(new HttpResponseBody(RESPONSE_BODY));
     }
 }

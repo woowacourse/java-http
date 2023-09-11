@@ -1,10 +1,9 @@
 package org.apache.catalina.controller;
 
-import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_LENGTH;
-import static org.apache.coyote.http11.response.ResponseHeaderType.CONTENT_TYPE;
-import static org.apache.coyote.http11.response.ResponseHeaderType.LOCATION;
+import static java.util.Objects.requireNonNull;
+import static org.apache.catalina.controller.StaticResourceUri.NOT_FOUND_PAGE;
+import static org.apache.coyote.http11.response.ResponseContentType.TEXT_HTML;
 
-import java.util.Objects;
 import org.apache.catalina.util.FileLoader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestUri;
@@ -23,14 +22,14 @@ public class StaticResourceController extends AbstractController {
         if (resource == null) {
             response.setHttpVersion(request.getHttpVersion())
                     .setStatusCode(HttpStatusCode.FOUND)
-                    .addHeader(CONTENT_TYPE, ResponseContentType.TEXT_HTML.getType())
-                    .addHeader(LOCATION, StaticResourceUri.NOT_FOUND_PAGE.getUri());
+                    .addContentTypeHeader(TEXT_HTML.getType())
+                    .addLocationHeader(NOT_FOUND_PAGE.getUri());
             return;
         }
 
         response.setStatusCode(HttpStatusCode.OK)
-                .addHeader(CONTENT_TYPE, ResponseContentType.from(requestUri.getPath()).getType())
-                .addHeader(CONTENT_LENGTH, Objects.requireNonNull(resource).getBytes().length)
+                .addContentTypeHeader(ResponseContentType.from(requestUri.getPath()).getType())
+                .addContentLengthHeader(requireNonNull(resource).getBytes().length)
                 .setResponseBody(new HttpResponseBody(resource));
     }
 }

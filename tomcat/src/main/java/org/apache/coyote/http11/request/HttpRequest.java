@@ -8,24 +8,24 @@ import org.apache.coyote.http11.common.HttpHeaders;
 
 public class HttpRequest {
 
-    private final RequestLine requestLine;
+    private final RequestStatusLine requestStatusLine;
     private final HttpHeaders headers;
     private final String requestBody;
 
-    public HttpRequest(final RequestLine requestLine,
+    public HttpRequest(final RequestStatusLine requestStatusLine,
                        final HttpHeaders headers,
                        final String requestBody) {
-        this.requestLine = requestLine;
+        this.requestStatusLine = requestStatusLine;
         this.headers = headers;
         this.requestBody = requestBody;
     }
 
     public static HttpRequest parse(final BufferedReader reader) throws IOException {
-        final RequestLine requestLine = RequestLine.parse(reader.readLine());
+        final RequestStatusLine requestStatusLine = RequestStatusLine.parse(reader.readLine());
         final HttpHeaders headers = HttpHeaders.parse(readHeaders(reader));
         final String requestBody = findRequestBody(reader, headers);
 
-        return new HttpRequest(requestLine, headers, requestBody);
+        return new HttpRequest(requestStatusLine, headers, requestBody);
     }
 
     private static List<String> readHeaders(final BufferedReader reader) throws IOException {
@@ -51,15 +51,15 @@ public class HttpRequest {
     }
 
     public String getUri() {
-        return requestLine.getUri();
+        return requestStatusLine.getUri();
     }
 
     public String getMethod() {
-        return requestLine.getMethod();
+        return requestStatusLine.getMethod();
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public RequestStatusLine getRequestLine() {
+        return requestStatusLine;
     }
 
     public HttpHeaders getHeaders() {

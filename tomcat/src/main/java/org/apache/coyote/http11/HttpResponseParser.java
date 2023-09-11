@@ -49,6 +49,13 @@ public class HttpResponseParser {
     }
 
     private String findResponseHeader(final HttpResponse httpResponse, final String responseBody) {
+        Map<String, String> responseHeader = getResponseHeader(httpResponse, responseBody);
+        return responseHeader.entrySet().stream()
+                .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue())
+                .collect(Collectors.joining(LINE_DELIMITER));
+    }
+
+    private Map<String, String> getResponseHeader(final HttpResponse httpResponse, final String responseBody) {
         Map<String, String> responseHeader = new LinkedHashMap<>();
         String redirectUri = httpResponse.getRedirectUri();
         if (!responseBody.isEmpty()) {
@@ -58,10 +65,7 @@ public class HttpResponseParser {
         }
         setSessionCookie(httpResponse, responseHeader);
         responseHeader.putAll(httpResponse.getHeaders());
-
-        return responseHeader.entrySet().stream()
-                .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue())
-                .collect(Collectors.joining(LINE_DELIMITER));
+        return responseHeader;
     }
 
     private void setSessionCookie(final HttpResponse httpResponse, final Map<String, String> responseHeader) {

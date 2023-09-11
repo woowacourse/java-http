@@ -15,12 +15,16 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public List<String> header(String headerName) {
-        return httpHeaders.get(headerName);
-    }
-
     public Optional<String> sessionId() {
         return httpHeaders.sessionId();
+    }
+
+    public String getContentTypeByAcceptHeader() {
+        List<String> acceptHeaderValues = httpHeaders.get("Accept");
+        if (acceptHeaderValues != null && acceptHeaderValues.contains("text/css")) {
+            return "text/css;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 
     public String method() {

@@ -17,7 +17,6 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
 
             httpResponse.setBody(readFile(httpResponse.getResponseFileName()));
             httpResponse.addHeader("Content-Length", String.valueOf(httpResponse.getBody().getBytes().length));
-            httpResponse.addHeader("Content-Type", getContentTypeHeaderFrom(httpRequest));
+            httpResponse.addHeader("Content-Type", httpRequest.getContentTypeByAcceptHeader());
 
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
             bufferedOutputStream.write(httpResponse.format().getBytes());
@@ -70,14 +69,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private static String getContentTypeHeaderFrom(HttpRequest httpRequest) {
-        List<String> acceptHeaderValues = httpRequest.header("Accept");
-        if (acceptHeaderValues != null && acceptHeaderValues.contains("text/css")) {
-            return "text/css;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
     }
 
     private String readFile(String fileName) {

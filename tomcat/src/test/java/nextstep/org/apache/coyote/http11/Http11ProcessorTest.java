@@ -1,5 +1,11 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.presentation.HomePageController;
+import nextstep.jwp.presentation.LoginController;
+import nextstep.jwp.presentation.LoginPageController;
+import nextstep.jwp.presentation.RegisterPageController;
+import org.apache.catalina.controller.ControllerMappingInfo;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -10,15 +16,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static org.apache.coyote.request.HttpMethod.GET;
+import static org.apache.coyote.request.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    final RequestMapping requestMapping = new RequestMapping()
+            .putController(ControllerMappingInfo.of(GET, false, "/"), new HomePageController())
+            .putController(ControllerMappingInfo.of(GET, false, "/login"), new LoginPageController())
+            .putController(ControllerMappingInfo.of(GET, true, "/login"), new LoginController())
+            .putController(ControllerMappingInfo.of(GET, false, "/register"), new RegisterPageController())
+            .putController(ControllerMappingInfo.of(POST, false, "/register"), new RegisterPageController());
 
     @Test
     void process() {
         // given
         final StubSocket socket = new StubSocket();
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(requestMapping, socket);
 
         // when
         processor.process(socket);
@@ -45,7 +60,7 @@ class Http11ProcessorTest {
                 "");
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(requestMapping, socket);
 
         // when
         processor.process(socket);

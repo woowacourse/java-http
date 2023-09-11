@@ -1,6 +1,5 @@
-package nextstep.jwp.presentation;
+package org.apache.catalina.controller;
 
-import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;

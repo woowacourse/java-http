@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int DEFAULT_MAX_THREAD_COUNT = 10;
 
+    private final RequestMapping requestMapping;
     private final ServerSocket serverSocket;
     private final ExecutorService pool;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
+    public Connector(final RequestMapping requestMapping) {
+        this(requestMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(final RequestMapping requestMapping, final int port, final int acceptCount, final int maxThreads) {
+        this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         pool = Executors.newFixedThreadPool(maxThreads);
@@ -63,17 +66,17 @@ public class Connector implements Runnable {
 
     private void connect() {
         try {
-            process(serverSocket.accept());
+            process(requestMapping, serverSocket.accept());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void process(final Socket connection) {
+    private void process(final RequestMapping requestMapping, final Socket connection) {
         if (connection == null) {
             return;
         }
-        Http11Processor processor = new Http11Processor(connection);
+        Http11Processor processor = new Http11Processor(requestMapping, connection);
         pool.execute(processor);
         logThreadPool();
     }

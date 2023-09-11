@@ -3,6 +3,7 @@ package nextstep.jwp.presentation;
 import org.apache.coyote.HttpFormTestUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.mock.MockRequestMapping;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -58,7 +59,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -87,7 +88,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -116,7 +117,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -145,7 +146,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -174,7 +175,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -203,7 +204,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);
@@ -232,7 +233,7 @@ class ResourceControllerTest {
                 .build();
 
         final StubSocket socket = new StubSocket(httpRequest);
-        final Processor processor = new Http11Processor(socket);
+        final Processor processor = new Http11Processor(MockRequestMapping.getMockRequestMapping(), socket);
 
         // when
         processor.process(socket);

@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.request.RequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -19,7 +20,7 @@ class FileHandlerTest {
     private final FileHandler fileHandler = new FileHandler();
 
     @Test
-    void indexHTML파일을_반환한다() throws IOException {
+    void indexHTML파일을_반환한다() throws Exception {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -32,8 +33,9 @@ class FileHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = fileHandler.handle(HttpRequest.from(request));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        fileHandler.handle(HttpRequest.from(request), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         String[] responseElements = response.split("\r\n");
         String responseBody = responseElements[responseElements.length - 1];
@@ -47,7 +49,7 @@ class FileHandlerTest {
     }
 
     @Test
-    void stylecss파일을_반환한다() throws IOException {
+    void stylecss파일을_반환한다() throws Exception {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
@@ -60,8 +62,9 @@ class FileHandlerTest {
         BufferedReader request = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = fileHandler.handle(HttpRequest.from(request));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        fileHandler.handle(HttpRequest.from(request), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         String[] responseElements = response.split("\r\n");
         String responseBody = responseElements[responseElements.length - 1];

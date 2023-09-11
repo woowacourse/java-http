@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.http11.response.ResponseHeaderKey.SET_COOKIE;
+
 public class Cookie {
 
     private static final String COOKIE_DELIMITER = ";";
@@ -18,6 +20,10 @@ public class Cookie {
         this.cookies = cookies;
     }
 
+    public Cookie() {
+        this.cookies = new HashMap<>();
+    }
+
     public static Cookie from(String cookieValue) {
         if (cookieValue.isBlank()) {
             return new Cookie(new HashMap<>());
@@ -29,15 +35,19 @@ public class Cookie {
         return new Cookie(cookies);
     }
 
-    public boolean containsKey(String key) {
-        return cookies.containsKey(key);
-    }
-
     public String findByKey(String key) {
         return cookies.get(key);
     }
 
     public void addCookie(String key, String value) {
         cookies.put(key, value);
+    }
+
+    public String generateResponseMessage() {
+        String cookieValue = cookies.entrySet().stream()
+                .map(cookieEntry -> cookieEntry.getKey() + COOKIE_VALUE_DELIMITER + cookieEntry.getValue())
+                .collect(Collectors.joining(COOKIE_DELIMITER));
+
+        return String.format("%s: %s ", SET_COOKIE.getResponseHeaderName(), cookieValue);
     }
 }

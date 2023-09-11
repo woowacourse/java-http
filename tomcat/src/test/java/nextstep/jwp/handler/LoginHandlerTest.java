@@ -1,16 +1,17 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
 
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.Session;
 import org.apache.coyote.http11.common.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ResponseEntity;
+import org.apache.coyote.http11.request.RequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.UUID;
 
+import static org.apache.coyote.http11.response.ResponseHeaderKey.JSESSION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -19,7 +20,7 @@ class LoginHandlerTest {
     private final LoginHandler loginHandler = new LoginHandler();
 
     @Test
-    void 로그인에_성공하면_indexhtml_로_리다이렉션() throws IOException {
+    void 로그인에_성공하면_indexhtml_로_리다이렉션() throws Exception {
         String validAccount = "gugu";
         String validPassword = "password";
         final String httpRequest = String.join("\r\n",
@@ -33,8 +34,9 @@ class LoginHandlerTest {
                 "account=" + validAccount + "&password=" + validPassword);
 
         BufferedReader input = RequestParser.requestToInput(httpRequest);
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        String response = httpResponse.generateResponseMessage();
         System.out.println(response);
 
         assertThat(response).contains(
@@ -44,7 +46,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 로그인에_성공하면_세션이_추가된다() throws IOException {
+    void 로그인에_성공하면_세션이_추가된다() throws Exception {
         // given
         String validAccount = "gugu";
         String validPassword = "password";
@@ -61,9 +63,10 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        Cookie cookie = responseEntity.getCookie();
-        String jsessionid = cookie.findByKey("JSESSIONID");
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        Cookie cookie = httpResponse.getCookie();
+        String jsessionid = cookie.findByKey(JSESSION.getResponseHeaderName());
         Session session = SessionManager.findSession(UUID.fromString(jsessionid));
 
         // then
@@ -71,7 +74,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 쿠키_없이_로그인에_성공하면_쿠키를_설정해준다() throws IOException {
+    void 쿠키_없이_로그인에_성공하면_쿠키를_설정해준다() throws Exception {
         // given
         String validAccount = "gugu";
         String validPassword = "password";
@@ -88,8 +91,9 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         // then
         assertThat(response).contains(
@@ -99,7 +103,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 쿠키_있을_때_로그인에_성공하면_쿠키_재발급() throws IOException {
+    void 쿠키_있을_때_로그인에_성공하면_쿠키_재발급() throws Exception {
         // given
         String validAccount = "gugu";
         String validPassword = "password";
@@ -117,8 +121,9 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         // then
         assertThat(response).contains(
@@ -127,7 +132,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 세션이_존재할_때_로그인_페이지에_접속하면_index_로_리다이렉션() throws IOException {
+    void 세션이_존재할_때_로그인_페이지에_접속하면_index_로_리다이렉션() throws Exception {
         // given
         UUID uuid = UUID.randomUUID();
         Session session = new Session(uuid);
@@ -143,8 +148,9 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        String response = httpResponse.generateResponseMessage();
         // then
         assertThat(response).contains(
                 "Location: index.html",
@@ -153,7 +159,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 세션_없이_로그인_페이지에_접속하면_login_리다이렉션() throws IOException {
+    void 세션_없이_로그인_페이지에_접속하면_login_리다이렉션() throws Exception {
         // given
         UUID uuid = UUID.randomUUID();
         Session session = new Session(uuid);
@@ -168,8 +174,9 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        String response = httpResponse.generateResponseMessage();
         // then
         assertThat(response).contains(
                 "HTTP/1.1 200 "
@@ -177,7 +184,7 @@ class LoginHandlerTest {
     }
 
     @Test
-    void 로그인에_실패하면_401html_로_리다이렉션() throws IOException {
+    void 로그인에_실패하면_401html_로_리다이렉션() throws Exception {
         // given
         String invalidAccount = "leo";
         String invalidPassword = "password1234";
@@ -194,8 +201,9 @@ class LoginHandlerTest {
         BufferedReader input = RequestParser.requestToInput(httpRequest);
 
         // when
-        ResponseEntity responseEntity = loginHandler.handle(HttpRequest.from(input));
-        String response = responseEntity.generateResponseMessage();
+        HttpResponse httpResponse = new HttpResponse();
+        loginHandler.handle(HttpRequest.from(input), httpResponse);
+        String response = httpResponse.generateResponseMessage();
 
         // then
         assertThat(response).contains(

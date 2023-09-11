@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

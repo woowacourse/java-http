@@ -7,7 +7,7 @@ public class RequestCookie {
 
     public static final String COOKIE_HEADER_KEY = "Cookie";
     public static final String COOKIE_DELIMITER = "; ";
-    public static final String KEY_VALUE_DELIMITER = "=";
+    private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 

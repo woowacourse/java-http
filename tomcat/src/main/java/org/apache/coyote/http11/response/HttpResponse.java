@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.exception.HostingFileNotFoundException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,58 +27,49 @@ public class HttpResponse {
         headers.addHeader(headerName, value);
     }
 
-    public HttpResponse hostingPage(final String filePath) {
+    public void hostingPage(final String filePath) throws IOException {
         responseBody = readStaticFile(filePath);
 
         headers.setContentType(getContentType(filePath));
         headers.setContentLength(responseBody.getBytes().length);
 
         status = HttpStatus.OK;
-        return this;
     }
 
-    private String readStaticFile(final String fileName) {
+    private String readStaticFile(final String fileName) throws IOException {
         final String filePath = "static/" + fileName;
         final URL res = CLASS_LOADER.getResource(filePath);
 
+        if (fileName.equals("/")) {
+            return "Hello world!";
+        }
         try {
             return new String(Files.readAllBytes(new File(res.getFile()).toPath()));
-        } catch (IOException e) {
-            return "Hello world!";
+        } catch (NullPointerException e) {
+            throw new HostingFileNotFoundException();
         }
     }
 
     private String getContentType(final String filePath) {
-        final String[] fileNameSplit = filePath.split("\\.");
-        final String fileType = fileNameSplit[fileNameSplit.length - 1];
-
-        if (fileType.equals("html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (fileType.equals("css")) {
-            return "text/css;charset=utf-8";
-        }
-        if (fileType.equals("js")) {
-            return "application/javascript";
-        }
-
-        if (filePath.equals("/")) {
-            return "text/html;charset=utf-8";
-        }
-        return null;
+        final HttpContentType contentType = HttpContentType.getByFilePath(filePath);
+        return contentType.getHeaderString();
     }
 
-    public HttpResponse redirectTo(final String redirectUrl) {
+    public void redirectTo(final String redirectUrl) {
         headers.setLocation(redirectUrl);
         status = HttpStatus.FOUND;
         responseBody = null;
-        return this;
     }
 
-    public HttpResponse methodNotAllowed() {
+    public void methodNotAllowed() {
         status = HttpStatus.METHOD_NOT_ALLOWED;
         responseBody = null;
-        return this;
+    }
+
+    public void badRequest(final String message) {
+        status = HttpStatus.BAD_REQUEST;
+        headers.setContentType(HttpContentType.PLAIN_TEXT.getHeaderString());
+        responseBody = message;
     }
 
     public void setCookie(final String cookieName, final String value) {
@@ -93,5 +86,9 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         return getResponseString().getBytes();
+    }
+
+    public void setStatus(final HttpStatus httpStatus) {
+        this.status = httpStatus;
     }
 }

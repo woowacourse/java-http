@@ -1,25 +1,39 @@
 package nextstep.org.apache.coyote.http11;
 
-import org.apache.coyote.http11.Constants;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import org.apache.coyote.Mapper;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.apache.coyote.http11.Constants.*;
+import static org.apache.coyote.http11.Constants.CRLF;
 
 class Http11ProcessorTest {
+
+    private Mapper mapper;
+
+    @BeforeEach
+    void setUp() {
+        mapper = new RequestMapping();
+        mapper.addController("/login", new LoginController());
+        mapper.addController("/register", new RegisterController());
+    }
 
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, mapper);
 
         // when
         processor.process(socket);
@@ -46,7 +60,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, mapper);
 
         // when
         processor.process(socket);
@@ -74,7 +88,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, mapper);
 
         // when
         processor.process(socket);
@@ -103,7 +117,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, mapper);
 
         // when
         processor.process(socket);
@@ -135,7 +149,7 @@ class Http11ProcessorTest {
                 "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, mapper);
 
         // when
         processor.process(socket);
@@ -160,7 +174,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, mapper);
 
         // when
         processor.process(socket);

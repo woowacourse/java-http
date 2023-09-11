@@ -6,8 +6,6 @@ import org.apache.coyote.http11.types.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-
 import static org.apache.coyote.http11.ViewResolver.resolveView;
 import static org.apache.coyote.http11.types.HttpProtocol.HTTP_1_1;
 

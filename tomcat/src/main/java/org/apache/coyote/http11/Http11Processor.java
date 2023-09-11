@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.Mapper;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
-import org.apache.coyote.http11.request.RequestMapping;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +21,18 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String CONTENT_LENGTH = "Content-Length";
+
+    private final Mapper mapper;
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.mapper = new RequestMapping();
+    }
+
+    public Http11Processor(final Socket connection, final Mapper mapper) {
+        this.connection = connection;
+        this.mapper = mapper;
     }
 
     @Override
@@ -57,9 +65,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getHttpResponse(HttpRequest request) throws Exception {
         HttpResponse response = HttpResponse.create();
-        RequestMapping requestMapping = new RequestMapping();
-        Controller controller = requestMapping.getController(request);
-        controller.service(request, response);
+        mapper.service(request, response);
         return response;
     }
 

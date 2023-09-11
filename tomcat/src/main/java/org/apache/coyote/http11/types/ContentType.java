@@ -8,6 +8,7 @@ public enum ContentType {
     APPLICATION_JSON("application/json", "json"),
     JAVASCRIPT("application/javascript", "js"),
     ;
+    
     private static final String DEFAULT_UTF8 = "charset=utf-8";
     private static final String EXT_SEPARATOR = ".";
 

@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.http11.controller.AbstractController;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpQueryParser;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -11,9 +12,9 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 import java.util.Map;
 
+import static nextstep.jwp.controller.URIPath.INDEX_URI;
+import static nextstep.jwp.controller.URIPath.UNAUTHORIZED_URI;
 import static org.apache.coyote.http11.ViewResolver.resolveView;
-import static org.apache.coyote.http11.controller.URIPath.INDEX_URI;
-import static org.apache.coyote.http11.controller.URIPath.UNAUTHORIZED_URI;
 import static org.apache.coyote.http11.types.HeaderType.LOCATION;
 import static org.apache.coyote.http11.types.HeaderType.SET_COOKIE;
 import static org.apache.coyote.http11.types.HttpStatus.FOUND;

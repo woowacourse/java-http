@@ -17,6 +17,9 @@ public class Http11RequestLineParser {
 	private static final String QUERY_PARAM_DELIMITER = "&";
 	private static final String KEY_VALUE_SEPARATOR = "=";
 
+	private Http11RequestLineParser() {
+	}
+
 	public static RequestLine parse(String requestLine) {
 		final var parts = requestLine.split(REQUEST_LINE_DELIMITER);
 		final var method = HttpMethod.from(parts[0]);

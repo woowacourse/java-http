@@ -11,6 +11,9 @@ public class Http11RequestBodyParser {
 	private static final String DELIMITER = "&";
 	private static final String KEY_VALUE_SEPARATOR = "=";
 
+	private Http11RequestBodyParser() {
+	}
+
 	public static RequestBody parse(final String body) {
 		if (body == null || body.isBlank()) {
 			return RequestBody.empty();

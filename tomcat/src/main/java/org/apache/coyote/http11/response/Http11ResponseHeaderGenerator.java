@@ -17,6 +17,9 @@ public class Http11ResponseHeaderGenerator {
 	private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
 	private static final String LINE_END = " ";
 
+	private Http11ResponseHeaderGenerator() {
+	}
+
 	public static String generate(final ResponseHeader responseHeader) {
 		final var headers = responseHeader.getHeaders();
 		final var cookies = responseHeader.getCookies();

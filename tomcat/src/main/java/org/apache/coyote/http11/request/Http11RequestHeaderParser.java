@@ -16,6 +16,9 @@ public class Http11RequestHeaderParser {
 	private static final String COOKIE_DELIMITER = "; ";
 	private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
 
+	private Http11RequestHeaderParser() {
+	}
+
 	public static RequestHeader parse(final List<String> requestHeaders) {
 		final var headers = requestHeaders.stream()
 			.map(header -> header.split(HEADER_SEPARATOR, 2))

@@ -3,6 +3,10 @@ package kokodak.http;
 import static kokodak.Constants.BLANK;
 import static kokodak.Constants.COLON;
 import static kokodak.Constants.CRLF;
+import static kokodak.http.HeaderConstants.CONTENT_LENGTH;
+import static kokodak.http.HeaderConstants.CONTENT_TYPE;
+import static kokodak.http.HeaderConstants.LOCATION;
+import static kokodak.http.HeaderConstants.SET_COOKIE;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,11 +80,11 @@ public class HttpResponse {
 
     public void redirect(final String redirectPath) {
         setHttpStatusCode(HttpStatusCode.FOUND);
-        header("Location", redirectPath);
+        header(LOCATION, redirectPath);
     }
 
     public void cookie(final String value) {
-        header("Set-Cookie", value);
+        header(SET_COOKIE, value);
     }
 
     public void notFound(final HttpRequest httpRequest) throws IOException {
@@ -101,14 +105,14 @@ public class HttpResponse {
         final File file = new File(resourceUrl.getPath());
         final String responseBody = new String(Files.readAllBytes(file.toPath()));
         final String contentType = ContentType.from(fileName, acceptHeader);
-        header("Content-Type", contentType);
-        header("Content-Length", String.valueOf(responseBody.getBytes().length));
+        header(CONTENT_TYPE, contentType);
+        header(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
         this.body = responseBody;
     }
 
     public void setBody(final String body) {
-        header("Content-Type", ContentType.TEXT_HTML.getContentType());
-        header("Content-Length", String.valueOf(body.getBytes().length));
+        header(CONTENT_TYPE, ContentType.TEXT_HTML.getContentType());
+        header(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         this.body = body;
     }
 }

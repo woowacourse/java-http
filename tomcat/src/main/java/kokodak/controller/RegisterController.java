@@ -1,5 +1,7 @@
 package kokodak.controller;
 
+import static kokodak.http.HeaderConstants.ACCEPT;
+
 import java.io.IOException;
 import java.util.Map;
 import kokodak.RequestMapper;
@@ -46,6 +48,6 @@ public class RegisterController extends AbstractController {
 
     private void doGetRegisterPage(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final String fileName = "static/register.html";
-        httpResponse.setBody(fileName, httpRequest.header("Accept"));
+        httpResponse.setBody(fileName, httpRequest.header(ACCEPT));
     }
 }

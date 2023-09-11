@@ -1,5 +1,7 @@
 package kokodak.controller;
 
+import static kokodak.http.HeaderConstants.ACCEPT;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -66,6 +68,6 @@ public class LoginController extends AbstractController {
 
     private void doGetLoginPage(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final String fileName = "static/login.html";
-        httpResponse.setBody(fileName, httpRequest.header("Accept"));
+        httpResponse.setBody(fileName, httpRequest.header(ACCEPT));
     }
 }

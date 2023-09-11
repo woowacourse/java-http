@@ -1,5 +1,7 @@
 package kokodak.controller;
 
+import static kokodak.http.HeaderConstants.ACCEPT;
+
 import java.net.URL;
 import kokodak.http.HttpRequest;
 import kokodak.http.HttpResponse;
@@ -19,6 +21,6 @@ public class ResourceController extends AbstractController {
         if (resourceUrl == null) {
             httpResponse.notFound(httpRequest);
         }
-        httpResponse.setBody(fileName, httpRequest.header("Accept"));
+        httpResponse.setBody(fileName, httpRequest.header(ACCEPT));
     }
 }

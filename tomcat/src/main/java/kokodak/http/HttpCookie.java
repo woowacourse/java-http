@@ -1,6 +1,7 @@
 package kokodak.http;
 
 import static kokodak.Constants.BLANK;
+import static kokodak.http.HeaderConstants.COOKIE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +15,8 @@ public class HttpCookie {
     }
 
     public static HttpCookie of(final Map<String, String> header) {
-        if (header.containsKey("Cookie")) {
-            final Map<String, String> cookie = getCookie(header.get("Cookie"));
+        if (header.containsKey(COOKIE)) {
+            final Map<String, String> cookie = getCookie(header.get(COOKIE));
             return new HttpCookie(cookie);
         }
         return new HttpCookie(new HashMap<>());

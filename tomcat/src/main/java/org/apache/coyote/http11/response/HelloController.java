@@ -12,7 +12,7 @@ public class HelloController implements Controller {
 
         response.setStatusCode(StatusCode.OK);
         response.setResponseBody(responseBody);
-        response.addHeader("Content-Type", ContentType.HTML.getExtension() + ";charset=utf-8");
+        response.addHeader("Content-Type", ContentType.HTML.getContentType() + ";charset=utf-8");
         response.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 

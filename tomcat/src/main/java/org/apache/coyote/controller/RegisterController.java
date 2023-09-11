@@ -2,11 +2,11 @@ package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.controller.util.RequestBodyParser;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httprequest.RequestBody;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.HttpStatus;
-import org.apache.coyote.controller.util.RequestBodyParser;
 
 public class RegisterController extends AbstractController {
 

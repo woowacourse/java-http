@@ -1,7 +1,5 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.controller.ControllerTestSupport;
-import org.apache.coyote.controller.UnAuthorizedController;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.junit.jupiter.api.Test;

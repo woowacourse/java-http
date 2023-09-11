@@ -2,7 +2,6 @@ package org.apache.coyote.httpresponse.header;
 
 import org.apache.coyote.httpresponse.ContentBody;
 
-import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;

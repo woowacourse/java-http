@@ -1,6 +1,5 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.controller.Controller;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.apache.coyote.httpresponse.HttpStatus;

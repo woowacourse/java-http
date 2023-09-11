@@ -6,9 +6,6 @@ import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
-import org.apache.coyote.controller.IndexController;
-import org.apache.coyote.controller.LoginController;
-import org.apache.coyote.controller.RegisterController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 

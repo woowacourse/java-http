@@ -4,7 +4,7 @@ import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 class AbstractControllerTest extends ControllerTestSupport {

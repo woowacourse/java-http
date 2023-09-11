@@ -3,7 +3,7 @@ package org.apache.coyote.controller;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 class RequestMappingTest extends ControllerTestSupport{

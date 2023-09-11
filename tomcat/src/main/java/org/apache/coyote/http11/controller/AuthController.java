@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.apache.coyote.http11.common.HttpHeaderType.SET_COOKIE;
 
@@ -40,11 +39,9 @@ public class AuthController extends AbstractController {
         User user = findUser.get();
         if (user.checkPassword(password.get())) {
             log.info(user.toString());
-            Session session = new Session(UUID.randomUUID().toString());
-            session.setAttribute("user", user);
-            sessionManager.add(session);
+            Session savedSession = sessionManager.add(user);
             response.setHttpStatus(HttpStatus.FOUND).setResponseFileName("/index.html");
-            response.addHeader(SET_COOKIE.getValue(), "JSESSIONID=" + session.getId());
+            response.addHeader(SET_COOKIE.getValue(), "JSESSIONID=" + savedSession.getId());
             return;
         }
         response.setHttpStatus(HttpStatus.UNAUTHORIZED).setResponseFileName("/401.html");

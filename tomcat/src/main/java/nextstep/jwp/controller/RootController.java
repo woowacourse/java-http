@@ -6,7 +6,6 @@ import org.apache.coyote.http11.handler.HttpController;
 import org.apache.coyote.http11.headers.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatusCode;
 
 public class RootController implements HttpController {
 

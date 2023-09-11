@@ -1,9 +1,11 @@
 package cache.com.example.version;
 
-import com.github.jknack.handlebars.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.github.jknack.handlebars.Options;
+
 import pl.allegro.tech.boot.autoconfigure.handlebars.HandlebarsHelper;
 
 @HandlebarsHelper

@@ -10,8 +10,7 @@ public class Request {
 	private final RequestHeader header;
 	private final RequestBody body;
 
-	public Request(final RequestLine requestLine, final RequestHeader header,
-		final RequestBody body) {
+	public Request(final RequestLine requestLine, final RequestHeader header, final RequestBody body) {
 		this.requestLine = requestLine;
 		this.header = header;
 		this.body = body;

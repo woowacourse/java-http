@@ -30,4 +30,8 @@ public class HttpResponseHeader {
         .map(it -> it.getKey() + ": " + it.getValue())
         .collect(Collectors.joining("\r\n"));
   }
+
+  public Map<String, Object> getValues() {
+    return values;
+  }
 }

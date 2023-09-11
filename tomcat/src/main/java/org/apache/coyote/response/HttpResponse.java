@@ -36,4 +36,16 @@ public class HttpResponse {
 
     return String.join("\r\n", responseParts);
   }
+
+  public HttpResponseStatusLine getHttpResponseStatusLine() {
+    return httpResponseStatusLine;
+  }
+
+  public HttpResponseHeader getHttpResponseHeader() {
+    return httpResponseHeader;
+  }
+
+  public ResponseBody getResponseBody() {
+    return responseBody;
+  }
 }

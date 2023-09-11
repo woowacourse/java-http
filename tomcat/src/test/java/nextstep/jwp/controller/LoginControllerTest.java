@@ -57,8 +57,8 @@ class LoginControllerTest {
         // given
         final RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
         final String uuid = UUID.randomUUID().toString();
-        final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), new RequestBody());
         final Session session = new Session(uuid);
+        final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), new RequestBody());
         session.setAttribute("user", new User("gugu", "password", "gugu@naver.com"));
         httpRequest.setSession(session);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
@@ -99,6 +99,9 @@ class LoginControllerTest {
         final RequestLine requestLine = RequestLine.from("POST /login HTTP/1.1");
         final RequestBody requestBody = RequestBody.from("account=hello&password=world");
         final HttpRequest httpRequest = new HttpRequest(requestLine, new Headers(), requestBody);
+        final String uuid = UUID.randomUUID().toString();
+        final Session session = new Session(uuid);
+        httpRequest.setSession(session);
         final HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
         InMemoryUserRepository.save(new User("hello", "world", "email@email.com"));
 

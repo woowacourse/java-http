@@ -13,7 +13,6 @@ public class HttpRequest {
     private final HttpRequestBody httpRequestBody;
     private static final Manager manager = new SessionManager();
 
-
     public HttpRequest(
             HttpRequestHeader httpRequestHeader,
             HttpRequestBody httpRequestBody
@@ -22,12 +21,24 @@ public class HttpRequest {
         this.httpRequestBody = httpRequestBody;
     }
 
-    public HttpRequestHeader getHttpRequestHeader() {
-        return httpRequestHeader;
+    public HttpMethod getMethod() {
+        return httpRequestHeader.getMethod();
     }
 
-    public HttpRequestBody getHttpRequestBody() {
-        return httpRequestBody;
+    public String getPath() {
+        return httpRequestHeader.getPath();
+    }
+
+    public String getFilePath() {
+        return httpRequestHeader.getFilePath();
+    }
+
+    public String getContentType() {
+        return httpRequestHeader.getContentType();
+    }
+
+    public String getBodyAttribute(String key) {
+        return httpRequestBody.get(key);
     }
 
     public HttpSession getHttpSession() {

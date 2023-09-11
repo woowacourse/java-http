@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -110,9 +113,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String mapController(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        HttpMethod method = httpRequestHeader.getMethod();
-        String path = httpRequestHeader.getPath();
+        HttpMethod method = httpRequest.getMethod();
+        String path = httpRequest.getPath();
 
         return controllerMapperByMethod.getOrDefault(method, getMethodControllerMapper)
                 .getOrDefault(path, this::loadExtraPage)
@@ -121,11 +123,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse loadExtraPage(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
+        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequest));
         HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
-        httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
-        httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
+        httpResponse.setAttribute(
+                CONTENT_TYPE.getValue(),
+                httpRequest.getContentType() + ";charset=utf-8"
+        );
+        httpResponse.setAttribute(
+                CONTENT_LENGTH.getValue(),
+                String.valueOf(responseBody.getBytes().length)
+        );
 
         return httpResponse;
     }
@@ -140,29 +147,38 @@ public class Http11Processor implements Runnable, Processor {
             return httpResponse;
         }
 
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequestHeader));
+        String responseBody = readForFilePath(convertAbsoluteUrl(httpRequest));
         HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
-        httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
-        httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
+        httpResponse.setAttribute(
+                CONTENT_TYPE.getValue(),
+                httpRequest.getContentType() + ";charset=utf-8"
+        );
+        httpResponse.setAttribute(
+                CONTENT_LENGTH.getValue(),
+                String.valueOf(responseBody.getBytes().length)
+        );
         return httpResponse;
     }
 
     private HttpResponse loadRootPage(HttpRequest httpRequest) {
-        HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         String responseBody = "Hello world!";
         HttpResponse httpResponse = new HttpResponse(200, "OK", responseBody);
-        httpResponse.setAttribute("Content-Type", httpRequestHeader.getContentType() + ";charset=utf-8");
-        httpResponse.setAttribute("Content-Length", String.valueOf(responseBody.getBytes().length));
+        httpResponse.setAttribute(
+                CONTENT_TYPE.getValue(),
+                httpRequest.getContentType() + ";charset=utf-8"
+        );
+        httpResponse.setAttribute(
+                CONTENT_LENGTH.getValue(),
+                String.valueOf(responseBody.getBytes().length)
+        );
 
         return httpResponse;
     }
 
     private HttpResponse register(HttpRequest httpRequest) {
-        HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-        String email = requestBody.get("email");
+        String account = httpRequest.getBodyAttribute("account");
+        String password = httpRequest.getBodyAttribute("password");
+        String email = httpRequest.getBodyAttribute("email");
         String redirectionUrl = "/index.html";
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
@@ -173,9 +189,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse login(HttpRequest httpRequest) {
-        HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
+        String account = httpRequest.getBodyAttribute("account");
+        String password = httpRequest.getBodyAttribute("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         HttpResponse httpResponse = new HttpResponse(302, "FOUND");
         String redirectionUrl = "/401.html";
@@ -193,9 +208,9 @@ public class Http11Processor implements Runnable, Processor {
         return httpResponse;
     }
 
-    private URL convertAbsoluteUrl(HttpRequestHeader httpRequestHeader) {
+    private URL convertAbsoluteUrl(HttpRequest httpRequest) {
         return getClass().getClassLoader()
-                .getResource("static" + httpRequestHeader.getFilePath());
+                .getResource("static" + httpRequest.getFilePath());
     }
 
     private String readForFilePath(URL path) {

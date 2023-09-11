@@ -23,7 +23,6 @@ public class DefaultController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         RequestUri requestUri = request.getRequestLine().getRequestUri();
 
-
         try {
             FileUtils.readFile(requestUri.getPath());
             response.setContentType(ContentType.from(requestUri.getExtension()));

@@ -10,6 +10,8 @@ public class HttpCookie {
 
     private static final String KEY_VALUE_SEPERATOR = "=";
     private static final String COOKIE_SEPERATOR = "; ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> cookie;
 
@@ -32,8 +34,8 @@ public class HttpCookie {
         for (String cookiePair : cookiePairs) {
             String[] parts = cookiePair.split(KEY_VALUE_SEPERATOR);
             if (parts.length == 2) {
-                String name = parts[0];
-                String value = parts[1];
+                String name = parts[KEY_INDEX];
+                String value = parts[VALUE_INDEX];
                 cookies.put(name, value);
             }
         }

@@ -7,13 +7,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.coyote.common.Headers.CONTENT_LENGTH;
-import static org.apache.coyote.common.Headers.COOKIE;
+import static org.apache.coyote.common.Headers.*;
 
 public class HttpRequestHeader {
 
-    private static final String SEPERATOR = "\r\n";
     private static final String HEADER_SEPERATOR = ": ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
 
@@ -23,14 +23,14 @@ public class HttpRequestHeader {
 
     public static HttpRequestHeader from(String requestHeader) {
         Map<String, String> headers = new LinkedHashMap<>();
-        String[] splitedLines = requestHeader.split(SEPERATOR);
+        String[] splitedLines = requestHeader.split(CRLF);
 
         List<String> splited = Arrays.asList(splitedLines);
         for (String line : splited) {
             String[] parts = line.split(HEADER_SEPERATOR);
             if (parts.length == 2) {
-                String key = parts[0].trim();
-                String value = parts[1].trim();
+                String key = parts[KEY_INDEX].trim();
+                String value = parts[VALUE_INDEX].trim();
                 headers.put(key, value);
             }
         }
@@ -42,7 +42,7 @@ public class HttpRequestHeader {
         try {
             return Integer.parseInt(contentLength);
         } catch (NumberFormatException e) {
-            return 0;
+            return KEY_INDEX;
         }
     }
 

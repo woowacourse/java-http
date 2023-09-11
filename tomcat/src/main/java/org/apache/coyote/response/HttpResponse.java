@@ -32,7 +32,7 @@ public class HttpResponse {
     }
 
     public String getResponse() {
-        return statusLine.getStatusLine() + "\r\n" + headers.getResponseHeader() + "\r\n" + body;
+        return statusLine.getStatusLine() + CRLF + headers.getResponseHeader() + CRLF + body;
     }
 
     public void setContentType(ContentType contentType) {

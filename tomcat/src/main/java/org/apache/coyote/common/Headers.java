@@ -12,4 +12,5 @@ public class Headers {
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String CHARSET_UTF8 = ";charset=utf-8";
     public static final String COOKIE = "Cookie";
+    public static final String CRLF = "\r\n";
 }

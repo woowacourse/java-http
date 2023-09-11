@@ -10,9 +10,11 @@ import java.util.Optional;
 
 public class RegisterController extends AbstractController {
 
+    private static final String MULTIPLE_VALUE_DELIMITER = "&";
+
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        String[] splitRequestBody = request.getBody().split("&");
+        String[] splitRequestBody = request.getBody().split(MULTIPLE_VALUE_DELIMITER);
         Optional<String> account = getValueOf("account", splitRequestBody);
         Optional<String> email = getValueOf("email", splitRequestBody);
         Optional<String> password = getValueOf("password", splitRequestBody);

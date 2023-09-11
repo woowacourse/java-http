@@ -12,6 +12,10 @@ public class HttpCookie {
         this.value = value;
     }
 
+    public static HttpCookie createSessionCookie(String sessionId) {
+        return new HttpCookie(HttpCookie.JSESSIONID, sessionId);
+    }
+
     public String getName() {
         return name;
     }

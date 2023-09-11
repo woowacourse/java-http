@@ -35,7 +35,7 @@ public class LoginServlet extends HttpServlet {
         if (login) {
             final var session = new Session(UUID.randomUUID().toString());
             SessionManager.add(session);
-            httpResponse.addCookie(new HttpCookie(HttpCookie.JSESSIONID, session.getId()));
+            httpResponse.addCookie(HttpCookie.createSessionCookie(session.getId()));
             ResponseWriter.redirect(httpResponse, "/index.html");
             return;
         }

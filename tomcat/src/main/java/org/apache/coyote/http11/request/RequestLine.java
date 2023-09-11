@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class RequestLine {
 
-    private static final String TOKEN_DELIMITER = " ";
+    private static final String REQUEST_LINE_DELIMITER = " ";
 
     private final String httpMethod;
     private final String path;
@@ -17,7 +17,7 @@ public class RequestLine {
     }
 
     public static RequestLine from(String requestLine) {
-        String[] splitStatusLine = Objects.requireNonNull(requestLine.trim()).split(TOKEN_DELIMITER);
+        String[] splitStatusLine = Objects.requireNonNull(requestLine.trim()).split(REQUEST_LINE_DELIMITER);
         String httpMethod = splitStatusLine[0];
         String path = splitStatusLine[1];
         String httpVersion = splitStatusLine[2];

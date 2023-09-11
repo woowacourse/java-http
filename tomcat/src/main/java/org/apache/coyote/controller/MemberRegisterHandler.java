@@ -55,7 +55,7 @@ public class MemberRegisterHandler extends AbstractController {
 
     private Http11Response redirectNotFoundPage() {
         final String resourcePath = RESOURCE_PATH + NOT_FOUND_PAGE;
-        return new Http11Response(classLoader.getResource(resourcePath), 302, HTTP_FOUND);
+        return new Http11Response(classLoader.getResource(resourcePath), 404, "NotFound");
     }
 
     private Http11Response redirectIndexPage() {

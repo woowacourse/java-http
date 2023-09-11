@@ -6,37 +6,18 @@ import java.util.Objects;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Headers;
-import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String REQUEST_API_DELIMITER = " ";
-    private static final int HTTP_METHOD_INDEX = 0;
-    private static final int REQUEST_URI_INDEX = 1;
-    private static final int HTTP_VERSION_INDEX = 2;
-    private static final String QUERY_STRING_SYMBOL = "?";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
-    private static final String DOT = ".";
-    private static final int START_LINE_SIZE = 3;
-
-    private final HttpMethod method;
-    private final String uri;
-    private final String version;
+    private RequestLine requestLine;
     private Headers headers;
     private RequestBody requestBody;
     private QueryString queryString;
 
-    public HttpRequest(BufferedReader bufferedReader) throws IOException {
-        final String requestApi = bufferedReader.readLine();
-        final String[] apiInfo = requestApi.split(REQUEST_API_DELIMITER);
-
-        if (apiInfo.length != START_LINE_SIZE) {
-            throw new IllegalArgumentException("잘못된 http 요청 입니다.");
-        }
-
-        this.method = HttpMethod.valueOf(apiInfo[HTTP_METHOD_INDEX]);
-        this.uri = apiInfo[REQUEST_URI_INDEX];
-        this.version = apiInfo[HTTP_VERSION_INDEX];
+    public HttpRequest(final BufferedReader bufferedReader) throws IOException {
+        requestLine = RequestLine.from(bufferedReader);
         initHeaders(bufferedReader);
         initRequestBody(bufferedReader);
         initQueryString();
@@ -47,45 +28,36 @@ public class HttpRequest {
     }
 
     private void initRequestBody(final BufferedReader bufferedReader) throws IOException {
-        if (headers.containsHeader("Content-Length")) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        if (headers.containsHeader(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
             requestBody = RequestBody.of(bufferedReader, contentLength);
         }
     }
 
     private void initQueryString() {
-        if (hasQueryString()) {
-            this.queryString = QueryString.of(uri);
+        if (requestLine.hasQueryString()) {
+            this.queryString = QueryString.of(requestLine.getUri());
         }
     }
 
-    public boolean hasQueryString() {
-        return uri.contains(QUERY_STRING_SYMBOL);
-    }
-
-    public String getUri() {
-        if (hasQueryString()) {
-            final int queryIndex = uri.indexOf(QUERY_STRING_SYMBOL);
-            return uri.substring(0, queryIndex);
-        }
-        return uri;
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public boolean isStaticRequest() {
-        return uri.contains(DOT) || uri.equals("/");
+        return requestLine.isStaticRequest();
     }
 
     public String getExtension() {
-        final int dotIndex = uri.indexOf(DOT);
-        return uri.substring(dotIndex + 1);
+        return requestLine.getExtension();
     }
 
     public QueryString getQueryString() {
         return queryString;
     }
 
-    public boolean isGetRequest() {
-        return method.isGet();
+    public boolean isGetMethod() {
+        return requestLine.isGetMethod();
     }
 
     public boolean hasRequestBody() {

@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-import static org.apache.coyote.http11.response.HttpStatusCode.NOT_FOUND;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -45,13 +43,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final Controller controller = requestMapping.getController(httpRequest);
             final HttpResponse httpResponse = HttpResponse.init();
-            try {
-                controller.service(httpRequest, httpResponse);
-            } catch (final Exception e) {
-                httpResponse.setStatusCode(NOT_FOUND);
-                httpResponse.setBody(e.getMessage());
-            }
 
+            controller.service(httpRequest, httpResponse);
             outputStream.write(httpResponse.stringify().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

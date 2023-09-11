@@ -12,6 +12,7 @@ public class HeaderValue {
     private static final String MULTIPLE_VALUE_DELIMITER = ",";
     private static final String VALUE_OPTION_DELIMITER = ";";
     private static final String NO_OPTION = "";
+    private static final int SINGLE_DELIMITER_COUNT = 1;
 
     private final List<String> values;
     private final String option;
@@ -21,22 +22,23 @@ public class HeaderValue {
         this.option = option;
     }
 
+    public static HeaderValue empty() {
+        return new HeaderValue(Collections.emptyList(), NO_OPTION);
+    }
+
     public static HeaderValue from(String value) {
-        int delimiterCount = StringUtils.countMatches(value, VALUE_OPTION_DELIMITER);
-        if (delimiterCount == 1) {
+        if (hasSingleDelimiter(value)) {
             int optionIndex = value.indexOf(VALUE_OPTION_DELIMITER);
             List<String> values = separateValuesAndTrim(value.substring(0, optionIndex));
             String valueOption = value.substring(optionIndex + 1);
             return new HeaderValue(values, valueOption);
         }
-        if (delimiterCount > 1) {
-            value = value.replace(VALUE_OPTION_DELIMITER, MULTIPLE_VALUE_DELIMITER);
-        }
+        value = value.replace(VALUE_OPTION_DELIMITER, MULTIPLE_VALUE_DELIMITER);
         return new HeaderValue(separateValuesAndTrim(value), NO_OPTION);
     }
 
-    public static HeaderValue empty() {
-        return new HeaderValue(Collections.emptyList(), NO_OPTION);
+    private static boolean hasSingleDelimiter(String value) {
+        return StringUtils.countMatches(value, VALUE_OPTION_DELIMITER) == SINGLE_DELIMITER_COUNT;
     }
 
     private static List<String> separateValuesAndTrim(String value) {
@@ -48,10 +50,6 @@ public class HeaderValue {
 
     public List<String> getValues() {
         return values;
-    }
-
-    public String getOption() {
-        return option;
     }
 
     public String format() {

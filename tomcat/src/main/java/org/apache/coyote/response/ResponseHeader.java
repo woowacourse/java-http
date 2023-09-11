@@ -24,7 +24,7 @@ public class ResponseHeader {
 	}
 
 	public void addContentType(final MimeType mimeType) {
-		headers.put(HeaderType.CONTENT_LENGTH, mimeType.getValue());
+		headers.put(HeaderType.CONTENT_TYPE, mimeType.getValue());
 	}
 
 	public void addContentLength(final String responseBody) {

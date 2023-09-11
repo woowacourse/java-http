@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final ControllerAdapter controllerAdapter = new ControllerAdapter();
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
 
     private final Socket connection;
 
@@ -37,20 +37,15 @@ public class Http11Processor implements Runnable, Processor {
                      new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             final HttpRequest request = new HttpRequest(bufferedReader);
-            final Controller controller = controllerAdapter.findController(request);
-            final HttpResponse httpResponse = getResponse(request, controller);
-            outputStream.write(httpResponse.toBytes());
+            final Controller controller = REQUEST_MAPPING.getController(request);
+            final HttpResponse response = new HttpResponse();
+            controller.service(request, response);
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private HttpResponse getResponse(final HttpRequest request, final Controller controller) {
-        try {
-            return controller.handle(request);
-        } catch (IllegalArgumentException e) {
-            return HttpResponse.toNotFound();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 }

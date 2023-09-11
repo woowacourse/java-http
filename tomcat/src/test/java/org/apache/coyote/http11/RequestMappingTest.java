@@ -13,13 +13,13 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ControllerAdapterTest {
+class RequestMappingTest {
 
     @DisplayName("Request에 해당하는 컨트롤러를 찾아온다.")
     @Test
     void findController() throws IOException {
         //given
-        final ControllerAdapter controllerAdapter = new ControllerAdapter();
+        final RequestMapping requestMapping = new RequestMapping();
 
         //when
         final String index = "GET /index.html HTTP/1.1";
@@ -35,13 +35,13 @@ class ControllerAdapterTest {
         //then
         SoftAssertions.assertSoftly(
                 soft -> {
-                    soft.assertThat(controllerAdapter.findController(indexRequest)).isInstanceOf(
+                    soft.assertThat(requestMapping.getController(indexRequest)).isInstanceOf(
                             StaticController.class);
-                    soft.assertThat(controllerAdapter.findController(loginRequest)).isInstanceOf(
+                    soft.assertThat(requestMapping.getController(loginRequest)).isInstanceOf(
                             LoginController.class);
-                    soft.assertThat(controllerAdapter.findController(registerRequest)).isInstanceOf(
+                    soft.assertThat(requestMapping.getController(registerRequest)).isInstanceOf(
                             RegisterController.class);
-                    soft.assertThat(controllerAdapter.findController(errorRequest)).isInstanceOf(
+                    soft.assertThat(requestMapping.getController(errorRequest)).isInstanceOf(
                             ErrorController.class);
                 }
         );

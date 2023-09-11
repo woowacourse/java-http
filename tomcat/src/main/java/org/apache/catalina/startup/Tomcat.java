@@ -1,5 +1,7 @@
 package org.apache.catalina.startup;
 
+import common.http.Controller;
+import common.http.ControllerManager;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +12,18 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
+    private final ControllerManager controllerManager;
+
+    public Tomcat() {
+        this.controllerManager = new DynamicControllerManager();
+    }
+
+    public void addController(String path, Controller controller) {
+        controllerManager.add(path, controller);
+    }
+
     public void start() {
-        var connector = new Connector();
+        Connector connector = new Connector(controllerManager);
         connector.start();
 
         try {

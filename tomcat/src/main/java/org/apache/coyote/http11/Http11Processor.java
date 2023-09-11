@@ -1,25 +1,29 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import common.http.ControllerManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.session.SessionManager;
+import org.apache.coyote.http11.controller.StaticControllerManager;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
-    public Http11Processor(Socket connection) {
+    private ControllerManager controllerManager;
+
+    public Http11Processor(Socket connection, ControllerManager controllerManager) {
         this.connection = connection;
+        this.controllerManager = controllerManager;
     }
 
     @Override
@@ -34,13 +38,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequestParser requestParser = HttpRequestParser.from(reader);
+            HttpRequest httpRequest = HttpRequestParser.parse(reader);
+            HttpResponse httpResponse = new HttpResponse();
 
-            String response = HttpResponseMaker.makeFrom(requestParser, sessionManager);
+            controllerManager.service(httpRequest, httpResponse);
 
-            outputStream.write(response.getBytes());
+            if (httpRequest.hasStaticResourcePath() || httpResponse.hasStaticResourcePath()) {
+                controllerManager = new StaticControllerManager();
+                controllerManager.service(httpRequest, httpResponse);
+            }
+
+            outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

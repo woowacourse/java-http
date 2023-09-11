@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package common.http;
 
 public enum HttpMethod {
     GET,

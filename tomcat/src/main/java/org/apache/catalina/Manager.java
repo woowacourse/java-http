@@ -1,4 +1,6 @@
-package org.apache.coyote.http11.session;
+package org.apache.catalina;
+
+import common.http.Session;
 
 import java.io.IOException;
 

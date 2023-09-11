@@ -1,5 +1,6 @@
 package org.apache.catalina.connector;
 
+import common.http.ControllerManager;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connector implements Runnable {
 
@@ -15,17 +18,23 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
+    private final ControllerManager controllerManager;
+    private final ExecutorService executorService;
+
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(ControllerManager controllerManager) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllerManager, DEFAULT_THREAD_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, ControllerManager controllerManager, final int maxThreads) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.controllerManager = controllerManager;
+        this.executorService = Executors.newFixedThreadPool(maxThreads);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -39,7 +48,7 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
+        Thread thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -66,8 +75,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
-        new Thread(processor).start();
+        Runnable processor = new Http11Processor(connection, controllerManager);
+        executorService.execute(processor);
     }
 
     public void stop() {
@@ -80,8 +89,8 @@ public class Connector implements Runnable {
     }
 
     private int checkPort(final int port) {
-        final var MIN_PORT = 1;
-        final var MAX_PORT = 65535;
+        final int MIN_PORT = 1;
+        final int MAX_PORT = 65535;
 
         if (port < MIN_PORT || MAX_PORT < port) {
             return DEFAULT_PORT;

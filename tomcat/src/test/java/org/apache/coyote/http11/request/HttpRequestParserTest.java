@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
+import common.http.HttpMethod;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,8 @@ class HttpRequestParserTest {
     @Test
     void HTTP_요청을_파싱한다() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+        final String request = String.join("\r\n",
+                "POST /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 80",
@@ -27,34 +28,18 @@ class HttpRequestParserTest {
                 "",
                 "account=gugu&password=password&email=hkkang%40woowahan.com");
 
-        BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+        BufferedReader reader = new BufferedReader(new StringReader(request));
 
         // when
-        HttpRequestParser requestParser = HttpRequestParser.from(reader);
+        HttpRequest parsed = HttpRequestParser.parse(reader);
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(requestParser)
-                    .isNotNull();
-
-            softly.assertThat(requestParser.getHttpRequestFirstLineInfo())
-                    .isNotNull()
-                    .extracting("httpMethod", "uri", "versionOfTheProtocol")
-                    .containsExactly(HttpMethod.GET, "/index.html", "HTTP/1.1");
-
-            softly.assertThat(requestParser.getHeaders())
-                    .isNotNull()
-                    .hasSize(4)
-                    .containsEntry("Host", "localhost:8080 ")
-                    .containsEntry("Connection", "keep-alive ")
-                    .containsEntry("Content-Length", "80")
-                    .containsEntry("Content-Type", "application/x-www-form-urlencoded");
-
-            softly.assertThat(requestParser.getBody())
-                    .isNotNull()
-                    .hasSize(3)
-                    .containsEntry("account", "gugu")
-                    .containsEntry("password", "password");
+            softly.assertThat(parsed).isNotNull();
+            softly.assertThat(parsed.getHttpMethod()).isEqualTo(HttpMethod.POST);
+            softly.assertThat(parsed.getVersionOfTheProtocol()).isEqualTo("HTTP/1.1");
+            softly.assertThat(parsed.getAccount()).isEqualTo("gugu");
+            softly.assertThat(parsed.getPassword()).isEqualTo("password");
         });
 
         reader.close();
@@ -68,7 +53,7 @@ class HttpRequestParserTest {
         BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
 
         // expect
-        assertThatThrownBy(() -> HttpRequestParser.from(reader))
+        assertThatThrownBy(() -> HttpRequestParser.parse(reader))
                 .isInstanceOf(IOException.class)
                 .hasMessage("요청에 Reqeust-line이 없습니다.");
 
@@ -90,7 +75,7 @@ class HttpRequestParserTest {
         BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
 
         // expect
-        assertThatThrownBy(() -> HttpRequestParser.from(reader))
+        assertThatThrownBy(() -> HttpRequestParser.parse(reader))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("요청의 바디가 잘못되었습니다.");
 

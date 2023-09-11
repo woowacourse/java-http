@@ -32,7 +32,11 @@ public class LoginHandler extends AbstractHandler {
             HttpResponse httpResponse
     ) {
         HttpSession httpSession = httpRequest.getHttpSession();
-        User user = (User) httpSession.get("user");
+        User user = null;
+
+        if (!Objects.isNull(httpSession)) {
+            user = (User) httpSession.get("user");
+        }
 
         if (!Objects.isNull(user)) {
             httpResponse.setStatus(HttpStatus.FOUND);

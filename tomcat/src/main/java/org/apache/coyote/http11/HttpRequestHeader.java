@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,20 +9,20 @@ public class HttpRequestHeader {
     private final String path;
     private final Map<String, String> extraContents;
     private final Map<String, String> queryStrings;
-    private final Map<String, String> cookies;
+    private final Cookie cookie;
 
     private HttpRequestHeader(
             HttpMethod method,
             String path,
             Map<String, String> extraContents,
             Map<String, String> queryStrings,
-            Map<String, String> cookies
+            Cookie cookie
     ) {
         this.method = method;
         this.path = path;
         this.extraContents = extraContents;
         this.queryStrings = queryStrings;
-        this.cookies = cookies;
+        this.cookie = cookie;
     }
 
     public static HttpRequestHeader of(String method, String path, String[] extraContents) {
@@ -88,26 +87,16 @@ public class HttpRequestHeader {
         return parseResultOfQueryStrings;
     }
 
-    private static Map<String, String> parseCookies(String cookies) {
-        if (cookies == null) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> parseResultOfCookies = new HashMap<>();
-
-        for (String cookie : cookies.split(";")) {
-            putParseResultOfComponent(parseResultOfCookies, cookie, "=");
-        }
-
-        return parseResultOfCookies;
+    private static Cookie parseCookies(String cookies) {
+        return Cookie.from(cookies);
     }
 
     public String get(String key) {
         return extraContents.getOrDefault(key, "");
     }
 
-    public Map<String, String> getCookies() {
-        return cookies;
+    public Cookie getCookies() {
+        return cookie;
     }
 
     public String getQueryString(String key) {

@@ -39,7 +39,7 @@ public class HttpRequest {
 
     public HttpSession getHttpSession(boolean create) {
         String jsessionId = httpRequestHeader.getCookies()
-                .getOrDefault("JSESSIONID", "");
+                .get("JSESSIONID");
 
         HttpSession session = null;
 
@@ -49,7 +49,7 @@ public class HttpRequest {
             // ignored
         }
 
-        if (Objects.isNull(session)) {
+        if (create && Objects.isNull(session)) {
             String uuid = UUID.randomUUID()
                     .toString();
             session = new HttpSession(uuid);

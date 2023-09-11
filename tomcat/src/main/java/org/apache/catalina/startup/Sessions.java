@@ -24,11 +24,11 @@ public class Sessions {
         idAndSessions.remove(id);
     }
 
-    public void clear() {
+    void clear() {
         idAndSessions.clear();
     }
 
-    public boolean has(Session session) {
+    boolean has(Session session) {
         return idAndSessions.containsValue(session);
     }
 }

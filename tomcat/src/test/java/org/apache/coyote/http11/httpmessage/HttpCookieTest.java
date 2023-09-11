@@ -14,7 +14,7 @@ class HttpCookieTest {
         final HttpCookie cookie = HttpCookie.from("JSESSIONID=ako");
 
         // when
-        final String result = cookie.getAuthorizedCookie();
+        final String result = cookie.getAuthCookie();
 
         // then
         assertThat(result).isEqualTo("ako");

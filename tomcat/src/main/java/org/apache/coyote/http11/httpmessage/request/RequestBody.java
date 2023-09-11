@@ -13,7 +13,7 @@ public class RequestBody {
 
     private final Map<String, String> body;
 
-    private RequestBody(final Map<String, String> body) {
+    public RequestBody(final Map<String, String> body) {
         this.body = body;
     }
 

@@ -12,7 +12,7 @@ public class QueryString {
 
     private final Map<String, String> queryStrings;
 
-    private QueryString(final Map<String, String> queryStrings) {
+    public QueryString(final Map<String, String> queryStrings) {
         this.queryStrings = queryStrings;
     }
 

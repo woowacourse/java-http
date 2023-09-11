@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
-import nextstep.jwp.exception.BadRequestException;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 public enum HttpVersion {
     V1_0("HTTP/1.0"),

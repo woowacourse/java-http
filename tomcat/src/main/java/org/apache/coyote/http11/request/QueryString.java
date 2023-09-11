@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.exception.BadRequestException;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 public class QueryString {
 

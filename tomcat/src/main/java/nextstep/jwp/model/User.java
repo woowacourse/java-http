@@ -1,6 +1,6 @@
 package nextstep.jwp.model;
 
-import nextstep.jwp.exception.BadRequestException;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 public class User {
 

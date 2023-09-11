@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.exception.InvalidRequestMethodException;
-import nextstep.jwp.exception.NotFoundException;
 import org.apache.catalina.AbstractController;
 import org.apache.coyote.http11.common.ContentType;
+import org.apache.coyote.http11.exception.InvalidRequestMethodException;
+import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

@@ -4,11 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.exception.BadRequestException;
 import org.apache.coyote.http11.common.HeaderType;
 import org.apache.coyote.http11.common.HttpBody;
 import org.apache.coyote.http11.common.HttpUri;
 import org.apache.coyote.http11.common.HttpVersion;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 public class HttpRequestParser {
 

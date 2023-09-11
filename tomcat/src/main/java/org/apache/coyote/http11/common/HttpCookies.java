@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.exception.BadRequestException;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 public class HttpCookies {
 

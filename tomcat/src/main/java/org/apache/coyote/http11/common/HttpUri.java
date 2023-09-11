@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.common;
 
-import nextstep.jwp.exception.BadRequestException;
+import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.request.QueryString;
 
 public class HttpUri {

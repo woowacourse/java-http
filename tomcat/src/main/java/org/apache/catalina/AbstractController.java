@@ -2,9 +2,9 @@ package org.apache.catalina;
 
 import java.io.IOException;
 import nextstep.jwp.exception.ExceptionHandler;
-import nextstep.jwp.exception.HttpGlobalException;
-import nextstep.jwp.exception.InvalidRequestMethodException;
 import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.exception.HttpGlobalException;
+import org.apache.coyote.http11.exception.InvalidRequestMethodException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;

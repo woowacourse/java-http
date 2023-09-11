@@ -3,9 +3,9 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.exception.BadRequestException;
 import org.apache.coyote.http11.common.Cookie;
 import org.apache.coyote.http11.common.HttpCookies;
+import org.apache.coyote.http11.exception.BadRequestException;
 
 public class HttpRequestHeaders {
 
@@ -35,7 +35,7 @@ public class HttpRequestHeaders {
                 .filter(line -> line.length == 2)
                 .collect(Collectors.toMap(line -> line[KEY_INDEX], line -> line[VALUE_INDEX]));
     }
-    
+
     private static HttpCookies createCookieHeader(List<String> lines) {
         if (hasCookie(lines)) {
             String cookieLine = lines.stream()

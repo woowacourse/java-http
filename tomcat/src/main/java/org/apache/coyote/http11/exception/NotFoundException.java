@@ -1,4 +1,4 @@
-package nextstep.jwp.exception;
+package org.apache.coyote.http11.exception;
 
 import org.apache.coyote.http11.common.HttpStatus;
 

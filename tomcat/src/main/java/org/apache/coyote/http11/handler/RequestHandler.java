@@ -23,6 +23,9 @@ public class RequestHandler {
     mappers.add(new StaticFileHandlerMapper());
   }
 
+  private RequestHandler() {
+  }
+
   private static HttpResponse responseHelloWorld() {
     final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
     final HttpHeader header = new HttpHeader();
@@ -31,7 +34,7 @@ public class RequestHandler {
     return new HttpResponse(responseLine, header, "Hello world!");
   }
 
-  public HttpResponse handle(final HttpRequest request) throws Exception {
+  public static HttpResponse handle(final HttpRequest request) throws Exception {
     for (final HandlerMapper mapper : mappers) {
       if (mapper.isSupport(request)) {
         return mapper.handle(request);

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,17 +9,16 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import org.apache.catalina.session.Session;
+import java.util.ArrayList;
+import java.util.List;
 
-public class HttpUtils {
+public class IOUtils {
+
 
   private static final String PREFIX_STATIC_PATH = "static";
   private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
 
-  private HttpUtils() {
+  private IOUtils() {
   }
 
   public static String readContentsFromFile(final String url) throws IOException {
@@ -41,24 +40,25 @@ public class HttpUtils {
     return new BufferedReader(reader);
   }
 
-  public static String getContentType(final String accept) {
-    if (accept == null) {
-      return "text/html";
+  public static List<String> readWhileEmptyLine(final BufferedReader br) throws IOException {
+    final List<String> lines = new ArrayList<>();
+    String line;
+    while (!(line = br.readLine()).isEmpty()) {
+      lines.add(line);
     }
-    return accept.split(",")[0];
+    return lines;
   }
 
-  public static Map<String, String> parseParam(final String queryString) {
-    final Map<String, String> params = new HashMap<>();
-    for (final String query : URLDecoder.decode(queryString, StandardCharsets.UTF_8).split("&")) {
-      final String[] tokens = query.split("=", 2);
-      params.put(tokens[0], tokens[1]);
+  public static String readAsContentLength(
+      final BufferedReader br,
+      final String contentLength
+  ) throws IOException {
+    if (contentLength == null) {
+      return "";
     }
-    return params;
-  }
-
-  public static Session generateSession() {
-    final String uuid = UUID.randomUUID().toString();
-    return new Session(uuid);
+    final int length = Integer.parseInt(contentLength);
+    final char[] buffer = new char[length];
+    br.read(buffer);
+    return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
   }
 }

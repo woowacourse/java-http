@@ -1,14 +1,12 @@
 package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.http11.header.HeaderType.CONTENT_LENGTH;
+import static org.apache.coyote.http11.utils.IOUtils.readAsContentLength;
+import static org.apache.coyote.http11.utils.IOUtils.readWhileEmptyLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.header.HeaderType;
@@ -32,30 +30,8 @@ public class HttpRequest {
   public static HttpRequest from(final BufferedReader br) throws IOException {
     final RequestLine requestLine = RequestLine.from(br.readLine());
     final HttpHeader header = HttpHeader.from(readWhileEmptyLine(br));
-    final String body = readBody(br, header.getHeader(CONTENT_LENGTH));
+    final String body = readAsContentLength(br, header.getHeader(CONTENT_LENGTH));
     return new HttpRequest(requestLine, header, body);
-  }
-
-  private static String readBody(
-      final BufferedReader br,
-      final String contentLength
-  ) throws IOException {
-    if (contentLength == null) {
-      return "";
-    }
-    final int length = Integer.parseInt(contentLength);
-    final char[] buffer = new char[length];
-    br.read(buffer);
-    return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
-  }
-
-  private static List<String> readWhileEmptyLine(final BufferedReader br) throws IOException {
-    final List<String> lines = new ArrayList<>();
-    String line;
-    while (!(line = br.readLine()).isEmpty()) {
-      lines.add(line);
-    }
-    return lines;
   }
 
   public String getUrl() {

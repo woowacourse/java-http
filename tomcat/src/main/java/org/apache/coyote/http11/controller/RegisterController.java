@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.HttpUtils.parseParam;
+import static org.apache.coyote.http11.ParseUtils.parseParam;
 
 import java.io.IOException;
 import java.util.Map;

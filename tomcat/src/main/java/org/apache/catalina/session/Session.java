@@ -1,6 +1,7 @@
 package org.apache.catalina.session;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
@@ -10,6 +11,10 @@ public class Session {
 
   public Session(final String id) {
     this.id = id;
+  }
+
+  public static Session generateSession() {
+    return new Session(UUID.randomUUID().toString());
   }
 
   public String getId() {

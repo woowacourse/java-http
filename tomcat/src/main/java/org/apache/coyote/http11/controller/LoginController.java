@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.controller;
 
-import static org.apache.coyote.http11.HttpUtils.generateSession;
-import static org.apache.coyote.http11.HttpUtils.parseParam;
+import static org.apache.coyote.http11.ParseUtils.parseParam;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class LoginController extends AbstractController {
 
     final Optional<User> user = InMemoryUserRepository.findByAccount(account);
     if (user.isPresent() && user.get().checkPassword(password)) {
-      final Session session = generateSession();
+      final Session session = Session.generateSession();
       request.addSession(session);
 
       final HttpHeader header = new HttpHeader();

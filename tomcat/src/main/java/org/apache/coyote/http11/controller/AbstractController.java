@@ -2,8 +2,10 @@ package org.apache.coyote.http11.controller;
 
 import static org.apache.coyote.http11.HttpUtils.getContentType;
 import static org.apache.coyote.http11.HttpUtils.readContentsFromFile;
+import static org.apache.coyote.http11.header.HeaderType.ACCEPT;
 
 import java.io.IOException;
+import org.apache.coyote.http11.header.HeaderType;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.requestline.HttpMethod;
@@ -35,11 +37,11 @@ public abstract class AbstractController implements Controller {
   protected HttpResponse responseStaticFile(final HttpRequest request, final String path)
       throws IOException {
     final String body = readContentsFromFile(path);
-    final String contentType = getContentType(request.getHeader("Accept"));
+    final String contentType = getContentType(request.getHeader(ACCEPT));
     final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
     final HttpHeader header = new HttpHeader();
-    header.setHeader("Content-Type", contentType + ";charset=utf-8");
-    header.setHeader("Content-Length", body.getBytes().length + "");
+    header.setHeader(HeaderType.CONTENT_TYPE, contentType + ";charset=utf-8");
+    header.setHeader(HeaderType.CONTENT_LENGTH, body.getBytes().length + "");
     return new HttpResponse(responseLine, header, body);
   }
 

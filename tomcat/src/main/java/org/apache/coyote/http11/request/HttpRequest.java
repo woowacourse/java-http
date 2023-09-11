@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.header.HeaderType.CONTENT_LENGTH;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -9,13 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.http11.header.HeaderType;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.requestline.HttpMethod;
 import org.apache.coyote.http11.requestline.RequestLine;
 
 public class HttpRequest {
-
-  private static final String CONTENT_LENGTH = "Content-Length";
 
   private final SessionManager sessionManager = new SessionManager();
   private final RequestLine requestLine;
@@ -65,7 +66,7 @@ public class HttpRequest {
     return this.requestLine.getParam(key);
   }
 
-  public String getHeader(final String key) {
+  public String getHeader(final HeaderType key) {
     return this.header.getHeader(key);
   }
 

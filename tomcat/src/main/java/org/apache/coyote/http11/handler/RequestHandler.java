@@ -6,6 +6,7 @@ import org.apache.coyote.http11.handler.mapper.HandlerMapper;
 import org.apache.coyote.http11.handler.mapper.LoginHandlerMapper;
 import org.apache.coyote.http11.handler.mapper.RegisterHandlerMapper;
 import org.apache.coyote.http11.handler.mapper.StaticFileHandlerMapper;
+import org.apache.coyote.http11.header.HeaderType;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -25,8 +26,8 @@ public class RequestHandler {
   private static HttpResponse responseHelloWorld() {
     final ResponseLine responseLine = new ResponseLine(HttpStatus.OK);
     final HttpHeader header = new HttpHeader();
-    header.setHeader("Content-Length", "12");
-    header.setHeader("Content-Type", "text/html;charset=utf-8");
+    header.setHeader(HeaderType.CONTENT_LENGTH, "12");
+    header.setHeader(HeaderType.CONTENT_TYPE, "text/html;charset=utf-8");
     return new HttpResponse(responseLine, header, "Hello world!");
   }
 

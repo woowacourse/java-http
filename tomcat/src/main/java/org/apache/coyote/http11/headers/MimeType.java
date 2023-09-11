@@ -12,9 +12,9 @@ public enum MimeType {
 		this.value = value;
 	}
 
-	public static MimeType parseEndpoint(final String requestEndPoint) {
-		int index = requestEndPoint.indexOf(".");
-		final String fileExtension = requestEndPoint.substring(index + 1);
+	public static MimeType parsePath(final String path) {
+		int index = path.indexOf(".");
+		final String fileExtension = path.substring(index + 1);
 		return MimeType.valueOf(fileExtension.toUpperCase());
 	}
 

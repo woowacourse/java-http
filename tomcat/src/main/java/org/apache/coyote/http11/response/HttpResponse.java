@@ -8,7 +8,6 @@ import org.apache.coyote.http11.headers.HttpHeaders;
 import org.apache.coyote.http11.headers.MimeType;
 
 public class HttpResponse {
-
 	private HttpStatusCode statusCode;
 	private String body;
 	private final HttpHeaders headers;

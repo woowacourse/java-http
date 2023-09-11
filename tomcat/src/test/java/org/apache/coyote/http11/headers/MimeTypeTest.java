@@ -12,7 +12,7 @@ class MimeTypeTest {
 	void parseEndpointTest() {
 		final String endPoint = "index.html";
 
-		final MimeType actual = MimeType.parseEndpoint(endPoint);
+		final MimeType actual = MimeType.parsePath(endPoint);
 
 		assertThat(actual)
 			.isEqualTo(MimeType.HTML);

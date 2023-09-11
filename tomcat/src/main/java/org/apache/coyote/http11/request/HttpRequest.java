@@ -17,8 +17,8 @@ public class HttpRequest {
 		this.body = body;
 	}
 
-	public boolean equalPath(final String endPoint) {
-		return requestLine.equalPath(endPoint);
+	public boolean equalPath(final String path) {
+		return requestLine.equalPath(path);
 	}
 
 	public QueryParam getQueryParam() {

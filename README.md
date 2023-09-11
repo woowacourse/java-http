@@ -11,7 +11,7 @@
         - [x] uri
         - [x] httpMethod
     - [x] body
-    - [x] endPoint
+    - [x] path
     - [x] headers
 - [x] http 응답 구현하기(리팩터링)
     - [x] redirect 응답을 생성하기

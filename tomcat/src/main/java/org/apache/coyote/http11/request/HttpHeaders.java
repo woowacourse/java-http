@@ -37,12 +37,12 @@ public class HttpHeaders {
         headers.put(key, HeaderValue.from(value));
     }
 
-    public List<String> get(String key) {
+    public List<String> header(String key) {
         return headers.getOrDefault(key, HeaderValue.empty()).getValues();
     }
 
     public int contentLength() {
-        List<String> contentLength = get("Content-Length");
+        List<String> contentLength = headers.getOrDefault("Content-Length", HeaderValue.empty()).getValues();
         if (contentLength.isEmpty()) {
             return 0;
         }
@@ -50,7 +50,7 @@ public class HttpHeaders {
     }
 
     public Optional<String> sessionId() {
-        List<String> cookies = get("Cookie");
+        List<String> cookies = headers.getOrDefault("Cookie", HeaderValue.empty()).getValues();
         return cookies.stream()
                       .filter(cookie -> cookie.startsWith("JSESSIONID="))
                       .map(jsessionid -> jsessionid.substring(jsessionid.indexOf('=') + 1))

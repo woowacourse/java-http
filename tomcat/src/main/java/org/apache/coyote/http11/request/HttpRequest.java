@@ -24,7 +24,7 @@ public class HttpRequest {
     }
 
     public String getContentTypeByAcceptHeader() {
-        List<String> acceptHeaderValues = httpHeaders.get("Accept");
+        List<String> acceptHeaderValues = httpHeaders.header("Accept");
         if (acceptHeaderValues != null && acceptHeaderValues.contains(MediaType.TEXT_CSS.getValue())) {
             return ContentType.of(MediaType.TEXT_CSS, Charset.UTF_8).format();
         }

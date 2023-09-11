@@ -57,7 +57,7 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
+        final var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -74,7 +74,7 @@ public class Connector implements Runnable {
     private void connect() {
         try {
             process(serverSocket.accept());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -92,7 +92,7 @@ public class Connector implements Runnable {
         try {
             serverSocket.close();
             executorService.shutdown();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
     }

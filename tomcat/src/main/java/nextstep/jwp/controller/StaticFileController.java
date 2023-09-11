@@ -8,13 +8,13 @@ import org.apache.coyote.http11.message.response.Response;
 public class StaticFileController extends AbstractController {
 
     @Override
-    protected void doPost(Request request, Response response) throws Exception {
+    protected void doPost(final Request request, final Response response) throws Exception {
         throw new UnsupportedRequestException();
     }
 
     @Override
-    protected void doGet(Request request, Response response) throws Exception {
-        Response createdResponse = Response.createByTemplate(request.getRequestLine().getRequestURI());
+    protected void doGet(final Request request, final Response response) throws Exception {
+        final Response createdResponse = Response.createByTemplate(request.getRequestURI());
         response.setBy(createdResponse);
     }
 }

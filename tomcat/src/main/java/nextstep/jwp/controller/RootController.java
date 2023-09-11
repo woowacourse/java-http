@@ -13,13 +13,13 @@ public class RootController extends AbstractController {
     private static final String ROOT_MESSAGE = "Hello world!";
 
     @Override
-    protected void doPost(Request request, Response response) throws Exception {
+    protected void doPost(final Request request, final Response response) throws Exception {
         throw new UnsupportedRequestException();
     }
 
     @Override
-    protected void doGet(Request request, Response response) throws Exception {
-        Response createdResponse = Response.createByResponseBody(HttpStatus.OK,
+    protected void doGet(final Request request, final Response response) throws Exception {
+        final Response createdResponse = Response.createByResponseBody(HttpStatus.OK,
                 new ResponseBody(ROOT_MESSAGE, ContentType.HTML));
         response.setBy(createdResponse);
     }

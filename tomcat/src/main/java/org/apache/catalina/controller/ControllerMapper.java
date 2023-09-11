@@ -13,11 +13,11 @@ public class ControllerMapper {
     public ControllerMapper() {
     }
 
-    public void addController(ControllerStatus controllerStatus, Controller controller) {
+    public void addController(final ControllerStatus controllerStatus, final Controller controller) {
         handlers.put(controllerStatus, controller);
     }
 
-    public Controller findHandler(RequestLine requestLine) {
+    public Controller findHandler(final RequestLine requestLine) {
         return handlers.getOrDefault(ControllerStatus.from(requestLine), DEFAULT_CONTROLLER);
     }
 }

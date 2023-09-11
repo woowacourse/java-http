@@ -60,6 +60,10 @@ public class Request {
         return requestLine.getHttpMethod().equals(httpMethod);
     }
 
+    public RequestURI getRequestURI() {
+        return requestLine.getRequestURI();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

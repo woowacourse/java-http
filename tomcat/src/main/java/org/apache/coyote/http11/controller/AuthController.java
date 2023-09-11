@@ -56,8 +56,8 @@ public class AuthController extends AbstractController {
         }
         Session session = sessionManager.findSession(sessionId.get());
         User user = (User) session.getAttribute("user");
-        if (InMemoryUserRepository.existsByAccount(user.getAccount())) {
-            response.setHttpStatus(HttpStatus.NOT_FOUND).setResponseFileName("/index.html");
+        if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
+            response.setHttpStatus(HttpStatus.FOUND).setResponseFileName("/index.html");
             return;
         }
         response.setHttpStatus(HttpStatus.OK).setResponseFileName("/login.html");

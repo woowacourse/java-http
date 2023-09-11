@@ -20,7 +20,7 @@ public class SessionManager implements Manager, LifeCycle {
 
     @Override
     public Session findSession(String id) {
-        return sessions.find(id);
+        return sessions.has(id);
     }
 
     @Override
@@ -46,5 +46,9 @@ public class SessionManager implements Manager, LifeCycle {
     @Override
     public boolean isStarted() {
         return isStarted;
+    }
+
+    public boolean hasSession(Session session) {
+        return sessions.has(session);
     }
 }

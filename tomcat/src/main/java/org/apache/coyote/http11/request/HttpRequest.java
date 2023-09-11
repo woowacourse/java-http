@@ -1,11 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import common.http.Cookie;
-import common.http.Cookies;
 import common.http.HttpMethod;
 import common.http.Request;
 import common.http.Session;
-import org.apache.catalina.startup.SessionManager;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -34,8 +31,6 @@ public class HttpRequest implements Request {
     }
 
     public boolean hasValidSession() {
-        Cookie cookie = Cookie.from(getCookie());
-        session = new SessionManager().findSession(Cookies.getJsessionid(cookie));
         return session != null;
     }
 
@@ -62,8 +57,11 @@ public class HttpRequest implements Request {
     public Session getSession(boolean create) {
         UUID uuid = UUID.randomUUID();
         this.session = new Session(uuid.toString());
-        new SessionManager().add(session);
         return session;
+    }
+
+    public void addSession(Session session) {
+        this.session = session;
     }
 
     public Session getSession() {

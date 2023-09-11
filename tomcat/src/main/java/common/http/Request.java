@@ -21,4 +21,6 @@ public interface Request {
     boolean hasValidSession();
 
     String getEmail();
+
+    void addSession(Session session);
 }

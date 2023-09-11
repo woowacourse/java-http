@@ -12,10 +12,10 @@ public class RequestParameters {
 
     public static final String FORM_DATA_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-    private final Map<String, String> requestParameters;
+    private final Map<String, String> values;
 
-    private RequestParameters(final Map<String, String> requestParameters) {
-        this.requestParameters = requestParameters;
+    private RequestParameters(final Map<String, String> values) {
+        this.values = values;
     }
 
     public static RequestParameters of(final RequestLine requestLine,
@@ -50,22 +50,18 @@ public class RequestParameters {
         return "";
     }
 
-    public void addParameter(final String key, final String value) {
-        requestParameters.put(key, value);
-    }
-
     public Optional<String> getValue(final String key) {
-        return Optional.ofNullable(requestParameters.get(key));
+        return Optional.ofNullable(values.get(key));
     }
 
-    public Map<String, String> getRequestParameters() {
-        return requestParameters;
+    public Map<String, String> getValues() {
+        return values;
     }
 
     @Override
     public String toString() {
         return "RequestParameters{" +
-                "requestParameters=" + requestParameters +
+                "requestParameters=" + values +
                 '}';
     }
 }

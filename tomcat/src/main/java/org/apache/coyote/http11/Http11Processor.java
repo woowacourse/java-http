@@ -8,7 +8,10 @@ import org.apache.coyote.http11.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
@@ -37,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             final Request request = Request.from(bufferedReader);
 
             final Response response = new Response();
-            
+
             response.preprocess(request);
 
             final Controller controller = ControllerMapper.getController(request);

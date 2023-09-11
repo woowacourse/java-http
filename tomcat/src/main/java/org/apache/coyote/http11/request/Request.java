@@ -78,15 +78,6 @@ public class Request {
         return new String(buffer);
     }
 
-    public boolean isMatching(final String requestPath, final RequestMethod requestMethod) {
-        return requestLine.isMatching(requestPath, requestMethod);
-    }
-
-    public void addParameter(final String key,
-                             final String value) {
-        requestParameters.addParameter(key, value);
-    }
-
     public Optional<String> getParameter(final String parameterKey) {
         return requestParameters.getValue(parameterKey);
     }

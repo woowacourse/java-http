@@ -38,13 +38,9 @@ public class Response {
         this(new StatusLine(), new Headers(), "");
     }
 
-    public Response(final String body) {
-        this(new StatusLine(), new Headers(), body);
-    }
-
-    public Response(final StatusLine statusLine,
-                    final Headers headers,
-                    final String body) {
+    private Response(final StatusLine statusLine,
+                     final Headers headers,
+                     final String body) {
         this(statusLine, headers, new HashMap<>(), body);
     }
 

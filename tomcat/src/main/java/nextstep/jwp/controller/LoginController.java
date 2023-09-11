@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.controller.AbstractController;
-import org.apache.coyote.controller.ControllerMapper;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.request.Session;
 import org.apache.coyote.http11.response.Response;

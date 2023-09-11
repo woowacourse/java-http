@@ -20,7 +20,7 @@ class RequestParametersTest {
         final RequestParameters requestParameters = RequestParameters.of(requestLine, headers, body);
 
         //then
-        assertThat(requestParameters.getRequestParameters()).hasSize(2);
+        assertThat(requestParameters.getValues()).hasSize(2);
     }
 
     @Test
@@ -37,7 +37,7 @@ class RequestParametersTest {
         final RequestParameters requestParameters = RequestParameters.of(requestLine, headers, body);
 
         //then
-        assertThat(requestParameters.getRequestParameters()).hasSize(2);
+        assertThat(requestParameters.getValues()).hasSize(2);
     }
 
     @Test

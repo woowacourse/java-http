@@ -29,11 +29,6 @@ public class RequestLine {
         return new RequestLine(requestMethod, requestUri, protocol);
     }
 
-    public boolean isMatching(final String requestPath, final RequestMethod requestMethod) {
-        return this.requestUri.getPath().equals(requestPath)
-                && this.requestMethod == requestMethod;
-    }
-
     public RequestMethod getRequestMethod() {
         return requestMethod;
     }

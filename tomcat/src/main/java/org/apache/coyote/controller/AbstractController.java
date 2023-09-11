@@ -12,7 +12,7 @@ public abstract class AbstractController implements Controller {
     @Override
     public void service(final Request request,
                         final Response response) {
-        if(request.getRequestLine().getRequestMethod() == GET) {
+        if (request.getRequestLine().getRequestMethod() == GET) {
             doGet(request, response);
             return;
         }

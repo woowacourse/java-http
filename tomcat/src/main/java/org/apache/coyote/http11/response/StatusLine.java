@@ -11,17 +11,9 @@ public class StatusLine {
         this(Protocol.HTTP11, StatusCode.OK);
     }
 
-    public StatusLine(final StatusCode statusCode) {
-        this(Protocol.HTTP11, statusCode);
-    }
-
     public StatusLine(final Protocol protocol, final StatusCode statusCode) {
         this.protocol = protocol;
         this.statusCode = statusCode;
-    }
-
-    public Protocol getProtocol() {
-        return protocol;
     }
 
     public StatusCode getStatusCode() {

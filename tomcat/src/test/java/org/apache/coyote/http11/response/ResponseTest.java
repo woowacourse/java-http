@@ -61,9 +61,11 @@ class ResponseTest {
         //given
         final Headers headers = new Headers();
         final String cookie = "a=b";
-        headers.addHeader(ResponseHeader.SET_COOKIE, cookie);
         final String body = "12345";
-        final Response response = new Response(new StatusLine(StatusCode.OK), headers, body);
+        final Response response = new Response();
+        response.setStatusCode(StatusCode.OK);
+        response.addHeader(ResponseHeader.SET_COOKIE, cookie);
+        response.writeBody(body);
 
         //when
         final String actual = response.parseString();

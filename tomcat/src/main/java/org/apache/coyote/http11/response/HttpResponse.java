@@ -5,9 +5,9 @@ import common.http.Cookie;
 import common.http.HttpStatus;
 import common.http.Response;
 
-public class HttpResponse implements Response {
+import static common.Constants.CRLF;
 
-    private static final String CRLF = "\r\n";
+public class HttpResponse implements Response {
 
     private final HttpStatusLine httpStatusLine;
     private final HttpResponseHeaders httpResponseHeaders;
@@ -39,13 +39,13 @@ public class HttpResponse implements Response {
         httpResponseHeaders.addHeaderFieldAndValue("Location", redirectURL);
     }
 
+    public void addStaticResourcePath(String name) {
+        httpResponseHeaders.addHeaderFieldAndValue("Resource-Path", name);
+    }
+
     public void addBody(String body) {
         httpResponseHeaders.addHeaderFieldAndValue("Content-Length", String.valueOf(body.getBytes().length));
         httpResponseBody.addBody(body);
-    }
-
-    public void addStaticResourcePath(String name) {
-        httpResponseHeaders.addHeaderFieldAndValue("Resource-Path", name);
     }
 
     public boolean hasStaticResourcePath() {
@@ -58,12 +58,14 @@ public class HttpResponse implements Response {
 
     @Override
     public String toString() {
-        if (httpResponseBody.hasBody()) {
+        if (httpResponseBody.exist()) {
+            httpResponseBody.validateLength(httpResponseHeaders.getContentLength());
             return String.join(CRLF,
                     httpStatusLine.toString(),
                     httpResponseHeaders.toString(),
                     httpResponseBody.toString());
         }
+
         return String.join(CRLF,
                 httpStatusLine.toString(),
                 httpResponseHeaders.toString());

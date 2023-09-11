@@ -38,11 +38,7 @@ public class HttpRequestParser {
 
         String headerLine;
         while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
-            int indexOfDelimiter = headerLine.indexOf(DELIMITER);
-
-            if (indexOfDelimiter == -1) {
-                throw new IllegalArgumentException("요청의 헤더가 잘못되었습니다.");
-            }
+            int indexOfDelimiter = getIndexOfDelimiter(headerLine);
 
             String property = headerLine.substring(0, indexOfDelimiter);
             String value = headerLine.substring(indexOfDelimiter + START_AFTER_SPACE);
@@ -50,6 +46,15 @@ public class HttpRequestParser {
         }
 
         return new HttpRequestHeaders(headers);
+    }
+
+    private static int getIndexOfDelimiter(String headerLine) {
+        int indexOfDelimiter = headerLine.indexOf(DELIMITER);
+
+        if (indexOfDelimiter == -1) {
+            throw new IllegalArgumentException("요청의 헤더가 잘못되었습니다.");
+        }
+        return indexOfDelimiter;
     }
 
     private static HttpRequestBody parseBody(BufferedReader reader, int contentLength) throws IOException {
@@ -61,16 +66,20 @@ public class HttpRequestParser {
         reader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
 
-        Map<String, String> body = Arrays.stream(requestBody.split(PARAMS_DELIMITER))
-                .map(property -> property.split(PARAM_VALUE_DELIMITER))
-                .filter(propertyAndValue -> propertyAndValue.length == 2)
-                .collect(Collectors.toMap(data -> data[PROPERTY_INDEX], data -> data[VALUE_INDEX]));
+        Map<String, String> body = parse(requestBody);
 
         if (body.size() != requestBody.split(PARAMS_DELIMITER).length) {
             throw new IllegalArgumentException("요청의 바디가 잘못되었습니다.");
         }
 
         return new HttpRequestBody(body);
+    }
+
+    private static Map<String, String> parse(String requestBody) {
+        return Arrays.stream(requestBody.split(PARAMS_DELIMITER))
+                .map(property -> property.split(PARAM_VALUE_DELIMITER))
+                .filter(propertyAndValue -> propertyAndValue.length == 2)
+                .collect(Collectors.toMap(data -> data[PROPERTY_INDEX], data -> data[VALUE_INDEX]));
     }
 
     private HttpRequestParser() {

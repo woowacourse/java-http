@@ -43,15 +43,19 @@ public class Http11Processor implements Runnable, Processor {
 
             controllerManager.service(httpRequest, httpResponse);
 
-            if (httpRequest.hasStaticResourcePath() || httpResponse.hasStaticResourcePath()) {
-                controllerManager = new StaticControllerManager();
-                controllerManager.service(httpRequest, httpResponse);
-            }
+            serviceIfHasStaticResourcePath(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void serviceIfHasStaticResourcePath(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (httpRequest.hasStaticResourcePath() || httpResponse.hasStaticResourcePath()) {
+            controllerManager = new StaticControllerManager();
+            controllerManager.service(httpRequest, httpResponse);
         }
     }
 }

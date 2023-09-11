@@ -10,6 +10,11 @@ import static common.Constants.SPACE;
 
 class HttpResponseHeaders {
 
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String LOCATION = "Location";
+    public static final String RESOURCE_PATH = "Resource-Path";
+
     private final Map<String, List<String>> headers;
 
     HttpResponseHeaders() {
@@ -17,7 +22,7 @@ class HttpResponseHeaders {
     }
 
     void addHeaderFieldAndValue(String field, String value) {
-        Set<String> uniqueHeaderFields = Set.of("Content-Type", "Content-Length", "Location");
+        Set<String> uniqueHeaderFields = Set.of(CONTENT_TYPE, CONTENT_LENGTH, LOCATION);
 
         if (headers.containsKey(field) && uniqueHeaderFields.contains(field)) {
             throw new IllegalStateException(String.format("헤더에 이미 %s에 대한 값이 존재합니다.", field));
@@ -32,11 +37,15 @@ class HttpResponseHeaders {
     }
 
     boolean hasStaticResourcePath() {
-        return headers.containsKey("Resource-Path");
+        return headers.containsKey(RESOURCE_PATH);
     }
 
     String getStaticResourcePath() {
-        return headers.get("Resource-Path").get(0);
+        return headers.get(RESOURCE_PATH).get(0);
+    }
+
+    public long getContentLength() {
+        return Long.parseLong(headers.get(CONTENT_LENGTH).get(0));
     }
 
     @Override

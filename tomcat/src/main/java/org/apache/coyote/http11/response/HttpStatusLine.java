@@ -29,6 +29,11 @@ class HttpStatusLine {
 
     @Override
     public String toString() {
-        return versionOfTheProtocol + SPACE + httpStatus.getStatusCode() + SPACE + httpStatus.getStatusMessage() + SPACE;
+        return versionOfTheProtocol +
+                SPACE +
+                httpStatus.getStatusCode() +
+                SPACE +
+                httpStatus.getStatusMessage() +
+                SPACE;
     }
 }

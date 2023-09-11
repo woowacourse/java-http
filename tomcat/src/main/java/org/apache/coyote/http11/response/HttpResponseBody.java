@@ -12,21 +12,17 @@ class HttpResponseBody {
     }
 
     void validateLength(long length) {
-        if (length != body.length()) {
+        if (length != body.getBytes().length) {
             throw new IllegalArgumentException("Response Body의 길이가 유효하지 않습니다.");
         }
     }
 
     boolean exist() {
-        return body.length() != 0;
+        return body != null;
     }
 
     @Override
     public String toString() {
         return body;
-    }
-
-    public boolean hasBody() {
-        return body != null;
     }
 }

@@ -22,20 +22,16 @@ public class HttpRequest implements Request {
         this.httpRequestBody = httpRequestBody;
     }
 
-    public String getVersionOfTheProtocol() {
-        return httpRequestLine.getVersionOfTheProtocol();
+    public HttpMethod getHttpMethod() {
+        return httpRequestLine.getHttpMethod();
     }
 
     public String getPath() {
         return httpRequestLine.getPath();
     }
 
-    public boolean hasValidSession() {
-        return session != null;
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpRequestLine.getHttpMethod();
+    public String getVersionOfTheProtocol() {
+        return httpRequestLine.getVersionOfTheProtocol();
     }
 
     public String getCookie() {
@@ -54,21 +50,25 @@ public class HttpRequest implements Request {
         return httpRequestBody.getEmail();
     }
 
+    public Session getSession() {
+        return session;
+    }
+
     public Session getSession(boolean create) {
         UUID uuid = UUID.randomUUID();
         this.session = new Session(uuid.toString());
         return session;
     }
 
-    public void addSession(Session session) {
-        this.session = session;
-    }
-
-    public Session getSession() {
-        return session;
+    public boolean hasValidSession() {
+        return session != null;
     }
 
     public boolean hasStaticResourcePath() {
         return STATIC_RESOURCE_PATH_PATTERN.matcher(getPath()).find();
+    }
+
+    public void addSession(Session session) {
+        this.session = session;
     }
 }

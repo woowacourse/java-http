@@ -20,16 +20,16 @@ public class StaticResourceController implements Controller {
     @Override
     public void service(Request request, Response response) {
         if (response.hasStaticResourcePath()) {
-            buildResponse(response.getStaticResourcePath(), response);
+            buildResponse(response, response.getStaticResourcePath());
             return;
         }
 
         response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
         response.addHttpStatus(OK);
-        buildResponse(request.getPath(), response);
+        buildResponse(response, request.getPath());
     }
 
-    private void buildResponse(String path, Response response) {
+    private void buildResponse(Response response, String path) {
         try {
             URL resource = getResource(path);
             String fileContent = readFileContent(resource);
@@ -40,8 +40,10 @@ public class StaticResourceController implements Controller {
             if (fileContent.length() != 0) {
                 response.addBody(fileContent);
             }
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("해당하는 파일을 찾을 수 없습니다.");
         } catch (IOException e) {
-            throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("파일을 읽을 수 없습니다.");
         }
     }
 

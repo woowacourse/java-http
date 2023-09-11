@@ -5,8 +5,13 @@ import java.io.IOException;
 import java.util.Optional;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.message.HttpMethod;
 
 public class Request {
+
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final RequestForms requestForms;
@@ -30,7 +35,7 @@ public class Request {
         if (!requestHeaders.hasContentType()) {
             return new RequestForms(null);
         }
-        final int contentLength = Integer.parseInt((String) requestHeaders.get("Content-Length"));
+        final int contentLength = Integer.parseInt((String) requestHeaders.get(CONTENT_LENGTH));
         final char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
         final String requestBody = new String(buffer);
@@ -38,12 +43,12 @@ public class Request {
     }
 
     public boolean noSession() {
-        final String sessionId = requestHeaders.getCookieValue("JSESSIONID");
+        final String sessionId = requestHeaders.getCookieValue(JSESSIONID);
         return SessionManager.findSession(sessionId) == null;
     }
 
     public Optional<Object> getSessionValue(final String key) {
-        final String sessionId = requestHeaders.getCookieValue("JSESSIONID");
+        final String sessionId = requestHeaders.getCookieValue(JSESSIONID);
         final Session session = SessionManager.findSession(sessionId);
         if (session == null) {
             return Optional.empty();
@@ -51,7 +56,7 @@ public class Request {
         return Optional.of(session.getAttribute(key));
     }
 
-    public boolean isMatchMethod(final String httpMethod) {
+    public boolean isMatchMethod(final HttpMethod httpMethod) {
         return requestLine.getHttpMethod().equals(httpMethod);
     }
 

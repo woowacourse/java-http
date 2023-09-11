@@ -8,21 +8,28 @@ import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;
 
 public class RegisterController extends AbstractController {
+
+    private static final String ACCOUNT = "account";
+    private static final String EMAIL = "email";
+    private static final String PASSWORD = "password";
+    private static final String INDEX_TEMPLATE = "index.html";
+    private static final String REGISTER_TEMPLATE = "register.html";
+
     @Override
     protected void doPost(final Request request, final Response response) throws Exception {
         final Map<String, String> requestForms = request.getRequestForms().getFormData();
-        final String account = requestForms.get("account");
-        final String email = requestForms.get("email");
-        final String password = requestForms.get("password");
+        final String account = requestForms.get(ACCOUNT);
+        final String email = requestForms.get(EMAIL);
+        final String password = requestForms.get(PASSWORD);
         InMemoryUserRepository.save(new User(account, password, email));
 
-        response.location("index.html");
-        response.status(HttpStatus.FOUND);
+        response.setLocation(INDEX_TEMPLATE);
+        response.setStatus(HttpStatus.FOUND);
     }
 
     @Override
     protected void doGet(final Request request, final Response response) throws Exception {
-        final Response createdResponse = Response.createByTemplate(HttpStatus.OK, "register.html");
+        final Response createdResponse = Response.createByTemplate(HttpStatus.OK, REGISTER_TEMPLATE);
         response.setBy(createdResponse);
     }
 }

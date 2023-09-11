@@ -5,7 +5,10 @@ import java.net.URL;
 import java.util.Map;
 
 public class RequestURI {
+
     private static final String ROOT_FOLDER = "static";
+    private static final String QUERY_START_CHARACTER = "?";
+
     private final String path;
     private final QueryParameter queryParameter;
     private final File file;
@@ -34,7 +37,7 @@ public class RequestURI {
     }
 
     private String parsePath(final String uri) {
-        final int index = uri.indexOf("?");
+        final int index = uri.indexOf(QUERY_START_CHARACTER);
         if (index == -1) {
             return uri;
         }
@@ -43,7 +46,7 @@ public class RequestURI {
     }
 
     private QueryParameter parseQueryString(final String uri) {
-        final int index = uri.indexOf("?");
+        final int index = uri.indexOf(QUERY_START_CHARACTER);
         if (index == -1) {
             return QueryParameter.EMPTY;
         }

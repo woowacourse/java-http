@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String PROCESS_MESSAGE = "connect host: {}, port: {}";
 
     private final Socket connection;
 
@@ -28,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        log.info(PROCESS_MESSAGE, connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 

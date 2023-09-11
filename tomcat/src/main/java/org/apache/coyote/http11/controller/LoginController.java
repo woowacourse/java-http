@@ -11,10 +11,18 @@ import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;
 
 public class LoginController extends AbstractController {
+
+    private static final String INDEX_TEMPLATE = "index.html";
+    private static final String USER = "user";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String LOGIN_TEMPLATE = "login.html";
+    private static final String JSESSIONID = "JSESSIONID";
+
     @Override
     protected void doPost(final Request request, final Response response) {
         final Map<String, String> requestForms = request.getRequestForms().getFormData();
-        final Optional<User> user = login(requestForms.get("account"), requestForms.get("password"));
+        final Optional<User> user = login(requestForms.get(ACCOUNT), requestForms.get(PASSWORD));
         if (user.isPresent()) {
             loginSuccess(request, response, user.get());
             return;
@@ -23,14 +31,14 @@ public class LoginController extends AbstractController {
     }
 
     private void loginSuccess(final Request request, final Response response, final User user) {
-        response.location("index.html");
-        response.status(HttpStatus.FOUND);
+        response.setLocation(INDEX_TEMPLATE);
+        response.setStatus(HttpStatus.FOUND);
 
         if (request.noSession()) {
             final Session session = new Session();
-            session.setAttribute("user", user);
+            session.setAttribute(USER, user);
             SessionManager.add(session);
-            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+            response.addCookie(JSESSIONID, session.getId());
         }
     }
 
@@ -45,12 +53,12 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final Request request, final Response response) throws Exception {
-        if (request.getSessionValue("user") != Optional.empty()) {
-            response.location("index.html");
-            response.status(HttpStatus.FOUND);
+        if (request.getSessionValue(USER) != Optional.empty()) {
+            response.setLocation(INDEX_TEMPLATE);
+            response.setStatus(HttpStatus.FOUND);
             return;
         }
-        final Response createdResponse = Response.createByTemplate(HttpStatus.OK, "login.html");
+        final Response createdResponse = Response.createByTemplate(HttpStatus.OK, LOGIN_TEMPLATE);
         response.setBy(createdResponse);
     }
 }

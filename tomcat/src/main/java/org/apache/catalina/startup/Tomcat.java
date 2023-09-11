@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private static final String SERVER_STOP_MESSAGE = "web server stop.";
 
     private final ControllerMapper controllerMapper = new ControllerMapper();
 
@@ -24,7 +25,7 @@ public class Tomcat {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {
-            log.info("web server stop.");
+            log.info(SERVER_STOP_MESSAGE);
             connector.stop();
         }
     }

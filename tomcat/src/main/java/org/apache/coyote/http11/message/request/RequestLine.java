@@ -1,12 +1,19 @@
 package org.apache.coyote.http11.message.request;
 
+import org.apache.coyote.http11.message.HttpMethod;
+
 public class RequestLine {
+
     private static final String REQUEST_HEADER_DELIMITER = " ";
-    private final String httpMethod;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int REQUEST_URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+
+    private final HttpMethod httpMethod;
     private final RequestURI requestURI;
     private final String httpVersion;
 
-    public RequestLine(final String httpMethod, final RequestURI requestURI, final String httpVersion) {
+    public RequestLine(final HttpMethod httpMethod, final RequestURI requestURI, final String httpVersion) {
         this.httpMethod = httpMethod;
         this.requestURI = requestURI;
         this.httpVersion = httpVersion;
@@ -15,9 +22,9 @@ public class RequestLine {
     public static RequestLine from(final String requestHeaderFirstLine) {
         final String[] splitedLine = requestHeaderFirstLine.split(REQUEST_HEADER_DELIMITER);
         return new RequestLine(
-                splitedLine[0],
-                new RequestURI(splitedLine[1]),
-                splitedLine[2]
+                HttpMethod.valueOf(splitedLine[HTTP_METHOD_INDEX]),
+                new RequestURI(splitedLine[REQUEST_URI_INDEX]),
+                splitedLine[HTTP_VERSION_INDEX]
         );
     }
 
@@ -33,7 +40,7 @@ public class RequestLine {
         return requestURI;
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 

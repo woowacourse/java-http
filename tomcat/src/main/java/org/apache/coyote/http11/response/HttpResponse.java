@@ -10,8 +10,8 @@ public class HttpResponse {
 
     private final HttpVersion httpVersion;
     private final Headers headers = new Headers();
+    private final HttpCookie httpCookie = new HttpCookie();
     private HttpStatus httpStatus;
-    private HttpCookie httpCookie = new HttpCookie();
     private Session session;
     private String redirect;
 

@@ -4,10 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ControllerMapper;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.handler.ControllerMapper;
 import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             final String response = createResponse(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (final IOException | UncheckedServletException e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException(e);

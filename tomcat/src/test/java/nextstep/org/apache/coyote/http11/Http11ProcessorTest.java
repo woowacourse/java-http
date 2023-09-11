@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.handler.ControllerMapper;
+import org.apache.catalina.controller.ControllerMapper;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 

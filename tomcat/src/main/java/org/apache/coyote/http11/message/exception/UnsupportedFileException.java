@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception.file;
+package org.apache.coyote.http11.message.exception;
 
 public class UnsupportedFileException extends RuntimeException {
 

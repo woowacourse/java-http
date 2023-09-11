@@ -2,9 +2,9 @@ package org.apache.catalina.startup;
 
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.handler.ControllerMapper;
-import org.apache.coyote.http11.handler.HandlerStatus;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.ControllerMapper;
+import org.apache.catalina.controller.ControllerStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class Tomcat {
     private final ControllerMapper controllerMapper = new ControllerMapper();
 
     public void start() {
-        var connector = new Connector(controllerMapper);
+        final var connector = new Connector(controllerMapper);
         connector.start();
 
         try {
@@ -30,7 +30,7 @@ public class Tomcat {
         }
     }
 
-    public void addController(HandlerStatus handlerStatus, Controller controller) {
-        controllerMapper.addController(handlerStatus, controller);
+    public void addController(final ControllerStatus controllerStatus, final Controller controller) {
+        controllerMapper.addController(controllerStatus, controller);
     }
 }

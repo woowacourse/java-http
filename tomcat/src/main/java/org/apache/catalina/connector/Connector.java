@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.handler.ControllerMapper;
+import org.apache.catalina.controller.ControllerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, controllerMapper);
+        final var processor = new Http11Processor(connection, controllerMapper);
         executorService.execute(processor);
     }
 

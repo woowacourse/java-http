@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.exception.file;
+package org.apache.catalina.exception.file;
 
 public class FileReadException extends RuntimeException {
 

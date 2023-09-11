@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.message.exception.UnsupportedFileException;
 
 public enum ContentType {
+
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
@@ -17,23 +19,15 @@ public enum ContentType {
     }
 
     public static ContentType findByFileName(final String fileName) {
-        final String extension = getExtension(fileName);
-        return findByExtension(extension);
-    }
-
-    public static String getExtension(final String fileName) {
-        final int lastDotIndex = fileName.lastIndexOf('.');
-        if (lastDotIndex > 0) {
-            return fileName.substring(lastDotIndex);
-        }
-        throw new IllegalArgumentException("파일 확장자가 존재하지 않습니다.");
+        final StaticFile file = new StaticFile(fileName);
+        return findByExtension(file.getExtension());
     }
 
     public static ContentType findByExtension(final String extension) {
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> contentType.extension.equals(extension))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 파일형식입니다."));
+                .orElseThrow(() -> new UnsupportedFileException());
     }
 
     public String getExtension() {

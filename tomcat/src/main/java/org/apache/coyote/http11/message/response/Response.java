@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.StaticFile;
 import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpStatus;
+import org.apache.coyote.http11.message.StaticFile;
 import org.apache.coyote.http11.message.request.RequestURI;
 
 public class Response {

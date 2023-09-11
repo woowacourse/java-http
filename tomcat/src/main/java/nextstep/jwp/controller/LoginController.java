@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.controller;
+package nextstep.jwp.controller;
 
 import java.util.Map;
 import java.util.Optional;
@@ -6,6 +6,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;

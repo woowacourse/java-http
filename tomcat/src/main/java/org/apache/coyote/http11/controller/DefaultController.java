@@ -20,6 +20,7 @@ public class DefaultController extends AbstractController {
         URL filePathUrl = getClass().getResource("/static" + request.getPath());
         if (filePathUrl == null) {
             handle404(response);
+            return;
         }
         String responseBody = readHtmlFile(filePathUrl);
 

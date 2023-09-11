@@ -4,14 +4,13 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.controller.AbstractController;
+import org.apache.coyote.http11.exception.UnauthorizeException;
 import org.apache.coyote.http11.request.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpResponseStatus;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,17 +23,16 @@ public class LoginPostController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         if (request.isNotExistBody()) {
             throw new IllegalArgumentException("로그인 정보가 입력되지 않았습니다.");
         }
         final HttpCookie cookie = request.getCookie();
         Map<String, String> parsedRequestBody = request.parseBody();
         User user = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("입력한 회원 ID가 존재하지 않습니다."));
+                .orElseThrow(() -> new UnauthorizeException("입력한 회원 ID가 존재하지 않습니다."));
         if (isLoginFail(user, parsedRequestBody)) {
-            handle401(request, response);
-            return;
+            throw new UnauthorizeException("입력한 회원 ID가 존재하지 않습니다.");
         }
         if (!cookie.isExist(JSESSIONID)) {
             String jSessionId = String.valueOf(UUID.randomUUID());
@@ -58,14 +56,5 @@ public class LoginPostController extends AbstractController {
 
     private boolean isLoginFail(User user, Map<String, String> parsedRequestBody) {
         return !user.checkPassword(parsedRequestBody.get("password"));
-    }
-
-    private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
-        String responseBody = readHtmlFile(getClass().getResource("/static/401.html"));
-        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
-                readContentType(request.getAccept(), request.getPath()),
-                String.valueOf(responseBody.getBytes().length))
-                .build();
-        response.updateResponse(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
     }
 }

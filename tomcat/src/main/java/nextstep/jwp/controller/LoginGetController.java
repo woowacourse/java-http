@@ -30,6 +30,7 @@ public class LoginGetController extends AbstractController {
                     .addLocation("/index.html")
                     .build();
             response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
+            return;
         }
         filePathUrl = getClass().getResource("/static/login.html");
         String responseBody = readHtmlFile(filePathUrl);

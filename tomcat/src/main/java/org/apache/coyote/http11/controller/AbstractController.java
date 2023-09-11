@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.http11.exception.UnauthorizeException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseHeader;
@@ -21,6 +22,8 @@ public abstract class AbstractController implements Controller {
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         try {
             handleRequest(request, response);
+        } catch (UnauthorizeException e) {
+            handle401(request, response);
         } catch (Exception e) {
             handle500(response);
         }
@@ -60,6 +63,15 @@ public abstract class AbstractController implements Controller {
 
     private boolean isAcceptCss(String accept) {
         return accept != null && accept.contains("text/css");
+    }
+
+    private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {
+        String responseBody = readHtmlFile(getClass().getResource("/static/401.html"));
+        HttpResponseHeader responseHeader = new HttpResponseHeader.Builder(
+                readContentType(request.getAccept(), request.getPath()),
+                String.valueOf(responseBody.getBytes().length))
+                .build();
+        response.updateResponse(HttpResponseStatus.UNAUTHORIZATION, responseHeader, responseBody);
     }
 
     private void handle500(HttpResponse response) throws IOException, URISyntaxException {

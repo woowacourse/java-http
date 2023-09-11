@@ -1,114 +1,26 @@
 package org.apache.coyote.http11;
 
-import static java.util.stream.Collectors.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.coyote.Cookie;
-import org.apache.coyote.HttpMethod;
-import org.apache.coyote.HttpProtocolVersion;
 import org.apache.coyote.request.Request;
-import org.apache.coyote.request.RequestBody;
-import org.apache.coyote.request.RequestHeader;
-import org.apache.coyote.request.RequestLine;
-import org.apache.coyote.request.RequestUri;
-import org.apache.coyote.response.HeaderType;
 
 public class Http11RequestReader {
 
-	private static final String REQUEST_LINE_DELIMITER = " ";
-	private static final String END_OF_LINE = "";
-	private static final String HEADER_SEPARATOR = ": ";
-	private static final String COOKIE_DELIMITER = "; ";
-	private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
-	private static final String QUERY_STRING_SEPARATOR = "?";
-	private static final String QUERY_PARAM_DELIMITER = "&";
-	private static final String KEY_VALUE_SEPARATOR = "=";
-
-	private final BufferedReader reader;
+	private final Http11RequestLineReader requestLineReader;
+	private final Http11RequestHeaderReader requestHeaderReader;
+	private final Http11RequestBodyReader requestBodyReader;
 
 	public Http11RequestReader(final BufferedReader reader) {
-		this.reader = reader;
+		this.requestLineReader = new Http11RequestLineReader(reader);
+		this.requestHeaderReader = new Http11RequestHeaderReader(reader);
+		this.requestBodyReader = new Http11RequestBodyReader(reader);
 	}
 
 	public Request read() throws IOException {
-		final var requestLine = readRequestLine();
-		final var requestHeader = readRequestHeader();
-		final var requestBody = readRequestBody(requestHeader);
+		final var requestLine = requestLineReader.read();
+		final var requestHeader = requestHeaderReader.read();
+		final var requestBody = requestBodyReader.read(requestHeader);
 		return new Request(requestLine, requestHeader, requestBody);
-	}
-
-	private RequestLine readRequestLine() throws IOException {
-		final var requestLine = reader.readLine();
-		final var parts = requestLine.split(REQUEST_LINE_DELIMITER);
-		final var method = HttpMethod.from(parts[0]);
-		final var uri = readRequestUri(parts[1]);
-		final var version = HttpProtocolVersion.from(parts[2]);
-		return new RequestLine(method, uri, version);
-	}
-
-	private RequestUri readRequestUri(String uri) {
-		final var queryStringIndex = uri.indexOf(QUERY_STRING_SEPARATOR);
-
-		if (hasNoQuery(queryStringIndex)) {
-			return new RequestUri(uri);
-		}
-
-		final var path = uri.substring(0, queryStringIndex);
-		final var queryString = uri.substring(queryStringIndex + 1);
-		final var queryParams = parseQueryString(queryString);
-
-		return new RequestUri(path, queryParams);
-	}
-
-	private boolean hasNoQuery(final int index) {
-		return index == -1;
-	}
-
-	private Map<String, String> parseQueryString(final String queryString) {
-		return Arrays.stream(queryString.split(QUERY_PARAM_DELIMITER))
-			.map(queryParam -> queryParam.split(KEY_VALUE_SEPARATOR, 2))
-			.filter(parts -> parts.length == 2)
-			.collect(toMap(parts -> parts[0], parts -> parts[1]));
-	}
-
-	private RequestHeader readRequestHeader() throws IOException {
-		final var headerString = new ArrayList<String>();
-		String line;
-		while ((!END_OF_LINE.equals(line = reader.readLine()))) {
-			headerString.add(line);
-		}
-		final var headers = headerString.stream()
-			.map(header -> header.split(HEADER_SEPARATOR, 2))
-			.collect(toMap(parts -> parts[0], parts -> parts[1]));
-		final var cookie = headers.remove(HeaderType.COOKIE.getName());
-		return new RequestHeader(headers, readCookies(cookie));
-	}
-
-	private List<Cookie> readCookies(final String cookieString) {
-		if (cookieString == null) {
-			return new ArrayList<>();
-		}
-		return Arrays.stream(cookieString.split(COOKIE_DELIMITER))
-			.map(field -> field.split(COOKIE_KEY_VALUE_SEPARATOR))
-			.filter(parts -> parts.length == 2)
-			.map(parts -> new Cookie(parts[0], parts[1]))
-			.collect(toList());
-	}
-
-	private RequestBody readRequestBody(final RequestHeader header) throws IOException {
-		final var contentLength = header.find(HeaderType.CONTENT_LENGTH.getName());
-		if (contentLength == null) {
-			return RequestBody.empty();
-		}
-		final var bodySize = Integer.parseInt(contentLength);
-		final var buffer = new char[bodySize];
-		reader.read(buffer, 0, bodySize);
-		return RequestBody.from(new String(buffer));
 	}
 }

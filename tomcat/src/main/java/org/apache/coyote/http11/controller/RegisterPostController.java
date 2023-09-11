@@ -7,7 +7,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseHeader;
 import org.apache.coyote.http11.response.HttpResponseStatus;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterPostController extends AbstractController {
@@ -23,7 +22,7 @@ public class RegisterPostController extends AbstractController {
         if (request.isNotExistBody()) {
             throw new IllegalArgumentException("회원가입 정보가 입력되지 않았습니다.");
         }
-        Map<String, String> parsedRequestBody = parseRequestBody(request);
+        Map<String, String> parsedRequestBody = request.parseBody();
         InMemoryUserRepository.save(new User(
                 Long.getLong(parsedRequestBody.get("id")),
                 parsedRequestBody.get("account"),
@@ -36,19 +35,5 @@ public class RegisterPostController extends AbstractController {
                 .addLocation("/index.html")
                 .build();
         response.updateResponse(HttpResponseStatus.FOUND, responseHeader, "");
-    }
-
-    private Map<String, String> parseRequestBody(HttpRequest request) {
-        Map<String, String> parsedRequestBody = new HashMap<>();
-        String[] queryTokens = request.getBody().split("&");
-        for (String queryToken : queryTokens) {
-            int equalSeparatorIndex = queryToken.indexOf("=");
-            if (equalSeparatorIndex != -1) {
-                parsedRequestBody.put(queryToken.substring(0, equalSeparatorIndex),
-                        queryToken.substring(equalSeparatorIndex + 1));
-
-            }
-        }
-        return parsedRequestBody;
     }
 }

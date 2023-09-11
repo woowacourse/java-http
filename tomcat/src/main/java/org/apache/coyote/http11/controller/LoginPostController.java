@@ -11,7 +11,6 @@ import org.apache.coyote.http11.response.HttpResponseStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ public class LoginPostController extends AbstractController {
             throw new IllegalArgumentException("로그인 정보가 입력되지 않았습니다.");
         }
         final HttpCookie cookie = request.getCookie();
-        Map<String, String> parsedRequestBody = parseRequestBody(request);
+        Map<String, String> parsedRequestBody = request.parseBody();
         User user = InMemoryUserRepository.findByAccount(parsedRequestBody.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("입력한 회원 ID가 존재하지 않습니다."));
         if (isLoginFail(user, parsedRequestBody)) {
@@ -58,23 +57,6 @@ public class LoginPostController extends AbstractController {
 
     private boolean isLoginFail(User user, Map<String, String> parsedRequestBody) {
         return !user.checkPassword(parsedRequestBody.get("password"));
-    }
-
-    private Map<String, String> parseRequestBody(HttpRequest request) {
-        Map<String, String> parsedRequestBody = new HashMap<>();
-        String[] queryTokens = request.getBody().split("&");
-        for (String queryToken : queryTokens) {
-            putRequestBodyToken(queryToken, parsedRequestBody);
-        }
-        return parsedRequestBody;
-    }
-
-    private void putRequestBodyToken(String queryToken, Map<String, String> parsedRequestBody) {
-        int equalSeparatorIndex = queryToken.indexOf("=");
-        if (equalSeparatorIndex != -1) {
-            parsedRequestBody.put(queryToken.substring(0, equalSeparatorIndex),
-                    queryToken.substring(equalSeparatorIndex + 1));
-        }
     }
 
     private void handle401(HttpRequest request, HttpResponse response) throws URISyntaxException, IOException {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -22,6 +23,10 @@ public class HttpRequest {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
+    }
+
+    public Map<String, String> parseBody() {
+        return this.body.parse();
     }
 
     public boolean isPOST() {

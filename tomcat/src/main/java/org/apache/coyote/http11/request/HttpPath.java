@@ -4,24 +4,19 @@ public class HttpPath {
     private static final String QUERY_DELIMITER = "?";
 
     private final String path;
+    private final HttpQuery query;
 
-    private HttpPath(final String path) {
+    private HttpPath(final String path, final HttpQuery query) {
         this.path = path;
+        this.query = query;
     }
 
     public static HttpPath from(final String path) {
-        final HttpQuery query = extractQuery(path);
-        if (path.equals("/login") || path.equals("/register")) {
-            return new HttpPath(path + ".html");
-        }
-        return new HttpPath(path);
-    }
-
-    private static HttpQuery extractQuery(final String path) {
         if (isExistQuery(path)) {
-            return HttpQuery.from(path.substring(path.indexOf(QUERY_DELIMITER)));
+            final HttpQuery query = HttpQuery.from(path.substring(path.indexOf(QUERY_DELIMITER)));
+            return new HttpPath(path, query);
         }
-        return HttpQuery.empty();
+        return new HttpPath(path, HttpQuery.empty());
     }
 
     private static boolean isExistQuery(final String path) {

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpProtocol;
+
 public class HttpRequestLine {
     private static final int METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;

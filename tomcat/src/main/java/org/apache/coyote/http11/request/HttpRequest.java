@@ -1,9 +1,13 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpProtocol;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class HttpRequest {
     private final HttpRequestLine requestLine;
@@ -53,11 +57,23 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public String getBody() {
+    public Map<String, String> getBody() {
         return body.getBody();
     }
 
     public String getCookie() {
         return headers.get("Cookie");
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getPathValue() {
+        return requestLine.getPathValue();
+    }
+
+    public HttpProtocol getProtocol() {
+        return requestLine.getProtocol();
     }
 }

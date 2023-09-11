@@ -1,10 +1,17 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
 
 public enum HttpMethod {
+    OPTIONS("OPTIONS"),
     GET("GET"),
-    POST("POST");
+    HEAD("HEAD"),
+    POST("POST"),
+    PUT("PUT"),
+    DELETE("DELETE"),
+    TRACE("TRACE"),
+    CONNECT("CONNECT"),
+    ;
 
     private final String method;
 

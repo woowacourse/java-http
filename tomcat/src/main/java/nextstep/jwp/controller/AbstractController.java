@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import static org.apache.coyote.request.Method.GET;
 import static org.apache.coyote.request.Method.POST;
 
-import org.apache.coyote.exception.PageNotFoundException;
+import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.Method;
 import org.apache.coyote.response.HttpResponse;
@@ -20,7 +20,7 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        throw new PageNotFoundException(request.getPath());
+        throw new MethodNotAllowedException(request.getPath(), request.getMethod());
     }
 
     protected void doPost(final HttpRequest request, final HttpResponse response) {

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManger;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.controller.support.FileFinder;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
@@ -126,7 +126,7 @@ class RegisterControllerTest {
     @DisplayName("로그인한 상태인 경우 index 화면으로 리다이랙트한다.")
     void redirect_index_page() throws Exception {
         // given
-        SessionManger.add(new Session("member"));
+        SessionManager.add(new Session("member"));
 
         final Map<String, String> header = new HashMap<>();
         header.put("Cookie", "JSESSIONID=member");

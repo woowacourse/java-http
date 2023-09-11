@@ -5,7 +5,7 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManger;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.controller.support.FileFinder;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
         if (user.isPresent() && user.get().checkPassword(body.getPassword())) {
             final Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user.get());
-            SessionManger.add(session);
+            SessionManager.add(session);
             response.setStatusCode(StatusCode.REDIRECT);
             response.addHeader(LOCATION, INDEX_PAGE);
             response.addHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
@@ -43,7 +43,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (SessionManger.findSession(request.getAuthCookie()) == null) {
+        if (SessionManager.findSession(request.getAuthCookie()) == null) {
             final String body = FileFinder.find(LOGIN_PAGE);
             response.setStatusCode(StatusCode.OK);
             response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8);

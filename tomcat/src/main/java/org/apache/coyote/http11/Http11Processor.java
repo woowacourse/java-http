@@ -18,9 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final FrontController frontController;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, FrontController frontController) {
         this.connection = connection;
+        this.frontController = frontController;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest request = HttpRequest.from(bufferedReader);
             final HttpResponse response = HttpResponse.create();
-            final Controller controller = FrontController.getController(request);
+            final Controller controller = frontController.getController(request);
             controller.service(request, response);
 
             bufferedWriter.write(response.message());

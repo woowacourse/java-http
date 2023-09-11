@@ -6,20 +6,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FrontController {
-    private static final Map<String, Controller> mappers = new HashMap<>();
+    private final Map<String, Controller> mappers;
 
-    private FrontController() {
-        throw new IllegalStateException("Utility class");
+    public FrontController() {
+        mappers = new HashMap<>();
     }
 
-    static {
-        mappers.put("/", new HomeController());
-        mappers.put("/login", new LoginController());
-        mappers.put("/register", new RegisterController());
-    }
-
-    public static Controller getController(final HttpRequest request) {
+    public Controller getController(final HttpRequest request) {
         String path = request.getPathValue();
         return mappers.getOrDefault(path, new ResourceController());
+    }
+
+    public void addController(String path, Controller controller) {
+        mappers.put(path, controller);
     }
 }

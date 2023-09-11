@@ -1,6 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.controller.FrontController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,26 +13,25 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Connector implements Runnable {
-
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int MAX_THREAD_POOL = 250;
 
     private final ServerSocket serverSocket;
-    private boolean stopped;
     private final ExecutorService executorService;
+    private final FrontController frontController;
+    private boolean stopped;
 
-
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_POOL);
+    public Connector(FrontController frontController) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_POOL, frontController);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(final int port, final int acceptCount, final int maxThreads, FrontController frontController) {
         this.executorService = Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.frontController = frontController;
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -72,7 +72,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, frontController);
         executorService.submit(processor);
     }
 

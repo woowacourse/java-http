@@ -7,6 +7,7 @@ public class HttpRequestLine {
     private static final int METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;
     private static final int PROTOCOL_INDEX = 2;
+    private static final String START_LINE_DELIMITER = " ";
 
     private final HttpMethod method;
     private final HttpPath path;
@@ -19,7 +20,7 @@ public class HttpRequestLine {
     }
 
     public static HttpRequestLine from(final String startLine) {
-        final String[] startLines = startLine.split(" ");
+        final String[] startLines = startLine.split(START_LINE_DELIMITER);
         final HttpMethod method = HttpMethod.from(startLines[METHOD_INDEX]);
         final HttpPath path = HttpPath.from(startLines[PATH_INDEX]);
         final HttpProtocol protocol = HttpProtocol.from(startLines[PROTOCOL_INDEX]);

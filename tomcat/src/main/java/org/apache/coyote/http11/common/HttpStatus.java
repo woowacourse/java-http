@@ -16,6 +16,8 @@ public enum HttpStatus {
     BAD_GATEWAY(502, "BAD_GATEWAY"),
     ;
 
+    private static final String STATUS_FORMAT = "%s %s ";
+
     private final int code;
     private final String text;
 
@@ -25,6 +27,6 @@ public enum HttpStatus {
     }
 
     public String message() {
-        return String.join(" ", String.valueOf(code), text, "");
+        return String.format(STATUS_FORMAT, code, text);
     }
 }

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.common.HttpHeaders;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,10 +29,10 @@ public class HttpRequestHeaders {
     }
 
     public boolean hasCookie() {
-        return headers.containsKey("Cookie");
+        return headers.containsKey(HttpHeaders.COOKIE.getMessage());
     }
 
     public String get(final String key) {
-        return headers.get(key);
+        return headers.getOrDefault(key, StringUtils.EMPTY);
     }
 }

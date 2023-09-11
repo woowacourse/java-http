@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMethod;
-import org.apache.coyote.http11.common.HttpProtocol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,8 +39,8 @@ public class HttpRequest {
     }
 
     private static HttpRequestBody extractRequestBody(final BufferedReader bufferedReader, final HttpRequestHeaders requestHeader) throws IOException {
-        final String contentLength = requestHeader.get("Content-Length");
-        if (contentLength == null) {
+        final String contentLength = requestHeader.get(HttpHeaders.CONTENT_LENGTH.getMessage());
+        if (contentLength.isBlank()) {
             return HttpRequestBody.empty();
         }
         final int length = Integer.parseInt(contentLength);
@@ -53,16 +53,12 @@ public class HttpRequest {
         return headers.hasCookie();
     }
 
-    public HttpRequestLine getRequestLine() {
-        return requestLine;
-    }
-
     public Map<String, String> getBody() {
         return body.getBody();
     }
 
     public String getCookie() {
-        return headers.get("Cookie");
+        return headers.get(HttpHeaders.COOKIE.getMessage());
     }
 
     public HttpMethod getMethod() {
@@ -71,9 +67,5 @@ public class HttpRequest {
 
     public String getPathValue() {
         return requestLine.getPathValue();
-    }
-
-    public HttpProtocol getProtocol() {
-        return requestLine.getProtocol();
     }
 }

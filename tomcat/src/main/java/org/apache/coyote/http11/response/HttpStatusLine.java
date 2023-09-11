@@ -13,7 +13,7 @@ public class HttpStatusLine {
     }
 
     public static HttpStatusLine empty() {
-        return new HttpStatusLine(null, null);
+        return new HttpStatusLine(HttpProtocol.HTTP_1_1, null);
     }
 
     public static HttpStatusLine of(final HttpProtocol protocol, final HttpStatus status) {

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.common.HttpContentType;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class HttpResponseBody {
     }
 
     public static HttpResponseBody empty() {
-        return new HttpResponseBody(null, null);
+        return new HttpResponseBody(null, StringUtils.EMPTY);
     }
 
     public static HttpResponseBody from(final String path) {
@@ -29,7 +30,7 @@ public class HttpResponseBody {
             final String fileContent = new String(Files.readAllBytes(Path.of(filePath)));
             return new HttpResponseBody(HttpContentType.from(filePath), String.join(CRLF, fileContent));
         } catch (IOException | NullPointerException e) {
-            throw new IllegalArgumentException("해당 경로에 파일이 존재하지 않습니다.");
+            throw new IllegalArgumentException("해당 경로에 파일이 존재하지 않습니다. filePath: " + path);
         }
     }
 

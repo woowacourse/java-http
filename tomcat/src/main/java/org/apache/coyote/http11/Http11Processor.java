@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,7 +16,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,25 +37,22 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final HttpRequest httpRequest = parseHttpRequest(bufferedReader);
-            if (httpRequest == null) {
-                return;
-            }
-            final HttpResponse response = handleRequest(httpRequest);
-
-            outputStream.write(Objects.requireNonNull(response).toString().getBytes());
+            final Controller controller = RequestMapping.getController(httpRequest);
+            final HttpResponse response = controller.service(httpRequest);
+            outputStream.write(
+                    response.toString()
+                            .getBytes()
+            );
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private HttpRequest parseHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final HttpRequestStartLine startLine = extractStartLine(bufferedReader);
-        if (startLine == null) {
-            return null;
-        }
         final HttpRequestHeader httpRequestHeaders = extractHeader(bufferedReader);
         final HttpRequestBody httpRequestBody = extractBody(httpRequestHeaders.getContentLength(), bufferedReader);
         return new HttpRequest(startLine, httpRequestHeaders, httpRequestBody);

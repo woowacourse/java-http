@@ -19,7 +19,7 @@ public class HttpRequestStartLine {
 
     public static HttpRequestStartLine from(final String startLine) {
         if (startLine == null) {
-            return null;
+            throw new IllegalArgumentException("HTTP 요청이 올바르게 입력되지 않았습니다.");
         }
         final List<String> startLineTokens = List.of(startLine.split(" "));
         final HttpMethod method = HttpMethod.valueOf(startLineTokens.get(0));

@@ -39,4 +39,8 @@ public class RequestInfo {
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
+
+    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
+    }
 }

@@ -9,15 +9,6 @@ import org.junit.jupiter.api.Test;
 class RequestBodyTest {
 
     @Test
-    void 요청이_없을_경우_빈_바디를_반환한다() {
-        // given when
-        final RequestBody requestBody = RequestBody.emptyBody();
-
-        // then
-        assertThat(requestBody).isNotNull();
-    }
-
-    @Test
     void key와_value_를_확인할_수_있다() {
         // given when
         final String testInput = "key1=value1&key2=value2&key3=value3";

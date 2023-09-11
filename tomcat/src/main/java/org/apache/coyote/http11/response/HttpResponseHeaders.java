@@ -1,27 +1,25 @@
 package org.apache.coyote.http11.response;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpResponseHeaders {
 
-    private final Map<String, String> headers;
+    private final List<HttpResponseHeaderField> headers;
 
-    private HttpResponseHeaders(final Map<String, String> headers) {
+    private HttpResponseHeaders(final List<HttpResponseHeaderField> headers) {
         this.headers = headers;
     }
 
     public static HttpResponseHeaders empty() {
-        return new HttpResponseHeaders(new LinkedHashMap<>());
+        return new HttpResponseHeaders(new ArrayList<>());
     }
 
     public void add(final String key, final String value) {
-        headers.put(key, value);
+        headers.add(new HttpResponseHeaderField(key, value));
     }
 
-    public Set<Entry<String, String>> getEntrySet() {
-        return headers.entrySet();
+    public List<HttpResponseHeaderField> getHeaders() {
+        return headers;
     }
 }

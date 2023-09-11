@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 class HttpRequestTest {
 
     @Test
-    void request_get_요청_생성_테스트() throws IOException {
+    void http_request_get_요청_생성_테스트() throws IOException {
         final String request = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
@@ -30,7 +30,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void request_post_요청_생성_테스트() throws IOException {
+    void http_request_post_요청_생성_테스트() throws IOException {
         String body = "account=gugu&password=password&email=hkkang%40woowahan.com";
         int contentLength = body.getBytes().length;
         final String request = String.join("\r\n",

@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -14,9 +12,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Mapper mapper;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final Mapper mapper) {
         this.connection = connection;
+        this.mapper = mapper;
     }
 
     @Override
@@ -30,16 +30,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = HttpRequest.of(inputStream);
-            HttpResponse httpResponse = new HttpResponse();
+            HttpRequest request = HttpRequest.of(inputStream);
+            HttpResponse response = new HttpResponse();
 
-            HttpServletMapper httpServletMapper = new HttpServletMapper();
-            HttpServlet httpServlet = httpServletMapper.get(httpRequest.getPath());
-            httpServlet.service(httpRequest, httpResponse);
+            Controller controller = mapper.getController(request);
+            controller.service(request, response);
 
-            outputStream.write(httpResponse.generateResponse());
+            outputStream.write(response.generateResponse());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

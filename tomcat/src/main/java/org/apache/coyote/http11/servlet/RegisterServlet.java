@@ -38,6 +38,11 @@ public class RegisterServlet extends Servlet {
         if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
             throw new BadRequestException();
         }
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            throw new BadRequestException();
+        }
+
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 

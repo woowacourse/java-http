@@ -7,10 +7,13 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestStartLine;
 import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class RegisterController implements Controller {
 
@@ -19,7 +22,11 @@ public class RegisterController implements Controller {
     private static final String INDEX_PAGE_URI = "/index.html";
 
     @Override
-    public ResponseEntity service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
+        response.modifyResponse(generateResponseEntity(request));
+    }
+
+    private static ResponseEntity generateResponseEntity(HttpRequest request) {
         HttpRequestStartLine httpRequestStartLine = request.getHttpRequestStartLine();
         HttpRequestBody httpRequestBody = request.getHttpRequestBody();
         HttpMethod httpMethod = httpRequestStartLine.getHttpMethod();

@@ -19,15 +19,25 @@ public class HttpResponse {
     private static final String BLANK_LINE = "";
     private static final String BLANK_SPACE = " ";
 
-    private final HttpResponseStatusLine httpResponseStatusLine;
-    private final HttpResponseHeaders httpResponseHeaders;
-    private final HttpResponseBody httpResponseBody;
+    private HttpResponseStatusLine httpResponseStatusLine;
+    private HttpResponseHeaders httpResponseHeaders;
+    private HttpResponseBody httpResponseBody;
+
+    public HttpResponse() {
+        this(null, null, null);
+    }
 
     @Builder
     public HttpResponse(HttpResponseStatusLine httpResponseStatusLine, HttpResponseHeaders httpResponseHeaders, HttpResponseBody httpResponseBody) {
         this.httpResponseStatusLine = httpResponseStatusLine;
         this.httpResponseHeaders = httpResponseHeaders;
         this.httpResponseBody = httpResponseBody;
+    }
+
+    public void modifyResponse(ResponseEntity responseEntity) throws IOException {
+        this.httpResponseStatusLine = HttpResponseStatusLine.of(HTTP11, responseEntity.getHttpStatus());
+        this.httpResponseHeaders = generateHttpResponseHeaders(responseEntity, getOrGenerateResponseBody(responseEntity));
+        this.httpResponseBody = getOrGenerateResponseBody(responseEntity);
     }
 
     public static HttpResponse from(ResponseEntity responseEntity) throws IOException {

@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.*;
 import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.session.HttpCookie;
@@ -13,6 +14,7 @@ import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -26,7 +28,11 @@ public class LoginController implements Controller {
     private final SessionManager sessionManager = new SessionManager();
 
     @Override
-    public ResponseEntity service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
+        response.modifyResponse(generateResponseEntity(request));
+    }
+
+    private ResponseEntity generateResponseEntity(HttpRequest request) {
         HttpRequestStartLine httpRequestStartLine = request.getHttpRequestStartLine();
         HttpRequestHeader httpRequestHeader = request.getHttpRequestHeader();
         HttpRequestBody httpRequestBody = request.getHttpRequestBody();

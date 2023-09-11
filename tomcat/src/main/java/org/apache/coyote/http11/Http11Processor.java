@@ -6,7 +6,6 @@ import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +36,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            HttpResponse httpResponse = new HttpResponse();
 
             Controller controller = controllers.getController(httpRequest);
-            ResponseEntity responseEntity = controller.service(httpRequest);
-            String response = HttpResponse.from(responseEntity).getResponse();
+            controller.service(httpRequest, httpResponse);
+            String response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

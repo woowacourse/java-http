@@ -46,20 +46,26 @@ public class RegisterHandler extends AbstractHandler {
     @Override
     public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         Query query = Query.create(httpRequest.body());
-        if (query.isEmpty()) {
-            handleRedirectPage(httpRequest, httpResponse);
-        }
 
         String account = query.get(ACCOUNT);
         String email = query.get(EMAIL);
         String password = query.get(PASSWORD);
-        // success
-        if (account != null && email != null && password != null && !isDuplicateAccount(account)) {
-            InMemoryUserRepository.save(new User(account, password, email));
+        if (isInvalidRegisterFormat(account, email, password)) {
             handleRedirectPage(httpRequest, httpResponse);
             return;
         }
+
+        if (isDuplicateAccount(account)) {
+            handleRedirectPage(httpRequest, httpResponse);
+            return;
+        }
+        // success
+        InMemoryUserRepository.save(new User(account, password, email));
         handleRedirectPage(httpRequest, httpResponse);
+    }
+
+    private boolean isInvalidRegisterFormat(String account, String email, String password) {
+        return account == null || email == null || password == null;
     }
 
     private boolean isDuplicateAccount(String account) {

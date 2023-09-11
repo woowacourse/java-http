@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
-import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.RequestLine;
 
 public class HttpRequestParser {
@@ -19,7 +19,7 @@ public class HttpRequestParser {
 
     public static HttpRequest extract(BufferedReader reader) throws IOException {
         RequestLine requestLine = extractRequestLine(reader);
-        RequestHeaders requestHeaders = extractRequestHeaders(reader);
+        HttpHeaders requestHeaders = extractRequestHeaders(reader);
         RequestBody requestBody = extractRequestBody(reader, requestHeaders.contentLength());
 
         return new HttpRequest(requestLine, requestHeaders, requestBody);
@@ -33,7 +33,7 @@ public class HttpRequestParser {
         return RequestLine.from(requestLine);
     }
 
-    private static RequestHeaders extractRequestHeaders(BufferedReader reader) throws IOException {
+    private static HttpHeaders extractRequestHeaders(BufferedReader reader) throws IOException {
         Map<String, String> requestHeaders = new HashMap<>();
         String line = reader.readLine();
 
@@ -42,7 +42,7 @@ public class HttpRequestParser {
             line = reader.readLine();
         }
 
-        return RequestHeaders.from(requestHeaders);
+        return HttpHeaders.createRequestHeaders(requestHeaders);
     }
 
     private static boolean canRead(String line) {

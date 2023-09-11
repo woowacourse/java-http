@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.catalina.Manager;
+import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.session.HttpSession;
 import org.apache.coyote.http11.session.SessionManager;
@@ -12,12 +13,12 @@ public class HttpRequest {
     private static final Manager SESSION_MANAGER = SessionManager.INSTANCE;
 
     private final RequestLine requestLine;
-    private final RequestHeaders requestHeaders;
+    private final HttpHeaders requestHeaders;
     private final RequestBody requestBody;
 
     public HttpRequest(
             RequestLine requestLine,
-            RequestHeaders requestHeaders,
+            HttpHeaders requestHeaders,
             RequestBody requestBody
     ) {
         this.requestLine = requestLine;
@@ -33,7 +34,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public RequestHeaders getRequestHeaders() {
+    public HttpHeaders getRequestHeaders() {
         return requestHeaders;
     }
 

@@ -12,15 +12,15 @@ public class HttpSession {
         this.id = id;
     }
 
-    public Object getAttribute(final String name) {
+    public Object getAttribute(String name) {
         return attributes.get(name);
     }
 
-    public void setAttribute(final String name, final Object value) {
+    public void setAttribute(String name, Object value) {
         attributes.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
+    public void removeAttribute(String name) {
         attributes.remove(name);
     }
 

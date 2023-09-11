@@ -8,21 +8,21 @@ public enum SessionManager implements Manager {
 
     INSTANCE;
 
-    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
 
     @Override
     public void add(HttpSession httpSession) {
-        SESSIONS.put(httpSession.getId(), httpSession);
+        sessions.put(httpSession.getId(), httpSession);
     }
 
     @Override
     public HttpSession findSession(String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(HttpSession httpSession) {
-        SESSIONS.remove(httpSession.getId());
+        sessions.remove(httpSession.getId());
     }
 
 }

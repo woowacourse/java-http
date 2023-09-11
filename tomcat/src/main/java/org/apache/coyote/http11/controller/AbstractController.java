@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -20,7 +21,10 @@ public abstract class AbstractController<T> implements Controller {
         }
         if (httpRequest.isSameHttpMethod(HttpMethod.POST)) {
             doPost(httpRequest, httpResponse);
+            return;
         }
+        httpResponse.setHttpStatus(HttpStatus.NOT_FOUND)
+                .setRedirect("/404.html");
     }
 
     protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse);

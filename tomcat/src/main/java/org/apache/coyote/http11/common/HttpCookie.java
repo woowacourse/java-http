@@ -70,10 +70,4 @@ public class HttpCookie {
         return String.format("Set-Cookie: %s=%s ", entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public String toString() {
-        return "HttpCookie{" +
-                "cookies=" + cookies +
-                '}';
-    }
 }

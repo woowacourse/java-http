@@ -9,7 +9,7 @@ public class HttpHeaders {
     private final Map<String, String> headers;
     private final HttpCookie httpCookie;
 
-    public HttpHeaders(Map<String, String> headers, HttpCookie httpCookie) {
+    private HttpHeaders(Map<String, String> headers, HttpCookie httpCookie) {
         this.headers = headers;
         this.httpCookie = httpCookie;
     }
@@ -48,6 +48,10 @@ public class HttpHeaders {
         return httpCookie.findJSessionId();
     }
 
+    public String contentLength() {
+        return headers.getOrDefault("Content-Length", "0");
+    }
+
     public StringBuilder convertResponseHeaders() {
         return new StringBuilder()
                     .append(httpCookie.getCookies())
@@ -64,11 +68,4 @@ public class HttpHeaders {
         return String.join(": ", entry.getKey(), entry.getValue());
     }
 
-    @Override
-    public String toString() {
-        return "HttpHeaders{" +
-                "headers=" + headers +
-                ", httpCookie=" + httpCookie +
-                '}';
-    }
 }

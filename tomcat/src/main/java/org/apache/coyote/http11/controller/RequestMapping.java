@@ -20,14 +20,14 @@ public enum RequestMapping {
 
     INSTANCE;
 
-    private static final Map<String, Controller> CONTROLLERS = new ConcurrentHashMap<>();
+    private static final Map<String, Controller> controllers = new ConcurrentHashMap<>();
 
     static {
-        CONTROLLERS.put("/", new DefaultController());
-        CONTROLLERS.put("/index", new ResourceController());
-        CONTROLLERS.put("/login", new LoginController(new UserService()));
-        CONTROLLERS.put("/register", new RegisterController(new UserService()));
-        CONTROLLERS.put("/401", new UnauthorizedController());
+        controllers.put("/", new DefaultController());
+        controllers.put("/index", new ResourceController());
+        controllers.put("/login", new LoginController(new UserService()));
+        controllers.put("/register", new RegisterController(new UserService()));
+        controllers.put("/401", new UnauthorizedController());
     }
 
     public void extractHttpResponse(HttpRequest request, HttpResponse response) {
@@ -48,7 +48,7 @@ public enum RequestMapping {
         if (path.contains(".")) {
             return new ResourceController();
         }
-        return CONTROLLERS.getOrDefault(path, new NotFoundController());
+        return controllers.getOrDefault(path, new NotFoundController());
     }
 
     private void render(HttpResponse response) {

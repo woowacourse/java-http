@@ -11,11 +11,11 @@ public class RequestBody {
 
     private final Map<String, String> body;
 
-    private RequestBody(final Map<String, String> body) {
+    private RequestBody(Map<String, String> body) {
         this.body = body;
     }
 
-    public static RequestBody from(final String requestBody) {
+    public static RequestBody from(String requestBody) {
         if (requestBody == null || requestBody.isEmpty()) {
             return EMPTY;
         }
@@ -30,7 +30,7 @@ public class RequestBody {
         return new RequestBody(body);
     }
 
-    public String get(final String key) {
+    public String get(String key) {
         return body.get(key);
     }
 

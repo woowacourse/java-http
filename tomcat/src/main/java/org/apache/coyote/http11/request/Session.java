@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
     private final String id;
-    private final Map<String, Object> value = new HashMap<>();
+    private final Map<String, Object> value = new ConcurrentHashMap<>();
     private LocalDateTime expiredAt;
 
     public Session() {

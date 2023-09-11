@@ -27,19 +27,22 @@ public class StaticResourceController implements Controller {
         buildResponse(request.getPath(), request, response);
     }
 
-    private void buildResponse(String path, Request request, Response response) throws IOException {
+    private void buildResponse(String path, Request request, Response response) {
         response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
         response.addHttpStatus(OK);
 
-        URL resource = getResource(path);
+        try {
+            URL resource = getResource(path);
+            String fileContent = readFileContent(resource);
+            ContentType contentType = ContentType.findByPath(path);
 
-        String fileContent = readFileContent(resource);
-        ContentType contentType = ContentType.findByPath(path);
+            response.addContentType(contentType);
 
-        response.addContentType(contentType);
-
-        if (fileContent.length() != 0) {
-            response.addBody(fileContent);
+            if (fileContent.length() != 0) {
+                response.addBody(fileContent);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
         }
     }
 

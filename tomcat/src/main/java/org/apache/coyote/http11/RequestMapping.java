@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.controller.*;
+import nextstep.jwp.controller.*;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.DefaultController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 import java.util.List;

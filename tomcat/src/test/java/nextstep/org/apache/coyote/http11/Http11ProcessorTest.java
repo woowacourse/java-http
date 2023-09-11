@@ -1,5 +1,10 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.RootController;
+import org.apache.catalina.DispatcherServlet;
+import org.apache.catalina.RequestMapping;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -17,7 +22,11 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final RequestMapping requestMapper = new RequestMapping()
+                .addHandler("/", new RootController())
+                .addHandler("/login", new LoginController())
+                .addHandler("register", new RegisterController());
+        final Http11Processor processor = new Http11Processor(socket, new DispatcherServlet(requestMapper));
 
         // when
         processor.process(socket);
@@ -44,7 +53,11 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final RequestMapping requestMapper = new RequestMapping()
+                .addHandler("/", new RootController())
+                .addHandler("/login", new LoginController())
+                .addHandler("register", new RegisterController());
+        final Http11Processor processor = new Http11Processor(socket, new DispatcherServlet(requestMapper));
 
         // when
         processor.process(socket);

@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestGenerator {
+public class HttpRequestParser {
 
-    private RequestGenerator() {
+    private HttpRequestParser() {
     }
 
     public static HttpRequest generate(final BufferedReader reader) throws IOException {
@@ -40,7 +40,7 @@ public class RequestGenerator {
     }
 
     private static RequestBody readRequestBody(final BufferedReader reader, final RequestHeader requestHeader) throws IOException {
-        if (requestHeader.getHeaderValue("Content-Type") == null) {
+        if (requestHeader.getHeaderValue("Content-Length") == null) {
             return null;
         }
         int contentLength = Integer.parseInt(requestHeader.getHeaderValue("Content-Length"));

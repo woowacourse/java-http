@@ -4,7 +4,7 @@ import org.apache.coyote.http11.common.Cookie;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class ResponseHeaders {
 
@@ -25,12 +25,9 @@ public class ResponseHeaders {
     }
 
     public String generateMessage() {
-        StringJoiner headers = new StringJoiner("\r\n");
-        responseHeaders.entrySet().stream()
+        return responseHeaders.entrySet().stream()
                 .map(headerEntry -> headerEntry.getKey() + ": " + headerEntry.getValue() + " ")
-                .forEach(headers::add);
-
-        return headers.toString();
+                .collect(Collectors.joining("\r\n"));
     }
 
     public String generateCookieMessage() {

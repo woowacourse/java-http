@@ -3,7 +3,6 @@ package org.apache.coyote.http11.common;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import static org.apache.coyote.http11.response.ResponseHeaderKey.SET_COOKIE;
@@ -45,11 +44,10 @@ public class Cookie {
     }
 
     public String generateResponseMessage() {
-        StringJoiner cookieHeader = new StringJoiner(COOKIE_DELIMITER);
-        cookies.entrySet().stream()
+        String cookieValue = cookies.entrySet().stream()
                 .map(cookieEntry -> cookieEntry.getKey() + COOKIE_VALUE_DELIMITER + cookieEntry.getValue())
-                .forEach(cookieHeader::add);
+                .collect(Collectors.joining(COOKIE_DELIMITER));
 
-        return String.format("%s: %s ", SET_COOKIE.getResponseHeaderName(), cookieHeader);
+        return String.format("%s: %s ", SET_COOKIE.getResponseHeaderName(), cookieValue);
     }
 }

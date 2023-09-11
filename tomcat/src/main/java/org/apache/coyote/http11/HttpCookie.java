@@ -7,11 +7,13 @@ import org.apache.catalina.Session;
 
 public class HttpCookie {
 
+    public static final String SESSION_KEY = "JSESSIONID";
+
     private Map<String, String> keyValues;
 
     public static HttpCookie from(Session session) {
         final var keyValues = new HashMap<String, String>();
-        keyValues.put("JSESSIONID", session.getId());
+        keyValues.put(SESSION_KEY, session.getId());
         return new HttpCookie(keyValues);
     }
 

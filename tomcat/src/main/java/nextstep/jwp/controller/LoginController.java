@@ -14,6 +14,7 @@ import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.coyote.http11.HttpCookie.SESSION_KEY;
 import static org.apache.coyote.http11.HttpStatus.FOUND;
 import static org.apache.coyote.http11.HttpStatus.UNAUTHORIZED;
 
@@ -66,7 +67,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isAlreadyLoggedIn(final HttpRequest request) {
-        String sessionId = request.getCookie("JSESSIONID");
+        String sessionId = request.getCookie(SESSION_KEY);
         if (sessionId == null) {
             return false;
         }

@@ -2,15 +2,8 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.ControllerMapping;
-import nextstep.jwp.controller.page.InternalServerErrorController;
-import nextstep.jwp.util.ResponseBodyUtil;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 

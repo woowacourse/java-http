@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -36,9 +38,10 @@ class HttpRequestMessageReaderTest {
                 "");
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
         final InputStream inputStream = stubSocket.getInputStream();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(br);
 
         // then
         assertSoftly(softAssertions -> {
@@ -50,7 +53,7 @@ class HttpRequestMessageReaderTest {
                     assertThat(httpRequest.getHeader("Cache-Control")).isEqualTo("max-age=0");
                 }
         );
-        stubSocket.close();
+        br.close();
     }
 
     @Test
@@ -64,12 +67,13 @@ class HttpRequestMessageReaderTest {
                 "");
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
         final InputStream inputStream = stubSocket.getInputStream();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         // when & then
-        assertThatThrownBy(() -> HttpRequestMessageReader.readHttpRequest(inputStream))
+        assertThatThrownBy(() -> HttpRequestMessageReader.readHttpRequest(br))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("시작 라인의 토큰은 3개여야 합니다.");
-        stubSocket.close();
+        br.close();
     }
 
     @Test
@@ -83,16 +87,17 @@ class HttpRequestMessageReaderTest {
                 "");
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
         final InputStream inputStream = stubSocket.getInputStream();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(inputStream);
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(br);
 
         // then
         assertSoftly(softAssertions -> {
             assertThat(httpRequest.getParam("name")).isEqualTo("royce");
             assertThat(httpRequest.getParam("password")).isEqualTo("p1234");
         });
-        stubSocket.close();
+        br.close();
     }
 
     @Test
@@ -108,16 +113,18 @@ class HttpRequestMessageReaderTest {
                 "",
                 requestBody);
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+        final InputStream inputStream = stubSocket.getInputStream();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(br);
 
         // then
         assertSoftly(softAssertions -> {
             assertThat(httpRequest.getPayloadValue("name")).isEqualTo("royce");
             assertThat(httpRequest.getPayloadValue("password")).isEqualTo("p1234");
         });
-        stubSocket.close();
+        br.close();
     }
 
     @Test
@@ -134,9 +141,11 @@ class HttpRequestMessageReaderTest {
                 "",
                 requestBody);
         final StubSocket stubSocket = new StubSocket(httpRequestMessage);
+        final InputStream inputStream = stubSocket.getInputStream();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(stubSocket.getInputStream());
+        final HttpRequest httpRequest = HttpRequestMessageReader.readHttpRequest(br);
 
         // then
         assertSoftly(softly -> {
@@ -144,6 +153,6 @@ class HttpRequestMessageReaderTest {
             softly.assertThat(httpRequest.getCookie("newjeans_cookie")).isEqualTo("newjeans");
             softly.assertThat(httpRequest.getCookie("JSESSIONID")).isEqualTo("randomUUID");
         });
-        stubSocket.close();
+        br.close();
     }
 }

@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import org.apache.coyote.http11.view.StaticResourceView;
+import org.apache.coyote.http11.view.View;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -42,9 +44,10 @@ class StaticResourceViewTest {
     void 존재하지_않는_리소스_접근시_예외발생() {
         // given
         final String resourcePath = "/not_found.html";
+        final StaticResourceView staticResourceView = StaticResourceView.of(resourcePath);
 
         // when & then
-        assertThatThrownBy(() -> StaticResourceView.of(resourcePath))
+        assertThatThrownBy(staticResourceView::renderView)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Resource not found: " + resourcePath);
     }

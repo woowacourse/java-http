@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.mvc.view;
+package org.apache.coyote.http11.view;
 
 public class SimpleStringDataView implements View {
 
@@ -6,8 +6,12 @@ public class SimpleStringDataView implements View {
 
     private final String data;
 
-    public SimpleStringDataView(final String data) {
+    private SimpleStringDataView(final String data) {
         this.data = data;
+    }
+
+    public static SimpleStringDataView from(final String data) {
+        return new SimpleStringDataView(data);
     }
 
     @Override

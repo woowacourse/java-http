@@ -14,12 +14,12 @@ public class RegisterHandler extends GetAndPostHandler {
     private final FileHandler fileHandler = new FileHandler();
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        return fileHandler.handle(httpRequest);
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        fileHandler.handle(httpRequest, httpResponse);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest httpRequest) {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         FormData formData = FormData.of(httpRequest.getBody());
 
         String account = formData.get("account");
@@ -27,6 +27,6 @@ public class RegisterHandler extends GetAndPostHandler {
         String email = formData.get("email");
 
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponse.redirectTo(MAIN_LOCATION);
+        httpResponse.redirectTo(MAIN_LOCATION);
     }
 }

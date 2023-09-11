@@ -13,36 +13,32 @@ public class HttpResponse {
     public static final String HTTP_VERSION = "HTTP/1.1";
     private static final String EMPTY_BODY = "";
 
-    private final HttpStatus status;
-    private final String body;
+    private HttpStatus status;
+    private String body;
     private final Map<String, HttpHeader> headers = new HashMap<>();
 
-    public HttpResponse(final String body, final String contentType) {
-        this(HttpStatus.OK, body, List.of(new ContentType(contentType)));
+    public HttpResponse() {
+        this.status = HttpStatus.OK;
+        setContentType(new ContentType("text/html"));
     }
 
-    public HttpResponse(final HttpStatus status, final List<HttpHeader> headers) {
-        this(status, EMPTY_BODY, headers);
+    public void redirectTo(final String location) {
+        setStatus(HttpStatus.FOUND);
+        setBody(EMPTY_BODY);
+        putHeader(new HttpHeader("Location", location));
     }
 
-    public HttpResponse(final HttpStatus status, final String body, final List<HttpHeader> headers) {
+    public void setStatus(final HttpStatus status) {
         this.status = status;
-        this.body = body;
-        putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
-        for (HttpHeader header : headers) {
-            putHeader(header);
-        }
-    }
-
-    public static HttpResponse redirectTo(final String location) {
-        return new HttpResponse(
-                HttpStatus.FOUND,
-                List.of(new HttpHeader("Location", location))
-        );
     }
 
     public HttpStatus getStatus() {
         return status;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
     }
 
     public String getBody() {
@@ -55,6 +51,10 @@ public class HttpResponse {
 
     public void putHeader(HttpHeader header) {
         this.headers.put(header.getName(), header);
+    }
+
+    public void setContentType(ContentType contentType) {
+        putHeader(contentType);
     }
 
     public List<HttpHeader> getHeaders() {

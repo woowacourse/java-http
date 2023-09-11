@@ -26,12 +26,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final LoginHandler LOGIN_HANDLER = new LoginHandler();
     private static final RegisterHandler REGISTER_HANDLER = new RegisterHandler();
     private static final Map<String, Handler> PREDEFINED_HANDLERS = Map.of(
-            "/", httpRequest -> new HttpResponse("Hello world!", "text/html"),
+            "/", (request, response) -> response.setBody("Hello world!"),
             "/login", LOGIN_HANDLER,
             "/login.html", LOGIN_HANDLER,
             "/register", REGISTER_HANDLER,
             "/register.html", REGISTER_HANDLER
     );
+    private static final String WHITE_SPACE = " ";
 
     private final Socket connection;
 
@@ -51,13 +52,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            HttpResponse httpResponse = handle(httpRequest);
+            HttpResponse httpResponse = new HttpResponse();
+            handle(httpRequest, httpResponse);
 
             String headerLines = httpResponse.getHeaders().stream()
                     .map(HttpHeader::toLine)
                     .collect(Collectors.joining(CRLF));
             final var response = String.join(CRLF,
-                    HttpResponse.HTTP_VERSION + httpResponse.getStatus().toLine(),
+                    HttpResponse.HTTP_VERSION + WHITE_SPACE + httpResponse.getStatus().toLine(),
                     headerLines,
                     "",
                     httpResponse.getBody()
@@ -70,10 +72,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handle(final HttpRequest httpRequest) {
+    private void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (PREDEFINED_HANDLERS.containsKey(httpRequest.getTarget().getPath())) {
-            return PREDEFINED_HANDLERS.get(httpRequest.getTarget().getPath()).handle(httpRequest);
+            PREDEFINED_HANDLERS.get(httpRequest.getTarget().getPath())
+                    .handle(httpRequest, httpResponse);
+            return;
         }
-        return DEFAULT_HANDLER.handle(httpRequest);
+        DEFAULT_HANDLER.handle(httpRequest, httpResponse);
     }
 }

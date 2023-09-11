@@ -6,14 +6,15 @@ import org.apache.coyote.http11.HttpResponse;
 public abstract class GetAndPostHandler implements Handler {
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
+    public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         if (httpRequest.getMethod().isGet()) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
-        return doPost(httpRequest);
+        doPost(httpRequest, httpResponse);
     }
 
-    protected abstract HttpResponse doGet(final HttpRequest httpRequest);
+    protected abstract void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse);
 
-    protected abstract HttpResponse doPost(final HttpRequest httpRequest);
+    protected abstract void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse);
 }

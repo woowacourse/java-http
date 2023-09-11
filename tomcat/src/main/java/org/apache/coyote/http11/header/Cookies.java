@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.header;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,7 @@ public class Cookies {
     private final Map<String, String> cookies;
 
     public Cookies() {
-        this(Collections.emptyMap());
+        this(new HashMap<>());
     }
 
     private Cookies(Map<String, String> cookies) {

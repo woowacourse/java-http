@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.header.ContentType;
 
 public class FileHandler implements Handler {
 
@@ -17,20 +18,20 @@ public class FileHandler implements Handler {
     private static final String DEFAULT_INDEX = "index";
     private static final String DEFAULT_EXTENSION = ".html";
 
-    private static final Map<String, String> CONTENT_TYPES_BY_EXTENSION = Map.of(
-            "html", "text/html",
-            "css", "text/css"
+    private static final Map<String, ContentType> CONTENT_TYPES_BY_EXTENSION = Map.of(
+            "html", new ContentType("text/html"),
+            "css", new ContentType("text/css")
     );
 
     @Override
-    public HttpResponse handle(final HttpRequest httpRequest) {
+    public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
             String targetPath = fillExtensionIfDoesNotExist(httpRequest.getTarget().getPath());
 
             File resource = getResourceFileFrom(targetPath);
             String body = Files.readString(resource.toPath());
-            String contentType = getContentTypeFrom(targetPath);
-            return new HttpResponse(body, contentType);
+            httpResponse.setContentType(getContentTypeFrom(targetPath));
+            httpResponse.setBody(body);
         } catch (IOException exception) {
             throw new IllegalArgumentException("파일 읽기에 실패했습니다");
         }
@@ -43,12 +44,12 @@ public class FileHandler implements Handler {
         return target;
     }
 
-    private String getContentTypeFrom(final String target) {
+    private ContentType getContentTypeFrom(final String target) {
         String extension = getExtensionOf(target);
         if (CONTENT_TYPES_BY_EXTENSION.containsKey(extension)) {
             return CONTENT_TYPES_BY_EXTENSION.get(extension);
         }
-        return CONTENT_TYPES_BY_EXTENSION.get(DEFAULT_EXTENSION);
+        return new ContentType("text/html");
     }
 
     private File getResourceFileFrom(final String target) {

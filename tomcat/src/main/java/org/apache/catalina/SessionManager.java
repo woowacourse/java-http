@@ -6,14 +6,14 @@ import org.apache.coyote.http11.security.Session;
 
 public class SessionManager implements Manager {
 
-    private static final Manager sessionManager = new SessionManager();
+    private static final Manager manager = new SessionManager();
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
 
     public static Manager getInstance() {
-        return sessionManager;
+        return manager;
     }
 
     @Override

@@ -23,11 +23,6 @@ import static org.reflections.Reflections.log;
 public class RegisterController extends AbstractController {
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException {
-        super.service(httpRequest, httpResponse);
-    }
-
-    @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> userInfo = readUserInfo(httpRequest.getRequestBody());
         User user = new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));

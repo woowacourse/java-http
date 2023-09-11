@@ -18,16 +18,6 @@ import static nextstep.jwp.common.StatusCode.OK;
 public class FileController extends AbstractController {
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException {
-        super.service(httpRequest, httpResponse);
-    }
-
-    @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-
-    }
-
-    @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException {
         Path path = readPath(httpRequest.getHttpLine().getUrl());
         byte[] bytes = readBytes(path);
@@ -36,16 +26,16 @@ public class FileController extends AbstractController {
             httpResponse.setStatusCode(NOT_FOUND);
             return;
         }
+        setResponse(httpRequest, httpResponse, bytes);
+    }
+
+    private void setResponse(HttpRequest httpRequest, HttpResponse httpResponse, byte[] bytes) {
         String responseBody = new String(bytes);
         ContentType contentType = ContentType.from(httpRequest.getHttpLine().getUrl());
         HttpHeader httpResponseHeader = HttpHeader.from(List.of(
                 "Content-Type: " + contentType.getContentType() + ";charset=utf-8",
                 "Content-Length: " + responseBody.getBytes().length));
 
-        setResponse(httpResponse, responseBody, httpResponseHeader);
-    }
-
-    private void setResponse(HttpResponse httpResponse, String responseBody, HttpHeader httpResponseHeader) {
         httpResponse.setVersion("HTTP/1.1");
         httpResponse.setStatusCode(OK);
         httpResponse.setHttpHeader(httpResponseHeader);
@@ -54,11 +44,10 @@ public class FileController extends AbstractController {
 
     private Path readPath(String url) throws URISyntaxException {
         URL resourcePath = getClass().getClassLoader().getResource("static" + url);
-        System.out.println(resourcePath.toString());
         return Path.of(resourcePath.toURI());
     }
 
-    private byte[] readBytes(Path path) throws IOException {
+    private byte[] readBytes(Path path) {
         try {
             byte[] bytes = Files.readAllBytes(path);
             return bytes;

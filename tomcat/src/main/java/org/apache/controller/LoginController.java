@@ -29,11 +29,6 @@ import static org.reflections.Reflections.log;
 public class LoginController extends AbstractController {
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws URISyntaxException, IOException {
-        super.service(httpRequest, httpResponse);
-    }
-
-    @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> userInfo = readUserInfo(httpRequest.getRequestBody());
         try {

@@ -12,9 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.coyote.http11.common.HttpHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.common.HttpHeaderType.LOCATION;
-import static org.apache.coyote.http11.common.MediaType.TEXT_HTML;
 import static org.apache.coyote.http11.response.HttpStatusCode.FOUND;
 
 public class RegisterController extends HttpController {
@@ -45,7 +43,6 @@ public class RegisterController extends HttpController {
                 httpRequest.getBody().get("email")
         );
         InMemoryUserRepository.save(newUser);
-        httpResponse.addHeader(CONTENT_TYPE, TEXT_HTML.stringifyWithUtf());
         httpResponse.addHeader(LOCATION, "/index.html");
         httpResponse.setStatusCode(FOUND);
     }

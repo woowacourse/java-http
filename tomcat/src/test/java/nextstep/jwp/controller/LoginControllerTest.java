@@ -120,10 +120,7 @@ class LoginControllerTest {
         );
 
         HttpResponse httpResponse = HttpResponse.init();
-        Map<String, String> headers = Map.of(
-                CONTENT_TYPE.getName(), TEXT_HTML.stringifyWithUtf(),
-                LOCATION.getName(), "/index.html"
-        );
+        Map<String, String> headers = Map.of(LOCATION.getName(), "/index.html");
 
         // when
         loginController.doGet(httpRequest, httpResponse);
@@ -155,10 +152,7 @@ class LoginControllerTest {
         );
 
         HttpResponse httpResponse = HttpResponse.init();
-        Map<String, String> headers = Map.of(
-                CONTENT_TYPE.getName(), TEXT_HTML.stringifyWithUtf(),
-                LOCATION.getName(), "/401.html"
-        );
+        Map<String, String> headers = Map.of(LOCATION.getName(), "/401.html");
 
         // when
         loginController.doPost(httpRequest, httpResponse);
@@ -190,10 +184,7 @@ class LoginControllerTest {
         );
 
         HttpResponse httpResponse = HttpResponse.init();
-        Map<String, String> headers = Map.of(
-                CONTENT_TYPE.getName(), TEXT_HTML.stringifyWithUtf(),
-                LOCATION.getName(), "/index.html"
-        );
+        Map<String, String> headers = Map.of(LOCATION.getName(), "/index.html");
 
         // when
         loginController.doPost(httpRequest, httpResponse);
@@ -226,7 +217,6 @@ class LoginControllerTest {
 
         HttpResponse httpResponse = HttpResponse.init();
         Map<String, String> headers = Map.of(
-                CONTENT_TYPE.getName(), TEXT_HTML.stringifyWithUtf(),
                 SET_COOKIE.getName(), "JSESSIONID=",
                 LOCATION.getName(), "/index.html"
         );

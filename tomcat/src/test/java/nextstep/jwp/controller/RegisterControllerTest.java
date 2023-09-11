@@ -124,10 +124,7 @@ class RegisterControllerTest {
         );
 
         HttpResponse httpResponse = HttpResponse.init();
-        Map<String, String> headers = Map.of(
-                CONTENT_TYPE.getName(), TEXT_HTML.stringifyWithUtf(),
-                LOCATION.getName(), "/index.html"
-        );
+        Map<String, String> headers = Map.of(LOCATION.getName(), "/index.html");
 
         // when
         registerController.doPost(httpRequest, httpResponse);

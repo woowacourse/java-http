@@ -31,10 +31,11 @@ class RegisterControllerTest extends ControllerTestSupport {
                 "",
                 String.format("account=%s&password=%s&email=%s", account, password, email));
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final RegisterController registerController = new RegisterController();
 
         // when
-        final HttpResponse httpResponse = registerController.service(httpRequest);
+        registerController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -60,10 +61,11 @@ class RegisterControllerTest extends ControllerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final RegisterController registerController = new RegisterController();
 
         // when
-        final HttpResponse httpResponse = registerController.service(httpRequest);
+        registerController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 200 OK",
@@ -84,10 +86,11 @@ class RegisterControllerTest extends ControllerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final RegisterController registerController = new RegisterController();
 
         // when
-        final HttpResponse httpResponse = registerController.service(httpRequest);
+        registerController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 405 Method Not Allowed",

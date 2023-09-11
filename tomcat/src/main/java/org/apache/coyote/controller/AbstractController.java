@@ -7,17 +7,19 @@ import org.apache.coyote.httpresponse.HttpResponse;
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    public void service(final HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.isSameRequestMethod(RequestMethod.GET)) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (httpRequest.isSameRequestMethod(RequestMethod.POST)) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+            return;
         }
-        return new MethodNotAllowedController().service(httpRequest);
+        new MethodNotAllowedController().service(httpRequest, httpResponse);
     }
 
-    protected abstract HttpResponse doPost(final HttpRequest httpRequest);
+    protected abstract void doPost(final HttpRequest httpRequest, HttpResponse httpResponse);
 
-    protected abstract HttpResponse doGet(final HttpRequest httpRequest);
+    protected abstract void doGet(final HttpRequest httpRequest, HttpResponse httpResponse);
 }

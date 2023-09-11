@@ -16,17 +16,17 @@ public class HttpResponse {
     private static final String LINE_SEPARATOR = "\r\n";
 
     private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
-    private final CookieResponseHeader cookieResponseHeader;
-    private final ResponseHeaders responseHeaders;
-    private final ContentBody contentBody;
+    private HttpStatus httpStatus;
+    private CookieResponseHeader cookieResponseHeader;
+    private ResponseHeaders responseHeaders;
+    private ContentBody contentBody;
 
     public HttpResponse(
             final HttpVersion httpVersion,
-            final HttpStatus httpStatus,
-            final CookieResponseHeader cookieResponseHeader,
-            final ResponseHeaders responseHeaders,
-            final ContentBody contentBody
+            HttpStatus httpStatus,
+            CookieResponseHeader cookieResponseHeader,
+            ResponseHeaders responseHeaders,
+            ContentBody contentBody
     ) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
@@ -47,27 +47,27 @@ public class HttpResponse {
                 ContentBody.noContent());
     }
 
-    public HttpResponse setHttpStatus(final HttpStatus httpStatus) {
+    public void setHttpStatus(final HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
         log.debug("Http Status: {}", httpStatus);
-        return new HttpResponse(this.httpVersion, httpStatus, this.cookieResponseHeader, this.responseHeaders, this.contentBody);
     }
 
-    public HttpResponse setCookieHeader(final CookieResponseHeader cookieResponseHeader) {
-        return new HttpResponse(this.httpVersion, httpStatus, cookieResponseHeader, this.responseHeaders, this.contentBody);
+    public void setCookieHeader(final CookieResponseHeader cookieResponseHeader) {
+        this.cookieResponseHeader = cookieResponseHeader;
     }
 
-    public HttpResponse setContent(final String path) {
+    public void setContent(final String path) {
         final String content = ResourceReader.read(path);
         final ContentBody newContentBody = new ContentBody(content);
-        final ResponseHeaders newResponseHeaders = ResponseHeaders.of(path, newContentBody);
+        this.contentBody = newContentBody;
+        this.responseHeaders =  ResponseHeaders.of(path, newContentBody);;
         log.debug("Content-Path: {}", path);
-        return new HttpResponse(this.httpVersion, this.httpStatus, this.cookieResponseHeader, newResponseHeaders, newContentBody);
     }
 
-    public HttpResponse setLocationHeader(final String path) {
+    public void setLocationHeader(final String path) {
         responseHeaders.setLocationHeader(path);
+        this.httpStatus = HttpStatus.FOUND;
         log.debug("Location: {}", path);
-        return new HttpResponse(this.httpVersion, HttpStatus.FOUND, this.cookieResponseHeader, responseHeaders, this.contentBody);
     }
 
     public byte[] getBytes() {

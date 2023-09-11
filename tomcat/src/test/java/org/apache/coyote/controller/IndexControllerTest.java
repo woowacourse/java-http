@@ -20,10 +20,11 @@ class IndexControllerTest extends ControllerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final IndexController indexController = new IndexController();
 
         // when
-        final HttpResponse httpResponse = indexController.service(httpRequest);
+        indexController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 200 OK",

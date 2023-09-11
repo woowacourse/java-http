@@ -18,20 +18,21 @@ class AbstractControllerTest extends ControllerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
 
         // when
         final AbstractController abstractController = new AbstractController() {
             @Override
-            protected HttpResponse doPost(final HttpRequest httpRequest) {
-                return HttpResponse.init(httpRequest.getHttpVersion());
+            protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+                HttpResponse.init(httpRequest.getHttpVersion());
             }
 
             @Override
-            protected HttpResponse doGet(final HttpRequest httpRequest) {
-                return HttpResponse.init(httpRequest.getHttpVersion());
+            protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+                HttpResponse.init(httpRequest.getHttpVersion());
             }
         };
-        final HttpResponse httpResponse = abstractController.service(httpRequest);
+        abstractController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
 
         // then

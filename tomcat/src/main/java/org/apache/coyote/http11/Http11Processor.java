@@ -39,8 +39,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
             final RequestMapping requestMapping = new RequestMapping();
             final HttpRequest request = HttpRequest.from(inputStream);
+            HttpResponse response = HttpResponse.init(request.getHttpVersion());
             final Controller controller = requestMapping.getController(request);
-            final HttpResponse response = controller.service(request);
+            controller.service(request, response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {

@@ -7,10 +7,8 @@ import org.apache.coyote.httpresponse.HttpStatus;
 public class MethodNotAllowedController implements Controller {
 
     @Override
-    public HttpResponse service(final HttpRequest request) {
-        return HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED)
-                .setContent("/405.html");
+    public void service(final HttpRequest request, final HttpResponse response) {
+        response.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
+        response.setContent("/405.html");
     }
 }

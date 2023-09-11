@@ -20,10 +20,11 @@ class UnAuthorizedControllerTest extends ControllerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final UnAuthorizedController unAuthorizedController = new UnAuthorizedController();
 
         // when
-        final HttpResponse httpResponse = unAuthorizedController.service(httpRequest);
+        unAuthorizedController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 401 Unauthorized",

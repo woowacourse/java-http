@@ -20,10 +20,11 @@ class MethodNotAllowedControllerTest extends ControllerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final MethodNotAllowedController methodNotAllowedController = new MethodNotAllowedController();
 
         // when
-        final HttpResponse httpResponse = methodNotAllowedController.service(httpRequest);
+        methodNotAllowedController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 405 Method Not Allowed",

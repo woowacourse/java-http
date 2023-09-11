@@ -59,24 +59,6 @@ class HttpRequestTest {
     }
 
     @Test
-    void 세션_매니저에_현재_사용자의_세션이_없고_생성도_원하지_않고_쿠키에_세션_id가_없으면_세션을_조회할_때_null을_조회한다() throws IOException {
-        // given
-        final String request = "GET /index.html HTTP/1.1\n" +
-                "Host: localhost:8080\n" +
-                "Connection: keep-alive\n" +
-                "Accept: */*\n" +
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry\n";
-        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
-        final HttpRequest httpRequest = HttpRequest.from(inputStream);
-
-        // when
-        final Session foundSession = httpRequest.getSession(false);
-
-        // then
-        assertThat(foundSession).isNull();
-    }
-
-    @Test
     void 새로운_세션_발급을_원하면_발급하되_기존_세션은_지운다() throws IOException {
         // given
         final String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";

@@ -7,15 +7,13 @@ import org.apache.coyote.httpresponse.HttpStatus;
 public class IndexController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
-        return new MethodNotAllowedController().service(request);
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        new MethodNotAllowedController().service(request, response);
     }
 
     @Override
-    public HttpResponse doGet(final HttpRequest request) {
-        return HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.OK)
-                .setContent(request.getPath());
+    public void doGet(final HttpRequest request, final HttpResponse response) {
+        response.setHttpStatus(HttpStatus.OK);
+        response.setContent(request.getPath());
     }
 }

@@ -11,12 +11,10 @@ import org.apache.coyote.httpresponse.HttpStatus;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         saveUser(request.getRequestBody());
-        return HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.CREATED)
-                .setLocationHeader("/index.html");
+        response.setHttpStatus(HttpStatus.CREATED);
+        response.setLocationHeader("/index.html");
     }
 
     private void saveUser(final RequestBody requestBody) {
@@ -25,11 +23,9 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String resourcePath = request.getPath() + ".html";
-        return HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.OK)
-                .setContent(resourcePath);
+        response.setHttpStatus(HttpStatus.OK);
+        response.setContent(resourcePath);
     }
 }

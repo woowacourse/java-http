@@ -23,52 +23,49 @@ public class LoginController extends AbstractController {
     private static final String REDIRECT_URL = "/index.html";
 
     @Override
-    public HttpResponse service(final HttpRequest request) {
+    public void service(final HttpRequest request, final HttpResponse response) {
         final RequestMethod requestMethod = request.getRequestMethod();
         try {
             if (requestMethod == RequestMethod.POST) {
-                return doPost(request);
+                doPost(request, response);
+                return;
             }
             if (requestMethod == RequestMethod.GET) {
-                return doGet(request);
+                doGet(request, response);
+                return;
             }
         } catch (UnauthorizedException e) {
             log.debug("로그인 실패 : {}", e.getMessage());
-            return new UnAuthorizedController().service(request);
+            new UnAuthorizedController().service(request, response);
+            return;
         }
-        return new MethodNotAllowedController().service(request);
+        new MethodNotAllowedController().service(request, response);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final String resourcePath = request.getPath() + ".html";
         final User user = getUser(QueryString.from(request.getRequestBody().getContents()));
-        return HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.CREATED)
-                .setContent(resourcePath)
-                .setLocationHeader(REDIRECT_URL)
-                .setCookieHeader(createCookie(request, user));
+        response.setHttpStatus(HttpStatus.CREATED);
+        response.setContent(resourcePath);
+        response.setLocationHeader(REDIRECT_URL);
+        response.setCookieHeader(createCookie(request, user));
     }
 
     @Override
-    protected HttpResponse doGet(final HttpRequest request) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String resourcePath = request.getPath() + ".html";
-        final HttpResponse response = HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.OK)
-                .setContent(resourcePath);
+        response.setHttpStatus(HttpStatus.OK);
+        response.setContent(resourcePath);
         if (checkLoginUser(request)) {
-            return response
-                    .setLocationHeader(REDIRECT_URL);
+            response.setLocationHeader(REDIRECT_URL);
+            return;
         }
         if (request.hasQueryString()) {
             final User user = getUser(request.getQueryString());
-            return response
-                    .setLocationHeader(REDIRECT_URL)
-                    .setCookieHeader(createCookie(request, user));
+            response.setLocationHeader(REDIRECT_URL);
+            response.setCookieHeader(createCookie(request, user));
         }
-        return response;
     }
 
     private User getUser(final QueryString queryString) {

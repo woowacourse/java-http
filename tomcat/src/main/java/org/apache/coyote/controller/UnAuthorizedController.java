@@ -7,10 +7,8 @@ import org.apache.coyote.httpresponse.HttpStatus;
 public class UnAuthorizedController implements Controller {
 
     @Override
-    public HttpResponse service(final HttpRequest request) {
-        return HttpResponse
-                .init(request.getHttpVersion())
-                .setHttpStatus(HttpStatus.UNAUTHORIZED)
-                .setContent("/401.html");
+    public void service(final HttpRequest request, final HttpResponse response) {
+        response.setHttpStatus(HttpStatus.UNAUTHORIZED);
+        response.setContent("/401.html");
     }
 }

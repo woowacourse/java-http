@@ -33,10 +33,11 @@ class LoginControllerTest extends ControllerTestSupport {
         // when
         final String jSessionId = "bebe-ditoo";
         final HttpRequest spyHttpRequest = spy(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.init(spyHttpRequest.getHttpVersion());
         final Session expectedSession = new Session(jSessionId);
         when(spyHttpRequest.getSession(true)).thenReturn(expectedSession);
 
-        final HttpResponse httpResponse = loginController.service(spyHttpRequest);
+        loginController.service(spyHttpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -60,10 +61,11 @@ class LoginControllerTest extends ControllerTestSupport {
                 "",
                 "account=gugu&password=dddd");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final LoginController loginController = new LoginController();
 
         // when
-        final HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 401 Unauthorized",
@@ -83,11 +85,12 @@ class LoginControllerTest extends ControllerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final LoginController loginController = new LoginController();
 
         // when
 
-        final HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 200 OK",
@@ -116,11 +119,12 @@ class LoginControllerTest extends ControllerTestSupport {
 
         // when
         final HttpRequest spyHttpRequest = spy(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.init(spyHttpRequest.getHttpVersion());
         final Session expectedSession = new Session(jSessionId);
         expectedSession.setAttribute("user", user);
-        when(spyHttpRequest.getSession(true)).thenReturn(expectedSession);
+        when(spyHttpRequest.getSession(false)).thenReturn(expectedSession);
 
-        final HttpResponse httpResponse = loginController.service(spyHttpRequest);
+        loginController.service(spyHttpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -141,10 +145,11 @@ class LoginControllerTest extends ControllerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final LoginController loginController = new LoginController();
 
         // when
-        final HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -164,10 +169,11 @@ class LoginControllerTest extends ControllerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
         final LoginController loginController = new LoginController();
 
         // when
-        final HttpResponse httpResponse = loginController.service(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 405 Method Not Allowed",

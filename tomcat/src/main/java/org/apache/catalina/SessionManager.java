@@ -6,20 +6,20 @@ import org.apache.coyote.http11.Session;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     @Override
     public void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     @Override
     public void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        sessions.remove(session.getId());
     }
 }

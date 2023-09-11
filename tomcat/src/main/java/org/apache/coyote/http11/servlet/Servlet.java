@@ -13,10 +13,10 @@ import org.apache.coyote.http11.util.StaticFileLoader;
 
 public abstract class Servlet {
 
-    private final List<HttpMethod> ALLOWED_METHOD;
+    private final List<HttpMethod> allowedMethods;
 
-    public Servlet(final List<HttpMethod> allowedMethods) {
-        this.ALLOWED_METHOD = allowedMethods;
+    protected Servlet(final List<HttpMethod> allowedMethods) {
+        this.allowedMethods = allowedMethods;
     }
 
     public void service(HttpRequest request, HttpResponse response) throws IOException {
@@ -25,7 +25,7 @@ public abstract class Servlet {
         } catch (BadRequestException e) {
             handleBadRequest(response);
         } catch (MethodNotAllowedException e) {
-            handleMethodNotAllowed(response, ALLOWED_METHOD);
+            handleMethodNotAllowed(response, allowedMethods);
         }
     }
 

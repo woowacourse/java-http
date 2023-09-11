@@ -29,7 +29,7 @@ public class HttpResponse {
         return new HttpResponse(
                 StatusLine.from(httpStatus),
                 ResponseHeaders.redirect(redirectPath),
-                ResponseBody.noContent(ContentType.HTML)
+                ResponseBody.noContent()
         );
     }
 

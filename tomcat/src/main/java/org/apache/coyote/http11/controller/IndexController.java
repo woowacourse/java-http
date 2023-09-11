@@ -7,17 +7,17 @@ import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.response.StaticResource;
 
 public class IndexController extends AbstractController {
-    private static final Uri indexUri = Uri.INDEX;
+    private static final Uri INDEX_URI = Uri.INDEX;
 
     @Override
     public boolean canHandle(final HttpRequest request) {
         final String path = request.getRequestLine().getPath();
-        return path.startsWith(indexUri.getSimplePath());
+        return path.startsWith(INDEX_URI.getSimplePath());
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
-        final StaticResource staticResource = StaticResource.from(indexUri.getFullPath());
+        final StaticResource staticResource = StaticResource.from(INDEX_URI.getFullPath());
         final ResponseBody responseBody = ResponseBody.from(staticResource);
         return HttpResponse.of(HttpStatus.OK, responseBody);
     }

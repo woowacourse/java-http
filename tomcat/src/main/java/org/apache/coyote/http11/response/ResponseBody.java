@@ -16,8 +16,8 @@ public class ResponseBody {
         );
     }
 
-    public static ResponseBody noContent(final ContentType contentType) {
-        return new ResponseBody(new byte[]{}, contentType);
+    public static ResponseBody noContent() {
+        return new ResponseBody(new byte[]{}, null);
     }
 
     public static ResponseBody rootContent() {

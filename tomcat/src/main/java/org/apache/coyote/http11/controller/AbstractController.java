@@ -18,9 +18,11 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException();
     }
 
-    public abstract boolean canHandle(final HttpRequest request);
+    protected HttpResponse doGet(HttpRequest request) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 
-    protected abstract HttpResponse doGet(HttpRequest request) throws Exception;
-
-    protected abstract HttpResponse doPost(HttpRequest request) throws Exception;
+    protected HttpResponse doPost(HttpRequest request) throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }

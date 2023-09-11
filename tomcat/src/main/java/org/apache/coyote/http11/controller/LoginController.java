@@ -19,20 +19,20 @@ import java.util.Optional;
 
 public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final Uri indexUri = Uri.INDEX;
-    private static final Uri loginUri = Uri.LOGIN;
-    private static final Uri unAuthorizedUri = Uri.UNAUTHORIZED;
+    private static final Uri INDEX_URI = Uri.INDEX;
+    private static final Uri LOGIN_URI = Uri.LOGIN;
+    private static final Uri UNAUTHORIZED_URI = Uri.UNAUTHORIZED;
 
     @Override
     public boolean canHandle(final HttpRequest request) {
         final String path = request.getRequestLine().getPath();
-        return path.startsWith(loginUri.getSimplePath());
+        return path.startsWith(LOGIN_URI.getSimplePath());
     }
 
     @Override
     protected HttpResponse doPost(final HttpRequest request) throws Exception {
         if (isLoggedIn(request)) {
-            return redirect(indexUri.getFullPath());
+            return redirect(INDEX_URI.getFullPath());
         }
         final RequestBody requestBody = request.getRequestBody();
         final String account = requestBody.getParamValue("account");
@@ -44,9 +44,9 @@ public class LoginController extends AbstractController {
             log.info("user = {}", user);
             final Session session = request.getSession(true);
             session.setAttribute("user", user);
-            return redirectWithSession(indexUri.getFullPath(), session.getId());
+            return redirectWithSession(INDEX_URI.getFullPath(), session.getId());
         }
-        return redirect(unAuthorizedUri.getFullPath());
+        return redirect(UNAUTHORIZED_URI.getFullPath());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
             final User user = (User) session.getAttribute("user");
             log.info("user = {}", user);
 
-            return HttpResponse.redirect(HttpStatus.FOUND, indexUri.getFullPath());
+            return HttpResponse.redirect(HttpStatus.FOUND, INDEX_URI.getFullPath());
         }
         final String path = request.getRequestLine().getPath();
         final StaticResource staticResource = StaticResource.from(path);

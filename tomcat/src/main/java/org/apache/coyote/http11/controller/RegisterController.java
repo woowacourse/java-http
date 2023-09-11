@@ -12,36 +12,35 @@ import org.apache.coyote.http11.response.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Optional;
 
 public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
 
-    private static final Uri indexUri = Uri.INDEX;
-    private static final Uri registerUri = Uri.REGISTER;
+    private static final Uri INDEX_URI = Uri.INDEX;
+    private static final Uri REGISTER_URI = Uri.REGISTER;
 
     @Override
     public boolean canHandle(final HttpRequest request) {
         final String path = request.getRequestLine().getPath();
-        return path.startsWith(registerUri.getSimplePath());
+        return path.startsWith(REGISTER_URI.getSimplePath());
     }
 
     @Override
     protected HttpResponse doGet(final HttpRequest request) throws Exception {
-        final StaticResource staticResource = StaticResource.from(registerUri.getFullPath());
+        final StaticResource staticResource = StaticResource.from(REGISTER_URI.getFullPath());
         final ResponseBody responseBody = ResponseBody.from(staticResource);
         return HttpResponse.of(HttpStatus.OK, responseBody);
     }
 
     @Override
-    protected HttpResponse doPost(final HttpRequest request) throws IOException {
+    protected HttpResponse doPost(final HttpRequest request) {
         final RequestBody requestBody = request.getRequestBody();
         final String accountValue = requestBody.getParamValue("account");
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(accountValue);
         if (userOptional.isPresent()) {
             log.error("중복 사용자 등록 : ", new MemberAlreadyExistException(accountValue));
-            return redirect(indexUri.getFullPath());
+            return redirect(INDEX_URI.getFullPath());
         }
         InMemoryUserRepository.save(
                 new User(
@@ -51,7 +50,7 @@ public class RegisterController extends AbstractController {
                 )
         );
 
-        return redirect(indexUri.getFullPath());
+        return redirect(INDEX_URI.getFullPath());
     }
 
     private HttpResponse redirect(final String path) {

@@ -15,8 +15,8 @@ public class HttpResponse {
         body = Body.EMPTY;
     }
 
-    public void setStatus(HttpStatus httpStatus) {
-        statusLine = new StatusLine(HttpVersion.HTTP11, httpStatus);
+    public void setStatusLine(HttpVersion httpVersion, HttpStatus httpStatus) {
+        statusLine = new StatusLine(httpVersion, httpStatus);
     }
 
     public void setHeader(String headerName, String headerValue) {

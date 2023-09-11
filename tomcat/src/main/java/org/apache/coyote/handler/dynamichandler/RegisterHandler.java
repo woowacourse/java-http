@@ -26,7 +26,7 @@ public class RegisterHandler extends AbstractHandler {
         try {
             String body = findStaticPage(DEFAULT_DIRECTORY_PATH + httpRequest.path() + ContentType.TEXT_HTML.extension());
 
-            httpResponse.setStatus(HttpStatus.OK);
+            httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.OK);
             httpResponse.setHeader(HttpHeader.CONTENT_TYPE.value(), ContentType.TEXT_HTML.value());
             httpResponse.setHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
             httpResponse.setBody(body);
@@ -67,7 +67,7 @@ public class RegisterHandler extends AbstractHandler {
     }
 
     private void handleRedirectPage(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setStatus(HttpStatus.FOUND);
+        httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.FOUND);
         httpResponse.setHeader(HttpHeader.LOCATION.value(), "/index.html");
     }
 }

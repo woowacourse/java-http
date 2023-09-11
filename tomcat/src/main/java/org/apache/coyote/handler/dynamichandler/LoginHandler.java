@@ -48,9 +48,10 @@ public class LoginHandler extends AbstractHandler {
 
     private void handleNotLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
-            String body = findStaticPage(DEFAULT_DIRECTORY_PATH + httpRequest.path() + ContentType.TEXT_HTML.extension());
+            String path = DEFAULT_DIRECTORY_PATH + httpRequest.path() + ContentType.TEXT_HTML.extension();
+            String body = findStaticPage(path);
 
-            httpResponse.setStatus(HttpStatus.OK);
+            httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.OK);
             httpResponse.setHeader(HttpHeader.CONTENT_TYPE.value(), ContentType.TEXT_HTML.value());
             httpResponse.setHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
             httpResponse.setBody(body);
@@ -74,7 +75,7 @@ public class LoginHandler extends AbstractHandler {
             httpResponse.setHeader(HttpHeader.SET_COOKIE.value(), Session.JSESSIONID + "=; " + "Max-Age=0 ");
         }
 
-        httpResponse.setStatus(HttpStatus.FOUND);
+        httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.FOUND);
         httpResponse.setHeader(HttpHeader.LOCATION.value(), "/index.html");
     }
 
@@ -84,30 +85,38 @@ public class LoginHandler extends AbstractHandler {
 
         String account = queries.get(ACCOUNT);
         String password = queries.get(PASSWORD);
-        if (account == null || password == null) {
-            httpResponse.setStatus(HttpStatus.FOUND);
+        if (isInvalidLoginFormat(account, password)) {
+            httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.FOUND);
             httpResponse.setHeader(HttpHeader.LOCATION.value(), "/login.html");
             return;
         }
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(password)) {
+        if (isCorrectUser(password, user)) {
             log.info(ACCOUNT + ": " + account + ", " + PASSWORD + ": " + password);
             handleLoginSuccess(httpRequest, httpResponse, user.get());
             return;
         }
-        handleUnauthorizedPage(httpRequest, httpResponse);
+        handleLoginFail(httpRequest, httpResponse);
+    }
+
+    private boolean isInvalidLoginFormat(String account, String password) {
+        return account == null || password == null;
+    }
+
+    private boolean isCorrectUser(String password, Optional<User> user) {
+        return user.isPresent() && user.get().checkPassword(password);
     }
 
     private void handleLoginSuccess(HttpRequest httpRequest, HttpResponse httpResponse, User user) {
         Session session = Session.create(UUID.randomUUID().toString());
         session.setAttribute("user", user);
 
-        httpResponse.setStatus(HttpStatus.FOUND);
+        httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.FOUND);
         httpResponse.setHeader(HttpHeader.LOCATION.value(), "/index.html");
         httpResponse.setHeader(HttpHeader.SET_COOKIE.value(), Session.JSESSIONID + "=" + session.getId());
     }
 
-    private void handleUnauthorizedPage(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void handleLoginFail(HttpRequest httpRequest, HttpResponse httpResponse) {
         new ExceptionHandler(HttpStatus.UNAUTHORIZED).service(httpRequest, httpResponse);
     }
 }

@@ -20,7 +20,7 @@ public class StaticHandler implements Handler {
         try {
             String body = findStaticPage(DEFAULT_DIRECTORY_PATH + httpRequest.path());
 
-            httpResponse.setStatus(HttpStatus.OK);
+            httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.OK);
             httpResponse.setHeader(HttpHeader.CONTENT_TYPE.value(), ContentType.findContentTypeByFilename(httpRequest.path()).value());
             httpResponse.setHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
             httpResponse.setBody(body);

@@ -27,7 +27,7 @@ public class ExceptionHandler implements Handler {
         try {
             String body = findErrorPage();
 
-            httpResponse.setStatus(httpStatus);
+            httpResponse.setStatusLine(httpRequest.httpVersion(), httpStatus);
             httpResponse.setHeader(HttpHeader.CONTENT_TYPE.value(), ContentType.TEXT_HTML.value());
             httpResponse.setHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
             httpResponse.setBody(body);

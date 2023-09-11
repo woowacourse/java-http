@@ -13,7 +13,7 @@ public class HelloHandler extends AbstractHandler {
     void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         String body = "Hello world!";
 
-        httpResponse.setStatus(HttpStatus.OK);
+        httpResponse.setStatusLine(httpRequest.httpVersion(), HttpStatus.OK);
         httpResponse.setHeader(HttpHeader.CONTENT_TYPE.value(), ContentType.TEXT_HTML.value());
         httpResponse.setHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(body.getBytes().length));
         httpResponse.setBody(body);

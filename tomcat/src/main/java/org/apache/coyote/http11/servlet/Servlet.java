@@ -25,7 +25,7 @@ public abstract class Servlet {
         } catch (BadRequestException e) {
             handleBadRequest(response);
         } catch (MethodNotAllowedException e) {
-            handleMethodNotAllowed(response, allowedMethods);
+            handleMethodNotAllowed(response);
         }
     }
 
@@ -56,13 +56,13 @@ public abstract class Servlet {
         response.setBody(content);
     }
 
-    private void handleMethodNotAllowed(HttpResponse response, List<HttpMethod> methods) throws IOException {
+    private void handleMethodNotAllowed(HttpResponse response) throws IOException {
         String content = StaticFileLoader.load(Page.BAD_REQUEST.getUri());
 
         response.setStatusCode(StatusCode.METHOD_NOT_ALLOWED);
         response.setContentType(ContentType.TEXT_HTML);
         response.setContentLength(content.getBytes().length);
-        response.setAllow(methods);
+        response.setAllow(allowedMethods);
         response.setBody(content);
     }
 }

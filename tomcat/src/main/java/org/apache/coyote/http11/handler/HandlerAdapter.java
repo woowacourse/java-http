@@ -14,7 +14,7 @@ import org.apache.coyote.http11.request.Request;
 
 public class HandlerAdapter {
 
-    private final Map<RequestMapper, Controller> controllers = new HashMap<>();
+    private final Map<MethodPath, Controller> controllers = new HashMap<>();
 
     public HandlerAdapter() {
         addController(HttpMethod.POST, "/login", new LoginController());
@@ -25,8 +25,8 @@ public class HandlerAdapter {
     }
 
     public Controller mapping(Request request) {
-        RequestMapper requestInfo
-                = new RequestMapper(request.getMethod(), request.getPath());
+        MethodPath requestInfo
+                = new MethodPath(request.getMethod(), request.getPath());
         if (request.getPath().contains(".")) {
             return new ViewController();
         }
@@ -38,6 +38,6 @@ public class HandlerAdapter {
     }
 
     private void addController(HttpMethod httpMethod, String path, Controller controller) {
-        controllers.put(new RequestMapper(httpMethod, path), controller);
+        controllers.put(new MethodPath(httpMethod, path), controller);
     }
 }

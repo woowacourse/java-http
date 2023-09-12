@@ -1,6 +1,7 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.request;
 
 import java.util.Arrays;
+import org.apache.coyote.exception.MethodNotAllowedException;
 
 public enum Method {
     GET("GET"),
@@ -16,6 +17,6 @@ public enum Method {
         return Arrays.stream(Method.values())
                 .filter(method -> method.name.equals(input))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Method Request"));
+                .orElseThrow(() -> new MethodNotAllowedException(input));
     }
 }

@@ -1,20 +1,11 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.request.Method.GET;
-import static org.apache.coyote.http11.request.Method.POST;
-import static org.apache.coyote.http11.request.RequestHeader.ACCEPT;
-import static org.apache.coyote.http11.response.ResponseHeader.LOCATION;
-import static org.apache.coyote.http11.response.ResponseHeader.SET_COOKIE;
-import static org.apache.coyote.http11.response.Status.FOUND;
-import static org.apache.coyote.http11.response.Status.INTERNAL_SERVER_ERROR;
-import static org.apache.coyote.http11.response.Status.NOT_FOUND;
-import static org.apache.coyote.http11.response.Status.OK;
-import static org.apache.coyote.http11.response.Status.UNAUTHORIZED;
-import static org.apache.coyote.http11.utils.Constant.BASE_PATH;
-import static org.apache.coyote.http11.utils.Constant.COOKIE_DELIMITER;
-import static org.apache.coyote.http11.utils.Constant.EMPTY;
-import static org.apache.coyote.http11.utils.Constant.LINE_SEPARATOR;
-import static org.apache.coyote.http11.utils.Parser.parseFormData;
+import static org.apache.catalina.RequestMapping.getController;
+import static org.apache.coyote.response.Status.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.utils.Constant.BASE_PATH;
+import static org.apache.coyote.utils.Constant.EMPTY;
+import static org.apache.coyote.utils.Constant.LINE_SEPARATOR;
+import static org.apache.coyote.utils.Converter.convertPathToUrl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,27 +13,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.util.Map;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.PageNotFoundException;
-import org.apache.coyote.http11.exception.UnauthorizedException;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Method;
-import org.apache.coyote.http11.request.RequestHeader;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseHeader;
-import org.apache.coyote.http11.response.Status;
+import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.RequestHeader;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
-    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final UserService userService = new UserService();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -62,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest request = readRequest(inputStream);
             final HttpResponse response = handleRequest(request);
 
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.stringify().getBytes());
             outputStream.flush();
 
         } catch (final IOException | UncheckedServletException e) {
@@ -110,102 +95,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse handleRequest(final HttpRequest request) {
+        final Controller controller = getController(request);
+
+        final HttpResponse response = HttpResponse.create(
+                request.getProtocol(),
+                request.getContentType()
+        );
         try {
-            return handleRequestWithMethod(request);
-        } catch (final PageNotFoundException e) {
-            log.error(e.getMessage());
-            return handleResponseWithException(NOT_FOUND);
-        } catch (final UnauthorizedException e) {
-            log.error(e.getMessage());
-            return handleResponseWithException(UNAUTHORIZED);
-        } catch (final Exception e) {
-            log.error(e.getMessage());
-            return handleResponseWithException(INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private HttpResponse handleRequestWithMethod(final HttpRequest request) {
-        final Method method = request.getMethod();
-        if (method == GET) {
-            return handleGetRequest(request);
-        }
-        if (method == POST) {
-            return handlePostRequest(request);
-        }
-        throw new PageNotFoundException(request.getPath());
-    }
-
-    private HttpResponse handleGetRequest(final HttpRequest request) {
-        final String path = request.getPath();
-        if (path.equals(BASE_PATH)) {
-            return new HttpResponse(OK, "Hello world!");
-        }
-        if (path.equals("/favicon.ico")) {
-            return new HttpResponse(OK, "Icon Not Exist!");
-        }
-        if (path.equals("/login") && request.isCookieExist(SESSION_COOKIE_NAME)) {
-            return handleAuthResponse(request, request.getCookie(SESSION_COOKIE_NAME));
-        }
-
-        try {
-            final URL resource = convertPathToUrl(path);
-            final HttpResponse response = new HttpResponse(OK, resource);
-            checkContentType(request, response);
+            controller.service(request, response);
             return response;
+        } catch (final HttpException e) {
+            log.error(e.getMessage());
+            return handleResponseWithException(response, e.getStatus());
         } catch (final Exception e) {
-            throw new PageNotFoundException(path);
+            log.error(e.getMessage());
+            return handleResponseWithException(response, INTERNAL_SERVER_ERROR);
         }
     }
 
-    private HttpResponse handleAuthResponse(final HttpRequest request, final String uuid) {
-        final HttpResponse response = new HttpResponse(FOUND);
-
-        response.addHeader(LOCATION, "/index.html");
-        if (!request.isCookieExist(SESSION_COOKIE_NAME)) {
-            response.addHeader(SET_COOKIE, SESSION_COOKIE_NAME + COOKIE_DELIMITER + uuid);
-        }
-        return response;
-    }
-
-    private URL convertPathToUrl(String path) {
-        if (!path.contains(".")) {
-            path += ".html";
-        }
-        return getClass().getClassLoader().getResource("static" + path);
-    }
-
-    private void checkContentType(final HttpRequest request, final HttpResponse response) {
-        final String accept = request.getHeader(ACCEPT);
-        if (accept != null && accept.contains("css")) {
-            response.addHeader(ResponseHeader.CONTENT_LENGTH, "text/css;charset=utf-8 ");
-        }
-    }
-
-    private HttpResponse handlePostRequest(final HttpRequest request) throws UnauthorizedException {
-        final String path = request.getPath();
-        if (path.equals("/login")) {
-            return logIn(request);
-        }
-        if (path.equals("/register")) {
-            return register(request);
-        }
-        throw new PageNotFoundException(request.getPath());
-    }
-
-    private HttpResponse logIn(final HttpRequest request) throws UnauthorizedException {
-        final Map<String, String> bodyFields = parseFormData(request.getBody());
-        final String uuid = userService.logIn(bodyFields);
-        return handleAuthResponse(request, uuid);
-    }
-
-    private HttpResponse register(final HttpRequest request) {
-        final Map<String, String> bodyFields = parseFormData(request.getBody());
-        final String uuid = userService.register(bodyFields);
-        return handleAuthResponse(request, uuid);
-    }
-
-    private HttpResponse handleResponseWithException(final Status status) {
+    private HttpResponse handleResponseWithException(final HttpResponse response, final Status status) {
         final URL resource = convertPathToUrl(BASE_PATH + status.getCode());
-        return new HttpResponse(status, resource);
+        response.setStatus(status);
+        response.setBody(resource);
+        return response;
     }
 }

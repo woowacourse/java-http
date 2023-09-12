@@ -1,29 +1,27 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.response;
 
 public enum Status {
     OK(200, "OK"),
     FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "Not Found"),
+    METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
+    NOT_ACCEPTABLE(406, "Not Acceptable"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private final int code;
-    private final String name;
+    private final String message;
 
-    Status(final int code, final String name) {
+    Status(final int code, final String message) {
         this.code = code;
-        this.name = name;
-    }
-
-    public String getStatusLine() {
-        return code + " " + name + " ";
+        this.message = message;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getName() {
-        return name;
+    public String getMessage() {
+        return message;
     }
 }

@@ -130,11 +130,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertSoftly(softly -> {
-            assertThat(socket.output()).contains("HTTP/1.1 302 Found");
-            assertThat(socket.output()).contains("JSESSIONID");
-            assertThat(socket.output()).contains("Location: /index.html");
-        });
+        assertSoftly(softly -> softly.assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("JSESSIONID")
+                .contains("Location: /index.html")
+        );
     }
 
     @DisplayName("로그인에 실패하면 401 에러 페이지를 응답한다.")
@@ -217,10 +217,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertSoftly(softly -> {
-            assertThat(socket.output()).contains("HTTP/1.1 302 Found");
-            assertThat(socket.output()).contains("JSESSIONID");
-            assertThat(socket.output()).contains("Location: /index.html");
-        });
+        assertSoftly(softly -> softly.assertThat(socket.output())
+                .contains("HTTP/1.1 302 Found")
+                .contains("JSESSIONID")
+                .contains("Location: /index.html")
+        );
     }
 }

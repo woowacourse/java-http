@@ -26,11 +26,11 @@ public class Headers {
     }
 
     public int getContentLength() {
-        HttpHeader contentLength = get("Content-Length");
-        if (contentLength.isEmpty()) {
+        HttpHeader contentLengthHeader = get("Content-Length");
+        if (contentLengthHeader.isEmpty()) {
             return 0;
         }
-        return Integer.parseInt(contentLength.getValue());
+        return Integer.parseInt(contentLengthHeader.getValue());
     }
 
     public List<HttpHeader> getHeaders() {

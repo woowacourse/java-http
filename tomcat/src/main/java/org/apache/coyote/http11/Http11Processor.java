@@ -3,10 +3,12 @@ package org.apache.coyote.http11;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.FileReader;
 import org.apache.coyote.http11.controller.AuthController;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.DefaultController;
 import org.apache.coyote.http11.controller.RegisterController;
+import org.apache.coyote.http11.controller.RequestMapping;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +25,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-
-    private final AuthController authController = new AuthController();
-    private final RegisterController registerController = new RegisterController();
     private final HttpRequestReader requestReader = new HttpRequestReader();
+    private final RequestMapping requestMapping = new RequestMapping(
+            new AuthController(),
+            new RegisterController(),
+            new DefaultController()
+    );
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -49,13 +53,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = requestReader.readHttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(httpRequest.httpVersion());
 
-            if (httpRequest.path().equals("/login") || httpRequest.path().equals("/login.html")) {
-                authController.service(httpRequest, httpResponse);
-            } else if (httpRequest.path().equals("/register") || httpRequest.path().equals("/register.html")) {
-                registerController.service(httpRequest, httpResponse);
-            } else {
-                httpResponse.setHttpStatus(HttpStatus.OK).setResponseFileName(httpRequest.path());
-            }
+            Controller controller = requestMapping.getController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             httpResponse.setBody(FileReader.readFile(httpResponse.getResponseFileName()));
             httpResponse.addHeader(CONTENT_LENGTH.getValue(), String.valueOf(httpResponse.getBody().getBytes().length));

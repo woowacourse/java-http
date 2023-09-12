@@ -20,6 +20,7 @@ public class RegisterController extends AbstractController {
         if (request.hasBlankRegisterUserBody()) {
             response.setStatusCode(StatusCode.FOUND);
             response.addHeader(LOCATION, REGISTER_PAGE);
+            response.setBody("입력한 아이디, 비밀번호, 이메일에는 공백이 들어오면 안됩니다.");
             return;
         }
         final User registerUser = new User(

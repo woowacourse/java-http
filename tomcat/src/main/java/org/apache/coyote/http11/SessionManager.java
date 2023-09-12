@@ -5,21 +5,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
 
     }
 
     public static void add(final Session session) {
-        SESSIONS.put(session.getId(), session);
+        sessions.put(session.getId(), session);
     }
 
     public static Session findSession(final String id) {
-        return SESSIONS.get(id);
+        return sessions.get(id);
     }
 
     public static void remove(final Session session) {
-        SESSIONS.remove(session.getId());
+        sessions.remove(session.getId());
     }
 }

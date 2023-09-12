@@ -3,7 +3,6 @@ package org.apache.coyote.http11.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
@@ -13,9 +12,9 @@ import org.apache.coyote.http11.request.RequestBody;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.hasRequestBody()) {
-            final RequestBody requestBody = request.getRequestBody();
+            final RequestBody requestBody = request.initRequestBody();
             register(requestBody);
             response
                 .statusCode(StatusCode.CREATED)
@@ -30,7 +29,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         response
             .statusCode(StatusCode.OK)
             .contentType(ContentType.TEXT_HTML)

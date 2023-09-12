@@ -8,7 +8,7 @@ public class HttpCookie {
     private static final String JSESSIONID = "JSESSIONID";
     private final Map<String, String> cookies = new HashMap<>();
 
-    public HttpCookie(String requestCookie) {
+    public HttpCookie(final String requestCookie) {
         final String[] cookies = requestCookie.replace(";", "").split(" ");
         for (String cookie : cookies) {
             final String[] cookieInfo = cookie.split("=");

@@ -11,33 +11,31 @@ public class HttpRequest {
 
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    private RequestLine requestLine;
-    private Headers headers;
-    private RequestBody requestBody;
-    private QueryString queryString;
+    private final RequestLine requestLine;
+    private final Headers headers;
+    private final RequestBody requestBody;
+    private final QueryString queryString;
 
     public HttpRequest(final BufferedReader bufferedReader) throws IOException {
         requestLine = RequestLine.from(bufferedReader);
-        initHeaders(bufferedReader);
-        initRequestBody(bufferedReader);
-        initQueryString();
-    }
-
-    private void initHeaders(final BufferedReader bufferedReader) throws IOException {
         headers = Headers.from(bufferedReader);
+        requestBody = initRequestBody(bufferedReader);
+        queryString = initQueryString();
     }
 
-    private void initRequestBody(final BufferedReader bufferedReader) throws IOException {
+    private RequestBody initRequestBody(final BufferedReader bufferedReader) throws IOException {
         if (headers.containsHeader(CONTENT_LENGTH)) {
             int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
-            requestBody = RequestBody.of(bufferedReader, contentLength);
+            return RequestBody.of(bufferedReader, contentLength);
         }
+        return RequestBody.empty();
     }
 
-    private void initQueryString() {
+    private QueryString initQueryString() {
         if (requestLine.hasQueryString()) {
-            this.queryString = QueryString.of(requestLine.getUri());
+            return QueryString.of(requestLine.getUri());
         }
+        return QueryString.empty();
     }
 
     public String getPath() {
@@ -64,7 +62,7 @@ public class HttpRequest {
         return Objects.nonNull(requestBody);
     }
 
-    public RequestBody getRequestBody() {
+    public RequestBody initRequestBody() {
         return requestBody;
     }
 
@@ -80,7 +78,7 @@ public class HttpRequest {
         return false;
     }
 
-    public Session getSession(boolean create) {
+    public Session getSession(final boolean create) {
         if (hasJSessionId()) {
             final HttpCookie cookie = headers.getCookie();
             final String jsessionid = cookie.getJsessionid();

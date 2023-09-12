@@ -5,7 +5,6 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
@@ -16,12 +15,11 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final int LOGIN_PARAMETER_SIZE = 2;
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        final RequestBody requestBody = request.getRequestBody();
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        final RequestBody requestBody = request.initRequestBody();
         if (Objects.isNull(requestBody) || requestBody.size() != LOGIN_PARAMETER_SIZE) {
             response
                 .statusCode(StatusCode.UNAUTHORIZED)
@@ -59,7 +57,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.hasJSessionId() && Objects.nonNull(request.getSession(false))) {
             final Session session = request.getSession(false);
             final User user = (User) session.getAttribute("user");

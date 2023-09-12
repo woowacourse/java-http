@@ -9,7 +9,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class ErrorController extends AbstractController {
 
     @Override
-    public void service(final HttpRequest request, HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         response
             .statusCode(StatusCode.NOT_FOUND)
             .contentType(ContentType.TEXT_HTML)

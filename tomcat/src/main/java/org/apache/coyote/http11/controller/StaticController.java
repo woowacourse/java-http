@@ -11,7 +11,7 @@ public class StaticController extends AbstractController {
     private static final String INDEX_URI = "/";
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.getPath().equals(INDEX_URI)) {
             response
                 .statusCode(StatusCode.OK)

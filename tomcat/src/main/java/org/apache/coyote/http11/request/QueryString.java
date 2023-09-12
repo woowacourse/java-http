@@ -7,7 +7,7 @@ public class QueryString {
 
     private static final String QUERY_STRING_SYMBOL = "?";
 
-    private Map<String, String> values;
+    private final Map<String, String> values;
 
     private QueryString(Map<String, String> values) {
         this.values = values;
@@ -27,5 +27,9 @@ public class QueryString {
             map.put(key, value);
         }
         return new QueryString(map);
+    }
+
+    public static QueryString empty() {
+        return new QueryString(new HashMap<>());
     }
 }

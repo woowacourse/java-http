@@ -25,7 +25,7 @@ public class RequestMapping {
         map.put("/register", new RegisterController());
     }
 
-    public Controller getController(HttpRequest httpRequest) {
+    public Controller getController(final HttpRequest httpRequest) {
         if (httpRequest.isStaticRequest()) {
             return map.get(STATIC_CONTROLLER);
         }

@@ -1,11 +1,15 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.List;
 import org.apache.coyote.http11.header.Cookies;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -63,7 +67,13 @@ public class HttpRequest {
     }
 
     public Cookies getCookies() {
-        return Cookies.from(getHeader("Cookie"));
+        HttpHeader cookieHeader = headers.get("Cookie");
+        return Cookies.from(cookieHeader);
+    }
+
+    public Optional<Session> getSession(String sessionKey) {
+        return getCookies().get(sessionKey)
+                .flatMap(SessionManager::findSession);
     }
 
     public HttpHeader getHeader(String name) {

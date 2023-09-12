@@ -29,4 +29,8 @@ public class Session {
     public Object getAttribute(String name) {
         return attributes.get(name);
     }
+
+    public boolean hasAttribute(String name) {
+        return attributes.containsKey(name);
+    }
 }

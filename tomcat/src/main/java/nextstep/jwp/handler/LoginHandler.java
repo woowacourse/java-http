@@ -1,7 +1,5 @@
 package nextstep.jwp.handler;
 
-import java.util.Objects;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
@@ -12,6 +10,8 @@ import org.apache.coyote.http11.handler.GetAndPostHandler;
 import org.apache.coyote.http11.header.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
+
+import java.util.Optional;
 
 public class LoginHandler extends GetAndPostHandler {
 
@@ -24,23 +24,13 @@ public class LoginHandler extends GetAndPostHandler {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        Session session = getSessionFrom(httpRequest.getCookies());
-        if (session != null && hasUserOn(session)) {
+        boolean isSignedIn = httpRequest.getSession(SESSION_KEY)
+                .map(session -> session.hasAttribute(SESSION_USER_KEY))
+                .isPresent();
+        if (isSignedIn) {
             httpResponse.redirectTo(MAIN_LOCATION);
         }
         fileHandler.handle(httpRequest, httpResponse);
-    }
-
-    private Session getSessionFrom(final Cookies cookies) {
-        String sessionId = cookies.get(SESSION_KEY);
-        if (sessionId == null) {
-            return null;
-        }
-        return SessionManager.findSession(sessionId);
-    }
-
-    private boolean hasUserOn(Session session) {
-        return Objects.nonNull(session.getAttribute(SESSION_USER_KEY));
     }
 
     @Override

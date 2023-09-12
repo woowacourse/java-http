@@ -1,16 +1,22 @@
 package nextstep.jwp.handler;
 
-import org.apache.catalina.RequestHandler;
+import static org.apache.coyote.response.StatusCode.*;
+
+import org.apache.catalina.AbstractHandler;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
+import org.apache.coyote.Cookie;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class RegisterRequestHandler extends RequestHandler {
+public class RegisterRequestHandler extends AbstractHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(RegisterRequestHandler.class);
 
@@ -22,27 +28,43 @@ public class RegisterRequestHandler extends RequestHandler {
 	}
 
 	@Override
-	protected Response doGet(final Request request) {
-		return Response.ok(ResourceProvider.provide(PAGE_PATH), MimeType.fromPath(PAGE_PATH));
+	protected void doGet(final Request request, final Response response) {
+		response.setStatusCode(StatusCode.OK);
+		response.setResponseBody(ResourceProvider.provide(PAGE_PATH), MimeType.fromPath(PAGE_PATH));
 	}
 
 	@Override
-	protected Response doPost(final Request request) {
+	protected void doPost(final Request request, final Response response) {
 		final var account = request.findBodyField("account");
 		final var password = request.findBodyField("password");
 		final var email = request.findBodyField("email");
 
-		return register(account, password, email);
+		register(response, account, password, email);
 	}
 
-	private Response register(final String account, final String password, final String email) {
+	private void register(final Response response, final String account, final String password,
+		final String email) {
 		if (isInvalidInput(account, password, email) || isDuplicatedAccount(account)) {
-			return Response.badRequest();
+			response.redirect(BAD_REQUEST.getResourcePath());
+			return;
 		}
 
-		InMemoryUserRepository.save(new User(account, password, email));
+		final var user = new User(account, password, email);
+		InMemoryUserRepository.save(user);
+
+		final var session = createSession(user);
+		final var cookie = Cookie.session(session.getId());
+
 		log.info("[REGISTER SUCCESS] account: {}", account);
-		return Response.redirect("/index.html");
+		response.redirect("/index.html");
+		response.addCookie(cookie);
+	}
+
+	private Session createSession(final User user) {
+		final var session = Session.create();
+		session.setAttribute("account", user.getAccount());
+		SessionManager.add(session);
+		return session;
 	}
 
 	private boolean isInvalidInput(final String account, final String password, final String email) {

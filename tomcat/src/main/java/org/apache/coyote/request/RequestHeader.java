@@ -1,43 +1,46 @@
 package org.apache.coyote.request;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.coyote.Cookie;
 
 public class RequestHeader {
 
 	private final Map<String, String> headers = new HashMap<>();
-	private final List<Cookie> cookies;
+	private final List<Cookie> cookies = new ArrayList<>();
+
+	private RequestHeader() {
+	}
 
 	public RequestHeader(Map<String, String> headers, final List<Cookie> cookies) {
 		this.headers.putAll(headers);
-		this.cookies = cookies;
+		this.cookies.addAll(cookies);
+	}
+
+	public static RequestHeader empty() {
+		return new RequestHeader();
 	}
 
 	public String find(final String key) {
 		return headers.get(key);
 	}
 
-	public String findCookie(final String key) {
-		final var optionalCookie = cookies.stream()
+	public Optional<String> findCookie(final String key) {
+		return cookies.stream()
 			.filter(cookie -> Objects.equals(key, cookie.getKey()))
-			.findAny();
-		if (optionalCookie.isEmpty()) {
-			return null;
-		}
-		return optionalCookie.get().getValue();
+			.findAny()
+			.map(Cookie::getValue);
 	}
 
-	public String findSession() {
-		final var optionalCookie = cookies.stream()
+	public Optional<String> findSessionId() {
+		return cookies.stream()
 			.filter(Cookie::isSession)
-			.findAny();
-		if (optionalCookie.isEmpty()) {
-			return null;
-		}
-		return optionalCookie.get().getValue();
+			.findAny()
+			.map(Cookie::getValue);
 	}
 }

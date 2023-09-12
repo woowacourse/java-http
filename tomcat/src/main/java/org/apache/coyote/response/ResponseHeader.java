@@ -20,12 +20,15 @@ public class ResponseHeader {
 	private final Map<HeaderType, String> headers = new HashMap<>();
 	private final List<Cookie> cookies = new ArrayList<>();
 
-	public ResponseHeader(final Map<HeaderType, String> headers) {
-		this.headers.putAll(headers);
+	private ResponseHeader() {
 	}
 
-	public void addContentLength(final MimeType mimeType) {
-		headers.put(HeaderType.CONTENT_LENGTH, mimeType.getValue());
+	public static ResponseHeader create() {
+		return new ResponseHeader();
+	}
+
+	public void addContentType(final MimeType mimeType) {
+		headers.put(HeaderType.CONTENT_TYPE, mimeType.getValue());
 	}
 
 	public void addContentLength(final String responseBody) {

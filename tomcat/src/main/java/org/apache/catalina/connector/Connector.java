@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.catalina.HandlerMapping;
 import org.apache.coyote.http11.Http11Processor;
@@ -16,18 +20,29 @@ public class Connector implements Runnable {
 
 	private static final int DEFAULT_PORT = 8080;
 	private static final int DEFAULT_ACCEPT_COUNT = 100;
+	private static final int MAX_THREAD_COUNT = 250;
+	private static final int QUEUE_SIZE = 100;
 
+	private final ExecutorService executorService;
 	private final ServerSocket serverSocket;
 	private final HandlerMapping handlerMapping;
 	private boolean stopped;
 
 	public Connector(final HandlerMapping handlerMapping) {
-		this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, handlerMapping);
+		this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREAD_COUNT, handlerMapping);
 	}
 
-	private Connector(final int port, final int acceptCount, final HandlerMapping handlerMapping) {
-		this.handlerMapping = handlerMapping;
+	private Connector(final int port, final int acceptCount, final int maxThreads,
+		final HandlerMapping handlerMapping) {
 		this.serverSocket = createServerSocket(port, acceptCount);
+		this.executorService = new ThreadPoolExecutor(
+			maxThreads,
+			maxThreads,
+			0,
+			TimeUnit.MILLISECONDS,
+			new LinkedBlockingDeque<>(QUEUE_SIZE)
+		);
+		this.handlerMapping = handlerMapping;
 		this.stopped = false;
 	}
 
@@ -70,12 +85,13 @@ public class Connector implements Runnable {
 			return;
 		}
 		var processor = new Http11Processor(connection, handlerMapping);
-		new Thread(processor).start();
+		executorService.submit(processor);
 	}
 
 	public void stop() {
 		stopped = true;
 		try {
+			executorService.shutdown();
 			serverSocket.close();
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);

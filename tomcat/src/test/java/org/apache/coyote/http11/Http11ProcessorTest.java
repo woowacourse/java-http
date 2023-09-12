@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.util.Set;
 
 import org.apache.catalina.HandlerMapping;
-import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

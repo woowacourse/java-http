@@ -30,4 +30,8 @@ public class RequestLine {
 	public String getPath() {
 		return uri.getPath();
 	}
+
+	public HttpProtocolVersion getVersion() {
+		return version;
+	}
 }

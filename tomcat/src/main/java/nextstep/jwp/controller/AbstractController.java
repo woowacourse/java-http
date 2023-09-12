@@ -24,9 +24,10 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doPost(final HttpRequest request, final HttpResponse response) {
+        throw new MethodNotAllowedException(request.getPath(), request.getMethod());
     }
 
     protected void doGet(final HttpRequest request, final HttpResponse response) {
-
+        throw new MethodNotAllowedException(request.getPath(), request.getMethod());
     }
 }

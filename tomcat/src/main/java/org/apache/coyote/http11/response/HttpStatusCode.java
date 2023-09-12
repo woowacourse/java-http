@@ -3,7 +3,8 @@ package org.apache.coyote.http11.response;
 public enum HttpStatusCode {
 
     OK(200, "OK"),
-    FOUND(302, "FOUND");
+    FOUND(302, "FOUND"),
+    METHOD_NOT_ALLOWED(405, "METHOD NOT ALLOWED");
 
     private final int code;
     private final String type;

@@ -1,7 +1,6 @@
 package org.apache.catalina.controller;
 
-import static org.apache.catalina.controller.StaticResourceUri.NOT_FOUND_PAGE;
-import static org.apache.coyote.http11.response.ResponseContentType.TEXT_HTML;
+import static org.apache.coyote.http11.response.ResponseHeaderType.ALLOW;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestMethod;
@@ -11,6 +10,7 @@ import org.apache.coyote.http11.response.HttpStatusCode;
 public abstract class AbstractController implements Controller {
 
     static final String RESOURCE_DIRECTORY = "static";
+    public static final String ALLOW_HEADER_DELIMITER = ", ";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -25,15 +25,23 @@ public abstract class AbstractController implements Controller {
             doGet(request, response);
             return;
         }
-
-        response.setStatusCode(HttpStatusCode.FOUND)
-                .addContentTypeHeader(TEXT_HTML.getType())
-                .addLocationHeader(NOT_FOUND_PAGE.getUri());
+        getMethodNotAllowedResponse(response);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        getMethodNotAllowedResponse(response);
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        getMethodNotAllowedResponse(response);
+    }
+
+    private void getMethodNotAllowedResponse(final HttpResponse response) {
+        final String allowedHeaders = String.join(ALLOW_HEADER_DELIMITER,
+                HttpRequestMethod.POST.name(),
+                HttpRequestMethod.GET.name());
+
+        response.setStatusCode(HttpStatusCode.METHOD_NOT_ALLOWED)
+                .addHeader(ALLOW, allowedHeaders);
     }
 }

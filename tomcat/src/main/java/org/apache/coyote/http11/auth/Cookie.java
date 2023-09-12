@@ -48,7 +48,7 @@ public class Cookie {
         if (key == null) {
             return Optional.empty();
         }
-        return Optional.of(elements.get(key));
+        return Optional.ofNullable(elements.get(key));
     }
 
 }

@@ -33,11 +33,11 @@ class HttpHttpHeaderTest {
                     () -> assertThat(httpHeader.headers().get("Host"))
                             .contains("www.test01.com"),
                     () -> assertThat(httpHeader.headers().get("Accept"))
-                            .contains("image/gif", "image/jpeg", "*/*"),
+                            .contains("image/gif, image/jpeg, */*"),
                     () -> assertThat(httpHeader.headers().get("Accept-Language"))
                             .contains("en-us"),
                     () -> assertThat(httpHeader.headers().get("Accept-Encoding"))
-                            .contains("gzip", "deflate"),
+                            .contains("gzip, deflate"),
                     () -> assertThat(httpHeader.headers().get("User-Agent"))
                             .contains("Mozilla/4.0"),
                     () -> assertThat(httpHeader.headers().get("Content-Length"))

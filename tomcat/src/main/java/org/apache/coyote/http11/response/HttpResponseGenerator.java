@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 
 public class HttpResponseGenerator {
 
@@ -70,7 +71,11 @@ public class HttpResponseGenerator {
     }
 
     private String generateSetCookieLine(final HttpResponse httpResponse) {
-        final String jsessionid = httpResponse.getHttpCookie().get("JSESSIONID");
+        Optional<String> cookieOption = httpResponse.getHttpCookie().get("JSESSIONID");
+        if (cookieOption.isEmpty()) {
+            return null;
+        }
+        final String jsessionid = cookieOption.get();
         if (jsessionid == null) {
             return "";
         }

@@ -18,14 +18,19 @@ public abstract class AbstractServlet implements Servlet{
 
     private static final String RESOURCES_PATH_PREFIX = "static";
     protected static final String NOT_FOUND_DEFAULT_MESSAGE = "404 Not Found";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String DEFAULT_EXTENSION = ".html";
+    private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String HTTP_GET_METHOD = "GET";
+    private static final String HTTP_POST_METHOD = "POST";
 
     @Override
     public void service(Http11Request request, Http11Response response) throws Exception {
         String method = request.getMethod();
 
-        if (method.equals("GET")) {
+        if (method.equals(HTTP_GET_METHOD)) {
             doGet(request, response);
-        } else if (method.equals("POST")) {
+        } else if (method.equals(HTTP_POST_METHOD)) {
             doPost(request, response);
         } else {
             response.setStatus(Status.NOT_IMPLEMENTED);
@@ -43,7 +48,7 @@ public abstract class AbstractServlet implements Servlet{
 
         String resourceName = RESOURCES_PATH_PREFIX + requestPath;
         if (!resourceName.contains(".")) {
-            resourceName += ".html";
+            resourceName += DEFAULT_EXTENSION;
         }
         URL resource = getClass().getClassLoader().getResource(resourceName);
 
@@ -63,19 +68,19 @@ public abstract class AbstractServlet implements Servlet{
         }
 
         response.setStatus(Status.OK)
-                .setHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8")
+                .setHeader(HttpHeader.CONTENT_TYPE, contentType + CHARSET_UTF_8)
                 .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(
                         responseBody.get().getBytes(StandardCharsets.UTF_8).length))
                 .setBody(responseBody.get());
     }
 
     private void responseWithNotFound(Http11Request request, Http11Response response) throws IOException {
-        String notFoundPageBody = createResponseBody("/404.html")
+        String notFoundPageBody = createResponseBody(NOT_FOUND_PAGE)
                 .orElse(NOT_FOUND_DEFAULT_MESSAGE);
         String contentType = selectFirstContentTypeOrDefault(request.getHeader(HttpHeader.ACCEPT));
 
         response.setStatus(Status.NOT_FOUND)
-                .setHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8")
+                .setHeader(HttpHeader.CONTENT_TYPE, contentType + CHARSET_UTF_8)
                 .setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(
                         notFoundPageBody.getBytes(StandardCharsets.UTF_8).length))
                 .setBody(notFoundPageBody);

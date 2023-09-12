@@ -10,11 +10,11 @@ public class HttpTarget {
 
     private static final String EMPTY_VALUE = "";
 
-    private final String path;
+    private final TargetPath path;
     private final Map<String, String> queries;
 
     public HttpTarget(final String target) {
-        this.path = removeQueriesFrom(target);
+        this.path = new TargetPath(removeQueriesFrom(target));
         this.queries = getQueriesFrom(target);
     }
 
@@ -40,7 +40,7 @@ public class HttpTarget {
         return target.substring(0, queryStringStart);
     }
 
-    public String getPath() {
+    public TargetPath getPath() {
         return path;
     }
 

@@ -1,40 +1,41 @@
 package org.apache.coyote.header;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpCookie {
 
-    private Map<String, String> cookies;
+    private Map<String, String> cookies = new LinkedHashMap<>();
 
-    public HttpCookie(String rawValue) {
-        if (rawValue.isBlank()) {
-            this.cookies = new HashMap<>();
-            return;
-        }
-        
-        Map<String, String> cookies = new HashMap<>();
-        String[] values = rawValue.split("; ");
+    public HttpCookie() {
+    }
+
+    public HttpCookie(String raw) {
+        String[] values = raw.split("; ");
         for (String value : values) {
+            if (value.strip().isBlank()) {
+                break;
+            }
             String[] keyValue = value.split("=");
             cookies.put(keyValue[0], keyValue[1]);
         }
-        this.cookies = cookies;
     }
 
-    public static HttpCookie from(String requestHeaders) {
-        String[] headers = requestHeaders.split("\r\n");
-        for (String header : headers) {
-            if (header.contains("Cookie")) {
-                String rawValue = header.substring(header.indexOf(": ") + 1);
-                return new HttpCookie(rawValue);
-            }
+    public void addSessionId(String sessionId) {
+        cookies.put("JSESSIONID", sessionId);
+    }
+
+    public String getValue(String name) {
+        return cookies.get(name);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : cookies.entrySet()) {
+            stringBuilder.append(entry.getKey()).append("=").append(entry.getValue());
+            stringBuilder.append("; ");
         }
-
-        return new HttpCookie("");
-    }
-
-    public String getValue(String key) {
-        return cookies.getOrDefault(key, null);
+        return stringBuilder.toString();
     }
 }

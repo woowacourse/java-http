@@ -1,17 +1,20 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.header.HttpHeaders.CONTENT_LENGTH;
+
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Set;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
+import org.apache.coyote.ProtocolVersion;
+import org.apache.coyote.header.HttpHeaders;
 import org.apache.coyote.header.HttpMethod;
-import org.apache.coyote.http11.adaptor.Http11MethodHandlerAdaptor;
-import org.apache.coyote.http11.handler.GetHttp11MethodHandler;
-import org.apache.coyote.http11.handler.PostHttp11MethodHandler;
-import org.apache.coyote.util.RequestExtractor;
+import org.apache.coyote.http11.adaptor.ControllerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Http11MethodHandlerAdaptor http11MethodHandlerAdaptor;
+    private final ControllerMapping controllerMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, ControllerMapping controllerMapping) {
         this.connection = connection;
-        this.http11MethodHandlerAdaptor = new Http11MethodHandlerAdaptor(Set.of(
-                new GetHttp11MethodHandler(), new PostHttp11MethodHandler())
-        );
+        this.controllerMapping = controllerMapping;
     }
 
     @Override
@@ -36,54 +37,48 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    public void process(Socket connection) {
+        try (var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             var writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
-            String headers = readHeaders(bufferedReader);
-            int contentLength = getContentLength(headers);
-            String payload = readPayload(bufferedReader, contentLength);
+            String[] rawStartLine = reader.readLine().split(" ");
+            HttpMethod method = HttpMethod.from(rawStartLine[0]);
+            String requestUrl = rawStartLine[1];
+            ProtocolVersion version = ProtocolVersion.from(rawStartLine[2]);
+            HttpHeaders headers = readHeaders(reader);
+            String requestBody = readBody(headers, reader);
+            HttpRequest httpRequest = new HttpRequest(method, requestUrl, version, headers, requestBody);
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpMethod httpMethod = RequestExtractor.extractHttpMethod(headers);
-            String response = http11MethodHandlerAdaptor.handle(httpMethod, headers, payload);
+            controllerMapping.handle(httpRequest, httpResponse);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            writer.write(httpResponse.toString());
+            writer.flush();
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readHeaders(final BufferedReader bufferedReader) throws IOException {
-        StringBuilder result = new StringBuilder();
+    private HttpHeaders readHeaders(BufferedReader reader) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
 
         String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
-            result.append(line).append("\r\n");
+        while ((line = reader.readLine()) != null && !line.isBlank()) {
+            String[] split = line.split(": ");
+            headers.add(split[0], split[1]);
         }
-        return result.toString();
-//        return bufferedReader.lines()
-//                .collect(Collectors.joining("\r\n", "", "\r\n")); // 이 방식 테스트에서 똑같이 했는데 통과함. 실제 실행하면 안됨
+        return headers;
     }
 
-    private int getContentLength(String headers) {
-        String[] lines = headers.split("\r\n");
-        for (String line : lines) {
-            if (line.startsWith("Content-Length")) {
-                String[] split = line.split(": ");
-                return Integer.parseInt(split[1]);
-            }
+    private String readBody(HttpHeaders headers, BufferedReader reader) throws IOException {
+        if (headers.contains(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            String requestBody = new String(buffer);
+
+            return requestBody;
         }
-        return 0;
-    }
-
-    private String readPayload(final BufferedReader bufferedReader, final int contentLength) throws IOException {
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-
-        return requestBody;
+        return "";
     }
 }

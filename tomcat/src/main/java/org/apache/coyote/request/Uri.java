@@ -32,11 +32,12 @@ public class Uri {
     }
 
     public boolean isQueryParamExist(final String... parameterNames) {
-        boolean isExist = true;
         for (final String parameterName : parameterNames) {
-            isExist = isExist && queryParams.containsKey(parameterName);
+            if (!queryParams.containsKey(parameterName)) {
+                return false;
+            }
         }
-        return isExist;
+        return true;
     }
 
     public String getQueryParam(final String parameterName) {

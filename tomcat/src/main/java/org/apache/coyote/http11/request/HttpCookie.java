@@ -25,14 +25,7 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public boolean contains(final String key) {
-        return cookies.containsKey(key);
-    }
-
     public String getValue(final String key) {
-        if (!cookies.containsKey(key)) {
-            return null;
-        }
         return cookies.get(key);
     }
 }

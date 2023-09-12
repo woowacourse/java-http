@@ -39,11 +39,12 @@ public class HttpRequest {
     }
 
     public String getSessionId() {
-        HttpCookie cookie = header.getCookie();
+        final HttpCookie cookie = header.getCookie();
 
-        if (cookie != null && cookie.contains("JSESSIONID")) {
-            return cookie.getValue("JSESSIONID");
+        if (cookie == null) {
+            return null;
         }
-        return null;
+
+        return cookie.getValue("JSESSIONID");
     }
 }

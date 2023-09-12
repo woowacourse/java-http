@@ -1,12 +1,13 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.header.ContentType;
+import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.header.HttpHeader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.header.ContentType;
-import org.apache.coyote.http11.header.Cookies;
-import org.apache.coyote.http11.header.HttpHeader;
 
 public class HttpResponse {
 
@@ -38,7 +39,9 @@ public class HttpResponse {
 
     public void setBody(String body) {
         this.body = body;
-        putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
+        if (!body.isEmpty()) {
+            putHeader(new HttpHeader("Content-Length", String.valueOf(body.getBytes().length)));
+        }
     }
 
     public String getBody() {

@@ -18,7 +18,6 @@ public class Connector implements Runnable {
     private static final int MIN_PORT = 1;
     private static final int MAX_PORT = 65535;
     private static final int DEFAULT_PORT = 8080;
-
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
     private final ExecutorService executorService;

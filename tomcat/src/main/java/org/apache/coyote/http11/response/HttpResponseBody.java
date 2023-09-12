@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
-import org.apache.coyote.http11.request.HttpRequestURI;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponseBody {
 
@@ -16,8 +16,8 @@ public class HttpResponseBody {
         this.body = body;
     }
 
-    public static HttpResponseBody from(final HttpRequestURI httpRequestURI) throws IOException {
-        final var uri = httpRequestURI.getUri();
+    public static HttpResponseBody from(final HttpRequest httpRequest) throws IOException {
+        final var uri = httpRequest.requestLine().getUri();
         if("/".equals(uri)) {
             return new HttpResponseBody("Hello world!");
         }

@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequestBody {
@@ -17,7 +18,8 @@ public class HttpRequestBody {
     private final Map<String, String> queryStrings;
 
     private HttpRequestBody(final Map<String, String> queryStrings) {
-        this.queryStrings = queryStrings;
+        this.queryStrings = new HashMap<>();
+        this.queryStrings.putAll(queryStrings);
     }
 
     public static HttpRequestBody from(final String queryString) {

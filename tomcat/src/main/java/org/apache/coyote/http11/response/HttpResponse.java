@@ -6,35 +6,42 @@ import static org.apache.coyote.http11.common.Constants.SPACE;
 
 import java.io.IOException;
 import java.util.UUID;
-import org.apache.coyote.http11.auth.HttpCookie;
 import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.http11.request.HttpRequestURI;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
 
-public class HttpResponseEntity {
+public class HttpResponse {
 
-    private final HttpRequestURI httpRequestURI;
+    private HttpRequest httpRequest;
 
-    private HttpResponseEntity(final HttpRequestURI httpRequestURI) {
-        this.httpRequestURI = httpRequestURI;
+    private HttpResponse(final HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
     }
 
-    public static HttpResponseEntity from(final HttpRequestURI httpRequestURI) {
-        return new HttpResponseEntity(httpRequestURI);
+    public static HttpResponse empty() {
+        return new HttpResponse(null);
     }
 
-    public String getResponse(final HttpCookie httpCookie) throws IOException {
-        final var uri = httpRequestURI.getUri();
+    public String getResponse() throws IOException {
+        final var requestLine = httpRequest.requestLine();
+        final var uri = requestLine.getUri();
         final var uuid = UUID.randomUUID();
-        final var responseHeader = HttpResponseHeader.from(httpRequestURI);
-        final var responseBody = HttpResponseBody.from(httpRequestURI);
+        final var responseHeader = HttpResponseHeader.from(httpRequest);
+        final var responseBody = HttpResponseBody.from(httpRequest);
 
         final StringBuilder body = new StringBuilder().append(parseHttpStatusLine(responseHeader)).append(CRLF)
                 .append(parseContentTypeLine(uri)).append(CRLF)
                 .append(parseContentLengthLine(responseBody)).append(CRLF);
 
-        if (httpRequestURI.isLoginSuccess() && httpCookie.noneJSessionId()) {
+        if (requestLine.isLoginSuccess() && httpRequest.cookie().noneJSessionId()) {
             body.append(parseCookieLine(uuid)).append(CRLF);
+            body.append("Location: /index.html");
         }
+
+        if (uri.startsWith("/login") && !httpRequest.cookie().noneJSessionId()) {
+            body.append("Location: /index.html");
+        }
+
         body.append(EMPTY).append(CRLF).append(responseBody.body());
 
         return body.toString();
@@ -48,7 +55,7 @@ public class HttpResponseEntity {
         final HttpStatus httpStatus = httpResponseHeader.getHttpStatus();
         return String.join(
                 SPACE,
-                httpRequestURI.getHttpVersion(),
+                httpRequest.requestLine().getHttpVersion(),
                 String.valueOf(httpStatus.getCode()),
                 httpStatus.name(),
                 ""
@@ -65,6 +72,10 @@ public class HttpResponseEntity {
 
     private String parseContentLengthLine(final HttpResponseBody httpResponseBody) {
         return String.join(SPACE, "Content-Length:", String.valueOf(httpResponseBody.contentLength()), "");
+    }
+
+    public void setRequest(final HttpRequest request) {
+        this.httpRequest = request;
     }
 
 }

@@ -42,6 +42,6 @@ public class HttpCookie {
     }
 
     public String getValue(final String key) {
-        return null;
+        return httpCookies.get(key);
     }
 }

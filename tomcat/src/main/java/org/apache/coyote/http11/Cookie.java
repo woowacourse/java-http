@@ -32,6 +32,10 @@ public final class Cookie {
         cookies.put(key, value);
     }
 
+    public String getCookie(final String key) {
+        return cookies.get(key);
+    }
+
     public boolean containsKey(final String key) {
         return cookies.containsKey(key);
     }

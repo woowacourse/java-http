@@ -18,12 +18,14 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public final class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String JSESSIONID = "JSESSIONID";
     private final SessionManager sessionManager = new SessionManager();
 
     @Override
@@ -40,7 +42,7 @@ public final class LoginController extends AbstractController {
             session.setAttribute("user", user);
             sessionManager.add(session);
 
-            response.addCookie("JSESSIONID", sessionId);
+            response.addCookie(JSESSIONID, sessionId);
             response.sendRedirect("/index.html");
             return;
         }
@@ -53,7 +55,7 @@ public final class LoginController extends AbstractController {
         if (request.getHttpHeaders().containsHeader("Cookie")) {
             cookie = Cookie.parse(request.getHttpHeaders().getHeaderValue("Cookie"));
         }
-        if (cookie.containsKey("JSESSIONID")) {
+        if (cookie.containsKey(JSESSIONID) && Objects.nonNull(sessionManager.findSession(cookie.getCookie(JSESSIONID)))) {
             response.sendRedirect("/index.html");
             return;
         }

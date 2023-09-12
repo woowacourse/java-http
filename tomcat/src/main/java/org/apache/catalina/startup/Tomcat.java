@@ -1,12 +1,12 @@
 package org.apache.catalina.startup;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 
@@ -18,8 +18,22 @@ public class Tomcat {
         this.container = container;
     }
 
-    public static Tomcat from(final List<Controller> controllers) {
-        return new Tomcat(Container.from(controllers));
+    public static class TomcatBuilder {
+
+        private final Map<String, Controller> controllers;
+
+        public TomcatBuilder() {
+            this.controllers = new HashMap<>();
+        }
+
+        public TomcatBuilder addController(final String path, final Controller controller) {
+            this.controllers.put(path, controller);
+            return this;
+        }
+
+        public Tomcat build() {
+            return new Tomcat(Container.from(controllers));
+        }
     }
 
     public void start() {

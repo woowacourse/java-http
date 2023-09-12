@@ -1,7 +1,7 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.ControllerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -15,7 +15,7 @@ public class Container {
         this.controllerMapper = controllerMapper;
     }
 
-    public static Container from(final List<Controller> controllers) {
+    public static Container from(final Map<String, Controller> controllers) {
         return new Container(new ControllerMapper(controllers));
     }
 

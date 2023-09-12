@@ -2,19 +2,24 @@ package org.apache.coyote.http11.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.ControllerMapper;
+import org.apache.catalina.startup.Container;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class ControllerMapperTest {
 
     private static final ControllerMapper controllerMapper = new ControllerMapper(
-            List.of(new LoginController(), new RegisterController())
+            new HashMap<>(
+                    Map.of("/login", new LoginController(), "/register", new RegisterController())
+            )
     );
 
     @Test

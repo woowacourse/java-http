@@ -1,21 +1,18 @@
 package org.apache.catalina.controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class ControllerMapper {
 
-    private final List<Controller> controllers;
+    private final Map<String, Controller> controllers;
 
-    public ControllerMapper(final List<Controller> controllers) {
-        this.controllers = new ArrayList<>(controllers);
+    public ControllerMapper(final Map<String, Controller> controllers) {
+        this.controllers = new HashMap<>(controllers);
     }
 
     public Controller findController(final HttpRequest request) {
-        return controllers.stream()
-                .filter(each -> each.supports(request))
-                .findAny()
-                .orElse(null);
+        return controllers.getOrDefault(request.getPath(), null);
     }
 }

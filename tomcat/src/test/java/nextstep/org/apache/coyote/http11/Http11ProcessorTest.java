@@ -6,7 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import org.apache.catalina.startup.Container;
@@ -17,7 +18,9 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private static final Container container = Container.from(List.of(new LoginController(), new RegisterController()));
+    private static final Container container = Container.from(new HashMap<>(
+            Map.of("/login", new LoginController(), "/register", new RegisterController())
+    ));
 
     @Test
     void process() {
@@ -107,7 +110,7 @@ class Http11ProcessorTest {
 
             final String[] split = socket1.output().split("\r\n");
             int setCookieIndex = 1;
-            if(!split[1].contains("Set-Cookie")) {
+            if (!split[1].contains("Set-Cookie")) {
                 setCookieIndex = 2;
             }
             final String jsessionid = split[setCookieIndex].split(": ")[1];

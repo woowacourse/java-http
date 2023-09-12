@@ -19,8 +19,4 @@ public class SessionRepository {
         return Optional.ofNullable(SESSIONS.get(id));
     }
 
-    public static void clearSessions() {
-        SESSIONS.clear();
-    }
-
 }

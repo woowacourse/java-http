@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.servlet;
 
 import nextstep.jwp.exception.UnauthorizedException;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.exception.NoSuchApiException;
 import org.apache.coyote.http11.handler.HandlerAdapter;
 import org.apache.coyote.http11.request.Request;
@@ -15,8 +16,8 @@ public class Servlet {
 
     public static void getResponse(Request request, Response response) {
         try {
-            var handlerAdapter = new HandlerAdapter();
-            var controller = handlerAdapter.mapping(request);
+            HandlerAdapter handlerAdapter = HandlerAdapter.getInstance();
+            Controller controller = handlerAdapter.mapping(request);
             controller.service(request, response);
         } catch (UnauthorizedException unauthorizedException) {
             response.badResponse(HttpStatus.UNAUTHORIZED, Resource.getFile("401.html"), "401.html");

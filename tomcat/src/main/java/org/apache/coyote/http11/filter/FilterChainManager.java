@@ -5,9 +5,20 @@ import org.apache.coyote.http11.response.Response;
 
 public class FilterChainManager {
 
+    private static FilterChainManager instance;
+
     private final Chain defaultChain;
     private Chain initialChain;
     private Chain lastChain;
+
+    public static FilterChainManager getInstance(){
+        if(instance == null){
+            synchronized (FilterChainManager.class){
+                instance = new FilterChainManager();
+            }
+        }
+        return instance;
+    }
 
     public FilterChainManager() {
         this.defaultChain = new Chain(new DefaultFilter());

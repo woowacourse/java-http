@@ -14,9 +14,20 @@ import org.apache.coyote.http11.request.Request;
 
 public class HandlerAdapter {
 
-    private final Map<MethodPath, Controller> controllers = new HashMap<>();
+    private static HandlerAdapter instance;
 
-    public HandlerAdapter() {
+    private static final Map<MethodPath, Controller> controllers = new HashMap<>();
+
+    public static HandlerAdapter getInstance(){
+        if(instance==null){
+            synchronized (HandlerAdapter.class){
+                instance = new HandlerAdapter();
+            }
+        }
+        return instance;
+    }
+
+    static  {
         addController(HttpMethod.POST, "/login", new LoginController());
         addController(HttpMethod.POST, "/register", new RegisterController());
         addController(HttpMethod.GET, "/login", new LoginController());
@@ -37,7 +48,7 @@ public class HandlerAdapter {
                 .orElseThrow(NoSuchApiException::new);
     }
 
-    private void addController(HttpMethod httpMethod, String path, Controller controller) {
+    private static void addController(HttpMethod httpMethod, String path, Controller controller) {
         controllers.put(new MethodPath(httpMethod, path), controller);
     }
 }

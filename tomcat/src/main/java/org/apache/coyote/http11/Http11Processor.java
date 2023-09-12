@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             final Request request = Request.from(bufferedReader);
             Response response = new Response();
 
-            FilterChainManager filterChainManager = new FilterChainManager();
+            FilterChainManager filterChainManager = FilterChainManager.getInstance();
             filterChainManager.add(new LoginFilter());
             filterChainManager.add(new RegisterFilter());
             filterChainManager.getInitialChain().doFilter(request, response);

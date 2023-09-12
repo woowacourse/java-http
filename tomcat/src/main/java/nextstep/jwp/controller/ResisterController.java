@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.handler.AbstractController;
 import org.apache.response.ContentType;
 import org.apache.common.FileReader;
 import org.apache.response.HttpStatus;

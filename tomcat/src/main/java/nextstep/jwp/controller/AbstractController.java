@@ -1,9 +1,10 @@
-package org.apache.handler;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.List;
 import org.apache.common.FileReader;
 import org.apache.common.HttpMethod;
+import org.apache.handler.Controller;
 import org.apache.request.HttpRequest;
 import org.apache.response.ContentType;
 import org.apache.response.HttpResponse;

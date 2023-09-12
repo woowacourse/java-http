@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import java.util.List;
 import org.apache.common.FileReader;
 import org.apache.common.HttpMethod;
-import org.apache.handler.AbstractController;
 import org.apache.request.HttpRequest;
 import org.apache.response.ContentType;
 import org.apache.response.HttpResponse;

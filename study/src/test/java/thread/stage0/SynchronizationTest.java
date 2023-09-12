@@ -45,11 +45,11 @@ class SynchronizationTest {
             setSum(getSum() + 1);
         }
 
-        public synchronized int getSum() {
+        public int getSum() {
             return sum;
         }
 
-        public synchronized void setSum(int sum) {
+        public void setSum(int sum) {
             this.sum = sum;
         }
     }

@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -21,36 +18,6 @@ public class HttpHeaders {
 
     public HttpHeaders(final Map<HttpHeaderName, String> headers) {
         this.headers = headers;
-    }
-
-    public static HttpHeaders from(final BufferedReader bufferedReader) {
-        final Map<HttpHeaderName, String> headers = parseHeaders(bufferedReader);
-
-        return new HttpHeaders(headers);
-    }
-
-    private static Map<HttpHeaderName, String> parseHeaders(final BufferedReader bufferedReader) {
-        final Map<HttpHeaderName, String> headers = new EnumMap<>(HttpHeaderName.class);
-
-        try {
-            String headerLine;
-            while (!"".equals(headerLine = bufferedReader.readLine())) {
-                final String[] rowHeaderData = headerLine.split(": ");
-                final HttpHeaderName headerName = HttpHeaderName.getHeaderName(rowHeaderData[0].trim());
-                final String headerContent = rowHeaderData[1].trim();
-
-                headers.put(headerName, headerContent);
-            }
-            parseToCookie(headers);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        return headers;
-    }
-
-    private static void parseToCookie(final Map<HttpHeaderName, String> headers) {
-        headers.computeIfPresent(HttpHeaderName.COOKIE, (key, value) -> HttpCookie.from(value).toString());
     }
 
     public static HttpHeaders makeHttpResponseHeaders(final String contentType, final String body) {

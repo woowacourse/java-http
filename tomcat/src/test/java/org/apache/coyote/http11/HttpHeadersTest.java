@@ -30,7 +30,7 @@ class HttpHeadersTest {
             )))
         ) {
             // when
-            final HttpHeaders headers = HttpHeaders.from(bufferedReader);
+            final HttpHeaders headers = HttpHeaderFactory.createHttpHeaders(bufferedReader);
 
             // then
             assertAll(
@@ -59,7 +59,7 @@ class HttpHeadersTest {
             )))
         ) {
             // when
-            final HttpHeaders headers = HttpHeaders.from(bufferedReader);
+            final HttpHeaders headers = HttpHeaderFactory.createHttpHeaders(bufferedReader);
 
             // then
             assertThat(headers.containsHeaderNameAndValue(COOKIE, "JSESSIONID=asdf1234")).isTrue();
@@ -97,7 +97,7 @@ class HttpHeadersTest {
             )))
         ) {
             // when
-            final HttpHeaders headers = HttpHeaders.from(bufferedReader);
+            final HttpHeaders headers = HttpHeaderFactory.createHttpHeaders(bufferedReader);
             final HttpHeaders emptyHeaders = HttpHeaders.empty();
 
             // then
@@ -124,7 +124,7 @@ class HttpHeadersTest {
             )))
         ) {
             // when
-            final HttpHeaders headers = HttpHeaders.from(bufferedReader);
+            final HttpHeaders headers = HttpHeaderFactory.createHttpHeaders(bufferedReader);
             final HttpHeaders emptyHeaders = HttpHeaders.empty();
             final HttpCookie httpCookie = headers.getCookie();
 
@@ -152,7 +152,7 @@ class HttpHeadersTest {
             )))
         ) {
             // when
-            final HttpHeaders headers = HttpHeaders.from(bufferedReader);
+            final HttpHeaders headers = HttpHeaderFactory.createHttpHeaders(bufferedReader);
             final String headersString = headers.toString();
 
             // then

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Response {
+
     private HttpStatus status;
     private String contentType;
     private String responseBody;

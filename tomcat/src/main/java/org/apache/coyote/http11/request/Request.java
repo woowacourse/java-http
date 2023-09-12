@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Request {
+
     private final RequestLine requestLine;
     private final Map<String, String> header;
     private final Map<String, String> body;

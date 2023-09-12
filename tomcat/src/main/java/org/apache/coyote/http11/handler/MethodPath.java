@@ -4,6 +4,7 @@ import java.util.Objects;
 import org.apache.coyote.http11.request.HttpMethod;
 
 public class MethodPath {
+
     private final HttpMethod httpMethod;
     private final String path;
 

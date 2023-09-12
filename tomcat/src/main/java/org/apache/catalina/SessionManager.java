@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.InvalidSessionException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.Session;
 
@@ -35,6 +36,13 @@ public class SessionManager implements Manager {
         if (!sessions.containsKey(sessionID)) {
             throw new InvalidSessionException();
         }
+    }
+
+    public Session createSessionByUser(final User user) {
+        final Session session = new Session();
+        SessionManager.getInstance().add(session);
+        session.setAttribute("user", user);
+        return session;
     }
 
     private static final class SessionManagerHolder {

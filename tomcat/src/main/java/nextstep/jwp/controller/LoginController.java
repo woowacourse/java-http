@@ -54,17 +54,11 @@ public class LoginController extends RestController {
     }
 
     private ResponseEntity makeSuccessResponse(final User user) {
-        final Session session = createSession(user);
+        final Session session = SessionManager.getInstance()
+                                              .createSessionByUser(user);
         final HttpCookie httpCookie = HttpCookie.fromJSessionId(session.getId());
         return ResponseEntityFactory.createRedirectHttpResponse(HttpResponseStatusLine.FOUND(), INDEX_PAGE,
             httpCookie);
-    }
-
-    private Session createSession(final User user) {
-        final Session session = new Session();
-        SessionManager.getInstance().add(session);
-        session.setAttribute("user", user);
-        return session;
     }
 
     @Override

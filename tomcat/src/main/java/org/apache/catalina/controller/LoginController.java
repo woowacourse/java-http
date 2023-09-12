@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        if (existSession(request)) {
+        if (Authorizer.hasValidSession(request)) {
             redirectToDefaultPage(response);
             return;
         }
@@ -49,7 +49,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (existSession(request)) {
+        if (Authorizer.hasValidSession(request)) {
             redirectToDefaultPage(response);
             return;
         }
@@ -68,11 +68,6 @@ public class LoginController extends AbstractController {
         Authorizer.addSession(newSession);
         log.info("로그인 성공! 아이디: {}", user.getAccount());
         return newSession;
-    }
-
-    private boolean existSession(final HttpRequest request) {
-        final Session session = Authorizer.findSession(request);
-        return session != null;
     }
 
     private void redirectToDefaultPage(final HttpResponse response) {

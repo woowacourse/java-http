@@ -7,7 +7,6 @@ import static org.apache.coyote.http11.response.ResponseContentType.TEXT_HTML;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.catalina.Session;
 import org.apache.catalina.util.Authorizer;
 import org.apache.catalina.util.FileLoader;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -23,7 +22,7 @@ public class RegisterController extends AbstractController {
         final HttpRequestBody requestBody = request.getBody();
         final User user = new User(requestBody.parse());
 
-        if (notExistSession(request) && notExistAccount(user)) {
+        if (!Authorizer.hasValidSession(request) && notExistAccount(user)) {
             InMemoryUserRepository.save(user);
         }
         redirectToDefaultPage(response);
@@ -31,7 +30,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (notExistSession(request)) {
+        if (!Authorizer.hasValidSession(request)) {
             final String resource = FileLoader.load(RESOURCE_DIRECTORY + REGISTER_PAGE.getUri());
 
             response.setStatusCode(HttpStatusCode.OK)
@@ -41,11 +40,6 @@ public class RegisterController extends AbstractController {
             return;
         }
         redirectToDefaultPage(response);
-    }
-
-    private boolean notExistSession(final HttpRequest request) {
-        final Session session = Authorizer.findSession(request);
-        return session == null;
     }
 
     private boolean notExistAccount(final User user) {

@@ -31,4 +31,9 @@ public class Authorizer {
 
         sessionManger.add(session);
     }
+
+    public static boolean hasValidSession(final HttpRequest request) {
+        final Session session = sessionManger.findSession(request.getSessionId());
+        return session != null;
+    }
 }

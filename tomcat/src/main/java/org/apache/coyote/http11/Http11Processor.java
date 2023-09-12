@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.Controller;
-import org.apache.coyote.handler.FrontController;
+import org.apache.coyote.handler.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
 
     private final Socket connection;
-    private final FrontController frontController;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection, final FrontController frontController) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
-        this.frontController = frontController;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
     private void doService(final HttpRequest request, final HttpResponse response) {
         final String requestUri = request.getRequestUri();
 
-        final Controller controller = frontController.getHandler(requestUri);
+        final Controller controller = requestMapping.getHandler(requestUri);
         controller.service(request, response);
     }
 }

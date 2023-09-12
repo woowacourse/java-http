@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import nextstep.jwp.JwpFrontController;
+import nextstep.jwp.JwpRequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -19,7 +19,7 @@ class Http11ProcessorTest {
     void 루트경로로_요청을_보내면_index_페이지를_응답한다() throws IOException {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket, new JwpFrontController());
+        final var processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);
@@ -54,7 +54,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket, new JwpFrontController());
+        final Http11Processor processor = new Http11Processor(socket, new JwpRequestMapping());
 
         // when
         processor.process(socket);

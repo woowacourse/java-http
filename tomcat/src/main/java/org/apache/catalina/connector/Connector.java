@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.coyote.handler.FrontController;
+import org.apache.coyote.handler.RequestMapping;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +20,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_MAX_THREAD_COUNT = 250;
 
     private final ServerSocket serverSocket;
-    private final FrontController frontController;
+    private final RequestMapping requestMapping;
     private final ExecutorService executorService;
     private boolean stopped;
 
-    public Connector(final FrontController frontController) {
-        this(frontController, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
+    public Connector(final RequestMapping requestMapping) {
+        this(requestMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_MAX_THREAD_COUNT);
     }
 
-    public Connector(final FrontController frontController, final int port, final int acceptCount,
+    public Connector(final RequestMapping requestMapping, final int port, final int acceptCount,
                      final int maxThreads) {
-        this.frontController = frontController;
+        this.requestMapping = requestMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = Executors.newFixedThreadPool(maxThreads);
@@ -74,7 +74,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, frontController);
+        final var processor = new Http11Processor(connection, requestMapping);
         executorService.execute(processor);
     }
 

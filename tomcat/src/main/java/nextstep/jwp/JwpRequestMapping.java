@@ -7,16 +7,16 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticController;
 import org.apache.coyote.handler.Controller;
-import org.apache.coyote.handler.FrontController;
+import org.apache.coyote.handler.RequestMapping;
 
-public class JwpFrontController implements FrontController {
+public class JwpRequestMapping implements RequestMapping {
 
     private static final String STATIC_RESOURCE_KEY = "static";
     private static final String EXTENSION_DELIMITER = ".";
 
     private final Map<String, Controller> handlerMapping = new HashMap<>();
 
-    public JwpFrontController() {
+    public JwpRequestMapping() {
         handlerMapping.put(STATIC_RESOURCE_KEY, new StaticController());
         handlerMapping.put("/", new IndexController());
         handlerMapping.put("/login", new LoginController());

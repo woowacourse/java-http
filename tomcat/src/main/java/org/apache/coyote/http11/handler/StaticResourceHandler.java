@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -37,7 +36,8 @@ public class StaticResourceHandler extends AbstractResourceHandler {
         createHttpResponse(response, StatusCode.NOT_FOUND, resource, ContentType.from(fileName).getContentType());
     }
 
-    private void createHttpResponse(final HttpResponse response, final StatusCode statusCode, final URL resource, final String contentType)
+    private void createHttpResponse(final HttpResponse response, final StatusCode statusCode, final URL resource,
+                                    final String contentType)
             throws IOException {
         final Path path = new File(resource.getPath()).toPath();
         final String body = new String(Files.readAllBytes(path));

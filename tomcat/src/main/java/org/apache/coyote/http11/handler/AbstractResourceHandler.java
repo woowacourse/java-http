@@ -5,11 +5,11 @@ import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public abstract class AbstractResourceHandler implements ResourceHandler{
+public abstract class AbstractResourceHandler implements ResourceHandler {
 
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws IOException {
-        if(HttpMethod.GET == request.getHttpMethod()) {
+        if (HttpMethod.GET == request.getHttpMethod()) {
             doGet(request, response);
             return;
         }

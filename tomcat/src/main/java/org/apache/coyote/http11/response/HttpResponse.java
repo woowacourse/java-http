@@ -18,9 +18,13 @@ public class HttpResponse {
     private StatusCode statusCode;
     private ContentType contentType;
     private String responseBody;
-    private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers;
 
     public HttpResponse() {
+        statusCode = StatusCode.NOT_FOUND;
+        contentType = ContentType.WILD_CARD;
+        responseBody = "";
+        headers = new HashMap<>();
     }
 
     public byte[] toBytes() {

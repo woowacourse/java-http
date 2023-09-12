@@ -4,74 +4,74 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.request.Cookie;
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.ResponseEntity;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.ResponseStatus;
-import org.apache.exception.MethodMappingFailException;
 import org.apache.exception.PageRedirectException;
+import org.apache.front.AbstractController;
 import org.apache.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     public static final String ACCOUNT_KEY = "account";
     public static final String PASSWORD_KEY = "password";
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public ResponseEntity handle(final Request request) {
-        if (request.isPost()) {
-            return login(request);
-        }
-        if (request.isGet() && request.hasQueryString()) {
-            return loginInConsole(request);
-        }
-        if (request.isGet()) {
-            return loginPage(request);
-        }
-        throw new MethodMappingFailException();
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        login(request, response);
     }
 
-    private ResponseEntity loginInConsole(final Request request) {
-        final String account = request.getQueryValueBy(ACCOUNT_KEY);
-        final String password = request.getQueryValueBy(PASSWORD_KEY);
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        if (request.hasQueryString()) {
+            loginInConsole(request, response);
+            return;
+        }
+        loginPage(request, response);
+    }
+
+    private void loginInConsole(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final String account = httpRequest.getQueryValueBy(ACCOUNT_KEY);
+        final String password = httpRequest.getQueryValueBy(PASSWORD_KEY);
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(MemberNotFoundException::new);
         if (user.checkPassword(password)) {
             log.info("user : {}", user);
         }
-        return ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.OK);
+        httpResponse.setViewPathAsBody(httpRequest.getPath());
     }
 
-    private ResponseEntity login(final Request request) {
-        final String account = request.getBodyValue(ACCOUNT_KEY);
-        final String password = request.getBodyValue(PASSWORD_KEY);
+    private void login(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final String account = httpRequest.getBodyValue(ACCOUNT_KEY);
+        final String password = httpRequest.getBodyValue(PASSWORD_KEY);
         final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new PageRedirectException.Unauthorized(request.httpVersion()));
+                .orElseThrow(() -> new PageRedirectException.Unauthorized(httpResponse));
 
         if (user.checkPassword(password)) {
-            final Session session = request.getSession(false);
+            final Session session = httpRequest.getSession(true);
             session.setAttribute("user", user);
-            final ResponseEntity responseEntity = ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.MOVED_TEMP);
-            responseEntity.setRedirect("/index.html");
-            responseEntity.addCookie(Cookie.ofJSessionId(session.getId()));
-            return responseEntity;
+            httpResponse.setStatus(ResponseStatus.MOVED_TEMP);
+            httpResponse.setRedirect("/index.html");
+            httpResponse.addCookie(Cookie.ofJSessionId(session.getId()));
+            return;
         }
-        throw new PageRedirectException.Unauthorized(request.httpVersion());
+        throw new PageRedirectException.Unauthorized(httpResponse);
     }
 
-    private ResponseEntity loginPage(final Request request) {
-        final Session session = request.getSession(false);
+    private void loginPage(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final Session session = httpRequest.getSession(true);
         final Optional<Object> user = session.getAttribute("user");
-        if(user.isPresent()){
-            final ResponseEntity responseEntity = ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.MOVED_TEMP);
-            responseEntity.setRedirect("/index.html");
-            return responseEntity;
+        if (user.isPresent()) {
+            httpResponse.setStatus(ResponseStatus.MOVED_TEMP);
+            httpResponse.setRedirect("/index.html");
+            return;
         }
-        return ResponseEntity.fromViewPath(request.httpVersion(), request.getPath(), ResponseStatus.OK);
+        httpResponse.setViewPathAsBody(httpRequest.getPath());
     }
 }

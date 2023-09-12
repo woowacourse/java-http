@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.common.FileType;
-import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.PathUrl;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.exception.PageRedirectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +25,18 @@ public class FileUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    public static String getResource(final HttpVersion httpVersion, final PathUrl resourceUrl){
+    public static String getResource(final HttpResponse httpResponse, final PathUrl resourceUrl) {
         final URL resource = FileUtil.class.getClassLoader().getResource("static" + resourceUrl);
-        if(Objects.isNull(resource)){
-            throw new PageRedirectException.PageNotFound(httpVersion);
+        if (Objects.isNull(resource)) {
+            throw new PageRedirectException.PageNotFound(httpResponse);
         }
         return readResource(resource);
     }
 
-    public static String getResourceFromViewPath(final HttpVersion httpVersion, final String viewPath){
+    public static String getResourceFromViewPath(final HttpResponse httpResponse, final String viewPath) {
         final URL resource = FileUtil.class.getClassLoader().getResource("static" + viewPath + FileType.HTML.getExtension());
-        if(Objects.isNull(resource)){
-            throw new PageRedirectException.PageNotFound(httpVersion);
+        if (Objects.isNull(resource)) {
+            throw new PageRedirectException.PageNotFound(httpResponse);
         }
         return readResource(resource);
     }
@@ -45,8 +45,8 @@ public class FileUtil {
         final Path path = Paths.get(resource.getPath());
         try (final BufferedReader fileReader = new BufferedReader(new FileReader(path.toFile()))) {
             return fileReader.lines()
-                    .collect(Collectors.joining(System.lineSeparator()))
-                    + System.lineSeparator();
+                    .collect(Collectors.joining("\r\n"))
+                    + "\r\n";
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

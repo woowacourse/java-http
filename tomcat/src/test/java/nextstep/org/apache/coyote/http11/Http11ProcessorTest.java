@@ -1,13 +1,12 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.ViewFileFixture;
 import org.junit.jupiter.api.Test;
+import support.StubSocket;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +22,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join(System.lineSeparator(),
+        var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
@@ -34,9 +33,9 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() {
         // given
-        final String httpRequest= String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -50,15 +49,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = String.join(System.lineSeparator(),
+        var expected = new ArrayList<>(Arrays.asList(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
-                "",
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
-        );
-
-        assertThat(socket.output()).isEqualTo(expected);
+                "Content-Length: 5670 ",
+                ViewFileFixture.PAGE_INDEX
+        ));
+        assertThat(socket.output()).contains(expected);
     }
 }

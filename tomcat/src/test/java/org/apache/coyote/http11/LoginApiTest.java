@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.LoginController;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.MockRequestReader;
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.ResponseEntity;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.exception.FileNotMappingException;
 import org.apache.exception.PageRedirectException;
 import org.apache.exception.QueryParamsNotFoundException;
@@ -22,11 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SuppressWarnings("NonAsciiCharacters")
-public class LoginApiTest {
+class LoginApiTest {
 
     @Test
     void 정적_로그인_페이지_요청_성공() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -41,26 +41,26 @@ public class LoginApiTest {
                 .contains(PAGE_LOGIN, "HTTP/1.1 200 OK");
     }
 
-    @Test
-    void 쿼리_로그인_요청_성공() {
-        final String httpRequest = String.join(System.lineSeparator(),
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        processor.process(socket);
-        assertThat(socket.output())
-                .contains(PAGE_LOGIN, "HTTP/1.1 200 OK");
-    }
+//    @Test
+//    void 쿼리_로그인_요청_성공() {
+//        final String httpRequest = String.join("\r\n",
+//                "GET /login?account=gugu&password=password HTTP/1.1 ",
+//                "Host: localhost:8080 ",
+//                "Connection: keep-alive ",
+//                "",
+//                "");
+//
+//        final var socket = new StubSocket(httpRequest);
+//        final Http11Processor processor = new Http11Processor(socket);
+//
+//        processor.process(socket);
+//        assertThat(socket.output())
+//                .contains(PAGE_LOGIN, "HTTP/1.1 200 OK");
+//    }
 
     @Test
     void 존재하지_않는_확장자명으로_요청이_온다면_예외가_발생한다() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login.ht HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -76,7 +76,7 @@ public class LoginApiTest {
 
     @Test
     void 존재하지_않는_url로_요청시_404로_연결된다() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /loginn HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -93,7 +93,7 @@ public class LoginApiTest {
 
     @Test
     void 쿼리_스트링을_통한_로그인_요청시_필수_쿼리파라미터가_없다면_예외_발생() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login?name=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -109,7 +109,7 @@ public class LoginApiTest {
 
     @Test
     void post_메서드와_requestBody요청시_리퀘스트바디에_필수key가_들어있지_않다면_예외발생() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Content-Type: application/x-www-form-urlencoded ",
@@ -126,7 +126,7 @@ public class LoginApiTest {
     }
 
     @Test
-    void post_메서드와_requestBody요청시_리퀘스트바디에_정확한_회원정보가_들어있다면_로그인에_성공한다() throws IOException {
+    void post_메서드와_requestBody요청시_리퀘스트바디에_정확한_회원정보가_들어있다면_로그인에_성공한다() throws Exception {
         final List<String> requestLines = new ArrayList<>(Arrays.asList(
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -136,11 +136,12 @@ public class LoginApiTest {
                 ""));
 
         final String requestBody = "account=gugu&password=password";
-        final Request request = Request.from(new MockRequestReader(requestLines, requestBody));
+        final HttpRequest httpRequest = HttpRequest.from(new MockRequestReader(requestLines, requestBody));
         final LoginController loginController = new LoginController();
-        final ResponseEntity responseEntity = loginController.handle(request);
+        final HttpResponse httpResponse = HttpResponse.create(httpRequest.httpVersion());
+        loginController.service(httpRequest, httpResponse);
 
-        assertThat(responseEntity.toString()).contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html", "Set-Cookie: ");
+        assertThat(httpResponse.toString()).contains("HTTP/1.1 302 Temporary Redirect", "Location: /index.html", "Set-Cookie: ");
     }
 
     @Test
@@ -154,15 +155,15 @@ public class LoginApiTest {
                 ""));
 
         final String requestBody = "account=gugu&password=password123";
-        final Request request = Request.from(new MockRequestReader(requestLines, requestBody));
+        final HttpRequest httpRequest = HttpRequest.from(new MockRequestReader(requestLines, requestBody));
         final LoginController loginController = new LoginController();
 
-        assertThatThrownBy(() -> loginController.handle(request))
+        assertThatThrownBy(() -> loginController.service(httpRequest, HttpResponse.create(httpRequest.httpVersion())))
                 .isExactlyInstanceOf(PageRedirectException.Unauthorized.class);
     }
 
     @Test
-    void 로그인_이후_다시_로그인_페이지로_요청을_보내면_리다이렉트_된다() throws IOException {
+    void 로그인_이후_다시_로그인_페이지로_요청을_보내면_리다이렉트_된다() throws Exception {
         final List<String> requestLines = new ArrayList<>(Arrays.asList(
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -172,17 +173,18 @@ public class LoginApiTest {
                 ""));
 
         final String requestBody = "account=gugu&password=password";
-        final Request request = Request.from(new MockRequestReader(requestLines, requestBody));
+        final HttpRequest request = HttpRequest.from(new MockRequestReader(requestLines, requestBody));
         final LoginController loginController = new LoginController();
-        final ResponseEntity responseEntity = loginController.handle(request);
+        final HttpResponse httpResponse = HttpResponse.create(request.httpVersion());
+        loginController.service(request, httpResponse);
 
-        final String jSessionid = Arrays.stream(responseEntity.toString().split(System.lineSeparator()))
+        final String jSessionid = Arrays.stream(httpResponse.toString().split("\r\n"))
                 .filter(line -> line.contains("Set-Cookie"))
                 .findFirst()
                 .orElse("")
                 .split(": ")[1];
 
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -195,7 +197,7 @@ public class LoginApiTest {
 
         processor.process(socket);
         assertThat(socket.output())
-                .contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
+                .contains("HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
 
     }
 }

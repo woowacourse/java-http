@@ -8,12 +8,12 @@ import org.apache.session.SessionManager;
 import java.io.IOException;
 import java.util.Optional;
 
-public class Request {
+public class HttpRequest {
     private final RequestStartLine requestStartLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
-    public Request(
+    public HttpRequest(
             final RequestStartLine requestStartLine,
             final RequestHeader requestHeader,
             final RequestBody requestBody
@@ -23,12 +23,12 @@ public class Request {
         this.requestBody = requestBody;
     }
 
-    public static Request from(final Reader reader) throws IOException {
+    public static HttpRequest from(final Reader reader) throws IOException {
         final RequestStartLine startLine = RequestStartLine.from(reader.getFirstLine());
         final RequestHeader requestHeader = RequestHeader.from(reader.getHeader());
         final String bodyString = reader.getBody(requestHeader.getContentLength());
         final RequestBody requestBody = RequestBody.from(bodyString);
-        return new Request(startLine, requestHeader, requestBody);
+        return new HttpRequest(startLine, requestHeader, requestBody);
     }
 
     public boolean hasQueryString() {
@@ -71,20 +71,22 @@ public class Request {
         return requestBody.getBodyValue(key);
     }
 
-
-    public Session getSession(final boolean bool) {
-        if (bool) {
-            final Session session = Session.create();
-            SessionManager.add(session);
-            return session;
+    public Session getSession(final boolean create) {
+        if (!create) {
+            final Optional<Session> session = SessionManager.findSession(requestHeader.getJsessionid());
+            return session.orElse(null);
         }
+
         if (requestHeader.hasJsessionid()) {
             final Optional<Session> session = SessionManager.findSession(requestHeader.getJsessionid());
             if (session.isPresent()) {
                 return session.get();
             }
-            Session.create(requestHeader.getJsessionid());
+            final Session newSession = Session.create(requestHeader.getJsessionid());
+            SessionManager.add(newSession);
+            return newSession;
         }
+
         final Session session = Session.create();
         SessionManager.add(session);
         return session;
@@ -92,8 +94,8 @@ public class Request {
 
     @Override
     public String toString() {
-        return requestStartLine + System.lineSeparator() +
-                requestHeader + System.lineSeparator() + System.lineSeparator() +
+        return requestStartLine + "\r\n" +
+                requestHeader + "\r\n" + "\r\n" +
                 requestBody;
     }
 }

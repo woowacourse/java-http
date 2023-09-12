@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.DuplicationMemberException;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.MockRequestReader;
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.ResponseEntity;
+import org.apache.coyote.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -18,11 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SuppressWarnings("NonAsciiCharacters")
-public class RegisterApiTest {
+class RegisterApiTest {
 
     @Test
     void 회원가입_페이지_정적_요청_확인() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /register.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -39,7 +39,7 @@ public class RegisterApiTest {
 
     @Test
     void 회원가입_페이지_viewName_요청_확인() {
-        final String httpRequest = String.join(System.lineSeparator(),
+        final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -55,7 +55,7 @@ public class RegisterApiTest {
     }
 
     @Test
-    void post_요청시_회원가입_성공() throws IOException {
+    void post_요청시_회원가입_성공() throws Exception {
         final List<String> requestLines = new ArrayList<>(Arrays.asList(
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -65,11 +65,12 @@ public class RegisterApiTest {
                 ""));
 
         final String requestBody = "account=kero&password=keroro&email=kero@kero.com";
-        final Request request = Request.from(new MockRequestReader(requestLines, requestBody));
+        final HttpRequest httpRequest = HttpRequest.from(new MockRequestReader(requestLines, requestBody));
         final RegisterController registerController = new RegisterController();
-        final ResponseEntity responseEntity = registerController.handle(request);
+        final HttpResponse httpResponse = HttpResponse.create(httpRequest.httpVersion());
+        registerController.service(httpRequest, httpResponse);
 
-        assertThat(responseEntity.toString()).contains(PAGE_REGISTER, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
+        assertThat(httpResponse.toString()).contains("HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
     }
 
     @Test
@@ -83,10 +84,10 @@ public class RegisterApiTest {
                 ""));
 
         final String requestBody = "account=gugu&password=password&email=gugu@gugu.com";
-        final Request request = Request.from(new MockRequestReader(requestLines, requestBody));
+        final HttpRequest httpRequest = HttpRequest.from(new MockRequestReader(requestLines, requestBody));
         final RegisterController registerController = new RegisterController();
-
-        assertThatThrownBy(() -> registerController.handle(request))
+        final HttpResponse httpResponse = HttpResponse.create(httpRequest.httpVersion());
+        assertThatThrownBy(() -> registerController.service(httpRequest, httpResponse))
                 .isExactlyInstanceOf(DuplicationMemberException.class);
     }
 }

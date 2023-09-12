@@ -1,33 +1,28 @@
 package org.apache.front;
 
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.ResponseEntity;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.exception.PageRedirectException;
 
 public class Proxy {
 
-    private final StaticController staticController;
+    private static final StaticMapping staticMapping = new StaticMapping();
 
-    private final DynamicController dynamicController;
+    private static final RequestMapping requestMapping = new RequestMapping();
 
-    public Proxy() {
-        this.staticController = StaticController.singleTone();
-        this.dynamicController = DynamicController.singleTone();
-    }
-
-    public ResponseEntity process(final Request request){
-        if(request.isStatic()){
-            return doProcess(staticController, request);
+    public void process(final HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (httpRequest.isStatic()) {
+            doProcess(staticMapping, httpRequest, httpResponse);
+            return;
         }
-        return doProcess(dynamicController, request);
+        doProcess(requestMapping, httpRequest, httpResponse);
     }
 
-    private ResponseEntity doProcess(final FrontController frontController, final Request request) {
-        try{
-            return frontController.process(request);
-        } catch (PageRedirectException pageRedirectException){
-            return pageRedirectException.getResponseEntity();
+    private void doProcess(final Controller controller, final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        try {
+            controller.service(httpRequest, httpResponse);
+        } catch (PageRedirectException pageRedirectException) {
+            pageRedirectException.setResponse();
         }
     }
-
 }

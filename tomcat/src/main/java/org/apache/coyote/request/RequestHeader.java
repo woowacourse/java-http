@@ -74,6 +74,6 @@ public class RequestHeader {
         return headers.keySet()
                 .stream()
                 .map(key -> key + ": " + headers.get(key))
-                .collect(Collectors.joining(System.lineSeparator()));
+                .collect(Collectors.joining("\r\n"));
     }
 }

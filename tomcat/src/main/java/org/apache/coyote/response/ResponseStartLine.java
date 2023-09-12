@@ -5,15 +5,19 @@ import org.apache.coyote.common.HttpVersion;
 public class ResponseStartLine {
 
     private final HttpVersion httpVersion;
-    private final ResponseStatus status;
+    private ResponseStatus status;
 
-    private ResponseStartLine(final HttpVersion httpVersion, final ResponseStatus status) {
+    private ResponseStartLine(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
-        this.status = status;
+        this.status = ResponseStatus.OK;
     }
 
-    public static ResponseStartLine from(final HttpVersion httpVersion, final ResponseStatus responseStatus) {
-        return new ResponseStartLine(httpVersion, responseStatus);
+    public static ResponseStartLine from(final HttpVersion httpVersion) {
+        return new ResponseStartLine(httpVersion);
+    }
+
+    public void setStatus(final ResponseStatus responseStatus) {
+        this.status = responseStatus;
     }
 
     @Override

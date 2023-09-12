@@ -1,20 +1,19 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.util.Map;
-import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.FileHandler;
 import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.header.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,17 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse httpResponse = new HttpResponse();
             handle(httpRequest, httpResponse);
 
-            String headerLines = httpResponse.getHeaders().stream()
-                    .map(HttpHeader::toLine)
-                    .collect(Collectors.joining(CRLF));
-            final var response = String.join(CRLF,
-                    HttpResponse.HTTP_VERSION + WHITE_SPACE + httpResponse.getStatus().toLine(),
-                    headerLines,
-                    "",
-                    httpResponse.getBody()
-            );
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toLine().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

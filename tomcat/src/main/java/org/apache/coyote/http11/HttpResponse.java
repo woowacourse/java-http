@@ -2,21 +2,18 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.header.ContentType;
 import org.apache.coyote.http11.header.Cookies;
+import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.HttpHeader;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class HttpResponse {
 
     public static final String HTTP_VERSION = "HTTP/1.1";
     private static final String EMPTY_BODY = "";
+    private static final String CRLF = "\r\n";
 
     private HttpStatus status;
     private String body;
-    private final Map<String, HttpHeader> headers = new HashMap<>();
+    private final Headers headers2 = new Headers();
 
     public HttpResponse() {
         this.status = HttpStatus.OK;
@@ -26,7 +23,7 @@ public class HttpResponse {
     public void redirectTo(final String location) {
         setStatus(HttpStatus.FOUND);
         setBody(EMPTY_BODY);
-        putHeader(new HttpHeader("Location", location));
+        headers2.add(new HttpHeader("Location", location));
     }
 
     public void setStatus(final HttpStatus status) {
@@ -48,24 +45,32 @@ public class HttpResponse {
         return body;
     }
 
-    public HttpHeader getHeader(String name) {
-        return headers.get(name);
+    public void putHeader(HttpHeader header) {
+        this.headers2.add(header);
     }
 
-    public void putHeader(HttpHeader header) {
-        this.headers.put(header.getName(), header);
+    public HttpHeader getHeader(String name) {
+        return headers2.get(name);
+    }
+
+    public Headers getHeaders() {
+        return headers2;
     }
 
     public void setContentType(ContentType contentType) {
         putHeader(contentType);
     }
 
-    public List<HttpHeader> getHeaders() {
-        return new ArrayList<>(headers.values());
+    public void setCookies(Cookies cookies) {
+        putHeader(cookies.toHeader("Set-Cookie"));
     }
 
-    public HttpResponse with(Cookies cookies) {
-        putHeader(cookies.toHeader("Set-Cookie"));
-        return this;
+    public String toLine() {
+        return String.join(CRLF,
+                HttpResponse.HTTP_VERSION + " " + status.toLine(),
+                headers2.toLine(),
+                "",
+                body
+        );
     }
 }

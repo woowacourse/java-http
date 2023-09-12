@@ -57,7 +57,8 @@ public class LoginHandler extends GetAndPostHandler {
             Cookies cookies = new Cookies();
             cookies.add(SESSION_KEY, session.getId());
 
-            httpResponse.with(cookies).redirectTo(MAIN_LOCATION);
+            httpResponse.redirectTo(MAIN_LOCATION);
+            httpResponse.setCookies(cookies);
             return;
         }
         httpResponse.redirectTo(UNAUTHORIZED_LOCATION);

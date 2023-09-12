@@ -10,7 +10,7 @@ public class HomeController implements Controller {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.getPath().equals("/") || request.getPath().equals("/index.html");
+        return request.isPathMatch("/") || request.isPathMatch("/index.html");
     }
 
     @Override

@@ -51,6 +51,10 @@ public class HttpRequest {
         return headers.hasCookie(key);
     }
 
+    public boolean isPathMatch(String path) {
+        return requestLine.isPathMatch(path);
+    }
+
     public Session getSession() {
         final Optional<String> sessionId = headers.getCookie("JSESSIONID");
         final var sessionManager = SessionManager.getInstance();
@@ -76,9 +80,5 @@ public class HttpRequest {
 
     public String getJsonProperty(String key) {
         return jsonProperties.getValue(key);
-    }
-
-    public String getPath() {
-        return requestLine.getPath();
     }
 }

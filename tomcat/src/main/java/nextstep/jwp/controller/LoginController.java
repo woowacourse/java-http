@@ -16,7 +16,7 @@ public class LoginController implements Controller {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.getPath().equals("/login");
+        return request.isPathMatch("/login");
     }
 
     @Override

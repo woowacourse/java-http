@@ -13,7 +13,7 @@ public class RegisterController implements Controller {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.getPath().equals("/register");
+        return request.isPathMatch("/register");
     }
 
     @Override

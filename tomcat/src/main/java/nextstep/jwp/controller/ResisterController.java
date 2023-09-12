@@ -26,6 +26,10 @@ public class ResisterController extends AbstractController {
         String email = httpRequest.getParam(EMAIL);
         String password = httpRequest.getParam(PASSWORD);
 
+        if (isDuplicateAccount(httpResponse, account)) {
+            return;
+        }
+
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         LOG.info("회원가입 성공한 회원 : {}", user);
@@ -35,6 +39,17 @@ public class ResisterController extends AbstractController {
         httpResponse.setContentType(ContentType.TEXT_HTML);
         httpResponse.setBody(content);
         httpResponse.setLocation(INDEX_PAGE);
+    }
+
+    private boolean isDuplicateAccount(HttpResponse httpResponse, String account) throws IOException {
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            String content = FileReader.read(REGISTER_PAGE);
+            httpResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+            httpResponse.setContentType(ContentType.TEXT_HTML);
+            httpResponse.setBody(content);
+            return true;
+        }
+        return false;
     }
 
     @Override

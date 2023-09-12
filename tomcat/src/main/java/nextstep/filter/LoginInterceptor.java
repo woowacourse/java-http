@@ -9,13 +9,13 @@ import org.apache.coyote.http11.HttpResponse;
 
 public class LoginInterceptor implements Interceptor {
 
-    private static final List<String> support_path = List.of(
+    private static final List<String> supportPath = List.of(
         "/login"
     );
 
     @Override
     public boolean support(final HttpRequest httpRequest) {
-        return support_path.contains(httpRequest.getPath());
+        return supportPath.contains(httpRequest.getPath());
     }
 
     @Override

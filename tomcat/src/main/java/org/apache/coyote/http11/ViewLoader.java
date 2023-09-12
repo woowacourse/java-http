@@ -14,7 +14,7 @@ public class ViewLoader {
     private ViewLoader() {
     }
 
-    public static String from(String viewName) {
+    public static String from(final String viewName) {
         URL resource = classLoader.getResource(STATIC_DIRECTORY + viewName);
 
         if (Objects.isNull(resource)) {

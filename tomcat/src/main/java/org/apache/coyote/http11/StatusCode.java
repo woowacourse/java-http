@@ -7,7 +7,7 @@ public enum StatusCode {
     UNAUTHORIZED("401 UNAUTHORIZED"),
     NOT_FOUND("404 NOT FOUND");
 
-    private String value;
+    private final String value;
 
     StatusCode(final String value) {
         this.value = value;

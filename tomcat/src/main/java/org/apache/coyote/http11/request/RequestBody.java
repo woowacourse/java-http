@@ -9,7 +9,8 @@ public class RequestBody {
 
     private static final String REQUEST_BODY_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private Map<String, String> values;
+
+    private final Map<String, String> values;
 
     private RequestBody(Map<String, String> values) {
         this.values = values;
@@ -31,6 +32,10 @@ public class RequestBody {
         }
 
         return new RequestBody(map);
+    }
+
+    public static RequestBody empty() {
+        return new RequestBody(new HashMap<>());
     }
 
     public int size() {

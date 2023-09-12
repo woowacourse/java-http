@@ -8,13 +8,13 @@ import org.apache.coyote.http11.controller.RegisterController;
 import org.apache.coyote.http11.controller.StaticController;
 import org.apache.coyote.http11.request.HttpRequest;
 
-public class ControllerAdapter {
+public class RequestMapping {
 
     private static final Map<String, Controller> map = new ConcurrentHashMap<>();
     private static final String STATIC_CONTROLLER = "staticController";
     private static final String ERROR_CONTROLLER = "errorController";
 
-    public ControllerAdapter() {
+    public RequestMapping() {
         init();
     }
 
@@ -25,12 +25,12 @@ public class ControllerAdapter {
         map.put("/register", new RegisterController());
     }
 
-    public Controller findController(HttpRequest httpRequest) {
+    public Controller getController(final HttpRequest httpRequest) {
         if (httpRequest.isStaticRequest()) {
             return map.get(STATIC_CONTROLLER);
         }
-        if (map.containsKey(httpRequest.getUri())) {
-            return map.get(httpRequest.getUri());
+        if (map.containsKey(httpRequest.getPath())) {
+            return map.get(httpRequest.getPath());
         }
         return map.get(ERROR_CONTROLLER);
     }

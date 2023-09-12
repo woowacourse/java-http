@@ -3,42 +3,37 @@ package org.apache.coyote.http11.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.ViewLoader;
 import org.apache.coyote.http11.request.RequestBody;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     @Override
-    public HttpResponse handle(final HttpRequest request) {
-        if (request.isGetRequest()) {
-            return handleGetMethod();
-        }
-        return handlePostMethod(request);
-    }
-
-    private HttpResponse handleGetMethod() {
-        return HttpResponse.builder()
-                .statusCode(StatusCode.OK)
-                .contentType(ContentType.TEXT_HTML)
-                .responseBody(ViewLoader.from("/register.html"))
-                .build();
-    }
-
-    private HttpResponse handlePostMethod(final HttpRequest request) {
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.hasRequestBody()) {
-            final RequestBody requestBody = request.getRequestBody();
+            final RequestBody requestBody = request.initRequestBody();
             register(requestBody);
-            return HttpResponse.builder()
-                    .statusCode(StatusCode.CREATED)
-                    .contentType(ContentType.TEXT_HTML)
-                    .responseBody(ViewLoader.toIndex())
-                    .build();
+            response
+                .statusCode(StatusCode.CREATED)
+                .contentType(ContentType.TEXT_HTML)
+                .responseBody(ViewLoader.toIndex());
+            return;
         }
-        return HttpResponse.toNotFound();
+        response
+            .statusCode(StatusCode.NOT_FOUND)
+            .contentType(ContentType.TEXT_HTML)
+            .responseBody(ViewLoader.toNotFound());
+    }
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        response
+            .statusCode(StatusCode.OK)
+            .contentType(ContentType.TEXT_HTML)
+            .responseBody(ViewLoader.from("/register.html"));
     }
 
     private void register(final RequestBody requestBody) {

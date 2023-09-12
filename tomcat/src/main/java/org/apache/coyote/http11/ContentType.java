@@ -12,7 +12,7 @@ public enum ContentType {
     private static final String JS = "js";
     private static final String ENCODING = ";charset=utf-8";
 
-    private String value;
+    private final String value;
 
     ContentType(final String value) {
         this.value = value;

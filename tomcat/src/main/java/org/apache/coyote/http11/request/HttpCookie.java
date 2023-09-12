@@ -8,7 +8,7 @@ public class HttpCookie {
     private static final String JSESSIONID = "JSESSIONID";
     private final Map<String, String> cookies = new HashMap<>();
 
-    public HttpCookie(String requestCookie) {
+    public HttpCookie(final String requestCookie) {
         final String[] cookies = requestCookie.replace(";", "").split(" ");
         for (String cookie : cookies) {
             final String[] cookieInfo = cookie.split("=");
@@ -23,7 +23,7 @@ public class HttpCookie {
     }
 
     public String getJsessionid() {
-        if (cookies.containsKey(JSESSIONID)) {
+        if (!cookies.containsKey(JSESSIONID)) {
             throw new IllegalArgumentException("Session이 존재하지 않습니다.");
         }
         return cookies.get(JSESSIONID);

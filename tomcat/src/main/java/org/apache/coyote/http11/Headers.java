@@ -10,8 +10,8 @@ import org.apache.coyote.http11.request.HttpCookie;
 public class Headers {
 
     private static final String HEADER_DELIMITER = ":";
-    private Map<String, String> values;
-    private HttpCookie cookie;
+    private final Map<String, String> values;
+    private final HttpCookie cookie;
 
     private Headers(Map<String, String> values, HttpCookie cookie) {
         this.values = values;

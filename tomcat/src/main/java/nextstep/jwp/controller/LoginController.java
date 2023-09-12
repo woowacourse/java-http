@@ -44,12 +44,10 @@ public class LoginController extends AbstractController {
         final boolean isSuccess = findUser.filter(user -> user.checkPassword(password))
                 .isPresent();
         if (isSuccess) {
-            final Session session = new Session();
-            sessionManager.add(session);
-            session.setAttribute(session.getId(), findUser.get());
+            final Session session = sessionManager.create(findUser.get());
+            response.setCookie(Session.SESSION_KEY, session.getId());
             response.setStatusCode(HttpStatusCode.FOUND);
             response.setLocation("/");
-            response.setCookie(Session.SESSION_KEY, session.getId());
             log.info("로그인 성공! 로그인 아이디: " + account);
             return;
         }

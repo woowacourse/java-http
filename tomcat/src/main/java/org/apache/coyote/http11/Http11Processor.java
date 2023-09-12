@@ -1,7 +1,12 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.handler.FrontController;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestParser;
+import org.apache.coyote.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +16,8 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final FrontController FRONT_CONTROLLER = new FrontController();
+    private static final HttpRequestParser HTTP_REQUEST_PARSER = new HttpRequestParser();
 
     private final Socket connection;
 
@@ -28,15 +35,11 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = HTTP_REQUEST_PARSER.convertToHttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Controller controller = FRONT_CONTROLLER.handle(httpRequest);
+            String response = controller.process(httpRequest, httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

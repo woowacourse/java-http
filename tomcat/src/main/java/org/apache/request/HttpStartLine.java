@@ -10,14 +10,14 @@ public class HttpStartLine {
     private static final int HTTP_VERSION_INDEX = 2;
     private static final int MIN_LINE_SIZE = 3;
 
-    private final HttpMethod httpMethod;
-    private final String requestTarget;
-    private final String httpVersion;
+    private final HttpMethod method;
+    private final String path;
+    private final String version;
 
-    private HttpStartLine(HttpMethod httpMethod, String requestTarget, String httpVersion) {
-        this.httpMethod = httpMethod;
-        this.requestTarget = requestTarget;
-        this.httpVersion = httpVersion;
+    private HttpStartLine(HttpMethod method, String path, String version) {
+        this.method = method;
+        this.path = path;
+        this.version = version;
     }
 
     public static HttpStartLine of(String line) {
@@ -39,15 +39,15 @@ public class HttpStartLine {
         }
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public HttpMethod getMethod() {
+        return method;
     }
 
-    public String getRequestTarget() {
-        return requestTarget;
+    public String getPath() {
+        return path;
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
+    public String getVersion() {
+        return version;
     }
 }

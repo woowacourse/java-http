@@ -20,4 +20,8 @@ public class FileReader {
         }
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
+
+    public static URL parseURL(String path) {
+        return FileReader.class.getClassLoader().getResource(DEFAULT_RESOURCE_LOCATION + path);
+    }
 }

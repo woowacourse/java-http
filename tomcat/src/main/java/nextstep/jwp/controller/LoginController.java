@@ -1,105 +1,77 @@
-package org.apache.handler;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.common.ContentType;
 import org.apache.common.Cookie;
 import org.apache.common.FileReader;
-import org.apache.common.HttpStatus;
 import org.apache.common.Session;
 import org.apache.common.SessionManager;
 import org.apache.request.HttpRequest;
+import org.apache.response.ContentType;
 import org.apache.response.HttpResponse;
+import org.apache.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements RequestHandler {
+public class LoginController extends AbstractController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoginHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
     private static final String JSESSIONID = "JSESSIONID=";
     private static final String INDEX_PAGE = "/index.html";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
-    private static final String METHOD_NOT_ALLOWED_PAGE = "/405.html";
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isPost()) {
-            return doPost(httpRequest);
-        }
-
-        if (httpRequest.isGet()) {
-            return doGet(httpRequest);
-        }
-
-        String content = FileReader.read(METHOD_NOT_ALLOWED_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.METHOD_NOT_ALLOWED, content);
-        httpResponse.setContentType(ContentType.TEXT_HTML);
-        return httpResponse;
-    }
-
-    private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
-        String query = httpRequest.getBody();
-        String[] queries = query.split("&");
-        String[] accountQuery = queries[0].split("=");
-        String[] passwordQuery = queries[1].split("=");
-
-        if (isInvalidParameter(accountQuery[0], passwordQuery[0])) {
-            String content = FileReader.read(LOGIN_PAGE);
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
-            httpResponse.setContentType(ContentType.TEXT_HTML);
-            httpResponse.setLocation(LOGIN_PAGE);
-            return httpResponse;
-        }
-
-        String account = accountQuery[1];
-        String password = passwordQuery[1];
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        String account = httpRequest.getParam(ACCOUNT);
+        String password = httpRequest.getParam(PASSWORD);
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
         if (user.isPresent() && user.get().checkPassword(password)) {
             LOG.info("user : {}", user);
             String content = FileReader.read(INDEX_PAGE);
 
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
+            httpResponse.setHttpStatus(HttpStatus.FOUND);
+            httpResponse.setContentType(ContentType.TEXT_HTML);
+            httpResponse.setBody(content);
+
             Session session = createSession(httpResponse, user.get());
             httpResponse.setCookie(JSESSIONID + session.getId());
             httpResponse.setLocation(INDEX_PAGE);
-            return httpResponse;
+            return;
         }
 
         String content = FileReader.read(UNAUTHORIZED_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, content);
+        httpResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
         httpResponse.setContentType(ContentType.TEXT_HTML);
+        httpResponse.setBody(content);
         httpResponse.setLocation(UNAUTHORIZED_PAGE);
-        return httpResponse;
     }
 
-    private boolean isInvalidParameter(String account, String password) {
-        return !Objects.equals(account, "account") || !Objects.equals(password, "password");
-    }
-
-    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    @Override
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Cookie cookie = httpRequest.getCookie();
         String sessionId = cookie.getValue("JSESSIONID");
         Session session = SessionManager.findSession(sessionId);
 
         if (isAuthenticatedUser(session)) {
             String content = FileReader.read(INDEX_PAGE);
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND, content);
+            httpResponse.setHttpStatus(HttpStatus.FOUND);
             httpResponse.setContentType(ContentType.TEXT_HTML);
+            httpResponse.setBody(content);
             httpResponse.setLocation(INDEX_PAGE);
-            return httpResponse;
+            return;
         }
 
         String content = FileReader.read(LOGIN_PAGE);
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, content);
+        httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setContentType(ContentType.TEXT_HTML);
-        return httpResponse;
+        httpResponse.setBody(content);
     }
 
     private boolean isAuthenticatedUser(Session session) {

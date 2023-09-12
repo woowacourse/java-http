@@ -2,6 +2,7 @@ package org.apache.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.response.ContentType;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.params.ParameterizedTest;

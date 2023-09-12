@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import org.apache.request.HttpRequest;
@@ -18,13 +17,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class FileHandlerTest {
+class FileControllerTest {
 
     @Nested
     class HTML_파일을_처리할_때 {
 
         @Test
-        void 정상적으로_응답_후_200_상태코드를_반환한다() throws IOException {
+        void 정상적으로_응답_후_200_상태코드를_반환한다() throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     "GET /index.html HTTP/1.1",
                     "Host: localhost:8080"
@@ -32,9 +31,10 @@ class FileHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new FileHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            Controller controller = RequestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             List<String> responses = List.of(
                     "HTTP/1.1 200 OK ",
@@ -45,7 +45,7 @@ class FileHandlerTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"DELETE", "PUT", "PATCH"})
-        void GET_또는_POST_요청이_아니면_405_상태코드를_발생한다(String method) throws IOException {
+        void GET_또는_POST_요청이_아니면_405_상태코드를_발생한다(String method) throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     "" + method + " /index.html HTTP/1.1",
                     "Host: localhost:8080"
@@ -53,9 +53,10 @@ class FileHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new FileHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            Controller controller = RequestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             List<String> responses = List.of(
                     "HTTP/1.1 405 METHOD_NOT_ALLOWED ",

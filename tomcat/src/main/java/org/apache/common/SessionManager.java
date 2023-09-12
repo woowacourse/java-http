@@ -1,11 +1,11 @@
 package org.apache.common;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }
@@ -15,6 +15,9 @@ public class SessionManager {
     }
 
     public static Session findSession(final String id) {
+        if (id == null) {
+            return null;
+        }
         return SESSIONS.get(id);
     }
 

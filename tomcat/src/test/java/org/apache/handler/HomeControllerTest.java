@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
@@ -17,13 +16,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class DefaultHandlerTest {
+class HomeControllerTest {
 
     @Nested
     class 기본_페이지_요청_시 {
 
         @Test
-        void GET_요청이면_200_상태코드를_반환한다() throws IOException {
+        void GET_요청이면_200_상태코드를_반환한다() throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     "GET / HTTP/1.1",
                     "Host: localhost:8080"
@@ -31,9 +30,10 @@ class DefaultHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new DefaultHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            Controller controller = RequestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
                     "HTTP/1.1 200 OK "
@@ -43,7 +43,7 @@ class DefaultHandlerTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"POST", "DELETE", "PUT", "PATCH"})
-        void GET_이외의_요청이면_405_상태코드를_반환한다(String method) throws IOException {
+        void GET_이외의_요청이면_405_상태코드를_반환한다(String method) throws Exception {
             String httpRequestMessage = String.join("\r\n",
                     ""+ method + " / HTTP/1.1",
                     "Host: localhost:8080"
@@ -51,9 +51,10 @@ class DefaultHandlerTest {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            RequestHandler requestHandler = new DefaultHandler();
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse httpResponse = requestHandler.handle(httpRequest);
+            Controller controller = RequestMapping.findController(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             String expected = String.join("\r\n",
                     "HTTP/1.1 405 METHOD_NOT_ALLOWED "

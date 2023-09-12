@@ -13,6 +13,9 @@ public class SessionRepository {
     }
 
     public Optional<Session> getSession(String id) {
+        if (id == null) {
+            return Optional.ofNullable(null);
+        }
         return Optional.ofNullable(SESSIONS.get(id));
     }
 

@@ -18,7 +18,11 @@ public class LoginService {
     private final SessionRepository sessionRepository = new SessionRepository();
 
     public HttpResponse getLoginViewResponse(Cookie cookie, Protocol protocol) {
-        final Optional<Session> session = sessionRepository.getSession(cookie.get(COOKIE_KEY));
+        Optional<String> cookieOption = cookie.get(COOKIE_KEY);
+        if (cookieOption.isEmpty()) {
+            return HttpResponse.getCookieNullResponseEntity(protocol, LOGIN_PAGE);
+        }
+        final Optional<Session> session = sessionRepository.getSession(cookieOption.get());
         if (session.isEmpty()) {
             return HttpResponse.getCookieNullResponseEntity(protocol, LOGIN_PAGE);
         }

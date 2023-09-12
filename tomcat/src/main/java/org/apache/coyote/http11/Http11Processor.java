@@ -43,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequestGenerator.generate(bufferedReader);
             final HttpResponse httpResponse = requestHandler.getResponse(httpRequest);
             final String response = responseGenerator.generate(httpResponse);
+            System.out.println("response = " + response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

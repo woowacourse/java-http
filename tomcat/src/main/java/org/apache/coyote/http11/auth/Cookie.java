@@ -3,6 +3,7 @@ package org.apache.coyote.http11.auth;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Collections.EMPTY_MAP;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -43,8 +44,11 @@ public class Cookie {
         elements.put(key, value);
     }
 
-    public String get(final String key) {
-        return elements.get(key);
+    public Optional<String> get(final String key) {
+        if (key == null) {
+            return Optional.empty();
+        }
+        return Optional.of(elements.get(key));
     }
 
 }

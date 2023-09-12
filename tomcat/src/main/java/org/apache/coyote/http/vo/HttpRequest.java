@@ -1,6 +1,7 @@
 package org.apache.coyote.http.vo;
 
 import java.util.Optional;
+import org.apache.catalina.exception.NoSuchBodyValueException;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 
@@ -68,7 +69,8 @@ public class HttpRequest {
     }
 
     public String getBodyValueOf(final String body) {
-        return this.body.getValue(body);
+        return Optional.ofNullable(this.body.getValue(body))
+                .orElseThrow(NoSuchBodyValueException::new);
     }
 
     public HttpBody getBody() {

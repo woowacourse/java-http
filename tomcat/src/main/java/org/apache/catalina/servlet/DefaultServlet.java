@@ -1,42 +1,39 @@
 package org.apache.catalina.servlet;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.exception.UncheckedServletException;
 import org.apache.catalina.util.ResourceFileReader;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpStatus;
 import org.apache.coyote.http.SupportFile;
-import org.apache.coyote.http.vo.HttpHeaders;
 import org.apache.coyote.http.vo.HttpRequest;
 import org.apache.coyote.http.vo.HttpResponse;
 import org.apache.coyote.http.vo.Url;
 
-public class DefaultServlet implements HttpServlet {
+public class DefaultServlet extends AbstractController {
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         try {
-            final Url url = httpRequest.getUrl();
-            final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
+            final Url url = request.getUrl();
             final String body = ResourceFileReader.readFile(url.getUrlPath());
 
-            headers.put(HttpHeader.CONTENT_TYPE, SupportFile.getContentType(httpRequest));
-
-            return new HttpResponse.Builder()
-                    .status(HttpStatus.OK)
-                    .headers(headers)
-                    .body(body)
-                    .build();
-
+            sendStaticFileResponse(request, response, HttpStatus.OK, body);
         } catch (UncheckedServletException e) {
-            final HttpHeaders headers = HttpHeaders.getEmptyHeaders();
-            headers.put(HttpHeader.LOCATION, "/404.html");
-
-            return new HttpResponse.Builder()
-                    .status(HttpStatus.REDIRECT)
-                    .headers(headers)
-                    .build();
+            final String body = ResourceFileReader.readFile("/404.html");
+            sendStaticFileResponse(request, response, HttpStatus.NOT_FOUND, body);
         }
+    }
+
+    private void sendStaticFileResponse(
+            final HttpRequest httpRequest,
+            final HttpResponse httpResponse,
+            final HttpStatus status,
+            final String body
+    ) {
+        httpResponse.setStatus(status)
+                .setHeader(HttpHeader.CONTENT_TYPE, SupportFile.getContentType(httpRequest))
+                .setBody(body);
     }
 
     @Override

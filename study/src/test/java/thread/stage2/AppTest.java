@@ -20,6 +20,9 @@ class AppTest {
      * - 스레드명(nio-8080-exec-x)으로 생성된 스레드 갯수를 파악
      * - http call count
      * - 테스트 결과값
+     accept count: backlog 크기 만큼 생성된 운영체제 단의 accept 큐 사이즈 3-way 핸드셰이크가 끝난 커넥션이 대기
+     max-connections: socket.accept() 로 받을 수 있는 커넥션 수 accept큐에서 대기 중인 커넥션을 꺼내서 accpet() 받을 수 있는 최대 커넥션 수
+     threads: 한번에 처리할 수 있는 최대 요청 개수 (즉 실제 생성되는 스레드 개수)
      */
     @Test
     void test() throws Exception {

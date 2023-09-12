@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class LoginServlet extends AbstractServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected void doGet(Http11Request request, Http11Response response) throws Exception {
@@ -61,7 +62,6 @@ public class LoginServlet extends AbstractServlet {
     }
 
     private Session createSession(User user) {
-        SessionManager sessionManager = new SessionManager();
         Session session = new Session(UUID.randomUUID().toString());
         session.setAttribute(user.getAccount(), user);
         sessionManager.add(session);

@@ -17,13 +17,14 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_THREADS_COUNT = 250;
 
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, 250);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS_COUNT);
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {

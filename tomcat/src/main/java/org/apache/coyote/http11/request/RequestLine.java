@@ -10,7 +10,7 @@ public class RequestLine {
     private final Map<String, String> query;
     private final String version;
 
-    public RequestLine(HttpMethod method, String path, Map<String, String> query, String version) {
+    private RequestLine(HttpMethod method, String path, Map<String, String> query, String version) {
         this.method = method;
         this.path = path;
         this.query = query;
@@ -36,7 +36,7 @@ public class RequestLine {
 
     private static Map<String, String> readQueries(String uri) {
         if (!uri.contains("?")) {
-            return new HashMap<>();
+            return Map.of();
         }
         final Map<String, String> queriesMap = new HashMap<>();
         String[] queries = uri.split("\\?")[1].split("&");

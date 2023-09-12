@@ -21,9 +21,9 @@ public class ControllerMapper {
 
     public static Controller getController(final Request request) {
         final String path = request.getRequestLine().getRequestPath();
-        if (path.contains(".")) {
-            return STATIC_RESOURCE_CONTROLLER;
+        if (CONTROLLER_MAP.containsKey(path)) {
+            return CONTROLLER_MAP.get(path);
         }
-        return CONTROLLER_MAP.get(path);
+        return STATIC_RESOURCE_CONTROLLER;
     }
 }

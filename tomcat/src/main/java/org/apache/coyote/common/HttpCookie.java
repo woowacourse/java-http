@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String KEY_VALUE_SEPERATOR = "=";
+    private static final String COOKIE_SEPERATOR = "; ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
     private final Map<String, String> cookie;
 
     public HttpCookie(Map<String, String> cookie) {
@@ -18,18 +23,22 @@ public class HttpCookie {
         Map<String, String> cookies = new LinkedHashMap<>();
 
         if (StringUtils.isNotBlank(cookieString)) {
-            String[] cookiePairs = cookieString.split("; ");
-            for (String cookiePair : cookiePairs) {
-                String[] parts = cookiePair.split("=");
-                if (parts.length == 2) {
-                    String name = parts[0];
-                    String value = parts[1];
-                    cookies.put(name, value);
-                }
-            }
+            String[] cookiePairs = cookieString.split(COOKIE_SEPERATOR);
+            generateCookie(cookies, cookiePairs);
         }
 
         return new HttpCookie(cookies);
+    }
+
+    private static void generateCookie(Map<String, String> cookies, String[] cookiePairs) {
+        for (String cookiePair : cookiePairs) {
+            String[] parts = cookiePair.split(KEY_VALUE_SEPERATOR);
+            if (parts.length == 2) {
+                String name = parts[KEY_INDEX];
+                String value = parts[VALUE_INDEX];
+                cookies.put(name, value);
+            }
+        }
     }
 
     public String getValue(String key) {
@@ -39,8 +48,8 @@ public class HttpCookie {
     public String convertToHeader() {
         return cookie.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("; "));
+                .map(entry -> entry.getKey() + KEY_VALUE_SEPERATOR + entry.getValue())
+                .collect(Collectors.joining(COOKIE_SEPERATOR));
     }
 
     @Override

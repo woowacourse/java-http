@@ -6,63 +6,53 @@ import org.apache.coyote.common.HttpCookie;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.apache.coyote.common.Headers.*;
+
 public class HttpResponse {
+
+    private static final String DEFAULT_VERSION = "HTTP/1.1";
 
     private final StatusLine statusLine;
     private final HttpResponseHeader headers;
-    private final String body;
 
-    private HttpResponse(Builder builder) {
-        this.statusLine = new StatusLine(builder.version, builder.httpStatus);
-        this.headers = new HttpResponseHeader(builder.headers);
-        this.body = builder.body;
+    private String body;
+
+    private HttpResponse(StatusLine statusLine, HttpResponseHeader headers, String body) {
+        this.statusLine = statusLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
+    public static HttpResponse createDefaultResponse() {
+        HttpStatus httpStatus = HttpStatus.OK;
+        Map<String, String> headers = new LinkedHashMap<>();
+        String body = "";
+
+        return new HttpResponse(new StatusLine(DEFAULT_VERSION, httpStatus), new HttpResponseHeader(headers), body);
     }
 
     public String getResponse() {
-        return statusLine.getStatusLine() + "\r\n" + headers.getResponseHeader() + "\r\n" + body;
+        return statusLine.getStatusLine() + CRLF + headers.getResponseHeader() + CRLF + body;
     }
 
-    public static class Builder {
-        private final String version;
-        private final Map<String, String> headers;
-        private HttpStatus httpStatus;
-        private String body;
+    public void setContentType(ContentType contentType) {
+        this.headers.add(CONTENT_TYPE, contentType.getType() + CHARSET_UTF8);
+    }
 
-        public Builder() {
-            this.version = "HTTP/1.1";
-            this.httpStatus = HttpStatus.OK;
-            this.headers = new LinkedHashMap<>();
-            this.body = "";
-        }
+    public void setBody(String body) {
+        addHeader(CONTENT_LENGTH, String.valueOf(body.length()));
+        this.body = body;
+    }
 
-        public Builder header(String key, String value) {
-            this.headers.put(key, value);
-            return this;
-        }
+    public void setStatus(HttpStatus status) {
+        this.statusLine.setStatus(status);
+    }
 
-        public Builder status(HttpStatus httpStatus) {
-            this.httpStatus = httpStatus;
-            return this;
-        }
+    public void addHeader(String key, String value) {
+        this.headers.add(key, value);
+    }
 
-        public Builder contentType(ContentType contentType) {
-            this.headers.put("Content-Type", contentType.getType() + ";charset=utf-8");
-            return this;
-        }
-
-        public Builder setCookie(HttpCookie cookie) {
-            this.headers.put("Set-Cookie", cookie.convertToHeader());
-            return this;
-        }
-
-        public Builder body(String body) {
-            this.headers.put("Content-Length", String.valueOf(body.getBytes().length));
-            this.body = body;
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(this);
-        }
+    public void setCookie(HttpCookie cookie) {
+        this.headers.add(SET_COOKIE, cookie.convertToHeader());
     }
 }

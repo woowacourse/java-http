@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class RequestUri {
 
-    private static final String SEPERATOR = "\\?";
     private static final String QUERY_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPEARTOR = "=";
     private static final String DOT = ".";

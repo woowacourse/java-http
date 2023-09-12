@@ -4,8 +4,8 @@ public class StatusLine {
 
     private static final String SEPERATOR = " ";
 
-    private final String version;
-    private final HttpStatus httpStatus;
+    private String version;
+    private HttpStatus httpStatus;
 
     public StatusLine(String version, HttpStatus httpStatus) {
         this.version = version;
@@ -14,5 +14,9 @@ public class StatusLine {
 
     public String getStatusLine() {
         return version + SEPERATOR + httpStatus.getHttpStatus() + SEPERATOR;
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.httpStatus = status;
     }
 }

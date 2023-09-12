@@ -7,6 +7,7 @@ public class HttpRequestBody {
 
     private static final String BODY_SEPERATOR = "=";
     private static final String SEPERATOR = "&";
+
     private final Map<String, String> body;
 
     private HttpRequestBody(Map<String, String> body) {

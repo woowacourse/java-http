@@ -1,16 +1,23 @@
 package org.apache.coyote.utils;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 
 public class FileUtils {
 
     private static final String STATIC_DIRECTORY = "static";
 
+    private FileUtils() {
+    }
+
     public static String readFile(String path) throws IOException {
-        final Path filePath = Path.of(Objects.requireNonNull(FileUtils.class.getClassLoader().getResource(STATIC_DIRECTORY + path)).getPath());
+        URL resource = FileUtils.class
+                .getClassLoader()
+                .getResource(STATIC_DIRECTORY + path);
+
+        Path filePath = Path.of(resource.getPath());
 
         return new String(Files.readAllBytes(filePath));
     }

@@ -6,7 +6,8 @@ public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JAVASCRIPT("js", "text/javascript"),
-    FAVICON("ico", "image/x-icon");
+    FAVICON("ico", "image/x-icon"),
+    SVG("svg", "image/svg+xml");
 
     private final String extension;
     private final String type;
@@ -18,7 +19,7 @@ public enum ContentType {
 
     public static ContentType from(String extension) {
         return Arrays.stream(values())
-                .filter(it -> it.getExtension().equals(extension))
+                .filter(contentType -> contentType.getExtension().equals(extension))
                 .findFirst()
                 .orElse(HTML);
     }

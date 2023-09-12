@@ -88,13 +88,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        try {
-            maxThreadSemaphore.acquire();
-        } catch (InterruptedException e) {
-            log.error("Interruption Exception occur ", e);
-            throw e;
-        }
 
+        maxThreadSemaphore.acquire();
         var processor = new Http11Processor(connection, container.createServlet());
         CompletableFuture.runAsync(processor, executorService)
             .whenCompleteAsync((result, throwable) -> maxThreadSemaphore.release());

@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemorySessionRepository {
 
+    private static final Map<Long, UUID> sessions = new ConcurrentHashMap<>();
+
     private InMemorySessionRepository() {
     }
-
-    private static final Map<Long, UUID> sessions = new ConcurrentHashMap<>();
 
     public static UUID save(Long userId) {
         UUID uuid = UUID.randomUUID();

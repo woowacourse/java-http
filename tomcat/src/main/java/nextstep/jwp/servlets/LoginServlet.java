@@ -3,9 +3,6 @@ package nextstep.jwp.servlets;
 import static org.apache.coyote.http11.PagePathMapper.*;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.database.InMemorySessionRepository;
 import nextstep.jwp.database.InMemoryUserRepository;
 import org.apache.coyote.http11.ContentType;
@@ -16,6 +13,9 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
+import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
 
 public class LoginServlet extends HttpServlet {
 

@@ -4,8 +4,6 @@ import static org.apache.coyote.http11.PagePathMapper.INDEX_PAGE;
 import static org.apache.coyote.http11.PagePathMapper.REGISTER_PAGE;
 import static org.apache.coyote.http11.message.HttpHeaders.*;
 
-import java.io.IOException;
-import java.util.Map;
 import nextstep.jwp.database.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
@@ -14,6 +12,8 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
+import java.io.IOException;
+import java.util.Map;
 
 public class RegisterServlet extends HttpServlet {
 

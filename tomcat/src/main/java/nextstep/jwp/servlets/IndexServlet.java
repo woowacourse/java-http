@@ -4,12 +4,12 @@ import static org.apache.coyote.http11.PagePathMapper.INDEX_PAGE;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.HttpHeaders.CONTENT_TYPE;
 
-import java.io.IOException;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
+import java.io.IOException;
 
 public class IndexServlet extends HttpServlet {
 

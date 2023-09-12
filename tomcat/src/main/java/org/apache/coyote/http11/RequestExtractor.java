@@ -1,10 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
 import org.apache.coyote.http11.exception.RequestBodyNotProvidedException;
 import org.apache.coyote.http11.message.Headers;
 import org.apache.coyote.http11.message.HttpHeaders;
@@ -13,6 +8,11 @@ import org.apache.coyote.http11.message.HttpVersion;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.request.RequestURI;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class RequestExtractor {
 

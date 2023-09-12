@@ -1,12 +1,12 @@
 package org.apache.catalina.container;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.servlets.*;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Context {
 

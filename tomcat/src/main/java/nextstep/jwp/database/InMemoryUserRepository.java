@@ -1,9 +1,9 @@
 package nextstep.jwp.database;
 
+import nextstep.jwp.model.User;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 

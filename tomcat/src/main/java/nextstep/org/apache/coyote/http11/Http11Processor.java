@@ -21,9 +21,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final Context context;
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Context context, final Socket connection) {
+        this.context = context;
         this.connection = connection;
     }
 
@@ -42,8 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             Http11Request request = new Http11Request(inputStream);
             Http11Response response = new Http11Response(Status.OK);
 
-            Context servletContainer = new Context();
-            Servlet servlet = servletContainer.getServlet(request.getPathInfo());
+            Servlet servlet = context.getServlet(request.getPathInfo());
             try {
                 servlet.service(request, response);
             } catch (Exception e) {

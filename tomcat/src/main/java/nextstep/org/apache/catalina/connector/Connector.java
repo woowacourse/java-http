@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import nextstep.org.apache.catalina.Context;
 import nextstep.org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +19,17 @@ public class Connector implements Runnable {
     private static final int DEFAULT_ACCEPT_COUNT = 100;
     private static final int MAX_THREADS_COUNT = 250;
 
+    private final Context context;
     private final ThreadPoolExecutor threadPoolExecutor;
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS_COUNT);
+    public Connector(Context context) {
+        this(context, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, MAX_THREADS_COUNT);
     }
 
-    public Connector(final int port, final int acceptCount, final int maxThreads) {
+    public Connector(Context context, final int port, final int acceptCount, final int maxThreads) {
+        this.context = context;
         this.threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxThreads);
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
@@ -70,7 +73,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(context, connection);
         this.threadPoolExecutor.submit(processor);
     }
 

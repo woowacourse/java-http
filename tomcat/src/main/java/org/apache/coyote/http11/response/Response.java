@@ -65,7 +65,7 @@ public class Response {
     public void addCookie(final Cookie cookie) {
         cookies.put(cookie.getKey(), cookie);
 
-        String setCookieValue = cookies.keySet().stream()
+        final String setCookieValue = cookies.keySet().stream()
                 .map(key -> key + "=" + cookies.get(key).getValue())
                 .collect(Collectors.joining("; "));
 

@@ -34,7 +34,7 @@ public class Connector implements Runnable {
     }
 
     public Connector(final int port, final int acceptCount, final int maxThreads) {
-        int coreThreadCount = Runtime.getRuntime().availableProcessors() * 2;
+        final int coreThreadCount = Runtime.getRuntime().availableProcessors() * 2;
         final BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(DEFAULT_ACCEPT_COUNT);
 
         this.executorService = new ThreadPoolExecutor(coreThreadCount, maxThreads, DEFAULT_KEEP_ALIVE_ALIVE, DEFAULT_TIME_UNIT, workQueue);
@@ -53,7 +53,7 @@ public class Connector implements Runnable {
     }
 
     public void start() {
-        var thread = new Thread(this);
+        final var thread = new Thread(this);
         thread.setDaemon(true);
         thread.start();
         stopped = false;
@@ -80,7 +80,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection);
+        final var processor = new Http11Processor(connection);
         executorService.submit(processor);
     }
 

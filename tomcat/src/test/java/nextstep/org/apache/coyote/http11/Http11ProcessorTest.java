@@ -28,12 +28,11 @@ class Http11ProcessorTest {
         // when
         processor.process(socket);
 
-        // then\
+        // then
         final String actual = socket.output();
         assertAll(() -> {
             assertThat(actual).contains("HTTP/1.1 200 OK");
             assertThat(actual).contains("Content-Type: text/html;charset=utf-8");
-            //assertThat(actual).contains("Content-Length: 12");
         });
     }
 
@@ -66,7 +65,6 @@ class Http11ProcessorTest {
         assertAll(() -> {
             assertThat(actual).contains("HTTP/1.1 200 OK");
             assertThat(actual).contains("Content-Type: text/html;charset=utf-8");
-            //assertThat(actual).contains("Content-Length: 5564");
         });
     }
 }

@@ -118,7 +118,7 @@ class RequestTest {
         final Request request = Request.from(bufferedReader);
 
         // when
-        Session actual = request.getSession();
+        final Session actual = request.getSession();
 
         // then
         assertThat(actual).isNotNull();

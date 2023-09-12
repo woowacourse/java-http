@@ -23,8 +23,23 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void setStatusCode(final StatusCode statusCode) {
+    public HttpResponse setStatusCode(final StatusCode statusCode) {
         this.statusCode = statusCode;
+        return this;
+    }
+
+    public HttpResponse addHeader(final String headerName, final String headerValue) {
+        httpHeader.addHeader(headerName, headerValue);
+        return this;
+    }
+
+    public HttpResponse setBody(final String body) {
+        this.body = body;
+        return this;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     public String makeToString() {
@@ -33,17 +48,5 @@ public class HttpResponse {
             httpHeader.makeResponseForm(),
             "",
             body);
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void addHeader(final String headerName, final String headerValue) {
-        httpHeader.addHeader(headerName, headerValue);
-    }
-
-    public void setBody(final String body) {
-        this.body = body;
     }
 }

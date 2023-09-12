@@ -10,9 +10,9 @@ public class RootController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         final String body = "Hello world!";
-        response.setStatusCode(StatusCode.OK);
-        response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8);
-        response.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        response.setBody(body);
+        response.setStatusCode(StatusCode.OK)
+            .addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8)
+            .addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+            .setBody(body);
     }
 }

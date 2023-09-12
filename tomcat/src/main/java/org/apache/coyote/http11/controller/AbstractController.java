@@ -22,8 +22,8 @@ public abstract class AbstractController implements Controller {
             doGet(request, response);
             return;
         }
-        response.setStatusCode(StatusCode.METHOD_NOT_ALLOWED);
-        response.addHeader(ALLOW, "GET, POST");
+        response.setStatusCode(StatusCode.METHOD_NOT_ALLOWED)
+            .addHeader(ALLOW, "GET, POST");
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

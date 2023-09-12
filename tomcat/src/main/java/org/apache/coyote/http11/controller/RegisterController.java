@@ -18,9 +18,9 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.hasBlankRegisterUserBody()) {
-            response.setStatusCode(StatusCode.FOUND);
-            response.addHeader(LOCATION, REGISTER_PAGE);
-            response.setBody("입력한 아이디, 비밀번호, 이메일에는 공백이 들어오면 안됩니다.");
+            response.setStatusCode(StatusCode.FOUND)
+                .addHeader(LOCATION, REGISTER_PAGE)
+                .setBody("입력한 아이디, 비밀번호, 이메일에는 공백이 들어오면 안됩니다.");
             return;
         }
         final User registerUser = new User(
@@ -29,21 +29,21 @@ public class RegisterController extends AbstractController {
             request.getBody().getEmail());
         InMemoryUserRepository.save(registerUser);
 
-        response.setStatusCode(StatusCode.FOUND);
-        response.addHeader(LOCATION, INDEX_PAGE);
+        response.setStatusCode(StatusCode.FOUND)
+            .addHeader(LOCATION, INDEX_PAGE);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (SessionManager.findSession(request.getAuthCookie()) == null) {
             final String body = FileFinder.find(REGISTER_PAGE);
-            response.setStatusCode(StatusCode.OK);
-            response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8);
-            response.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-            response.setBody(body);
+            response.setStatusCode(StatusCode.OK)
+                .addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8)
+                .addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setBody(body);
             return;
         }
-        response.setStatusCode(StatusCode.FOUND);
-        response.addHeader(LOCATION, INDEX_PAGE);
+        response.setStatusCode(StatusCode.FOUND)
+            .addHeader(LOCATION, INDEX_PAGE);
     }
 }

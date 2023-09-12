@@ -87,7 +87,7 @@ class RegisterControllerTest {
         final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /register.html \r\n" +
             "\r\n" +
-            "null";
+            "입력한 아이디, 비밀번호, 이메일에는 공백이 들어오면 안됩니다.";
 
         assertThat(httpResponse.makeToString()).isEqualTo(expected);
     }

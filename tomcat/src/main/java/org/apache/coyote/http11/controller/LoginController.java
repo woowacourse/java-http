@@ -29,26 +29,26 @@ public class LoginController extends AbstractController {
             final Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user.get());
             SessionManager.add(session);
-            response.setStatusCode(StatusCode.FOUND);
-            response.addHeader(LOCATION, INDEX_PAGE);
-            response.addHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
+            response.setStatusCode(StatusCode.FOUND)
+                .addHeader(LOCATION, INDEX_PAGE)
+                .addHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
             return;
         }
-        response.setStatusCode(StatusCode.FOUND);
-        response.addHeader(LOCATION, UNAUTHORIZED_PAGE);
+        response.setStatusCode(StatusCode.FOUND)
+            .addHeader(LOCATION, UNAUTHORIZED_PAGE);
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (SessionManager.findSession(request.getAuthCookie()) == null) {
             final String body = FileFinder.find(LOGIN_PAGE);
-            response.setStatusCode(StatusCode.OK);
-            response.addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8);
-            response.addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-            response.setBody(body);
+            response.setStatusCode(StatusCode.OK)
+                .addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8)
+                .addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setBody(body);
             return;
         }
-        response.setStatusCode(StatusCode.FOUND);
-        response.addHeader(LOCATION, INDEX_PAGE);
+        response.setStatusCode(StatusCode.FOUND)
+            .addHeader(LOCATION, INDEX_PAGE);
     }
 }

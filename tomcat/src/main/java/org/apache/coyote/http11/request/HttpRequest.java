@@ -14,6 +14,10 @@ public class HttpRequest {
         this.body = body;
     }
 
+    public static HttpRequest createEmpty() {
+        return new HttpRequest(null, null, null);
+    }
+
     public static HttpRequest of(final String requestLine, final Map<String, String> headers, final String body) {
         return new HttpRequest(
                 RequestLine.from(requestLine),
@@ -44,5 +48,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public boolean isEmpty() {
+        return requestLine == null;
     }
 }

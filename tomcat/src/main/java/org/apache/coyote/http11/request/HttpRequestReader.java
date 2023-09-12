@@ -13,7 +13,7 @@ public class HttpRequestReader {
     public static HttpRequest read(final BufferedReader bufferedReader) throws IOException {
         final String requestLine = bufferedReader.readLine();
         if(requestLine == null) {
-            return null;
+            return HttpRequest.createEmpty();
         }
         final Map<String, String> headers = extractHeaders(bufferedReader);
         final String body = extractBody(bufferedReader, headers.get("Content-Length"));

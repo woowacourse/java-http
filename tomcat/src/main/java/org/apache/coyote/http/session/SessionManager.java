@@ -12,7 +12,7 @@ public class SessionManager {
 
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    public static Session findSession(String sessionId) {
+    public static Session findOrCreate(String sessionId) {
         if (sessionId == null) {
             return new Session();
         }

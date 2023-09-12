@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, RunnableProcessor {
             HttpRequest httpRequest = requestDecoder.decode(bufferedReader);
 
             Optional<String> sessionId = httpRequest.getSessionId();
-            Session session = SessionManager.findSession(sessionId.orElse(null));
+            Session session = SessionManager.findOrCreate(sessionId.orElse(null));
 
             HttpResponse httpResponse = new HttpResponse();
             Optional<HttpController> controller = httpControllers.get(httpRequest.getPath());

@@ -23,10 +23,10 @@ public class StaticFileController extends RequestController {
     }
 
     private static boolean isStaticFile(final HttpRequest httpRequest) {
-        return httpRequest.isRequestUriEndsWith(HTML.getFileExtension()) ||
-                httpRequest.isRequestUriEndsWith(JS.getFileExtension()) ||
-                httpRequest.isRequestUriEndsWith(CSS.getFileExtension()) ||
-                httpRequest.isRequestUriEndsWith(ICO.getFileExtension());
+        return httpRequest.isEndsWithRequestUri(HTML.getFileExtension()) ||
+                httpRequest.isEndsWithRequestUri(JS.getFileExtension()) ||
+                httpRequest.isEndsWithRequestUri(CSS.getFileExtension()) ||
+                httpRequest.isEndsWithRequestUri(ICO.getFileExtension());
     }
 
     @Override
@@ -38,22 +38,22 @@ public class StaticFileController extends RequestController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final String filePath = request.getRequestUri().getRequestUri();
 
-        if (request.isRequestUriEndsWith(HTML.getFileExtension())) {
+        if (request.isEndsWithRequestUri(HTML.getFileExtension())) {
             createHttpResponseByContentTypeAndPath(response, HTML, filePath);
             return;
         }
 
-        if (request.isRequestUriEndsWith(JS.getFileExtension())) {
+        if (request.isEndsWithRequestUri(JS.getFileExtension())) {
             createHttpResponseByContentTypeAndPath(response, JS, filePath);
             return;
         }
 
-        if (request.isRequestUriEndsWith(CSS.getFileExtension())) {
+        if (request.isEndsWithRequestUri(CSS.getFileExtension())) {
             createHttpResponseByContentTypeAndPath(response, CSS, filePath);
             return;
         }
 
-        if (request.isRequestUriEndsWith(ICO.getFileExtension())) {
+        if (request.isEndsWithRequestUri(ICO.getFileExtension())) {
             createHttpResponseByContentTypeAndPath(response, ICO, filePath);
             return;
         }

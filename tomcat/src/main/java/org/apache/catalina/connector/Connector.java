@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -74,9 +75,14 @@ public class Connector implements Runnable {
         try {
             semaphore.acquire();
 
-            process(serverSocket.accept());
+            if (!stopped) {
+                process(serverSocket.accept());
+            }
         } catch (IOException | InterruptedException e) {
-            log.error(e.getMessage(), e);
+            if (!(e instanceof SocketException)) {
+                log.error(e.getMessage(), e);
+            }
+            Thread.currentThread().interrupt();
         }
     }
 

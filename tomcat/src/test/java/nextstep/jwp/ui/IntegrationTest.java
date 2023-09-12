@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 public class IntegrationTest {
 
-    private static Connector connector;
+    private Connector connector;
     protected int port;
 
     @BeforeEach

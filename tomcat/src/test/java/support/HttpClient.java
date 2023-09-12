@@ -10,8 +10,12 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.apache.coyote.http.request.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpClient {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpClient.class);
 
     private static final java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
                                                                                    .version(
@@ -19,10 +23,10 @@ public class HttpClient {
                                                                                    .build();
 
     public static HttpResponse<String> send(int port, final String path, final int timeout) {
-        var request = java.net.http.HttpRequest.newBuilder()
-                                               .uri(URI.create("http://localhost:" + port + path))
-                                               .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
-                                               .build();
+        var request = HttpRequest.newBuilder()
+                                 .uri(URI.create("http://localhost:" + port + path))
+                                 .timeout(Duration.of(timeout, ChronoUnit.MILLIS))
+                                 .build();
 
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -32,15 +36,16 @@ public class HttpClient {
     }
 
     public static HttpResponse<String> send(final int port, final String path) {
-        var request = java.net.http.HttpRequest.newBuilder()
-                                               .uri(URI.create("http://localhost:" + port + path))
-                                               .GET()
-                                               .build();
+        var request = HttpRequest.newBuilder()
+                                 .uri(URI.create("http://localhost:" + port + path))
+                                 .GET()
+                                 .build();
 
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
@@ -55,23 +60,25 @@ public class HttpClient {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
     public static HttpResponse<String> send(final int port, final String path, final String body,
         final ContentType contentType) {
-        var request = java.net.http.HttpRequest.newBuilder()
-                                               .uri(URI.create("http://localhost:" + port + path))
-                                               .header("Content-Type", contentType.getValue())
-                                               .POST(HttpRequest.BodyPublishers.ofString(body,
-                                                   StandardCharsets.UTF_8))
-                                               .build();
+        var request = HttpRequest.newBuilder()
+                                 .uri(URI.create("http://localhost:" + port + path))
+                                 .header("Content-Type", contentType.getValue())
+                                 .POST(HttpRequest.BodyPublishers.ofString(body,
+                                     StandardCharsets.UTF_8))
+                                 .build();
 
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 }

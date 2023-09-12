@@ -13,6 +13,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketImpl;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.coyote.RunnableProcessor;
@@ -30,18 +33,15 @@ class ConnectorTest {
         int requestsCount = 5;
         int acceptCount = 0;
         int maxThreadsCount = 2;
+        Map<String, Integer> taskCountByThread = new ConcurrentHashMap<>();
         CountDownLatch latch = new CountDownLatch(requestsCount);
-        AtomicInteger successCount = new AtomicInteger(0);
-        AtomicInteger failCount = new AtomicInteger(0);
 
-        Connector connector = getConnector(acceptCount, maxThreadsCount, 100);
+        Connector connector = getConnector(acceptCount, maxThreadsCount, taskCountByThread);
         for (int i = 0; i < requestsCount; i++) {
             new Thread(() -> {
                 try {
                     HttpClient.send(8080, "/index.html", 150);
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failCount.incrementAndGet();
+                } catch (Exception ignored) {
                 } finally {
                     latch.countDown();
                 }
@@ -51,14 +51,14 @@ class ConnectorTest {
         latch.await();
 
         assertAll(
-            () -> assertEquals(maxThreadsCount, successCount.get()),
-            () -> assertEquals(requestsCount - maxThreadsCount, failCount.get())
+            () -> assertEquals(maxThreadsCount, taskCountByThread.size()),
+            () -> assertEquals(requestsCount, taskCountByThread.values().stream().mapToInt(Integer::intValue).sum())
         );
 
         connector.stop();
     }
 
-    private static Connector getConnector(int acceptCount, int maxThreadsCount, int sleepTime) {
+    private static Connector getConnector(int acceptCount, int maxThreadsCount, Map<String, Integer> taskCountByThread) {
         Connector connector = new Connector(8080, acceptCount, maxThreadsCount,
             (socket, sem) -> new RunnableProcessor() {
                 @Override
@@ -68,7 +68,7 @@ class ConnectorTest {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(sleepTime);
+                        taskCountByThread.merge(Thread.currentThread().getName(), 1, Integer::sum);
                         OutputStream outputStream = socket.getOutputStream();
 
                         outputStream.write(String.join("\r\n",
@@ -79,7 +79,7 @@ class ConnectorTest {
                             "Hello world!").getBytes(StandardCharsets.UTF_8));
                         outputStream.flush();
                         outputStream.close();
-                    } catch (InterruptedException | IOException e) {
+                    } catch (IOException e) {
                         logger.error(e.getMessage(), e);
                     } finally {
                         sem.release();

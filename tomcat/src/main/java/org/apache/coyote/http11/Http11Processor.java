@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.Controller;
+import nextstep.jwp.exception.ResourceNotFoundException;
+import nextstep.jwp.exception.UnsupportedMethodException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.http11.header.RequestLine;
@@ -42,6 +44,8 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(request, response);
             log.info("{} {} {}", response.getStatus(), requestLine.getMethod(), request.getPath());
             writeResponse(outputStream, response.build());
+        } catch (UnsupportedMethodException | IllegalArgumentException | ResourceNotFoundException e) {
+            log.info("{}", e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

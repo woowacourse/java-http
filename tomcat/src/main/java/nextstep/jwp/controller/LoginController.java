@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.AbstractController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.UnsupportedMethodException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
@@ -37,18 +36,5 @@ public class LoginController extends AbstractController {
         }
         response.addStatus(HttpStatus.FOUND)
                 .addLocation("/login.html");
-    }
-
-    @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (request.isGet()) {
-            doGet(request, response);
-            return;
-        }
-        if (request.isPost()) {
-            doPost(request, response);
-            return;
-        }
-        throw new UnsupportedMethodException();
     }
 }

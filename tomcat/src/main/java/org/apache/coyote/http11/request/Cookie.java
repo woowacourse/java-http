@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Cookie {
 
@@ -16,12 +16,12 @@ public class Cookie {
 
     public static Cookie from(String cookie) {
         String[] params = cookie.split("; ");
-        ConcurrentHashMap<String, String> cookies = initCookies(params);
+        HashMap<String, String> cookies = initCookies(params);
         return new Cookie(cookies);
     }
 
-    private static ConcurrentHashMap<String, String> initCookies(String[] params) {
-        ConcurrentHashMap<String, String> cookies = new ConcurrentHashMap<>();
+    private static HashMap<String, String> initCookies(String[] params) {
+        HashMap<String, String> cookies = new HashMap<>();
         for (String param : params) {
             String[] splitParam = param.split("=");
             String key = splitParam[PARAM_KEY_INDEX];

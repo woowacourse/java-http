@@ -89,3 +89,21 @@
 
 ## 2. 동시성 컬렉션 사용
 - [x] 쓰레드에 동시성 컬렉션을 적용
+
+
+## 피드백
+### 패키지, 클래스 구조 개선
+- [x] Session 작업 Request와 분리
+  - [x] SessionManager를 catalina 패키지로 분리
+  - [x] SessionManager를 coyote 패키지에서 사용할 수 있도록 프록시 객체 생성
+- [ ] AbstractController 내 공통 메소드 분리
+  - [ ] response를 체이닝 형식으로 setter 사용
+- [ ] Controller 패키지 분리 -> jwp 하위 패키지로 분리
+- [ ] RequestHeader/ResponseHeader 내 Line 값 -> Request/Response로 추출
+
+### 추상화/재활용/통일성 유지
+- [ ] RequestParser의 message.split() 추출
+- [ ] enum 객체 static 메소드의 비교 메소드 통일(equals -> equalsIgnoreCase)
+- [ ] Response의 protocol 기본값 제거 -> 외부 주입
+- [ ] ResponseHeader.getHeader() 상수화
+- [ ] 메소드명 체크 ex) ResourceController.getHttpResponse

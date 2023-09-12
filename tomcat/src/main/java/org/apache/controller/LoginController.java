@@ -5,12 +5,13 @@ import java.util.Optional;
 import java.util.Set;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.session.Session;
+import org.apache.catalina.session.Session;
 import org.apache.controller.FileReader.FileReader;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
+import org.apache.coyote.session.HttpSessionManager;
 
 public class LoginController extends AbstractController {
 
@@ -20,6 +21,7 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String USER_SESSION_KEY = "user";
+    private static final HttpSessionManager httpSessionManager = new HttpSessionManager();
 
     public LoginController() {
         super(URL, AVAILABLE_HTTP_METHODS);
@@ -27,7 +29,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(Request request, Response response) {
-        Session session = request.getSession(false);
+        Session session = getSession(request.getSessionId());
         if (hasUserSession(session)) {
             redirectPage(response, INDEX_PATH);
             return;
@@ -48,7 +50,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(Request request, Response response) {
-        Session session = request.getSession(false);
+        Session session = getSession(request.getSessionId());
         if (hasUserSession(session)) {
             doSessionLogin(response, session);
             return;
@@ -76,7 +78,7 @@ public class LoginController extends AbstractController {
         User user = loginUser.get();
         System.out.println(user);
 
-        registerSession(request, response, user);
+        registerSession(response, user);
         redirectPage(response, INDEX_PATH);
     }
 
@@ -84,9 +86,16 @@ public class LoginController extends AbstractController {
         return loginUser.isEmpty() || !loginUser.get().checkPassword(password);
     }
 
-    private void registerSession(Request request, Response response, User user) {
-        Session session = request.getSession(true);
+    private void registerSession(Response response, User user) {
+        Session session = httpSessionManager.addNewSession();
         session.setAttribute(USER_SESSION_KEY, user);
         response.addCookie(JSESSIONID, session.getId());
+    }
+
+    private Session getSession(String sessionId) {
+        if (sessionId == null) {
+            return null;
+        }
+        return httpSessionManager.findSession(sessionId);
     }
 }

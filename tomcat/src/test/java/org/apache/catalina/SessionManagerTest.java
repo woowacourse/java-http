@@ -3,8 +3,8 @@ package org.apache.catalina;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.UUID;
-import org.apache.coyote.session.SessionException;
-import org.apache.coyote.session.SessionManager;
+import org.apache.catalina.session.SessionException;
+import org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

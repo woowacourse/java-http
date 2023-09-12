@@ -20,7 +20,6 @@ public class Http11Request {
     private static final String FORM_KEY_VALUE_DELIMITER = "=";
 
     private StartLine startLine;
-    private Map<String, String> queryParams = new HashMap<>();
     private Map<HttpHeader, String> headers = new HashMap<>();
     private final Cookies cookies = new Cookies();
     private Map<String, String> parsedBody = null;
@@ -31,10 +30,6 @@ public class Http11Request {
         this.startLine = new StartLine(bufferedReader.readLine());
         extractHeaders(bufferedReader);
 
-        if (startLine.hasQueryString()) {
-            parseMultipleValues(queryParams,
-                    startLine.getQueryString(), "&", "=");
-        }
         if (headers.containsKey(HttpHeader.COOKIE)) {
             cookies.parseCookieHeaders(headers.get(HttpHeader.COOKIE));
         }
@@ -58,7 +53,7 @@ public class Http11Request {
         }
     }
 
-    private void parseBody(BufferedReader bufferedReader) throws IOException{
+    private void parseBody(BufferedReader bufferedReader) throws IOException {
         parsedBody = new HashMap<>();
         String requestBody = extractRequestBody(bufferedReader);
         parseMultipleValues(parsedBody,

@@ -1,9 +1,9 @@
 package org.apache.coyote;
 
-import nextstep.jwp.controller.HelloController;
-import nextstep.jwp.controller.IndexController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
+import org.apache.coyote.http11.controller.impl.HelloController;
+import org.apache.coyote.http11.controller.impl.IndexController;
+import org.apache.coyote.http11.controller.impl.LoginController;
+import org.apache.coyote.http11.controller.impl.RegisterController;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpRequest;

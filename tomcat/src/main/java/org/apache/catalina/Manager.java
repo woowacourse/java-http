@@ -1,7 +1,8 @@
 package org.apache.catalina;
 
+import org.apache.catalina.session.Session;
+
 import java.io.IOException;
-import nextstep.jwp.model.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a

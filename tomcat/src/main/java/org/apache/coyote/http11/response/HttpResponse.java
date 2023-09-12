@@ -1,14 +1,16 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.common.HttpHeaderType;
+import org.apache.coyote.http11.common.HttpHeaders;
 
 import java.util.Map;
 
-import static org.apache.coyote.http11.HttpStatusCode.NOT_FOUND;
+import static org.apache.coyote.http11.response.HttpStatusCode.NOT_FOUND;
 
 public class HttpResponse {
 
     private HttpStatusCode statusCode;
     private final HttpHeaders headers;
-//    private final Map<String, String> header;
     private String body;
 
     private HttpResponse(final HttpStatusCode statusCode, final HttpHeaders headers, final String body) {
@@ -18,7 +20,7 @@ public class HttpResponse {
     }
 
     public static HttpResponse init() {
-        return new HttpResponse(NOT_FOUND, new HttpHeaders(), "");
+        return new HttpResponse(NOT_FOUND, HttpHeaders.empty(), "");
     }
 
     public void addHeader(final String key, final String value) {

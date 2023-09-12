@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;

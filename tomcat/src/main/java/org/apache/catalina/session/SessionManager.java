@@ -1,12 +1,20 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
-import java.util.HashMap;
+import org.apache.catalina.Manager;
+
 import java.util.Map;
-import nextstep.jwp.model.Session;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final SessionManager instance = new SessionManager();
+
+    private SessionManager() {}
+
+    public static SessionManager getInstance() {
+        return instance;
+    }
 
     @Override
     public void add(final Session session) {
@@ -22,6 +30,4 @@ public class SessionManager implements Manager {
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
     }
-
-    public SessionManager() {}
 }

@@ -10,6 +10,7 @@ import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.util.Resource;
 
 public class RegisterController extends AbstractController {
+
     @Override
     public void doPost(Request request, Response response) {
         Map<String, String> requestBody = request.getBody();
@@ -23,7 +24,6 @@ public class RegisterController extends AbstractController {
                 .setLocation("index.html")
                 .setResponseBody(Resource.getFile("index.html"));
     }
-
 
     @Override
     protected void doGet(Request request, Response response) {

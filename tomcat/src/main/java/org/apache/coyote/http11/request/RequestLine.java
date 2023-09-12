@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestLine {
+
     private final HttpMethod method;
     private final String path;
     private final Map<String, String> query;

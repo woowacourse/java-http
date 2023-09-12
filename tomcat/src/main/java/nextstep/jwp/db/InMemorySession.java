@@ -6,6 +6,7 @@ import java.util.UUID;
 import nextstep.jwp.model.User;
 
 public class InMemorySession {
+
     private static final Map<User, UUID> session = new HashMap<>();
 
     public static String login(User user) {

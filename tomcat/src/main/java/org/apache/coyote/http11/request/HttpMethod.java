@@ -4,6 +4,7 @@ import java.util.Arrays;
 import org.apache.coyote.http11.exception.NoSuchApiException;
 
 public enum HttpMethod {
+
     GET("GET"),
     POST("POST"),
     PATCH("PATCH"),

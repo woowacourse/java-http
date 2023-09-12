@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.servlet;
 
-
 import nextstep.jwp.exception.UnauthorizedException;
 import org.apache.coyote.http11.exception.NoSuchApiException;
 import org.apache.coyote.http11.handler.HandlerAdapter;

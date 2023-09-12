@@ -7,7 +7,6 @@ import org.apache.coyote.http11.response.Response;
 
 public abstract class AbstractController implements Controller {
 
-
     @Override
     public void service(Request request, Response response) {
         if (request.getMethod().equals(HttpMethod.POST)) {

@@ -1,6 +1,7 @@
 package org.apache.coyote.handler;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -20,8 +21,15 @@ public class HandlerComposite implements Handler {
 
   @Override
   public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-    handlers.stream()
+    final Optional<Handler> handler = handlers.stream()
         .filter(it -> it.canHandle(httpRequest))
-        .forEach(it -> it.safeHandle(httpRequest, httpResponse));
+        .findAny();
+
+    handler.ifPresentOrElse(
+        it -> it.safeHandle(httpRequest, httpResponse),
+        () -> {
+          throw new IllegalArgumentException("handler가 존재하지 않습니다.");
+        }
+    );
   }
 }

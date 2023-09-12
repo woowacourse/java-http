@@ -10,6 +10,11 @@ import nextstep.org.apache.coyote.http11.Status;
 public class RegisterServlet extends AbstractServlet{
 
     @Override
+    protected void doGet(Http11Request request, Http11Response response) throws Exception {
+        responseWithBody(request, response);
+    }
+
+    @Override
     protected void doPost(Http11Request request, Http11Response response) {
 
         InMemoryUserRepository.save(
@@ -22,10 +27,5 @@ public class RegisterServlet extends AbstractServlet{
 
         response.setStatus(Status.FOUND)
                 .setHeader(HttpHeader.LOCATION, "/index.html");
-    }
-
-    @Override
-    protected void doGet(Http11Request request, Http11Response response) throws Exception {
-        responseWithBody(request, response);
     }
 }

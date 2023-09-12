@@ -20,6 +20,18 @@ public class LoginServlet extends AbstractServlet {
     private final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
+    protected void doGet(Http11Request request, Http11Response response) throws Exception {
+        // Todo: 헤더에 담긴 sessionId 유효성 검증
+        Cookies cookies = request.getCookies();
+        if (cookies.hasCookie("JSESSIONID")) {
+            response.setStatus(Status.FOUND)
+                    .setHeader(HttpHeader.LOCATION, "/index.html");
+            return;
+        }
+        responseWithBody(request, response);
+    }
+
+    @Override
     protected void doPost(Http11Request request, Http11Response response) {
         Cookies cookies = request.getCookies();
         try {
@@ -55,17 +67,5 @@ public class LoginServlet extends AbstractServlet {
         session.setAttribute(user.getAccount(), user);
         sessionManager.add(session);
         return session;
-    }
-
-    @Override
-    protected void doGet(Http11Request request, Http11Response response) throws Exception {
-        // Todo: 헤더에 담긴 sessionId 유효성 검증
-        Cookies cookies = request.getCookies();
-        if (cookies.hasCookie("JSESSIONID")) {
-            response.setStatus(Status.FOUND)
-                    .setHeader(HttpHeader.LOCATION, "/index.html");
-            return;
-        }
-        responseWithBody(request, response);
     }
 }

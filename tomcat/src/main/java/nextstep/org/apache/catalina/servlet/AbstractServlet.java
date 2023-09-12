@@ -32,9 +32,9 @@ public abstract class AbstractServlet implements Servlet{
         }
     }
 
-    protected abstract void doPost(Http11Request request, Http11Response response) throws Exception;
-
     protected abstract void doGet(Http11Request request, Http11Response response) throws  Exception;
+
+    protected abstract void doPost(Http11Request request, Http11Response response) throws Exception;
 
     protected Optional<String> createResponseBody(String requestPath) throws IOException {
         if (requestPath.equals("/")) {

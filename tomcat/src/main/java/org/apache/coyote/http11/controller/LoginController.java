@@ -30,6 +30,7 @@ public class LoginController extends AbstractController {
             final Session session = request.getSession(true);
             session.setAttribute("user", getUser(account));
             redirectByFound(response, session);
+            return;
         }
         redirectByUnauthorized(response);
     }

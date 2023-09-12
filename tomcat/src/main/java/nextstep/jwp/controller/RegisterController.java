@@ -16,15 +16,6 @@ import java.nio.file.Path;
 public final class RegisterController extends AbstractController {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if ("GET".equals(request.getHttpMethod())) {
-            doGet(request, response);
-            return;
-        }
-        doPost(request, response);
-    }
-
-    @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         InMemoryUserRepository.save(new User(request.getRequestBody().get("account"), request.getRequestBody().get("password"), request.getRequestBody().get("email")));
         response.sendRedirect("/index.html");

@@ -27,15 +27,6 @@ public final class LoginController extends AbstractController {
     private final SessionManager sessionManager = new SessionManager();
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if ("GET".equals(request.getHttpMethod())) {
-            doGet(request, response);
-            return;
-        }
-        doPost(request, response);
-    }
-
-    @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final Optional<User> user = InMemoryUserRepository.findByAccount(request.getRequestBody().get("account"));
         if (user.isEmpty()) {

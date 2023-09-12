@@ -12,13 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class IndexController extends AbstractController {
-    @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if ("GET".equals(request.getHttpMethod())) {
-            doGet(request,response);
-            return;
-        }
-    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

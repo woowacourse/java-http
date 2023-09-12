@@ -5,13 +5,13 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.body.FormData;
-import org.apache.coyote.http11.handler.FileHandler;
-import org.apache.coyote.http11.handler.GetAndPostHandler;
+import org.apache.coyote.http11.controller.FileController;
+import org.apache.coyote.http11.controller.GetAndPostController;
 
-public class RegisterHandler extends GetAndPostHandler {
+public class RegisterController extends GetAndPostController {
 
     private static final String MAIN_LOCATION = "/index";
-    private final FileHandler fileHandler = new FileHandler();
+    private final FileController fileHandler = new FileController();
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {

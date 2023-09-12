@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-public abstract class GetAndPostHandler implements Handler {
+public abstract class GetAndPostController implements Controller {
 
     @Override
     public void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {

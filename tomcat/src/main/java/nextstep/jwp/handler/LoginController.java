@@ -5,22 +5,22 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.body.FormData;
-import org.apache.coyote.http11.handler.FileHandler;
-import org.apache.coyote.http11.handler.GetAndPostHandler;
+import org.apache.coyote.http11.controller.FileController;
+import org.apache.coyote.http11.controller.GetAndPostController;
 import org.apache.coyote.http11.header.Cookies;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
 import java.util.Optional;
 
-public class LoginHandler extends GetAndPostHandler {
+public class LoginController extends GetAndPostController {
 
     private static final String SESSION_KEY = "JSESSIONID";
     private static final String UNAUTHORIZED_LOCATION = "/401";
     private static final String MAIN_LOCATION = "/index";
     private static final String SESSION_USER_KEY = "user";
 
-    private final FileHandler fileHandler = new FileHandler();
+    private final FileController fileHandler = new FileController();
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {

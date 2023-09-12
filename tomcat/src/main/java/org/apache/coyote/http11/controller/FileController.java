@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.header.ContentType;
 
-public class FileHandler implements Handler {
+public class FileController implements Controller {
 
-    private static final ClassLoader CLASS_LOADER = FileHandler.class.getClassLoader();
+    private static final ClassLoader CLASS_LOADER = FileController.class.getClassLoader();
 
     private static final String STATIC_RESOURCES_PATH = "static";
     private static final String DEFAULT_INDEX = "index";

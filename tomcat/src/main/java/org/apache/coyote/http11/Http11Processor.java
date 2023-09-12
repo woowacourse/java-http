@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.handler.LoginHandler;
-import nextstep.jwp.handler.RegisterHandler;
+import nextstep.jwp.handler.LoginController;
+import nextstep.jwp.handler.RegisterController;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.FileHandler;
-import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.FileController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,17 +19,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String CRLF = "\r\n";
-
-    private static final Handler DEFAULT_HANDLER = new FileHandler();
-    private static final LoginHandler LOGIN_HANDLER = new LoginHandler();
-    private static final RegisterHandler REGISTER_HANDLER = new RegisterHandler();
-    private static final Map<String, Handler> PREDEFINED_HANDLERS = Map.of(
+    private static final Controller DEFAULT_CONTROLLER = new FileController();
+    private static final LoginController LOGIN_CONTROLLER = new LoginController();
+    private static final RegisterController REGISTER_CONTROLLER = new RegisterController();
+    private static final Map<String, Controller> PREDEFINED_CONTROLLERS = Map.of(
             "/", (request, response) -> response.setBody("Hello world!"),
-            "/login", LOGIN_HANDLER,
-            "/login.html", LOGIN_HANDLER,
-            "/register", REGISTER_HANDLER,
-            "/register.html", REGISTER_HANDLER
+            "/login", LOGIN_CONTROLLER,
+            "/login.html", LOGIN_CONTROLLER,
+            "/register", REGISTER_CONTROLLER,
+            "/register.html", REGISTER_CONTROLLER
     );
     private static final String WHITE_SPACE = " ";
 
@@ -62,11 +60,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handle(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (PREDEFINED_HANDLERS.containsKey(httpRequest.getTarget().getPath())) {
-            PREDEFINED_HANDLERS.get(httpRequest.getTarget().getPath())
+        if (PREDEFINED_CONTROLLERS.containsKey(httpRequest.getTarget().getPath())) {
+            PREDEFINED_CONTROLLERS.get(httpRequest.getTarget().getPath())
                     .handle(httpRequest, httpResponse);
             return;
         }
-        DEFAULT_HANDLER.handle(httpRequest, httpResponse);
+        DEFAULT_CONTROLLER.handle(httpRequest, httpResponse);
     }
 }

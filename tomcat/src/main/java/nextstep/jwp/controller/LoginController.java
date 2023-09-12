@@ -54,7 +54,7 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new PageRedirectException.Unauthorized(httpResponse));
 
         if (user.checkPassword(password)) {
-            final Session session = httpRequest.getSession(false);
+            final Session session = httpRequest.getSession(true);
             session.setAttribute("user", user);
             httpResponse.setStatus(ResponseStatus.MOVED_TEMP);
             httpResponse.setRedirect("/index.html");
@@ -65,7 +65,7 @@ public class LoginController extends AbstractController {
     }
 
     private void loginPage(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final Session session = httpRequest.getSession(false);
+        final Session session = httpRequest.getSession(true);
         final Optional<Object> user = session.getAttribute("user");
         if (user.isPresent()) {
             httpResponse.setStatus(ResponseStatus.MOVED_TEMP);

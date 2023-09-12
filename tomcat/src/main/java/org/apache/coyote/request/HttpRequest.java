@@ -71,20 +71,22 @@ public class HttpRequest {
         return requestBody.getBodyValue(key);
     }
 
-
-    public Session getSession(final boolean bool) {
-        if (bool) {
-            final Session session = Session.create();
-            SessionManager.add(session);
-            return session;
+    public Session getSession(final boolean create) {
+        if (!create) {
+            final Optional<Session> session = SessionManager.findSession(requestHeader.getJsessionid());
+            return session.orElse(null);
         }
+
         if (requestHeader.hasJsessionid()) {
             final Optional<Session> session = SessionManager.findSession(requestHeader.getJsessionid());
             if (session.isPresent()) {
                 return session.get();
             }
-            Session.create(requestHeader.getJsessionid());
+            final Session newSession = Session.create(requestHeader.getJsessionid());
+            SessionManager.add(newSession);
+            return newSession;
         }
+
         final Session session = Session.create();
         SessionManager.add(session);
         return session;

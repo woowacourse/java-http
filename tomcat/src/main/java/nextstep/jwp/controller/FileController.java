@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import java.util.List;
 import org.apache.common.FileReader;
 import org.apache.common.HttpMethod;
@@ -15,7 +16,7 @@ public class FileController extends AbstractController {
     private static final String METHOD_NOT_ALLOWED_PAGE = "/405.html";
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         String target = httpRequest.getPath();
         if (isNotFoundPage(target)) {
             String content = FileReader.read(NOT_FOUND_PAGE);
@@ -35,7 +36,7 @@ public class FileController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse httpResponse) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse httpResponse) throws IOException {
         String content = FileReader.read(METHOD_NOT_ALLOWED_PAGE);
         httpResponse.setHttpStatus(HttpStatus.METHOD_NOT_ALLOWED);
         httpResponse.setAllow(ALLOW_METHOD);

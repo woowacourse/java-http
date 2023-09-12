@@ -30,9 +30,9 @@ public abstract class AbstractController implements Controller {
         resolveMethodNotAllowed(httpResponse);
     }
 
-    protected abstract void doPost(HttpRequest request, HttpResponse httpResponse) throws Exception;
+    protected abstract void doPost(HttpRequest request, HttpResponse httpResponse) throws IOException;
 
-    protected abstract void doGet(HttpRequest request, HttpResponse httpResponse) throws Exception;
+    protected abstract void doGet(HttpRequest request, HttpResponse httpResponse) throws IOException;
 
     private void resolveMethodNotAllowed(HttpResponse httpResponse) throws IOException {
         String content = FileReader.read(METHOD_NOT_ALLOWED_PAGE);

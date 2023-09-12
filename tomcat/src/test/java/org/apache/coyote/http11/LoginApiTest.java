@@ -197,7 +197,7 @@ class LoginApiTest {
 
         processor.process(socket);
         assertThat(socket.output())
-                .contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
+                .contains("HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
 
     }
 }

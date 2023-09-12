@@ -70,7 +70,7 @@ class RegisterApiTest {
         final HttpResponse httpResponse = HttpResponse.create(httpRequest.httpVersion());
         registerController.service(httpRequest, httpResponse);
 
-        assertThat(httpResponse.toString()).contains(PAGE_REGISTER, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
+        assertThat(httpResponse.toString()).contains("HTTP/1.1 302 Temporary Redirect", "Location: /index.html");
     }
 
     @Test

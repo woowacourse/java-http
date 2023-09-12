@@ -1,5 +1,6 @@
 package nextstep.jwp.config;
 
+import java.util.Map;
 import nextstep.jwp.db.InMemorySession;
 import org.apache.coyote.http11.filter.Filter;
 import org.apache.coyote.http11.filter.FilterChain;
@@ -14,7 +15,7 @@ public class LoginFilter implements Filter {
     public void doFilter(Request request, Response response, FilterChain filterChain) {
 
         final String uri = request.getPath();
-        final var cookie = request.getCookie();
+        final Map<String, String> cookie = request.getCookie();
 
         if ( uri.equals("/login") && cookie.containsKey("JSESSIONID")) {
             validKey(cookie.get("JSESSIONID"), response);

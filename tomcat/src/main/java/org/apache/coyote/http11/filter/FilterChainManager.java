@@ -11,6 +11,7 @@ public class FilterChainManager {
     private Chain initialChain;
     private Chain lastChain;
 
+
     public static FilterChainManager getInstance(){
         if(instance == null){
             synchronized (FilterChainManager.class){
@@ -20,7 +21,7 @@ public class FilterChainManager {
         return instance;
     }
 
-    public FilterChainManager() {
+    private FilterChainManager() {
         this.defaultChain = new Chain(new DefaultFilter());
         initialChain = lastChain = defaultChain;
     }

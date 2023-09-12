@@ -18,6 +18,8 @@ public class HandlerAdapter {
 
     private static final Map<MethodPath, Controller> controllers = new HashMap<>();
 
+    private HandlerAdapter(){}
+
     public static HandlerAdapter getInstance(){
         if(instance==null){
             synchronized (HandlerAdapter.class){

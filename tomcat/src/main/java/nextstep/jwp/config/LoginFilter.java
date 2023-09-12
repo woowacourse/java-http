@@ -17,7 +17,7 @@ public class LoginFilter implements Filter {
         final String uri = request.getPath();
         final Map<String, String> cookie = request.getCookie();
 
-        if ( uri.equals("/login") && cookie.containsKey("JSESSIONID")) {
+        if (uri.equals("/login") && cookie.containsKey("JSESSIONID")) {
             validKey(cookie.get("JSESSIONID"), response);
         }
         filterChain.doFilter(request, response);

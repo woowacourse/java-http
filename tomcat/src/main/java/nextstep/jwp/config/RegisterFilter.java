@@ -17,7 +17,7 @@ public class RegisterFilter implements Filter {
         final String uri = request.getPath();
         final Map<String, String> cookie = request.getCookie();
 
-        if (( uri.equals("/register")) && cookie.containsKey("JSESSIONID")) {
+        if ((uri.equals("/register")) && cookie.containsKey("JSESSIONID")) {
             validKey(cookie.get("JSESSIONID"), response);
         }
         filterChain.doFilter(request, response);

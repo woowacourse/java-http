@@ -12,7 +12,7 @@ import static org.apache.coyote.http11.header.EntityHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.header.EntityHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.StatusCode.UNAUTHORIZED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class ResponseTest {
 
@@ -26,9 +26,9 @@ class ResponseTest {
         redirectResponse.redirect(path);
 
         //then
-        assertAll(() -> {
-            assertThat(redirectResponse.getStatusLine().getStatusCode()).isEqualTo(StatusCode.FOUND);
-            assertThat(redirectResponse.getHeaders().getValue(ResponseHeader.LOCATION)).isEqualTo(path);
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(redirectResponse.getStatusLine().getStatusCode()).isEqualTo(StatusCode.FOUND);
+            softAssertions.assertThat(redirectResponse.getHeaders().getValue(ResponseHeader.LOCATION)).isEqualTo(path);
         });
     }
 
@@ -47,10 +47,10 @@ class ResponseTest {
         final String actual = response.parseString();
 
         //then
-        assertAll(() -> {
-            assertThat(actual).contains("HTTP/1.1 200 OK");
-            assertThat(actual).contains("Set-Cookie: " + cookie);
-            assertThat(actual).contains(body);
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(actual).contains("HTTP/1.1 200 OK");
+            softAssertions.assertThat(actual).contains("Set-Cookie: " + cookie);
+            softAssertions.assertThat(actual).contains(body);
         });
     }
 
@@ -64,9 +64,9 @@ class ResponseTest {
         response.writeBody(content);
 
         //then
-        assertAll(() -> {
-            assertThat(response.getHeaders().getValue(CONTENT_LENGTH)).isEqualTo(String.valueOf(content.length()));
-            assertThat(response.getBody()).contains(content);
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(response.getHeaders().getValue(CONTENT_LENGTH)).isEqualTo(String.valueOf(content.length()));
+            softAssertions.assertThat(response.getBody()).contains(content);
         });
     }
 
@@ -82,7 +82,7 @@ class ResponseTest {
         final String actual = response.parseString();
         assertThat(actual).contains("Content-Length: 5564");
     }
-    
+
     @Test
     void 헤더를_추가한다() {
         //given
@@ -109,20 +109,20 @@ class ResponseTest {
         final String actual = response.parseString();
         assertThat(actual).contains("Set-Cookie: a=1");
     }
-    
+
     @Test
     void 응답_코드를_세팅한다() {
         //given
         final Response response = new Response();
-        
+
         //when
         response.setStatusCode(UNAUTHORIZED);
-        
+
         //then
         final String actual = response.parseString();
         assertThat(actual).contains("401 UNAUTHORIZED");
     }
-    
+
     @Test
     void Request를_보고_ContenType을_결정하는_전처리를_한다() throws IOException {
         //given

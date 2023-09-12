@@ -5,7 +5,7 @@ import org.apache.coyote.http11.header.Headers;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RequestParametersTest {
 
@@ -52,9 +52,9 @@ class RequestParametersTest {
         final RequestParameters requestParameters = RequestParameters.of(requestLine, headers, body);
 
         //when & then
-        assertAll(() -> {
-            assertThat(requestParameters.getValue("a")).contains("1");
-            assertThat(requestParameters.getValue("b")).contains("2");
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(requestParameters.getValue("a")).contains("1");
+            softAssertions.assertThat(requestParameters.getValue("b")).contains("2");
         });
     }
 }

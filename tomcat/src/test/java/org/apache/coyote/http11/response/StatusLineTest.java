@@ -1,13 +1,12 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.protocol.Protocol;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class StatusLineTest {
-    
+
     @Test
     void String으로_변환한다() {
         //given
@@ -17,6 +16,6 @@ class StatusLineTest {
         final String actual = statusLine.parseResponse();
 
         //then
-        Assertions.assertThat(actual).isEqualTo("HTTP/1.1 200 OK ");
+        assertThat(actual).isEqualTo("HTTP/1.1 200 OK ");
     }
 }

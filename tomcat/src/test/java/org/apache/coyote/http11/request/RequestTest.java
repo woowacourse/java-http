@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -8,7 +7,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class RequestTest {
 
@@ -30,10 +28,10 @@ class RequestTest {
         final Request request = Request.from(bufferedReader);
 
         // then
-        assertAll(() -> {
-            assertThat(request.getRequestLine().getRequestPath()).isEqualTo("/index.html");
-            assertThat(request.getRequestLine().getRequestMethod()).isEqualTo(RequestMethod.GET);
-            assertThat(request.getBody()).isEmpty();
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(request.getRequestLine().getRequestPath()).isEqualTo("/index.html");
+            softAssertions.assertThat(request.getRequestLine().getRequestMethod()).isEqualTo(RequestMethod.GET);
+            softAssertions.assertThat(request.getBody()).isEmpty();
         });
     }
 

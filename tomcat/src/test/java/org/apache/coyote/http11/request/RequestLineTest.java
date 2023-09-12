@@ -1,11 +1,9 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.protocol.Protocol;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class RequestLineTest {
 
@@ -18,10 +16,10 @@ class RequestLineTest {
         final RequestLine requestLine = RequestLine.from(firstLine);
 
         // then
-        assertAll(() -> {
-            assertThat(requestLine.getRequestPath()).isEqualTo("/index.html");
-            assertThat(requestLine.getRequestMethod()).isEqualTo(RequestMethod.GET);
-            assertThat(requestLine.getProtocol()).isEqualTo(Protocol.HTTP11);
+        assertSoftly(softAssertions -> {
+            softAssertions.assertThat(requestLine.getRequestPath()).isEqualTo("/index.html");
+            softAssertions.assertThat(requestLine.getRequestMethod()).isEqualTo(RequestMethod.GET);
+            softAssertions.assertThat(requestLine.getProtocol()).isEqualTo(Protocol.HTTP11);
         });
     }
 }

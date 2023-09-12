@@ -6,14 +6,9 @@ import org.apache.exception.PageRedirectException;
 
 public class Proxy {
 
-    private final StaticMapping staticMapping;
+    private static final StaticMapping staticMapping = new StaticMapping();
 
-    private final RequestMapping requestMapping;
-
-    public Proxy() {
-        this.staticMapping = new StaticMapping();
-        this.requestMapping = new RequestMapping();
-    }
+    private static final RequestMapping requestMapping = new RequestMapping();
 
     public void process(final HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.isStatic()) {

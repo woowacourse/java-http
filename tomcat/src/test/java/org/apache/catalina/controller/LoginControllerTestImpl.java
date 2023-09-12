@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;

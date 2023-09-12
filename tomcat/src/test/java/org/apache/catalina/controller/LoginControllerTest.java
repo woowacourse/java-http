@@ -1,12 +1,12 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.controller.support.FileFinder;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.catalina.controller.support.FileFinder;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;

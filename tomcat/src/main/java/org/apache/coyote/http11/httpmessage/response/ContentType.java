@@ -3,6 +3,7 @@ package org.apache.coyote.http11.httpmessage.response;
 import java.util.Arrays;
 
 public enum ContentType {
+
     HTML("text/html", "html"),
     CSS("text/css", "css"),
     JS("text/javascript", "js");
@@ -20,7 +21,6 @@ public enum ContentType {
 
     public static ContentType find(final String path) {
         final String extension = path.split(EXTENSION_DELIMITER)[EXTENSION_INDEX];
-        System.out.println(extension);
         return Arrays.stream(ContentType.values())
             .filter(type -> type.extension.equals(extension))
             .findAny()

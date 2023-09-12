@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
-import org.apache.coyote.http11.controller.Controller;
-import org.apache.coyote.http11.controller.LoginController;
-import org.apache.coyote.http11.controller.PageController;
-import org.apache.coyote.http11.controller.RegisterController;
-import org.apache.coyote.http11.controller.RootController;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.PageController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.RootController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

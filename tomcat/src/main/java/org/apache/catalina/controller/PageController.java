@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.controller.support.FileFinder;
+import org.apache.catalina.controller.support.FileFinder;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.ContentType;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;

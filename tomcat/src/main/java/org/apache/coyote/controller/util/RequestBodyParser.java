@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler.util;
+package org.apache.coyote.controller.util;
 
 import nextstep.jwp.model.User;
 import org.apache.coyote.httprequest.QueryString;

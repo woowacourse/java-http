@@ -2,12 +2,10 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
-import org.apache.coyote.httpresponse.handler.Handler;
-import org.apache.coyote.httpresponse.handler.IndexHandler;
-import org.apache.coyote.httpresponse.handler.LoginHandler;
-import org.apache.coyote.httpresponse.handler.RegisterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,20 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Map<String, Handler> HANDLERS = new HashMap<>();
-
-    static {
-        HANDLERS.put("/", new IndexHandler());
-        HANDLERS.put("/index.html", new IndexHandler());
-        HANDLERS.put("/login", new LoginHandler());
-        HANDLERS.put("/register", new RegisterHandler());
-    }
 
     private final Socket connection;
 
@@ -49,12 +37,11 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+            final RequestMapping requestMapping = new RequestMapping();
             final HttpRequest request = HttpRequest.from(inputStream);
-            Handler handler = HANDLERS.get(request.getPath());
-            if (handler == null) {
-                handler = HANDLERS.get("/");
-            }
-            final HttpResponse response = handler.handle(request);
+            HttpResponse response = HttpResponse.init(request.getHttpVersion());
+            final Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {

@@ -67,6 +67,10 @@ public class HttpRequest {
         return requestHeaders.hasJSessionId();
     }
 
+    public boolean isSameRequestMethod(final RequestMethod requestMethod) {
+        return httpRequestLine.isSameRequestMethod(requestMethod);
+    }
+
     public String getPath() {
         return httpRequestLine.getPath();
     }
@@ -93,10 +97,11 @@ public class HttpRequest {
         if (create) {
             return createSession(jSessionId, sessionManager);
         }
-        if (!isSessionValid(jSessionId, sessionManager)) {
-            return null;
+        final Session session = sessionManager.findSession(jSessionId);
+        if (session == null) {
+            return saveById(jSessionId, sessionManager);
         }
-        return saveById(jSessionId, sessionManager);
+        return session;
     }
 
     private Session createSession(final String jSessionId, final SessionManager sessionManager) {

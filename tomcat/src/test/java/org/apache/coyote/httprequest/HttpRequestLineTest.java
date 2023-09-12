@@ -27,4 +27,20 @@ class HttpRequestLineTest {
             assertThat(httpRequestLine.getHttpVersion()).isEqualTo(HttpVersion.from(httpVersionInput));
         });
     }
+
+    @Test
+    void 같은_request_method_인지_확인한다() {
+        // given
+        final String requestMethodInput = "POST";
+        final String requestUrlInput = "/register";
+        final String httpVersionInput = "HTTP/1.1";
+        final String requestInput = String.join(" ", requestMethodInput, requestUrlInput, httpVersionInput);
+        final HttpRequestLine httpRequestLine = HttpRequestLine.from(requestInput);
+
+        // when
+        final boolean actual = httpRequestLine.isSameRequestMethod(RequestMethod.POST);
+
+        // then
+        assertThat(actual).isTrue();
+    }
 }

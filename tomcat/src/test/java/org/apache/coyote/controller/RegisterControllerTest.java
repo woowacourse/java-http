@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler;
+package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @SuppressWarnings("NonAsciiCharacters")
-class RegisterHandlerTest extends HandlerTestSupport {
+class RegisterControllerTest extends ControllerTestSupport {
 
     @Test
     void 회원가입을_완료_하면_index_페이지로_리다이렉트_한다() {
@@ -31,10 +31,11 @@ class RegisterHandlerTest extends HandlerTestSupport {
                 "",
                 String.format("account=%s&password=%s&email=%s", account, password, email));
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final RegisterHandler registerHandler = new RegisterHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final RegisterController registerController = new RegisterController();
 
         // when
-        final HttpResponse httpResponse = registerHandler.handle(httpRequest);
+        registerController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -60,10 +61,11 @@ class RegisterHandlerTest extends HandlerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final RegisterHandler registerHandler = new RegisterHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final RegisterController registerController = new RegisterController();
 
         // when
-        final HttpResponse httpResponse = registerHandler.handle(httpRequest);
+        registerController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 200 OK",
@@ -84,10 +86,11 @@ class RegisterHandlerTest extends HandlerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final RegisterHandler registerHandler = new RegisterHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final RegisterController registerController = new RegisterController();
 
         // when
-        final HttpResponse httpResponse = registerHandler.handle(httpRequest);
+        registerController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 405 Method Not Allowed",

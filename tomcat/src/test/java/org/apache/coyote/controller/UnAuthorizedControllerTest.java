@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler;
+package org.apache.coyote.controller;
 
 import org.apache.coyote.httprequest.HttpRequest;
 import org.apache.coyote.httpresponse.HttpResponse;
@@ -9,7 +9,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
-class UnAuthorizedHandlerTest extends HandlerTestSupport {
+class UnAuthorizedControllerTest extends ControllerTestSupport {
 
     @Test
     void 에러코드_401_페이지를_보여준다() {
@@ -20,10 +20,11 @@ class UnAuthorizedHandlerTest extends HandlerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final UnAuthorizedHandler unAuthorizedHandler = new UnAuthorizedHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final UnAuthorizedController unAuthorizedController = new UnAuthorizedController();
 
         // when
-        final HttpResponse httpResponse = unAuthorizedHandler.handle(httpRequest);
+        unAuthorizedController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 401 Unauthorized",

@@ -44,6 +44,10 @@ public class HttpRequestLine {
         return parsedRequestLine;
     }
 
+    public boolean isSameRequestMethod(final RequestMethod requestMethod) {
+        return this.requestMethod == requestMethod;
+    }
+
     public RequestMethod getRequestMethod() {
         return requestMethod;
     }

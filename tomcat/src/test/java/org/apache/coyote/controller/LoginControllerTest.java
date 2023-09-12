@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler;
+package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("NonAsciiCharacters")
-class LoginHandlerTest extends HandlerTestSupport {
+class LoginControllerTest extends ControllerTestSupport {
 
     @Test
     void 올바른_계정으로_request_body로_login_하면_index_페이지로_리다이렉트_한다() {
@@ -28,15 +28,16 @@ class LoginHandlerTest extends HandlerTestSupport {
                 "",
                 "account=gugu&password=password");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final LoginHandler loginHandler = new LoginHandler();
+        final LoginController loginController = new LoginController();
 
         // when
         final String jSessionId = "bebe-ditoo";
         final HttpRequest spyHttpRequest = spy(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.init(spyHttpRequest.getHttpVersion());
         final Session expectedSession = new Session(jSessionId);
         when(spyHttpRequest.getSession(true)).thenReturn(expectedSession);
 
-        final HttpResponse httpResponse = loginHandler.handle(spyHttpRequest);
+        loginController.service(spyHttpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -60,10 +61,11 @@ class LoginHandlerTest extends HandlerTestSupport {
                 "",
                 "account=gugu&password=dddd");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final LoginHandler loginHandler = new LoginHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final LoginController loginController = new LoginController();
 
         // when
-        final HttpResponse httpResponse = loginHandler.handle(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 401 Unauthorized",
@@ -83,11 +85,12 @@ class LoginHandlerTest extends HandlerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final LoginHandler loginHandler = new LoginHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final LoginController loginController = new LoginController();
 
         // when
 
-        final HttpResponse httpResponse = loginHandler.handle(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 200 OK",
@@ -112,15 +115,16 @@ class LoginHandlerTest extends HandlerTestSupport {
                 "Cookie: JSESSIONID=" + jSessionId,
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final LoginHandler loginHandler = new LoginHandler();
+        final LoginController loginController = new LoginController();
 
         // when
         final HttpRequest spyHttpRequest = spy(httpRequest);
+        final HttpResponse httpResponse = HttpResponse.init(spyHttpRequest.getHttpVersion());
         final Session expectedSession = new Session(jSessionId);
         expectedSession.setAttribute("user", user);
-        when(spyHttpRequest.getSession(true)).thenReturn(expectedSession);
+        when(spyHttpRequest.getSession(false)).thenReturn(expectedSession);
 
-        final HttpResponse httpResponse = loginHandler.handle(spyHttpRequest);
+        loginController.service(spyHttpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -141,10 +145,11 @@ class LoginHandlerTest extends HandlerTestSupport {
                 "Accept: */* ",
                 "");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final LoginHandler loginHandler = new LoginHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final LoginController loginController = new LoginController();
 
         // when
-        final HttpResponse httpResponse = loginHandler.handle(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 302 Found",
@@ -164,10 +169,11 @@ class LoginHandlerTest extends HandlerTestSupport {
                 "Connection: keep-alive",
                 "Accept: */*");
         final HttpRequest httpRequest = super.makeHttpRequest(input);
-        final LoginHandler loginHandler = new LoginHandler();
+        final HttpResponse httpResponse = HttpResponse.init(httpRequest.getHttpVersion());
+        final LoginController loginController = new LoginController();
 
         // when
-        final HttpResponse httpResponse = loginHandler.handle(httpRequest);
+        loginController.service(httpRequest, httpResponse);
         final String actual = super.bytesToText(httpResponse.getBytes());
         final Set<String> expectedHeaders = Set.of(
                 "HTTP/1.1 405 Method Not Allowed",

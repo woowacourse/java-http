@@ -1,4 +1,4 @@
-package org.apache.coyote.httpresponse.handler;
+package org.apache.coyote.controller;
 
 import org.apache.coyote.httprequest.HttpRequest;
 
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class HandlerTestSupport {
+public class ControllerTestSupport {
 
     protected HttpRequest makeHttpRequest(final String inputText) {
         try {

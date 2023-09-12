@@ -18,12 +18,13 @@ import static org.apache.coyote.http11.common.HttpHeaderType.SET_COOKIE;
 public class AuthController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+    private static final String MULTIPLE_VALUE_DELIMITER = "&";
 
     private final SessionManager sessionManager = new SessionManager();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        String[] splitBody = request.getBody().split("&");
+        String[] splitBody = request.getBody().split(MULTIPLE_VALUE_DELIMITER);
         Optional<String> account = getValueOf("account", splitBody);
         Optional<String> password = getValueOf("password", splitBody);
 

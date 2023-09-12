@@ -2,6 +2,9 @@ package org.apache.coyote.http11.request;
 
 public class Path {
 
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final int NON_EXIST = -1;
+
     private final String path;
     private final QueryString queryString;
 
@@ -11,8 +14,8 @@ public class Path {
     }
 
     public static Path from(String path) {
-        int queryStringIndex = path.indexOf("?");
-        if (queryStringIndex == -1) {
+        int queryStringIndex = path.indexOf(QUERY_STRING_DELIMITER);
+        if (queryStringIndex == NON_EXIST) {
             return new Path(path, QueryString.empty());
         }
         String queryString = path.substring(queryStringIndex + 1);

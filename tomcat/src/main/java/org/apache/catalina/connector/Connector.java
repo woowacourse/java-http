@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Connector implements Runnable {
 
@@ -76,8 +77,24 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
+            shutdownAndAwaitTermination(executorService);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void shutdownAndAwaitTermination(ExecutorService executorService) {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                    log.error("Pool did not terminate");
+                }
+            }
+        } catch (InterruptedException ie) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
@@ -18,9 +17,9 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private static final Container container = Container.from(new HashMap<>(
+    private static final Container container = Container.from(
             Map.of("/login", new LoginController(), "/register", new RegisterController())
-    ));
+    );
 
     @Test
     void process() {

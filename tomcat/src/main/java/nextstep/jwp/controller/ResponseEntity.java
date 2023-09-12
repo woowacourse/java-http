@@ -23,10 +23,6 @@ public class ResponseEntity {
         return new ResponseEntity(statusCode, headers, path, false);
     }
 
-    public static ResponseEntity ok(String body) {
-        return new ResponseEntity(HttpStatusCode.OK, HttpHeaders.defaultHeaders(), body, true);
-    }
-
     public static ResponseEntity found(String location) {
         final var headers = HttpHeaders.defaultHeaders();
         headers.put(HttpHeaders.LOCATION, location);

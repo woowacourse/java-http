@@ -1,9 +1,7 @@
-package nextstep.jwp.controller.rest;
+package nextstep.jwp.controller;
 
-import static nextstep.jwp.controller.StaticResourceResolver.HOME_PAGE;
+import static nextstep.servlet.StaticResourceResolver.HOME_PAGE;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.ResponseEntity;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatusCode;
 import org.apache.coyote.http11.message.request.HttpRequest;

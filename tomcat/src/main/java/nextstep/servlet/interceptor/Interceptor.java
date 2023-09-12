@@ -1,4 +1,4 @@
-package nextstep.servlet.filter;
+package nextstep.servlet.interceptor;
 
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;

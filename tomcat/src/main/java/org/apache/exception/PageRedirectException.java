@@ -16,7 +16,8 @@ public class PageRedirectException extends RuntimeException {
     }
 
     public void setResponse() {
-        response.setViewPathAsBodyAndSetStatus(viewPath, responseStatus);
+        response.setStatus(responseStatus);
+        response.setViewPathAsBody(viewPath);
     }
 
     public static class Unauthorized extends PageRedirectException {

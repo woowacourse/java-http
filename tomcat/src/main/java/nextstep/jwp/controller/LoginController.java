@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             final Session session = httpRequest.getSession(false);
             session.setAttribute("user", user);
-            httpResponse.setViewPathAsBodyAndSetStatus(httpRequest.getPath(), ResponseStatus.MOVED_TEMP);
+            httpResponse.setStatus(ResponseStatus.MOVED_TEMP);
             httpResponse.setRedirect("/index.html");
             httpResponse.addCookie(Cookie.ofJSessionId(session.getId()));
             return;
@@ -68,7 +68,7 @@ public class LoginController extends AbstractController {
         final Session session = httpRequest.getSession(false);
         final Optional<Object> user = session.getAttribute("user");
         if (user.isPresent()) {
-            httpResponse.setViewPathAsBodyAndSetStatus(httpRequest.getPath(), ResponseStatus.MOVED_TEMP);
+            httpResponse.setStatus(ResponseStatus.MOVED_TEMP);
             httpResponse.setRedirect("/index.html");
             return;
         }

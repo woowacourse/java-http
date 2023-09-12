@@ -141,7 +141,7 @@ class LoginApiTest {
         final HttpResponse httpResponse = HttpResponse.create(httpRequest.httpVersion());
         loginController.service(httpRequest, httpResponse);
 
-        assertThat(httpResponse.toString()).contains(PAGE_LOGIN, "HTTP/1.1 302 Temporary Redirect", "Location: /index.html", "Set-Cookie: ");
+        assertThat(httpResponse.toString()).contains("HTTP/1.1 302 Temporary Redirect", "Location: /index.html", "Set-Cookie: ");
     }
 
     @Test

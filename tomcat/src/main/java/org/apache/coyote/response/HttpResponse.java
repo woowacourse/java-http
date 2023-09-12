@@ -57,11 +57,6 @@ public class HttpResponse {
         responseStartLine.setStatus(responseStatus);
     }
 
-    public void setViewPathAsBodyAndSetStatus(final String viewPath, final ResponseStatus responseStatus) {
-        setViewPathAsBody(viewPath);
-        setStatus(responseStatus);
-    }
-
     @Override
     public String toString() {
         return String.join("\r\n",

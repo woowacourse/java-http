@@ -38,7 +38,7 @@ public class RegisterController extends AbstractController {
         final User newUser = new User(account, password, email);
         InMemoryUserRepository.save(newUser);
 
-        httpResponse.setViewPathAsBodyAndSetStatus(httpRequest.getPath(), ResponseStatus.MOVED_TEMP);
+        httpResponse.setStatus(ResponseStatus.MOVED_TEMP);
         httpResponse.setRedirect("/index.html");
     }
 

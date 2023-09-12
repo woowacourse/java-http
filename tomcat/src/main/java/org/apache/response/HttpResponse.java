@@ -67,6 +67,6 @@ public class HttpResponse {
         String allowMethods = httpMethods.stream()
                 .map(HttpMethod::getName)
                 .collect(Collectors.joining(ALLOW_JOINER));
-        headers.put(ALLOW, allowMethods);
+        headers.put(ALLOW, allowMethods + SPACE);
     }
 }

@@ -1,4 +1,4 @@
-package org.apache.http;
+package org.apache.coyote.http11;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +30,10 @@ public final class Cookie {
 
     public void addCookie(final String key, final String value) {
         cookies.put(key, value);
+    }
+
+    public String getCookie(final String key) {
+        return cookies.get(key);
     }
 
     public boolean containsKey(final String key) {

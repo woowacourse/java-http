@@ -30,12 +30,12 @@ public class LoginControllerTestImpl extends AbstractController {
             final Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user.get());
             SessionManager.add(session);
-            response.setStatusCode(StatusCode.REDIRECT);
+            response.setStatusCode(StatusCode.FOUND);
             response.addHeader(LOCATION, INDEX_PAGE);
             response.addHeader(SET_COOKIE, "JSESSIONID=success");
             return;
         }
-        response.setStatusCode(StatusCode.REDIRECT);
+        response.setStatusCode(StatusCode.FOUND);
         response.addHeader(LOCATION, UNAUTHORIZED_PAGE);
     }
 }

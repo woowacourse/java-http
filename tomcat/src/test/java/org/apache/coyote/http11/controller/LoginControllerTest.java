@@ -43,7 +43,7 @@ class LoginControllerTest {
         loginControllerTest.doPost(httpRequest, httpResponse);
 
         // then
-        final String expected = "HTTP/1.1 302 REDIRECT \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /index.html \r\n" +
             "Set-Cookie: JSESSIONID=success \r\n" +
             "\r\n" +
@@ -76,7 +76,7 @@ class LoginControllerTest {
         loginControllerTest.doPost(httpRequest, httpResponse);
 
         // then
-        final String expected = "HTTP/1.1 302 REDIRECT \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /401.html \r\n" +
             "\r\n" +
             "null";
@@ -138,7 +138,7 @@ class LoginControllerTest {
         loginController.doGet(httpRequest, httpResponse);
 
         // then
-        final String expected = "HTTP/1.1 302 REDIRECT \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /index.html \r\n" +
             "\r\n" +
             "null";

@@ -44,7 +44,7 @@ class RegisterControllerTest {
         registerController.doPost(httpRequest, httpResponse);
 
         // then
-        final String expected = "HTTP/1.1 302 REDIRECT \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /index.html \r\n" +
             "\r\n" +
             "null";
@@ -84,7 +84,7 @@ class RegisterControllerTest {
         registerController.doPost(httpRequest, httpResponse);
 
         // then
-        final String expected = "HTTP/1.1 302 REDIRECT \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /register.html \r\n" +
             "\r\n" +
             "null";
@@ -146,7 +146,7 @@ class RegisterControllerTest {
         registerController.doGet(httpRequest, httpResponse);
 
         // then
-        final String expected = "HTTP/1.1 302 REDIRECT \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
             "Location: /index.html \r\n" +
             "\r\n" +
             "null";

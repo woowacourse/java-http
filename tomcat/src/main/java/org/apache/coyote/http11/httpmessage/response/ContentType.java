@@ -20,6 +20,7 @@ public enum ContentType {
 
     public static ContentType find(final String path) {
         final String extension = path.split(EXTENSION_DELIMITER)[EXTENSION_INDEX];
+        System.out.println(extension);
         return Arrays.stream(ContentType.values())
             .filter(type -> type.extension.equals(extension))
             .findAny()

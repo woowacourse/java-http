@@ -29,12 +29,12 @@ public class LoginController extends AbstractController {
             final Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user.get());
             SessionManager.add(session);
-            response.setStatusCode(StatusCode.REDIRECT);
+            response.setStatusCode(StatusCode.FOUND);
             response.addHeader(LOCATION, INDEX_PAGE);
             response.addHeader(SET_COOKIE, "JSESSIONID=" + session.getId());
             return;
         }
-        response.setStatusCode(StatusCode.REDIRECT);
+        response.setStatusCode(StatusCode.FOUND);
         response.addHeader(LOCATION, UNAUTHORIZED_PAGE);
     }
 
@@ -48,7 +48,7 @@ public class LoginController extends AbstractController {
             response.setBody(body);
             return;
         }
-        response.setStatusCode(StatusCode.REDIRECT);
+        response.setStatusCode(StatusCode.FOUND);
         response.addHeader(LOCATION, INDEX_PAGE);
     }
 }

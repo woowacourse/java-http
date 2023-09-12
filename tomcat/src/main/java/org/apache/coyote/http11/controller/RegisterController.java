@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.hasBlankRegisterUserBody()) {
-            response.setStatusCode(StatusCode.REDIRECT);
+            response.setStatusCode(StatusCode.FOUND);
             response.addHeader(LOCATION, REGISTER_PAGE);
             return;
         }
@@ -28,7 +28,7 @@ public class RegisterController extends AbstractController {
             request.getBody().getEmail());
         InMemoryUserRepository.save(registerUser);
 
-        response.setStatusCode(StatusCode.REDIRECT);
+        response.setStatusCode(StatusCode.FOUND);
         response.addHeader(LOCATION, INDEX_PAGE);
     }
 
@@ -42,7 +42,7 @@ public class RegisterController extends AbstractController {
             response.setBody(body);
             return;
         }
-        response.setStatusCode(StatusCode.REDIRECT);
+        response.setStatusCode(StatusCode.FOUND);
         response.addHeader(LOCATION, INDEX_PAGE);
     }
 }

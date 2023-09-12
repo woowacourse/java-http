@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.common.Cookie;
-import org.apache.common.HttpBody;
 import org.apache.common.HttpMethod;
 
 public class HttpRequest {

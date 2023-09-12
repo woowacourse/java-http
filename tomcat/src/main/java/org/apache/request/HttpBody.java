@@ -1,4 +1,4 @@
-package org.apache.common;
+package org.apache.request;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -33,30 +33,6 @@ class ResponseTest {
     }
 
     @Test
-    void NOT_FOUND_응답을_생성한다() {
-        //given
-        final Response notFoundResponse = new Response();
-
-        //when
-        notFoundResponse.responseNotFound();
-
-        //then
-        assertThat(notFoundResponse.getStatusLine().getStatusCode()).isEqualTo(StatusCode.NOT_FOUND);
-    }
-
-    @Test
-    void UNAUTHORIZED_응답을_생성한다() {
-        //given
-        final Response unauthorizedResponse = new Response();
-
-        //when
-        unauthorizedResponse.responseUnauthorized();
-
-        //then
-        assertThat(unauthorizedResponse.getStatusLine().getStatusCode()).isEqualTo(UNAUTHORIZED);
-    }
-
-    @Test
     void String으로_반환한다() {
         //given
         final Headers headers = new Headers();

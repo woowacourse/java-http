@@ -9,11 +9,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 
+import static org.apache.coyote.http11.response.StatusCode.*;
+
 public class StaticResourceController extends AbstractController {
 
     @Override
     protected void doPost(final Request request, final Response response) {
-        response.responseNotFound();
+        response.setStatusCode(METHOD_NOT_ALLOWED);
     }
 
     @Override
@@ -23,7 +25,8 @@ public class StaticResourceController extends AbstractController {
         final URL fileURL = classLoader.getResource(name);
 
         if (fileURL == null) {
-            response.responseNotFound();
+            response.setStatusCode(NOT_FOUND);
+            response.writeStaticResource("/404.html");
             return;
         }
 

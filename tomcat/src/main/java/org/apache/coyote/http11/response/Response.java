@@ -159,18 +159,6 @@ public class Response {
         this.headers = redirectHeaders;
     }
 
-    public void responseUnauthorized() {
-        this.statusLine.setStatusCode(UNAUTHORIZED);
-        this.headers = new Headers();
-        this.body = "";
-    }
-
-    public void responseNotFound() {
-        this.statusLine.setStatusCode(NOT_FOUND);
-        this.headers = new Headers();
-        this.body = "";
-    }
-
     public StatusLine getStatusLine() {
         return statusLine;
     }

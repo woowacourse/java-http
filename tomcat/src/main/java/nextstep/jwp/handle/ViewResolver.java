@@ -17,16 +17,16 @@ public class ViewResolver {
     private ViewResolver() {
     }
 
-    public static void renderPage(final HttpResponse request, final HttpStatus response, final String page)
+    public static void renderPage(final HttpResponse response, final HttpStatus httpStatus, final String page)
             throws IOException {
         try {
-            request.setStatus(response);
-            request.setContentType(getContentType(page));
-            request.setContent(getBody(page));
+            response.setStatus(httpStatus);
+            response.setContentType(getContentType(page));
+            response.setContent(getBody(page));
         } catch (NullPointerException e) {
-            request.setStatus(HttpStatus.NOT_FOUND);
-            request.setContentType(ContentType.TEXT_HTML.getType());
-            request.setContent(getBody(NOT_FOUND));
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.setContentType(ContentType.TEXT_HTML.getType());
+            response.setContent(getBody(NOT_FOUND));
         }
     }
 

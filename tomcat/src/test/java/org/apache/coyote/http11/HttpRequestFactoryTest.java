@@ -27,8 +27,8 @@ class HttpRequestFactoryTest {
 
             // then
             assertAll(
-                () -> assertThat(httpRequest.getBody().containsKey("account")).isTrue(),
-                () -> assertThat(httpRequest.getBody().containsKey("password")).isTrue(),
+                () -> assertThat(httpRequest.getBody()).containsKey("account"),
+                () -> assertThat(httpRequest.getBody()).containsKey("password"),
                 () -> assertThat(httpRequest.getHeaders().getHeaderValue(HttpHeaderName.CONTENT_LENGTH))
                     .isEqualTo("30"),
                 () -> assertThat(httpRequest.getHeaders().getHeaderValue(HttpHeaderName.CONTENT_TYPE))
@@ -52,7 +52,7 @@ class HttpRequestFactoryTest {
 
             // then
             assertAll(
-                () -> assertThat(httpRequest.getBody().isEmpty()).isTrue(),
+                () -> assertThat(httpRequest.getBody()).isEmpty(),
                 () -> assertThat(httpRequest.getHeaders().getHeaderValue(HttpHeaderName.CONTENT_LENGTH))
                     .isEqualTo("0"),
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),

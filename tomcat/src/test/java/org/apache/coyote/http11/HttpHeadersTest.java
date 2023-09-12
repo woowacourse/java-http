@@ -103,7 +103,7 @@ class HttpHeadersTest {
             // then
             assertAll(
                 () -> assertThat(headers.getContentLength()).isEqualTo(30),
-                () -> assertThat(emptyHeaders.getContentLength()).isEqualTo(0)
+                () -> assertThat(emptyHeaders.getContentLength()).isZero()
             );
         }
     }

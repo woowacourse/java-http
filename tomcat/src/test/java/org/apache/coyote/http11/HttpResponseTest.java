@@ -44,7 +44,7 @@ class HttpResponseTest {
             () -> assertThat(basicResponse.getHeaders().getHeaderValue(HttpHeaderName.CONTENT_TYPE)).isEqualTo(
                 "text/html"),
             () -> assertThat(basicResponse.getHeaders().getHeaderValue(HttpHeaderName.CONTENT_LENGTH)).isEqualTo("4"),
-            () -> assertThat(basicResponse.getResponseLine().toString()).isEqualTo("HTTP/1.1 200 OK"),
+            () -> assertThat(basicResponse.getResponseLine()).hasToString("HTTP/1.1 200 OK"),
             () -> assertThat(basicResponse.getBody()).isEqualTo("body")
         );
     }
@@ -62,7 +62,7 @@ class HttpResponseTest {
         assertAll(
             () -> assertThat(basicResponse.getHeaders().getHeaderValue(HttpHeaderName.LOCATION)).isEqualTo(
                 StaticPages.INDEX_PAGE.getFileName()),
-            () -> assertThat(basicResponse.getResponseLine().toString()).isEqualTo("HTTP/1.1 302 Found")
+            () -> assertThat(basicResponse.getResponseLine()).hasToString("HTTP/1.1 302 Found")
         );
     }
 }

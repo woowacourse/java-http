@@ -21,7 +21,7 @@ class HttpCookieTest {
         // then
         assertAll(
             () -> assertThat(cookie.getJSessionID()).isEqualTo("1234"),
-            () -> assertThat(cookie.getValues().get("TEMP")).isEqualTo("aaaa")
+            () -> assertThat(cookie.getValues()).containsEntry("TEMP", "aaaa")
         );
     }
 
@@ -47,6 +47,6 @@ class HttpCookieTest {
 
         // when
         // then
-        assertThat(cookie.toString()).isEqualTo("JSESSIONID=1234; TEMP=aaaa");
+        assertThat(cookie).hasToString("JSESSIONID=1234; TEMP=aaaa");
     }
 }

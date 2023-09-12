@@ -125,8 +125,8 @@ public class Response {
     public void postprocess(final Request request) {
         final Session session = request.getSession();
         final String sessionId = session.getId();
-        final Optional<Cookie> sessionIdCookie = request.getCookie("JSESSIONID");
-        if (sessionIdCookie.isEmpty() || !Objects.equals(sessionIdCookie.get().getKey(), sessionId)) {
+        final Optional<Cookie> sessionIdCookie = request.getCookie("JSESSIONID".toLowerCase());
+        if (sessionIdCookie.isEmpty() || !Objects.equals(sessionIdCookie.get().getValue(), sessionId)) {
             final Cookie cookie = new Cookie("JSESSIONID", session.getId());
             addCookie(cookie);
         }

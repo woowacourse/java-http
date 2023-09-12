@@ -59,7 +59,7 @@ public class LoginController extends RequestController {
         }
     }
 
-    private static User getValidateUser(final HttpRequest request) {
+    private User getValidateUser(final HttpRequest request) {
         final Map<String, String> bodyParams = request.getParsedBody();
         final String account = bodyParams.get(CREDENTIALS);
         final String password = bodyParams.get(PASSWORD);
@@ -124,7 +124,7 @@ public class LoginController extends RequestController {
         response.mapToRedirect(MAIN.getValue());
     }
 
-    private static boolean wantToLogin(final HttpRequest request) {
+    private boolean wantToLogin(final HttpRequest request) {
         return request.hasQueryString();
     }
 

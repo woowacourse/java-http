@@ -11,27 +11,15 @@ import nextstep.jwp.database.InMemoryUserRepository;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.message.Cookie;
 import org.apache.coyote.http11.message.Headers;
-import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class LoginServlet extends Servlet {
+public class LoginServlet extends HttpServlet {
 
     private static final String JSESSIONID = "JSESSIONID";
-
-    @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        HttpMethod httpMethod = httpRequest.getMethod();
-        if (httpMethod.isEqualTo(HttpMethod.GET)) {
-            doGet(httpRequest, httpResponse);
-        }
-        if (httpMethod.isEqualTo(HttpMethod.POST)) {
-            doPost(httpRequest, httpResponse);
-        }
-    }
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

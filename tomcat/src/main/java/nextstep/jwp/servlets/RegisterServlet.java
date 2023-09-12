@@ -9,24 +9,13 @@ import java.util.Map;
 import nextstep.jwp.database.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestBody;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class RegisterServlet extends Servlet {
-
-    @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if (httpRequest.getMethod().isEqualTo(HttpMethod.GET)) {
-            doGet(httpRequest, httpResponse);
-        }
-        if (httpRequest.getMethod().isEqualTo(HttpMethod.POST)) {
-            doPost(httpRequest, httpResponse);
-        }
-    }
+public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {

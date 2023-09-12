@@ -11,10 +11,10 @@ import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.ResponseBody;
 
-public class StaticResourceServlet extends Servlet {
+public class StaticResourceServlet extends HttpServlet {
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         RequestURI requestURI = httpRequest.getRequestURI();
         String absolutePath = requestURI.absolutePath();
 

@@ -5,9 +5,9 @@ import org.apache.coyote.http11.httpmessage.HttpHeader;
 
 public class HttpResponse {
 
-    StatusCode statusCode;
-    HttpHeader httpHeader;
-    String body;
+    private StatusCode statusCode;
+    private final HttpHeader httpHeader;
+    private String body;
 
     public HttpResponse() {
         this.statusCode = null;
@@ -15,7 +15,8 @@ public class HttpResponse {
         this.body = null;
     }
 
-    public HttpResponse(final StatusCode statusCode, final HttpHeader httpHeader,
+    public HttpResponse(final StatusCode statusCode,
+        final HttpHeader httpHeader,
         final String body) {
         this.statusCode = statusCode;
         this.httpHeader = httpHeader;
@@ -32,14 +33,6 @@ public class HttpResponse {
             httpHeader.makeResponseForm(),
             "",
             body);
-    }
-
-    public StatusCode getStatusCode() {
-        return statusCode;
-    }
-
-    public HttpHeader getHttpHeader() {
-        return httpHeader;
     }
 
     public String getBody() {

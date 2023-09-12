@@ -8,6 +8,7 @@ import org.apache.coyote.http.response.StatusCode;
 import org.apache.coyote.http.response.StatusLine;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.apache.coyote.http.common.ContentType.CSS;
 import static org.apache.coyote.http.common.ContentType.HTML;
@@ -38,27 +39,21 @@ public class StaticFileController extends RequestController {
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
         final String filePath = request.getRequestUri().getRequestUri();
 
-        if (request.isEndsWithRequestUri(HTML.getFileExtension())) {
-            createHttpResponseByContentTypeAndPath(response, HTML, filePath);
-            return;
-        }
+        Arrays.stream(ContentType.values())
+                .filter(contentType -> request.isEndsWithRequestUri(contentType.getFileExtension()))
+                .findAny()
+                .ifPresentOrElse(
+                        contenttype -> createHttpResponse(response, contenttype, filePath),
+                        () -> response.mapToRedirect("/404.html")
+                );
+    }
 
-        if (request.isEndsWithRequestUri(JS.getFileExtension())) {
-            createHttpResponseByContentTypeAndPath(response, JS, filePath);
-            return;
+    private void createHttpResponse(final HttpResponse response, final ContentType contenttype, final String filePath) {
+        try {
+            createHttpResponseByContentTypeAndPath(response, contenttype, filePath);
+        } catch (final IOException e) {
+            throw new IllegalStateException(e);
         }
-
-        if (request.isEndsWithRequestUri(CSS.getFileExtension())) {
-            createHttpResponseByContentTypeAndPath(response, CSS, filePath);
-            return;
-        }
-
-        if (request.isEndsWithRequestUri(ICO.getFileExtension())) {
-            createHttpResponseByContentTypeAndPath(response, ICO, filePath);
-            return;
-        }
-
-        response.mapToRedirect("/404.html");
     }
 
     private void createHttpResponseByContentTypeAndPath(final HttpResponse response, final ContentType contentType, final String filePath) throws IOException {

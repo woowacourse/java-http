@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.cookie.HttpCookie;
-
 public class Response {
 
     public static String of(final String contentType, final String responseBody) {

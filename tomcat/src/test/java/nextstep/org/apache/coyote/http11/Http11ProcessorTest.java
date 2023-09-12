@@ -2,7 +2,6 @@ package nextstep.org.apache.coyote.http11;
 
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.cookie.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

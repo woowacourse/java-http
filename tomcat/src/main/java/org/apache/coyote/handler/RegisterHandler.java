@@ -6,8 +6,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpResponseHeader;
-import org.apache.coyote.response.HttpResponseStatusLine;
 
 public class RegisterHandler implements DynamicHandler {
 
@@ -31,12 +29,6 @@ public class RegisterHandler implements DynamicHandler {
 
     InMemoryUserRepository.save(new User(account, password, email));
 
-    final HttpResponseHeader header = new HttpResponseHeader().sendRedirect(
-        REDIRECT_URL);
-
-    final HttpResponseStatusLine statusLine = HttpResponseStatusLine.redirect();
-
-    httpResponse.setHttpResponseHeader(header);
-    httpResponse.setHttpResponseStatusLine(statusLine);
+    httpResponse.redirect(REDIRECT_URL);
   }
 }

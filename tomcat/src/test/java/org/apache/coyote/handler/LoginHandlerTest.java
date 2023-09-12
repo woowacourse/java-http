@@ -6,9 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
 import org.apache.coyote.request.Cookie;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.HttpRequestLine;
@@ -17,8 +14,6 @@ import org.apache.coyote.request.SessionManager;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponseHeader;
 import org.apache.coyote.response.HttpResponseStatusLine;
-import org.apache.coyote.response.HttpStatus;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -77,7 +72,6 @@ class LoginHandlerTest {
         new SessionManager()
     );
 
-
     final HttpResponse actual = new HttpResponse();
     actual.setHttpResponseHeader(new HttpResponseHeader().addCookie(cookie)
         .sendRedirect("http://localhost:8080/index.html"));
@@ -93,7 +87,7 @@ class LoginHandlerTest {
 
     assertAll(
         () -> assertTrue(expectHeader.getValues().containsKey("Set-Cookie")),
-        () -> assertEquals("http://localhost:8080/index.html", expectHeader.getValues().get("Location")),
+        () -> assertEquals("/index.html", expectHeader.getValues().get("Location")),
         () -> assertThat(actual.getHttpResponseStatusLine())
             .usingRecursiveComparison()
             .isEqualTo(expectStatusLine)

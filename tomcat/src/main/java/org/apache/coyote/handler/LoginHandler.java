@@ -8,8 +8,6 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.Session;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.HttpResponseHeader;
-import org.apache.coyote.response.HttpResponseStatusLine;
 
 public class LoginHandler implements DynamicHandler {
 
@@ -53,22 +51,10 @@ public class LoginHandler implements DynamicHandler {
 
     final Cookie cookie = httpRequest.getCookie();
     cookie.putJSessionId(session.getId());
-
-    final HttpResponseHeader responseHeader = new HttpResponseHeader()
-        .addCookie(cookie)
-        .sendRedirect(SUCCESS_REDIRECT_URL);
-    final HttpResponseStatusLine responseStatusLine = HttpResponseStatusLine.redirect();
-
-    httpResponse.setHttpResponseHeader(responseHeader);
-    httpResponse.setHttpResponseStatusLine(responseStatusLine);
+    httpResponse.redirect(SUCCESS_REDIRECT_URL, cookie);
   }
 
   private void redirectOnFailure(final HttpResponse httpResponse) {
-    final HttpResponseHeader responseHeader = new HttpResponseHeader()
-        .sendRedirect(FAIL_REDIRECT_URL);
-    final HttpResponseStatusLine responseStatusLine = HttpResponseStatusLine.redirect();
-
-    httpResponse.setHttpResponseStatusLine(responseStatusLine);
-    httpResponse.setHttpResponseHeader(responseHeader);
+    httpResponse.redirect(FAIL_REDIRECT_URL);
   }
 }

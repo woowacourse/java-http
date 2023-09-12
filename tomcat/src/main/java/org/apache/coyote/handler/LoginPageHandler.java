@@ -40,13 +40,7 @@ public class LoginPageHandler implements StaticHandler {
       final HttpRequest httpRequest,
       final HttpResponse httpResponse
   ) {
-    final HttpResponseStatusLine statusLine = HttpResponseStatusLine.redirect();
-    final HttpResponseHeader header = new HttpResponseHeader()
-        .addCookie(httpRequest.getCookie())
-        .sendRedirect(REDIRECT_URL);
-
-    httpResponse.setHttpResponseHeader(header);
-    httpResponse.setHttpResponseStatusLine(statusLine);
+    httpResponse.redirect(REDIRECT_URL, httpRequest.getCookie());
   }
 
   private void handleNoLoginRequest(final HttpResponse httpResponse) {

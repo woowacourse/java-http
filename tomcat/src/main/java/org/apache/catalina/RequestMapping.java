@@ -1,9 +1,15 @@
-package org.apache.catalina.controller;
+package org.apache.catalina;
 
 import static org.apache.catalina.controller.StaticResourceUri.DEFAULT_PAGE;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.DefaultController;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.RootController;
+import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

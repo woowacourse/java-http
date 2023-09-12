@@ -1,6 +1,6 @@
 package org.apache.catalina.controller;
 
-enum StaticResourceUri {
+public enum StaticResourceUri {
     DEFAULT_PAGE("/index.html"),
     NOT_FOUND_PAGE("/404.html"),
     LOGIN_PAGE("/login.html"),

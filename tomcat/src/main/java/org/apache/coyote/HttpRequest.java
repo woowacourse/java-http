@@ -1,12 +1,18 @@
 package org.apache.coyote;
 
+import static org.apache.coyote.header.HttpHeaders.COOKIE;
+
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.header.HttpCookie;
 import org.apache.coyote.header.HttpHeaders;
 import org.apache.coyote.header.HttpMethod;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
 
+    private static final String QUERY_PARAMETER_DELIMETER = "?";
     private final HttpMethod httpMethod;
     private final String requestUrl;
     private final ProtocolVersion protocolVersion;
@@ -22,7 +28,7 @@ public class HttpRequest {
     }
 
     public String getQueryParams() {
-        int index = requestUrl.indexOf("?");
+        int index = requestUrl.indexOf(QUERY_PARAMETER_DELIMETER);
         return requestUrl.substring(index + 1);
     }
 
@@ -35,8 +41,26 @@ public class HttpRequest {
         return mapped;
     }
 
+    public String getRequestUrlWithoutQueryParams() {
+        if (requestUrl.contains(QUERY_PARAMETER_DELIMETER)) {
+            int index = requestUrl.indexOf(QUERY_PARAMETER_DELIMETER);
+            return requestUrl.substring(0, index);
+        }
+        return requestUrl;
+    }
+
     public String getHeaderValue(String name) {
         return headers.getValue(name);
+    }
+
+    public Session getSession() {
+        String cookieValue = getHeaderValue(COOKIE);
+        if (cookieValue == null) {
+            return null;
+        }
+        HttpCookie cookie = new HttpCookie(cookieValue);
+        String sessionId = cookie.getValue("JSESSIONID");
+        return SessionManager.findSession(sessionId);
     }
 
     public HttpMethod httpMethod() {

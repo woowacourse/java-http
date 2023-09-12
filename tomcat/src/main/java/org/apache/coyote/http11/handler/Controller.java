@@ -5,7 +5,5 @@ import org.apache.coyote.HttpResponse;
 
 public interface Controller {
 
-    boolean support(HttpRequest request);
-
-    void handle(HttpRequest request, HttpResponse response);
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

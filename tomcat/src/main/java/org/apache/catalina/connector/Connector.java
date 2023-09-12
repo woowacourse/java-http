@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.adaptor.ControllerAdaptor;
+import org.apache.coyote.http11.adaptor.ControllerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,18 +17,18 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private final ControllerAdaptor controllerAdaptor;
+    private final ControllerMapping controllerMapping;
     private final ExecutorService executorService;
 
     private final ServerSocket serverSocket;
     private boolean stopped;
 
-    public Connector(ControllerAdaptor controllerAdaptor, int maxThreads) {
-        this(controllerAdaptor, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
+    public Connector(ControllerMapping controllerMapping, int maxThreads) {
+        this(controllerMapping, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, maxThreads);
     }
 
-    public Connector(ControllerAdaptor controllerAdaptor, int port, int acceptCount, int maxThreads) {
-        this.controllerAdaptor = controllerAdaptor;
+    public Connector(ControllerMapping controllerMapping, int port, int acceptCount, int maxThreads) {
+        this.controllerMapping = controllerMapping;
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.executorService = Executors.newFixedThreadPool(maxThreads);
@@ -71,7 +71,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, controllerAdaptor);
+        var processor = new Http11Processor(connection, controllerMapping);
         executorService.submit(processor);
     }
 

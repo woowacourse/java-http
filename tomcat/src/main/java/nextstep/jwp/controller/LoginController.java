@@ -1,31 +1,46 @@
 package nextstep.jwp.controller;
 
 import static org.apache.coyote.HttpStatus.FOUND;
+import static org.apache.coyote.HttpStatus.OK;
+import static org.apache.coyote.header.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.coyote.header.HttpHeaders.CONTENT_TYPE;
 import static org.apache.coyote.header.HttpHeaders.LOCATION;
 import static org.apache.coyote.header.HttpHeaders.SET_COOKIE;
-import static org.apache.coyote.header.HttpMethod.POST;
 
 import java.util.Map;
 import nextstep.jwp.application.LoginService;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.ResourceLoaderUtil;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.header.ContentType;
 import org.apache.coyote.header.HttpCookie;
-import org.apache.coyote.http11.handler.Controller;
+import org.apache.coyote.http11.handler.AbstractController;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private final LoginService loginService = new LoginService();
 
     @Override
-    public boolean support(HttpRequest request) {
-        return request.httpMethod().equals(POST) && request.requestUrl().startsWith("/login");
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        response.setVersion(request.protocolVersion());
+        if (request.getSession() != null) {
+            response.setStatus(FOUND);
+            response.addHeader(LOCATION, "index.html");
+            return;
+        }
+
+        String content = ResourceLoaderUtil.loadContent(request.requestUrl());
+        response.setStatus(OK);
+        response.addHeader(CONTENT_TYPE, ContentType.negotiate(request.requestUrl()));
+        response.addHeader(CONTENT_LENGTH, String.valueOf(content.getBytes().length));
+        response.setBody(content);
     }
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> requestBody = request.getRequestBody();
 
         response.setVersion(request.protocolVersion());

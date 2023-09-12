@@ -13,6 +13,9 @@ public class HttpCookie {
     public HttpCookie(String raw) {
         String[] values = raw.split("; ");
         for (String value : values) {
+            if (value.strip().isBlank()) {
+                break;
+            }
             String[] keyValue = value.split("=");
             cookies.put(keyValue[0], keyValue[1]);
         }

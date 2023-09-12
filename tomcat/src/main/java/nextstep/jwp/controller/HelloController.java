@@ -3,21 +3,15 @@ package nextstep.jwp.controller;
 import static org.apache.coyote.HttpStatus.OK;
 import static org.apache.coyote.header.HttpHeaders.CONTENT_LENGTH;
 import static org.apache.coyote.header.HttpHeaders.CONTENT_TYPE;
-import static org.apache.coyote.header.HttpMethod.GET;
 
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.http11.handler.Controller;
+import org.apache.coyote.http11.handler.AbstractController;
 
-public class HelloController implements Controller {
-
-    @Override
-    public boolean support(HttpRequest request) {
-        return request.httpMethod().equals(GET) && request.requestUrl().equals("/");
-    }
+public class HelloController extends AbstractController {
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String message = "Hello world!";
 
         response.setVersion(request.protocolVersion());

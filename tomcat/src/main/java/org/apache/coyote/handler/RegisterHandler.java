@@ -11,7 +11,7 @@ import org.apache.coyote.response.HttpResponseStatusLine;
 
 public class RegisterHandler implements DynamicHandler {
 
-  private static final String REDIRECT_URL = "http://localhost:8080/index.html";
+  private static final String REDIRECT_URL = "/index.html";
 
   @Override
   public boolean canHandle(final HttpRequest httpRequest) {

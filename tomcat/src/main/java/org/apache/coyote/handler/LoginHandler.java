@@ -13,8 +13,8 @@ import org.apache.coyote.response.HttpResponseStatusLine;
 
 public class LoginHandler implements DynamicHandler {
 
-  private static final String SUCCESS_REDIRECT_URL = "http://localhost:8080/index.html";
-  private static final String FAIL_REDIRECT_URL = "http://localhost:8080/401.html";
+  private static final String SUCCESS_REDIRECT_URL = "/index.html";
+  private static final String FAIL_REDIRECT_URL = "/401.html";
 
   @Override
   public boolean canHandle(final HttpRequest httpRequest) {

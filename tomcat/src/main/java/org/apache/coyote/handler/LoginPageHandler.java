@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class LoginPageHandler implements StaticHandler {
 
   private static final Logger log = LoggerFactory.getLogger(LoginPageHandler.class);
-  private static final String REDIRECT_URL = "http://localhost:8080/index.html";
+  private static final String REDIRECT_URL = "/index.html";
   private static final String FILE_PATH = "static/login.html";
 
   @Override

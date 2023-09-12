@@ -4,22 +4,23 @@ import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGT
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
 
 import java.io.IOException;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class DefaultResourceHandler extends AbstractResourceHandler {
+public class DefaultResourceHandler implements ResourceHandler {
 
     private static final String PATH = "/";
 
     @Override
-    public boolean supports(final HttpRequest httpRequest) {
-        return PATH.equals(httpRequest.getPath());
+    public boolean supports(final HttpRequest request) {
+        return PATH.equals(request.getPath()) && HttpMethod.GET == request.getHttpMethod();
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
         final String body = "Hello world!";
         response.setStatusCode(StatusCode.OK);
         response.setBody(body);

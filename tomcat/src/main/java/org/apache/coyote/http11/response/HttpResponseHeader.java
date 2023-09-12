@@ -5,7 +5,8 @@ public enum HttpResponseHeader {
     SET_COOKIE("Set-Cookie"),
     LOCATION("Location"),
     CONTENT_TYPE("Content-Type"),
-    CONTENT_LENGTH("Content-Length");
+    CONTENT_LENGTH("Content-Length"),
+    ALLOW("Allow");
 
     private final String header;
 

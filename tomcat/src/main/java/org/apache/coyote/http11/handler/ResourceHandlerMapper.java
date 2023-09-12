@@ -7,7 +7,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 public class ResourceHandlerMapper {
 
     private static final List<ResourceHandler> handlers = new ArrayList<>();
-    private static final ResourceHandler unsupportedResourceHandler = new UnsupportedResourceHandler();
+    private static final ResourceHandler unsupportedResourceHandler = new UnsupportedMethodHandler();
 
     static {
         handlers.add(new DefaultResourceHandler());

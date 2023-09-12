@@ -8,23 +8,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusCode;
 
-public class StaticResourceHandler extends AbstractResourceHandler {
+public class StaticResourceHandler implements ResourceHandler {
 
     private static final String NOT_FOUND_PAGE_PATH = "/404.html";
     private static final String RESOURCE_DIRECTORY = "static";
 
     @Override
-    public boolean supports(final HttpRequest httpRequest) {
-        return true;
+    public boolean supports(final HttpRequest request) {
+        return HttpMethod.GET == request.getHttpMethod();
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
         String fileName = RESOURCE_DIRECTORY + request.getPath();
         URL resource = getClass().getClassLoader().getResource(fileName);
         if (resource != null) {

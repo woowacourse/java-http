@@ -35,7 +35,6 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = RequestExtractor.extract(inputStream);
-            LoggingFilter.logUserInfoIfExists(httpRequest);
             HttpResponse httpResponse = Context.service(httpRequest);
 
             outputStream.write(httpResponse.getBytes());

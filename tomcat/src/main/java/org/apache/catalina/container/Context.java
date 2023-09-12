@@ -1,6 +1,7 @@
 package org.apache.catalina.container;
 
 import nextstep.jwp.servlets.*;
+import org.apache.catalina.filter.LoggingFilter;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestURI;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -31,6 +32,8 @@ public class Context {
         RequestURI requestURI = httpRequest.getRequestURI();
         String absolutePath = requestURI.absolutePath();
         HttpResponse httpResponse = HttpResponse.init();
+
+        LoggingFilter.doFilter(httpRequest, httpResponse);
 
         Servlet servlet = findServlet(absolutePath);
         servlet.service(httpRequest, httpResponse);

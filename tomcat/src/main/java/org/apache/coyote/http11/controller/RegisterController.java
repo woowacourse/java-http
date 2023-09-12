@@ -14,9 +14,6 @@ public class RegisterController extends AbstractController {
     private static final String LOCATION = "Location";
     public static final String REGISTER_PAGE = "/register.html";
     private static final String INDEX_PAGE = "/index.html";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {

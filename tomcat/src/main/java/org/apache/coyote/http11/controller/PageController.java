@@ -8,10 +8,6 @@ import org.apache.coyote.http11.httpmessage.response.StatusCode;
 
 public class PageController extends AbstractController {
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
-    private static final String CONTENT_LENGTH = "Content-Length";
-
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final String pathInfo = request.getPath();

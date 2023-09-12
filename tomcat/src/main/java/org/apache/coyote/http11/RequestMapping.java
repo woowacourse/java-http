@@ -18,11 +18,10 @@ public class RequestMapping {
         REQUEST_MAPPER.put("/register", new RegisterController());
     }
 
-    public static Controller getController(final String path) {
-        if (REQUEST_MAPPER.containsKey(path)) {
-            return REQUEST_MAPPER.get(path);
-        }
-        return new PageController();
+    private RequestMapping() {
     }
 
+    public static Controller getController(final String path) {
+        return REQUEST_MAPPER.getOrDefault(path, new PageController());
+    }
 }

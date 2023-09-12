@@ -17,9 +17,6 @@ public class LoginController extends AbstractController {
 
     private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String LOGIN_PAGE = "/login.html";

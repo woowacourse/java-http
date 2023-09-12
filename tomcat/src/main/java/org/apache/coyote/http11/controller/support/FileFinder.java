@@ -11,6 +11,9 @@ public class FileFinder {
     private static final String FILE_PATH = "static/";
     private static final String NOT_FOUND_PAGE = "404.html";
 
+    private FileFinder() {
+    }
+
     public static String find(final String file) throws IOException {
         try {
             final ClassLoader classLoader = FileFinder.class.getClassLoader();

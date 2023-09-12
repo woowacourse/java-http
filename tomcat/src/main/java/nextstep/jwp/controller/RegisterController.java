@@ -25,14 +25,14 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
         final SessionManager sessionManager = SessionManager.getInstance();
         final String sessionId = sessionManager.createSession(user);
-        response.addStatus(HttpStatus.FOUND)
-                .addLocation("/index.html")
-                .addSetCookie(new Cookie("JSESSIONID", sessionId));
+        response.status(HttpStatus.FOUND)
+                .location("/index.html")
+                .setCookie(new Cookie("JSESSIONID", sessionId));
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        response.addStatus(HttpStatus.FOUND)
-                .addLocation("/register.html");
+        response.status(HttpStatus.FOUND)
+                .location("/register.html");
     }
 }

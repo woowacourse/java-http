@@ -9,8 +9,8 @@ public class NotFoundExceptionController extends ExceptionController {
 
     @Override
     protected void createErrorResponse(final HttpResponse response) {
-        response.addStatus(HttpStatus.FOUND)
-                .addLocation("/404.html");
+        response.status(HttpStatus.FOUND)
+                .location("/404.html");
     }
 
     public static Controller getInstance() {

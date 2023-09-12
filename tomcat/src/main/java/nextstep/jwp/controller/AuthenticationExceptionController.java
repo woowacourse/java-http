@@ -9,8 +9,8 @@ public class AuthenticationExceptionController extends ExceptionController {
 
     @Override
     protected void createErrorResponse(final HttpResponse response) {
-        response.addStatus(HttpStatus.FOUND)
-                .addLocation("/login.html");
+        response.status(HttpStatus.FOUND)
+                .location("/login.html");
     }
 
     public static Controller getInstance() {

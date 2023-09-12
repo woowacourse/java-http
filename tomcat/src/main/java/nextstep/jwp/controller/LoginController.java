@@ -22,19 +22,19 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new AuthenticationException("아이디 또는 비밀번호가 틀립니다."));
         final SessionManager sessionManager = SessionManager.getInstance();
         final String sessionId = sessionManager.createSession(loginUser);
-        response.addStatus(HttpStatus.FOUND)
-                .addLocation("/index.html")
-                .addSetCookie(new Cookie("JSESSIONID", sessionId));
+        response.status(HttpStatus.FOUND)
+                .location("/index.html")
+                .setCookie(new Cookie("JSESSIONID", sessionId));
     }
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.getHeaders().getCookies().containsKey("JSESSIONID")) {
-            response.addStatus(HttpStatus.FOUND)
-                    .addLocation("/index.html");
+            response.status(HttpStatus.FOUND)
+                    .location("/index.html");
             return;
         }
-        response.addStatus(HttpStatus.FOUND)
-                .addLocation("/login.html");
+        response.status(HttpStatus.FOUND)
+                .location("/login.html");
     }
 }

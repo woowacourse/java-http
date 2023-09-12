@@ -37,8 +37,8 @@ public class ResourceController extends AbstractController {
         final String extension = resourcePath.substring(resourcePath.lastIndexOf(".") + 1);
         final ContentType contentType = ContentType.from(extension);
         final String content = getResourceContent(resourcePath);
-        response.addStatus(HttpStatus.OK)
-                .addContentType(contentType)
-                .addBody(content);
+        response.status(HttpStatus.OK)
+                .contentType(contentType)
+                .body(content);
     }
 }

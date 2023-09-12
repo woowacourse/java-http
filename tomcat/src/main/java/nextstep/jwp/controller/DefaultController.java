@@ -15,8 +15,8 @@ public class DefaultController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
         final var responseBody = "Hello world!";
-        response.addStatus(HttpStatus.OK)
-                .addContentType(ContentType.HTML)
-                .addBody(responseBody);
+        response.status(HttpStatus.OK)
+                .contentType(ContentType.HTML)
+                .body(responseBody);
     }
 }

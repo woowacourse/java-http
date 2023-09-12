@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.handler.AbstractController;
+import org.apache.handler.Controller;
 import org.apache.handler.RequestMapping;
 import org.apache.request.HttpRequest;
 import org.apache.response.HttpResponse;
@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            AbstractController controller = RequestMapping.findController(httpRequest);
+            Controller controller = RequestMapping.findController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getResponse().getBytes());

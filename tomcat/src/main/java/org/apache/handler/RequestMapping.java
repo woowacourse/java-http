@@ -10,7 +10,7 @@ import org.apache.request.HttpRequest;
 
 public class RequestMapping {
 
-    private static final Map<String, AbstractController> handlers = new HashMap<>();
+    private static final Map<String, Controller> handlers = new HashMap<>();
     private static final String QUERY_STRING = "?";
 
     static {
@@ -22,7 +22,7 @@ public class RequestMapping {
     private RequestMapping() {
     }
 
-    public static AbstractController findController(HttpRequest httpRequest) {
+    public static Controller findController(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
         if (isQueryString(path)) {
             path = extractPathWithoutQuery(path);

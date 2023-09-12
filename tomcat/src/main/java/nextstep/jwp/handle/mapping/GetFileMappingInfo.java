@@ -6,11 +6,11 @@ import org.apache.coyote.request.HttpRequest;
 
 public class GetFileMappingInfo extends MappingInfo {
 
-    private static final String FILE_PATTER = "/[^.]*\\.[^.]*$";
-    private static final Pattern PATTERN = Pattern.compile(FILE_PATTER);
+    private static final String FILE_PATTERN = "/[^.]*\\.[^.]*$";
+    private static final Pattern PATTERN = Pattern.compile(FILE_PATTERN);
 
     public GetFileMappingInfo() {
-        super(HttpMethod.GET, FILE_PATTER);
+        super(HttpMethod.GET, FILE_PATTERN);
     }
 
     @Override

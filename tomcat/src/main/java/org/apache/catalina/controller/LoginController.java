@@ -22,7 +22,7 @@ public class LoginController extends AbstractController {
     private static final String LOGIN_PAGE = "/login.html";
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final RequestBody body = request.getBody();
         final Optional<User> user = InMemoryUserRepository.findByAccount(body.getAccount());
         if (user.isPresent() && user.get().checkPassword(body.getPassword())) {

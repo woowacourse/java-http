@@ -16,7 +16,7 @@ public class RegisterController extends AbstractController {
     private static final String INDEX_PAGE = "/index.html";
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         if (request.hasBlankRegisterUserBody()) {
             response.setStatusCode(StatusCode.FOUND)
                 .addHeader(LOCATION, REGISTER_PAGE)

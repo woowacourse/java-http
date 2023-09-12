@@ -8,7 +8,6 @@ public class SessionManager {
     private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
-
     }
 
     public static void add(final Session session) {

@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 import java.net.Socket;
 
@@ -24,9 +24,8 @@ import java.net.Socket;
 public interface Processor {
 
     /**
-     * Process a connection. This is called whenever an event occurs (e.g. more
-     * data arrives) that allows processing to continue for a connection that is
-     * not currently being processed.
+     * Process a connection. This is called whenever an event occurs (e.g. more data arrives) that allows processing to
+     * continue for a connection that is not currently being processed.
      */
     void process(Socket socket);
 }

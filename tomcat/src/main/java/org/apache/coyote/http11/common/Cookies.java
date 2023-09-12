@@ -14,18 +14,18 @@ public class Cookies {
         values = new HashMap<>();
     }
 
-    private Cookies(Map<String, String> values) {
+    private Cookies(final Map<String, String> values) {
         this.values = values;
     }
 
-    public static Cookies from(String cookieHeader) {
-        if (cookieHeader.isEmpty()) {
+    public static Cookies from(final String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
             return new Cookies();
         }
 
-        Map<String, String> values = Arrays.stream(cookieHeader.split("; "))
+        final Map<String, String> values = Arrays.stream(cookieHeader.split("; "))
                 .map(field -> {
-                    String[] split = field.split("=");
+                    final String[] split = field.split("=");
                     return new AbstractMap.SimpleEntry<>(split[0], split[1]);
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a));
@@ -33,15 +33,12 @@ public class Cookies {
         return new Cookies(values);
     }
 
-    public static String ofJSessionId(String id) {
-        return "JSESSIONID=" + id;
+    public static String ofSingleHeader(final String name, final String value) {
+        return String.join("=", name, value);
     }
 
-    public boolean isExistByName(String name) {
-        return values.containsKey(name);
-    }
-
-    public String findByName(String name) {
+    public String findByName(final String name) {
         return values.get(name);
     }
+
 }

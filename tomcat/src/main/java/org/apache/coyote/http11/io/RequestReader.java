@@ -2,58 +2,57 @@ package org.apache.coyote.http11.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.common.Headers;
+import org.apache.coyote.http11.common.header.EntityHeaders;
 import org.apache.coyote.http11.request.Request;
 
 public class RequestReader {
 
     private final BufferedReader reader;
 
-    public RequestReader(BufferedReader reader) {
-        this.reader = reader;
+    public RequestReader(final InputStream inputStream) {
+        this.reader = new BufferedReader(new InputStreamReader(inputStream));
     }
-
 
     public Request read() throws IOException {
-        String requestHead = reader.readLine();
-        String[] head = requestHead.split(" ");
-        String method = head[0];
-        String uri = head[1];
+        final var requestLine = reader.readLine();
+        final var words = requestLine.split(" ");
+        final var method = words[0];
+        final var uri = words[1];
+        final var protocol = words[2];
 
-        Headers headers = readHeaders();
-        String body = readBody(headers);
+        final var allHeaders = readHeaders();
+        final var body = readBody(new EntityHeaders(allHeaders));
 
-        return Request.from(
-                method,
-                uri,
-                headers,
-                body
-        );
+        return Request.of(method, uri, protocol, allHeaders, body);
     }
 
-    private Headers readHeaders() throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private Map<String, String> readHeaders() throws IOException {
+        final Map<String, String> headers = new HashMap<>();
         String line;
         while (!"".equals((line = reader.readLine()))) {
-            String[] header = line.split(": ");
-            String key = header[0];
-            String value = header[1].trim();
+            final var headerPair = line.split(": ");
+            final var key = headerPair[0];
+            final var value = headerPair[1].trim();
+
             headers.put(key, value);
         }
 
-        return new Headers(headers);
+        return headers;
     }
 
-    private String readBody(Headers headers) throws IOException {
-        String body = "";
+    private String readBody(final EntityHeaders headers) throws IOException {
         if (headers.hasContentLength()) {
-            int contentLength = Integer.parseInt(headers.find("Content-Length"));
-            char[] buffer = new char[contentLength];
+            final var contentLength = Integer.parseInt(headers.getContentLength());
+            final var buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
-            body = new String(buffer);
+
+            return new String(buffer);
         }
-        return body;
+
+        return "";
     }
 }

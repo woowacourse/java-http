@@ -1,51 +1,47 @@
 package nextstep.jwp.controller;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import static org.apache.catalina.core.servlet.HttpServletResponse.redirect;
+import static org.apache.catalina.core.session.SessionManager.SESSION_ID_COOKIE_NAME;
+
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.Session;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.util.QueryStringParser;
+import org.apache.catalina.core.servlet.HttpServletRequest;
+import org.apache.catalina.core.servlet.HttpServletResponse;
 
-public class UserController {
+public class UserController implements Controller {
 
     private UserController() {
     }
 
-    public static Response login(Request request) {
-        String form = request.getBody();
-        Map<String, List<String>> formContents = QueryStringParser.parse(form);
-        String account = formContents.get("account").get(0);
-        String password = formContents.get("password").get(0);
+    public static HttpServletResponse login(final HttpServletRequest request) {
+        final var account = request.getQueryParamsForBody("account");
+        final var password = request.getQueryParamsForBody("password");
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            Response redirect = Response.redirect("/index.html");
-            Session session = request.getOrCreateSession();
-            session.setAttribute("user", user.get());
-            redirect.addSetCookie(Cookies.ofJSessionId(session.getId()));
-            return redirect;
-        }
-        return Response.redirect("/401.html");
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .map(user -> redirectLoginUser(request, user))
+                .orElseGet(() -> redirect("/401.html"));
     }
 
-    public static Response register(Request request) {
-        String form = request.getBody();
-        Map<String, List<String>> formContents = QueryStringParser.parse(form);
-        String account = formContents.get("account").get(0);
-        String email = formContents.get("email").get(0);
-        String password = formContents.get("password").get(0);
+    private static HttpServletResponse redirectLoginUser(final HttpServletRequest request, final User user) {
+        final var session = request.getSession();
+        session.setAttribute("user", user);
+
+        return redirect("/index.html")
+                .addSetCookie(SESSION_ID_COOKIE_NAME, session.getId());
+    }
+
+    public static HttpServletResponse register(final HttpServletRequest request) {
+        final var account = request.getQueryParamsForBody("account");
+        final var email = request.getQueryParamsForBody("email");
+        final var password = request.getQueryParamsForBody("password");
 
         if (InMemoryUserRepository.isExistByAccount(account)) {
-            return Response.redirect("/401.html");
+            return redirect("/401.html");
         }
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return Response.redirect("/index.html");
+        return redirect("/index.html");
     }
+
 }

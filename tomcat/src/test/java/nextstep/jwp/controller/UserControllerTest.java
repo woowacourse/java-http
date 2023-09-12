@@ -1,15 +1,13 @@
 package nextstep.jwp.controller;
 
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
-import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.Headers;
-import org.apache.coyote.http11.common.Session;
+import org.apache.catalina.core.HttpServletRequestFixture;
+import org.apache.catalina.core.servlet.HttpServletResponse;
+import org.apache.catalina.core.session.SessionManager;
+import org.apache.catalina.core.session.SessionManager.Session;
 import org.apache.coyote.http11.common.Status;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,13 +18,12 @@ class UserControllerTest {
     @DisplayName("로그인에 성공하면 index.html로 리다이렉트한다.")
     @Test
     void loginSuccess() {
-        Session session = new Session();
-        sessionManager.add(session);
+        final Session session = sessionManager.findOrCreate(randomUUID().toString());
+        final var httpServletRequest = HttpServletRequestFixture.createPost(
+                "/login", session.getId(), "account=gugu&password=password"
+        );
 
-        Response response = UserController.login(
-                Request.from("post", "/login",
-                        new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
-                        "account=gugu&password=password"));
+        final HttpServletResponse response = UserController.login(httpServletRequest);
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);
         assertThat(response.getLocation()).isEqualTo("/index.html");
@@ -35,13 +32,12 @@ class UserControllerTest {
     @DisplayName("로그인에 실패하면 401.html로 리다이렉트한다.")
     @Test
     void loginFail() {
-        Session session = new Session();
-        sessionManager.add(session);
+        final Session session = sessionManager.findOrCreate(randomUUID().toString());
+        final var httpServletRequest = HttpServletRequestFixture.createPost(
+                "/login", session.getId(), "account=dodo&password=password"
+        );
 
-        Response response = UserController.login(
-                Request.from("post", "/login",
-                        new Headers(Map.of("Cookie", Cookies.ofJSessionId(session.getId()))),
-                        "account=dodo&password=password"));
+        final HttpServletResponse response = UserController.login(httpServletRequest);
 
         assertThat(response.getStatus()).isEqualTo(Status.FOUND);
         assertThat(response.getLocation()).isEqualTo("/401.html");

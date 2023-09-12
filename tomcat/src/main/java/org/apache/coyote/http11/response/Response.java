@@ -1,69 +1,54 @@
 package org.apache.coyote.http11.response;
 
-import static org.apache.coyote.http11.common.ContentType.HTML;
-import static org.apache.coyote.http11.common.ContentType.TEXT;
-import static org.apache.coyote.http11.common.Status.FOUND;
-
-import org.apache.coyote.http11.common.ContentType;
-import org.apache.coyote.http11.common.Headers;
+import org.apache.catalina.core.servlet.HttpServletResponse;
+import org.apache.coyote.http11.common.Protocol;
 import org.apache.coyote.http11.common.Status;
+import org.apache.coyote.http11.common.header.EntityHeaders;
+import org.apache.coyote.http11.common.header.GeneralHeaders;
+import org.apache.coyote.http11.common.header.ResponseHeaders;
 
 public class Response {
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
 
-    private final Status status;
-    private final ContentType contentType;
-    private final Headers headers;
+    private final StatusLine statusLine;
+    private final GeneralHeaders generalHeaders;
+    private final ResponseHeaders responseHeaders;
+    private final EntityHeaders entityHeaders;
     private final String body;
 
     private Response(
-            Status status,
-            ContentType contentType,
-            String body
+            final StatusLine statusLine,
+            final GeneralHeaders generalHeaders,
+            final ResponseHeaders responseHeaders,
+            final EntityHeaders entityHeaders,
+            final String body
     ) {
-        this.status = status;
-        this.contentType = contentType;
-        this.headers = new Headers();
+        this.statusLine = statusLine;
+        this.generalHeaders = generalHeaders;
+        this.responseHeaders = responseHeaders;
+        this.entityHeaders = entityHeaders;
         this.body = body;
     }
 
-    public static Response of(
-            Status status,
-            String contentTypeString,
-            String body
-    ) {
-        ContentType contentType = ContentType.from(contentTypeString)
-                .orElse(TEXT);
-
-        return new Response(status, contentType, body);
-    }
-
-    public static Response redirect(String location) {
-        Response response = Response.of(FOUND, HTML.toString(), "");
-        response.addLocation(location);
-
-        return response;
-    }
-
-    public void addLocation(String location) {
-        headers.addLocation(location);
-    }
-
-    public void addSetCookie(String cookie) {
-        headers.addSetCookie(cookie);
+    public Response(final HttpServletResponse httpServletResponse) {
+        this(new StatusLine(Protocol.HTTP11, httpServletResponse.getStatus()),
+                httpServletResponse.getGeneralHeaders(),
+                httpServletResponse.getResponseHeaders(),
+                httpServletResponse.getEntityHeaders(),
+                httpServletResponse.getBody());
     }
 
     public Status getStatus() {
-        return status;
+        return statusLine.getStatus();
+    }
+
+    public String getContentType() {
+        return entityHeaders.getContentType();
     }
 
     public String getLocation() {
-        return headers.getLocation();
-    }
-
-    public ContentType getContentType() {
-        return contentType;
+        return responseHeaders.getLocation();
     }
 
     public String getBody() {
@@ -76,11 +61,16 @@ public class Response {
 
     @Override
     public String toString() {
-        return "HTTP/1.1 " + status.getCode() + " " + status.name() + LINE_SEPARATOR
-                + "Content-Type: " + contentType.withCharset("utf-8") + LINE_SEPARATOR
-                + "Content-Length: " + body.getBytes().length + LINE_SEPARATOR
-                + headers
-                + LINE_SEPARATOR
-                + body;
+        final var headerGroup = String.join(
+                generalHeaders.toString(),
+                responseHeaders.toString(),
+                entityHeaders.toString()
+        );
+
+        return String.join(LINE_SEPARATOR,
+                statusLine.toString(),
+                headerGroup,
+                body);
     }
+
 }

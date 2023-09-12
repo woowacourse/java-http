@@ -1,74 +1,66 @@
 package org.apache.coyote.http11.request;
 
-import static org.apache.coyote.http11.SessionManager.SESSION_ID_COOKIE_NAME;
-
-import java.net.URI;
-import java.util.Optional;
-import org.apache.coyote.http11.SessionManager;
+import java.util.Map;
 import org.apache.coyote.http11.common.Cookies;
-import org.apache.coyote.http11.common.Headers;
 import org.apache.coyote.http11.common.Method;
-import org.apache.coyote.http11.common.Session;
+import org.apache.coyote.http11.common.header.EntityHeaders;
+import org.apache.coyote.http11.common.header.GeneralHeaders;
+import org.apache.coyote.http11.common.header.RequestHeaders;
 
 public class Request {
 
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private final Method method;
-    private final String uri;
-    private final Headers headers;
+    private final RequestLine requestLine;
+    private final GeneralHeaders generalHeaders;
+    private final RequestHeaders requestHeaders;
+    private final EntityHeaders entityHeaders;
     private final String body;
 
     private Request(
-            Method method,
-            String uri,
-            Headers headers,
-            String body
+            final RequestLine requestLine,
+            final GeneralHeaders generalHeaders,
+            final RequestHeaders requestHeaders,
+            final EntityHeaders entityHeaders,
+            final String body
     ) {
-        this.method = method;
-        this.uri = uri;
-        this.headers = headers;
+
+        this.requestLine = requestLine;
+        this.generalHeaders = generalHeaders;
+        this.requestHeaders = requestHeaders;
+        this.entityHeaders = entityHeaders;
         this.body = body;
     }
 
-    public static Request from(
-            String methodName,
-            String requestURI,
-            Headers headers,
-            String body
+    public static Request of(
+            final String methodName,
+            final String requestURI,
+            final String protocolName,
+            final Map<String, String> headers,
+            final String body
     ) {
-        Method method = Method.find(methodName)
-                .orElseThrow(() -> new IllegalArgumentException("invalid method"));
 
-        return new Request(method, requestURI, headers, body);
+        return new Request(
+                RequestLine.of(methodName, requestURI, protocolName),
+                new GeneralHeaders(headers),
+                new RequestHeaders(headers),
+                new EntityHeaders(headers),
+                body
+        );
     }
 
     public String getPath() {
-        return URI.create(uri).getPath();
+        return requestLine.getPath();
     }
 
     public Method getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getUri() {
-        return uri;
+        return requestLine.getUri().toString();
     }
 
-    public Session getOrCreateSession() {
-        return findSession()
-                .orElseGet(this::createSession);
-    }
-
-    private Session createSession() {
-        Session session = new Session();
-        SESSION_MANAGER.add(session);
-        return session;
-    }
-
-    private Optional<Session> findSession() {
-        Cookies cookies = headers.getCookie();
-        String sessionId = cookies.findByName(SESSION_ID_COOKIE_NAME);
-        return Optional.ofNullable(SESSION_MANAGER.findSession(sessionId));
+    public Cookies getCookies() {
+        return Cookies.from(requestHeaders.getCookie());
     }
 
     public String getBody() {
@@ -78,11 +70,11 @@ public class Request {
     @Override
     public String toString() {
         return "Request{" +
-                "method=" + method +
-                ", URI='" + uri + '\'' +
-                ", headers='" + headers + '\'' +
+                "requestLine=" + requestLine +
+                ", generalHeaders=" + generalHeaders +
+                ", requestHeaders=" + requestHeaders +
+                ", entityHeaders=" + entityHeaders +
                 ", body='" + body + '\'' +
                 '}';
     }
-
 }

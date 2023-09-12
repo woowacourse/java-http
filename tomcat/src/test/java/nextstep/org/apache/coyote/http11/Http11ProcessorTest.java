@@ -9,15 +9,55 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.HomeController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.servlet.DispatcherServletManager;
+import nextstep.servlet.StaticResourceResolver;
+import nextstep.servlet.interceptor.Interceptor;
+import nextstep.servlet.interceptor.SessionInterceptor;
+import org.apache.catalina.servlet.ServletManger;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.message.HttpMethod;
+import org.apache.coyote.http11.message.request.RequestLine;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+    
+    ServletManger servletManager;
+
+    @BeforeEach
+    void setUp() {
+        final Map<List<RequestLine>, Interceptor> interceptors = Map.of(
+                List.of(
+                        new RequestLine(HttpMethod.GET, "/login"),
+                        new RequestLine(HttpMethod.POST, "/login")
+                )
+                , new SessionInterceptor()
+        );
+
+        final List<Controller> controllers = List.of(
+                new HomeController(),
+                new LoginController(),
+                new RegisterController()
+        );
+
+        final StaticResourceResolver staticResourceResolver = new StaticResourceResolver();
+
+        servletManager = new DispatcherServletManager(
+                interceptors,
+                controllers,
+                staticResourceResolver
+        );
+        }
+
 
     @Nested
     class Index {
@@ -33,7 +73,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);
@@ -60,7 +100,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);
@@ -91,7 +131,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);
@@ -121,7 +161,7 @@ class Http11ProcessorTest {
 
             InMemoryUserRepository.save(new User(1L, "gugu", "password", "ttset@dsffd.com"));
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);
@@ -145,7 +185,7 @@ class Http11ProcessorTest {
 
             InMemoryUserRepository.save(new User(1L, "gugu", "password", "ttset@dsffd.com"));
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);
@@ -174,7 +214,7 @@ class Http11ProcessorTest {
                     "");
 
             final var socket = new StubSocket(httpRequest);
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);
@@ -205,7 +245,7 @@ class Http11ProcessorTest {
 
             final var socket = new StubSocket(httpRequest);
 
-            final Http11Processor processor = new Http11Processor(socket, new DispatcherServletManager());
+            final Http11Processor processor = new Http11Processor(socket, servletManager);
 
             // when
             processor.process(socket);

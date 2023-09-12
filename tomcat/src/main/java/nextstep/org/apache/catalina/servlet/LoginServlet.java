@@ -17,11 +17,10 @@ import org.slf4j.LoggerFactory;
 
 public class LoginServlet extends AbstractServlet {
 
-    private final Logger log = LoggerFactory.getLogger(LoginServlet.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
     protected void doGet(Http11Request request, Http11Response response) throws Exception {
-        // Todo: 헤더에 담긴 sessionId 유효성 검증
         Cookies cookies = request.getCookies();
         if (cookies.hasCookie("JSESSIONID")) {
             response.setStatus(Status.FOUND)

@@ -8,7 +8,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.util.Resource;
 
-public class LoginFilter implements Filter {
+public class RegisterFilter implements Filter {
 
     @Override
     public void doFilter(Request request, Response response, FilterChain filterChain) {
@@ -16,7 +16,7 @@ public class LoginFilter implements Filter {
         final String uri = request.getPath();
         final var cookie = request.getCookie();
 
-        if ( uri.equals("/login") && cookie.containsKey("JSESSIONID")) {
+        if (( uri.equals("/register")) && cookie.containsKey("JSESSIONID")) {
             validKey(cookie.get("JSESSIONID"), response);
         }
         filterChain.doFilter(request, response);

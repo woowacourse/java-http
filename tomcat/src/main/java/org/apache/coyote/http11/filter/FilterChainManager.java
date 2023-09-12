@@ -11,14 +11,19 @@ public class FilterChainManager {
 
     public FilterChainManager() {
         this.defaultChain = new Chain(new DefaultFilter());
+        initialChain = lastChain = defaultChain;
     }
 
     public void add(Filter filter) {
         Chain chain = new Chain(filter);
-        if (lastChain == null) {
+        if(initialChain.equals(defaultChain)){
             initialChain = chain;
+            initialChain.next = defaultChain;
+            return;
+        }
+        if(lastChain.equals(defaultChain)){
+            initialChain.next = chain;
             lastChain = chain;
-            initialChain.next = lastChain;
             lastChain.next = defaultChain;
             return;
         }
@@ -41,7 +46,9 @@ public class FilterChainManager {
 
         @Override
         public void doFilter(Request request, Response response) {
-            filter.doFilter(request, response, next);
+            if(!response.isFiltered()){
+                filter.doFilter(request, response, next);
+            }
         }
     }
 }

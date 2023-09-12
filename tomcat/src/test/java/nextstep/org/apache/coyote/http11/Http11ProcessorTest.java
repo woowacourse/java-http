@@ -102,13 +102,40 @@ class Http11ProcessorTest {
             assertThat(socket.output()).contains(responseBody);
         }
 
-        @DisplayName("login 상태에서 페이지에 조회시 메인 화면으로 리다이렉트 된다.")
+        @DisplayName("login 상태에서 로그인 페이지에 조회시 메인 화면으로 리다이렉트 된다.")
         @Test
-        void loginPageTest_redirect() throws IOException {
+        void loginPageTest_loginRedirect() throws IOException {
             // given
             final String jSessionId = InMemorySession.login(new User("", "", ""));
             final String httpRequest = String.join("\r\n",
                     "GET /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Cookie: JSESSIONID=" + jSessionId,
+                    "");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            var expectedHeader = getResponseHeader(302, "Found", responseBody);
+
+            assertThat(socket.output()).contains(expectedHeader);
+            assertThat(socket.output()).contains(responseBody);
+        }
+
+        @DisplayName("login 상태에서 회원가입 페이지에 조회시 메인 화면으로 리다이렉트 된다.")
+        @Test
+        void loginPageTest_registerRedirect() throws IOException {
+            // given
+            final String jSessionId = InMemorySession.login(new User("", "", ""));
+            final String httpRequest = String.join("\r\n",
+                    "GET /register HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "Cookie: JSESSIONID=" + jSessionId,

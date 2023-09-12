@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.config.LoginFilter;
+import nextstep.jwp.config.RegisterFilter;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.filter.FilterChainManager;
@@ -42,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
 
             FilterChainManager filterChainManager = new FilterChainManager();
             filterChainManager.add(new LoginFilter());
+            filterChainManager.add(new RegisterFilter());
             filterChainManager.getInitialChain().doFilter(request, response);
 
             if (!response.isFiltered()) {

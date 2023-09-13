@@ -21,14 +21,8 @@ public class LoginService {
     private static final String JSESSIONID = "JSESSIONID";
     private static final String INDEX_HTML = "/index.html";
 
-    private final SessionManager sessionManager;
-
-    public LoginService(SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
-    }
-
     public void loginWithSession(String jsessionid, HttpResponse response) {
-        Session session = sessionManager.findSession(jsessionid)
+        Session session = SessionManager.findSession(jsessionid)
                 .orElseThrow(() -> new AuthException(INVALID_SESSION_ID));
         if (session.getAttribute("user").isEmpty()) {
             throw new AuthException(USER_NO_EXIST_IN_SESSION);
@@ -46,7 +40,7 @@ public class LoginService {
             String jsessionid = UUID.randomUUID().toString();
             Session session = new Session(jsessionid);
             session.setAttribute("user", user.get());
-            sessionManager.add(session);
+            SessionManager.add(session);
             response.setStatus(FOUND);
             response.sendRedirect(INDEX_HTML);
             response.addCookie(JSESSIONID, jsessionid);

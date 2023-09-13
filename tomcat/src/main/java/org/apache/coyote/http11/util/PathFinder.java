@@ -9,9 +9,17 @@ public class PathFinder {
 
     private static final String RESOURCE_ROOT_DIRECTORY_PATH = "static";
 
-    public static Path findPath(String resourceName) throws URISyntaxException {
-        final URL resource =
-                PathFinder.class.getClassLoader().getResource(RESOURCE_ROOT_DIRECTORY_PATH + resourceName);
-        return Paths.get(resource.toURI());
+    public static Path findPath(String resourceName) {
+        try {
+            URL resource =
+                    PathFinder.class.getClassLoader().getResource(RESOURCE_ROOT_DIRECTORY_PATH + resourceName);
+
+            if (resource == null) {
+                throw new IllegalArgumentException("Resource Not Found: " + resourceName);
+            }
+            return Paths.get(resource.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("URI Syntax Exception : " + resourceName);
+        }
     }
 }

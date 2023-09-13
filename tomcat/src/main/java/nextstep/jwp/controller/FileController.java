@@ -22,6 +22,6 @@ public class FileController extends AbstractController {
         var responseBody = new String(Files.readAllBytes(path));
         ContentType contentType = ContentType.findContentType(extension);
 
-        return new HttpResponse(HttpStatus.OK, responseBody, contentType);
+        return new HttpResponse.Builder(HttpStatus.OK, responseBody, contentType).build();
     }
 }

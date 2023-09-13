@@ -31,11 +31,16 @@ public class LoginController extends AbstractController {
         if (loginUser.isPresent()) {
             return redirectByAlreadyLogin(responseBody);
         }
-        return new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
+        return new HttpResponse.Builder(HttpStatus.OK, responseBody, ContentType.HTML)
+                .build();
+
     }
 
     private HttpResponse redirectByAlreadyLogin(String responseBody) {
-        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
+        return new HttpResponse.Builder(HttpStatus.FOUND, responseBody, ContentType.HTML)
+                .redirect("/index.html")
+                .build();
+
     }
 
     @Override
@@ -58,18 +63,25 @@ public class LoginController extends AbstractController {
     }
 
     private HttpResponse successLoginResponse(String responseBody, User user) {
-        HttpResponse httpResponse =
-                new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
         Session session = new Session();
         session.setAttribute("user", user);
         SessionManager.add(session);
-        httpResponse.addJSessionId(session);
+        HttpResponse httpResponse =
+                new HttpResponse.Builder(HttpStatus.FOUND, responseBody, ContentType.HTML)
+                        .redirect("index.html")
+                        .addJSessionId(session)
+                        .build();
+
+
         return httpResponse;
     }
 
     private HttpResponse failLoginResponse(String responseBody) {
         log.info("로그인 계정 정보가 이상합니다. responseBody={}", responseBody);
-        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/401.html");
+        return new HttpResponse.Builder(HttpStatus.FOUND, responseBody, ContentType.HTML)
+                .redirect("/401.html")
+                .build();
+
     }
 
     private boolean isSuccessLogin(String account, String password) {

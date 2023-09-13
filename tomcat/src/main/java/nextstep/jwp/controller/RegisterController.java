@@ -30,7 +30,9 @@ public class RegisterController extends AbstractController{
         String requestUrl = request.getRequestUrl();
         Path path = PathFinder.findPath(requestUrl + ".html");
         var responseBody = new String(Files.readAllBytes(path));
-        return new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
+        return new HttpResponse.Builder(HttpStatus.OK, responseBody, ContentType.HTML)
+                .build();
+
     }
 
     @Override
@@ -44,7 +46,11 @@ public class RegisterController extends AbstractController{
         saveUser(registerData);
         Path path = PathFinder.findPath(requestUrl + ".html");
         String responseBody = new String(Files.readAllBytes(path));
-        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
+        return new HttpResponse.Builder(HttpStatus.FOUND, responseBody, ContentType.HTML)
+                .redirect("/index.html")
+                .build();
+
+
     }
 
     private boolean checkInputForm(final HashMap<String, String> registerData) {
@@ -56,7 +62,10 @@ public class RegisterController extends AbstractController{
     private HttpResponse generateBadRequestResponse() throws URISyntaxException, IOException {
         Path path = PathFinder.findPath("/400.html");
         String responseBody = new String(Files.readAllBytes(path));
-        return new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/400.html");
+        return new HttpResponse.Builder(HttpStatus.FOUND, responseBody, ContentType.HTML)
+                .redirect("/400.html")
+                .build();
+
     }
 
     private void saveUser(HashMap<String, String> registerData) {

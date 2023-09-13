@@ -23,12 +23,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final Request request, final Response response) {
         final Map<String, String> requestForms = request.getRequestForms().getFormData();
-        final Optional<User> user = login(requestForms.get(ACCOUNT), requestForms.get(PASSWORD));
-        if (user.isPresent()) {
-            loginSuccess(request, response, user.get());
-            return;
-        }
-        loginFail(response);
+        final Optional<User> optionalUser = login(requestForms.get(ACCOUNT), requestForms.get(PASSWORD));
+        optionalUser.ifPresentOrElse(user -> loginSuccess(request, response, user), () -> loginFail(response));
     }
 
     private void loginSuccess(final Request request, final Response response, final User user) {

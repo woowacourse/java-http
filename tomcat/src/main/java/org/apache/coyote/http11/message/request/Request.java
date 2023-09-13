@@ -43,17 +43,17 @@ public class Request {
     }
 
     public boolean noSession() {
-        final String sessionId = requestHeaders.getCookieValue(JSESSIONID);
-        return SessionManager.findSession(sessionId) == null;
+        final Optional<String> sessionId = requestHeaders.getCookieValue(JSESSIONID);
+        return sessionId.map(s -> SessionManager.findSession(s).isEmpty()).orElse(true);
     }
 
     public Optional<Object> getSessionValue(final String key) {
-        final String sessionId = requestHeaders.getCookieValue(JSESSIONID);
-        final Session session = SessionManager.findSession(sessionId);
-        if (session == null) {
+        final Optional<String> sessionId = requestHeaders.getCookieValue(JSESSIONID);
+        if (sessionId.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(session.getAttribute(key));
+        final Optional<Session> session = SessionManager.findSession(sessionId.get());
+        return session.map(value -> value.getAttribute(key));
     }
 
     public boolean isMatchMethod(final HttpMethod httpMethod) {

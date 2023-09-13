@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RequestHeaders {
@@ -39,7 +40,7 @@ public class RequestHeaders {
         return headers.get(headerKey);
     }
 
-    public String getCookieValue(final String cookieKey) {
-        return cookie.get(cookieKey);
+    public Optional<String> getCookieValue(final String cookieKey) {
+        return Optional.ofNullable(cookie.get(cookieKey));
     }
 }

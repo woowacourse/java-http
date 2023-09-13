@@ -28,8 +28,8 @@ public class User {
         return account;
     }
 
-    public User putId(Long id){
-        return new User(id,account,password,email);
+    public User putId(Long id) {
+        return new User(id, account, password, email);
     }
 
 

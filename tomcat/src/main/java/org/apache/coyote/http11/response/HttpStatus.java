@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.response;
 
 public enum HttpStatus {
-    OK(200,"OK"),
-    FOUND(302,"Found"),
-    UNAUTHORIZED(401,"Unauthorized"),
-    NOTFOUND(404,"Not Found");
+
+    OK(200, "OK"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOTFOUND(404, "Not Found");
 
     private final int value;
     private final String detail;

@@ -1,25 +1,28 @@
 package org.apache.coyote.http11.servlet;
 
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import nextstep.jwp.exception.UnauthorizedException;
+import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.exception.NoSuchApiException;
-import org.apache.coyote.http11.handler.Configurer;
+import org.apache.coyote.http11.handler.HandlerAdapter;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.util.Resource;
 
 public class Servlet {
-    public static String getResponse(Request request){
+
+    private Servlet() {
+    }
+
+    public static void getResponse(Request request, Response response) {
         try {
-            return Configurer.handle(request);
+            HandlerAdapter handlerAdapter = HandlerAdapter.getInstance();
+            Controller controller = handlerAdapter.mapping(request);
+            controller.service(request, response);
         } catch (UnauthorizedException unauthorizedException) {
-            return Response.badResponse(HttpStatus.UNAUTHORIZED).redirect(Resource.getFile("401.html"),"401.html").getResponse();
-        } catch (NoSuchApiException e){
-            return Response.badResponse(HttpStatus.NOTFOUND).redirect(Resource.getFile("404.html"),"404.html").getResponse();
+            response.badResponse(HttpStatus.UNAUTHORIZED, Resource.getFile("401.html"), "401.html");
+        } catch (NoSuchApiException e) {
+            response.badResponse(HttpStatus.NOTFOUND, Resource.getFile("404.html"), "404.html");
         }
     }
 }

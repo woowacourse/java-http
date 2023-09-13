@@ -38,7 +38,6 @@ class AppTest {
         for (final var thread : threads) {
             thread.join();
         }
-
         assertThat(count.intValue()).isEqualTo(2);
     }
 

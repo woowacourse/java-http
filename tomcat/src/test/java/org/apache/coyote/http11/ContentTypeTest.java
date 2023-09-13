@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class ContentTypeParserTest {
+class ContentTypeTest {
 
     @Test
     void 확장자에_따른_컨텐츠_타입을_알아낼_수_있다() {
@@ -16,7 +16,7 @@ class ContentTypeParserTest {
         String path = "target.html";
 
         // when
-        String contentType = ContentTypeParser.parse(path);
+        String contentType = ContentType.parse(path);
 
         // then
         assertThat(contentType).isEqualTo("text/html;charset=utf-8");

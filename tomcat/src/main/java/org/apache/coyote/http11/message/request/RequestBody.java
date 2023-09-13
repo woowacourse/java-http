@@ -1,34 +1,26 @@
 package org.apache.coyote.http11.message.request;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RequestBody {
 
-    private final Map<String, String> body;
+    private final String content;
 
-    private RequestBody(Map<String, String> body) {
-        this.body = body;
-    }
-
-    public static RequestBody from(List<String> lines) {
-        Map<String, String> body = new HashMap<>();
-
-        lines.stream()
-                .map(each -> each.split("="))
-                .forEach(each -> body.put(each[0], each[1]));
-
-        return new RequestBody(body);
+    public RequestBody(String content) {
+        this.content = content;
     }
 
     public static RequestBody ofEmpty() {
-        return new RequestBody(Collections.emptyMap());
+        return new RequestBody(StringUtils.EMPTY);
     }
 
-    public String get(String key) {
-        return body.get(key);
+    public Map<String, String> getAsFormData() {
+        return Arrays.stream(content.split("&"))
+                .map(each -> each.split("="))
+                .map(each -> Map.entry(each[0], each[1]))
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
-
 }

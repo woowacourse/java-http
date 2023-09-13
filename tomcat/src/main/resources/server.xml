@@ -1,0 +1,4 @@
+<Server port = "8080">
+    <Connector acceptCount="100" maxThreads="1">
+    </Connector>
+</Server>

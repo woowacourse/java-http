@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.catalina.filter;
 
 import org.apache.coyote.http11.message.Cookie;
 import org.apache.coyote.http11.message.Headers;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +14,8 @@ public class LoggingFilter {
     private LoggingFilter() {
     }
 
-    public static void logUserInfoIfExists(Request request) {
-        Headers requestHeaders = request.getHeaders();
+    public static void doFilter(HttpRequest httpRequest, HttpResponse httpResponse) {
+        Headers requestHeaders = httpRequest.getHeaders();
         Cookie cookie = requestHeaders.getCookie();
 
         if (cookie.hasKey("JSESSIONID")) {

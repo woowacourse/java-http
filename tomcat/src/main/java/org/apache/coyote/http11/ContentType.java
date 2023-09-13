@@ -2,17 +2,17 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
-public enum ContentTypeParser {
+public enum ContentType {
 
     HTML("text/html;charset=utf-8"),
     CSS("text/css"),
     JS("text/javascript"),
     ICO("image/x-icon");
 
-    private final String contentType;
+    private final String value;
 
-    ContentTypeParser(String contentType) {
-        this.contentType = contentType;
+    ContentType(String value) {
+        this.value = value;
     }
 
     public static String parse(String path) {
@@ -23,6 +23,6 @@ public enum ContentTypeParser {
                 .filter(value -> value.name().toLowerCase().equals(resourceExtension))
                 .findFirst()
                 .orElse(HTML)
-                .contentType;
+                .value;
     }
 }

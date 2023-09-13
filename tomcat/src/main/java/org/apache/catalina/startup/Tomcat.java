@@ -1,16 +1,19 @@
 package org.apache.catalina.startup;
 
-import java.io.IOException;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.connector.ConnectorConfiguration;
+import org.apache.catalina.connector.ServerXmlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
     public void start() {
-        var connector = new Connector();
+        ConnectorConfiguration configuration = ServerXmlParser.parse();
+        Connector connector = new Connector(configuration);
         connector.start();
 
         try {

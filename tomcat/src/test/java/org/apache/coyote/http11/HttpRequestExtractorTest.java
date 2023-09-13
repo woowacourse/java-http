@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.HttpVersion;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import support.StubSocket;
 
 @SuppressWarnings("NonAsciiCharacters")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class RequestExtractorTest {
+class HttpRequestExtractorTest {
 
     @Test
     void 입력_스트림으로부터_Request를_파싱할_수_있다() throws IOException {
@@ -24,11 +24,11 @@ class RequestExtractorTest {
 
         // when
         InputStream inputStream = socket.getInputStream();
-        Request request = RequestExtractor.extract(inputStream);
+        HttpRequest httpRequest = RequestExtractor.extract(inputStream);
 
         // then
-        assertThat(request.getHttpVersion()).isEqualTo(HttpVersion.V_1_1);
-        assertThat(request.getMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(request.getHeaders().get("Host")).isEqualTo("localhost:8080");
+        assertThat(httpRequest.getHttpVersion()).isEqualTo(HttpVersion.V_1_1);
+        assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(httpRequest.getHeaders().get("Host")).isEqualTo("localhost:8080");
     }
 }

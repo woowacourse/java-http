@@ -1,14 +1,16 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.container.Context;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handlers;
-import org.apache.coyote.http11.message.request.Request;
-import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -17,7 +19,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
 
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -29,14 +31,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
 
-            Request request = RequestExtractor.extract(inputStream);
-            LoggingFilter.logUserInfoIfExists(request);
-            Response response = Handlers.handle(request);
+            HttpRequest httpRequest = RequestExtractor.extract(inputStream);
+            HttpResponse httpResponse = Context.service(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {

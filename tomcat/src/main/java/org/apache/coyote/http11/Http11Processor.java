@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
 
@@ -26,7 +26,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+        LOG.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(httpResponse.convertToMessage().getBytes());
             outputStream.flush();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

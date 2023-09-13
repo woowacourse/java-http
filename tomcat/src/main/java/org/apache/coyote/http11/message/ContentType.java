@@ -22,10 +22,10 @@ public enum ContentType {
     private static final ContentType DEFAULT = HTML;
     private static final String FIELD_DELIMITER = ",";
     private static final String WEIGHT_DELIMITER = ";";
-    private static final Map<String, ContentType> contentTypesByType;
+    private static final Map<String, ContentType> CONTENT_TYPES_BY_TYPE;
 
     static {
-        contentTypesByType = Arrays.stream(values())
+        CONTENT_TYPES_BY_TYPE = Arrays.stream(values())
             .collect(
                 Collectors.toMap(ContentType::getType, contentType -> contentType));
     }
@@ -67,7 +67,7 @@ public enum ContentType {
 
     private static ContentType findContentTypeFromAcceptTypes(final List<String> types) {
         return types.stream()
-            .map(contentTypesByType::get)
+            .map(CONTENT_TYPES_BY_TYPE::get)
             .filter(Objects::nonNull)
             .findFirst()
             .orElseThrow(UnsupportedContentTypeException::new);

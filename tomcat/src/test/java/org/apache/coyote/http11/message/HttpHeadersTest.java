@@ -20,7 +20,7 @@ class HttpHeadersTest {
         final HttpHeaders headers = HttpHeaders.from(headerLines);
 
         // then
-        assertThat(headers.getHeadersWithValue())
+        assertThat(headers.getValuesByHeaderField())
             .containsExactlyInAnyOrderEntriesOf(Map.of(
                 "Host", "localhost:8080",
                 "Connection", "keep-alive"

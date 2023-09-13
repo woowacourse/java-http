@@ -13,10 +13,10 @@ public class HttpHeaders {
     private static final int FIELD_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final Map<String, String> headersWithValue;
+    private final Map<String, String> valuesByHeaderField;
 
-    public HttpHeaders(final Map<String, String> headersWithValue) {
-        this.headersWithValue = headersWithValue;
+    public HttpHeaders(final Map<String, String> valuesByHeaderField) {
+        this.valuesByHeaderField = valuesByHeaderField;
     }
 
     public static HttpHeaders empty() {
@@ -24,30 +24,30 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders from(final List<String> headerLines) {
-        final Map<String, String> headersWithValue = new LinkedHashMap<>();
+        final Map<String, String> valuesByHeaderField = new LinkedHashMap<>();
         String[] parsedHeaderLine;
 
         for (final String line : headerLines) {
             parsedHeaderLine = line.split(FIELD_VALUE_DELIMITER);
-            headersWithValue.put(parsedHeaderLine[FIELD_INDEX].trim(), parsedHeaderLine[VALUE_INDEX].trim());
+            valuesByHeaderField.put(parsedHeaderLine[FIELD_INDEX].trim(), parsedHeaderLine[VALUE_INDEX].trim());
         }
-        return new HttpHeaders(headersWithValue);
+        return new HttpHeaders(valuesByHeaderField);
     }
 
     public Optional<String> findFirstValueOfField(final String field) {
-        return Optional.ofNullable(headersWithValue.get(field))
+        return Optional.ofNullable(valuesByHeaderField.get(field))
             .flatMap(values -> Arrays.stream(values.split(VALUES_DELIMITER)).findFirst());
     }
 
     public Optional<String> getValuesOfField(final String field) {
-        return Optional.ofNullable(headersWithValue.get(field));
+        return Optional.ofNullable(valuesByHeaderField.get(field));
     }
 
-    public Map<String, String> getHeadersWithValue() {
-        return new LinkedHashMap<>(headersWithValue);
+    public Map<String, String> getValuesByHeaderField() {
+        return new LinkedHashMap<>(valuesByHeaderField);
     }
 
     public void setHeaderWithValue(final String field, final String value) {
-        headersWithValue.put(field, value);
+        valuesByHeaderField.put(field, value);
     }
 }

@@ -65,7 +65,7 @@ public class HttpResponse {
     }
 
     private String createHeaderLines() {
-        return headers.getHeadersWithValue()
+        return headers.getValuesByHeaderField()
             .entrySet()
             .stream()
             .map(entry -> String.join(HttpHeaders.FIELD_VALUE_DELIMITER, entry.getKey(), entry.getValue()) + BLANK)

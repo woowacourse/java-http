@@ -102,7 +102,7 @@
 - [x] RequestHeader/ResponseHeader 내 Line 값 -> Request/Response로 추출
 
 ### 추상화/재활용/통일성 유지
-- [ ] RequestParser의 message.split() 추출
+- [x] RequestParser의 message.split() 추출
 - [ ] enum 객체 static 메소드의 비교 메소드 통일(equals -> equalsIgnoreCase)
 - [ ] Response의 protocol 기본값 제거 -> 외부 주입
 - [ ] ResponseHeader.getHeader() 상수화

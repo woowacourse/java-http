@@ -23,4 +23,6 @@ public interface Request {
     String getEmail();
 
     void addSession(Session session);
+
+    boolean hasStaticResourcePath();
 }

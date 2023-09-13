@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
 import common.http.ControllerManager;
+import common.http.Request;
+import common.http.Response;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.StaticControllerManager;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -38,8 +39,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequest httpRequest = HttpRequestParser.parse(reader);
-            HttpResponse httpResponse = new HttpResponse();
+            Request httpRequest = HttpRequestParser.parse(reader);
+            Response httpResponse = new HttpResponse();
 
             controllerManager.service(httpRequest, httpResponse);
 
@@ -52,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void serviceIfHasStaticResourcePath(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void serviceIfHasStaticResourcePath(Request httpRequest, Response httpResponse) {
         if (httpRequest.hasStaticResourcePath() || httpResponse.hasStaticResourcePath()) {
             controllerManager = new StaticControllerManager();
             controllerManager.service(httpRequest, httpResponse);

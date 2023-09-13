@@ -7,6 +7,7 @@ import org.apache.catalina.Manager;
 public class SessionManager implements Manager, LifeCycle {
 
     private static final Sessions sessions = new Sessions();
+
     private boolean isStarted = false;
 
     public SessionManager() {

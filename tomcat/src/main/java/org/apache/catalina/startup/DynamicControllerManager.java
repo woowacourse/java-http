@@ -14,8 +14,7 @@ import java.util.Map;
 public class DynamicControllerManager implements ControllerManager {
 
     private static final Map<String, Controller> mapper = new HashMap<>();
-
-    private final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = new SessionManager();
 
     @Override
     public void add(String path, Controller controller) {

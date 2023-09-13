@@ -7,7 +7,14 @@ import common.http.Response;
 
 public class StaticControllerManager implements ControllerManager {
 
+    private static final StaticControllerManager instance = new StaticControllerManager();
     private static final Controller controller = new StaticResourceController();
+
+    private StaticControllerManager() {}
+
+    public static StaticControllerManager getInstance() {
+        return instance;
+    }
 
     @Override
     public void add(String path, Controller controller) {

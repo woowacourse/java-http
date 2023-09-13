@@ -1,14 +1,12 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
-
-    public SessionManager() {}
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     @Override
     public void add(Session session) {

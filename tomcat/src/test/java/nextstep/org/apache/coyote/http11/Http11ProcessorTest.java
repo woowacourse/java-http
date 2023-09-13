@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.model.User;
+import nextstep.org.apache.catalina.Context;
+import nextstep.org.apache.catalina.cookie.Cookies;
+import nextstep.org.apache.catalina.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -20,7 +23,8 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -47,7 +51,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -77,7 +82,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -105,7 +111,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -133,7 +140,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -163,7 +171,8 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -189,7 +198,8 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -217,7 +227,8 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -243,7 +254,8 @@ class Http11ProcessorTest {
                 requestBody);
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -261,9 +273,9 @@ class Http11ProcessorTest {
             requestHeaders.put(splitedLine[0], splitedLine[1].strip());
         }
 
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
-        String jSessionId = httpCookie.get("JSESSIONID");
+        Cookies cookies = new Cookies();
+        cookies.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
+        String jSessionId = cookies.get("JSESSIONID");
         User user = (User) sessionManager.findSession(jSessionId).getAttribute("gugu");
 
         assertThat(user).isNotNull();
@@ -284,7 +296,8 @@ class Http11ProcessorTest {
 
         // when
         final var socket = new StubSocket(httpGetRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         processor.process(socket);
 
@@ -307,7 +320,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final var context = new Context();
+        final var processor = new Http11Processor(context, socket);
 
         // when
         processor.process(socket);
@@ -335,7 +349,8 @@ class Http11ProcessorTest {
                 requestBody);
 
         var preSocket = new StubSocket(httpRequest);
-        Http11Processor preProcessor = new Http11Processor(preSocket);
+        final var context = new Context();
+        final var preProcessor = new Http11Processor(context, preSocket);
 
         preProcessor.process(preSocket);
         String preOutput = preSocket.output();
@@ -349,8 +364,8 @@ class Http11ProcessorTest {
             requestHeaders.put(splitedLine[0], splitedLine[1].strip());
         }
 
-        HttpCookie httpCookie = new HttpCookie();
-        httpCookie.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
-        return httpCookie.get("JSESSIONID");
+        Cookies cookies = new Cookies();
+        cookies.parseCookieHeaders(requestHeaders.get("Set-Cookie"));
+        return cookies.get("JSESSIONID");
     }
 }

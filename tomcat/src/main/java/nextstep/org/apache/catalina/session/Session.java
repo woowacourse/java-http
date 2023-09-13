@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package nextstep.org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;

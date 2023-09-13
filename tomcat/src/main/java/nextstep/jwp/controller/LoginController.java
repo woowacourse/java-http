@@ -1,12 +1,12 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import nextstep.jwp.controller.FileReader.FileReader;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
-import org.apache.controller.FileReader.FileReader;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;

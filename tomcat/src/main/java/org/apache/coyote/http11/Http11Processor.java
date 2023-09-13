@@ -5,7 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.controller.Controller;
+import nextstep.jwp.controller.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;

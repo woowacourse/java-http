@@ -1,4 +1,4 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.util.Set;
 import org.apache.coyote.http11.HttpMethod;

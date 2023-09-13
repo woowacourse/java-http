@@ -1,8 +1,8 @@
-package org.apache.controller;
+package nextstep.jwp.controller;
 
 import java.util.Set;
-import org.apache.controller.ControllerException.ControllerHttpMethodException;
-import org.apache.controller.ControllerException.ControllerNotImplementMethodException;
+import nextstep.jwp.controller.ControllerException.ControllerHttpMethodException;
+import nextstep.jwp.controller.ControllerException.ControllerNotImplementMethodException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;

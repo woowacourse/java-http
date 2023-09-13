@@ -1,4 +1,4 @@
-package org.apache.controller.FileReader;
+package nextstep.jwp.controller.FileReader;
 
 public class FileReadException extends RuntimeException {
 

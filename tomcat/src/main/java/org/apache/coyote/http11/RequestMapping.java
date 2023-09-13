@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
 import java.util.List;
-import org.apache.controller.Controller;
-import org.apache.controller.DefaultController;
-import org.apache.controller.LoginController;
-import org.apache.controller.RegisterController;
-import org.apache.controller.ResourceController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.DefaultController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.ResourceController;
 import org.apache.coyote.request.Request;
 
 public class RequestMapping {

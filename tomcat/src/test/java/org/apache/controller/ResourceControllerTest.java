@@ -4,11 +4,10 @@ import static org.apache.coyote.FixtureFactory.DEFAULT_HEADERS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.controller.FileReader.FileReader;
+import nextstep.jwp.controller.FileReader.FileReader;
+import nextstep.jwp.controller.ResourceController;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;

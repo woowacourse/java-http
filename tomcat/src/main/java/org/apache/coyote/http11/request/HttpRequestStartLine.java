@@ -2,6 +2,11 @@ package org.apache.coyote.http11.request;
 
 public class HttpRequestStartLine {
 
+    private static final String START_LINE_DELIMITER = " ";
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
+
     private final HttpRequestMethod httpRequestMethod;
     private final HttpRequestUri httpRequestUri;
     private final String httpVersion;
@@ -14,11 +19,11 @@ public class HttpRequestStartLine {
     }
 
     public static HttpRequestStartLine from(final String startLine) {
-        String[] startLineInfo = startLine.split(" ");
+        final String[] startLineInfo = startLine.split(START_LINE_DELIMITER);
 
-        HttpRequestMethod httpRequestMethod = HttpRequestMethod.from(startLineInfo[0]);
-        HttpRequestUri requestUri = HttpRequestUri.from(startLineInfo[1]);
-        String httpVersion = startLineInfo[2];
+        final HttpRequestMethod httpRequestMethod = HttpRequestMethod.from(startLineInfo[METHOD_INDEX]);
+        final HttpRequestUri requestUri = HttpRequestUri.from(startLineInfo[URI_INDEX]);
+        final String httpVersion = startLineInfo[VERSION_INDEX];
 
         return new HttpRequestStartLine(httpRequestMethod, requestUri, httpVersion);
     }

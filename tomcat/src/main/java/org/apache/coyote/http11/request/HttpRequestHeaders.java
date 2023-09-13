@@ -9,6 +9,7 @@ public class HttpRequestHeaders {
     public static final String DELIMITER = ": ";
     public static final int KEY_INDEX = 0;
     public static final int VALUE_INDEX = 1;
+    public static final String COOKIE_HEADER = "Cookie";
     private final Map<String, String> headers;
 
     private HttpRequestHeaders(final Map<String, String> headers) {
@@ -16,17 +17,25 @@ public class HttpRequestHeaders {
     }
 
     public static HttpRequestHeaders from(final List<String> headers) {
-        HashMap<String, String> httpHeaders = new HashMap<>();
-        headers.forEach(header -> httpHeaders.put(header.split(DELIMITER)[KEY_INDEX], header.split(DELIMITER)[VALUE_INDEX]));
+        final HashMap<String, String> httpHeaders = new HashMap<>();
+        headers.forEach(
+                header -> httpHeaders.put(header.split(DELIMITER)[KEY_INDEX], header.split(DELIMITER)[VALUE_INDEX]));
 
         return new HttpRequestHeaders(httpHeaders);
     }
 
-    public String getValue(String header) {
+    public String getValue(final String header) {
         return headers.get(header);
     }
 
-    public boolean contains(String header) {
+    public boolean contains(final String header) {
         return headers.containsKey(header);
+    }
+
+    public HttpCookie getCookie() {
+        if (headers.containsKey(COOKIE_HEADER)) {
+            return HttpCookie.from(headers.get(COOKIE_HEADER));
+        }
+        return null;
     }
 }

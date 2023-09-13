@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 
 public enum HttpRequestMethod {
+
     POST,
     PATCH,
     PUT,

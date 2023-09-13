@@ -1,8 +1,5 @@
 package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -29,7 +26,7 @@ public interface Manager {
      *
      * @param session Session to be added
      */
-    void add(HttpSession session);
+    void add(Session session);
 
     /**
      * Return the active Session, associated with this Manager, with the
@@ -39,18 +36,16 @@ public interface Manager {
      *
      * @exception IllegalStateException if a new session cannot be
      *  instantiated for any reason
-     * @exception IOException if an input/output error occurs while
-     *  processing this request
      *
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    HttpSession findSession(String id) throws IOException;
+    Session findSession(String id);
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
      * @param session Session to be removed
      */
-    void remove(HttpSession session);
+    void remove(Session session);
 }

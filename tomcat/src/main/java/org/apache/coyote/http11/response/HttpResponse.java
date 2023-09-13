@@ -1,9 +1,16 @@
 package org.apache.coyote.http11.response;
 
 public class HttpResponse {
+
     private final HttpResponseStatusLine statusLine;
     private final HttpResponseHeaders header;
-    private final HttpResponseBody responseBody;
+    private HttpResponseBody responseBody;
+
+    public HttpResponse(final String httpVersion) {
+        this(new HttpResponseStatusLine(httpVersion),
+                new HttpResponseHeaders(),
+                new HttpResponseBody());
+    }
 
     public HttpResponse(final HttpResponseStatusLine statusLine, final HttpResponseHeaders header,
                         final HttpResponseBody responseBody) {
@@ -12,12 +19,55 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    @Override
-    public String toString() {
-        return String.join("\r\n",
-                statusLine.toString(),
-                header.toString(),
-                "",
-                responseBody.getBody());
+    public HttpResponse setHttpVersion(final String version) {
+        this.statusLine.setHttpVersion(version);
+        return this;
+    }
+
+    public HttpResponse setStatusCode(final HttpStatusCode statusCode) {
+        this.statusLine.setStatusCode(statusCode);
+        return this;
+    }
+
+    public HttpResponse addHeader(final ResponseHeaderType headerType, final Object value) {
+        this.header.add(headerType, value);
+        return this;
+    }
+
+    public HttpResponse addContentTypeHeader(final Object value) {
+        this.header.addContentType(value);
+        return this;
+    }
+
+    public HttpResponse addLocationHeader(final Object value) {
+        this.header.addLocation(value);
+        return this;
+    }
+
+    public HttpResponse addSetCookieHeader(final Object value) {
+        this.header.addCookie(value);
+        return this;
+    }
+
+    public HttpResponse addContentLengthHeader(final Object value) {
+        this.header.addContentLength(value);
+        return this;
+    }
+
+    public HttpResponse setResponseBody(final HttpResponseBody httpResponseBody) {
+        this.responseBody = httpResponseBody;
+        return this;
+    }
+
+    public HttpResponseStatusLine getStatusLine() {
+        return statusLine;
+    }
+
+    public HttpResponseHeaders getHeader() {
+        return header;
+    }
+
+    public HttpResponseBody getResponseBody() {
+        return responseBody;
     }
 }

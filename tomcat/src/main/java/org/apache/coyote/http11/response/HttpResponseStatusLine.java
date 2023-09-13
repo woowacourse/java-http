@@ -2,16 +2,32 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponseStatusLine {
 
-    private final String httpVersion;
-    private final HttpStatusCode statusCode;
+    private String httpVersion;
+    private HttpStatusCode statusCode;
+
+    public HttpResponseStatusLine(final String httpVersion) {
+        this(httpVersion, null);
+    }
+
 
     public HttpResponseStatusLine(final String httpVersion, final HttpStatusCode statusCode) {
         this.httpVersion = httpVersion;
         this.statusCode = statusCode;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s %s ", httpVersion, statusCode.toString());
+    public void setHttpVersion(final String version) {
+        this.httpVersion = version;
+    }
+
+    public void setStatusCode(final HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
+    public HttpStatusCode getStatusCode() {
+        return statusCode;
     }
 }

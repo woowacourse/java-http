@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 public class HttpRequest {
+
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeaders header;
     private final HttpRequestBody body;
@@ -21,10 +22,6 @@ public class HttpRequest {
         return new HttpRequest(startLine, header, null);
     }
 
-    public HttpRequestStartLine getStartLine() {
-        return startLine;
-    }
-
     public HttpRequestBody getBody() {
         return body;
     }
@@ -39,5 +36,15 @@ public class HttpRequest {
 
     public HttpRequestUri getUri() {
         return startLine.getHttpRequestUri();
+    }
+
+    public String getSessionId() {
+        final HttpCookie cookie = header.getCookie();
+
+        if (cookie == null) {
+            return null;
+        }
+
+        return cookie.getValue("JSESSIONID");
     }
 }

@@ -6,11 +6,11 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.ViewResolver;
 
-public class IndexController extends AbstractController {
+public class StaticController extends AbstractController {
 
     @Override
     public void doGet(final HttpRequest request, final HttpResponse response) {
-        final String responseBody = ViewResolver.read("/index.html");
+        final String responseBody = ViewResolver.read(request.getRequestUri());
         response.setResponseBody(responseBody);
         response.setContentLength();
         response.setStatusCode(HttpStatusCode.OK);

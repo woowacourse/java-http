@@ -5,31 +5,35 @@ import java.util.Map;
 
 public class HttpHeaders {
 
+    public static final String COOKIE = "Cookie";
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String ACCEPT = "Accept";
+    public static final String LOCATION = "Location";
+    public static final String SET_COOKIE = "Set-Cookie";
+
     private static final String EMPTY_VALUE = "";
     private static final String CONTENT_TYPE_DELIMITER = ",";
 
-    private final Map<String, String> headers = new HashMap<>();
-
-    public HttpHeaders() {
-    }
+    private final Map<String, String> values = new HashMap<>();
 
     public void add(final String key, final String value) {
-        headers.put(key, value);
+        values.put(key, value);
     }
 
     public String get(final String headerName) {
-        return headers.getOrDefault(headerName, EMPTY_VALUE);
+        return values.getOrDefault(headerName, EMPTY_VALUE);
     }
 
     public String getContentType() {
-        String value = headers.getOrDefault("Content-Type", EMPTY_VALUE);
+        String value = values.getOrDefault(CONTENT_TYPE, EMPTY_VALUE);
         if (value.isEmpty()) {
-            value = headers.get("Accept");
+            value = values.get(ACCEPT);
         }
         return value.split(CONTENT_TYPE_DELIMITER)[0];
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public Map<String, String> getValues() {
+        return values;
     }
 }

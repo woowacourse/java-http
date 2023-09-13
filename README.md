@@ -18,7 +18,18 @@
     - [x] 회원가입 페이지는 GET으로 요청한다.
     - [x] 회원가입을 완료하면 index.html로 리다이렉트한다.
     - [x] 로그인 페이지도 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경한다.
-- [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가한다.
-    - [ ] Cookie에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환해준다.
-- [ ] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크한다.
-    - [ ] 로그인된 상태에서 /login 페이지에 접근하면 index.html 페이지로 리다이렉트 처리한다.
+- [x] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가한다.
+    - [x] Cookie에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환해준다.
+- [x] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크한다.
+    - [x] 로그인된 상태에서 /login 페이지에 접근하면 index.html 페이지로 리다이렉트 처리한다.
+
+### 3단계
+
+- [x] HttpRequest 클래스 구현하기
+- [x] HttpResponse 클래스 구현하기
+- [x] Controller 인터페이스 추가하기
+
+### 4단계
+
+- [x] Executors로 Thread Pool 적용
+- [x] 동시성 컬렉션 사용하기

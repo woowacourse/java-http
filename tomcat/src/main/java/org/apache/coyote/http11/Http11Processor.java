@@ -1,32 +1,27 @@
 package org.apache.coyote.http11;
 
-import static java.util.stream.Collectors.joining;
-
-import handler.Controller;
-import handler.RequestHandler;
-import handler.RequestHandlerMapping;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.handler.Controller;
+import org.apache.coyote.handler.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String EXTENSION_DELIMITER = ".";
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
-    private static final RequestHandler requestHandler = new RequestHandlerMapping();
-    private static final ViewResolver viewResolver = new ViewResolver();
+    private static final HttpResponseGenerator httpResponseGenerator = new HttpResponseGenerator();
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, final RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -37,18 +32,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-             final var outputStream = connection.getOutputStream()) {
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             final HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
             final HttpResponse httpResponse = new HttpResponse();
 
-            final String viewName = getViewName(httpRequest, httpResponse);
-            final String responseBody = viewResolver.read(viewName);
+            doService(httpRequest, httpResponse);
 
-            httpResponse.setHeader("Content-Type", httpRequest.getContentType());
-            httpResponse.setHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
-            httpResponse.setResponseBody(responseBody);
-            final String response = makeResponseString(httpResponse);
+            httpResponse.setProtocol(httpRequest.getProtocol());
+            httpResponse.setHeader(HttpHeaders.CONTENT_TYPE, httpRequest.getContentType());
+            final String response = httpResponseGenerator.generate(httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -57,40 +52,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getViewName(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final String requestUri = httpRequest.getRequestUri();
+    private void doService(final HttpRequest request, final HttpResponse response) {
+        final String requestUri = request.getRequestUri();
 
-        if (isFileRequest(requestUri)) {
-            httpResponse.setStatusCode(HttpStatusCode.OK);
-            return requestUri;
-        }
-        final Controller controller = requestHandler.getHandler(requestUri);
-        return controller.run(httpRequest, httpResponse);
-    }
-
-    private boolean isFileRequest(final String requestUri) {
-        return requestUri.contains(EXTENSION_DELIMITER);
-    }
-
-    private String makeResponseString(final HttpResponse httpResponse) {
-        return String.join(System.lineSeparator(),
-                makeResponseCode(httpResponse),
-                makeResponseHeaders(httpResponse),
-                "",
-                httpResponse.getResponseBody());
-    }
-
-    private String makeResponseCode(final HttpResponse httpResponse) {
-        final int code = httpResponse.getStatusCode().getCode();
-        final String message = httpResponse.getStatusCode().getMessage();
-        return "HTTP/1.1 " + code + " " + message + " ";
-    }
-
-    private String makeResponseHeaders(final HttpResponse httpResponse) {
-        final Map<String, String> headers = httpResponse.getHeaders();
-        return headers.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(joining(System.lineSeparator()));
+        final Controller controller = requestMapping.getHandler(requestUri);
+        controller.service(request, response);
     }
 }

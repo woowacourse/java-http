@@ -1,40 +1,57 @@
 package nextstep.jwp.controller;
 
-import handler.Controller;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import org.apache.coyote.http11.HttpMethod;
+import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
+import org.apache.coyote.handler.AbstractController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
+    private final SessionManager sessionManager = new SessionManager();
+
     @Override
-    public String run(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final HttpMethod method = httpRequest.getMethod();
-        if (method.equals(HttpMethod.GET)) {
-            httpResponse.setStatusCode(HttpStatusCode.OK);
-            return "/login.html";
+    public void doGet(final HttpRequest request, final HttpResponse response) {
+        final String sessionId = request.getCookie(Session.SESSION_KEY);
+        final Session session = sessionManager.findSession(sessionId);
+        if (session == null) {
+            final String responseBody = ViewResolver.read("/login.html");
+            response.setResponseBody(responseBody);
+            response.setStatusCode(HttpStatusCode.OK);
+            response.setContentLength();
+            return;
         }
-        final Map<String, String> requestBody = httpRequest.getRequestBody();
-        final String account = requestBody.get("account");
-        final String password = requestBody.get("password");
-        final boolean isSuccess = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
+        response.setStatusCode(HttpStatusCode.FOUND);
+        response.setLocation("/");
+    }
+
+    @Override
+    public void doPost(final HttpRequest request, final HttpResponse response) {
+        final Map<String, Object> requestBody = request.getRequestBody();
+        final String account = (String) requestBody.get("account");
+        final String password = (String) requestBody.get("password");
+        final Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
+        final boolean isSuccess = findUser.filter(user -> user.checkPassword(password))
                 .isPresent();
         if (isSuccess) {
-            httpResponse.setStatusCode(HttpStatusCode.FOUND);
-            httpResponse.setHeader("Location", "/");
+            final Session session = sessionManager.create(findUser.get());
+            response.setCookie(Session.SESSION_KEY, session.getId());
+            response.setStatusCode(HttpStatusCode.FOUND);
+            response.setLocation("/");
             log.info("로그인 성공! 로그인 아이디: " + account);
-            return "/index.html";
+            return;
         }
-        httpResponse.setStatusCode(HttpStatusCode.FOUND);
-        httpResponse.setHeader("Location", "/401.html");
-        return "/401.html";
+        response.setStatusCode(HttpStatusCode.FOUND);
+        response.setLocation("/401.html");
     }
 }

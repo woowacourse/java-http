@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface BodyParser {
 
-    Map<String, String> parse(final String body);
+    Map<String, Object> parse(final String body);
 }

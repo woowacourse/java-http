@@ -10,6 +10,7 @@ public class HttpRequestHeaders {
     private static final String HEADER_SEPARATOR = System.lineSeparator();
     private static final String HEADER_KEY_VALUE_SPLIT = ":";
     private static final String COOKIE = "Cookie";
+    public static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> headers;
     private final Optional<Cookies> cookies;
@@ -56,5 +57,9 @@ public class HttpRequestHeaders {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public Optional<String> getContentLength() {
+        return Optional.ofNullable(headers.get(CONTENT_LENGTH));
     }
 }

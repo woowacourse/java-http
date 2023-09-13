@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -47,11 +48,11 @@ public class HttpRequest {
 
     private static String readBody(BufferedReader inputReader, HttpRequestHeaders httpRequestHeaders) {
         try {
-            String s = httpRequestHeaders.getHeaders().get("Content-Length");
-            if (s == null) {
+            Optional<String> length = httpRequestHeaders.getContentLength();
+            if (length.isEmpty()) {
                 return null;
             }
-            int contentLength = Integer.parseInt(s);
+            int contentLength = Integer.parseInt(length.get());
             char[] buffer = new char[contentLength];
             inputReader.read(buffer, 0, contentLength);
             return new String(buffer);

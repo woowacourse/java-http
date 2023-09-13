@@ -26,7 +26,7 @@ class HttpResponseTest {
     }
 
     @Test
-    void ResponseEntity_가_Body가_없다면_Body_는_null_이다() {
+    void ResponseEntity_가_Body가_없다면_Body_는_비어있다() {
         // given
         HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
@@ -35,7 +35,7 @@ class HttpResponseTest {
         httpResponse.responseFrom(responseEntity);
 
         // then
-        assertThat(httpResponse.getBody()).isNull();
+        assertThat(httpResponse.getBody().getValue()).isEmpty();
     }
 
     @Test
@@ -49,7 +49,7 @@ class HttpResponseTest {
         httpResponse.responseFrom(responseEntity);
 
         // then
-        assertThat(httpResponse.getBody()).isNotNull();
+        assertThat(httpResponse.getBody().getValue()).isPresent();
     }
 
     @Test

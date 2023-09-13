@@ -10,13 +10,13 @@ public class HttpResponse {
 
     private StatusLine statusLine;
     private HttpResponseHeaders headers;
-    private String body;
+    private ResponseBody body;
 
     public HttpResponse() {
         this(null, null, null);
     }
 
-    private HttpResponse(StatusLine statusLine, HttpResponseHeaders headers, String body) {
+    private HttpResponse(StatusLine statusLine, HttpResponseHeaders headers, ResponseBody body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
@@ -26,7 +26,7 @@ public class HttpResponse {
         Optional<String> extractBody = extractBody(responseEntity);
         this.statusLine = makeStatusLine(responseEntity);
         this.headers = HttpResponseHeaders.from(responseEntity, extractBody);
-        this.body = extractBody.isPresent() ? extractBody.get() : null;
+        this.body = extractBody.isPresent() ? new ResponseBody(extractBody.get()) : new ResponseBody(null);
     }
 
     private Optional<String> extractBody(ResponseEntity<Object> responseEntity) {
@@ -68,7 +68,7 @@ public class HttpResponse {
         return headers;
     }
 
-    public String getBody() {
+    public ResponseBody getBody() {
         return body;
     }
 
@@ -83,8 +83,9 @@ public class HttpResponse {
     }
 
     private void addBody(StringJoiner responseJoiner) {
-        if (body != null) {
-            responseJoiner.add(body);
+        Optional<String> responseBody = this.body.getValue();
+        if (responseBody.isPresent()) {
+            responseJoiner.add(responseBody.get());
         }
     }
 }

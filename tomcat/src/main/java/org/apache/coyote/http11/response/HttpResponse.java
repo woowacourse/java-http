@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.request.header.HeaderKey;
 import org.apache.coyote.http11.request.header.Headers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,6 +19,12 @@ public class HttpResponse {
 
     public HttpResponse() {
         headers = new Headers(new LinkedHashMap<>());
+    }
+
+    public void init() {
+        statusLine = null;
+        headers = new Headers(new LinkedHashMap<>());
+        body = null;
     }
 
     public void setStatusLine(final StatusLine statusLine) {
@@ -46,20 +51,5 @@ public class HttpResponse {
         }
 
         return String.join("\r\n", result).getBytes();
-    }
-
-    public String get(final String body) throws IOException {
-        final List<String> responses = new ArrayList<>();
-        responses.add("HTTP/1.1 200 OK ");
-        responses.add(contentLength(body));
-
-        responses.add(HEADER_BODY_SEPARATOR);
-        responses.add(body);
-
-        return String.join("\r\n", responses);
-    }
-
-    private String contentLength(final String body) {
-        return "Content-Length: " + body.getBytes().length + " ";
     }
 }

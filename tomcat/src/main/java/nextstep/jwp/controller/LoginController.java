@@ -24,7 +24,7 @@ public class LoginController extends AbstractController {
             UserSession.login(request.getSession(), user);
 
             redirect(response, INDEX_PAGE);
-        } catch (Exception e) {
+        } catch (final IllegalArgumentException e) {
             redirect(response, UNAUTHORIZED_PAGE);
         }
     }

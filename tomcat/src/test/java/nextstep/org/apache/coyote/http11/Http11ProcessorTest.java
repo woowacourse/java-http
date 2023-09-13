@@ -68,7 +68,7 @@ class Http11ProcessorTest {
     void css() {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /index.css HTTP/1.1 ",
+                "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

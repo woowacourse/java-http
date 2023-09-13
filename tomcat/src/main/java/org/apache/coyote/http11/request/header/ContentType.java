@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum ContentType {
     HTML("text/html", "html"),
     CSS("text/css", "css"),
-    JS("text/js", "js");
+    JS("text/js", "js"),
+    SVG("image/svg+xml", "svg");
 
     private static final String EXTENSION_DELIMITER = "\\.";
 

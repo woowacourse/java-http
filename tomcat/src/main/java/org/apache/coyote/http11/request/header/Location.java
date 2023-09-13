@@ -12,7 +12,6 @@ public class Location {
     private static final int LOCATION_INDEX = 1;
     private static final String BASE_PATH = "static";
     private static final String REGEX_FOR_EXTENSION = "\\.[^.]+$";
-    private static final String ROOT = "/";
     private static final String EMPTY = "";
 
     private final Path path;
@@ -37,13 +36,11 @@ public class Location {
 
         final ClassLoader classLoader = Location.class.getClassLoader();
         final String locationWithoutExtension = location.replaceAll(REGEX_FOR_EXTENSION, EMPTY);
-        final URL resource = classLoader.getResource(BASE_PATH +
-                locationWithoutExtension +
-                "." +
-                contentType.getExtension());
+        final String absolutePath = BASE_PATH + locationWithoutExtension + "." + contentType.getExtension();
+        final URL resource = classLoader.getResource(absolutePath);
 
         if (isNull(resource)) {
-            return Paths.get(ROOT);
+            return Paths.get(absolutePath);
         }
         return Paths.get(resource.getPath());
     }

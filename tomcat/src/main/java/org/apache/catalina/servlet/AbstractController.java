@@ -1,12 +1,13 @@
 package org.apache.catalina.servlet;
 
+import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.isPost()) {
             doPost(request, response);
             return;
@@ -16,14 +17,14 @@ public abstract class AbstractController implements Controller {
             return;
         }
 
-        throw new UnsupportedOperationException();
+        throw new UncheckedServletException();
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        throw new UnsupportedOperationException();
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+        throw new UncheckedServletException();
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        throw new UnsupportedOperationException();
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        throw new UncheckedServletException();
     }
 }

@@ -1,7 +1,6 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.FileReader;
-import org.apache.coyote.Controller;
+import org.apache.catalina.FileReader;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
@@ -25,7 +24,7 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException();
     }
 
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception { /* NOOP */ }
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) { /* NOOP */ }
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception { /* NOOP */ }
 }
 

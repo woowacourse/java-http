@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina.controller;
 
-import org.apache.coyote.http11.exception.FileNotReadableException;
+import org.apache.catalina.exception.FileNotReadableException;
 import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpStatus;
 import org.apache.coyote.http11.message.request.HttpRequest;
@@ -16,7 +16,7 @@ public class FileController extends AbstractController {
     }
 
     @Override
-    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         throw new UnsupportedOperationException();
     }
 }

@@ -1,10 +1,10 @@
-package org.apache.coyote;
+package org.apache.catalina;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.exception.FileNotReadableException;
+import org.apache.catalina.exception.FileNotReadableException;
 
 public class FileReader {
 

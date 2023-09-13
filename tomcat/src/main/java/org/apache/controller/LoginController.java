@@ -31,7 +31,8 @@ public class LoginController extends AbstractController {
     protected void doGet(Request request, Response response) {
         Session session = getSession(request.getSessionId());
         if (hasUserSession(session)) {
-            redirectPage(response, INDEX_PATH);
+            response.setHttpStatus(HttpStatus.FOUND)
+                    .redirectLocation(INDEX_PATH);
             return;
         }
         getLoginPage(request, response);
@@ -41,7 +42,10 @@ public class LoginController extends AbstractController {
         FileReader fileReader = FileReader.from(request.getPath());
         String body = fileReader.read();
 
-        makeResourceResponse(request, response, HttpStatus.OK, body);
+        response.setHttpStatus(HttpStatus.OK)
+                .addHeaders(CONTENT_TYPE, request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8)
+                .addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setResponseBody(body);
     }
 
     private boolean hasUserSession(Session session) {
@@ -62,7 +66,8 @@ public class LoginController extends AbstractController {
         User user = (User) session.getAttribute(USER_SESSION_KEY);
         System.out.println(user);
 
-        redirectPage(response, INDEX_PATH);
+        response.setHttpStatus(HttpStatus.FOUND)
+                .redirectLocation(INDEX_PATH);
     }
 
     private void doLogin(Request request, Response response) {
@@ -72,14 +77,16 @@ public class LoginController extends AbstractController {
 
         Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
         if (isInvalidLogin(password, loginUser)) {
-            redirectPage(response, UNAUTHORIZED_PATH);
+            response.setHttpStatus(HttpStatus.FOUND)
+                    .redirectLocation(UNAUTHORIZED_PATH);
             return;
         }
         User user = loginUser.get();
         System.out.println(user);
 
         registerSession(response, user);
-        redirectPage(response, INDEX_PATH);
+        response.setHttpStatus(HttpStatus.FOUND)
+                .redirectLocation(INDEX_PATH);
     }
 
     private boolean isInvalidLogin(String password, Optional<User> loginUser) {

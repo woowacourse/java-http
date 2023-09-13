@@ -5,7 +5,6 @@ import org.apache.controller.ControllerException.ControllerHttpMethodException;
 import org.apache.controller.ControllerException.ControllerNotImplementMethodException;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
-import org.apache.coyote.response.HttpStatus;
 import org.apache.coyote.response.Response;
 
 public abstract class AbstractController implements Controller {
@@ -56,25 +55,5 @@ public abstract class AbstractController implements Controller {
             throw new ControllerNotImplementMethodException(HttpMethod.POST);
         }
         throw new ControllerHttpMethodException(HttpMethod.POST);
-    }
-
-    protected String getContentLength(String body) {
-        return String.valueOf(body.getBytes().length);
-    }
-
-    protected String getContentType(Request request) {
-        return request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8;
-    }
-
-    protected void redirectPage(Response response, String path) {
-        response.setHttpStatus(HttpStatus.FOUND);
-        response.redirectLocation(path);
-    }
-
-    protected void makeResourceResponse(Request request, Response response, HttpStatus httpStatus, String body) {
-        response.setHttpStatus(httpStatus);
-        response.addHeaders(CONTENT_TYPE, getContentType(request));
-        response.addHeaders(CONTENT_LENGTH, getContentLength(body));
-        response.setResponseBody(body);
     }
 }

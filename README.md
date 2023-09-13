@@ -96,8 +96,8 @@
 - [x] Session 작업 Request와 분리
   - [x] SessionManager를 catalina 패키지로 분리
   - [x] SessionManager를 coyote 패키지에서 사용할 수 있도록 프록시 객체 생성
-- [ ] AbstractController 내 공통 메소드 분리
-  - [ ] response를 체이닝 형식으로 setter 사용
+- [x] AbstractController 내 공통 메소드 분리
+  - [x] response를 체이닝 형식으로 setter 사용
 - [ ] Controller 패키지 분리 -> jwp 하위 패키지로 분리
 - [ ] RequestHeader/ResponseHeader 내 Line 값 -> Request/Response로 추출
 

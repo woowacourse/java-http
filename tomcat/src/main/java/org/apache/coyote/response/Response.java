@@ -19,28 +19,34 @@ public class Response {
         this.responseBody = responseBody;
     }
 
-    public void setProtocol(Protocol protocol) {
+    public Response setProtocol(Protocol protocol) {
         responseHeader.setProtocol(protocol);
+        return this;
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
+    public Response setHttpStatus(HttpStatus httpStatus) {
         responseHeader.setHttpStatus(httpStatus);
+        return this;
     }
 
-    public void addHeaders(String key, String value) {
+    public Response addHeaders(String key, String value) {
         responseHeader.addHeaders(key, value);
+        return this;
     }
 
-    public void addCookie(String key, String value) {
+    public Response addCookie(String key, String value) {
         responseHeader.addCookie(key, value);
+        return this;
     }
 
-    public void redirectLocation(String path) {
+    public Response redirectLocation(String path) {
         addHeaders(LOCATION, path);
+        return this;
     }
 
-    public void setResponseBody(String body) {
+    public Response setResponseBody(String body) {
         responseBody.setBody(body);
+        return this;
     }
 
     public byte[] getResponseBytes() {

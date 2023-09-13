@@ -19,6 +19,9 @@ public class DefaultController extends AbstractController {
     protected void doGet(Request request, Response response) {
         String body = "Hello world!";
 
-        makeResourceResponse(request, response, HttpStatus.OK, body);
+        response.setHttpStatus(HttpStatus.OK)
+                .addHeaders(CONTENT_TYPE, request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8)
+                .addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setResponseBody(body);
     }
 }

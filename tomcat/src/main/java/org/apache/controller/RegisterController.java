@@ -27,7 +27,10 @@ public class RegisterController extends AbstractController {
         FileReader fileReader = FileReader.from(request.getPath());
         String body = fileReader.read();
 
-        makeResourceResponse(request, response, HttpStatus.OK, body);
+        response.setHttpStatus(HttpStatus.OK)
+                .addHeaders(CONTENT_TYPE, request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8)
+                .addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setResponseBody(body);
     }
 
     @Override
@@ -43,6 +46,7 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        redirectPage(response, INDEX_PATH);
+        response.setHttpStatus(HttpStatus.FOUND)
+                .redirectLocation(INDEX_PATH);
     }
 }

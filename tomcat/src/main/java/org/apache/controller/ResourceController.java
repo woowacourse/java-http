@@ -21,10 +21,13 @@ public class ResourceController extends AbstractController {
         FileReader fileReader = FileReader.from(request.getPath());
         String body = fileReader.read();
 
-        makeResourceResponse(request, response, getHttpResponse(fileReader), body);
+        response.setHttpStatus(getHttpStatusResponse(fileReader))
+                .addHeaders(CONTENT_TYPE, request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8)
+                .addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setResponseBody(body);
     }
 
-    private HttpStatus getHttpResponse(FileReader fileReader) {
+    private HttpStatus getHttpStatusResponse(FileReader fileReader) {
         if (fileReader.isFound()) {
             return HttpStatus.OK;
         }

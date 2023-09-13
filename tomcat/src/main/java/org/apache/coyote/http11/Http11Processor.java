@@ -42,16 +42,17 @@ public class Http11Processor implements Runnable, Processor {
             final byte[] bytes = response.getBytes();
             outputStream.write(bytes);
             outputStream.flush();
-        } catch (Exception e) {
+        } catch (final IOException e) {
             log.error(e.getMessage(), e);
         }
+
     }
 
     private void invokeServlet(final InputStream inputStream, final HttpResponse response) throws IOException {
         try {
             final HttpRequest request = RequestMapper.toRequest(inputStream);
             final Controller controller = MappingHandler.getController(request);
-            
+
             controller.service(request, response);
         } catch (final UncheckedServletException e) {
             ErrorHandler.handle(e, response);

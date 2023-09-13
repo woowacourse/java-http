@@ -11,6 +11,7 @@ public class HttpHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> values = new HashMap<>();
 
@@ -31,7 +32,7 @@ public class HttpHeader {
         if (cookie == null) {
             return false;
         }
-        return cookie.contains("JSESSIONID");
+        return cookie.contains(JSESSIONID);
     }
 
     public boolean notContainJsessionId() {
@@ -39,12 +40,12 @@ public class HttpHeader {
         if (cookie == null) {
             return true;
         }
-        return !cookie.contains("JSESSIONID");
+        return !cookie.contains(JSESSIONID);
     }
 
     public String findJsessionId() {
         final String cookie = values.get(COOKIE);
-        final Pattern pattern = Pattern.compile("JSESSIONID=([a-zA-Z0-9-]+)");
+        final Pattern pattern = Pattern.compile(JSESSIONID + "=([a-zA-Z0-9-]+)");
         final Matcher matcher = pattern.matcher(cookie);
         if (matcher.find()) {
             return matcher.group(1);

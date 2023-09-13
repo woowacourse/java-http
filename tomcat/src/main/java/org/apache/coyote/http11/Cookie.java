@@ -36,6 +36,10 @@ public class Cookie {
         return value.containsKey(JSESSIONID);
     }
 
+    public String findByKey(final String key) {
+        return value.get(key);
+    }
+
     public Map<String, String> getValue() {
         return value;
     }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,15 +11,15 @@ public class HttpResponse {
 
     private final String version;
     private final Map<String, String> otherHeader = new HashMap<>();
+
     private StatusCode statusCode;
     private ContentType contentType;
     private String redirect;
     private String body;
-
     private Cookie cookie;
 
-    public HttpResponse(final String version) {
-        this(version, null, null, null);
+    public HttpResponse(final HttpRequest request) {
+        this(request.getVersion(), null, null, null);
     }
 
     public HttpResponse(final String version, final StatusCode statusCode, final ContentType contentType, final String redirect) {
@@ -40,6 +41,14 @@ public class HttpResponse {
         return this.body != null;
     }
 
+    public String findCookie(final String key) {
+        return cookie.findByKey(key);
+    }
+
+    public boolean isOtherHeaderNotEmpty() {
+        return !otherHeader.isEmpty();
+    }
+
     public StatusCode getStatusCode() {
         return statusCode;
     }
@@ -51,11 +60,7 @@ public class HttpResponse {
     public Map<String, String> getOtherHeader() {
         return otherHeader;
     }
-
-    public Cookie getCookie() {
-        return cookie;
-    }
-
+    
     public String getRedirect() {
         return redirect;
     }

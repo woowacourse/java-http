@@ -14,7 +14,8 @@ public class HttpRequest {
     private final HttpHeader httpHeader;
     private final RequestBody requestBody;
 
-    public HttpRequest(final HttpMethod httpMethod, final String path, final String version, final String query, final HttpHeader httpHeader, final RequestBody requestBody) {
+    public HttpRequest(final HttpMethod httpMethod, final String path, final String version, final String query,
+                       final HttpHeader httpHeader, final RequestBody requestBody) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.version = version;
@@ -52,8 +53,8 @@ public class HttpRequest {
         return true;
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+    public String findBodyParameter(final String key) {
+        return requestBody.getParameter(key);
     }
 
     public String getPath() {

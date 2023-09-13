@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.HandlerMapping;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -14,15 +17,12 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HandlerMapping handlerMapping = new HandlerMapping();
 
     private final Socket connection;
-    private final HttpRequestParser httpRequestParser;
-    private final HttpDispatcher httpDispatcher;
 
-    public Http11Processor(final Socket connection, final HttpRequestParser httpRequestParser, final HttpDispatcher httpDispatcher) {
+    public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.httpRequestParser = httpRequestParser;
-        this.httpDispatcher = httpDispatcher;
     }
 
     @Override
@@ -37,14 +37,39 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var request = httpRequestParser.parse(reader);
-            final var response = new HttpResponse(request.getVersion());
-            httpDispatcher.doDispatch(request, response);
+            final var request = HttpRequestParser.parse(reader);
+            final var response = new HttpResponse(request);
 
+            if (request.isFile()) {
+                generateStaticFile(request, response);
+                sendResponse(outputStream, response);
+                return;
+            }
+
+            final Controller controller = handlerMapping.findController(request.getPath());
+            if (controller == null) {
+                generateNotFoundController(response);
+                sendResponse(outputStream, response);
+                return;
+            }
+
+            controller.service(request, response);
             sendResponse(outputStream, response);
         } catch (final IOException | UncheckedServletException exception) {
             log.error(exception.getMessage(), exception);
         }
+    }
+
+    private void generateStaticFile(final HttpRequest request, final HttpResponse response) {
+        response.setStatusCode(StatusCode.OK)
+                .setContentType(ContentType.findByPath(request.getPath()))
+                .setRedirect(request.getPath());
+    }
+
+    private void generateNotFoundController(final HttpResponse response) {
+        response.setStatusCode(StatusCode.NOT_FOUND)
+                .setContentType(ContentType.HTML)
+                .setRedirect("/404.html");
     }
 
     private void sendResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {

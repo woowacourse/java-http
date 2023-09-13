@@ -28,9 +28,9 @@ public class RequestParser {
         RequestLine requestLine = readRequestUrl();
         Map<String, String> headers = getHeaders();
 
-        RequestHeader requestHeader = new RequestHeader(requestLine, headers);
+        RequestHeader requestHeader = new RequestHeader(headers);
         RequestBody requestBody = getRequestBody(requestHeader);
-        return new Request(requestHeader, requestBody);
+        return new Request(requestLine, requestHeader, requestBody);
     }
 
     private RequestLine readRequestUrl() throws IOException {

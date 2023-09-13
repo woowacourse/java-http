@@ -22,15 +22,15 @@ public class FixtureFactory {
         return new RequestLine(httpMethod, RequestUrl.from(url), Protocol.HTTP1_1);
     }
 
-    public static RequestHeader getRequestHeader(HttpMethod httpMethod, String url, Map<String, String> headers) {
-        return new RequestHeader(getRequestLine(httpMethod, url), headers);
+    public static RequestHeader getRequestHeader(Map<String, String> headers) {
+        return new RequestHeader(headers);
     }
 
     public static Request getGetRequest(String url, Map<String, String> headers) {
-        return new Request(getRequestHeader(HttpMethod.GET, url, headers), new RequestBody(new HashMap<>()));
+        return new Request(getRequestLine(HttpMethod.GET, url), getRequestHeader(headers), new RequestBody(new HashMap<>()));
     }
 
     public static Request getPostRequest(String url, Map<String, String> headers, RequestBody requestBody) {
-        return new Request(getRequestHeader(HttpMethod.POST, url, headers), requestBody);
+        return new Request(getRequestLine(HttpMethod.POST, url), getRequestHeader(headers), requestBody);
     }
 }

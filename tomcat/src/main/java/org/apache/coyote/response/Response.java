@@ -6,26 +6,27 @@ public class Response {
 
     private static final String LOCATION = "Location";
 
+    private final ResponseLine responseLine;
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
     public Response() {
-        responseHeader = new ResponseHeader();
-        responseBody = new ResponseBody();
+        this(new ResponseLine(), new ResponseHeader(), new ResponseBody());
     }
 
-    public Response(ResponseHeader responseHeader, ResponseBody responseBody) {
+    public Response(ResponseLine responseLine, ResponseHeader responseHeader, ResponseBody responseBody) {
+        this.responseLine = responseLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
     public Response setProtocol(Protocol protocol) {
-        responseHeader.setProtocol(protocol);
+        responseLine.setProtocol(protocol);
         return this;
     }
 
     public Response setHttpStatus(HttpStatus httpStatus) {
-        responseHeader.setHttpStatus(httpStatus);
+        responseLine.setHttpStatus(httpStatus);
         return this;
     }
 
@@ -50,6 +51,6 @@ public class Response {
     }
 
     public byte[] getResponseBytes() {
-        return String.join("\r\n", responseHeader.getHeader(), responseBody.getBody()).getBytes();
+        return String.join("\r\n", responseLine.getResponseLine(), responseHeader.getHeader(), responseBody.getBody()).getBytes();
     }
 }

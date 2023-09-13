@@ -7,24 +7,26 @@ public class Request {
 
     private static final String JSESSIONID = "JSESSIONID";
 
+    private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
 
-    public Request(RequestHeader requestHeader, RequestBody requestBody) {
+    public Request(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+        this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
     }
 
     public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
-        return requestHeader.isSameHttpMethod(otherHttpMethod);
+        return requestLine.isSameHttpMethod(otherHttpMethod);
     }
 
     public HttpMethod getHttpMethod() {
-        return requestHeader.getHttpMethod();
+        return requestLine.getHttpMethod();
     }
 
     public String getPath() {
-        return requestHeader.getPath();
+        return requestLine.getPath();
     }
 
     public String getResourceTypes() {
@@ -36,11 +38,11 @@ public class Request {
     }
 
     public boolean isSamePath(String urlPath) {
-        return requestHeader.isSamePath(urlPath);
+        return requestLine.isSamePath(urlPath);
     }
 
     public Map<String, String> getQueryString() {
-        return requestHeader.getQueryString();
+        return requestLine.getQueryString();
     }
 
     public Map<String, String> getBody() {

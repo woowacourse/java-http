@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static common.Constants.CRLF;
-import static common.Constants.SPACE;
+import static org.apache.Constants.CRLF;
+import static org.apache.Constants.SPACE;
 
 class HttpResponseHeaders {
 

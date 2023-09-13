@@ -1,4 +1,4 @@
-package common;
+package org.apache;
 
 public class Constants {
 

@@ -5,7 +5,7 @@ import common.http.Cookie;
 import common.http.HttpStatus;
 import common.http.Response;
 
-import static common.Constants.CRLF;
+import static org.apache.Constants.CRLF;
 
 public class HttpResponse implements Response {
 

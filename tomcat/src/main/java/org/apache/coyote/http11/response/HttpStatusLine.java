@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import common.http.HttpStatus;
 
-import static common.Constants.SPACE;
+import static org.apache.Constants.SPACE;
 
 class HttpStatusLine {
 

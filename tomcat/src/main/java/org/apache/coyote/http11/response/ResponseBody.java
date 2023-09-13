@@ -18,14 +18,6 @@ public class ResponseBody {
         );
     }
 
-    public static ResponseBody noContent() {
-        return new ResponseBody(new byte[]{}, null);
-    }
-
-    public static ResponseBody rootContent() {
-        return new ResponseBody("Hello world!".getBytes(), ContentType.HTML);
-    }
-
     public byte[] getContent() {
         return content;
     }

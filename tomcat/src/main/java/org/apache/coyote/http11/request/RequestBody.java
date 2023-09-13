@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 public class RequestBody {
@@ -16,9 +17,9 @@ public class RequestBody {
         this.content = content;
     }
 
-    public static RequestBody of(final RequestHeaders requestHeaders, final BufferedReader bufferedReader) throws IOException {
+    public static Optional<RequestBody> of(final RequestHeaders requestHeaders, final BufferedReader bufferedReader) throws IOException {
         if (!requestHeaders.containsKey("Content-Length")) {
-            return EMPTY;
+            return Optional.empty();
         }
         final Map<String, String> result = new HashMap<>();
         final int contentLength = Integer.parseInt(requestHeaders.getHeaderValue("Content-Length"));
@@ -33,10 +34,10 @@ public class RequestBody {
                 final String[] split = param.split("=");
                 result.put(split[0], split[1]);
             }
-            return new RequestBody(result);
+            return Optional.of(new RequestBody(result));
         }
 
-        return EMPTY;
+        return Optional.empty();
     }
 
     public String getParamValue(final String key) {

@@ -22,6 +22,9 @@ public class StaticResource {
     }
 
     public static StaticResource from(final String fileName) throws IOException {
+        if (fileName.equals("/")) {
+            return new StaticResource("Hello World!".getBytes(), "");
+        }
         return new StaticResource(extractContent(fileName), extractFileExtension(fileName));
     }
 

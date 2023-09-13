@@ -13,11 +13,11 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final RequestBody requestBody;
+    private final Optional<RequestBody> requestBody;
 
     private HttpRequest(final RequestLine requestLine,
                         final RequestHeaders requestHeaders,
-                        final RequestBody requestBody) {
+                        final Optional<RequestBody> requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
@@ -26,7 +26,7 @@ public class HttpRequest {
     public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
-        final RequestBody requestBody = RequestBody.of(requestHeaders, bufferedReader);
+        final Optional<RequestBody> requestBody = RequestBody.of(requestHeaders, bufferedReader);
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
@@ -34,7 +34,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public RequestBody getRequestBody() {
+    public Optional<RequestBody> getRequestBody() {
         return requestBody;
     }
 

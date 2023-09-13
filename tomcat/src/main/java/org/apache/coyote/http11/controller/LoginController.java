@@ -44,7 +44,7 @@ public class LoginController extends AbstractController {
             response.redirect(INDEX_URI.getFullPath());
             return;
         }
-        final RequestBody requestBody = request.getRequestBody();
+        final RequestBody requestBody = request.getRequestBody().orElseThrow(IllegalStateException::new);
         final String account = requestBody.getParamValue("account");
         final String password = requestBody.getParamValue("password");
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);

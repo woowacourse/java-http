@@ -28,7 +28,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        final RequestBody requestBody = request.getRequestBody();
+        final RequestBody requestBody = request.getRequestBody().orElseThrow(IllegalStateException::new);
         final String accountValue = requestBody.getParamValue("account");
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(accountValue);
         if (userOptional.isPresent()) {

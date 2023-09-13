@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.service.LoginService;
 
 public class HandlerMapper {
@@ -38,10 +37,10 @@ public class HandlerMapper {
         return controllerByMapper.get(mapper);
     }
 
-    public String controllerResponse(HttpRequest httpRequest) {
+    public String controllerResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
         Controller handler = getHandler(httpRequest);
-        ResponseEntity<Object> responseEntity = (ResponseEntity<Object>) handler.handle(httpRequest);
-        return HttpResponse.from(responseEntity).toString();
+        handler.service(httpRequest, httpResponse);
+        return httpResponse.toString();
     }
 
     @FunctionalInterface

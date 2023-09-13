@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.controller.util.BodyExtractor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.service.LoginService;
 import org.apache.coyote.http11.session.SessionManager;
@@ -22,30 +23,33 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public ResponseEntity<Object> doGet(HttpRequest httpRequest) {
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (SessionManager.loggedIn(httpRequest)) {
-            return ResponseEntity.redirect(INDEX_PAGE);
+            httpResponse.responseFrom(ResponseEntity.redirect(INDEX_PAGE));
+            return;
         }
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
         responseEntity.responseView("/login.html");
-        return responseEntity;
+        httpResponse.responseFrom(responseEntity);
     }
 
     @Override
-    protected ResponseEntity<Object> doPost(HttpRequest httpRequest) {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (SessionManager.loggedIn(httpRequest)) {
-            return ResponseEntity.redirect(INDEX_PAGE);
+            httpResponse.responseFrom(ResponseEntity.redirect(INDEX_PAGE));
+            return;
         }
 
         Optional<String> loginSession = login(httpRequest);
         if (loginSession.isPresent()) {
-            return ResponseEntity.status(302)
+            httpResponse.responseFrom(ResponseEntity.status(302)
                 .addHeader(LOCATION_HEADER, INDEX_PAGE)
                 .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession.get())
-                .build();
+                .build());
+            return;
         }
 
-        return ResponseEntity.redirect("/401.html");
+        httpResponse.responseFrom(ResponseEntity.redirect("/401.html"));
     }
 
     private Optional<String> login(HttpRequest httpRequest) {

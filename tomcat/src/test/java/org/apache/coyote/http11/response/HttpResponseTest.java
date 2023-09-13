@@ -14,10 +14,11 @@ class HttpResponseTest {
     @Test
     void ResponseEntity_의_응답코드에_따라서_StatusLine을_생성한다() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
 
         // when
-        HttpResponse httpResponse = HttpResponse.from(responseEntity);
+        httpResponse.responseFrom(responseEntity);
 
         // then
         assertThat(httpResponse.getStatusLine().toString())
@@ -27,10 +28,11 @@ class HttpResponseTest {
     @Test
     void ResponseEntity_가_Body가_없다면_Body_는_null_이다() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
 
         // when
-        HttpResponse httpResponse = HttpResponse.from(responseEntity);
+        httpResponse.responseFrom(responseEntity);
 
         // then
         assertThat(httpResponse.getBody()).isNull();
@@ -39,11 +41,12 @@ class HttpResponseTest {
     @Test
     void ResponseEntity_에_유효한_viewPath_가_있으면_body에_해당_응답_Body_가_있다() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
         responseEntity.responseView("/index.html");
 
         // when
-        HttpResponse httpResponse = HttpResponse.from(responseEntity);
+        httpResponse.responseFrom(responseEntity);
 
         // then
         assertThat(httpResponse.getBody()).isNotNull();
@@ -52,11 +55,12 @@ class HttpResponseTest {
     @Test
     void ResponseEntity_에_유효하지_viewPath_가_있으면_예외_발생() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
         responseEntity.responseView("/pooh.html");
 
         // when & then
-        assertThatThrownBy(() -> HttpResponse.from(responseEntity))
+        assertThatThrownBy(() -> httpResponse.responseFrom(responseEntity))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("파일이 존재하지 않습니다.");
     }
@@ -64,11 +68,12 @@ class HttpResponseTest {
     @Test
     void ResponseEntity_의_Body_를_넣은_응답은_아직_만들지_않아서_예외() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200)
             .body(new Pooh("pooh"));
 
         // when & then
-        assertThatThrownBy(() -> HttpResponse.from(responseEntity))
+        assertThatThrownBy(() -> httpResponse.responseFrom(responseEntity))
             .isInstanceOf(UnsupportedOperationException.class)
             .hasMessage("ResponseBody 에 Body 가 들어있는 경우는 아직 만들지 않았습니다.");
     }
@@ -76,11 +81,12 @@ class HttpResponseTest {
     @Test
     void Body_가_있으면_ContentType_과_ContentLength_헤더가_있다() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
         responseEntity.responseView("/index.html");
 
         // when
-        HttpResponse httpResponse = HttpResponse.from(responseEntity);
+        httpResponse.responseFrom(responseEntity);
 
         // then
         assertThat(httpResponse.getHeaders().getHeaders())
@@ -90,12 +96,13 @@ class HttpResponseTest {
     @Test
     void ResponseEntity_에서_추가한_헤더도_있다() {
         // given
+        HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).
             addHeader("Location", "index.html").build();
         responseEntity.responseView("/index.html");
 
         // when
-        HttpResponse httpResponse = HttpResponse.from(responseEntity);
+        httpResponse.responseFrom(responseEntity);
 
         // then
         assertThat(httpResponse.getHeaders().getHeaders())

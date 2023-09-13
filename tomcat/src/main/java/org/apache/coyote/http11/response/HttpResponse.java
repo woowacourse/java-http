@@ -8,9 +8,13 @@ public class HttpResponse {
 
     private static final ResourceProvider resourceProvider = new ResourceProvider();
 
-    private final StatusLine statusLine;
-    private final HttpResponseHeaders headers;
-    private final String body;
+    private StatusLine statusLine;
+    private HttpResponseHeaders headers;
+    private String body;
+
+    public HttpResponse() {
+        this(null, null, null);
+    }
 
     private HttpResponse(StatusLine statusLine, HttpResponseHeaders headers, String body) {
         this.statusLine = statusLine;
@@ -18,23 +22,21 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse from(ResponseEntity<Object> responseEntity) {
+    public void responseFrom(ResponseEntity<Object> responseEntity) {
         Optional<String> extractBody = extractBody(responseEntity);
-        return new HttpResponse(
-            makeStatusLine(responseEntity),
-            HttpResponseHeaders.from(responseEntity, extractBody),
-            extractBody.isPresent() ? extractBody.get() : null
-        );
+        this.statusLine = makeStatusLine(responseEntity);
+        this.headers = HttpResponseHeaders.from(responseEntity, extractBody);
+        this.body = extractBody.isPresent() ? extractBody.get() : null;
     }
 
-    private static Optional<String> extractBody(ResponseEntity<Object> responseEntity) {
+    private Optional<String> extractBody(ResponseEntity<Object> responseEntity) {
         if (haveBody(responseEntity)) {
             return Optional.of(bodyOf(responseEntity));
         }
         return Optional.empty();
     }
 
-    private static boolean haveBody(ResponseEntity<Object> responseEntity) {
+    private boolean haveBody(ResponseEntity<Object> responseEntity) {
         if (responseEntity.isViewResponse()) {
             return true;
         }
@@ -44,7 +46,7 @@ public class HttpResponse {
         return false;
     }
 
-    private static String bodyOf(ResponseEntity<Object> responseEntity) {
+    private String bodyOf(ResponseEntity<Object> responseEntity) {
         if (responseEntity.isViewResponse()) {
             return resourceProvider.resourceBodyOf(responseEntity.getViewPath());
         }
@@ -54,7 +56,7 @@ public class HttpResponse {
         throw new IllegalArgumentException("body 가 존재하지 않는 응답입니다.");
     }
 
-    private static StatusLine makeStatusLine(ResponseEntity<Object> responseEntity) {
+    private StatusLine makeStatusLine(ResponseEntity<Object> responseEntity) {
         return new StatusLine(HttpStatusCode.of(responseEntity.getStatusCode()));
     }
 

@@ -8,6 +8,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             final var outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = HttpRequest.makeRequest(inputReader);
-            String response = getResponse(httpRequest);
+            String response = getResponse(httpRequest, new HttpResponse());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -44,12 +45,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpRequest httpRequest) {
+    private String getResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (resourceProvider.haveResource(httpRequest.getRequestLine().getPath())) {
             return resourceProvider.staticResourceResponse(httpRequest.getRequestLine().getPath());
         }
         if (handlerMapper.haveAvailableHandler(httpRequest)) {
-            return handlerMapper.controllerResponse(httpRequest);
+            return handlerMapper.controllerResponse(httpRequest, httpResponse);
         }
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",

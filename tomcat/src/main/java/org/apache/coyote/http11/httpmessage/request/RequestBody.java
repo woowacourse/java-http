@@ -10,6 +10,8 @@ public class RequestBody {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int VALUE_EMPTY_SIZE = 1;
+    private static final String SPACE = " ";
 
     private final Map<String, String> body;
 
@@ -22,8 +24,14 @@ public class RequestBody {
         final Map<String, String> body = Arrays.stream(requestBodies)
             .map(headerContent -> headerContent.split(KEY_VALUE_DELIMITER))
             .collect(Collectors.toMap(
+
                 headerContent -> headerContent[KEY_INDEX],
-                headerContent -> headerContent[VALUE_INDEX]));
+                headerContent -> {
+                    if (headerContent.length == VALUE_EMPTY_SIZE) {
+                        return SPACE;
+                    }
+                    return headerContent[VALUE_INDEX];
+                }));
         return new RequestBody(body);
     }
 

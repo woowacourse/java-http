@@ -18,9 +18,11 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
         if (request.hasBlankRegisterUserBody()) {
-            response.setStatusCode(StatusCode.FOUND)
-                .addHeader(LOCATION, REGISTER_PAGE)
-                .setBody("입력한 아이디, 비밀번호, 이메일에는 공백이 들어오면 안됩니다.");
+            final String body = "입력한 아이디, 비밀번호, 이메일에는 공백이 들어오면 안됩니다.";
+            response.setStatusCode(StatusCode.BAD_REQUEST)
+                .addHeader(CONTENT_TYPE, ContentType.HTML.getValue() + CHARSET_UTF_8)
+                .addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
+                .setBody(body);
             return;
         }
         final User registerUser = new User(

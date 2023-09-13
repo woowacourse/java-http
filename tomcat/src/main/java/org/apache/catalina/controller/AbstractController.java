@@ -1,13 +1,10 @@
 package org.apache.catalina.controller;
 
-import org.apache.catalina.FileReader;
 import org.apache.coyote.http11.message.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
-
-    protected final FileReader fileReader = new FileReader();
 
     @Override
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {

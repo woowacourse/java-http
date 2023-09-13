@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 
 class FileReaderTest {
 
-    private final FileReader fileReader = new FileReader();
-
     @Test
     @DisplayName("static 디렉터리에 위치한 정적 파일을 읽어온다.")
     void readStaticFile_success() {
@@ -17,7 +15,7 @@ class FileReaderTest {
         final String name = "/index.html";
 
         // when
-        final String fileContent = fileReader.readStaticFile(name);
+        final String fileContent = FileReader.readStaticFile(name);
 
         // then
         assertThat(fileContent).isNotEmpty();
@@ -30,10 +28,10 @@ class FileReaderTest {
         final String name = "/hello.html";
 
         // when
-        final String fileContent = fileReader.readStaticFile(name);
+        final String fileContent = FileReader.readStaticFile(name);
 
         // then
-        final String expected = fileReader.readStaticFile("/404.html");
+        final String expected = FileReader.readStaticFile("/404.html");
         assertThat(fileContent).isEqualTo(expected);
     }
 }

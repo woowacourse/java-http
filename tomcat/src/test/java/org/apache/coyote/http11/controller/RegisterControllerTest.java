@@ -7,8 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import nextstep.jwp.controller.RegisterController;
-import org.apache.catalina.controller.Controller;
 import org.apache.catalina.FileReader;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 class RegisterControllerTest {
 
     private final Controller controller = new RegisterController();
-    private final FileReader fileReader = new FileReader();
 
     @Test
     @DisplayName("/register 에 GET 요청을 했을 때 /register.html 이 반환된다.")
@@ -44,7 +43,7 @@ class RegisterControllerTest {
 
         // then
         final String message = httpResponse.convertToMessage();
-        final String fileContent = fileReader.readStaticFile("/register.html");
+        final String fileContent = FileReader.readStaticFile("/register.html");
         assertThat(message).contains(
             "HTTP/1.1", "200 OK",
             "Content-Type: text/html;charset=utf-8",
@@ -112,11 +111,9 @@ class RegisterControllerTest {
 
         // then
         final String message = httpResponse.convertToMessage();
-        final String fileContent = fileReader.readStaticFile("/401.html");
         assertThat(message).contains(
-            "HTTP/1.1", "409 CONFLICT",
-            "Content-Type: text/html;charset=utf-8",
-            "Content-Length: " + fileContent.getBytes().length
+            "HTTP/1.1", "302 FOUND",
+            "Location: /401.html"
         );
     }
 }

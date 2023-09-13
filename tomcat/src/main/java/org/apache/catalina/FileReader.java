@@ -8,9 +8,12 @@ import org.apache.catalina.exception.FileNotReadableException;
 
 public class FileReader {
 
-    private final ClassLoader classLoader = getClass().getClassLoader();
+    private static final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
-    public String readStaticFile(final String fileName) throws FileNotReadableException {
+    private FileReader() {
+    }
+
+    public static String readStaticFile(final String fileName) throws FileNotReadableException {
         try {
             return new String(Files.readAllBytes(new File(getFilePath(fileName).getFile()).toPath()));
         } catch (IOException e) {
@@ -18,7 +21,7 @@ public class FileReader {
         }
     }
 
-    private URL getFilePath(final String path){
+    private static URL getFilePath(final String path){
         final URL url = classLoader.getResource("static" + path);
         if (url == null) {
             return classLoader.getResource("static/404.html");

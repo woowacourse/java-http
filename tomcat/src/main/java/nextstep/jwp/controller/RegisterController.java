@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.MemberExistException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.FileReader;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.http11.message.ContentType;
 import org.apache.coyote.http11.message.HttpStatus;
@@ -13,7 +14,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final String fileContent = fileReader.readStaticFile("/register.html");
+        final String fileContent = FileReader.readStaticFile("/register.html");
         httpResponse.setHttpStatus(HttpStatus.OK);
         httpResponse.setBody(fileContent, ContentType.findResponseContentTypeFromRequest(httpRequest));
     }
@@ -23,9 +24,8 @@ public class RegisterController extends AbstractController {
         try {
             register(httpRequest);
         } catch (MemberExistException e) {
-            httpResponse.setHttpStatus(HttpStatus.CONFLICT);
-            httpResponse.setBody(fileReader.readStaticFile("/401.html"),
-                ContentType.findResponseContentTypeFromRequest(httpRequest));
+            httpResponse.setHttpStatus(HttpStatus.FOUND);
+            httpResponse.redirect("/401.html");
             return;
         }
         httpResponse.setHttpStatus(HttpStatus.FOUND);

@@ -7,9 +7,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.apache.catalina.FileReader;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.FileController;
-import org.apache.catalina.FileReader;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 class FileControllerTest {
 
     private final Controller controller = new FileController();
-    private final FileReader fileReader = new FileReader();
 
     @Test
     @DisplayName("특정 파일에 GET 요청을 하면 파일이 조회된다.")
@@ -44,7 +43,7 @@ class FileControllerTest {
 
         // then
         final String message = httpResponse.convertToMessage();
-        final String fileContent = fileReader.readStaticFile("/css/styles.css");
+        final String fileContent = FileReader.readStaticFile("/css/styles.css");
         assertThat(message).contains(
             "HTTP/1.1", "200 OK",
             "Content-Type: text/css;charset=utf-8",

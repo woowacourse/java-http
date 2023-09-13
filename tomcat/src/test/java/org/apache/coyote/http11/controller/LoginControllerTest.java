@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.UUID;
 import nextstep.jwp.controller.LoginController;
-import org.apache.catalina.controller.Controller;
 import org.apache.catalina.FileReader;
+import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 class LoginControllerTest {
 
     private final Controller controller = new LoginController();
-    private final FileReader fileReader = new FileReader();
 
     @Test
     @DisplayName("/login 에 GET 요청을 했을 때, 세션이 없다면 /login.html 이 반환된다.")
@@ -47,7 +46,7 @@ class LoginControllerTest {
 
         // then
         final String message = httpResponse.convertToMessage();
-        final String fileContent = fileReader.readStaticFile("/login.html");
+        final String fileContent = FileReader.readStaticFile("/login.html");
         assertThat(message).contains(
             "HTTP/1.1", "200 OK",
             "Content-Type: text/html;charset=utf-8",

@@ -6,10 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
-import nextstep.jwp.handler.DispatcherServlet;
-import nextstep.jwp.handler.LoginPageHandler;
-import nextstep.jwp.handler.LoginRequestHandler;
+import java.util.Map;
+import nextstep.jwp.handler.DispatcherController;
+import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
 import nextstep.jwp.handler.StaticResourceRequestHandler;
@@ -20,14 +19,14 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    private final HandlerMapping mapping = new HandlerMapping(List.of(
-            new RootPageRequestHandler(),
-            new LoginPageHandler(),
-            new LoginRequestHandler(),
-            new SignUpRequestHandler(),
-            new StaticResourceRequestHandler()
+    private final HandlerMapping mapping = new HandlerMapping(Map.of(
+            "/", new RootPageRequestHandler(),
+            "/login", new LoginHandler(),
+            "/register", new SignUpRequestHandler(),
+            "/**", new StaticResourceRequestHandler()
     ));
-    private final DispatcherServlet dispatcherServlet = new DispatcherServlet(mapping);
+
+    private final DispatcherController dispatcherServlet = new DispatcherController(mapping);
 
     @Test
     void process() {

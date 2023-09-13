@@ -2,11 +2,12 @@ package nextstep.jwp.handler.mappaing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import nextstep.jwp.handler.LoginPageHandler;
-import nextstep.jwp.handler.RequestHandler;
+import java.util.Map;
+import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
+import nextstep.jwp.handler.StaticResourceRequestHandler;
+import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.request.HttpRequest;
 import org.apache.catalina.servlet.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
@@ -22,18 +23,19 @@ class HandlerMappingTest {
     @Test
     void 요청을_처리할_수_있는_핸들러를_찾는다() {
         // given
-        HandlerMapping handlerMapping = new HandlerMapping(List.of(
-                new SignUpRequestHandler(),
-                new LoginPageHandler(),
-                new RootPageRequestHandler()
+        HandlerMapping mapping = new HandlerMapping(Map.of(
+                "/", new RootPageRequestHandler(),
+                "/login", new LoginHandler(),
+                "/register", new SignUpRequestHandler(),
+                "/**", new StaticResourceRequestHandler()
         ));
         RequestLine requestLine = RequestLine.from("GET /login HTTP/1.1");
         HttpRequest request = HttpRequest.builder().requestLine(requestLine).build();
 
         // when
-        RequestHandler handler = handlerMapping.getHandler(request);
+        Controller handler = mapping.getHandler(request);
 
         // then
-        assertThat(handler).isInstanceOf(LoginPageHandler.class);
+        assertThat(handler).isInstanceOf(LoginHandler.class);
     }
 }

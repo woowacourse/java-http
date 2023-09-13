@@ -2,7 +2,7 @@ package org.apache.catalina.startup;
 
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.servlet.Servlet;
+import org.apache.catalina.servlet.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,15 +10,15 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final Servlet dispatcherServlet;
+    private final Controller dispatcherController;
 
-    public Tomcat(Servlet dispatcherServlet) {
-        this.dispatcherServlet = dispatcherServlet;
+    public Tomcat(Controller dispatcherController) {
+        this.dispatcherController = dispatcherController;
     }
 
 
     public void start() {
-        var connector = new Connector(dispatcherServlet);
+        var connector = new Connector(dispatcherController);
         connector.start();
 
         try {

@@ -1,9 +1,8 @@
 package nextstep;
 
-import java.util.List;
-import nextstep.jwp.handler.DispatcherServlet;
-import nextstep.jwp.handler.LoginPageHandler;
-import nextstep.jwp.handler.LoginRequestHandler;
+import java.util.Map;
+import nextstep.jwp.handler.DispatcherController;
+import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RootPageRequestHandler;
 import nextstep.jwp.handler.SignUpRequestHandler;
 import nextstep.jwp.handler.StaticResourceRequestHandler;
@@ -13,14 +12,13 @@ import org.apache.catalina.startup.Tomcat;
 public class Application {
 
     public static void main(String[] args) {
-        HandlerMapping mapping = new HandlerMapping(List.of(
-                new RootPageRequestHandler(),
-                new LoginPageHandler(),
-                new LoginRequestHandler(),
-                new SignUpRequestHandler(),
-                new StaticResourceRequestHandler()
+        HandlerMapping mapping = new HandlerMapping(Map.of(
+                "/", new RootPageRequestHandler(),
+                "/login", new LoginHandler(),
+                "/register", new SignUpRequestHandler(),
+                "/**", new StaticResourceRequestHandler()
         ));
-        DispatcherServlet dispatcherServlet = new DispatcherServlet(mapping);
+        DispatcherController dispatcherServlet = new DispatcherController(mapping);
         final var tomcat = new Tomcat(dispatcherServlet);
         tomcat.start();
     }

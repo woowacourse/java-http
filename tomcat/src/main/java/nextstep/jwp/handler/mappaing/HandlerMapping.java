@@ -1,24 +1,23 @@
 package nextstep.jwp.handler.mappaing;
 
-import java.util.List;
-import javax.annotation.Nullable;
-import nextstep.jwp.handler.RequestHandler;
+import java.util.Map;
+import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.request.HttpRequest;
 
 public class HandlerMapping {
 
-    private final List<RequestHandler> handler;
+    private final Map<String, Controller> handler;
 
-    public HandlerMapping(List<RequestHandler> handler) {
+    public HandlerMapping(Map<String, Controller> handler) {
         this.handler = handler;
     }
 
-    public @Nullable RequestHandler getHandler(HttpRequest request) {
-        for (RequestHandler requestHandler : handler) {
-            if (requestHandler.canHandle(request)) {
-                return requestHandler;
-            }
+    public Controller getHandler(HttpRequest request) {
+        String uri = request.requestLine().uri().uri();
+        Controller controller = handler.get(uri);
+        if (controller == null) {
+            return handler.get("/**");
         }
-        return null;
+        return controller;
     }
 }

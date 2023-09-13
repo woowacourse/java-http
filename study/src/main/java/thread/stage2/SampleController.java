@@ -26,7 +26,7 @@ public class SampleController {
     @GetMapping("/test")
     @ResponseBody
     public String helloWorld() throws InterruptedException {
-        Thread.sleep(500);
+        Thread.sleep(1500);
         log.info("http call count : {}", count.incrementAndGet());
         return helloWorldService.helloWorld();
     }

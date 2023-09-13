@@ -17,7 +17,7 @@ public class HttpRequestLine {
         return new HttpRequestLine(requestLineInfos.get(0), requestLineInfos.get(1), requestLineInfos.get(2));
     }
 
-    public HttpRequestLine(
+    private HttpRequestLine(
             final String httpMethod,
             final String uri,
             final String httpVersion

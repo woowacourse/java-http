@@ -7,6 +7,8 @@ import org.apache.coyote.http11.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String NOT_FOUND_PAGE = "/404.html";
+
     @Override
     public void service(final HttpRequest request, final HttpResponse response) throws Exception {
         if (request.matchesMethod(HttpMethod.GET)) {
@@ -18,7 +20,7 @@ public abstract class AbstractController implements Controller {
             return;
         }
         response.setHttpStatus(HttpStatus.FOUND);
-        response.sendRedirect("/404.html");
+        response.sendRedirect(NOT_FOUND_PAGE);
     }
 
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {

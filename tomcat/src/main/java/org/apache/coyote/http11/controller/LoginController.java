@@ -7,10 +7,10 @@ import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +49,18 @@ public class LoginController extends AbstractController {
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (request.hasJSessionId()) {
             final Session session = SESSION_MANAGER.findSession(request.getJSessionId());
-            if (session == null) {
-                throw new IllegalArgumentException("존재하지 않는 세션입니다.");
-            }
+            validateExistentSession(session);
             response.setHttpStatus(HttpStatus.FOUND);
             response.sendRedirect(MAIN_PAGE);
             return;
         }
         response.setHttpStatus(HttpStatus.OK);
         response.setPath(LOGIN_PAGE);
+    }
+
+    private void validateExistentSession(final Session session) {
+        if (session == null) {
+            throw new IllegalArgumentException("존재하지 않는 세션입니다.");
+        }
     }
 }

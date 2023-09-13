@@ -1,6 +1,6 @@
 package org.apache.catalina;
 
-import org.apache.coyote.http11.auth.Session;
+import org.apache.coyote.http11.session.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a particular Container.  Different Manager

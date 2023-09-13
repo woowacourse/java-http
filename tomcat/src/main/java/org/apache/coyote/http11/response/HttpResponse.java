@@ -11,6 +11,8 @@ public class HttpResponse {
 
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String BLANK = " ";
+    private static final String STATIC_PATH = "static";
+    private static final String ROOT_PATH = "/";
 
     private final HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
     private HttpStatusLine httpStatusLine;
@@ -20,7 +22,7 @@ public class HttpResponse {
 
     public String get() throws IOException {
         final String contentType = ContentType.getByPath(path) + CHARSET_UTF_8;
-        if (path.equals("/")) {
+        if (path.equals(ROOT_PATH)) {
             return makeResponse(contentType);
         }
         if (isRedirect) {
@@ -30,7 +32,7 @@ public class HttpResponse {
             return makeRedirectResponse();
         }
 
-        final URL resource = HttpResponse.class.getClassLoader().getResource("static" + path);
+        final URL resource = HttpResponse.class.getClassLoader().getResource(STATIC_PATH + path);
         this.body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         return makeResponse(contentType);
     }

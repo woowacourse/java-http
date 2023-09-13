@@ -32,7 +32,7 @@ public class HttpResponse implements Response {
     }
 
     public void addCookie(Cookie cookie) {
-        httpResponseHeaders.addHeaderFieldAndValue("Set-Cookie", cookie.toString());
+        httpResponseHeaders.addHeaderFieldAndValue("Set-Cookie", cookie.getValue());
     }
 
     public void sendRedirect(String redirectURL) {
@@ -56,18 +56,17 @@ public class HttpResponse implements Response {
         return httpResponseHeaders.getStaticResourcePath();
     }
 
-    @Override
-    public String toString() {
+    public String getMessage() {
         if (httpResponseBody.exist()) {
             httpResponseBody.validateLength(httpResponseHeaders.getContentLength());
             return String.join(CRLF,
-                    httpStatusLine.toString(),
-                    httpResponseHeaders.toString(),
-                    httpResponseBody.toString());
+                    httpStatusLine.getMessage(),
+                    httpResponseHeaders.getMessage(),
+                    httpResponseBody.getMessage());
         }
 
         return String.join(CRLF,
-                httpStatusLine.toString(),
-                httpResponseHeaders.toString());
+                httpStatusLine.getMessage(),
+                httpResponseHeaders.getMessage());
     }
 }

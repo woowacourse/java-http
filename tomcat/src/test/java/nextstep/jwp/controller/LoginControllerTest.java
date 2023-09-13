@@ -41,7 +41,7 @@ class LoginControllerTest {
         loginController.doGet(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(
+        assertThat(response.getMessage()).hasToString(
                 "HTTP/1.1 302 Found " + CRLF +
                 "Set-Cookie: JSESSIONID=id " + CRLF +
                 "Location: /index.html " + CRLF
@@ -112,7 +112,7 @@ class LoginControllerTest {
         loginController.doPost(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(
+        assertThat(response.getMessage()).hasToString(
                 "HTTP/1.1 302 Found " + CRLF +
                         "Set-Cookie: JSESSIONID=로이스 " + CRLF +
                         "Location: /index.html " + CRLF

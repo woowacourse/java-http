@@ -21,8 +21,7 @@ class HttpResponseBody {
         return body != null;
     }
 
-    @Override
-    public String toString() {
+    public String getMessage() {
         return body;
     }
 }

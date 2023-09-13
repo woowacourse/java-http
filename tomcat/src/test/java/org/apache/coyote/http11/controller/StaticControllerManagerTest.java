@@ -44,6 +44,6 @@ class StaticControllerManagerTest {
         staticControllerManager.service(request, response);
 
         // then
-        assertThat(response.toString()).contains("HTTP/1.1 200 OK");
+        assertThat(response.getMessage()).contains("HTTP/1.1 200 OK");
     }
 }

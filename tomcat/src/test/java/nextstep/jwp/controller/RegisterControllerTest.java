@@ -71,6 +71,6 @@ class RegisterControllerTest {
         // then
         User user = InMemoryUserRepository.findByAccount("롤스로이스").get();
         assertThat(user.checkPassword("비쌈")).isTrue();
-        assertThat(response.toString()).contains("Location: /index.html");
+        assertThat(response.getMessage()).contains("Location: /index.html");
     }
 }

@@ -23,7 +23,7 @@ class HttpResponseTest {
         httpResponse.addBody("로이스 잘생겼다");
 
         // when
-        String string = httpResponse.toString();
+        String string = httpResponse.getMessage();
 
         // then
         Assertions.assertThat(string).contains("HTTP/1.1 200 OK", "Set-Cookie: JSESSIONID=1234", "Content-Type: text/html", "로이스 잘생겼다");

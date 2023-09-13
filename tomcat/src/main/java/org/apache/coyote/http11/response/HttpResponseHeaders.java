@@ -48,8 +48,7 @@ class HttpResponseHeaders {
         return Long.parseLong(headers.get(CONTENT_LENGTH).get(0));
     }
 
-    @Override
-    public String toString() {
+    public String getMessage() {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Map.Entry<String, List<String>> fieldAndValue : headers.entrySet()) {

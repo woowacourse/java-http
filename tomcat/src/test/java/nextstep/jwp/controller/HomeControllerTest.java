@@ -28,7 +28,7 @@ class HomeControllerTest {
         homeController.doGet(request, httpResponse);
 
         // then
-        Assertions.assertThat(httpResponse.toString()).hasToString(
+        Assertions.assertThat(httpResponse.getMessage()).hasToString(
                 "HTTP/1.1 200 OK " + CRLF +
                 "Content-Length: 12 " + CRLF +
                 "Content-Type: text/html;charset=utf-8 " + CRLF + CRLF +

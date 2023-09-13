@@ -27,8 +27,7 @@ class HttpStatusLine {
         this.httpStatus = httpStatus;
     }
 
-    @Override
-    public String toString() {
+    public String getMessage() {
         return versionOfTheProtocol +
                 SPACE +
                 httpStatus.getStatusCode() +

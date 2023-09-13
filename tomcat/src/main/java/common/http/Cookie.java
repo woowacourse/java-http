@@ -46,8 +46,7 @@ public class Cookie {
         return items.get(attribute);
     }
 
-    @Override
-    public String toString() {
+    public String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, String> item : items.entrySet()) {
             stringBuilder.append(item.getKey()).append(DELIMITER).append(item.getValue()).append(SEPARATOR);

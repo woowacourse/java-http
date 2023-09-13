@@ -19,4 +19,6 @@ public interface Response {
     String getStaticResourcePath();
 
     void addBody(String body);
+
+    String getMessage();
 }

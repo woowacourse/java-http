@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
 
             serviceIfHasStaticResourcePath(httpRequest, httpResponse);
 
-            outputStream.write(httpResponse.toString().getBytes());
+            outputStream.write(httpResponse.getMessage().getBytes());
             outputStream.flush();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

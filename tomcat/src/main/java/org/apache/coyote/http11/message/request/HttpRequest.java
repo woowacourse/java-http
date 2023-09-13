@@ -70,12 +70,11 @@ public class HttpRequest {
 
     public Session getSession(final boolean createIfNotExist) {
         final Optional<Cookie> foundCookie = getCookie();
-        final Session session = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
-            .map(SessionManager::findSession)
-            .orElse(null);
+        final Optional<Session> session = foundCookie.map(cookie -> cookie.findByName("JSESSIONID"))
+            .flatMap(SessionManager::findSession);
 
-        if (session != null) {
-            return session;
+        if (session.isPresent()) {
+            return session.get();
         }
         if (createIfNotExist) {
             return createNewSession();

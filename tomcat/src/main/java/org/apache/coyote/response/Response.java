@@ -5,6 +5,7 @@ import org.apache.coyote.http11.Protocol;
 public class Response {
 
     private static final String LOCATION = "Location";
+    private static final String LINE_SPLIT_DELIMITER = "\r\n";
 
     private final ResponseLine responseLine;
     private final ResponseHeader responseHeader;
@@ -51,6 +52,9 @@ public class Response {
     }
 
     public byte[] getResponseBytes() {
-        return String.join("\r\n", responseLine.getResponseLine(), responseHeader.getHeader(), responseBody.getBody()).getBytes();
+        return String.join(LINE_SPLIT_DELIMITER,
+                responseLine.getResponseLine(),
+                responseHeader.getHeader(),
+                responseBody.getBody()).getBytes();
     }
 }

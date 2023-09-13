@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpCookie;
 public class ResponseHeader {
 
     private static final String LINE_SPLIT_DELIMITER = "\r\n";
-
+    private static final String KEY_SPLIT_DELIMITER = ": ";
 
     private Map<String, String> headers;
     private HttpCookie httpCookie;
@@ -31,7 +31,7 @@ public class ResponseHeader {
         for (Entry<String, String> entry : headers.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            stringBuilder.append(key + ": " + value + LINE_SPLIT_DELIMITER);
+            stringBuilder.append(key + KEY_SPLIT_DELIMITER + value + LINE_SPLIT_DELIMITER);
         }
         addCookieHeader(stringBuilder);
         return stringBuilder.toString();

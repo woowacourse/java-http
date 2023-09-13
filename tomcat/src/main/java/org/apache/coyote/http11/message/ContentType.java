@@ -1,7 +1,11 @@
 package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestLine;
@@ -16,6 +20,15 @@ public enum ContentType {
 
     public static final String ACCEPT_HEADER = "Accept";
     private static final ContentType DEFAULT = HTML;
+    private static final String FIELD_DELIMITER = ",";
+    private static final String WEIGHT_DELIMITER = ";";
+    private static final Map<String, ContentType> CONTENT_TYPES_BY_TYPE;
+
+    static {
+        CONTENT_TYPES_BY_TYPE = Arrays.stream(values())
+            .collect(
+                Collectors.toMap(ContentType::getType, contentType -> contentType));
+    }
 
     private final String type;
 
@@ -24,22 +37,39 @@ public enum ContentType {
     }
 
     public static ContentType findResponseContentTypeFromRequest(final HttpRequest httpRequest) {
-        final ContentType acceptedContentType = httpRequest.findFirstHeaderValue(ACCEPT_HEADER)
-            .map(ContentType::findContentTypeByType)
-            .orElse(ALL);
+        final Optional<String> acceptValues = httpRequest.getHeaderValues(ACCEPT_HEADER);
 
-        // 1. content type이 없으면? 경로에서 찾음
-        // 2.
+        ContentType acceptedContentType = ALL;
+        if (acceptValues.isPresent()) {
+            final List<String> acceptTypes = parseAcceptTypes(acceptValues.get());
+            acceptedContentType = findContentTypeFromAcceptTypes(acceptTypes);
+        }
+
         if (acceptedContentType != ALL) {
             return acceptedContentType;
         }
         return findContentTypeFromRequestPath(httpRequest.getRequestLine());
     }
 
-    private static ContentType findContentTypeByType(final String type) {
-        return Arrays.stream(values())
-            .filter(contentType -> contentType.type.equals(type))
-            .findAny()
+    private static List<String> parseAcceptTypes(final String rawAcceptTypes) {
+        return Arrays.stream(rawAcceptTypes.split(FIELD_DELIMITER))
+            .map(ContentType::removeWeight)
+            .collect(Collectors.toList());
+    }
+
+    private static String removeWeight(final String value) {
+        final int weightIndex = value.indexOf(WEIGHT_DELIMITER);
+        if (weightIndex == -1) {
+            return value;
+        }
+        return value.substring(0, weightIndex);
+    }
+
+    private static ContentType findContentTypeFromAcceptTypes(final List<String> types) {
+        return types.stream()
+            .map(CONTENT_TYPES_BY_TYPE::get)
+            .filter(Objects::nonNull)
+            .findFirst()
             .orElseThrow(UnsupportedContentTypeException::new);
     }
 

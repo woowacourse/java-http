@@ -20,3 +20,10 @@
   - [x] Request 헤더에 `JSESSIONID` 가 없으면 Response 헤더에 `Set-Cookie` 를 설정한다.
 - [x] 로그인에 성공한 사용자를 세션에 저장한다.
   - [x] 로그인 된 상태로 GET "/login" 에 접속하면 "/index.html" 로 리다이렉트한다.
+
+### 3단계
+- [x] Controller 인터페이스를 추가하여 요청 URL에 따라 로직을 처리하는 Handler 를 분리한다.
+
+### 4단계
+- [x] `ThreadPoolExecutors` 를 사용해 스레드 풀을 사용한다.
+- [x] 동시성 컬렉션 (SessionManager) 을 적용한다.

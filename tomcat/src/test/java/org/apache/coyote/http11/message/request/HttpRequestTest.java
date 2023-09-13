@@ -43,7 +43,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(httpRequest.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
             () -> assertThat(httpRequest.getRequestLine().getPath()).isEqualTo("/index.html"),
-            () -> assertThat(httpRequest.getHeaders().getHeadersWithValue())
+            () -> assertThat(httpRequest.getHeaders().getValuesByHeaderField())
                 .containsExactlyInAnyOrderEntriesOf(
                     Map.of(
                         "Host", "localhost:8080",
@@ -78,7 +78,7 @@ class HttpRequestTest {
         assertAll(
             () -> assertThat(httpRequest.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
             () -> assertThat(httpRequest.getRequestLine().getPath()).isEqualTo("/index.html"),
-            () -> assertThat(httpRequest.getHeaders().getHeadersWithValue())
+            () -> assertThat(httpRequest.getHeaders().getValuesByHeaderField())
                 .containsExactlyInAnyOrderEntriesOf(
                     Map.of(
                         "Host", "localhost:8080",

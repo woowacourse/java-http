@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Protocol HTTP_11 = Protocol.HTTP1_1;
 
     private final Socket connection;
 
@@ -35,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = new BufferedOutputStream(connection.getOutputStream())) {
             RequestParser requestParser = new RequestParser(inputStream);
             Request request = requestParser.parse();
-            Response response = new Response();
+            Response response = new Response(HTTP_11);
 
             doService(request, response);
 
@@ -51,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             controller.service(request, response);
         } catch (Exception e) {
-            log.info(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 }

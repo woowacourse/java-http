@@ -9,8 +9,8 @@ public class ResponseLine {
     private Protocol protocol;
     private HttpStatus httpStatus;
 
-    public ResponseLine() {
-        this.protocol = Protocol.HTTP1_1;
+    public ResponseLine(Protocol protocol) {
+        this.protocol = protocol;
         this.httpStatus = null;
     }
 

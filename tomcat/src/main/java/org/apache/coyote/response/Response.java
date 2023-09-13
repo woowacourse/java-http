@@ -10,8 +10,8 @@ public class Response {
     private final ResponseHeader responseHeader;
     private final ResponseBody responseBody;
 
-    public Response() {
-        this(new ResponseLine(), new ResponseHeader(), new ResponseBody());
+    public Response(Protocol protocol) {
+        this(new ResponseLine(protocol), new ResponseHeader(), new ResponseBody());
     }
 
     public Response(ResponseLine responseLine, ResponseHeader responseHeader, ResponseBody responseBody) {

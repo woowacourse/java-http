@@ -1,10 +1,10 @@
 package nextstep.jwp.common;
 
-import static nextstep.jwp.exception.AuthExceptionType.INVALID_FORM;
+import static nextstep.jwp.exception.FormDataExceptionType.INVALID_FORM;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.exception.AuthException;
+import nextstep.jwp.exception.FormDataException;
 
 public class FormData {
 
@@ -33,6 +33,6 @@ public class FormData {
         if (formTable.containsKey(key)) {
             return formTable.get(key);
         }
-        throw new AuthException(INVALID_FORM);
+        throw new FormDataException(INVALID_FORM);
     }
 }

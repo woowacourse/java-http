@@ -5,7 +5,8 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.catalina.controller.ControllerMapper;
@@ -17,9 +18,9 @@ public class Connector implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int MAX_THREADS_SIZE = 10;
     private static final int MIN_PORT = 1;
     private static final int MAX_PORT = 65535;
+    private static final int DEFAULT_MAX_THREAD = 250;
     private static final String SERVER_START_MESSAGE = "Web Application Server started {} port.";
     public static final int TASK_AWAIT_TIME = 60;
 
@@ -29,11 +30,11 @@ public class Connector implements Runnable {
     private final ExecutorService executorService;
 
     public Connector(final ControllerMapper controllerMapper) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllerMapper, MAX_THREADS_SIZE);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllerMapper, DEFAULT_MAX_THREAD);
     }
 
     public Connector(final int port, final int acceptCount, final ControllerMapper controllerMapper) {
-        this(port, acceptCount, controllerMapper, MAX_THREADS_SIZE);
+        this(port, acceptCount, controllerMapper, DEFAULT_MAX_THREAD);
     }
 
     public Connector(
@@ -45,7 +46,17 @@ public class Connector implements Runnable {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
         this.controllerMapper = controllerMapper;
-        this.executorService = Executors.newFixedThreadPool(maxThreads);
+        this.executorService = new ThreadPoolExecutor(
+                getMaxThread(maxThreads),
+                getMaxThread(maxThreads),
+                0,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(acceptCount)
+        );
+    }
+
+    private int getMaxThread(final int maxThread) {
+        return Math.max(maxThread, DEFAULT_MAX_THREAD);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {

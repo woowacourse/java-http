@@ -28,10 +28,11 @@ public class StaticFile {
     public String getBody() {
         final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         final URL url = classLoader.getResource(STATIC_ROOT_PATH + path);
+        if (url == null) {
+            throw new NoExistFileException();
+        }
         try {
             return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-        } catch (final NullPointerException e) {
-            throw new NoExistFileException();
         } catch (final IOException e) {
             throw new FileReadException();
         }

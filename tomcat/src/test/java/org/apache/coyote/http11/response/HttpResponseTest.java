@@ -98,7 +98,7 @@ class HttpResponseTest {
         // given
         HttpResponse httpResponse = new HttpResponse();
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).
-            addHeader("Location", "index.html").build();
+            location("index.html").build();
         responseEntity.responseView("/index.html");
 
         // when

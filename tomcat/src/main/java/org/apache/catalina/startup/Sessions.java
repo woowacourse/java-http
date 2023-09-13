@@ -13,7 +13,7 @@ public class Sessions {
         idAndSessions.put(id, session);
     }
 
-    Session has(String id) {
+    Session get(String id) {
         if (!idAndSessions.containsKey(id)) {
             return null;
         }
@@ -28,7 +28,7 @@ public class Sessions {
         idAndSessions.clear();
     }
 
-    boolean has(Session session) {
+    boolean get(Session session) {
         return idAndSessions.containsValue(session);
     }
 }

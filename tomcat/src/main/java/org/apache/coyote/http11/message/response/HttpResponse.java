@@ -12,6 +12,7 @@ public class HttpResponse {
 
     private static final String DEFAULT_CHARSET = ";charset=utf-8";
     private static final String SET_COOKIE = "Set-Cookie";
+    private static final String LOCATION = "Location";
     private static final String EMPTY_STRING = "";
     private static final String BLANK = " ";
 
@@ -34,6 +35,10 @@ public class HttpResponse {
     public void setJSessionCookieBySession(final Session session) {
         final Cookie cookie = new Cookie("JSESSIONID", session.getId());
         headers.setHeaderWithValue(SET_COOKIE, cookie.getAllNamesWithValue());
+    }
+
+    public void redirect(final String redirectLocation) {
+        setHeader(LOCATION, redirectLocation);
     }
 
     public void setBody(final String body, final ContentType contentType) {

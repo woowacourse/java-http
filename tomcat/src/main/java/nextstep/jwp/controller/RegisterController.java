@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
             return;
         }
         httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.setHeader("Location", "/index.html");
+        httpResponse.redirect("/index.html");
     }
 
     private void register(final HttpRequest httpRequest) {

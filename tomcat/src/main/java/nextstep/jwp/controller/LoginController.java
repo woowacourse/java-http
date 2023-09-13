@@ -18,7 +18,7 @@ public class LoginController extends AbstractController {
         final Session session = httpRequest.getSession(false);
         if (session != null) {
             httpResponse.setHttpStatus(HttpStatus.FOUND);
-            httpResponse.setHeader("Location", "/index.html");
+            httpResponse.redirect( "/index.html");
             return;
         }
         final String fileContent = fileReader.readStaticFile("/login.html");
@@ -31,11 +31,11 @@ public class LoginController extends AbstractController {
         try {
             final User user = login(httpRequest);
             httpResponse.setHttpStatus(HttpStatus.FOUND);
-            httpResponse.setHeader("Location", "/index.html");
+            httpResponse.redirect("/index.html");
             httpResponse.setJSessionCookieBySession(createUserSession(httpRequest, user));
         } catch (UnauthorizedException e) {
             httpResponse.setHttpStatus(HttpStatus.FOUND);
-            httpResponse.setHeader("Location", "/401.html");
+            httpResponse.redirect("/401.html");
         }
     }
 

@@ -22,52 +22,64 @@ public class HttpRequest implements Request {
         this.httpRequestBody = httpRequestBody;
     }
 
+    @Override
     public HttpMethod getHttpMethod() {
         return httpRequestLine.getHttpMethod();
     }
 
+    @Override
     public String getPath() {
         return httpRequestLine.getPath();
     }
 
+    @Override
     public String getVersionOfTheProtocol() {
         return httpRequestLine.getVersionOfTheProtocol();
     }
 
+    @Override
     public String getCookie() {
         return httpRequestHeaders.getCookie();
     }
 
+    @Override
     public String getAccount() {
         return httpRequestBody.getAccount();
     }
 
+    @Override
     public String getPassword() {
         return httpRequestBody.getPassword();
     }
 
+    @Override
     public String getEmail() {
         return httpRequestBody.getEmail();
     }
 
+    @Override
     public Session getSession() {
         return session;
     }
 
+    @Override
     public Session getSession(boolean create) {
         UUID uuid = UUID.randomUUID();
         this.session = new Session(uuid.toString());
         return session;
     }
 
+    @Override
     public boolean hasValidSession() {
         return session != null;
     }
 
+    @Override
     public boolean hasStaticResourcePath() {
         return STATIC_RESOURCE_PATH_PATTERN.matcher(getPath()).find();
     }
 
+    @Override
     public void addSession(Session session) {
         this.session = session;
     }

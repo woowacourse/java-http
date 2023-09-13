@@ -19,39 +19,48 @@ public class HttpResponse implements Response {
         this.httpResponseBody = new HttpResponseBody();
     }
 
+    @Override
     public void addVersionOfTheProtocol(String versionOfTheProtocol) {
         httpStatusLine.addVersionOfTheProtocol(versionOfTheProtocol);
     }
 
+    @Override
     public void addHttpStatus(HttpStatus httpStatus) {
         httpStatusLine.addHttpStatus(httpStatus);
     }
 
+    @Override
     public void addContentType(ContentType contentType) {
         httpResponseHeaders.addHeaderFieldAndValue("Content-Type", contentType.getType() + ";charset=utf-8");
     }
 
+    @Override
     public void addCookie(Cookie cookie) {
         httpResponseHeaders.addHeaderFieldAndValue("Set-Cookie", cookie.getValue());
     }
 
+    @Override
     public void sendRedirect(String redirectURL) {
         httpResponseHeaders.addHeaderFieldAndValue("Location", redirectURL);
     }
 
+    @Override
     public void addStaticResourcePath(String name) {
         httpResponseHeaders.addHeaderFieldAndValue("Resource-Path", name);
     }
 
+    @Override
     public void addBody(String body) {
         httpResponseHeaders.addHeaderFieldAndValue("Content-Length", String.valueOf(body.getBytes().length));
         httpResponseBody.addBody(body);
     }
 
+    @Override
     public boolean hasStaticResourcePath() {
         return httpResponseHeaders.hasStaticResourcePath();
     }
 
+    @Override
     public String getStaticResourcePath() {
         return httpResponseHeaders.getStaticResourcePath();
     }

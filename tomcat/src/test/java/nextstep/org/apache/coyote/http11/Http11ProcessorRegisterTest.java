@@ -32,7 +32,7 @@ class Http11ProcessorRegisterTest {
     class Register {
 
         @Test
-        void register으로_POST_요청하면_해당_페이지로_이동한다() throws IOException {
+        void register으로_POST_요청하면_index_html_페이지로_이동한다() throws IOException {
             // given
             final RequestLine requestLine = new RequestLine(HttpMethod.POST, new RequestUri("/register"), Protocol.HTTP_1_1);
             final HttpHeaders headers = new HttpHeaders(new EnumMap<>(HttpHeader.class));
@@ -53,9 +53,9 @@ class Http11ProcessorRegisterTest {
         }
 
         @Test
-        void register으로_GET_요청하면_register_html로_리다이렉트_된다() throws IOException {
+        void register으로_GET_요청하면_register_html로_이동한다() throws IOException {
             // given
-            final RequestLine requestLine = new RequestLine(HttpMethod.GET, new RequestUri("/login"), Protocol.HTTP_1_1);
+            final RequestLine requestLine = new RequestLine(HttpMethod.GET, new RequestUri("/register"), Protocol.HTTP_1_1);
             final HttpHeaders headers = new HttpHeaders(new EnumMap<>(HttpHeader.class));
             headers.add(HttpHeader.HOST, "localhost:8080");
             final HttpRequest httpRequest = new HttpRequest(requestLine, headers, HttpBody.empty());
@@ -70,7 +70,7 @@ class Http11ProcessorRegisterTest {
             final HttpResponse expected = new HttpResponse();
             expected.changeStatusLine(StatusLine.from(StatusCode.OK));
             expected.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getValue());
-            expected.changeBody(HttpBody.file("/login.html"));
+            expected.changeBody(HttpBody.file("/register.html"));
 
             assertThat(socket.output()).isEqualTo(expected.serialize());
         }

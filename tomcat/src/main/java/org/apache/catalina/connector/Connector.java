@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.catalina.controller.ControllerMapper;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ public class Connector implements Runnable {
     private static final int MIN_PORT = 1;
     private static final int MAX_PORT = 65535;
     private static final String SERVER_START_MESSAGE = "Web Application Server started {} port.";
+    public static final int TASK_AWAIT_TIME = 60;
 
     private final ServerSocket serverSocket;
     private final ControllerMapper controllerMapper;
@@ -91,9 +93,24 @@ public class Connector implements Runnable {
         stopped = true;
         try {
             serverSocket.close();
-            executorService.shutdown();
+            shutdown();
         } catch (final IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void shutdown () {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(TASK_AWAIT_TIME, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+                if (!executorService.awaitTermination(TASK_AWAIT_TIME, TimeUnit.SECONDS)) {
+                    log.error("Pool did not terminate");
+                }
+            }
+        } catch (final InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 

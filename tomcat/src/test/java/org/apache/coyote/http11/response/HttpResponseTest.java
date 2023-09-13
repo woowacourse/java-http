@@ -21,8 +21,8 @@ class HttpResponseTest {
         httpResponse.responseFrom(responseEntity);
 
         // then
-        assertThat(httpResponse.getStatusLine().toString())
-            .hasToString("HTTP/1.1 200 OK");
+        assertThat(httpResponse.getStatusLine().getHttpStatusCode())
+            .isEqualTo(HttpStatusCode.OK);
     }
 
     @Test

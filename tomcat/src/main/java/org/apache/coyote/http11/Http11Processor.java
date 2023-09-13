@@ -50,7 +50,8 @@ public class Http11Processor implements Runnable, Processor {
             return resourceProvider.staticResourceResponse(httpRequest.getRequestLine().getPath());
         }
         if (handlerMapper.haveAvailableHandler(httpRequest)) {
-            return handlerMapper.controllerResponse(httpRequest, httpResponse);
+            handlerMapper.process(httpRequest, httpResponse);
+            return HttpResponseConverter.convert(httpResponse);
         }
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",

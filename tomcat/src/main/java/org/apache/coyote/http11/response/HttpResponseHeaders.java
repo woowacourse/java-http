@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.coyote.http11.ResourceProvider;
 
 public class HttpResponseHeaders {
@@ -38,17 +37,5 @@ public class HttpResponseHeaders {
 
     public Map<String, String> getHeaders() {
         return headers;
-    }
-
-    @Override
-    public String toString() {
-        return headers.keySet()
-            .stream()
-            .map(headerName -> makeHeader(headerName, headers.get(headerName)))
-            .collect(Collectors.joining(System.lineSeparator()));
-    }
-
-    private String makeHeader(String headerName, String value) {
-        return headerName + ": " + value;
     }
 }

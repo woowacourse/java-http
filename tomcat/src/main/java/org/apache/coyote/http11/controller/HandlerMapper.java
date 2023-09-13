@@ -37,10 +37,9 @@ public class HandlerMapper {
         return controllerByMapper.get(mapper);
     }
 
-    public String controllerResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void process(HttpRequest httpRequest, HttpResponse httpResponse) {
         Controller handler = getHandler(httpRequest);
         handler.service(httpRequest, httpResponse);
-        return httpResponse.toString();
     }
 
     @FunctionalInterface

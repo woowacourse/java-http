@@ -12,28 +12,26 @@ import java.io.InputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class RootControllerTest {
+class GetRegisterControllerTest {
 
     @Test
     void process() throws IOException {
         //given
-        InputStream inputStream = new ByteArrayInputStream(RequestFixture.ROOT_REQUEST.getBytes());
+        InputStream inputStream = new ByteArrayInputStream(RequestFixture.GET_REGISTER_REQUEST.getBytes());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
         httpRequestParser.accept(inputStream);
 
-        RootController rootController = new RootController();
+        GetRegisterController getRegisterController = new GetRegisterController();
         HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder();
 
         //when
-        String response = rootController.process(httpRequestParser, httpResponseBuilder);
+        String response = getRegisterController.process(httpRequestParser, httpResponseBuilder);
 
         //then
         assertAll(
                 () -> assertThat(response).contains("HTTP/1.1 200 OK"),
                 () -> assertThat(response).contains("Content-Type: text/html;charset=utf-8"),
-                () -> assertThat(response).contains("Content-Length: 12"),
-                () -> assertThat(response).contains("Hello world!")
+                () -> assertThat(response).contains("Content-Length: 4319")
         );
     }
-
 }

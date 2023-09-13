@@ -1,8 +1,8 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http11;
 
 public enum HttpStatus {
     OK("200", "OK"),
-    REDIRECT("302", "FOUND"),
+    REDIRECT("302", "Moved Temporarily"),
     NOT_FOUND("404", "Not Found");
 
     private final String httpStatusCode;

@@ -1,12 +1,8 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.handler.FrontController;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http.HttpRequest;
-import org.apache.coyote.http.HttpRequestParser;
-import org.apache.coyote.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +12,17 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final FrontController FRONT_CONTROLLER = new FrontController();
-    private static final HttpRequestParser HTTP_REQUEST_PARSER = new HttpRequestParser();
 
     private final Socket connection;
+    private final HttpRequestParser httpRequestParser;
+    private final HttpResponseBuilder httpResponseBuilder;
+    private final FrontController frontController;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.httpRequestParser = new HttpRequestParser();
+        this.httpResponseBuilder = new HttpResponseBuilder();
+        this.frontController = new FrontController();
     }
 
     @Override
@@ -35,11 +35,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = HTTP_REQUEST_PARSER.convertToHttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse();
-
-            Controller controller = FRONT_CONTROLLER.handle(httpRequest);
-            String response = controller.process(httpRequest, httpResponse);
+            httpRequestParser.accept(inputStream);
+            String response = frontController.process(httpRequestParser, httpResponseBuilder);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -1,4 +1,4 @@
-package coyote.http;
+package org.apache.coyote.http;
 
 public class RequestFixture {
 

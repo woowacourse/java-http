@@ -38,6 +38,17 @@ public class LoginController extends AbstractController {
         getLoginPage(request, response);
     }
 
+    private Session getSession(String sessionId) {
+        if (sessionId == null) {
+            return null;
+        }
+        return httpSessionManager.findSession(sessionId);
+    }
+
+    private boolean hasUserSession(Session session) {
+        return session != null && session.getAttribute(USER_SESSION_KEY) != null;
+    }
+
     private void getLoginPage(Request request, Response response) {
         FileReader fileReader = FileReader.from(request.getPath());
         String body = fileReader.read();
@@ -46,10 +57,6 @@ public class LoginController extends AbstractController {
                 .addHeaders(CONTENT_TYPE, request.getResourceTypes() + FINISH_VALUE + ENCODING_UTF_8)
                 .addHeaders(CONTENT_LENGTH, String.valueOf(body.getBytes().length))
                 .setResponseBody(body);
-    }
-
-    private boolean hasUserSession(Session session) {
-        return session != null && session.getAttribute(USER_SESSION_KEY) != null;
     }
 
     @Override
@@ -97,12 +104,5 @@ public class LoginController extends AbstractController {
         Session session = httpSessionManager.addNewSession();
         session.setAttribute(USER_SESSION_KEY, user);
         response.addCookie(JSESSIONID, session.getId());
-    }
-
-    private Session getSession(String sessionId) {
-        if (sessionId == null) {
-            return null;
-        }
-        return httpSessionManager.findSession(sessionId);
     }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 import nextstep.jwp.controller.FileReader.FileReader;
 import nextstep.jwp.controller.LoginController;
 import org.apache.coyote.FixtureFactory;
+import org.apache.coyote.http11.Protocol;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.response.Response;
@@ -25,8 +26,8 @@ class LoginControllerTest {
         Map<String, String> body = new HashMap<>();
         body.put("account", "gugu");
         body.put("password", "password");
-        Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
-        Response response = new Response();
+        Request request = FixtureFactory.getHttpPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
+        Response response = new Response(Protocol.HTTP1_1);
 
         LoginController loginController = new LoginController();
         loginController.service(request, response);
@@ -47,8 +48,8 @@ class LoginControllerTest {
         body.put("account", "gugu12");
         body.put("password", "password123");
 
-        Request request = FixtureFactory.getPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
-        Response response = new Response();
+        Request request = FixtureFactory.getHttpPostRequest("/login", DEFAULT_HEADERS, new RequestBody(body));
+        Response response = new Response(Protocol.HTTP1_1);
 
         LoginController loginController = new LoginController();
         loginController.service(request, response);
@@ -65,8 +66,8 @@ class LoginControllerTest {
     @Test
     @DisplayName("로그인 페이지에 접속할 수 있다")
     void login_get() throws Exception {
-        Request request = FixtureFactory.getGetRequest("/login", DEFAULT_HEADERS);
-        Response response = new Response();
+        Request request = FixtureFactory.getHttpGetRequest("/login", DEFAULT_HEADERS);
+        Response response = new Response(Protocol.HTTP1_1);
 
         LoginController loginController = new LoginController();
         loginController.service(request, response);

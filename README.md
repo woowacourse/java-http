@@ -106,4 +106,4 @@
 - [x] enum 객체 static 메소드의 비교 메소드 통일(equals -> equalsIgnoreCase)
 - [x] Response의 protocol 기본값 제거 -> 외부 주입
 - [x] ResponseHeader.getHeader() 상수화
-- [ ] 메소드명 체크 ex) ResourceController.getHttpResponse
+- [x] 메소드명 체크 ex) ResourceController.getHttpResponse

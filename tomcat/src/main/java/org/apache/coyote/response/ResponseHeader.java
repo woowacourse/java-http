@@ -33,11 +33,11 @@ public class ResponseHeader {
             String value = entry.getValue();
             stringBuilder.append(key + KEY_SPLIT_DELIMITER + value + LINE_SPLIT_DELIMITER);
         }
-        addCookieHeader(stringBuilder);
+        getCookieHeader(stringBuilder);
         return stringBuilder.toString();
     }
 
-    private void addCookieHeader(StringBuilder stringBuilder) {
+    private void getCookieHeader(StringBuilder stringBuilder) {
         if (httpCookie.isEmpty()) {
             return;
         }

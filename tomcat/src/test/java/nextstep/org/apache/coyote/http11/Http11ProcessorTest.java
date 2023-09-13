@@ -113,7 +113,7 @@ class Http11ProcessorTest {
 
 
     @Test
-    @DisplayName("로그인 요청을 보내면 JSESSIONID가 담긴 응답이 온다.")
+    @DisplayName("JSESSIONID를 가지고 로그인할 수 있다.")
     void login_JSESSIONID() throws URISyntaxException, IOException {
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",

@@ -26,11 +26,11 @@ public class FixtureFactory {
         return new RequestHeader(headers);
     }
 
-    public static Request getGetRequest(String url, Map<String, String> headers) {
+    public static Request getHttpGetRequest(String url, Map<String, String> headers) {
         return new Request(getRequestLine(HttpMethod.GET, url), getRequestHeader(headers), new RequestBody(new HashMap<>()));
     }
 
-    public static Request getPostRequest(String url, Map<String, String> headers, RequestBody requestBody) {
+    public static Request getHttpPostRequest(String url, Map<String, String> headers, RequestBody requestBody) {
         return new Request(getRequestLine(HttpMethod.POST, url), getRequestHeader(headers), requestBody);
     }
 }

@@ -8,9 +8,10 @@ import java.nio.file.Path;
 
 public class FileReader {
 
-    private static final URL NOT_FOUND_HTML = FileReader.class.getResource("/static/404.html");
     private static final String DEFAULT_RESOURCE_PATH = "/static";
     private static final String HTML_EXTENSION = ".html";
+    private static final URL NOT_FOUND_HTML = FileReader.class.getResource(
+            DEFAULT_RESOURCE_PATH + "/404" + HTML_EXTENSION);
 
     private final Path path;
     private final boolean found;

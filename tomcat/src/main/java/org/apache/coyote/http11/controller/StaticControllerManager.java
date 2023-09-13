@@ -4,11 +4,14 @@ import common.http.Controller;
 import common.http.ControllerManager;
 import common.http.Request;
 import common.http.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaticControllerManager implements ControllerManager {
 
     private static final StaticControllerManager instance = new StaticControllerManager();
     private static final Controller controller = new StaticResourceController();
+    private static final Logger log = LoggerFactory.getLogger(StaticControllerManager.class);
 
     private StaticControllerManager() {}
 
@@ -23,6 +26,7 @@ public class StaticControllerManager implements ControllerManager {
 
     @Override
     public void service(Request request, Response response) {
+        log.info("Controller: {}", this.getClass().getName());
         controller.service(request, response);
     }
 }

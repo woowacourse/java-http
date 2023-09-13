@@ -21,7 +21,7 @@ class StaticControllerManagerTest {
     @Test
     void 컨트롤러를_추가할_시_예외를_반환한다() {
         // given
-        StaticControllerManager staticControllerManager = new StaticControllerManager();
+        StaticControllerManager staticControllerManager = StaticControllerManager.getInstance();
         LoginController loginController = new LoginController();
 
         // expect
@@ -33,7 +33,7 @@ class StaticControllerManagerTest {
     @Test
     void 정적파일을_제공하는_컨트롤러를_찾아서_service를_실행한다() {
         // given
-        StaticControllerManager staticControllerManager = new StaticControllerManager();
+        StaticControllerManager staticControllerManager = StaticControllerManager.getInstance();
         Request request = mock(HttpRequest.class);
         HttpResponse response = new HttpResponse();
         when(request.getVersionOfTheProtocol()).thenReturn("HTTP/1.1");

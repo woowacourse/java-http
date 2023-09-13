@@ -42,9 +42,13 @@ public class Http11Processor implements Runnable, Processor {
             Request httpRequest = HttpRequestParser.parse(reader);
             Response httpResponse = new HttpResponse();
 
+            log.info("Path: {}, Method: {}", httpRequest.getPath(), httpRequest.getHttpMethod());
+
             controllerManager.service(httpRequest, httpResponse);
 
             serviceIfHasStaticResourcePath(httpRequest, httpResponse);
+
+            log.info(httpResponse.getMessage());
 
             outputStream.write(httpResponse.getMessage().getBytes());
             outputStream.flush();

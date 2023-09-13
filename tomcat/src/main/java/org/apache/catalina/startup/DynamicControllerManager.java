@@ -7,6 +7,8 @@ import common.http.Cookies;
 import common.http.Request;
 import common.http.Response;
 import common.http.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ public class DynamicControllerManager implements ControllerManager {
 
     private static final Map<String, Controller> mapper = new HashMap<>();
     private static final SessionManager sessionManager = new SessionManager();
+    private static final Logger log = LoggerFactory.getLogger(DynamicControllerManager.class);
 
     @Override
     public void add(String path, Controller controller) {
@@ -30,6 +33,7 @@ public class DynamicControllerManager implements ControllerManager {
             return;
         }
 
+        log.info("Controller: {}", controller.getClass().getName());
         controller.service(request, response);
 
         saveNewSession(request);

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toMap;
 
 public class Cookies {
 
@@ -22,18 +23,16 @@ public class Cookies {
     }
 
     public static Cookies from(final String cookieValue) {
-        final Map<String, String> result = new HashMap<>();
-
         if (isNull(cookieValue)) {
-            return new Cookies(result);
+            return new Cookies(new HashMap<>());
         }
 
         final String[] cookies = cookieValue.split(DELIMITER);
-        Arrays.stream(cookies)
+        final Map<String, String> cookieEntry = Arrays.stream(cookies)
                 .map(cookie -> cookie.split(KEY_VALUE_DELIMITER))
-                .forEach(cookie -> result.put(cookie[KEY_INDEX], cookie[VALUE_INDEX]));
+                .collect(toMap(cookie -> cookie[KEY_INDEX], cookie -> cookie[VALUE_INDEX]));
 
-        return new Cookies(result);
+        return new Cookies(cookieEntry);
     }
 
     public static String createNewSession() {

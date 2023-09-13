@@ -11,6 +11,7 @@ public class HttpResponse {
 
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
     private static final String BLANK = " ";
+    private static final String EMPTY_STRING = "";
     private static final String STATIC_PATH = "static";
     private static final String ROOT_PATH = "/";
 
@@ -33,6 +34,9 @@ public class HttpResponse {
         }
 
         final URL resource = HttpResponse.class.getClassLoader().getResource(STATIC_PATH + path);
+        if (resource == null) {
+            return EMPTY_STRING;
+        }
         this.body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         return makeResponse(contentType);
     }

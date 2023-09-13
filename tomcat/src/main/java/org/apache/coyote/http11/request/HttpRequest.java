@@ -7,27 +7,24 @@ import java.util.Map;
 
 import static org.apache.coyote.http11.ContentType.ALL;
 import static org.apache.coyote.http11.ContentType.HTML;
-import static org.apache.coyote.http11.ContentType.URL_ENCODED;
 import static org.apache.coyote.http11.response.Header.ACCEPT;
 import static org.apache.coyote.http11.response.Header.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.Header.CONTENT_TYPE;
 import static org.apache.coyote.http11.response.Header.COOKIE;
 
-public class RequestReader {
+public class HttpRequest {
 
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
-    private static final String AMPERSAND = "&";
-    private static final String EQUAL_SIGN = "=";
     private static final String CRLF = "\r\n";
     private static final String SPACE = " ";
     private static final String COMMA = ",";
     private final BufferedReader bufferedReader;
-    private RequestLine requestLine;
     private final Map<String, String> headers = new HashMap<>();
-    private final Map<String, String> bodies = new HashMap<>();
+    private RequestLine requestLine;
+    private RequestBody requestBody;
     private Cookie cookie;
 
-    public RequestReader(BufferedReader bufferedReader) {
+    public HttpRequest(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
     }
 
@@ -38,9 +35,7 @@ public class RequestReader {
         while (!(line = bufferedReader.readLine()).isBlank()) {
             putHeader(line);
         }
-        if (URL_ENCODED.getType().equals(headers.get(CONTENT_TYPE.getName()))) {
-            readBody();
-        }
+        requestBody = new RequestBody(readBody(), headers.get(CONTENT_TYPE.getName()));
     }
 
     private void putHeader(String line) {
@@ -56,23 +51,18 @@ public class RequestReader {
         }
     }
 
-    private void readBody() throws IOException {
+    private String readBody() throws IOException {
+        if(!headers.containsKey(CONTENT_LENGTH.getName())){
+            return "";
+        }
         int contentLength = getContentLength();
         char[] chars = new char[contentLength];
         bufferedReader.read(chars, 0, contentLength);
-        putBody(new String(chars));
+        return new String(chars);
     }
 
     private int getContentLength() {
         return Integer.parseInt(headers.get(CONTENT_LENGTH.getName()));
-    }
-
-    private void putBody(String line) {
-        String[] split = line.split(AMPERSAND);
-        for (String s : split) {
-            String[] keyValue = s.split(EQUAL_SIGN);
-            bodies.put(keyValue[0], keyValue[1]);
-        }
     }
 
     public String getContentType() {
@@ -88,7 +78,7 @@ public class RequestReader {
     }
 
     public String getBodyValue(String key) {
-        return bodies.get(key);
+        return requestBody.getBodyValue(key);
     }
 
     public boolean hasSessionId() {

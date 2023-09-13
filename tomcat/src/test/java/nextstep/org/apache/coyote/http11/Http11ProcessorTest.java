@@ -249,9 +249,8 @@ class Http11ProcessorTest {
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5564 ",
                 "",
-                responseBody);
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

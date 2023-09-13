@@ -1,17 +1,28 @@
 package nextstep.jwp.presentation;
 
-import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-import static org.apache.coyote.http11.response.StatusCode.OK;
+public class MainController extends AbstractController{
 
-public class MainController implements Controller{
+    private static final MainController INSTANCE = new MainController();
+
+    private MainController() {
+    }
+
+    public static MainController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
-    public Response service(RequestReader requestReader) {
-        return new Response()
-                .addResponseLine(requestReader.getProtocol(), OK)
-                .addBaseHeader(requestReader.getContentType())
-                .createBodyByText("Hello world!");
+    public HttpResponse doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        return httpResponse
+                .addBaseHeader(httpRequest.getContentType())
+                .addBody("Hello world!");
+    }
+
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        return null;
     }
 }

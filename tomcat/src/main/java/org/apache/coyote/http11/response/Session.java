@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Session  {
     private final String id;
-    private final Map<String, Object> params = new HashMap<>();
+    private final Map<String, Object> params = new ConcurrentHashMap<>();
 
     public Session(final String id) {
         this.id = id;
@@ -20,6 +20,6 @@ public class Session  {
     }
 
     public void setAttribute(final String name, final Object value) {
-        params.put(name, value);
+        params.putIfAbsent(name, value);
     }
 }

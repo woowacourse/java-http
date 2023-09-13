@@ -2,52 +2,42 @@ package nextstep.jwp.presentation;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.FileReader;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
-import java.io.IOException;
+public class RegisterController extends AbstractController {
 
-import static org.apache.coyote.http11.response.Header.LOCATION;
-import static org.apache.coyote.http11.Method.GET;
-import static org.apache.coyote.http11.Method.POST;
-import static org.apache.coyote.http11.response.StatusCode.FOUND;
-import static org.apache.coyote.http11.response.StatusCode.OK;
+    private static final RegisterController INSTANCE = new RegisterController();
 
-public class RegisterController implements Controller {
+    private RegisterController() {
+    }
 
-    private static final String INDEX = "/index.html";
+    public static RegisterController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
-    public Response service(RequestReader requestReader) throws IOException {
-        String method = requestReader.getMethod();
-
-        if (GET.matches(method)) {
-            return registerPage(requestReader);
-        }
-        if (POST.matches(method)) {
-            return register(requestReader);
-        }
-
-        return null;
+    public HttpResponse doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        String body = FileReader.read(httpRequest.getUri());
+        return httpResponse
+                .addBaseHeader(httpRequest.getContentType())
+                .addBody(body);
     }
 
-    private Response registerPage(RequestReader requestReader) throws IOException {
-        return new Response()
-                .addResponseLine(requestReader.getProtocol(), OK)
-                .addBaseHeader(requestReader.getContentType())
-                .createBodyByFile(requestReader.getUri());
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        join(httpRequest);
+        return httpResponse
+                .addBaseHeader(httpRequest.getContentType())
+                .redirect("/index.html");
     }
 
-    private Response register(RequestReader requestReader) throws IOException {
+    private static void join(HttpRequest httpRequest) {
         InMemoryUserRepository.save(new User(
-                requestReader.getBodyValue("account"),
-                requestReader.getBodyValue("password"),
-                requestReader.getBodyValue("email")
+                httpRequest.getBodyValue("account"),
+                httpRequest.getBodyValue("password"),
+                httpRequest.getBodyValue("email")
         ));
-        return new Response()
-                .addResponseLine(requestReader.getProtocol(), FOUND)
-                .createBodyByFile(INDEX)
-                .addHeader(LOCATION, INDEX)
-                .addBaseHeader(requestReader.getContentType());
     }
 }

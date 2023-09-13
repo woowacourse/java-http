@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.controller.Controller;
+import org.apache.catalina.core.MappingHandler;
+import org.apache.catalina.servlet.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestMapper;

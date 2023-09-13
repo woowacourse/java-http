@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
+import org.apache.catalina.servlet.AbstractController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.header.Cookies;
 import org.apache.coyote.http11.request.header.UserSession;

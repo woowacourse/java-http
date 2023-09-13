@@ -13,8 +13,9 @@ public class LoginController extends AbstractController {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
-    private static final String LOCATION_HEADER = "Location";
     private static final String INDEX_PAGE = "/index.html";
+    public static final String UNAUTHORIZED_PAGE = "/401.html";
+    public static final String LOGIN_PAGE = "/login.html";
 
     private final LoginService loginService;
 
@@ -29,7 +30,7 @@ public class LoginController extends AbstractController {
             return;
         }
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
-        responseEntity.responseView("/login.html");
+        responseEntity.responseView(LOGIN_PAGE);
         httpResponse.responseFrom(responseEntity);
     }
 
@@ -43,13 +44,13 @@ public class LoginController extends AbstractController {
         Optional<String> loginSession = login(httpRequest);
         if (loginSession.isPresent()) {
             httpResponse.responseFrom(ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, INDEX_PAGE)
-                .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession.get())
+                .location(INDEX_PAGE)
+                .sessionCookie(loginSession.get())
                 .build());
             return;
         }
 
-        httpResponse.responseFrom(ResponseEntity.redirect("/401.html"));
+        httpResponse.responseFrom(ResponseEntity.redirect(UNAUTHORIZED_PAGE));
     }
 
     private Optional<String> login(HttpRequest httpRequest) {

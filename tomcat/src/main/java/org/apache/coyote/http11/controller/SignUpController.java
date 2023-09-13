@@ -14,8 +14,8 @@ public class SignUpController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
-    private static final String LOCATION_HEADER = "Location";
     private static final String INDEX_PAGE = "/index.html";
+    public static final String REGISTER_PAGE = "/register.html";
 
     private final LoginService loginService;
 
@@ -30,7 +30,7 @@ public class SignUpController extends AbstractController {
             return;
         }
         ResponseEntity<Object> responseEntity = ResponseEntity.status(200).build();
-        responseEntity.responseView("/register.html");
+        responseEntity.responseView(REGISTER_PAGE);
         httpResponse.responseFrom(responseEntity);
     }
 
@@ -43,11 +43,11 @@ public class SignUpController extends AbstractController {
             }
             String loginSession = signUp(httpRequest);
             httpResponse.responseFrom(ResponseEntity.status(302)
-                .addHeader(LOCATION_HEADER, INDEX_PAGE)
-                .addHeader("Set-Cookie", "JSESSIONID" + "=" + loginSession)
+                .location(INDEX_PAGE)
+                .sessionCookie(loginSession)
                 .build());
         } catch (MemberAlreadyExistsException e) {
-            httpResponse.responseFrom(ResponseEntity.redirect("/register.html"));
+            httpResponse.responseFrom(ResponseEntity.redirect(REGISTER_PAGE));
         }
     }
 

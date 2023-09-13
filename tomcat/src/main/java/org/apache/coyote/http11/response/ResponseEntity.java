@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class ResponseEntity<T> {
 
+    private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
+
     private final int statusCode;
     private final Map<String, String> headers;
     private final T body;
@@ -24,7 +27,7 @@ public class ResponseEntity<T> {
 
     public static ResponseEntity<Object> redirect(String path) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Location", path);
+        headers.put(LOCATION, path);
         return new ResponseEntity<>(302, headers, null);
     }
 
@@ -61,6 +64,10 @@ public class ResponseEntity<T> {
 
         ResponseBuilder addHeader(String key, String value);
 
+        ResponseBuilder location(String location);
+
+        ResponseBuilder sessionCookie(String cookieId);
+
         <T> ResponseEntity<T> build();
 
         <T> ResponseEntity<T> body(T body);
@@ -79,6 +86,18 @@ public class ResponseEntity<T> {
         @Override
         public ResponseBuilder addHeader(String key, String value) {
             headers.put(key, value);
+            return this;
+        }
+
+        @Override
+        public ResponseBuilder location(String location) {
+            headers.put(LOCATION, location);
+            return this;
+        }
+
+        @Override
+        public ResponseBuilder sessionCookie(String cookieId) {
+            headers.put(SET_COOKIE, String.format("JSESSIONID=%s", cookieId));
             return this;
         }
 

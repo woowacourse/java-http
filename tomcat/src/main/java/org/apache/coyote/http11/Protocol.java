@@ -15,7 +15,7 @@ public enum Protocol {
 
     public static Protocol from(String protocolValue) {
         return Arrays.stream(values())
-                .filter(protocol -> protocol.getValue().equals(protocolValue))
+                .filter(protocol -> protocol.getValue().equalsIgnoreCase(protocolValue))
                 .findFirst()
                 .orElseThrow(HttpProtocolException::new);
     }

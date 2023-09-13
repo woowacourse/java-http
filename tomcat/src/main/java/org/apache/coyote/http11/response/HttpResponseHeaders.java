@@ -8,6 +8,8 @@ import org.apache.coyote.http11.ResourceProvider;
 public class HttpResponseHeaders {
 
     private static final ResourceProvider resourceProvider = new ResourceProvider();
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> headers;
 
@@ -19,8 +21,8 @@ public class HttpResponseHeaders {
         Map<String, String> headers = new HashMap<>();
         headers.putAll(responseEntity.getHeaders());
         if (body.isPresent()) {
-            headers.put("Content-Type", typeOf(responseEntity));
-            headers.put("Content-Length", body.get().getBytes().length + " ");
+            headers.put(CONTENT_TYPE, typeOf(responseEntity));
+            headers.put(CONTENT_LENGTH, body.get().getBytes().length + " ");
         }
         return new HttpResponseHeaders(headers);
     }

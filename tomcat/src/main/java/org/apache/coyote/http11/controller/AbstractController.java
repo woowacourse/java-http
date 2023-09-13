@@ -10,24 +10,24 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpMethod method = httpRequest.getRequestLine().getMethod();
-        if (method == HttpMethod.GET) {
+        if (httpRequest.isRequestOf(HttpMethod.GET)) {
             doGet(httpRequest, httpResponse);
             return;
         }
-        if (method == HttpMethod.POST) {
+        if (httpRequest.isRequestOf(HttpMethod.POST)) {
             doPost(httpRequest, httpResponse);
             return;
         }
-        if (method == HttpMethod.PUT) {
+        if (httpRequest.isRequestOf(HttpMethod.PUT)) {
             doPut(httpRequest, httpResponse);
             return;
         }
-        if (method == HttpMethod.DELETE) {
+        if (httpRequest.isRequestOf(HttpMethod.DELETE)) {
             doDelete(httpRequest, httpResponse);
             return;
         }
-        throw new UnsupportedOperationException("해당 HttpMethod 는 아직 지원하지 않습니다." + method);
+        throw new UnsupportedOperationException(
+            "해당 HttpMethod 는 아직 지원하지 않습니다." + httpRequest.getRequestLine().getMethod());
     }
 
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {

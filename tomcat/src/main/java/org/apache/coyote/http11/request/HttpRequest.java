@@ -48,7 +48,7 @@ public class HttpRequest {
 
     private static String readBody(BufferedReader inputReader, HttpRequestHeaders httpRequestHeaders) {
         try {
-            Optional<String> length = httpRequestHeaders.getContentLength();
+            Optional<String> length = httpRequestHeaders.contentLength();
             if (length.isEmpty()) {
                 return null;
             }
@@ -59,6 +59,10 @@ public class HttpRequest {
         } catch (IOException e) {
             throw new IllegalArgumentException("RequestBody 를 읽을 수 없습니다.");
         }
+    }
+
+    public boolean isRequestOf(HttpMethod method) {
+        return requestLine.isRequestOf(method);
     }
 
     public RequestLine getRequestLine() {

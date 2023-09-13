@@ -46,8 +46,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (resourceProvider.haveResource(httpRequest.getRequestLine().getPath())) {
-            return resourceProvider.staticResourceResponse(httpRequest.getRequestLine().getPath());
+        String path = httpRequest.getRequestLine().getPath();
+        if (resourceProvider.haveResource(path)) {
+            return resourceProvider.staticResourceResponse(path);
         }
         if (handlerMapper.haveAvailableHandler(httpRequest)) {
             handlerMapper.process(httpRequest, httpResponse);

@@ -72,6 +72,10 @@ public class RequestLine {
         return httpMethod;
     }
 
+    public boolean isRequestOf(HttpMethod method) {
+        return this.getMethod() == method;
+    }
+
     public String getPath() {
         return path;
     }

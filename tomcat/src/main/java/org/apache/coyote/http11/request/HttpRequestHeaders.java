@@ -51,15 +51,15 @@ public class HttpRequestHeaders {
         return stringBuilder.toString().trim();
     }
 
-    public Optional<Cookies> getCookie() {
-        return cookies;
+    public Optional<String> contentLength() {
+        return Optional.ofNullable(headers.get(CONTENT_LENGTH));
     }
 
     public Map<String, String> getHeaders() {
         return headers;
     }
 
-    public Optional<String> getContentLength() {
-        return Optional.ofNullable(headers.get(CONTENT_LENGTH));
+    public Optional<Cookies> getCookie() {
+        return cookies;
     }
 }

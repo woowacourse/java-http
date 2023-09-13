@@ -11,22 +11,16 @@ import org.apache.coyote.http11.HttpResponse;
 
 public class ResourceController extends AbstractController {
 
-    private final ResourceLoader resourceLoader;
-
-    public ResourceController(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
-
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatus(OK);
         Optional<String> acceptHeader = request.getHeader("Accept");
         if (acceptHeader.isPresent() && acceptHeader.get().contains("text/css")) {
             response.setContentType(TEXT_CSS);
-            response.setBody(resourceLoader.load("static" + request.uri()));
+            response.setBody(ResourceLoader.load("static" + request.uri()));
             return;
         }
         response.setContentType(TEXT_HTML);
-        response.setBody(resourceLoader.load("static" + request.uri()));
+        response.setBody(ResourceLoader.load("static" + request.uri()));
     }
 }

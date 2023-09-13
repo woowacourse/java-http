@@ -12,8 +12,7 @@ public class HttpExceptionHandler {
     public void handleException(HttpException e, HttpResponse response) {
         HttpStatus httpStatus = e.httpStatus();
         int code = httpStatus.statusCode();
-        ResourceLoader resourceLoader = new ResourceLoader();
-        String body = resourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
+        String body = ResourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
         response.setStatus(httpStatus);
         response.setHeader("Content-Type", TEXT_HTML.value());
         response.setBody(body);
@@ -21,8 +20,7 @@ public class HttpExceptionHandler {
 
     public void setInternalServerError(HttpResponse response) {
         int code = INTERNAL_SERVER_ERROR.statusCode();
-        ResourceLoader resourceLoader = new ResourceLoader();
-        String body = resourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
+        String body = ResourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
         response.setStatus(INTERNAL_SERVER_ERROR);
         response.setHeader("Content-Type", TEXT_HTML.value());
         response.setBody(body);

@@ -15,8 +15,7 @@ public class ExceptionControllerAdvice {
         HttpStatus httpStatus = e.exceptionType().httpStatus();
         response.setStatus(httpStatus);
         int code = httpStatus.statusCode();
-        ResourceLoader resourceLoader = new ResourceLoader();
-        String body = resourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
+        String body = ResourceLoader.load(String.format(RESOURCE_PATH_FORMAT, code));
         response.setBody(body);
         response.setHeader("Content-Type", TEXT_HTML.value());
     }

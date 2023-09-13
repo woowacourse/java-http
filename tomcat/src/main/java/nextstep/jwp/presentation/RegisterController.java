@@ -17,12 +17,6 @@ public class RegisterController extends AbstractController {
 
     private static final String INDEX_HTML = "/index.html";
 
-    private final ResourceLoader resourceLoader;
-
-    public RegisterController(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-    }
-
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         register(request, response);
@@ -31,7 +25,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         response.setStatus(OK);
-        response.setBody(resourceLoader.load("static/register.html"));
+        response.setBody(ResourceLoader.load("static/register.html"));
         response.setContentType(TEXT_HTML);
     }
 

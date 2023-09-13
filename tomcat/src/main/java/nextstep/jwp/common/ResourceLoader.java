@@ -10,8 +10,8 @@ import nextstep.jwp.exception.ResourceException;
 
 public class ResourceLoader {
 
-    public String load(String path) {
-        URL resource = getClass().getClassLoader().getResource(path);
+    public static String load(String path) {
+        URL resource = ResourceLoader.class.getClassLoader().getResource(path);
         if (resource == null) {
             throw new ResourceException(RESOURCE_NOT_FOUND);
         }

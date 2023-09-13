@@ -13,11 +13,9 @@ public class LoginController extends AbstractController {
 
     private static final String JSESSIONID = "JSESSIONID";
 
-    private final ResourceLoader resourceLoader;
     private final LoginService loginService;
 
-    public LoginController(ResourceLoader resourceLoader, LoginService loginService) {
-        this.resourceLoader = resourceLoader;
+    public LoginController(LoginService loginService) {
         this.loginService = loginService;
     }
 
@@ -40,6 +38,6 @@ public class LoginController extends AbstractController {
         }
         response.setStatus(OK);
         response.setContentType(TEXT_HTML);
-        response.setBody(resourceLoader.load("static/login.html"));
+        response.setBody(ResourceLoader.load("static/login.html"));
     }
 }

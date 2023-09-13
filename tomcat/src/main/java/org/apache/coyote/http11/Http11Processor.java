@@ -38,8 +38,10 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
+            HttpRequest request = HttpRequest.from(bufferedReader);
             HttpResponse response = new HttpResponse();
-            process(bufferedReader, response);
+            process(request, response);
+            
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -47,10 +49,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void process(BufferedReader bufferedReader, HttpResponse response) {
+    private void process(HttpRequest request, HttpResponse response) {
         HttpExceptionHandler httpExceptionHandler = new HttpExceptionHandler();
         try {
-            HttpRequest request = HttpRequest.from(bufferedReader);
             frontController.service(request, response);
         } catch (HttpException e) {
             httpExceptionHandler.handleException(e, response);

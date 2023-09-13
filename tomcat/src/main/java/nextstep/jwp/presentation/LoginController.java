@@ -4,6 +4,7 @@ import static org.apache.coyote.http11.ContentType.TEXT_HTML;
 import static org.apache.coyote.http11.HttpStatus.OK;
 
 import java.util.Optional;
+import nextstep.jwp.common.FormData;
 import nextstep.jwp.common.ResourceLoader;
 import nextstep.jwp.service.LoginService;
 import org.apache.coyote.http11.HttpRequest;
@@ -26,7 +27,10 @@ public class LoginController extends AbstractController {
             loginService.loginWithSession(jsessionid.get(), response);
             return;
         }
-        loginService.login(request, response);
+        FormData formData = FormData.from(request.getBody());
+        String account = formData.get("account");
+        String password = formData.get("password");
+        loginService.login(account, password, response);
     }
 
     @Override

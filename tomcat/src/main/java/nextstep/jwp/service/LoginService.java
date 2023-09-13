@@ -7,13 +7,11 @@ import static org.apache.coyote.http11.HttpStatus.FOUND;
 
 import java.util.Optional;
 import java.util.UUID;
-import nextstep.jwp.common.FormData;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
 public class LoginService {
@@ -31,10 +29,7 @@ public class LoginService {
         response.sendRedirect(INDEX_HTML);
     }
 
-    public void login(HttpRequest httpRequest, HttpResponse response) {
-        FormData formData = FormData.from(httpRequest.getBody());
-        String account = formData.get("account");
-        String password = formData.get("password");
+    public void login(String account, String password, HttpResponse response) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             String jsessionid = UUID.randomUUID().toString();

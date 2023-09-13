@@ -31,6 +31,9 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(final Request request, final Response response) throws Exception {
         final Response createdResponse = Response.createByTemplate(HttpStatus.OK, REGISTER_TEMPLATE);
+//        response.setStatus(HttpStatus.OK);
+//        final ResponseBody responseBody = ResponseBody.from(REGISTER_TEMPLATE);
+//        response.setBody(responseBody);
         response.setBy(createdResponse);
     }
 }

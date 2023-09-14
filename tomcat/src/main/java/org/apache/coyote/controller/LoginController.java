@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doGet(final HttpRequest request, final HttpResponse response) {
-        if (request.containsCookie()) {
+        if (request.containsSessionId()) {
             response.setReasonPhrase(ReasonPhrase.FOUND);
             response.setMessageHeaders(LOCATION, FILE_PATH_PREFIX + FileResolver.INDEX_HTML.getFileName());
             response.setMessageBody(EMPTY_MESSAGE_BODY);

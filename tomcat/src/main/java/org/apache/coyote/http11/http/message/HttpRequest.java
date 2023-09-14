@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.coyote.http11.http.message.RequestHeaders.COOKIE;
-
 
 public class HttpRequest {
 
     private static final int REQUEST_LINE_INDEX = 0;
     private static final int REQUEST_HEADER_START_INDEX = 1;
+    private static final String SESSSION_NAME = "JSESSIONID";
 
     private final RequestLine requestLine;
     private final RequestHeaders headers;
@@ -44,8 +43,8 @@ public class HttpRequest {
         return lines;
     }
 
-    public boolean containsCookie() {
-        return headers.containsKey(COOKIE);
+    public boolean containsSessionId() {
+        return headers.containsKey(SESSSION_NAME);
     }
 
     public String getUri() {

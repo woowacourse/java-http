@@ -14,19 +14,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.List;
+import java.util.Set;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping(List.of(
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping(Set.of(
             new HelloController(),
             new LoginController(),
             new FileController(),
             new RegisterController()
     ));
-    
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {

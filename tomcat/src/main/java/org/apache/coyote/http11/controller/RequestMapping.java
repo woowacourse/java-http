@@ -3,13 +3,13 @@ package org.apache.coyote.http11.controller;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 
-import java.util.List;
+import java.util.Set;
 
 public class RequestMapping {
 
-    private final List<Controller> controllers;
+    private final Set<Controller> controllers;
 
-    public RequestMapping(List<Controller> controllers) {
+    public RequestMapping(Set<Controller> controllers) {
         this.controllers = controllers;
     }
 

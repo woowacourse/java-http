@@ -4,12 +4,12 @@ import nextstep.jwp.model.User;
 import org.apache.catalina.Manager;
 import org.apache.coyote.http11.http.message.HttpSession;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final ConcurrentMap<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
     private static final String USER_KEY = "user";
 
     @Override

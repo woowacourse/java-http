@@ -2,31 +2,38 @@ package org.apache.coyote.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.Controller;
 import org.apache.coyote.controller.util.Extension;
 import org.apache.coyote.controller.util.FileResolver;
 import org.apache.coyote.http11.http.message.HttpRequest;
 import org.apache.coyote.http11.http.message.HttpResponse;
-import org.apache.coyote.http11.http.util.HttpMethod;
+import org.apache.coyote.http11.http.util.ReasonPhrase;
 
 import java.io.IOException;
 import java.util.Map;
 
-public class RegisterController implements Controller {
+import static org.apache.coyote.http11.http.util.HttpResponseMessageHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.http.util.HttpResponseMessageHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.http.util.HttpResponseMessageHeader.LOCATION;
+
+public class RegisterController extends AbstractController {
 
     @Override
-    public HttpResponse run(final HttpRequest request) throws IOException {
-        final String method = request.getMethod();
-        if (HttpMethod.GET.isSameMethod(method)) {
-            final String messageBody = FileResolver.readFileToString(FileResolver.REGISTER);
-            return HttpResponse.ofOk(Extension.findExtension(FileResolver.REGISTER.getFileName()), messageBody);
-        }
-        if (HttpMethod.POST.isSameMethod(method)) {
-            final Map<String, String> body = request.getBody();
-            final User user = new User(body.get("account"), body.get("password"), body.get("email"));
-            InMemoryUserRepository.save(user);
-            return HttpResponse.ofRedirect(FileResolver.INDEX_HTML);
-        }
-        throw new IllegalArgumentException("잘못된 메소드 형식입니다.");
+    public void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        response.setReasonPhrase(ReasonPhrase.OK);
+        final String messageBody = FileResolver.readFileToString(FileResolver.REGISTER);
+        response.setMessageHeaders(CONTENT_LENGTH, Integer.toString(messageBody.getBytes().length));
+        response.setMessageHeaders(CONTENT_TYPE, Extension.findExtension(FileResolver.REGISTER.getFileName())
+                                                          .getContentType());
+        response.setMessageBody(messageBody);
+    }
+
+    @Override
+    public void doPost(final HttpRequest request, final HttpResponse response) {
+        final Map<String, String> body = request.getBody();
+        final User user = new User(body.get("account"), body.get("password"), body.get("email"));
+        InMemoryUserRepository.save(user);
+        response.setReasonPhrase(ReasonPhrase.FOUND);
+        response.setMessageHeaders(LOCATION, FILE_PATH_PREFIX + FileResolver.INDEX_HTML.getFileName());
+        response.setMessageBody(EMPTY_MESSAGE_BODY);
     }
 }

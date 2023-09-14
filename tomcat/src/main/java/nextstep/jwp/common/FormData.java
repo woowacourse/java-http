@@ -1,9 +1,10 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.common;
 
-import static org.apache.coyote.http11.HttpStatus.BAD_REQUEST;
+import static nextstep.jwp.exception.FormDataExceptionType.INVALID_FORM;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.FormDataException;
 
 public class FormData {
 
@@ -32,6 +33,6 @@ public class FormData {
         if (formTable.containsKey(key)) {
             return formTable.get(key);
         }
-        throw new HttpException(BAD_REQUEST, "데이터가 존재하지 않습니다");
+        throw new FormDataException(INVALID_FORM);
     }
 }

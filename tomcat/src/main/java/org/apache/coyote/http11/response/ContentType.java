@@ -26,4 +26,9 @@ public enum ContentType {
                 .findAny()
                 .orElse(HTML.type);
     }
+
+    public static boolean matchesFileExtension(final String path) {
+        return Arrays.stream(values())
+                .anyMatch(contentType -> path.endsWith(contentType.fileExtension));
+    }
 }

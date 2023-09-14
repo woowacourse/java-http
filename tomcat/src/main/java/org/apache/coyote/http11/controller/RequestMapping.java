@@ -3,6 +3,7 @@ package org.apache.coyote.http11.controller;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
 
 public class RequestMapping {
 
@@ -19,6 +20,10 @@ public class RequestMapping {
     }
 
     public Controller getController(final HttpRequest request) {
-        return REQUEST_MAPPER.getOrDefault(request.getUri().getPath(), new PageController());
+        final String requestPath = request.getUri().getPath();
+        if (ContentType.matchesFileExtension(requestPath)) {
+            return new PageController();
+        }
+        return REQUEST_MAPPER.getOrDefault(requestPath, new NotFoundController());
     }
 }

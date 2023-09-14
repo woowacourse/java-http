@@ -24,7 +24,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final ControllerMapper controllerMapper = new ControllerMapper();
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int DEFAULT_BUFFER_SIZE = 1024;
 
     private final Socket connection;
 
@@ -82,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         final StringBuilder bodyBuilder = new StringBuilder();
 
         int totalRead = 0;
-        final char[] buffer = new char[DEFAULT_BUFFER_SIZE];
+        final char[] buffer = new char[bodyLength];
 
         while (totalRead < bodyLength) {
             final int readBytesCount =

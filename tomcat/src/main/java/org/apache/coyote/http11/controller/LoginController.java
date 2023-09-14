@@ -18,13 +18,16 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class LoginController extends AbstractController {
 
     private static final String SESSION_COOKIE_KEY = "JSESSIONID";
+    private static final String INDEX_PAGE_RESOURCE = "/index.html";
+    private static final String LOGIN_PAGE_RESOURCE = "/login.html";
+    private static final String UNAUTHORIZED_PAGE_RESOURCE = "/401.html";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        String resourcepath = "/login.html";
+        String resourcepath = LOGIN_PAGE_RESOURCE;
         try {
             if (isSessionValid(request)) {
-                resourcepath = "/index.html";
+                resourcepath = INDEX_PAGE_RESOURCE;
                 final HttpResponse newResponse =
                     StaticResourceResponseSupplier.getWithExtensionContentType(resourcepath);
                 response.update(newResponse);
@@ -72,7 +75,7 @@ public class LoginController extends AbstractController {
         final Session session = InMemorySessionRepository.findByUser(user)
             .orElseGet(() -> createNewSession(user));
 
-        final HttpResponse newResponse = HttpResponse.redirect("/index.html");
+        final HttpResponse newResponse = HttpResponse.redirect(INDEX_PAGE_RESOURCE);
         newResponse.addCookie(SESSION_COOKIE_KEY, session.getUuid());
 
         response.update(newResponse);
@@ -85,7 +88,9 @@ public class LoginController extends AbstractController {
     private void loginFail(final HttpRequest request, final HttpResponse response) {
         try {
             final HttpResponse newResponse =
-                StaticResourceResponseSupplier.getWithExtensionContentType("/401.html");
+                StaticResourceResponseSupplier.getWithExtensionContentType(
+                    UNAUTHORIZED_PAGE_RESOURCE
+                );
             response.update(newResponse);
         } catch (IOException e) {
             throw new ResourceLoadingException(request.getPath());

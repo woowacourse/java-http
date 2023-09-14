@@ -1,5 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
+import nextstep.jwp.LoginHandler;
+import nextstep.jwp.model.User;
+import org.apache.catalina.session.HttpSession;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.*;
@@ -28,14 +32,34 @@ public enum RequestMappingHandler {
     }
 
     public static Controller findController(final HttpRequest request) {
-        String resourcePath = request.getRequestLine().getRequestUrl();
-        HttpMethod requestMethod = request.getRequestLine().getHttpMethod();
+        final String resourcePath = request.getRequestLine().getRequestUrl();
+        final HttpMethod requestMethod = request.getRequestLine().getHttpMethod();
 
-        return Arrays.stream(values())
+        final Controller findController = Arrays.stream(values())
                 .filter(value -> value.condition.test(resourcePath, requestMethod))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 url 요청입니다."))
                 .getController();
+
+        if (findController instanceof LoginPostController
+                && (!request.hasJSessionId())) {
+            addSession(request);
+        }
+        if (findController instanceof LoginGetController
+                && request.hasJSessionId()
+                && SessionManager.isExist(request.getJSessionId())) {
+            request.setHasValidatedSessionTrue();
+        }
+        return findController;
+    }
+
+    private static void addSession(final HttpRequest request) {
+        final SessionManager sessionManager = new SessionManager();
+        final LoginHandler loginHandler = new LoginHandler();
+        final User user = loginHandler.getUser(request.getRequestBody());
+        final HttpSession httpSession = new HttpSession("user", user);
+        sessionManager.add(httpSession);
+        request.addJSessionId(httpSession.getId());
     }
 
     public static boolean isFileGetUrl(final String resourcePath, final HttpMethod requestMethod) {

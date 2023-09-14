@@ -42,4 +42,8 @@ public class RequestHeader {
         final String[] parts = cookie.split("=");
         return parts[1];
     }
+
+    public void addSession(String jSessionId){
+        headers.put(COOKIE, "JSessionId=" + jSessionId);
+    }
 }

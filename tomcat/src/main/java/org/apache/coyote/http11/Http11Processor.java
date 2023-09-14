@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.RequestMappingHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.Controller;
@@ -51,7 +52,4 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    // 쿠키값 빼내올때 문제점
-    // doPost, doGet 추가수정
-    // 세션 전략 세우기
 }

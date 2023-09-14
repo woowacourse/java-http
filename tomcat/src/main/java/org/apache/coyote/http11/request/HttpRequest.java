@@ -12,6 +12,7 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final String requestBody;
+    private boolean hasValidatedSession;
 
     public HttpRequest(final BufferedReader reader) throws IOException, URISyntaxException {
         final List<String> lines = readAllLines(reader);
@@ -19,6 +20,7 @@ public class HttpRequest {
         requestLine = createRequestLine(lines);
         requestHeader = createRequestHeader(lines);
         requestBody = addRequestBody(lines, reader);
+        hasValidatedSession = false;
     }
 
     private static List<String> readAllLines(final BufferedReader reader) {
@@ -70,8 +72,16 @@ public class HttpRequest {
         return 0;
     }
 
+    public void addJSessionId(final String jSessionId) {
+        requestHeader.addSession(jSessionId);
+    }
+
     public boolean hasJSessionId() {
         return requestHeader.hasJSessionId();
+    }
+
+    public void setHasValidatedSessionTrue() {
+        this.hasValidatedSession = true;
     }
 
     public String getJSessionId() {
@@ -88,5 +98,9 @@ public class HttpRequest {
 
     public String getRequestBody() {
         return requestBody;
+    }
+
+    public boolean isHasValidatedSession() {
+        return hasValidatedSession;
     }
 }

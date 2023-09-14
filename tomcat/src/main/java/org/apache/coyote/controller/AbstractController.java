@@ -24,9 +24,7 @@ public abstract class AbstractController implements Controller {
         throw new IllegalArgumentException("잘못된 메소드 형식입니다. " + method);
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-    }
+    protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-    }
+    protected abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
 }

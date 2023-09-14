@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.auth;
 
 import java.util.List;
-import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.RequestBody;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +22,7 @@ class CookieTest {
             Cookie cookie = Cookie.from(elements);
 
             // then
-            assertThat(cookie.get("JSESSIONID")).isEqualTo("5669d1ea-eb70-4881-b17e-c7ab8cfd10b8");
+            assertThat(cookie.get("JSESSIONID").get()).isEqualTo("5669d1ea-eb70-4881-b17e-c7ab8cfd10b8");
         }
 
     }
@@ -39,7 +39,7 @@ class CookieTest {
             cookie.put("woowacourse", "베베");
 
             // then
-            assertThat(cookie.get("woowacourse")).isEqualTo("베베");
+            assertThat(cookie.get("woowacourse").get()).isEqualTo("베베");
         }
 
         @Test

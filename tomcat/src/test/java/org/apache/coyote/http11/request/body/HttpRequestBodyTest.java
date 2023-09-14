@@ -1,15 +1,16 @@
 package org.apache.coyote.http11.request.body;
 
+import org.apache.coyote.http11.request.RequestBody;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class RequestBodyTest {
+class HttpRequestBodyTest {
 
     @Nested
-    class RequestBody_생성_검증 {
+    class HttpRequestBody_생성_검증 {
 
         @Test
         void RequestBody가_유효하다면_생성한다() {

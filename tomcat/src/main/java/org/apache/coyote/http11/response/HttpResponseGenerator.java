@@ -4,31 +4,34 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 
 public class HttpResponseGenerator {
 
     public static final String CRLF = "\r\n";
     public static final String BLANK = " ";
+    public static final String CSS_FILE_SUFFIX = ".css";
+    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
-    public String generate(final ResponseEntity responseEntity) throws IOException {
-        final String location = responseEntity.getLocation();
+    public String generate(final HttpResponse httpResponse) throws IOException {
+        final String location = httpResponse.getLocation();
         if (location.equals("/")) {
-            return generateResponse(responseEntity, "Hello world!");
+            return generateResponse(httpResponse, DEFAULT_RESPONSE_BODY);
         }
-        if (responseEntity.getHttpStatus() == HttpStatus.FOUND) {
-            return generateRedirectResponse(responseEntity);
+        if (httpResponse.getHttpStatus() == HttpStatus.FOUND) {
+            return generateRedirectResponse(httpResponse);
         }
         final String responseBody = readStaticFile(location);
-        return generateResponse(responseEntity, responseBody);
+        return generateResponse(httpResponse, responseBody);
     }
 
-    private String generateResponse(final ResponseEntity responseEntity, final String responseBody) {
+    private String generateResponse(final HttpResponse httpResponse, final String responseBody) {
         return String.join(
                 CRLF,
-                generateHttpStatusLine(responseEntity.getProtocol(), responseEntity.getHttpStatus()),
-                generateContentTypeLine(responseEntity.getLocation()),
+                generateHttpStatusLine(httpResponse.getProtocol(), httpResponse.getHttpStatus()),
+                generateContentTypeLine(httpResponse.getLocation()),
                 generateContentLengthLine(responseBody),
                 "",
                 responseBody
@@ -40,7 +43,7 @@ public class HttpResponseGenerator {
     }
 
     private String generateContentTypeLine(final String location) {
-        if (location.endsWith(".css")) {
+        if (location.endsWith(CSS_FILE_SUFFIX)) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
         return "Content-Type: text/html;charset=utf-8 ";
@@ -56,19 +59,23 @@ public class HttpResponseGenerator {
         return new String(Files.readAllBytes(file.toPath()));
     }
 
-    private String generateRedirectResponse(final ResponseEntity responseEntity) {
-        final HttpStatus httpStatus = responseEntity.getHttpStatus();
+    private String generateRedirectResponse(final HttpResponse httpResponse) {
+        final HttpStatus httpStatus = httpResponse.getHttpStatus();
         final String firstLine = String.join(BLANK, "HTTP/1.1", httpStatus.getCode(), httpStatus.name(), "");
         return String.join(
                 CRLF,
                 firstLine,
-                "Location: " + responseEntity.getLocation(),
-                generateSetCookieLine(responseEntity)
+                "Location: " + httpResponse.getLocation(),
+                generateSetCookieLine(httpResponse)
         );
     }
 
-    private String generateSetCookieLine(final ResponseEntity responseEntity) {
-        final String jsessionid = responseEntity.getHttpCookie().get("JSESSIONID");
+    private String generateSetCookieLine(final HttpResponse httpResponse) {
+        Optional<String> cookieOption = httpResponse.getHttpCookie().get("JSESSIONID");
+        if (cookieOption.isEmpty()) {
+            return null;
+        }
+        final String jsessionid = cookieOption.get();
         if (jsessionid == null) {
             return "";
         }

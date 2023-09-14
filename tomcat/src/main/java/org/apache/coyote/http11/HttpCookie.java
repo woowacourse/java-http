@@ -18,7 +18,11 @@ public class HttpCookie {
         return new HttpCookie(values);
     }
 
-    public HttpCookie(final Map<String, String> values) {
+    public HttpCookie() {
+        this.values = new HashMap<>();
+    }
+
+    private HttpCookie(final Map<String, String> values) {
         this.values = values;
     }
 

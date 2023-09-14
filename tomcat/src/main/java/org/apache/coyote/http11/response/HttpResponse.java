@@ -15,7 +15,7 @@ public class HttpResponse {
     private static final String STATIC_PATH = "static";
     private static final String ROOT_PATH = "/";
 
-    private final HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+    private HttpCookie httpCookie = new HttpCookie();
     private HttpStatusLine httpStatusLine;
     private String path;
     private String body;
@@ -27,7 +27,7 @@ public class HttpResponse {
             return makeResponse(contentType);
         }
         if (isRedirect) {
-            if (httpResponseHeader.hasCookie()) {
+            if (httpCookie.isNotEmpty()) {
                 return makeRedirectResponseWithCookie();
             }
             return makeRedirectResponse();
@@ -42,7 +42,7 @@ public class HttpResponse {
     }
 
     private String makeResponse(final String contentType) {
-        if (httpResponseHeader.hasCookie()) {
+        if (httpCookie.isNotEmpty()) {
             return makeGeneralResponseWithCookie(contentType, body);
         }
         return makeGeneralResponse(contentType, body);
@@ -61,10 +61,9 @@ public class HttpResponse {
     private String makeRedirectResponseWithCookie() {
         final HttpVersion httpVersion = httpStatusLine.getHttpVersion();
         final HttpStatus status = httpStatusLine.getHttpStatus();
-        final HttpCookie cookie = httpResponseHeader.getCookie();
         return String.join("\r\n",
                 httpVersion.getValue() + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Set-Cookie: " + cookie.printValues() + BLANK,
+                "Set-Cookie: " + httpCookie.printValues() + BLANK,
                 "Location: " + path + BLANK,
                 ""
         );
@@ -73,10 +72,9 @@ public class HttpResponse {
     private String makeGeneralResponseWithCookie(final String contentType, final String body) {
         final HttpVersion httpVersion = httpStatusLine.getHttpVersion();
         final HttpStatus status = httpStatusLine.getHttpStatus();
-        final HttpCookie cookie = httpResponseHeader.getCookie();
         return String.join("\r\n",
                 httpVersion.getValue() + BLANK + status.getCode() + BLANK + status.name() + BLANK,
-                "Set-Cookie: " + cookie.printValues() + BLANK,
+                "Set-Cookie: " + httpCookie.printValues() + BLANK,
                 "Content-Type: " + contentType + BLANK,
                 "Content-Length: " + body.getBytes().length + BLANK,
                 "",
@@ -100,7 +98,7 @@ public class HttpResponse {
     }
 
     public void addCookie(final HttpCookie cookie) {
-        this.httpResponseHeader.setCookie(cookie);
+        this.httpCookie = cookie;
     }
 
     public void sendRedirect(final String path) {

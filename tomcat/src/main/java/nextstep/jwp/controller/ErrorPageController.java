@@ -14,7 +14,7 @@ public class ErrorPageController extends AbstractController {
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatusLine(StatusLine.of(request.getHttpVersion(), HttpStatus.NOT_FOUND));
         response.addHeader("Content-Type", ContentType.HTML.getType());
         final String content = readResponseBody("500.html");

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.apache.catalina.Controller;
+import org.apache.coyote.common.HttpMethod;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 
@@ -17,8 +18,16 @@ abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        // http method 분기문
+        if (request.getHttpMethod().equals(HttpMethod.GET)) {
+            doGet(request, response);
+        }
+        if (request.getHttpMethod().equals(HttpMethod.POST)) {
+            doPost(request, response);
+        }
     }
+
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
 
     protected String readResponseBody(final String requestUri) throws IOException, URISyntaxException {
         final URL url = getClass().getClassLoader().getResource(DEFAULT_FILE_LOCATION + requestUri);

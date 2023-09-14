@@ -8,9 +8,8 @@ public class Session {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public Session(final String id, final SessionManager sessionManager) {
+    public Session(final String id) {
         this.id = id;
-        sessionManager.add(this);
     }
 
     public String getId() {

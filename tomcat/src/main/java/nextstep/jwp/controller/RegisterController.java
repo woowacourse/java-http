@@ -1,23 +1,27 @@
-package nextstep.jwp.controller.rest;
+package nextstep.jwp.controller;
 
-import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
-import static nextstep.jwp.controller.StaticResourceController.REGISTER_PAGE;
+import static nextstep.servlet.StaticResourceResolver.HOME_PAGE;
+import static nextstep.servlet.StaticResourceResolver.REGISTER_PAGE;
 
-import nextstep.jwp.controller.ResponseEntity;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.message.HttpStatusCode;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
-public class RegisterController implements RestController {
+public class RegisterController extends AbstractController {
 
     @Override
     public boolean canHandle(HttpRequest request) {
-        return request.getPath().equals("/register") && request.getMethod() == HttpMethod.POST;
+        return request.isPathMatch("/register");
     }
 
     @Override
-    public ResponseEntity handle(HttpRequest request) {
+    ResponseEntity doGet() {
+        return ResponseEntity.forward(HttpStatusCode.OK, REGISTER_PAGE);
+    }
+
+    @Override
+    ResponseEntity doPost(HttpRequest request) {
         final var user = new User(
                 request.getJsonProperty("account"),
                 request.getJsonProperty("password"),

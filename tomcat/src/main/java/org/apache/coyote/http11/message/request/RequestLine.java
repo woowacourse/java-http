@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.request;
 
 import java.util.Objects;
+import org.apache.coyote.http11.message.HttpMethod;
 
 public class RequestLine {
 
@@ -34,24 +35,12 @@ public class RequestLine {
         return new RequestLine(method, path, protocol, queryStrings);
     }
 
-    public boolean hasQueryStrings() {
-        return queryStrings.hasQueryStrings();
+    public boolean isPathMatch(String path) {
+        return this.path.equals(path);
     }
 
     public HttpMethod getMethod() {
         return method;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public QueryStrings getQueryStrings() {
-        return queryStrings;
     }
 
     @Override

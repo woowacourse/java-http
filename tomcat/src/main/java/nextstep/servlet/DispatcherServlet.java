@@ -4,34 +4,26 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.StaticResourceController;
-import nextstep.jwp.controller.rest.LoginController;
-import nextstep.jwp.controller.rest.RegisterController;
-import nextstep.servlet.filter.Interceptor;
-import nextstep.servlet.filter.SessionInterceptor;
+import nextstep.servlet.interceptor.Interceptor;
 import org.apache.catalina.servlet.Servlet;
-import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestLine;
+import org.apache.coyote.http11.message.response.HttpResponse;
 
 public class DispatcherServlet implements Servlet {
 
-    private final Map<List<RequestLine>, Interceptor> interceptors = Map.of(
-            List.of(
-                    new RequestLine(HttpMethod.GET, "/login"),
-                    new RequestLine(HttpMethod.POST, "/login")
-            )
-            , new SessionInterceptor()
-    );
+    private final Map<List<RequestLine>, Interceptor> interceptors;
+    private final List<Controller> controllers;
+    private final StaticResourceResolver staticResourceResolver;
 
-    private final List<Controller> controllers = List.of(
-            new LoginController(),
-            new RegisterController(),
-            new StaticResourceController()
-    );
-
-    public DispatcherServlet() {
+    public DispatcherServlet(
+            final Map<List<RequestLine>, Interceptor> interceptors,
+            final List<Controller> controllers,
+            final StaticResourceResolver staticResourceResolver
+    ) {
+        this.interceptors = interceptors;
+        this.controllers = controllers;
+        this.staticResourceResolver = staticResourceResolver;
     }
 
     @Override
@@ -42,7 +34,13 @@ public class DispatcherServlet implements Servlet {
 
             response.setStatus(responseEntity.getStatusCode());
             responseEntity.getHeaders().forEach(response::setHeader);
-            response.setBody(responseEntity.getBody());
+
+            if (responseEntity.isRestResponse()) {
+                response.setBody(responseEntity.getBody());
+                return;
+            }
+            final var staticResource = staticResourceResolver.findFileContentByPath(responseEntity.getBody());
+            response.setBody(staticResource);
         }
     }
 

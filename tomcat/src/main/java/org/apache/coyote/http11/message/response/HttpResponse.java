@@ -1,8 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.response;
 
-import static org.apache.coyote.http11.HttpHeaders.HTTP_LINE_SUFFIX;
+import static org.apache.coyote.http11.message.HttpHeaders.HTTP_LINE_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.message.HttpHeaders;
+import org.apache.coyote.http11.message.HttpStatusCode;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class HttpResponse {
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class HttpHeaders {
 
@@ -13,7 +14,6 @@ public class HttpHeaders {
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_TYPE_UTF_8 = "text/html;charset=utf-8";
     public static final String CONTENT_TYPE_CSS = "text/css";
-    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String ACCEPT = "Accept";
     public static final String LOCATION = "Location";
@@ -45,7 +45,7 @@ public class HttpHeaders {
 
     public static HttpHeaders createBasicResponseHeadersFrom(HttpRequest request) {
         final var headers = new HashMap<String, String>();
-        headers.put(CONTENT_TYPE, getContentTypeFrom(request.getHeaders().get(ACCEPT)));
+        headers.put(CONTENT_TYPE, getContentTypeFrom(request.getHeaderValue(ACCEPT)));
         headers.put(CONTENT_LENGTH, DEFAULT_CONTENT_LENGTH);
         return new HttpHeaders(headers);
     }
@@ -68,7 +68,7 @@ public class HttpHeaders {
         return headers.containsKey(COOKIE) && headers.get(COOKIE).contains(key);
     }
 
-    private String get(String key) {
+    public String get(String key) {
         return headers.get(key);
     }
 

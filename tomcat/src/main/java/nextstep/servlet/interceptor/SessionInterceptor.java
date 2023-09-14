@@ -1,9 +1,9 @@
-package nextstep.servlet.filter;
+package nextstep.servlet.interceptor;
 
-import static nextstep.jwp.controller.StaticResourceController.HOME_PAGE;
+import static nextstep.servlet.StaticResourceResolver.HOME_PAGE;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 
 public class SessionInterceptor implements Interceptor {
 

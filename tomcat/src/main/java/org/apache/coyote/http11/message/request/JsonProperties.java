@@ -1,17 +1,18 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.request;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.message.HttpHeaders;
 
 public class JsonProperties {
 
-    private final Map<String, String> jsonProperties;
+    private final Map<String, String> properties;
 
-    public JsonProperties(Map<String, String> jsonProperties) {
-        this.jsonProperties = jsonProperties;
+    public JsonProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 
     private static JsonProperties fromUrlEncodedForm(String body) {
@@ -46,6 +47,6 @@ public class JsonProperties {
     }
 
     public String getValue(String key) {
-        return jsonProperties.get(key);
+        return properties.get(key);
     }
 }

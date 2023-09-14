@@ -19,19 +19,19 @@ public abstract class AbstractController implements Controller {
     protected static final String HTTP_METHOD_EXCEPTION_MESSAGE = "올바르지 않은 HTTP Method 입니다.";
 
     @Override
-    public void service(final HttpRequest request, final HttpResponse response) throws IOException {
-        if (request.getRequestLine().getMethod().equals("POST")) {
-            doPost(request, response);
+    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        if (httpRequest.getRequestLine().getMethod().equals("POST")) {
+            doPost(httpRequest, httpResponse);
             return;
         }
-        if (request.getRequestLine().getMethod().equals("GET")) {
-            doGet(request, response);
+        if (httpRequest.getRequestLine().getMethod().equals("GET")) {
+            doGet(httpRequest, httpResponse);
             return;
         }
         throw new HttpRequestException(HTTP_METHOD_EXCEPTION_MESSAGE);
     }
 
-    protected abstract void doPost(final HttpRequest request, final HttpResponse response) throws IOException;
+    protected abstract void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException;
 
-    protected abstract void doGet(final HttpRequest request, final HttpResponse response) throws IOException;
+    protected abstract void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException;
 }

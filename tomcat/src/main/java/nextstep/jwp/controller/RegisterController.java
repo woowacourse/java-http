@@ -14,24 +14,24 @@ import java.util.Map;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> requestBodyValues = request.getRequestParameters();
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final Map<String, String> requestBodyValues = httpRequest.getRequestParameters();
         final var user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
                 requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);
 
-        final var statusLine = StatusLine.of(request.getRequestLine().getProtocol(), HttpStatus.FOUND);
-        response.setStatusLine(statusLine);
-        response.addResponseHeader("Location", INDEX_PAGE);
+        final var statusLine = StatusLine.of(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND);
+        httpResponse.setStatusLine(statusLine);
+        httpResponse.addResponseHeader("Location", INDEX_PAGE);
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
-        final var statusLine = StatusLine.of(request.getRequestLine().getProtocol(), HttpStatus.OK);
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final var statusLine = StatusLine.of(httpRequest.getRequestLine().getProtocol(), HttpStatus.OK);
         final var responseBody = ResponseBody.fromUri("/register.html");
-        response.setStatusLine(statusLine);
-        response.addResponseHeader("Content-Type", TEXT_HTML);
-        response.addResponseHeader("Content-Length", String.valueOf(responseBody.getBody().getBytes().length));
-        response.setResponseBody(responseBody);
+        httpResponse.setStatusLine(statusLine);
+        httpResponse.addResponseHeader("Content-Type", TEXT_HTML);
+        httpResponse.addResponseHeader("Content-Length", String.valueOf(responseBody.getBody().getBytes().length));
+        httpResponse.setResponseBody(responseBody);
     }
 }

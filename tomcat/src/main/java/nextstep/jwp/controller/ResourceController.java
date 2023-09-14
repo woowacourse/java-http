@@ -11,20 +11,20 @@ import java.io.IOException;
 public class ResourceController extends AbstractController {
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final var statusLine = StatusLine.of(request.getRequestLine().getProtocol(), HttpStatus.METHOD_NOT_ALLOWED);
-        response.setStatusLine(statusLine);
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var statusLine = StatusLine.of(httpRequest.getRequestLine().getProtocol(), HttpStatus.METHOD_NOT_ALLOWED);
+        httpResponse.setStatusLine(statusLine);
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
-        final var statusLine = StatusLine.of(request.getRequestLine().getProtocol(), HttpStatus.OK);
-        final String uri = request.getRequestLine().getPath().split("\\?")[0];
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        final var statusLine = StatusLine.of(httpRequest.getRequestLine().getProtocol(), HttpStatus.OK);
+        final String uri = httpRequest.getRequestLine().getPath().split("\\?")[0];
         final var responseBody = ResponseBody.fromUri(uri);
-        response.setStatusLine(statusLine);
-        response.addResponseHeader("Content-Type", getContentType(uri));
-        response.addResponseHeader("Content-Length", String.valueOf(responseBody.getBody().getBytes().length));
-        response.setResponseBody(responseBody);
+        httpResponse.setStatusLine(statusLine);
+        httpResponse.addResponseHeader("Content-Type", getContentType(uri));
+        httpResponse.addResponseHeader("Content-Length", String.valueOf(responseBody.getBody().getBytes().length));
+        httpResponse.setResponseBody(responseBody);
     }
 
     private String getContentType(final String uri) {

@@ -27,10 +27,10 @@ class ContentTypeTest {
         final ContentType contentType = ContentType.from(file);
 
         //when
-        final String header = contentType.toHeader();
+        final String header = contentType.toHeaderValue();
 
         //then
-        final String expected = "Content-Type: text/html;charset=utf-8 ";
+        final String expected = "text/html;charset=utf-8 ";
         assertThat(header).isEqualTo(expected);
     }
 }

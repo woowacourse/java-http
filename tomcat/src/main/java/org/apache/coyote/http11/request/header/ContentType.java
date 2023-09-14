@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum ContentType {
     HTML("text/html", "html"),
     CSS("text/css", "css"),
-    JS("text/js", "js");
+    JS("text/js", "js"),
+    SVG("image/svg+xml", "svg");
 
     private static final String EXTENSION_DELIMITER = "\\.";
 
@@ -27,8 +28,8 @@ public enum ContentType {
                 .orElse(HTML);
     }
 
-    public String toHeader() {
-        return "Content-Type: " + type + ";charset=utf-8 ";
+    public String toHeaderValue() {
+        return type + ";charset=utf-8 ";
     }
 
     public String getExtension() {

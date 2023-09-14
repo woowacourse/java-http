@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class CookiesTest {
 
@@ -19,23 +18,20 @@ class CookiesTest {
         final Cookies cookies = Cookies.from(cookieHeader);
 
         //then
-        assertThat(cookies.notExist("JSESSIONID")).isTrue();
+        assertThat(cookies.getJavaSessionId()).isNull();
     }
 
     @Test
     @DisplayName("쿠키 헤더가 존재하면 파싱해서 생성한다")
     void construct_exist() {
         //given
-        final String cookieHeader = "Cookie: JSESSIONID=test";
+        final String cookieHeader = "JSESSIONID=test";
 
         //when
         final Cookies cookies = Cookies.from(cookieHeader);
 
         //then
-        assertSoftly(softAssertions -> {
-            assertThat(cookies.getValue("JSESSIONID")).isEqualTo("test");
-            assertThat(cookies.notExist("JSESSIONID")).isFalse();
-        });
+        assertThat(cookies.getJavaSessionId()).isEqualTo("test");
     }
 
     @Test
@@ -45,9 +41,9 @@ class CookiesTest {
         final Cookies cookies = Cookies.from(null);
 
         //when
-        final String cookieHeader = cookies.createNewJSessionIdHeader();
+        final String cookieHeader = cookies.createNewSession();
 
         //then
-        assertThat(cookieHeader).contains("Set-Cookie");
+        assertThat(cookieHeader).contains("JSESSIONID=");
     }
 }

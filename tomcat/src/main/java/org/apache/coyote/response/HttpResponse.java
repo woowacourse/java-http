@@ -35,7 +35,7 @@ public class HttpResponse {
         cookies.save(name, value);
     }
 
-    public String toResponse() {
+    public String cconvertToString() {
         return String.join(DELIMITER,
                 statusLine.toResponse(),
                 cookies.toResponse() + responseHeaders.toResponse(),

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class HttpCookies {
 
     private static final String DELIMITER = "\r\n";
+
     private final Map<String, String> cookies = new LinkedHashMap<>();
 
     public HttpCookies() {

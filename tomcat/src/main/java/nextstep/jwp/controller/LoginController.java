@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.common.ContentType;
+import org.apache.coyote.common.HttpHeader;
 import org.apache.coyote.common.HttpStatus;
 import org.apache.coyote.common.Session;
 import org.apache.coyote.common.SessionManager;
@@ -24,7 +25,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         final Map<String, String> logInfo = Arrays.stream(request.getRequestBody().split("&"))
                 .map(input -> input.split("="))
                 .collect(Collectors.toMap(info -> info[0], info -> info[1]));
@@ -34,7 +35,7 @@ public class LoginController extends AbstractController {
         if (savedUser.isPresent()) {
             final User user = savedUser.get();
             if (user.checkPassword(logInfo.get("password"))) {
-                response.addHeader("Location", "index.html");
+                response.addHeader(HttpHeader.LOCATION.getName(), "index.html");
                 final Session session = new Session(UUID.randomUUID().toString());
                 session.setAttribute("user", user);
                 SessionManager.add(session);
@@ -42,7 +43,7 @@ public class LoginController extends AbstractController {
                 return;
             }
         }
-        response.addHeader("Location", "401.html");
+        response.addHeader(HttpHeader.LOCATION.getName(), "401.html");
     }
 
     @Override
@@ -51,12 +52,12 @@ public class LoginController extends AbstractController {
         final Session session = SessionManager.findSession(sessionId);
         if (session != null) {
             response.setStatusLine(StatusLine.of(request.getHttpVersion(), HttpStatus.FOUND));
-            response.addHeader("Location", "index.html");
+            response.addHeader(HttpHeader.LOCATION.getName(), "index.html");
             return;
         }
         response.setStatusLine(StatusLine.of(request.getHttpVersion(), HttpStatus.OK));
-        response.addHeader("Content-Type", ContentType.HTML.getType());
-        final String content = readResponseBody(request.getRequestUri() + ".html");
+        response.addHeader(HttpHeader.CONTENT_TYPE.getName(), ContentType.HTML.getType());
+        final String content = readResponseBody(request.getRequestUri() + ContentType.HTML.getExtension());
         response.setResponseBody(content);
     }
 }

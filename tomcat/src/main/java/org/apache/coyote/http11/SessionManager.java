@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.catalina.Manager;
 
@@ -24,7 +25,7 @@ public class SessionManager implements Manager {
     }
 
     public boolean isExist(final String id) {
-        return SESSIONS.containsKey(id);
+        return Objects.nonNull(id) && SESSIONS.containsKey(id);
     }
 
 }

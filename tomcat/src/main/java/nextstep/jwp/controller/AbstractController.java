@@ -12,7 +12,6 @@ public abstract class AbstractController implements Controller {
     protected static final String TEXT_CSS = "text/css;";
     protected static final String INDEX_PAGE = "/index.html";
     protected static final String UNAUTHORIZED_PAGE = "/401.html";
-    protected static final String HEADER_COOKIE = "Cookie";
     protected static final String HEADER_LOCATION = "Location";
     protected static final String HEADER_SET_COOKIE = "Set-Cookie";
     protected static final String HEADER_CONTENT_TYPE = "Content-Type";

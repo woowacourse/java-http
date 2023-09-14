@@ -21,8 +21,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final String cookieHeader = request.getRequestHeader().getValue(HEADER_COOKIE);
-        final var cookie = HttpCookie.from(cookieHeader);
+        final HttpCookie cookie = request.getCookie();
         final User user = findUserBySessionId(cookie.getJSessionId());
         final var statusLine = StatusLine.of(request.getRequestLine().getProtocol(), HttpStatus.FOUND);
         response.setStatusLine(statusLine);
@@ -47,8 +46,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
-        final String cookieHeader = request.getRequestHeader().getValue(HEADER_COOKIE);
-        final var cookie = HttpCookie.from(cookieHeader);
+        final HttpCookie cookie = request.getCookie();
         final User user = findUserBySessionId(cookie.getJSessionId());
         if (user != null) {
             doPost(request, response);

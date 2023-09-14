@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpCookie;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,6 +73,11 @@ public class HttpRequest {
             requestBodyValues.put(splitValue[0], splitValue[1]);
         }
         return requestBodyValues;
+    }
+
+    public HttpCookie getCookie() {
+        final String cookieHeader = requestHeader.getValue("Cookie");
+        return HttpCookie.from(cookieHeader);
     }
 
     public RequestLine getRequestLine() {

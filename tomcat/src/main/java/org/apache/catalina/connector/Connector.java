@@ -1,35 +1,35 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.HttpDispatcher;
-import org.apache.coyote.http11.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connector implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int DEFAULT_THREAD_COUNT = 250;
 
-    private final HttpDispatcher httpDispatcher;
     private final ServerSocket serverSocket;
-    
+    private final ExecutorService executorService;
+
     private boolean stopped;
 
-    public Connector(final HttpDispatcher httpDispatcher) {
-        this(httpDispatcher, DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector() {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, DEFAULT_THREAD_COUNT);
     }
 
-    public Connector(final HttpDispatcher httpDispatcher, final int port, final int acceptCount) {
-        this.httpDispatcher = httpDispatcher;
+    private Connector(final int port, final int acceptCount, final int threadCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.executorService = Executors.newFixedThreadPool(threadCount);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -70,8 +70,8 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, new HttpRequestParser(), httpDispatcher);
-        new Thread(processor).start();
+        final var processor = new Http11Processor(connection);
+        executorService.execute(processor);
     }
 
     public void stop() {

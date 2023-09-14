@@ -1,7 +1,6 @@
 package org.apache.catalina.startup;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.HttpDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -10,14 +9,9 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final HttpDispatcher httpDispatcher;
-
-    public Tomcat(final HttpDispatcher httpDispatcher) {
-        this.httpDispatcher = httpDispatcher;
-    }
 
     public void start() {
-        final var connector = new Connector(httpDispatcher);
+        final var connector = new Connector();
         connector.start();
 
         try {

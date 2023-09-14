@@ -36,5 +36,4 @@ class RegisterControllerTest {
         assertThat(response.getHeaders().get("Location")).isEqualTo("/index.html");
     }
 
-
 }

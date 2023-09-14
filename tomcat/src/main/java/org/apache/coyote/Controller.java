@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package org.apache.coyote;
 
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;

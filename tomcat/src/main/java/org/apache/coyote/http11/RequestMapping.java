@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.List;
-import nextstep.jwp.controller.Controller;
+import org.apache.coyote.Controller;
 import nextstep.jwp.controller.DefaultController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;

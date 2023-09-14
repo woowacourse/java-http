@@ -1,7 +1,8 @@
 package nextstep.jwp.controller;
 
 import java.util.Set;
-import nextstep.jwp.controller.FileReader.FileReader;
+import org.apache.coyote.fileReader.FileReader;
+import org.apache.coyote.AbstractController;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.HttpStatus;

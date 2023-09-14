@@ -1,4 +1,4 @@
-package org.apache.coyote.session;
+package nextstep.jwp.session;
 
 import java.util.UUID;
 import org.apache.catalina.session.Session;

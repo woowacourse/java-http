@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.controller.FileReader.FileReader;
+import org.apache.coyote.fileReader.FileReader;
 import nextstep.jwp.controller.ResourceController;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.http11.Protocol;

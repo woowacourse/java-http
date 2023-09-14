@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.controller.FileReader.FileReader;
+import org.apache.coyote.fileReader.FileReader;
 import nextstep.jwp.controller.LoginController;
 import org.apache.coyote.FixtureFactory;
 import org.apache.coyote.http11.Protocol;

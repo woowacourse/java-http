@@ -1,4 +1,4 @@
-package nextstep.jwp.controller.FileReader;
+package org.apache.coyote.fileReader;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

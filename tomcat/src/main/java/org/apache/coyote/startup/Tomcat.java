@@ -1,4 +1,4 @@
-package org.apache.catalina.startup;
+package org.apache.coyote.startup;
 
 import java.io.IOException;
 import org.apache.catalina.connector.Connector;

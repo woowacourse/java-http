@@ -22,3 +22,26 @@
     - [x] Status Line
     - [x] Headers
     - [x] Body
+
+- [x] HttpRequest
+    - [x] Method
+    - [x] Path
+    - [x] Protocol Version
+    - [x] Headers
+    - [x] Body
+
+- [x] HttpResponse
+    - [x] Protocol Version
+    - [x] Status Code
+    - [x] Status Message
+    - [x] Headers
+    - [x] Body
+
+- [x] Controller Interface
+    - Method : Service
+    - Parameters : HttpRequest, HttpResponse
+
+- [x] AbstractController
+    - Implement : Controller
+    - Method : doGet, doPost
+    - Parameters : HttpRequest, HttpResponse

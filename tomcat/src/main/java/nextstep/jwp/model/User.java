@@ -25,9 +25,13 @@ public class User {
     }
 
     public void setId(final Long id) {
-        if (Objects.nonNull(this.id)) {
+        if (Objects.nonNull(id)) {
             this.id = id;
         }
+    }
+
+    public Long getId() {
+        return this.id;
     }
 
     public String getAccount() {
@@ -43,6 +47,9 @@ public class User {
             return false;
         }
         final User user = (User) o;
+        if (Objects.isNull(id) || Objects.isNull(user.id)) {
+            return false;
+        }
         return Objects.equals(id, user.id);
     }
 

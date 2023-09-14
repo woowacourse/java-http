@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.header;
 
 public enum HeaderName {
+    COOKIE("Cookie"),
     LOCATION("Location"),
     SET_COOKIE("Set-cookie"),
     CONTENT_TYPE("Content-Type"),
@@ -9,6 +10,10 @@ public enum HeaderName {
 
     HeaderName(final String value) {
         this.value = value;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override

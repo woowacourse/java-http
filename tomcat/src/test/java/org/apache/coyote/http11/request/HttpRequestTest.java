@@ -3,8 +3,9 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.header.Headers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,17 +17,17 @@ class HttpRequestTest {
     void parseHttpRequest_exist_start() {
         //given
         final String startLine = "GET /hello?name=split HTTP/1.1";
-        final Headers headers = new Headers(Collections.emptyList());
-        final String body = "";
 
         //when
-        final HttpRequest request = new HttpRequest(startLine, headers, body);
+        final HttpRequest request = HttpRequest.requestLine(startLine);
 
         //then
         assertAll(
-            () -> assertThat(request.getStartLine()).isEqualTo(startLine),
-            () -> assertThat(request.getRequestTarget()).isEqualTo("/hello?name=split"),
-            () -> assertThat(request.getHeaders().getValues()).isEmpty(),
+            () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
+            () -> assertThat(request.getPath()).isEqualTo("/hello"),
+            () -> assertThat(request.getProtocolVersion()).isEqualTo(HttpVersion.HTTP_1_1),
+            () -> assertThat(request.getQueryParameters()).isEqualTo(Map.of("name", "split")),
+            () -> assertThat(request.getHeaders().getAllHeaders()).isEmpty(),
             () -> assertThat(request.getBody()).isEmpty()
         );
     }
@@ -37,17 +38,19 @@ class HttpRequestTest {
         //given
         final String startLine = "GET /hello HTTP/1.1";
         final Headers headers = new Headers(List.of("Host: www.example.com"));
-        final String body = "";
 
         //when
-        final HttpRequest request = new HttpRequest(startLine, headers, body);
+        final HttpRequest request = HttpRequest.builder(startLine)
+            .headers(headers)
+            .build();
 
         //then
         assertAll(
-            () -> assertThat(request.getStartLine()).isEqualTo(startLine),
-            () -> assertThat(request.getRequestTarget()).isEqualTo("/hello"),
-            () -> assertThat(request.getHeaders().getValues()).hasSize(1),
-            () -> assertThat(request.getHeaderValueIgnoringCase("host"))
+            () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
+            () -> assertThat(request.getPath()).isEqualTo("/hello"),
+            () -> assertThat(request.getProtocolVersion()).isEqualTo(HttpVersion.HTTP_1_1),
+            () -> assertThat(request.getHeaders().getAllHeaders()).hasSize(1),
+            () -> assertThat(request.getHeader("Host"))
                 .isEqualTo("www.example.com"),
             () -> assertThat(request.getBody()).isEmpty()
         );
@@ -65,16 +68,20 @@ class HttpRequestTest {
         final String body = "This is Body";
 
         //when
-        final HttpRequest request = new HttpRequest(startLine, headers, body);
+        final HttpRequest request = HttpRequest.builder(startLine)
+            .headers(headers)
+            .body(body)
+            .build();
 
         //then
         assertAll(
-            () -> assertThat(request.getStartLine()).isEqualTo(startLine),
-            () -> assertThat(request.getRequestTarget()).isEqualTo("/hello"),
-            () -> assertThat(request.getHeaders().getValues()).hasSize(2),
-            () -> assertThat(request.getHeaderValueIgnoringCase("host"))
+            () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
+            () -> assertThat(request.getPath()).isEqualTo("/hello"),
+            () -> assertThat(request.getProtocolVersion()).isEqualTo(HttpVersion.HTTP_1_1),
+            () -> assertThat(request.getHeaders().getAllHeaders()).hasSize(2),
+            () -> assertThat(request.getHeader("Host"))
                 .isEqualTo("www.example.com"),
-            () -> assertThat(request.getHeaderValueIgnoringCase("accept"))
+            () -> assertThat(request.getHeader("Accept"))
                 .isEqualTo("text/plain"),
             () -> assertThat(request.getBody()).isEqualTo("This is Body")
         );

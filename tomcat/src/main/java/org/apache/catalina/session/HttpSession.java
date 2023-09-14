@@ -1,8 +1,8 @@
 package org.apache.catalina.session;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpSession {
 
@@ -11,8 +11,8 @@ public class HttpSession {
 
     public HttpSession(final String name, final Object value) {
         this.id = UUID.randomUUID().toString();
-        values = new HashMap<>();
-        values.put(name, value);
+        values = new ConcurrentHashMap<>();
+        addAttribute(name, value);
     }
 
     public String getId() {

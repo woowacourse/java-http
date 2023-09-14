@@ -16,7 +16,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionManager sessionManager = new SessionManager();
+    private final RequestMapping requestMapping = new RequestMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -37,8 +37,6 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = new HttpRequest(bufferedReader);
             HttpResponse response = new HttpResponse();
-
-            RequestMapping requestMapping = new RequestMapping();
 
             Controller controller = requestMapping.getController(request);
             controller.service(request, response);

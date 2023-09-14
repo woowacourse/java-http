@@ -61,6 +61,6 @@ class RootControllerTest {
                 "Content-Length: " + content.getBytes().length + " ",
                 "",
                 content);
-        assertThat(expected).isEqualTo(response.toString());
+        assertThat(response.toString()).isEqualTo(expected);
     }
 }

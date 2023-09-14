@@ -46,8 +46,8 @@ class LoginControllerTest {
 
         //when, then
         assertAll(
-                () -> assertThat(postRequest.getRequestBody().getParamValue("account")).isEqualTo("hubk"),
-                () -> assertThat(postRequest.getRequestBody().getParamValue("password")).isEqualTo("hubkpassword")
+                () -> assertThat(postRequest.getRequestBody().get().getParamValue("account")).isEqualTo("hubk"),
+                () -> assertThat(postRequest.getRequestBody().get().getParamValue("password")).isEqualTo("hubkpassword")
         );
     }
 

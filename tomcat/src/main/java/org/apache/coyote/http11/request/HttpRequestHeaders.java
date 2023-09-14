@@ -58,8 +58,4 @@ public class HttpRequestHeaders {
     public Optional<Cookies> getCookie() {
         return cookies;
     }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
 }

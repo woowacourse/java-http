@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.HashMap;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -73,8 +74,10 @@ class HttpRequestLineTest {
         expected.put("key2", "value2");
 
         // then
-        assertThat(actual.getQueryParam()).usingRecursiveComparison()
-            .isEqualTo(expected);
+        assertAll(
+            () -> actual.find("key1").equals("value1"),
+            () -> actual.find("key2").equals("value2")
+        );
     }
 
     @Test

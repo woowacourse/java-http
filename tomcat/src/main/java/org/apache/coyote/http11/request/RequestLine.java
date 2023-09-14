@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,12 +77,12 @@ public class RequestLine {
         return this.getMethod() == method;
     }
 
-    public String getPath() {
-        return path;
+    public Optional<String> find(String key) {
+        return Optional.ofNullable(queryParam.get(key));
     }
 
-    public Map<String, String> getQueryParam() {
-        return queryParam;
+    public String getPath() {
+        return path;
     }
 
     public String getHttpVersion() {

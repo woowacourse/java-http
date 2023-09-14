@@ -1,7 +1,12 @@
-package org.apache.coyote.http11.controller;
+package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.controller.HomeController;
+import org.apache.catalina.controller.LoginController;
+import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.controller.StaticResourceController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -8,7 +8,7 @@ public class HttpResponse {
     private final Map<String, String> headers = new HashMap<>();
     private final StringBuilder body = new StringBuilder();
 
-    public String createResponse() {
+    public String createResponseString() {
         StringBuilder responseBuilder = new StringBuilder();
         responseBuilder.append("HTTP/1.1 ")
                 .append(status.getCode()).append(" ")

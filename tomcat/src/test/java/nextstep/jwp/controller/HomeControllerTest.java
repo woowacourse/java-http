@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.HttpRequestException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.*;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -12,7 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -38,9 +37,15 @@ class HomeControllerTest {
         final var httpRequest = HttpRequest.from(bufferedReader);
         final var httpResponse = HttpResponse.createEmpty();
 
-        // when & then
-        assertThatThrownBy(() -> homeController.doPost(httpRequest, httpResponse))
-                .isInstanceOf(HttpRequestException.class);
+        final var expectedStatusLine = StatusLine.of("HTTP/1.1", HttpStatus.METHOD_NOT_ALLOWED);
+
+        // when
+        homeController.doPost(httpRequest, httpResponse);
+
+        // then
+        assertThat(httpResponse.getStatusLine())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedStatusLine);
         bufferedReader.close();
         inputStreamReader.close();
         inputStream.close();

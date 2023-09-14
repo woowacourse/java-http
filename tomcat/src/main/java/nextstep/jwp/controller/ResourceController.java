@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.HttpRequestException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -13,7 +12,8 @@ public class ResourceController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        throw new HttpRequestException(HTTP_METHOD_EXCEPTION_MESSAGE);
+        final var statusLine = StatusLine.of(request.getRequestLine().getProtocol(), HttpStatus.METHOD_NOT_ALLOWED);
+        response.setStatusLine(statusLine);
     }
 
     @Override

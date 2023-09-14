@@ -13,7 +13,7 @@ public class HttpResponse {
 
     private HttpStatus status;
     private String body;
-    private final Headers headers2 = new Headers();
+    private final Headers headers = new Headers();
 
     public HttpResponse() {
         this.status = HttpStatus.OK;
@@ -23,7 +23,7 @@ public class HttpResponse {
     public void redirectTo(final String location) {
         setStatus(HttpStatus.FOUND);
         setBody(EMPTY_BODY);
-        headers2.add(new HttpHeader("Location", location));
+        headers.add(new HttpHeader("Location", location));
     }
 
     public void setStatus(final HttpStatus status) {
@@ -46,15 +46,15 @@ public class HttpResponse {
     }
 
     public void putHeader(HttpHeader header) {
-        this.headers2.add(header);
+        this.headers.add(header);
     }
 
     public HttpHeader getHeader(String name) {
-        return headers2.get(name);
+        return headers.get(name);
     }
 
     public Headers getHeaders() {
-        return headers2;
+        return headers;
     }
 
     public void setContentType(ContentType contentType) {
@@ -68,7 +68,7 @@ public class HttpResponse {
     public String toLine() {
         return String.join(CRLF,
                 HttpResponse.HTTP_VERSION + " " + status.toLine(),
-                headers2.toLine(),
+                headers.toLine(),
                 "",
                 body
         );

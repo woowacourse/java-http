@@ -1,12 +1,11 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.SessionManager;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.BusinessException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -20,23 +19,24 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response) {
         if (request.notContainJsessionId()) {
-            response.setStatusCode(StatusCode.OK)
-                    .setContentType(ContentType.HTML)
-                    .setRedirect("/login.html");
+            redirectToLoginPage(response);
             return;
         }
         final String jsessionId = request.findJsessionId();
         final Session session = sessionManager.findSession(jsessionId);
-        validateSession(session);
+        if (session == null) {
+            redirectToLoginPage(response);
+            return;
+        }
         response.setStatusCode(StatusCode.FOUND)
                 .setContentType(ContentType.HTML)
                 .setRedirect("/index.html");
     }
 
-    private void validateSession(final Session session) {
-        if (session == null) {
-            throw new BusinessException("세션이 적절하지 않습니다.");
-        }
+    private void redirectToLoginPage(final HttpResponse response) {
+        response.setStatusCode(StatusCode.OK)
+                .setContentType(ContentType.HTML)
+                .setRedirect("/login.html");
     }
 
     @Override
@@ -56,6 +56,12 @@ public class LoginController extends AbstractController {
 
     private void generateAlreadyAuthorized(final String jsessionId, final HttpResponse response) {
         final Session session = sessionManager.findSession(jsessionId);
+        if (session == null) {
+            response.setStatusCode(StatusCode.OK)
+                    .setContentType(ContentType.HTML)
+                    .setRedirect("/register.html");
+            return;
+        }
         generateLogin(response, session);
     }
 

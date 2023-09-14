@@ -36,12 +36,8 @@ public class HttpRequest {
         return httpHeader.findJsessionId();
     }
 
-    public boolean isGet() {
-        return httpMethod.equals(HttpMethod.GET);
-    }
-
-    public boolean isPost() {
-        return httpMethod.equals(HttpMethod.POST);
+    public boolean methodEquals(final HttpMethod httpMethod) {
+        return this.httpMethod.equals(httpMethod);
     }
 
     public boolean isFile() {

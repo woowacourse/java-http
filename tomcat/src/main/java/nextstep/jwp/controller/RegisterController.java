@@ -1,11 +1,11 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.SessionManager;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookies;
 import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -34,7 +34,7 @@ public class RegisterController extends AbstractController {
     }
 
     private User makeUser(final HttpRequest request) {
-        final String account = request.findBodyParameter("acoount");
+        final String account = request.findBodyParameter("account");
         final String email = request.findBodyParameter("email");
         final String password = request.findBodyParameter("password");
         return new User(account, password, email);

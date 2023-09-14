@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.HandlerMapping;
-import nextstep.jwp.controller.Controller;
+import nextstep.jwp.DispatcherServlet;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -17,7 +16,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HandlerMapping handlerMapping = new HandlerMapping();
+    private static final HttpServlet httpServlet = new DispatcherServlet();
 
     private final Socket connection;
 
@@ -46,14 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final Controller controller = handlerMapping.findController(request.getPath());
-            if (controller == null) {
-                generateNotFoundController(response);
-                sendResponse(outputStream, response);
-                return;
-            }
-
-            controller.service(request, response);
+            httpServlet.service(request, response);
             sendResponse(outputStream, response);
         } catch (final IOException | UncheckedServletException exception) {
             log.error(exception.getMessage(), exception);
@@ -64,12 +56,6 @@ public class Http11Processor implements Runnable, Processor {
         response.setStatusCode(StatusCode.OK)
                 .setContentType(ContentType.findByPath(request.getPath()))
                 .setRedirect(request.getPath());
-    }
-
-    private void generateNotFoundController(final HttpResponse response) {
-        response.setStatusCode(StatusCode.NOT_FOUND)
-                .setContentType(ContentType.HTML)
-                .setRedirect("/404.html");
     }
 
     private void sendResponse(final OutputStream outputStream, final HttpResponse response) throws IOException {

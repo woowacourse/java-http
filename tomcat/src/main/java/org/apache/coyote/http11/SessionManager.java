@@ -1,7 +1,6 @@
-package nextstep.jwp;
+package org.apache.coyote.http11;
 
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.Session;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

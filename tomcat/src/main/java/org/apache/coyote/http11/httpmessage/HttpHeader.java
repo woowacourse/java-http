@@ -43,6 +43,10 @@ public class HttpHeader {
         return new HttpCookie(new HashMap<>());
     }
 
+    public void addHeader(final String headerName, final String headerValue) {
+        header.put(headerName, headerValue);
+    }
+
     public Map<String, String> getHeader() {
         return header;
     }

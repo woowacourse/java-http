@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.httpmessage.request;
 
-import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeader;
 import org.apache.coyote.http11.httpmessage.support.HttpRequestParser;
 
@@ -13,7 +12,7 @@ public class HttpRequest {
     private final QueryString queryString;
     private final RequestBody requestBody;
 
-    private HttpRequest(
+    public HttpRequest(
         final HttpMethod httpMethod,
         final String path,
         final String protocol,
@@ -40,6 +39,12 @@ public class HttpRequest {
         );
     }
 
+    public boolean hasBlankRegisterUserBody() {
+        return requestBody.getAccount().isBlank()
+            || requestBody.getEmail().isBlank()
+            || requestBody.getPassword().isBlank();
+    }
+
     public String getProtocol() {
         return protocol;
     }
@@ -48,11 +53,11 @@ public class HttpRequest {
         return header;
     }
 
-    public HttpCookie getCookie() {
-        return header.getCookies();
+    public String getAuthCookie() {
+        return header.getCookies().getAuthCookie();
     }
 
-    public RequestBody getRequestBody() {
+    public RequestBody getBody() {
         return requestBody;
     }
 

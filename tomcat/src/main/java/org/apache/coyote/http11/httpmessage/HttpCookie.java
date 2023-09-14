@@ -26,7 +26,7 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public String getAuthorizedCookie() {
+    public String getAuthCookie() {
         if (cookies.containsKey("JSESSIONID")) {
             return cookies.get("JSESSIONID");
         }

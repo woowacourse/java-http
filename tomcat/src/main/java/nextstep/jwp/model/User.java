@@ -25,9 +25,13 @@ public class User {
     }
 
     public void setId(final Long id) {
-        if (Objects.nonNull(this.id)) {
+        if (Objects.nonNull(id)) {
             this.id = id;
         }
+    }
+
+    public Long getId() {
+        return this.id;
     }
 
     public String getAccount() {

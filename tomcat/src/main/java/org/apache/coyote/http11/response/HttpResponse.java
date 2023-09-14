@@ -65,6 +65,21 @@ public class HttpResponse implements Response {
         return httpResponseHeaders.getStaticResourcePath();
     }
 
+    @Override
+    public void addException(Exception e) {
+        httpResponseHeaders.addException(e);
+    }
+
+    @Override
+    public String getException() {
+        return httpResponseHeaders.getException();
+    }
+
+    @Override
+    public boolean hasException() {
+        return httpResponseHeaders.hasException();
+    }
+
     public String getMessage() {
         if (httpResponseBody.exist()) {
             httpResponseBody.validateLength(httpResponseHeaders.getContentLength());

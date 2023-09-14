@@ -21,4 +21,10 @@ public interface Response {
     void addBody(String body);
 
     String getMessage();
+
+    void addException(Exception e);
+
+    String getException();
+
+    boolean hasException();
 }

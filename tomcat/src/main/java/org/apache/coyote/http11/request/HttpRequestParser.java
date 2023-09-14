@@ -28,7 +28,7 @@ public class HttpRequestParser {
     private static HttpRequestLine parseRequestLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
         if (requestLine == null) {
-            throw new IOException("요청에 Reqeust-line이 없습니다.");
+            throw new IllegalArgumentException("요청에 Reqeust-line이 없습니다.");
         }
         return HttpRequestLine.from(requestLine);
     }

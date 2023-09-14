@@ -54,7 +54,7 @@ class HttpRequestParserTest {
 
         // expect
         assertThatThrownBy(() -> HttpRequestParser.parse(reader))
-                .isInstanceOf(IOException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("요청에 Reqeust-line이 없습니다.");
 
         reader.close();

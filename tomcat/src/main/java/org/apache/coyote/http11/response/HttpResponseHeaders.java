@@ -36,8 +36,16 @@ class HttpResponseHeaders {
         headers.put(field, List.of(value));
     }
 
+    public void addException(Exception e) {
+        headers.put("Exception-Type", List.of(e.getClass().getName()));
+    }
+
     boolean hasStaticResourcePath() {
         return headers.containsKey(RESOURCE_PATH);
+    }
+
+    public boolean hasException() {
+        return headers.containsKey("Exception-Type");
     }
 
     String getStaticResourcePath() {
@@ -46,6 +54,10 @@ class HttpResponseHeaders {
 
     public long getContentLength() {
         return Long.parseLong(headers.get(CONTENT_LENGTH).get(0));
+    }
+
+    public String getException() {
+        return headers.get("Exception-Type").get(0);
     }
 
     public String getMessage() {

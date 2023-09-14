@@ -25,7 +25,7 @@ public class InMemoryUserRepository {
             if (user.equals(database.get(user.getAccount()))) {
                 throw new IllegalArgumentException("이미 가입된 유저입니다.");
             }
-            throw new IllegalArgumentException("잘못된 유저 정보입니다.");
+            throw new SecurityException("잘못된 유저 정보입니다.");
         }
 
         user.setId(id.getAndIncrement());

@@ -12,7 +12,7 @@ import static common.http.HttpMethod.PUT;
 
 public abstract class AbstractController implements Controller {
 
-    public static final String ERROR_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD = "요청에 해당하는 메서드가 없습니다.";
+    public static final String EXCEPTION_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD = "요청에 해당하는 메서드가 없습니다.";
     private final Map<HttpMethod, BiConsumer<Request, Response>> methodMapping = new EnumMap<>(HttpMethod.class);
 
     protected AbstractController() {
@@ -29,22 +29,22 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(Request request, Response response) {
-        throw new IllegalArgumentException(ERROR_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
+        throw new IllegalArgumentException(EXCEPTION_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
     }
 
     protected void doPost(Request request, Response response) {
-        throw new IllegalArgumentException(ERROR_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
+        throw new IllegalArgumentException(EXCEPTION_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
     }
 
     protected void doPut(Request request, Response response) {
-        throw new IllegalArgumentException(ERROR_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
+        throw new IllegalArgumentException(EXCEPTION_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
     }
 
     protected void doPatch(Request request, Response response) {
-        throw new IllegalArgumentException(ERROR_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
+        throw new IllegalArgumentException(EXCEPTION_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
     }
 
     protected void doDelete(Request request, Response response) {
-        throw new IllegalArgumentException(ERROR_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
+        throw new IllegalArgumentException(EXCEPTION_MESSAGE_WHEN_CALL_NOT_DECLARED_METHOD);
     }
 }

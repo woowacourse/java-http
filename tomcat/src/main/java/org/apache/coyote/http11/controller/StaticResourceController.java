@@ -19,6 +19,12 @@ public class StaticResourceController implements Controller {
 
     @Override
     public void service(Request request, Response response) {
+        if (response.hasException()) {
+            response.addVersionOfTheProtocol(request.getVersionOfTheProtocol());
+            buildResponse(response, response.getStaticResourcePath());
+            return;
+        }
+
         if (response.hasStaticResourcePath()) {
             buildResponse(response, response.getStaticResourcePath());
             return;

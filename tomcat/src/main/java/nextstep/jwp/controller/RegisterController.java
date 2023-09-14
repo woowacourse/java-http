@@ -15,7 +15,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> requestBodyValues = getRequestParameters(request);
+        final Map<String, String> requestBodyValues = request.getRequestParameters();
         final var user = new User(requestBodyValues.get("account"), requestBodyValues.get("password"),
                 requestBodyValues.get("email"));
         InMemoryUserRepository.save(user);

@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -51,6 +53,24 @@ public class HttpRequest {
         final var buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
+    }
+
+    public Map<String, String> getRequestParameters() {
+        final String[] uri = requestLine.getPath().split("\\?");
+        if (requestBody == null) {
+            return parseRequestBody(uri[1]);
+        }
+        return parseRequestBody(requestBody);
+    }
+
+    private Map<String, String> parseRequestBody(final String requestBody) {
+        final var requestBodyValues = new HashMap<String, String>();
+        final String[] splitRequestBody = requestBody.split("&");
+        for (var value : splitRequestBody) {
+            final String[] splitValue = value.split("=");
+            requestBodyValues.put(splitValue[0], splitValue[1]);
+        }
+        return requestBodyValues;
     }
 
     public RequestLine getRequestLine() {

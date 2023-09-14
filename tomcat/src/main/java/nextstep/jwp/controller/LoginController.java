@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
     }
 
     private void handleFirstLogin(final HttpRequest request, final HttpResponse response) {
-        final Map<String, String> requestBodyValues = getRequestParameters(request);
+        final Map<String, String> requestBodyValues = request.getRequestParameters();
         final Optional<User> user = InMemoryUserRepository.findByAccount(requestBodyValues.get("account"));
         if (user.isEmpty() || !user.get().checkPassword(requestBodyValues.get("password"))) {
             response.addResponseHeader(HEADER_LOCATION, UNAUTHORIZED_PAGE);

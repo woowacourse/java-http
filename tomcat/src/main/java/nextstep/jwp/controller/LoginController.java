@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -12,30 +12,13 @@ import org.apache.coyote.http11.response.Http11Response;
 
 import java.util.Optional;
 
-public class LoginHandler extends AbstractController {
+public class LoginController extends AbstractController {
     private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String COOKIE_KEY = "Cookie";
     private static final String LOGIN_PAGE = "/login.html";
     private static final String SESSION_KEY = "JSESSIONID";
-
-    public LoginHandler(String mappingUri) {
-        this.mappingUri = mappingUri;
-    }
-
-    @Override
-    public void service(final HttpRequest httpRequest, final Http11Response httpResponse) {
-        final String httpMethod = httpRequest.getRequestLine().getHttpMethod();
-
-        if (httpMethod.equals("GET")) {
-            doGet(httpRequest, httpResponse);
-        } else if (httpMethod.equals("POST")) {
-            doPost(httpRequest, httpResponse);
-        } else {
-            redirectUnAuthorizedPage(httpResponse);
-        }
-    }
 
     @Override
     public void doPost(final HttpRequest httpRequest, final Http11Response httpResponse) {

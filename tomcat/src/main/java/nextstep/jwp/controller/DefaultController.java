@@ -1,9 +1,9 @@
-package org.apache.coyote.controller;
+package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.Http11Response;
 
-public class EmptyController extends AbstractController {
+public class DefaultController extends AbstractController {
 
     @Override
     public void service(HttpRequest httpRequest, Http11Response httpResponse) throws RuntimeException {

@@ -11,7 +11,8 @@ import java.util.Map;
 public class Http11Response {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
-    public static final String CRLF = "\r\n";
+    private static final String CRLF = "\r\n";
+    private static final String COOKIE_DELIMITER = "=";
 
     private final Map<String, String> cookieValues = new HashMap<>();
     private URL resource;
@@ -39,7 +40,7 @@ public class Http11Response {
         sb.append(HTTP_VERSION + " " + httpStatusCode + " " + statusMessage + " ").append(CRLF)
                 .append("Content-Type: " + contentType(resource.getPath()) + ";charset=utf-8 ").append(CRLF)
                 .append("Content-Length: " + responseBody.getBytes().length + " ").append(CRLF)
-                .append(cookieResponse(cookieValues)).append("\r\n")
+                .append(cookieResponse(cookieValues)).append(CRLF)
                 .append(responseBody);
 
         return sb.toString();
@@ -61,7 +62,7 @@ public class Http11Response {
     private String cookieResponse(Map<String, String> cookieValues) {
         final StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> cookie : cookieValues.entrySet()) {
-            sb.append("Set-Cookie: ").append(cookie.getKey()).append("=").append(cookie.getValue()).append("\r\n");
+            sb.append("Set-Cookie: ").append(cookie.getKey()).append(COOKIE_DELIMITER).append(cookie.getValue()).append(CRLF);
         }
         return sb.toString();
     }

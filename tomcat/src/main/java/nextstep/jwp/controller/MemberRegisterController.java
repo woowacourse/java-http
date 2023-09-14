@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -8,30 +8,12 @@ import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MemberRegisterHandler extends AbstractController {
+public class MemberRegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(MemberRegisterHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(MemberRegisterController.class);
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
-    private static final String NOT_FOUND = "NotFound";
-
-    public MemberRegisterHandler(String mappingUri) {
-        this.mappingUri = mappingUri;
-    }
-
-    @Override
-    public void service(final HttpRequest httpRequest, final Http11Response httpResponse) {
-        final String httpMethod = httpRequest.getRequestLine().getHttpMethod();
-
-        if (httpMethod.equals("POST")) {
-            doPost(httpRequest, httpResponse);
-        } else if (httpMethod.equals("GET")) {
-            doGet(httpRequest, httpResponse);
-        } else {
-            redirectNotFoundPage(httpResponse);
-        }
-    }
 
     @Override
     void doGet(final HttpRequest httpRequest, final Http11Response httpResponse) {
@@ -50,13 +32,6 @@ public class MemberRegisterHandler extends AbstractController {
         log.info("User create - {}", user);
 
         redirectIndexPage(httpResponse);
-    }
-
-    private void redirectNotFoundPage(final Http11Response httpResponse) {
-        final String resourcePath = RESOURCE_PATH + NOT_FOUND_PAGE;
-        httpResponse.setResource(classLoader.getResource(resourcePath));
-        httpResponse.setHttpStatusCode(404);
-        httpResponse.setStatusMessage(NOT_FOUND);
     }
 
     private void redirectIndexPage(final Http11Response httpResponse) {

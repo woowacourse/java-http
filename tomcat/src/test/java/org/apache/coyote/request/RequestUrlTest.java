@@ -3,47 +3,30 @@ package org.apache.coyote.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.HashMap;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestUrlTest {
 
     @Test
-    @DisplayName("url의 값을 파싱하여 RequestUrl을 생성할 수 있다.")
-    void init_test() {
-        RequestUrl requestUrl = RequestUrl.of("/index.html", new HashMap<>());
+    @DisplayName("쿼리 스트링이 없는 경우에도 RequestUrl을 생성할 수 있다.")
+    void parse_url() {
+        RequestUrl requestUrl = RequestUrl.from("index.html");
 
-        assertThat(requestUrl.getUrl().getPath()).contains("/index.html");
+        assertThat(requestUrl.getPath()).isEqualTo("index.html");
     }
 
     @Test
-    @DisplayName("url의 값이 '/'라면 index.html을 url로 가진다.")
-    void home_url() {
-        RequestUrl requestUrl = RequestUrl.of("/", new HashMap<>());
-
-        assertThat(requestUrl.getUrl().getPath()).contains("/index.html");
-    }
-
-    @Test
-    @DisplayName("url의 값이 존재하지 않는다면 404.html을 url로 가진다.")
-    void no_url() {
-        RequestUrl requestUrl = RequestUrl.of("/없는주소/입니다/ㅎㅎ", new HashMap<>());
+    @DisplayName("쿼리 스트링이 있는 경우에는 QueryString을 Map형태로 파싱하여 RequestUrl을 생성할 수 있다.")
+    void parse_url_queryString() {
+        RequestUrl requestUrl = RequestUrl.from("login.html?account=kong&password=password");
 
         assertAll(
-                () -> assertThat(requestUrl.getUrl().getPath()).contains("/404.html"),
-                () -> assertThat(requestUrl.isNullPath()).isTrue()
+                () -> assertThat(requestUrl.getPath()).isEqualTo("login.html"),
+                () -> assertThat(requestUrl.getQueryValue("account")).isEqualTo("kong"),
+                () -> assertThat(requestUrl.getQueryValue("password")).isEqualTo("password")
         );
-    }
 
-    @Test
-    @DisplayName("url의 값이 존재하지않지만 html 문서는 존재할 때 해당 html 문서를 url로 생성한다.")
-    void no_url_html() {
-        RequestUrl requestUrl = RequestUrl.of("/index", new HashMap<>());
 
-        assertAll(
-                () -> assertThat(requestUrl.getUrl().getPath()).contains("/index.html"),
-                () -> assertThat(requestUrl.isNullPath()).isFalse()
-        );
     }
 }

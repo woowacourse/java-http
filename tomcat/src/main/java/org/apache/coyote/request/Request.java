@@ -1,39 +1,51 @@
 package org.apache.coyote.request;
 
-import java.net.URL;
 import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
 
 public class Request {
 
-    private final RequestUrl url;
-    private final RequestContentType requestContentType;
+    private static final String JSESSIONID = "JSESSIONID";
 
-    public Request(RequestUrl url, RequestContentType requestContentType) {
-        this.url = url;
-        this.requestContentType = requestContentType;
+    private final RequestLine requestLine;
+    private final RequestHeader requestHeader;
+    private final RequestBody requestBody;
+
+    public Request(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
+        this.requestLine = requestLine;
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
+    }
+
+    public boolean isSameHttpMethod(HttpMethod otherHttpMethod) {
+        return requestLine.isSameHttpMethod(otherHttpMethod);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public String getResourceTypes() {
-        return requestContentType.getContentType();
+        return requestHeader.getResourceType();
     }
 
-    public String getQueryStringValue(String key) {
-        return url.getQueryValue(key);
+    public String getSessionId() {
+        return requestHeader.getCookie().getValue(JSESSIONID);
     }
 
     public boolean isSamePath(String urlPath) {
-        return url.isSamePath(urlPath);
-    }
-
-    public URL getUrl() {
-        return url.getUrl();
+        return requestLine.isSamePath(urlPath);
     }
 
     public Map<String, String> getQueryString() {
-        return url.getQueryString();
+        return requestLine.getQueryString();
     }
 
-    public boolean isExists() {
-        return !url.isNullPath();
+    public Map<String, String> getBody() {
+        return requestBody.getBody();
     }
 }

@@ -14,64 +14,27 @@ class RequestParserTest {
     @Test
     @DisplayName("주어진 InputStream의 정보를 파싱하여 request 객체를 생성한다.")
     void parse_normal() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream("GET /index.html HTTP/1.1".getBytes());
+        InputStream inputStream = new ByteArrayInputStream("GET /index.html HTTP/1.1\r\n".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
         Request request = requestParser.parse();
 
-        assertAll(
-                () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
-                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
-                () -> assertThat(request.isExists()).isTrue()
-        );
-    }
-
-    @Test
-    @DisplayName("주어진 url이 /라면 index.html에 대한 request를 생성한다.")
-    void parse_home() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream("GET / HTTP/1.1".getBytes());
-        RequestParser requestParser = new RequestParser(inputStream);
-
-        Request request = requestParser.parse();
-
-        assertAll(
-                () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
-                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
-                () -> assertThat(request.isExists()).isTrue()
-        );
-    }
-
-    @Test
-    @DisplayName("주어진 url의 파일이 없다면 url이 null이고 isExists가 false인 request 객체가 반환한다.")
-    void parse_noFile() throws IOException {
-        InputStream inputStream = new ByteArrayInputStream(
-                "GET /trestset/qweqsdae/asdawdqd/qwdqweqw HTTP/1.1".getBytes());
-        RequestParser requestParser = new RequestParser(inputStream);
-
-        Request request = requestParser.parse();
-
-        assertAll(
-                () -> assertThat(request.getUrl().getFile()).contains("/404.html"),
-                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
-                () -> assertThat(request.isExists()).isFalse()
-        );
+        assertThat(request.getPath()).contains("/index.html");
     }
 
     @Test
     @DisplayName("주어진 url의 쿼리스트링을 파싱해 쿼리스트링을 key와 value로 가지고 있는 request 객체를 생성할 수 있다.")
     void parse_queryString() throws IOException {
         InputStream inputStream = new ByteArrayInputStream(
-                "GET /index.html?account=123&password=password1234! HTTP/1.1".getBytes());
+                "GET /index.html?account=123&password=password1234! HTTP/1.1\r\n".getBytes());
         RequestParser requestParser = new RequestParser(inputStream);
 
         Request request = requestParser.parse();
 
         assertAll(
-                () -> assertThat(request.getUrl().getFile()).contains("/index.html"),
-                () -> assertThat(request.getResourceTypes()).contains(RequestContentType.HTML.getContentType()),
+                () -> assertThat(request.getPath()).contains("/index.html"),
                 () -> assertThat(request.getQueryString()).containsEntry("account", "123"),
-                () -> assertThat(request.getQueryString()).containsEntry("password", "password1234!"),
-                () -> assertThat(request.isExists()).isTrue()
+                () -> assertThat(request.getQueryString()).containsEntry("password", "password1234!")
         );
     }
 }

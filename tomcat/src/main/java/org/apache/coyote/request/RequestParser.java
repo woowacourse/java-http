@@ -6,17 +6,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.Protocol;
 
 public class RequestParser {
 
-    private static final String ACCEPT_HEADER = "Accept: ";
-    private static final String CONTENT_TYPE = "Content-Type: ";
-    private static final String SPLIT_HEADER_DELIMITER = " ";
-    private static final String FINISH_SPLIT_DELIMITER = ";";
+    private static final String BODY_KEY_PAIR_SPLIT_DELIMITER = "&";
+    private static final String BODY_KEY_VALUE_SPLIT_DELIMITER = "=";
+    private static final String LINE_SPLIT_DELIMITER = " ";
     private static final String SPLIT_VALUE_DELIMITER = ",";
-    private static final String QUERY_STRING_SPLIT_DELIMITER = "\\?";
-    private static final String QUERY_STRING_KEY_PAIR_SPLIT_DELIMITER = "&";
-    private static final String QUERY_STRING_KEY_VALUE_SPLIT_DELIMITER = "=";
+    private static final String HEADER_DELIMITER = ": ";
 
     private final BufferedReader bufferedReader;
 
@@ -26,52 +25,56 @@ public class RequestParser {
     }
 
     public Request parse() throws IOException {
-        RequestUrl requestUrl = readUrl(bufferedReader.readLine());
-        RequestContentType requestContentType = getResourceType();
+        RequestLine requestLine = readRequestUrl();
+        Map<String, String> headers = getHeaders();
 
-        return new Request(requestUrl, requestContentType);
+        RequestHeader requestHeader = new RequestHeader(headers);
+        RequestBody requestBody = getRequestBody(requestHeader);
+        return new Request(requestLine, requestHeader, requestBody);
     }
 
-    private RequestUrl readUrl(String message) {
-        String pathLine = readLine(message);
+    private RequestLine readRequestUrl() throws IOException {
+        String message = bufferedReader.readLine();
 
-        String requestPath = pathLine.split(QUERY_STRING_SPLIT_DELIMITER)[0];
-        if (hasNoQueryParameter(pathLine)) {
-            return RequestUrl.of(requestPath, new HashMap<>());
-        }
-
-        Map<String, String> requestQueryString = getRequestQueryString(pathLine);
-        return RequestUrl.of(requestPath, requestQueryString);
+        String httpMethod = getSplit(message, LINE_SPLIT_DELIMITER)[0];
+        String url = getSplit(message, LINE_SPLIT_DELIMITER)[1];
+        String protocol = getSplit(message, LINE_SPLIT_DELIMITER)[2];
+        return new RequestLine(HttpMethod.from(httpMethod), RequestUrl.from(url), Protocol.from(protocol));
     }
 
-    private String readLine(String message) {
-        return message.split(SPLIT_HEADER_DELIMITER)[1]
-                .split(FINISH_SPLIT_DELIMITER)[0];
+    private static String[] getSplit(String message, String delimiter) {
+        return message.split(delimiter);
     }
 
-    private boolean hasNoQueryParameter(String pathLine) {
-        return pathLine.split(QUERY_STRING_KEY_VALUE_SPLIT_DELIMITER).length == 1;
-    }
-
-    private Map<String, String> getRequestQueryString(String pathLine) {
-        String queryStrings = pathLine.split(QUERY_STRING_SPLIT_DELIMITER)[1];
-        Map<String, String> requestQueryString = new HashMap<>();
-        for (String queryString : queryStrings.split(QUERY_STRING_KEY_PAIR_SPLIT_DELIMITER)) {
-            String key = queryString.split(QUERY_STRING_KEY_VALUE_SPLIT_DELIMITER)[0];
-            String value = queryString.split(QUERY_STRING_KEY_VALUE_SPLIT_DELIMITER)[1];
-            requestQueryString.put(key, value);
-        }
-        return requestQueryString;
-    }
-
-    private RequestContentType getResourceType() throws IOException {
+    public Map<String, String> getHeaders() throws IOException {
+        Map<String, String> headers = new HashMap<>();
         String header;
-        while ((header = bufferedReader.readLine()) != null) {
-            if (header.startsWith(ACCEPT_HEADER) || header.startsWith(CONTENT_TYPE)) {
-                String resourceType = readLine(header);
-                return RequestContentType.findResourceType(resourceType.split(SPLIT_VALUE_DELIMITER)[0]);
-            }
+        while ((header = bufferedReader.readLine()) != null && !header.isBlank()) {
+            String entry = getSplit(header, SPLIT_VALUE_DELIMITER)[0];
+            String key = getSplit(entry, HEADER_DELIMITER)[0];
+            String value = getSplit(entry, HEADER_DELIMITER)[1];
+            headers.put(key, value);
         }
-        return RequestContentType.HTML;
+        return headers;
+    }
+
+    public RequestBody getRequestBody(RequestHeader requestHeader) throws IOException {
+        if (!requestHeader.hasRequestBody()) {
+            return new RequestBody(new HashMap<>());
+        }
+        String body = getBody(requestHeader.getContentLength());
+        Map<String, String> requestBody = new HashMap<>();
+        for (String entry : getSplit(body, BODY_KEY_PAIR_SPLIT_DELIMITER)) {
+            String key = getSplit(entry, BODY_KEY_VALUE_SPLIT_DELIMITER)[0];
+            String value = getSplit(entry, BODY_KEY_VALUE_SPLIT_DELIMITER)[1];
+            requestBody.put(key, value);
+        }
+        return new RequestBody(requestBody);
+    }
+
+    private String getBody(int contentLength) throws IOException {
+        char[] requestBodyBuffer = new char[contentLength];
+        bufferedReader.read(requestBodyBuffer, 0, contentLength);
+        return new String(requestBodyBuffer);
     }
 }

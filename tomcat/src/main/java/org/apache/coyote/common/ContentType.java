@@ -1,6 +1,7 @@
-package nextstep.jwp.common;
+package org.apache.coyote.common;
 
 import java.util.Arrays;
+import org.apache.coyote.exception.UnSupportedContentTypeException;
 
 public enum ContentType {
     HTML("text/html;charset=utf-8", ".html"),
@@ -33,7 +34,7 @@ public enum ContentType {
         return Arrays.stream(ContentType.values())
                 .filter(type -> uri.endsWith(type.getExtension()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(""))
+                .orElseThrow(UnSupportedContentTypeException::new)
                 .getType();
     }
 }

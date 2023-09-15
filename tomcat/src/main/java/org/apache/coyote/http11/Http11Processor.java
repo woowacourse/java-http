@@ -1,15 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import nextstep.jwp.RequestProcessor;
-import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.controller.RequestMapping;
+import org.apache.catalina.Controller;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +15,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final Controller requestMapping = RequestMapping.getDefault();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -33,14 +32,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
-
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final RequestProcessor requestProcessor = new RequestProcessor();
-            final HttpResponse httpResponse = requestProcessor.process(httpRequest);
-
-            outputStream.write(httpResponse.toResponse().getBytes());
+            final HttpResponse httpResponse = new HttpResponse();
+            requestMapping.service(httpRequest, httpResponse);
+            outputStream.write(httpResponse.cconvertToString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

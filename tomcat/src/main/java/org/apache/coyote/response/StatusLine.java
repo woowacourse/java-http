@@ -1,7 +1,7 @@
-package nextstep.jwp.response;
+package org.apache.coyote.response;
 
-import nextstep.jwp.common.HttpStatus;
-import nextstep.jwp.common.HttpVersion;
+import org.apache.coyote.common.HttpStatus;
+import org.apache.coyote.common.HttpVersion;
 
 public class StatusLine {
 

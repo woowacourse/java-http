@@ -1,8 +1,8 @@
-package nextstep.jwp.request;
+package org.apache.coyote.request;
 
 import java.util.Map;
-import nextstep.jwp.common.HttpMethod;
-import nextstep.jwp.common.HttpVersion;
+import org.apache.coyote.common.HttpMethod;
+import org.apache.coyote.common.HttpVersion;
 
 public class RequestLine {
 
@@ -23,7 +23,7 @@ public class RequestLine {
     public static RequestLine from(final String requestLine) {
         final String[] params = requestLine.split(" ");
         final HttpMethod httpMethod = HttpMethod.from(params[METHOD_INDEX]);
-        final RequestUri uri = RequestUri.from(params[1].substring(URI_INDEX));
+        final RequestUri uri = RequestUri.from(params[URI_INDEX].substring(1));
         final HttpVersion httpVersion = HttpVersion.from(params[VERSION_INDEX]);
         return new RequestLine(httpMethod, uri, httpVersion);
     }

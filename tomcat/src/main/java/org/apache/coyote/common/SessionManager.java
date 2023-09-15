@@ -1,12 +1,11 @@
-package org.apache.catalina;
+package org.apache.coyote.common;
 
-import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.Session;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> sessions = new HashMap<>();
+    private static final Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     private SessionManager() {
     }

@@ -1,5 +1,6 @@
-package nextstep.jwp.response;
+package org.apache.coyote.response;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,12 +11,12 @@ public class ResponseHeaders {
 
     private final Map<String, String> headers;
 
-    private ResponseHeaders(final Map<String, String> headers) {
-        this.headers = headers;
+    public ResponseHeaders() {
+        this.headers = new LinkedHashMap<>();
     }
 
-    public static ResponseHeaders from(final Map<String, String> headers) {
-        return new ResponseHeaders(headers);
+    public void save(final String name, final String value) {
+        headers.put(name, value);
     }
 
     public Map<String, String> getHeaders() {

@@ -1,4 +1,4 @@
-package nextstep.jwp.exception;
+package org.apache.coyote.exception;
 
 public class UnSupportedContentTypeException extends RuntimeException {
 

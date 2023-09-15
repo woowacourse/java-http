@@ -1,6 +1,7 @@
-package nextstep.jwp.common;
+package org.apache.coyote.common;
 
 import java.util.Arrays;
+import org.apache.coyote.exception.InvalidHttpVersionException;
 
 public enum HttpVersion {
     HTTP_1_1("HTTP/1.1");
@@ -15,7 +16,7 @@ public enum HttpVersion {
         return Arrays.stream(values())
                 .filter(httpVersion -> httpVersion.version.equals(version))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(InvalidHttpVersionException::new);
     }
 
     public String getVersion() {

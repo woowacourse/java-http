@@ -1,4 +1,4 @@
-package nextstep.jwp.common;
+package org.apache.coyote.common;
 
 public enum HttpStatus {
     OK(200),

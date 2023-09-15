@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package org.apache.coyote.common;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,10 +1,10 @@
-package nextstep.jwp.request;
+package org.apache.coyote.request;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.exception.InvalidQueryStringException;
+import org.apache.coyote.exception.InvalidQueryStringException;
 
 public class RequestUri {
     private final String uri;
@@ -16,7 +16,7 @@ public class RequestUri {
     }
 
     public static RequestUri from(final String requestUri) {
-        if (notExistQueryParametersIn(requestUri)) {
+        if (existQueryParametersIn(requestUri)) {
             final int queryParamStartIndex = requestUri.indexOf("?");
             final String uri = requestUri.substring(0, queryParamStartIndex);
             final Map<String, String> params = parseParams(requestUri.substring(queryParamStartIndex+1));
@@ -25,8 +25,8 @@ public class RequestUri {
         return new RequestUri(requestUri, Collections.emptyMap());
     }
 
-    private static boolean notExistQueryParametersIn(final String uri) {
-        return !uri.contains("?");
+    private static boolean existQueryParametersIn(final String uri) {
+        return uri.contains("?");
     }
 
     private static Map<String, String> parseParams(final String params) {

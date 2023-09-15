@@ -1,7 +1,7 @@
-package nextstep.jwp.common;
+package org.apache.coyote.common;
 
 import java.util.Arrays;
-import nextstep.jwp.exception.InvalidHttpMethodException;
+import org.apache.coyote.exception.InvalidHttpMethodException;
 
 public enum HttpMethod {
     GET,

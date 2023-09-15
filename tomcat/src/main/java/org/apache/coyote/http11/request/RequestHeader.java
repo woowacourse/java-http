@@ -1,10 +1,16 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.common.HttpCookie;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.coyote.http11.common.constant.Constants.EMPTY;
+
 public class RequestHeader {
+
+    private static final String COOKIE_HEADER = "Cookie";
     private final Map<String, String> headers;
 
     public RequestHeader(final Map<String, String> headers) {
@@ -25,6 +31,11 @@ public class RequestHeader {
             return null;
         }
         return headers.get(header);
+    }
+
+    public HttpCookie getCookie() {
+        String cookie = headers.getOrDefault(COOKIE_HEADER, EMPTY);
+        return HttpCookie.from(cookie);
     }
 }
 

@@ -22,9 +22,4 @@ public enum RequestMethod {
                 .orElseThrow(InvalidRequestException::new);
     }
 
-    public boolean isSameRequestMethod(String value) {
-        return Arrays.stream(RequestMethod.values())
-                .anyMatch(requestMethod -> requestMethod.name().equals(value));
-
-    }
 }

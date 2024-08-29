@@ -1,4 +1,4 @@
-package camp.nextstep.model;
+package com.techcourse.model;
 
 public class User {
 

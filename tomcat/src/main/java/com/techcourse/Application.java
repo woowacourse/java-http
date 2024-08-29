@@ -1,4 +1,4 @@
-package camp.nextstep;
+package com.techcourse;
 
 import org.apache.catalina.startup.Tomcat;
 

@@ -1,6 +1,6 @@
-package camp.nextstep.db;
+package com.techcourse.db;
 
-import camp.nextstep.model.User;
+import com.techcourse.model.User;
 
 import java.util.Map;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package camp.nextstep.exception;
+package com.techcourse.exception;
 
 public class UncheckedServletException extends RuntimeException {
 

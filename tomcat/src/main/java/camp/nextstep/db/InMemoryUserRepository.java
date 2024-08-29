@@ -1,6 +1,6 @@
-package nextstep.jwp.db;
+package camp.nextstep.db;
 
-import nextstep.jwp.model.User;
+import camp.nextstep.model.User;
 
 import java.util.Map;
 import java.util.Optional;

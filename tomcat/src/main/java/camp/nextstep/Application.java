@@ -1,4 +1,4 @@
-package nextstep;
+package camp.nextstep;
 
 import org.apache.catalina.startup.Tomcat;
 

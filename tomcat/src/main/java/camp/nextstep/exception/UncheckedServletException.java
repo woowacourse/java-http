@@ -1,4 +1,4 @@
-package nextstep.jwp.exception;
+package camp.nextstep.exception;
 
 public class UncheckedServletException extends RuntimeException {
 

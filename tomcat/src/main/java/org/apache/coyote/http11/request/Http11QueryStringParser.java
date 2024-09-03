@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.LinkedHashMap;
 
-public class Http11QueryStringParser {
+class Http11QueryStringParser {
 
-    public LinkedHashMap<String, String> parse(String requestUri) {
+    LinkedHashMap<String, String> parse(String requestUri) {
         if (notHasQueryString(requestUri)) {
             return new LinkedHashMap<>();
         }

@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Http11Method;
+import org.apache.coyote.http11.request.Http11Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

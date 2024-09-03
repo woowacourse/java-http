@@ -1,8 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
+import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.Http11Header;
 
 public record Http11Request(Http11Method method, String requestUri, List<Http11Query> queries,
                             List<Http11Header> headers, List<Cookie> cookies, LinkedHashMap<String, String> body) {

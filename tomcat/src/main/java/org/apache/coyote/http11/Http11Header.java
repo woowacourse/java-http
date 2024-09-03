@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-record Http11Header(String key, String value) {
+public record Http11Header(String key, String value) {
 
     @Override
     public String toString() {

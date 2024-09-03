@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public record Http11Query(String key, String value) {
+record Http11Query(String key, String value) {
 
     @Override
     public String toString() {

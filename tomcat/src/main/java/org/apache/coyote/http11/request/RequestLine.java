@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.method.HttpMethod;
 
 public class RequestLine {
 

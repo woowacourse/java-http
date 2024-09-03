@@ -1,10 +1,13 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -22,11 +25,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Http11ContentTypeFinder contentTypeFinder;
 
+    private final Http11QueryStringParser queryStringParser;
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestParser = new Http11RequestParser();
         this.resourceFinder = new Http11ResourceFinder();
         this.contentTypeFinder = new Http11ContentTypeFinder();
+        this.queryStringParser = new Http11QueryStringParser();
     }
 
     @Override
@@ -42,6 +48,18 @@ public class Http11Processor implements Runnable, Processor {
             String requestURI = requestParser.parseRequestURI(inputStream);
 
             Path path = resourceFinder.find(requestURI);
+
+            if (path.getFileName().toString().equals("login.html")) {
+                LinkedHashMap<String, String> queryStrings = queryStringParser.parse(requestURI);
+                String account = queryStrings.getOrDefault("account", "");
+                String password = queryStrings.getOrDefault("password", "");
+
+                InMemoryUserRepository.findByAccount(account)
+                        .filter(user -> user.checkPassword(password))
+                        .map(User::toString)
+                        .ifPresent(log::info);
+            }
+
             String contentTypes = contentTypeFinder.find(path);
 
             List<String> fileLines = Files.readAllLines(path);

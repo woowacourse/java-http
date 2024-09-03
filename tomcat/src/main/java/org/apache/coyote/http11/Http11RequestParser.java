@@ -8,8 +8,8 @@ public class Http11RequestParser {
     /*
     https://www.rfc-editor.org/rfc/rfc2616#section-5 이 문서에서 이 메서드가 반환하는 것을 Request-URI라 지칭합니다.
      */
-    public String parseRequestURI(InputStream inputStream) {
-        String startLine = parseStartLine(inputStream);
+    public String parseRequestURI(String requestMessage) {
+        String startLine = parseStartLine(requestMessage);
         validateStartLine(startLine);
         return startLine.split(" ")[1];
     }
@@ -21,12 +21,11 @@ public class Http11RequestParser {
         }
     }
 
-    private String parseStartLine(InputStream inputStream) {
-        String allHttpRequest = readAsString(inputStream);
-        return allHttpRequest.split("\r\n")[0];
+    private String parseStartLine(String requestMessage) {
+        return requestMessage.split("\r\n")[0];
     }
 
-    private String readAsString(InputStream inputStream) {
+    public String readAsString(InputStream inputStream) {
         try {
             // 학습 InputStream 의 readAllBytes 는 요청 전체를 읽는다. 이때, EOF를 만날때 까지 읽으므로 EOF가 없다면 Integer.MAX_VALUE 크기만큼 읽는다.
             int readByte = inputStream.available();
@@ -37,9 +36,9 @@ public class Http11RequestParser {
         }
     }
 
-    public Http11Method parseMethod(InputStream inputStream) {
-        String startLine = parseStartLine(inputStream);
+    public Http11Method parseMethod(String requestMessage) {
+        String startLine = parseStartLine(requestMessage);
         String rawMethod = startLine.split(" ")[0];
-        return Http11Method.valueOf(rawMethod);
+        return Http11Method.valueOf(rawMethod.toUpperCase());
     }
 }

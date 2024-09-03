@@ -62,8 +62,8 @@ public class Http11Processor implements Runnable, Processor {
 
         Http11Method http11Method = requestParser.parseMethod(requestMessage);
 
-        if (path.getFileName().toString().equals("login.html") && http11Method.equals(Http11Method.GET)) {
-            login(requestURI, outputStream);
+        if (path.getFileName().toString().equals("login.html") && http11Method.equals(Http11Method.POST)) {
+            login(requestMessage, outputStream);
             return;
         }
 
@@ -87,10 +87,10 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void login(String requestURI, OutputStream outputStream) {
-        LinkedHashMap<String, String> queryStrings = queryStringParser.parse(requestURI);
-        String account = queryStrings.getOrDefault("account", "");
-        String password = queryStrings.getOrDefault("password", "");
+    private void login(String requestMessage, OutputStream outputStream) {
+        LinkedHashMap<String, String> requestBody = requestParser.parseBody(requestMessage);
+        String account = requestBody.getOrDefault("account", "");
+        String password = requestBody.getOrDefault("password", "");
 
         boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

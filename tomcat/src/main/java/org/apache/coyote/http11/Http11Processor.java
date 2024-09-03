@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,6 +67,10 @@ public class Http11Processor implements Runnable, Processor {
             login(requestMessage, outputStream);
             return;
         }
+        if (path.getFileName().toString().equals("register.html") && http11Method.equals(Http11Method.POST)) {
+            register(requestMessage, outputStream);
+            return;
+        }
 
         String contentTypes = contentTypeFinder.find(path);
 
@@ -113,5 +118,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void register(String requestMessage, OutputStream outputStream) {
+        LinkedHashMap<String, String> requestBody = requestParser.parseBody(requestMessage);
+        String account = requestBody.getOrDefault("account", "");
+        String password = requestBody.getOrDefault("password", "");
+        String email = requestBody.getOrDefault("email", "");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        sendRedirect("/index.html", outputStream);
     }
 }

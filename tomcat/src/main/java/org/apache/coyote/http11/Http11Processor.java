@@ -21,20 +21,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    private final Http11RequestParser requestParser;
-
     private final Http11ResourceFinder resourceFinder;
 
     private final Http11ContentTypeFinder contentTypeFinder;
 
-    private final Http11QueryStringParser queryStringParser;
-
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestParser = new Http11RequestParser();
         this.resourceFinder = new Http11ResourceFinder();
         this.contentTypeFinder = new Http11ContentTypeFinder();
-        this.queryStringParser = new Http11QueryStringParser();
     }
 
     @Override
@@ -55,45 +49,28 @@ public class Http11Processor implements Runnable, Processor {
     private void sendResponse(Socket connection) throws IOException {
         InputStream inputStream = connection.getInputStream();
         OutputStream outputStream = connection.getOutputStream();
-        String requestMessage = requestParser.readAsString(inputStream);
+        Http11Request request = Http11Request.from(inputStream);
 
-        String requestURI = requestParser.parseRequestURI(requestMessage);
+        String requestURI = request.requestUri();
 
         Path path = resourceFinder.find(requestURI);
 
-        Http11Method http11Method = requestParser.parseMethod(requestMessage);
-
-        if (path.getFileName().toString().equals("login.html") && http11Method.equals(Http11Method.POST)) {
-            login(requestMessage, outputStream);
-            return;
+        if (path.getFileName().toString().equals("login.html")) {
+            login(request, outputStream);
         }
-        if (path.getFileName().toString().equals("register.html") && http11Method.equals(Http11Method.POST)) {
-            register(requestMessage, outputStream);
-            return;
+        if (path.getFileName().toString().equals("register.html")) {
+            register(request, outputStream);
         }
 
-        String contentTypes = contentTypeFinder.find(path);
-
-        List<String> fileLines = Files.readAllLines(path);
-        var responseBody = String.join("\n", fileLines);
-
-        String statusLine = "HTTP/1.1 200 OK ";
-        String contentType = "Content-Type: %s;charset=utf-8 ".formatted(contentTypes);
-        String contentLength = "Content-Length: " + responseBody.getBytes().length + " ";
-        String empty = "";
-        var response = String.join("\r\n",
-                statusLine,
-                contentType,
-                contentLength,
-                empty,
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        sendStaticResourceResponse(path, outputStream);
     }
 
-    private void login(String requestMessage, OutputStream outputStream) {
-        LinkedHashMap<String, String> requestBody = requestParser.parseBody(requestMessage);
+    private void login(Http11Request request, OutputStream outputStream) {
+        Http11Method http11Method = request.method();
+        if (http11Method.equals(Http11Method.GET)) {
+            return;
+        }
+        LinkedHashMap<String, String> requestBody = request.body();
         String account = requestBody.getOrDefault("account", "");
         String password = requestBody.getOrDefault("password", "");
 
@@ -120,8 +97,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void register(String requestMessage, OutputStream outputStream) {
-        LinkedHashMap<String, String> requestBody = requestParser.parseBody(requestMessage);
+    private void register(Http11Request request, OutputStream outputStream) {
+        Http11Method http11Method = request.method();
+        if (http11Method.equals(Http11Method.GET)) {
+            return;
+        }
+
+        LinkedHashMap<String, String> requestBody = request.body();
         String account = requestBody.getOrDefault("account", "");
         String password = requestBody.getOrDefault("password", "");
         String email = requestBody.getOrDefault("email", "");
@@ -129,5 +111,26 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(new User(account, password, email));
 
         sendRedirect("/index.html", outputStream);
+    }
+
+    private void sendStaticResourceResponse(Path path, OutputStream outputStream) throws IOException {
+        String contentTypes = contentTypeFinder.find(path);
+
+        List<String> fileLines = Files.readAllLines(path);
+        var responseBody = String.join("\n", fileLines);
+
+        String statusLine = "HTTP/1.1 200 OK ";
+        String contentType = "Content-Type: %s;charset=utf-8 ".formatted(contentTypes);
+        String contentLength = "Content-Length: " + responseBody.getBytes().length + " ";
+        String empty = "";
+        var response = String.join("\r\n",
+                statusLine,
+                contentType,
+                contentLength,
+                empty,
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

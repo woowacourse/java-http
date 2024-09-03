@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Http11RequestParser {
 
@@ -43,6 +45,45 @@ public class Http11RequestParser {
         return Http11Method.valueOf(rawMethod.toUpperCase());
     }
 
+    public List<Http11Header> parseHeaders(String requestMessage) {
+        String rawHeaders = requestMessage.split("\r\n\r\n")[0]
+                .replace(parseStartLine(requestMessage), "")
+                .replaceFirst("\r\n", "");
+
+        return Arrays.stream(rawHeaders.split("\r\n"))
+                .filter(rawHeader -> !rawHeader.startsWith("Cookie"))
+                .map(rawHeader -> {
+                    String[] split = rawHeader.split(":");
+                    String key = split[0].trim();
+                    String value = split[1].trim();
+                    return new Http11Header(key, value);
+                })
+                .toList();
+    }
+
+    public List<Cookie> parseCookies(String requestMessage) {
+        String rawHeaders = requestMessage.split("\r\n\r\n")[0]
+                .replace(parseStartLine(requestMessage), "")
+                .replaceFirst("\r\n", "");
+
+        return Arrays.stream(rawHeaders.split("\r\n"))
+                .filter(rawHeader -> rawHeader.startsWith("Cookie"))
+                .flatMap(rawCookies -> {
+                    String[] split = rawCookies.split(";");
+                    return Arrays.stream(split);
+                })
+                .map(String::trim)
+                .map(this::parseCookie)
+                .toList();
+    }
+
+    private Cookie parseCookie(String rawCookie) {
+        String[] split = rawCookie.split("=");
+        String key = split[0].trim();
+        String value = split[1].trim();
+        return new Cookie(key, value);
+    }
+
     public LinkedHashMap<String, String> parseBody(String requestMessage) {
         int startIndex = requestMessage.indexOf("\r\n\r\n");
         if (startIndex == -1) {
@@ -50,6 +91,9 @@ public class Http11RequestParser {
         }
         startIndex = startIndex + 4;
         String requestBody = requestMessage.substring(startIndex);
+        if (!requestBody.contains("&")) {
+            return new LinkedHashMap<>();
+        }
         LinkedHashMap<String, String> result = new LinkedHashMap<>();
         for (String singleRequestBody : requestBody.split("&")) {
             putQueryString(singleRequestBody, result);

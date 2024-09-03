@@ -9,9 +9,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpInputStreamReader {
+public class Http11InputStreamReader {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpInputStreamReader.class);
+    private static final Logger log = LoggerFactory.getLogger(Http11InputStreamReader.class);
 
     public static List<String> read(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));

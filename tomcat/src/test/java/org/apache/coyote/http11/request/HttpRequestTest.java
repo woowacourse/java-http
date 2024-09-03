@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ class HttpRequestTest {
 
     @Test
     @DisplayName("HttpRequest 을 생성한다.")
-    void createHttpRequest() {
+    void createHttpRequest() throws IOException {
         String line = "GET /index.html HTTP/1.1";
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(line.getBytes());
 

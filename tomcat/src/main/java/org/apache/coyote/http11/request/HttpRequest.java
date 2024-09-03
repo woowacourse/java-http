@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.method.HttpMethod;
 
@@ -12,12 +11,9 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
 
-    public HttpRequest(InputStream inputStream) {
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            requestLine = readRequestLine(bufferedReader);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public HttpRequest(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        requestLine = readRequestLine(bufferedReader);
     }
 
     private RequestLine readRequestLine(BufferedReader reader) throws IOException {

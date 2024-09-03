@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.method;
+package org.apache.coyote.http11.domain.method;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.ContentTypeResolver;
-import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.domain.request.HttpRequest;
+import org.apache.coyote.http11.domain.response.ContentTypeResolver;
+import org.apache.coyote.http11.domain.response.HttpResponse;
+import org.apache.coyote.http11.domain.response.HttpStatus;
 
 public class GetMethodHandler {
 

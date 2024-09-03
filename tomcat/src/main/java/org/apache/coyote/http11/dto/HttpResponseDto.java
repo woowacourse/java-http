@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.dto;
 
 import java.util.Map;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.domain.response.HttpResponse;
 
 public record HttpResponseDto(
         int httpStatusCode,

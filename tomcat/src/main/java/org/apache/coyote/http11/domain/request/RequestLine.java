@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.domain.request;
 
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.method.HttpMethod;
+import org.apache.coyote.http11.domain.method.HttpMethod;
 
 public class RequestLine {
 

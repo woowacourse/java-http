@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import org.apache.coyote.http11.domain.response.ContentTypeResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

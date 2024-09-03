@@ -25,11 +25,16 @@ public class Http11ResourceFinder {
         }
     }
 
-    private String toRelativePath(String requestUri){
+    private String toRelativePath(String requestUri) {
         String replaceFirstSlash = requestUri.replaceFirst("/", "");
+
         if (replaceFirstSlash.isEmpty()) {
             return toRelativePath(INDEX_HTML);
         }
-        return "static"+File.separator+replaceFirstSlash;
+
+        if (!replaceFirstSlash.contains(".")) {
+            replaceFirstSlash = replaceFirstSlash + ".html";
+        }
+        return "static" + File.separator + replaceFirstSlash;
     }
 }

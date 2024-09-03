@@ -179,11 +179,12 @@ class IOStreamTest {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
             final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            try(bufferedInputStream) {
+                final byte[] actual = bufferedInputStream.readAllBytes();
 
-            final byte[] actual = bufferedInputStream.readAllBytes();
-
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+                assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
+                assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            }
         }
     }
 
@@ -211,12 +212,14 @@ class IOStreamTest {
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final StringBuilder actual = new StringBuilder();
-            while (bufferedReader.ready()) {
-                actual.append(bufferedReader.readLine()).append("\r\n");
-            }
+            try(bufferedReader) {
+                final StringBuilder actual = new StringBuilder();
+                while (bufferedReader.ready()) {
+                    actual.append(bufferedReader.readLine()).append("\r\n");
+                }
 
-            assertThat(actual).hasToString(emoji);
+                assertThat(actual).hasToString(emoji);
+            }
         }
     }
 }

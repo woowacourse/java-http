@@ -3,6 +3,7 @@ package org.apache.coyote.http11.method;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentTypeResolver;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -26,7 +27,8 @@ public class GetMethodHandler {
     }
 
     private HttpResponse handleStaticFile(String requestURI) throws IOException {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(STATIC_PATH + requestURI);
+        String staticFilePath = STATIC_PATH + requestURI;
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
 
         if (inputStream == null) {
             return HttpResponse.status(HttpStatus.NOT_FOUND).build();
@@ -35,8 +37,8 @@ public class GetMethodHandler {
         String responseBody = new String(inputStream.readAllBytes());
 
         return HttpResponse.status(HttpStatus.OK)
-                .header("Content-Type", "text/html;charset=utf-8")
-                .header("Content-Length", String.valueOf(responseBody.getBytes().length))
+                .contentType(ContentTypeResolver.getContentType(staticFilePath))
+                .contentLength(String.valueOf(responseBody.getBytes().length))
                 .body(responseBody)
                 .build();
     }

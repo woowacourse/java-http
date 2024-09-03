@@ -10,28 +10,25 @@ import java.util.List;
 
 public class InputStreamConvertor {
     public static String convertToString(InputStream inputStream, Charset charset) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset));
+        StringBuilder stringBuilder = new StringBuilder();
 
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line).append(System.lineSeparator());
-            }
-
-            return stringBuilder.toString();
+        while (reader.ready()) {
+            stringBuilder.append(reader.readLine())
+                    .append(System.lineSeparator());
         }
+
+        return stringBuilder.toString();
     }
 
     public static List<String> convertToLines(InputStream inputStream, Charset charset) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
-            List<String> lines = new ArrayList<>();
-            String line;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset));
+        List<String> lines = new ArrayList<>();
 
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-
-            return lines;
+        while (reader.ready()) {
+            lines.add(reader.readLine());
         }
+
+        return lines;
     }
 }

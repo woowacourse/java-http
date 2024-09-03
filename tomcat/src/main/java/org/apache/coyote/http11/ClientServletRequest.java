@@ -31,4 +31,13 @@ public class ClientServletRequest {
     public String getProtocolVersion() {
         return protocolVersion;
     }
+
+    @Override
+    public String toString() {
+        return "ClientServletRequest{" +
+                "method='" + method + '\'' +
+                ", path='" + path + '\'' +
+                ", protocolVersion='" + protocolVersion + '\'' +
+                '}';
+    }
 }

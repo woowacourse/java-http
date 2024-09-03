@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLConnection;
 import java.util.List;
@@ -33,13 +34,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
             Http11ServletRequest servletRequest = Http11ServletRequest.parse(requestLines);
+
+            if (servletRequest.path().equals("/")) {
+                processRootPath(outputStream);
+                return;
+            }
+
             String contentType = URLConnection.guessContentTypeFromName(servletRequest.path());
-
-            final var responseBody =
-                    servletRequest.path().equals("/") ?
-                            "Hello world!".getBytes()
-                            : staticResourceReader.read(servletRequest.path());
-
+            final var responseBody = staticResourceReader.read(servletRequest.path());
             final var response = responseBody == null ?
                     "HTTP/1.1 404 Not Found" :
                     String.join("\r\n",
@@ -54,5 +56,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void processRootPath(OutputStream outputStream) throws IOException {
+        final var responseBody = "Hello world!";
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

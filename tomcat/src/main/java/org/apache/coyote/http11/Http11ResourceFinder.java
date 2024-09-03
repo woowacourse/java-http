@@ -28,6 +28,11 @@ public class Http11ResourceFinder {
     private String toRelativePath(String requestUri) {
         String replaceFirstSlash = requestUri.replaceFirst("/", "");
 
+        if (replaceFirstSlash.contains("?")) {
+            int endIndex = replaceFirstSlash.indexOf("?");
+            replaceFirstSlash = replaceFirstSlash.substring(0, endIndex);
+        }
+
         if (replaceFirstSlash.isEmpty()) {
             return toRelativePath(INDEX_HTML);
         }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URLConnection;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,6 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            if (inputStream.available() == 0) {
-                return;
-            }
 
             ClientServletRequest servletRequest = new ClientServletRequest(inputStream);
 
@@ -40,11 +38,12 @@ public class Http11Processor implements Runnable, Processor {
                             "Hello world!"
                             : staticResourceReader.read(servletRequest.getPath());
 
+            String contentType = URLConnection.guessContentTypeFromName(servletRequest.getPath());
             final var response = responseBody == null ?
                     "HTTP/1.1 404 Not Found" :
                     String.join("\r\n",
                             "HTTP/1.1 200 OK ",
-                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Type: " + contentType + ";charset=utf-8 ",
                             "Content-Length: " + responseBody.getBytes().length + " ",
                             "",
                             responseBody);

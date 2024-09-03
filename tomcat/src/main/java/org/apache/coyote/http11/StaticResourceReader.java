@@ -7,10 +7,12 @@ import java.nio.charset.StandardCharsets;
 
 public class StaticResourceReader {
 
+    private final static String BASE_PATH = "static";
+
     private final ClassLoader classLoader = getClass().getClassLoader();
 
     public String read(String path) throws IOException {
-        InputStream resourceAsStream = classLoader.getResourceAsStream(path);
+        InputStream resourceAsStream = classLoader.getResourceAsStream(BASE_PATH + path);
         if (resourceAsStream == null) {
             return null;
         }

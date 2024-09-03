@@ -14,13 +14,13 @@ public class StubSocket extends Socket {
     private final String request;
     private final ByteArrayOutputStream outputStream;
 
+    public StubSocket() {
+        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+    }
+
     public StubSocket(final String request) {
         this.request = request;
         this.outputStream = new ByteArrayOutputStream();
-    }
-
-    public StubSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
     }
 
     public InetAddress getInetAddress() {

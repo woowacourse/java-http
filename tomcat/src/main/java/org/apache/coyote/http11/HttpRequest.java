@@ -21,4 +21,15 @@ public class HttpRequest {
         return new HttpRequest(method, uri);
     }
 
+    public Method getMethod() {
+        return method;
+    }
+
+    public URI getUri() {
+        return uri;
+    }
+
+    public String getUriPath() {
+        return uri.getPath();
+    }
 }

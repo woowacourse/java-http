@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
@@ -11,7 +12,7 @@ public class RequestLine {
     String HttpVersion;
 
     public RequestLine(String line) {
-        List<String> tokens = Arrays.stream(line.split(" ")).toList();
+        List<String> tokens = Arrays.stream(line.split(StringUtils.SPACE)).toList();
         validate(tokens);
 
         this.method = HttpMethod.ofName(tokens.get(0));

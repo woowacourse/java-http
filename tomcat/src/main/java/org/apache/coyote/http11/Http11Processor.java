@@ -1,12 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,14 +35,20 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            var result = "";
+            final String line = bufferedReader.readLine();
+            log.info("GET 메서드 호출");
+            final String[] texts = line.split(" ");
+            final var path = texts[1];
+            final URL resource = getClass().getClassLoader().getResource("static" + path);
+            result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+            final var response = String.join("\r\n", "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + result.getBytes().length + " ",
                     "",
-                    responseBody);
+                    result);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -14,8 +16,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private final Http11RequestParser requestParser;
+
+    private final Http11ResourceFinder resourceFinder;
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestParser = new Http11RequestParser();
+        this.resourceFinder = new Http11ResourceFinder();
     }
 
     @Override
@@ -26,12 +34,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (var inputStream = connection.getInputStream();
+             var outputStream = connection.getOutputStream()) {
+            String requestURI = requestParser.parseRequestURI(inputStream);
+            Path path = resourceFinder.find(requestURI);
 
-            final var responseBody = "Hello world!";
+            List<String> fileLines = Files.readAllLines(path);
+            var responseBody = String.join("\n", fileLines);
 
-            final var response = String.join("\r\n",
+            var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",

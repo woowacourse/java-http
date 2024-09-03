@@ -16,3 +16,7 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 * BufferedOutputStream와 ByteArrayOutputStream의 차이
 * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿈
   * [참고](https://www.baeldung.com/convert-input-stream-to-string)
+* 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
+  * DEFAULT_BUFFER_SIZE = 8192
+* 
+* 

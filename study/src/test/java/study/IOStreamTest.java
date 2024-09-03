@@ -203,10 +203,15 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
             final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = bufferedInputStream.readAllBytes();
+            // Integer.MAX_VALUE로 최대 사이즈를 설정하는듯...?
+            // 아닌가 그냥 숫자만 Integer.MAX_VALUE로 하고 나중에 설정하는 건가
+//            final byte[] actual = bufferedInputStream.readAllBytes();
+
+            final byte[] bytes = new byte[text.getBytes().length];
+            inputStream.read(bytes);
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            assertThat(bytes).isEqualTo("필터에 연결해보자.".getBytes());
         }
     }
 

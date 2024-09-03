@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,12 +37,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             String uri = extractURIByRequest(inputStream);
             final URL resource = getClass().getClassLoader().getResource(uri);
-            if (resource != null) {
-                final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                writeAndFlush(content, outputStream);
+            if (resource == null) {
+                writeAndFlush(uri.substring("static".length()), outputStream);
                 return;
             }
-            writeAndFlush("Hello world!", outputStream);
+            final String content = new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+            writeAndFlush(content, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -62,9 +63,9 @@ public class Http11Processor implements Runnable, Processor {
         consumeHeader(inputStream);
         String uri = getUri(inputStream);
         if (uri.equals("/")) {
-            return uri;
+            return "static/index.html";
         }
-        return "static/" + uri.substring(1);
+        return "static" + uri;
     }
 
     private static void consumeHeader(InputStream inputStream) throws IOException {

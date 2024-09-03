@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -12,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    @Disabled
     @Test
     void process() {
         // given

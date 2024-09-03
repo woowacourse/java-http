@@ -14,3 +14,4 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 ![img.png](img.png)
 
 * BufferedOutputStream와 ByteArrayOutputStream의 차이
+* inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿈

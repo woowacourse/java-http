@@ -6,12 +6,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -91,7 +95,6 @@ class IOStreamTest {
             final OutputStream outputStream = mock(OutputStream.class);
 
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
@@ -121,20 +124,45 @@ class IOStreamTest {
          * 그리고 Stream 끝에 도달하면 -1을 반환한다.
          */
         @Test
-        void InputStream은_데이터를_바이트로_읽는다() throws IOException {
+        void InputStream은_데이터를_바이트로_읽는다1() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
-             * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+
+            final StringBuilder sb = new StringBuilder();
+            try (final Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                int c = 0;
+                while ((c = reader.read()) != -1) {
+                    sb.append((char) c);
+                }
+            }
+
+            final String actual = sb.toString();
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
             inputStream.close();
         }
+
+        @Test
+        void InputStream은_데이터를_바이트로_읽는다2() throws IOException {
+            byte[] bytes = {-16, -97, -92, -87};
+            final InputStream inputStream = new ByteArrayInputStream(bytes);
+
+            /**
+             * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
+             */
+
+            final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            assertThat(actual).isEqualTo("🤩");
+            assertThat(inputStream.read()).isEqualTo(-1);
+            inputStream.close();
+        }
+
 
         /**
          * 스트림 사용이 끝나면 항상 close() 메서드를 호출하여 스트림을 닫는다. 장시간 스트림을 닫지 않으면 파일, 포트 등 다양한 리소스에서 누수(leak)가 발생한다.

@@ -76,6 +76,9 @@ class IOStreamTest {
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
          * 데드락(deadlock) 상태가 되기 때문에 flush로 해제해야 한다.
          */
+        // [참고]
+        // 스트림을 두 스레드가 사용하고 있고, 버퍼를 다 채우지 못하면 무한정 기다리는 데드락 상태가 발생한다.
+        // 그래서 flush() 메서드를 사용하여 버퍼를 비워주어야 한다.
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
             final OutputStream outputStream = mock(BufferedOutputStream.class);

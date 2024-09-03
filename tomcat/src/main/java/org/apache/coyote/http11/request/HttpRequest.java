@@ -1,9 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.method.HttpMethod;
 
@@ -11,16 +8,9 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        requestLine = readRequestLine(bufferedReader);
-    }
-
-    private RequestLine readRequestLine(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        validateLineEmpty(line);
-
-        return new RequestLine(line);
+    public HttpRequest(String requestLine) throws IOException {
+        validateLineEmpty(requestLine);
+        this.requestLine = new RequestLine(requestLine);
     }
 
     private void validateLineEmpty(String line) {

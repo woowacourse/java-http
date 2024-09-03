@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
@@ -16,9 +15,8 @@ class HttpRequestTest {
     @DisplayName("HttpRequest 을 생성한다.")
     void createHttpRequest() throws IOException {
         String line = "GET /index.html HTTP/1.1";
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(line.getBytes());
 
-        HttpRequest httpRequest = new HttpRequest(byteArrayInputStream);
+        HttpRequest httpRequest = new HttpRequest(line);
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
@@ -31,9 +29,8 @@ class HttpRequestTest {
     @DisplayName("HttpRequest 을 생성할 때 첫줄에 빈 라인이 들어오면 예외를 던진다.")
     void createHttpRequestWithEmptyLine() {
         String line = "";
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(line.getBytes());
 
-        assertThatThrownBy(() -> new HttpRequest(byteArrayInputStream))
+        assertThatThrownBy(() -> new HttpRequest(line))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Line is Empty");
     }

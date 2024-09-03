@@ -49,13 +49,13 @@ public class Http11Processor implements Runnable, Processor {
                 line = br.readLine();
             }
 
-            final var responseBody = Files.readAllBytes(path);
+            final var responseBody = new String(Files.readAllBytes(path));
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.length + " ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
-                    new String(responseBody));
+                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

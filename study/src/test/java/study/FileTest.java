@@ -2,12 +2,22 @@ package study;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDirFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import javax.swing.filechooser.FileSystemView;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -28,7 +38,10 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL url = getClass().getClassLoader().getResource(fileName);
+        File file = new File(url.getPath());
+
+        final String actual = file.getAbsolutePath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,15 +53,18 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        URL url = getClass().getClassLoader().getResource(fileName);
+        File file = new File(url.getPath());
+        final Path path = file.toPath();
+        // TODO: 왜 아래와 같이 하면 테스트가 통과하지 않을까? File 클래스를 꼭 써야하는 이유는?
+        // Path path = Paths.get(url.getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
-
+        final List<String> actual = Files.readAllLines(path);
         assertThat(actual).containsOnly("nextstep");
     }
 }

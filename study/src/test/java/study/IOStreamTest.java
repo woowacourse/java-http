@@ -78,6 +78,7 @@ class IOStreamTest {
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
 
+            outputStream.flush();
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
         }
@@ -94,6 +95,10 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+
+            try (outputStream) {
+            } catch (IOException ignored) {
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }

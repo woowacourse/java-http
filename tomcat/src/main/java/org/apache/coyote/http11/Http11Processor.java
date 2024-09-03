@@ -20,10 +20,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Http11ResourceFinder resourceFinder;
 
+    private final Http11ContentTypeFinder contentTypeFinder;
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestParser = new Http11RequestParser();
         this.resourceFinder = new Http11ResourceFinder();
+        this.contentTypeFinder = new Http11ContentTypeFinder();
     }
 
     @Override
@@ -37,16 +40,22 @@ public class Http11Processor implements Runnable, Processor {
         try (var inputStream = connection.getInputStream();
              var outputStream = connection.getOutputStream()) {
             String requestURI = requestParser.parseRequestURI(inputStream);
+
             Path path = resourceFinder.find(requestURI);
+            String contentTypes = contentTypeFinder.find(path);
 
             List<String> fileLines = Files.readAllLines(path);
             var responseBody = String.join("\n", fileLines);
 
+            String statusLine = "HTTP/1.1 200 OK ";
+            String contentType = "Content-Type: %s;charset=utf-8 ".formatted(contentTypes);
+            String contentLength = "Content-Length: " + responseBody.getBytes().length + " ";
+            String empty = "";
             var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
+                    statusLine,
+                    contentType,
+                    contentLength,
+                    empty,
                     responseBody);
 
             outputStream.write(response.getBytes());

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.method.GetMethodHandler;
+import org.apache.coyote.http11.domain.method.StaticResourceHandler;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.dto.HttpResponseDto;
@@ -38,7 +38,8 @@ public class Http11Processor implements Runnable, Processor {
             InputView inputView = new InputView(new BufferedReader(new InputStreamReader(inputStream)));
             HttpRequest httpRequest = new HttpRequest(inputView.readLine());
 
-            GetMethodHandler handler = new GetMethodHandler();
+            // requestMapping -> 적절한 컨트롤러 호출
+            StaticResourceHandler handler = new StaticResourceHandler();
             HttpResponse httpResponse = handler.handle(httpRequest);
 
             OutputView outputView = new OutputView(outputStream);

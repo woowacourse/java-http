@@ -7,7 +7,7 @@ import org.apache.coyote.http11.domain.response.ContentTypeResolver;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;
 
-public class GetMethodHandler {
+public class StaticResourceHandler {
 
     private static final String ROOT_PATH = "/";
     private static final String INDEX_FILE = "/index.html";
@@ -17,16 +17,16 @@ public class GetMethodHandler {
         String requestURI = httpRequest.getRequestURI();
 
         if (isIndexPageRequest(requestURI)) {
-            return handleStaticFile(INDEX_FILE);
+            return handleStaticResource(INDEX_FILE);
         }
-        return handleStaticFile(requestURI);
+        return handleStaticResource(requestURI);
     }
 
     private boolean isIndexPageRequest(String requestURI) {
         return ROOT_PATH.equals(requestURI) || INDEX_FILE.equals(requestURI);
     }
 
-    private HttpResponse handleStaticFile(String requestURI) throws IOException {
+    private HttpResponse handleStaticResource(String requestURI) throws IOException {
         String staticFilePath = STATIC_PATH + requestURI;
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
 

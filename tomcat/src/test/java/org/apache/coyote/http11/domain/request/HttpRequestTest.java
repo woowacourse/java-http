@@ -1,12 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.domain.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
-import org.apache.coyote.http11.domain.method.HttpMethod;
-import org.apache.coyote.http11.domain.request.HttpRequest;
+import org.apache.coyote.http11.domain.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

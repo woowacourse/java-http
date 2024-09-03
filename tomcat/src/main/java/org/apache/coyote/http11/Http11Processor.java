@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.method.StaticResourceHandler;
+import org.apache.coyote.http11.domain.StaticResourceHandler;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.dto.HttpResponseDto;

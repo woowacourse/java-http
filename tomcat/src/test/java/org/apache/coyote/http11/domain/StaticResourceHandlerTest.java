@@ -1,9 +1,8 @@
-package org.apache.coyote.http11.method;
+package org.apache.coyote.http11.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import org.apache.coyote.http11.domain.method.StaticResourceHandler;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;

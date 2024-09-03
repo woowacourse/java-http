@@ -2,7 +2,7 @@ package org.apache.coyote.http11.domain.request;
 
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.domain.method.HttpMethod;
+import org.apache.coyote.http11.domain.HttpMethod;
 
 public class HttpRequest {
 

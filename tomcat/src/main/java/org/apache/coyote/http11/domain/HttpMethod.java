@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain.method;
+package org.apache.coyote.http11.domain;
 
 public enum HttpMethod {
     GET,

@@ -2,8 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,10 +54,16 @@ public class Http11Processor implements Runnable, Processor {
                 String account = queryStrings.getOrDefault("account", "");
                 String password = queryStrings.getOrDefault("password", "");
 
-                InMemoryUserRepository.findByAccount(account)
+                boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
                         .filter(user -> user.checkPassword(password))
-                        .map(User::toString)
-                        .ifPresent(log::info);
+                        .isPresent();
+
+                if (loginSuccess) {
+                    sendRedirect("/index.html", outputStream);
+                    return;
+                }
+                sendRedirect("/401.html", outputStream);
+                return;
             }
 
             String contentTypes = contentTypeFinder.find(path);
@@ -79,6 +85,18 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void sendRedirect(String uri, OutputStream outputStream) {
+        String statusLine = "HTTP/1.1 302 Found ";
+        String location = "Location: %s".formatted(uri);
+        var response = String.join("\r\n", statusLine, location, "");
+        try (outputStream) {
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -18,5 +18,5 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
   * [참고](https://www.baeldung.com/convert-input-stream-to-string)
 * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
   * DEFAULT_BUFFER_SIZE = 8192
-* 
+* while (true) 대신 for(; ;) 사용하는 이유가 뭘까? [코드](java.io.BufferedInputStream.implRead(byte[], int, int))
 * 

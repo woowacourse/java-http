@@ -26,7 +26,7 @@ public class HttpResponse {
     }
 
     public String getResponseHeader(String key) {
-        return responseHeaders.get("Content-Type");
+        return responseHeaders.get(key);
     }
 
     public String getMessageBody() {

@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponseBuilder {
-    private final Map<String, String> responseHeaders = new HashMap<>();
+    private final Map<String, String> responseHeaders = new LinkedHashMap<>();
     private HttpStatus httpStatus;
     private String messageBody;
 

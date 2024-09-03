@@ -34,25 +34,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
             Http11ServletRequest servletRequest = Http11ServletRequest.parse(requestLines);
+            log.debug(servletRequest.toString());
 
             if (servletRequest.path().equals("/")) {
                 processRootPath(outputStream);
                 return;
             }
 
-            String contentType = URLConnection.guessContentTypeFromName(servletRequest.path());
-            final var responseBody = staticResourceReader.read(servletRequest.path());
-            final var response = responseBody == null ?
-                    "HTTP/1.1 404 Not Found" :
-                    String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
-                            "Content-Type: " + contentType + ";charset=utf-8 ",
-                            "Content-Length: " + responseBody.length + " ",
-                            "",
-                            new String(responseBody));
+            if (servletRequest.path().equals("/login")) {
+                processLoginPage(outputStream);
+                return;
+            }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            processStaticResource(servletRequest, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -66,6 +60,40 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void processLoginPage(OutputStream outputStream) throws IOException {
+        String loginResourcePath = "login.html";
+        String contentType = URLConnection.guessContentTypeFromName(loginResourcePath);
+        final var responseBody = staticResourceReader.read(loginResourcePath);
+        final var response = responseBody == null ?
+                "HTTP/1.1 404 Not Found" :
+                String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: " + contentType + ";charset=utf-8 ",
+                        "Content-Length: " + responseBody.length + " ",
+                        "",
+                        new String(responseBody));
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void processStaticResource(Http11ServletRequest servletRequest, OutputStream outputStream)
+            throws IOException {
+        String contentType = URLConnection.guessContentTypeFromName(servletRequest.path());
+        final var responseBody = staticResourceReader.read(servletRequest.path());
+        final var response = responseBody == null ?
+                "HTTP/1.1 404 Not Found" :
+                String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: " + contentType + ";charset=utf-8 ",
+                        "Content-Length: " + responseBody.length + " ",
+                        "",
+                        new String(responseBody));
+
         outputStream.write(response.getBytes());
         outputStream.flush();
     }

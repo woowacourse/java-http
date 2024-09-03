@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 
 public class StaticResourceReader {
 
@@ -11,7 +12,7 @@ public class StaticResourceReader {
     private final ClassLoader classLoader = getClass().getClassLoader();
 
     public byte[] read(String path) throws IOException {
-        try (InputStream resourceAsStream = classLoader.getResourceAsStream(BASE_PATH + path)) {
+        try (InputStream resourceAsStream = classLoader.getResourceAsStream(Paths.get(BASE_PATH, path).toString())) {
             if (resourceAsStream == null) {
                 return null;
             }

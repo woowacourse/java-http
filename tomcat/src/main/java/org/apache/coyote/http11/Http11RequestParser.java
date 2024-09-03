@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 
 public class Http11RequestParser {
 
@@ -40,5 +41,24 @@ public class Http11RequestParser {
         String startLine = parseStartLine(requestMessage);
         String rawMethod = startLine.split(" ")[0];
         return Http11Method.valueOf(rawMethod.toUpperCase());
+    }
+
+    public LinkedHashMap<String, String> parseBody(String requestMessage) {
+        int startIndex = requestMessage.indexOf("\r\n\r\n");
+        if (startIndex == -1) {
+            return new LinkedHashMap<>();
+        }
+        startIndex = startIndex + 4;
+        String requestBody = requestMessage.substring(startIndex);
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        for (String singleRequestBody : requestBody.split("&")) {
+            putQueryString(singleRequestBody, result);
+        }
+        return result;
+    }
+
+    private void putQueryString(String singleQueryString, LinkedHashMap<String, String> result) {
+        String[] split = singleQueryString.split("=");
+        result.putLast(split[0], split[1]);
     }
 }

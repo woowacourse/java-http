@@ -34,8 +34,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final var clientReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var httpRequestHeader = clientReader.readLine();
-            final var response = createHttpResponse(loadStaticFile(httpRequestHeader));
+            final var startLine = clientReader.readLine();
+            final var response = createHttpResponse(loadStaticFile(startLine));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -44,28 +44,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private byte[] loadStaticFile(String httpRequestHeader) throws IOException {
-        final var startLine = httpRequestHeader.split(" ");
-        if ("/".equals(startLine[1])) {
-            return "Hello world!".getBytes();
+    private HttpResponseData loadStaticFile(String startLine) throws IOException {
+        final var startLines = startLine.split(" ");
+        if ("/".equals(startLines[1])) {
+            return new HttpResponseData("Hello world!".getBytes(), "text/html;charset=utf-8");
         }
-
-        final var requestResource = startLine[1].split("/");
+        final var requestResource = startLines[1].split("/");
         final var resourceName = requestResource[requestResource.length - 1];
         final var resourcePath = getClass().getClassLoader().getResource("static/" + resourceName).getPath();
         final var bufferedInputStream = new BufferedInputStream(new FileInputStream(resourcePath));
         final var responseBody = bufferedInputStream.readAllBytes();
         bufferedInputStream.close();
 
-        return responseBody;
+        return new HttpResponseData(responseBody, "text/html;charset=utf-8");
     }
 
-    private String createHttpResponse(byte[] responseBody) {
+    private String createHttpResponse(HttpResponseData httpResponseData) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.length + " ",
+                "Content-Type: " + httpResponseData.contentType + " ",
+                "Content-Length: " + httpResponseData.responseBody.length + " ",
                 "",
-                new String(responseBody, StandardCharsets.UTF_8));
+                new String(httpResponseData.responseBody, StandardCharsets.UTF_8));
     }
+
+    private static record HttpResponseData(byte[] responseBody, String contentType) {
+    }
+
+    ;
 }

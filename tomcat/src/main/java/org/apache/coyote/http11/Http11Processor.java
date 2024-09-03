@@ -1,6 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +36,42 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String requestLine = extractRequestLine(inputStream);
+            if (requestLine == null) {
+                outputStream.flush();
+                return;
+            }
+            String responseBody = decideResponseBody(requestLine);
+            String response = buildResponse(responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractRequestLine(InputStream inputStream) throws IOException {
+        InputStreamReader reader = new InputStreamReader(inputStream);
+        BufferedReader br = new BufferedReader(reader);
+        return br.readLine();
+    }
+
+    private String decideResponseBody(String requestLine) throws IOException, URISyntaxException {
+        String endpoint = requestLine.split(" ")[1];
+        if (endpoint.equals("/index.html")) {
+            URL resource = getClass().getResource("/static/index.html");
+            return Files.readString(Paths.get(resource.toURI()));
+        }
+        return "Hello world!";
+    }
+
+    private String buildResponse(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

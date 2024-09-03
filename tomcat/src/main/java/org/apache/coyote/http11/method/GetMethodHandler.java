@@ -36,8 +36,10 @@ public class GetMethodHandler {
 
         return HttpResponse.status(HttpStatus.OK)
                 .header("Content-Type", "text/html;charset=utf-8")
+                .header("Content-Length", String.valueOf(responseBody.getBytes().length))
                 .body(responseBody)
                 .build();
     }
 
 }
+

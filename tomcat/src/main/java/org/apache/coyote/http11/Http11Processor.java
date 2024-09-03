@@ -1,12 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,20 +34,50 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            String uri = extractURIByRequest(inputStream);
+            final URL resource = getClass().getClassLoader().getResource(uri);
+            if (resource != null) {
+                final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                writeAndFlush(content, outputStream);
+                return;
+            }
+            writeAndFlush("Hello world!", outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static void writeAndFlush(String content, OutputStream outputStream) throws IOException {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " ",
+                "",
+                content);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    public static String extractURIByRequest(InputStream inputStream) throws IOException {
+        consumeHeader(inputStream);
+        String uri = getUri(inputStream);
+        if (uri.equals("/")) {
+            return uri;
+        }
+        return "static/" + uri.substring(1);
+    }
+
+    private static void consumeHeader(InputStream inputStream) throws IOException {
+        while ((inputStream.read()) != ' ') {
+        }
+    }
+
+    private static String getUri(InputStream inputStream) throws IOException {
+        int ch;
+        StringBuilder uriBuilder = new StringBuilder();
+        while ((ch = inputStream.read()) != ' ') {
+            uriBuilder.append((char) ch);
+        }
+        return uriBuilder.toString();
     }
 }

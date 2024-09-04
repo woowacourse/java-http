@@ -83,6 +83,10 @@ public class Http11Request {
         return startLine.getEndPoint();
     }
 
+    public RequestTarget getRequestTarget() {
+        return startLine.getRequestTarget();
+    }
+
     public Http11StartLine getStartLine() {
         return startLine;
     }

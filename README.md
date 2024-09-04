@@ -18,3 +18,10 @@
 1. [File, I/O Stream](study/src/test/java/study)
 2. [HTTP Cache](study/src/test/java/cache)
 3. [Thread](study/src/test/java/thread)
+
+
+### 1단계 - HTTP 서버 구현하기
+- [ ] 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있다.
+- [ ] CSS 지원
+- [ ] String Query 파싱
+- 

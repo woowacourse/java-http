@@ -1,7 +1,5 @@
 package org.apache.catalina;
 
-import java.io.IOException;
-
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a particular Container.  Different Manager
  * implementations may support value-added features such as the persistent storage of session data, as well as migrating
@@ -28,15 +26,15 @@ public interface Manager {
     void add(Session session);
 
     /**
-     * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise return
+     * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise
+     * return
      * <code>null</code>.
      *
      * @param id The session id for the session to be returned
      * @return the request session or {@code null} if a session with the requested ID could not be found
      * @throws IllegalStateException if a new session cannot be instantiated for any reason
-     * @throws IOException           if an input/output error occurs while processing this request
      */
-    Session findSession(String id) throws IOException;
+    Session findSession(String id);
 
     /**
      * Remove this Session from the active Sessions for this Manager.

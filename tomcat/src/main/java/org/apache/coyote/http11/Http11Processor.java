@@ -7,6 +7,7 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,15 +19,15 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final StaticResourceReader staticResourceReader;
     private final Function<Http11Request, Http11Response> defaultProcessor;
-    private final Map<String, Function<Http11Request, Http11Response>> processors;
+    private final Map<Predicate<Http11Request>, Function<Http11Request, Http11Response>> processors;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.staticResourceReader = new StaticResourceReader();
         this.defaultProcessor = this::processStaticResource;
         this.processors = Map.of(
-                "/", this::processRootPage,
-                "/login", this::processLoginPage
+                req -> req.method().equals("GET") && req.path().equals("/"), this::processRootPage,
+                req -> req.method().equals("GET") && req.path().equals("/login"), this::processLoginPage
         );
     }
 
@@ -45,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             log.debug(servletRequest.toString());
 
             for (final var processor : processors.entrySet()) {
-                if (servletRequest.path().equals(processor.getKey())) {
+                if (processor.getKey().test(servletRequest)) {
                     Http11Response response = processor.getValue().apply(servletRequest);
                     outputStream.write(response.toMessage());
                     outputStream.flush();

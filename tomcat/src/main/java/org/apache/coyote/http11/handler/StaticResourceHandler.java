@@ -24,6 +24,9 @@ public class StaticResourceHandler implements HttpRequestHandler {
         if (request.isHttpProtocolNotEqualWith(SUPPORTING_PROTOCOL)) {
             return false;
         }
+        if (request.isUriHome()) {
+            return false;
+        }
         try {
             final String fileName = request.getUriPath();
             final String filePath = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName).getFile();

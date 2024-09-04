@@ -38,6 +38,14 @@ public class HttpRequest {
         return !httpProtocol.equals(getHttpProtocol());
     }
 
+    public boolean isUriNotEqualWith(URI uri) {
+        return uri.equals(getUri());
+    }
+
+    public boolean isUriHome() {
+        return getUri().equals(URI.create("/"));
+    }
+
     public String getHeaderValue(String key) {
         return headers.get(key);
     }

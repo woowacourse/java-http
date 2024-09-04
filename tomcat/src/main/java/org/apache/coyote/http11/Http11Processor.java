@@ -20,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int ENDPOINT_POSITION = 1;
+    private static final String DEFAULT_EXTENSION = MimeType.HTML.getExtension();
 
     private final Socket connection;
 
@@ -83,7 +84,14 @@ public class Http11Processor implements Runnable, Processor {
         if (fileName.isEmpty()) {
             fileName = "hello.html";
         }
+        if(isWithoutExtension(fileName)){
+            fileName = String.join(".",fileName,DEFAULT_EXTENSION);
+        }
         return fileName;
+    }
+
+    private boolean isWithoutExtension(String fileName) {
+        return !fileName.contains(".");
     }
 
     private String getResponseBody(String fileName) throws IOException {

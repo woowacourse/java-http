@@ -14,20 +14,20 @@ public class StaticResourceHandler {
     private static final String STATIC_PATH = "static";
 
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        String requestURI = httpRequest.getRequestURI();
+        String path = httpRequest.getPath();
 
-        if (isIndexPageRequest(requestURI)) {
+        if (isIndexPageRequest(path)) {
             return handleStaticResource(INDEX_FILE);
         }
-        return handleStaticResource(requestURI);
+        return handleStaticResource(path);
     }
 
-    private boolean isIndexPageRequest(String requestURI) {
-        return ROOT_PATH.equals(requestURI) || INDEX_FILE.equals(requestURI);
+    private boolean isIndexPageRequest(String path) {
+        return ROOT_PATH.equals(path) || INDEX_FILE.equals(path);
     }
 
-    private HttpResponse handleStaticResource(String requestURI) throws IOException {
-        String staticFilePath = STATIC_PATH + requestURI;
+    private HttpResponse handleStaticResource(String path) throws IOException {
+        String staticFilePath = STATIC_PATH + path;
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
 
         if (inputStream == null) {

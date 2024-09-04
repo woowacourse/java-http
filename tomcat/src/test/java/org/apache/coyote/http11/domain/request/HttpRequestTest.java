@@ -20,7 +20,7 @@ class HttpRequestTest {
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(httpRequest.getRequestURI()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.getPath()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.getHttpVersion()).isEqualTo("HTTP/1.1")
         );
     }

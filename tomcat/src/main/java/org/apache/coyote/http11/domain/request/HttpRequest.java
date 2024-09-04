@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.domain.request;
 
 import java.io.IOException;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.domain.HttpMethod;
 
@@ -23,8 +24,16 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public String getRequestURI() {
-        return requestLine.getRequestURI();
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getQueryParameter(String key) {
+        return requestLine.getQueryParameter(key);
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return requestLine.getQueryParameters();
     }
 
     public String getHttpVersion() {

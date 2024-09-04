@@ -2,13 +2,14 @@ package org.apache.coyote.http11.domain.request;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.domain.HttpMethod;
 
 public class RequestLine {
 
     HttpMethod method;
-    String requestURI;
+    RequestURI requestURI;
     String HttpVersion;
 
     public RequestLine(String line) {
@@ -16,7 +17,7 @@ public class RequestLine {
         validate(tokens);
 
         this.method = HttpMethod.ofName(tokens.get(0));
-        this.requestURI = tokens.get(1);
+        this.requestURI = new RequestURI(tokens.get(1));
         this.HttpVersion = tokens.get(2);
     }
 
@@ -30,8 +31,16 @@ public class RequestLine {
         return method;
     }
 
-    public String getRequestURI() {
-        return requestURI;
+    public String getPath() {
+        return requestURI.getPath();
+    }
+
+    public String getQueryParameter(String key) {
+        return requestURI.getQueryParameter(key);
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return requestURI.getQueryParameters();
     }
 
     public String getHttpVersion() {

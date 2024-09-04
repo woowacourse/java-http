@@ -27,4 +27,7 @@ public class Http11RequestHeaders {
         }
     }
 
+    public String getValue(String key) {
+        return headers.get(key);
+    }
 }

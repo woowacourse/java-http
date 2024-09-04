@@ -35,7 +35,12 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String parsePath() {
+    public String getRequestURI() {
         return requestLine.getPath();
+    }
+
+    @Override
+    public String getHeaderValue(String header) {
+        return headers.getValue(header);
     }
 }

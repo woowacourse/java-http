@@ -2,5 +2,7 @@ package org.apache.coyote;
 
 public interface HttpRequest {
 
-    String parsePath();
+    String getRequestURI();
+
+    String getHeaderValue(String header);
 }

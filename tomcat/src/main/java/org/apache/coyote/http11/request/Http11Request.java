@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,11 +21,11 @@ public class Http11Request {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final Http11StartLine startLine;
+    private final Http11RequestStartLine startLine;
     private final HttpHeaders headers;
     private final String body;
 
-    public Http11Request(Http11StartLine startLine, HttpHeaders headers, String body) {
+    public Http11Request(Http11RequestStartLine startLine, HttpHeaders headers, String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -34,7 +34,7 @@ public class Http11Request {
     public static Http11Request from(InputStream inputStream) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        Http11StartLine startLine = Http11StartLine.from(bufferedReader.readLine());
+        Http11RequestStartLine startLine = Http11RequestStartLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = HttpHeaders.of(createHttpHeaderMap(bufferedReader), HEADER_FILTER);
         if (startLine.getMethod().hasBody()) {
             return new Http11Request(startLine, httpHeaders, createBody(bufferedReader, getContentLength(httpHeaders)));
@@ -79,15 +79,19 @@ public class Http11Request {
         return startLine.getMethod() == HttpMethod.GET && startLine.getEndPoint().contains(".");
     }
 
+    public HttpMethod getMethod() {
+        return startLine.getMethod();
+    }
+
     public String getEndpoint() {
         return startLine.getEndPoint();
     }
 
-    public RequestTarget getRequestTarget() {
+    public Http11RequestTarget getRequestTarget() {
         return startLine.getRequestTarget();
     }
 
-    public Http11StartLine getStartLine() {
+    public Http11RequestStartLine getStartLine() {
         return startLine;
     }
 

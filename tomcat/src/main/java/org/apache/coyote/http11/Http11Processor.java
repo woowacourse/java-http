@@ -10,7 +10,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.Http11RequestTarget;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.util.QueryStringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,79 +42,94 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            String response = createResponse(inputStream);
+            Http11Request request = Http11Request.from(inputStream);
+            log.info("http request : {}", request);
+            Http11Response response = new Http11Response();
 
-            outputStream.write(response.getBytes());
+            controll(request, response);
+
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponse(final InputStream inputStream) throws IOException {
-        Http11Request http11Request = Http11Request.from(inputStream);
-        log.info("http request : {}", http11Request);
-
-        try {
-            String responseBody = getResponseBody(http11Request);
-            String contentType = getContentType(http11Request);
-
-            return String.join(
-                    "\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody
-            );
-        } catch (IllegalArgumentException e) {
-            return String.join(
-                    "\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: " + "/401.html",
-                    "Content-Length: 0 ",
-                    ""
-            );
+    private void controll(Http11Request request, Http11Response response) throws IOException {
+        if (request.isStaticResourceRequest()) {
+            getStaticResource(request, response);
+            return;
         }
+        String endpoint = request.getEndpoint();
+        HttpMethod method = request.getMethod();
+        if (method == HttpMethod.GET && "/login".equals(endpoint)) {
+            login(request, response);
+            return;
+        }
+        if (method == HttpMethod.GET && "/register".equals(endpoint)) {
+            viewRegist(request, response);
+            return;
+        }
+        if (method == HttpMethod.POST && "/register".equals(endpoint)) {
+            regist(request, response);
+            return;
+        }
+        response.addBody("Hello world!");
     }
 
-    private String getResponseBody(Http11Request http11Request) throws IOException {
-        if (http11Request.isStaticResourceRequest()) {
-            return getStaticResource(http11Request.getEndpoint());
-        }
-        if ("/login".equals(http11Request.getEndpoint())) {
-            RequestTarget requestTarget = http11Request.getRequestTarget();
-            if (requestTarget.hasParam("account")) {
-                String account = requestTarget.getParam("account");
-                String password = requestTarget.getParam("password");
+    private void getStaticResource(Http11Request request, Http11Response response) throws IOException {
+        getView(request.getEndpoint(), response);
 
+        String accept = request.getHeader("Accept")
+                .orElse("text/html");
+        response.addHeader("Accept", accept);
+    }
+
+    private void getView(String view, Http11Response response) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static" + view);
+        if (resource == null) {
+            throw new IllegalArgumentException("존재하지 않는 자원입니다.");
+        }
+        response.addBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        response.addHeader("Accept", "text/html");
+    }
+
+    private void login(Http11Request request, Http11Response response) throws IOException {
+        Http11RequestTarget requestTarget = request.getRequestTarget();
+        if (requestTarget.hasParam("account")) {
+            String account = requestTarget.getParam("account");
+            String password = requestTarget.getParam("password");
+
+            try {
                 User user = InMemoryUserRepository.findByAccount(account)
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
-
                 if (!user.checkPassword(password)) {
                     throw new IllegalArgumentException("잘못된 비밀번호입니다.");
                 }
                 log.info("user {}", user);
-                return getStaticResource("/index.html");
+                response.redirect("/index.html");
+            } catch (IllegalArgumentException e) {
+                response.redirect("/401.html");
             }
-            return getStaticResource("/login.html");
+            return;
         }
-        return "Hello world!";
+        getView("/login.html", response);
     }
 
-    private String getStaticResource(String name) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + name);
-        if (resource == null) {
-            throw new IllegalArgumentException("존재하지 않는 자원입니다.");
-        }
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    private void viewRegist(Http11Request request, Http11Response response) throws IOException {
+        getView("/register.html", response);
     }
 
-    private String getContentType(Http11Request http11Request) {
-        String accept = http11Request.getHeader("Accept")
-                .orElse("text/html");
+    private void regist(Http11Request request, Http11Response response) {
+        String body = request.getBody();
+        Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
+        String account = queryStrings.get("account").get(0);
+        String email = queryStrings.get("email").get(0);
+        String password = queryStrings.get("password").get(0);
 
-        return accept + ";charset=utf-8";
+        User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+        response.redirect("/index.html");
     }
-
 }

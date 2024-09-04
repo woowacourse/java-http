@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public class Http11StartLine {
+public class Http11RequestStartLine {
 
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_TARGET_INDEX = 1;
@@ -8,14 +8,14 @@ public class Http11StartLine {
     private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final HttpMethod method;
-    private final RequestTarget requestTarget;
+    private final Http11RequestTarget requestTarget;
 
-    private Http11StartLine(HttpMethod method, RequestTarget requestTarget) {
+    private Http11RequestStartLine(HttpMethod method, Http11RequestTarget requestTarget) {
         this.method = method;
         this.requestTarget = requestTarget;
     }
 
-    public static Http11StartLine from(String value) {
+    public static Http11RequestStartLine from(String value) {
         if (value == null) {
             throw new IllegalArgumentException("startLine이 없습니다.");
         }
@@ -24,9 +24,9 @@ public class Http11StartLine {
         validateVersion(values[HTTP_VERSION_INDEX]);
 
         HttpMethod method = HttpMethod.valueOf(values[HTTP_METHOD_INDEX]);
-        RequestTarget requestTarget = RequestTarget.from(values[REQUEST_TARGET_INDEX]);
+        Http11RequestTarget requestTarget = Http11RequestTarget.from(values[REQUEST_TARGET_INDEX]);
 
-        return new Http11StartLine(method, requestTarget);
+        return new Http11RequestStartLine(method, requestTarget);
     }
 
     private static void validateVersion(String version) {
@@ -43,7 +43,7 @@ public class Http11StartLine {
         return method;
     }
 
-    public RequestTarget getRequestTarget() {
+    public Http11RequestTarget getRequestTarget() {
         return requestTarget;
     }
 

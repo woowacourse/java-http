@@ -43,6 +43,9 @@ public class Http11Processor implements Runnable, Processor {
 
             String responseBody = getFileContent(responseURL);
             HttpResponse response = new HttpResponse(responseBody);
+
+            String extension = getFileExtension(responseURL);
+            response.setContentType(extension);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -62,4 +65,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         return "";
     }
+
+    private String getFileExtension(URL resourceURL) {
+        return resourceURL.getPath().substring(resourceURL.getPath().lastIndexOf('.') + 1);
+    }
+
 }

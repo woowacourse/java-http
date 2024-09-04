@@ -17,6 +17,18 @@ public class HttpResponse {
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
+    public void setContentType(String extentions) {
+        if (extentions.equals("html")) {
+            headers.put("Content-Type", "text/html;charset=utf-8");
+        }
+        if (extentions.equals("css")) {
+            headers.put("Content-Type", "text/css");
+        }
+        if (extentions.equals("js")) {
+            headers.put("Content-Type", "application/javascript");
+        }
+    }
+
     public byte[] getBytes() {
         String response = createResponse();
         return response.getBytes();

@@ -12,15 +12,10 @@ public class InputView {
     }
 
     public String readLine() throws IOException {
-        String line = bufferedReader.readLine();
-        validateLineEmpty(line);
-
-        return line;
+        return bufferedReader.readLine();
     }
 
-    private void validateLineEmpty(String line) {
-        if (line == null) {
-            throw new IllegalArgumentException("Line is Null");
-        }
+    public boolean isReadable() throws IOException {
+        return bufferedReader.ready();
     }
 }

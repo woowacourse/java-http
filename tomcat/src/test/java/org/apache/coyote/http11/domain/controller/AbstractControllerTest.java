@@ -31,7 +31,8 @@ public class AbstractControllerTest {
     void service() throws IOException {
         String requestLine = "GET /index.html HTTP/1.1";
         List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        HttpRequest request = new HttpRequest(requestLine, headerLines);
+        String requestMessage = "test body";
+        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
 
         HttpResponse response = controller.service(request);
 
@@ -46,7 +47,8 @@ public class AbstractControllerTest {
     void serviceMethodNotImplemented() throws IOException {
         String requestLine = "POST /index.html HTTP/1.1";
         List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        HttpRequest request = new HttpRequest(requestLine, headerLines);
+        String requestMessage = "test body";
+        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
 
         HttpResponse response = controller.service(request);
 

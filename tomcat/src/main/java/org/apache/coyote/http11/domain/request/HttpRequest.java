@@ -10,11 +10,13 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
+    private final String requestMessage;
 
-    public HttpRequest(String requestLine, List<String> headerLines) throws IOException {
+    public HttpRequest(String requestLine, List<String> headerLines, String requestMessage) throws IOException {
         validateLineEmpty(requestLine);
         this.requestLine = new RequestLine(requestLine);
         this.requestHeaders = new RequestHeaders(headerLines);
+        this.requestMessage = requestMessage;
     }
 
     private void validateLineEmpty(String line) {
@@ -29,6 +31,18 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public String getHeader(String key) {
+        return requestHeaders.getHeader(key);
+    }
+
+    public Map<String, String> getHeaders() {
+        return requestHeaders.getHeaders();
+    }
+
+    public String getRequestMessage() {
+        return requestMessage;
     }
 
     public String getQueryParameter(String key) {

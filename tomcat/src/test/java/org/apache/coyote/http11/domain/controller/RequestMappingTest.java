@@ -27,7 +27,8 @@ class RequestMappingTest {
         ));
         String requestLine = "GET /test HTTP/1.1";
         List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        HttpRequest request = new HttpRequest(requestLine, headerLines);
+        String requestMessage = "test body";
+        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
 
         HttpResponse response = requestMapping.getController(request).service(request);
 
@@ -43,7 +44,8 @@ class RequestMappingTest {
         RequestMapping requestMapping = new RequestMapping(Map.of());
         String requestLine = "GET /not/matched HTTP/1.1";
         List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        HttpRequest request = new HttpRequest(requestLine, headerLines);
+        String requestMessage = "test body";
+        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
 
         Controller controller = requestMapping.getController(request);
 

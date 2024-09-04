@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.controller.Controller;
 import org.apache.coyote.http11.domain.controller.RequestMapping;
@@ -58,20 +59,26 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest readHttpRequest(InputView inputView) throws IOException {
         String requestLine = inputView.readLine();
-        readHttpHeaders(inputView);
-        List<String> headerLines = List.of();
-        return new HttpRequest(requestLine, headerLines);
+        List<String> headerLines = readHttpHeaders(inputView);
+        String requestBody = readRequestMessage(inputView);
+
+        return new HttpRequest(requestLine, headerLines, requestBody);
     }
 
     private List<String> readHttpHeaders(InputView inputView) throws IOException {
         ArrayList<String> headerLines = new ArrayList<>();
-        String line = inputView.readLine();
-        while (!line.isEmpty()) {
-            headerLines.add(line);
-            line = inputView.readLine();
+        while (inputView.isReadable()) {
+            headerLines.add(inputView.readLine());
         }
-        
+
         return headerLines;
     }
 
+    private String readRequestMessage(InputView inputView) throws IOException {
+        if (!inputView.isReadable()) {
+            return StringUtils.EMPTY;
+        }
+
+        return inputView.readLine();
+    }
 }

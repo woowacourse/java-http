@@ -18,7 +18,8 @@ class ResourceControllerTest {
         ResourceController resourceController = new ResourceController();
         String requestLine = "GET /index.html HTTP/1.1";
         List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        HttpRequest httpRequest = new HttpRequest(requestLine, headerLines);
+        String requestMessage = "test body";
+        HttpRequest httpRequest = new HttpRequest(requestLine, headerLines, requestMessage);
 
         HttpResponse httpResponse = resourceController.service(httpRequest);
 
@@ -31,7 +32,8 @@ class ResourceControllerTest {
         ResourceController resourceController = new ResourceController();
         String requestLine = "GET /static/login.html HTTP/1.1";
         List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        HttpRequest httpRequest = new HttpRequest(requestLine, headerLines);
+        String requestMessage = "test body";
+        HttpRequest httpRequest = new HttpRequest(requestLine, headerLines, requestMessage);
 
         HttpResponse httpResponse = resourceController.service(httpRequest);
 

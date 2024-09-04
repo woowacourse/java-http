@@ -38,72 +38,23 @@ public class Http11Processor implements Runnable, Processor {
 
             // parse request
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String request = bufferedReader.readLine();
-            System.out.println(request);
+            StringBuilder sb = new StringBuilder();
+            while (bufferedReader.ready()) {
+                sb.append(bufferedReader.readLine()).append("\r\n");
+            }
+
+            if (sb.isEmpty()) {
+                return;
+            }
+
+            // handle request
+            String request = sb.toString().split("\r\n")[0];
+
+            log.info("request = {}", request);
 
             outputStream.write(handleStaticRequest(request));
             outputStream.flush();
 
-//        }
-//
-
-//
-//            String request = bufferedReader.readLine();
-//            if (request == null || request.isEmpty()) {
-//                return;
-//            }
-
-//            if (request.contains("/login")) {
-//                System.out.println(request);
-//
-//                String fileName = request.split(" ")[1];
-//
-//                File directory = new File(getClass().getClassLoader().getResource("static/login").getFile());
-//                System.out.println(directory.getPath());
-
-//                resources.hasMoreElements();
-            return;
-//                Path resourcePath = Files.find(path, 100,
-//                                (p, a) -> p.toString().toLowerCase().startsWith(fileName))
-//                        .findAny().orElseThrow();
-//
-//                System.out.println(resourcePath);
-//
-//
-//                String responseBody = Files.readString(resourcePath);
-//                final var response = String.join("\r\n",
-//                        "HTTP/1.1 200 OK ",
-//                        "Content-Type: " + +";charset=utf-8 ",
-//                        "Content-Length: " + responseBody.getBytes().length + " ",
-//                        "",
-//                        responseBody);
-//
-//                outputStream.write(response.getBytes());
-//                outputStream.flush();
-//                return;
-//            }
-//
-//            String fileName = request.split(" ")[1];
-//
-//            String path = getClass().getClassLoader().getResource("static" + fileName).getPath();
-//
-//            String responseBody = Files.readString(Path.of(path));
-//
-//            if (request.equals("/")) {
-//                outputStream.write("helllo world!".getBytes());
-//                outputStream.flush();
-//                return;
-//            }
-//
-//            final var response = String.join("\r\n",
-//                    "HTTP/1.1 200 OK ",
-//                    "Content-Type: text/html;charset=utf-8 ",
-//                    "Content-Length: " + responseBody.getBytes().length + " ",
-//                    "",
-//                    responseBody);
-//
-//            outputStream.write(response.getBytes());
-//            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
@@ -141,19 +92,34 @@ public class Http11Processor implements Runnable, Processor {
             keyValues.put(keyValueSplit[0], keyValueSplit[1]);
         }
 
-        String responseBody = Files.readString(
-                Path.of(getClass().getClassLoader().getResource("static" + fileName).toURI())
-        );
+        String statusCode = "200 OK";
 
         log.info("account={}", keyValues.get("account"));
         log.info("password={}", keyValues.get("password"));
+
+        if (fileName.equals("/login.html")) {
+            if (keyValues.get("account").equals("gugu") && keyValues.get("password").equals("password")) {
+                statusCode = "302 Found";
+                return String.join("\r\n",
+                                "HTTP/1.1 " + statusCode + " ",
+                                "Content-Type: " + "text/html" + " ",
+                                "Location: /index.html" + " ")
+                        .getBytes();
+            } else {
+                fileName = "/401.html";
+                statusCode = "401 Unauthorized";
+            }
+        }
 
         String extension = fileName.split("\\.")[1];
         if (extension.equals("js")) {
             extension = "javascript";
         }
+        String responseBody = Files.readString(
+                Path.of(getClass().getClassLoader().getResource("static" + fileName).toURI())
+        );
         return String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
+                        "HTTP/1.1 " + statusCode + " ",
                         "Content-Type: " + "text/" + extension + " ",
                         "Content-Length: " + responseBody.getBytes().length + " ",
                         "", responseBody)

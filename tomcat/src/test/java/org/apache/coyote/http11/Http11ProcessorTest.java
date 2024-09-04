@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -12,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    @DisplayName("process 메서드는 요청에 대해 올바른 HTTP 응답을 생성한다.")
     @Test
     void process() {
         // given
@@ -32,6 +34,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("GET /index.html의 응답을 반환한다.")
     @Test
     void index() throws IOException {
         // given

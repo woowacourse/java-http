@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
@@ -35,11 +34,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            var responseBody = getStaticFileContent(inputStream);
+            String fileName = getFileName(inputStream);
+            var responseBody = getStaticFileContent(fileName);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + getFileExtension(fileName) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -51,11 +51,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getStaticFileContent(InputStream inputStream) throws IOException {
+    private String getFileName(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        String fileName = bufferedReader.readLine().split(" ")[1];
+        return bufferedReader.readLine().split(" ")[1];
+    }
+
+    private String getStaticFileContent(String fileName) throws IOException {
         if (Objects.equals(fileName, "/")) {
             return "Hello world!";
         }
@@ -63,5 +66,13 @@ public class Http11Processor implements Runnable, Processor {
 
         File file = new File(getClass().getClassLoader().getResource(staticFileName).getPath());
         return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    private String getFileExtension(String fileName) {
+        if (Objects.equals(fileName, "/")) {
+            return "html";
+        }
+        String[] splitFileName = fileName.split("\\.");
+        return splitFileName[splitFileName.length - 1];
     }
 }

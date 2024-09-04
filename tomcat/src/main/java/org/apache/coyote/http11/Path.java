@@ -12,7 +12,7 @@ public class Path {
 
     private final String line;
 
-    public static Path create(final String line) {
+    public static Path from(final String line) {
         return CACHE.computeIfAbsent(line, Path::new);
     }
 

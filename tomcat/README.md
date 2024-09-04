@@ -3,4 +3,4 @@
 - [x] GET /index.html 응답하기
   - [x] Http11Processor 의 InputStream 사용하여 요청 처리
 - [x] CSS 파일 요청 처리
-- [ ] 로그인 요청에 대해 Query String 파싱하여 login.html 응답
+- [x] 로그인 요청에 대해 Query String 파싱하여 login.html 응답

@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -97,20 +98,21 @@ public class Http11Processor implements Runnable, Processor {
                     User user = optionalUser.get();
                     if (user.checkPassword(password)) {
                         log.info(user.toString());
-                        response = getRedirectResponse(responseBody, "/index.html");
+                        response = getRedirectResponse(UUID.randomUUID().toString(), responseBody, "/index.html");
                     } else {
                         response = getRedirectResponse(responseBody, "/401.html");
                     }
                 } else {
                     response = getRedirectResponse(responseBody, "/401.html");
                 }
+
             } else if (firstLines[1].equals("/register") && firstLines[0].equals("POST")) {
                 String account = requestBody.split("&")[0].split("=")[1];
                 String password = requestBody.split("&")[1].split("=")[1];
                 String email = requestBody.split("&")[2].split("=")[1];
 
                 InMemoryUserRepository.save(new User(account, password, email));
-                response = getRedirectResponse(responseBody, "/index.html");
+                response = getRedirectResponse(UUID.randomUUID().toString(), responseBody, "/index.html");
             } else {
                 mimeType = "text/html";
 
@@ -144,6 +146,15 @@ public class Http11Processor implements Runnable, Processor {
     private String getRedirectResponse(String responseBody, String location) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                "",
+                responseBody);
+    }
+
+    private String getRedirectResponse(String sessionId, String responseBody, String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Set-Cookie: JSESSIONID=" + sessionId + " ",
                 "Location: " + location + " ",
                 "",
                 responseBody);

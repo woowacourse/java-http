@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -35,9 +37,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String requestMessage = new String(inputStream.readAllBytes());
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String requestFirstLine = bufferedReader.readLine();
 
-            final var responseBody = buildResponseBody(requestMessage);
+            final var responseBody = buildResponseBody(requestFirstLine);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
@@ -52,11 +56,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponseBody(String requestMessage) throws IOException {
-        String requestFirstLine = requestMessage.split(System.lineSeparator())[0].trim();
+    private String buildResponseBody(String requestFirstLine) throws IOException {
         String httpMethod = requestFirstLine.split(" ")[0];
         String route = requestFirstLine.split(" ")[1];
-
         if (!HOME_PAGE_METHOD.equals(httpMethod) || !HOME_PAGE_ROUTE.equals(route)) {
             return DEFAULT_RESPONSE_BODY;
         }

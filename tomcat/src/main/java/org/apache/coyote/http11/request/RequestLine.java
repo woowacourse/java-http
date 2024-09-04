@@ -13,4 +13,20 @@ public class RequestLine {
         this.uri = uri;
         this.protocol = protocol;
     }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public URI getUri() {
+        return uri;
+    }
+
+    public String getUriPath() {
+        return uri.getPath();
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
 }

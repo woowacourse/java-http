@@ -10,15 +10,15 @@ class PathTest {
 
     @Test
     @DisplayName("/로 시작하지 않으면, 자동으로 /가 붙는다.")
-    void some() {
+    void start_with_slash() {
         final String line = "create_page";
         final Path path = Path.create(line);
-        assertThat("/create_page").isEqualTo(path.value());
+        assertThat(path.value()).isEqualTo("/create_page");
     }
 
     @Test
     @DisplayName("/를 기반으로 경로를 파싱한다.")
-    void some1() {
+    void parse_with_slash() {
         final String line = "/create_page/sample";
         final Path path = Path.create(line);
         assertThat(path.next()).isEqualTo(Path.create("/sample"));
@@ -26,7 +26,7 @@ class PathTest {
 
     @Test
     @DisplayName("/가 더 없으면, 마지막으로 간주한다.")
-    void some2() {
+    void last_if_not_contain_slash() {
         final String line = "sample";
         final Path path = Path.create(line);
         assertThat(path.last()).isTrue();
@@ -34,11 +34,10 @@ class PathTest {
 
     @Test
     @DisplayName("파싱할 경로가 없을 시 예외를 발생한다.")
-    void some3() {
+    void throw_exception_when_parse_with_not_contain_slash() {
         final String line = "sample";
         final Path path = Path.create(line);
         assertThatThrownBy(() -> path.next())
-                .isInstanceOf(UriParseException.class);
+                .isInstanceOf(PathParseException.class);
     }
-
 }

@@ -15,8 +15,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String GET_METHOD = "GET";
+    private static final String DEFAULT_ROUTE = "/";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
-    private static final String HOME_PAGE_METHOD = "GET";
     private static final String HOME_PAGE_ROUTE = "/index.html";
     private static final String HOME_PAGE_RESPONSE_BODY = "static/index.html";
 
@@ -36,19 +37,11 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
             String requestFirstLine = bufferedReader.readLine();
-
-            final var responseBody = buildResponseBody(requestFirstLine);
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            final var response = bindResponse(requestFirstLine);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -56,18 +49,42 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String buildResponseBody(String requestFirstLine) throws IOException {
+    private String bindResponse(String requestFirstLine) throws IOException {
         String httpMethod = requestFirstLine.split(" ")[0];
         String route = requestFirstLine.split(" ")[1];
-        if (!HOME_PAGE_METHOD.equals(httpMethod) || !HOME_PAGE_ROUTE.equals(route)) {
-            return DEFAULT_RESPONSE_BODY;
+
+        if (DEFAULT_ROUTE.equals(route) && GET_METHOD.equals(httpMethod)) {
+            return buildSuccessfulResponse(DEFAULT_RESPONSE_BODY);
         }
 
-        URL resource = getClass().getClassLoader().getResource(HOME_PAGE_RESPONSE_BODY);
-        if (resource == null) {
-            throw new InternalError("기본으로 보여줄 파일을 찾을 수 없습니다.");
+        if (HOME_PAGE_ROUTE.equals(route) && GET_METHOD.equals(httpMethod)) {
+            URL resource = getClass().getClassLoader().getResource(HOME_PAGE_RESPONSE_BODY);
+            if (resource == null) {
+                throw new InternalError("기본으로 보여줄 파일을 찾을 수 없습니다.");
+            }
+            String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return buildSuccessfulResponse(body);
         }
 
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return buildFailedResponse(404, "NotFound",
+                "There is no static resource matched with rout and method");
+    }
+
+    private String buildSuccessfulResponse(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String buildFailedResponse(int statusCode, String statusMessage, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " " + statusMessage,
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

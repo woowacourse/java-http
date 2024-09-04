@@ -30,6 +30,14 @@ public class HttpRequest {
         headers.put(key, value);
     }
 
+    public boolean isMethodNotEqualWith(Method method) {
+        return !method.equals(getMethod());
+    }
+
+    public boolean isHttpProtocolNotEqualWith(HttpProtocol httpProtocol) {
+        return !httpProtocol.equals(getHttpProtocol());
+    }
+
     public String getHeaderValue(String key) {
         return headers.get(key);
     }
@@ -40,6 +48,10 @@ public class HttpRequest {
 
     public URI getUri() {
         return requestLine.getUri();
+    }
+
+    public HttpProtocol getHttpProtocol() {
+        return requestLine.getProtocol();
     }
 
     public String getUriPath() {

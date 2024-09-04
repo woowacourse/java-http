@@ -26,6 +26,10 @@ public class RequestLine {
         return uri.getPath();
     }
 
+    public HttpProtocol getProtocol() {
+        return protocol;
+    }
+
     public String getProtocolMessage() {
         return protocol.getHttpMessage();
     }

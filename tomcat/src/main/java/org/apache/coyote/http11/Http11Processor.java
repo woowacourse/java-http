@@ -23,7 +23,9 @@ import com.techcourse.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     private static final String STATIC_RESOURCE_PATH = "static/";
+    private static final String ROOT_PATH = "/";
 
     private final Socket connection;
 
@@ -45,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
 
-            final String responseBody = readStaticResource(httpRequest);
+            final String responseBody = findResponseBody(httpRequest);
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
@@ -78,8 +80,13 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private String readStaticResource(HttpRequest httpRequest) throws IOException {
-        final String fileName = httpRequest.uri().getPath().replace("/", STATIC_RESOURCE_PATH);
+    private String findResponseBody(HttpRequest httpRequest) throws IOException {
+        String endPoint = httpRequest.uri().getPath();
+        if (endPoint.equals(ROOT_PATH)) {
+            return "Hello world!";
+        }
+
+        final String fileName = endPoint.replace(ROOT_PATH, STATIC_RESOURCE_PATH);
         final URL resourceURL = getClass().getClassLoader().getResource(fileName);
 
         return Files.readString(Path.of(resourceURL.getPath()));

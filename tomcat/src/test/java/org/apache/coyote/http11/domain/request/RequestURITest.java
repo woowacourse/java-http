@@ -20,7 +20,8 @@ class RequestURITest {
 
         assertAll(
                 () -> assertThat(requestURI.getPath()).isEqualTo(expectedPath),
-                () -> assertThat(requestURI.getQueryParameters()).containsExactlyEntriesOf(expectedQueryParameters)
+                () -> assertThat(requestURI.getQueryParameters())
+                        .containsExactlyInAnyOrderEntriesOf(expectedQueryParameters)
         );
     }
 

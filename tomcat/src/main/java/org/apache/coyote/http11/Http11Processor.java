@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private String requestPath;
+
     private int statusCode = 200;
     private String statusMessage = "OK";
 
@@ -38,13 +41,27 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String input = bufferedReader.readLine();
-            if (input == null) {
+            String line = bufferedReader.readLine();
+            if (line == null) {
                 return;
             }
-            String requestUri = input.split(" ")[1];
+            String[] headerFirstLine = line.split(" ");
+            String requestUri = headerFirstLine[1];
+            log.info("requestUri = {}", requestUri);
+
+            Map<String, String> httpRequestHeaders = new HashMap<>();
+            while (true) {
+                line = bufferedReader.readLine();
+                if ("".equals(line)) {
+                    break;
+                }
+                String[] split = line.split(": ");
+                String key = split[0];
+                String value = split[1];
+                httpRequestHeaders.put(key, value);
+            }
+
             requestPath = requestUri;
             int index = requestUri.indexOf("?");
             if (index >= 0 && requestUri.substring(0, index).equals("/login")) {
@@ -56,6 +73,27 @@ public class Http11Processor implements Runnable, Processor {
                 login(account[1], password[1]);
             }
 
+
+            if (requestUri.equals("/register") && headerFirstLine[0].equals("POST")) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+
+                Map<String, String> userInfo = new HashMap<>();
+                for (String request : requestBody.split("&")) {
+                    String[] input = request.split("=");
+                    userInfo.put(input[0], input[1]);
+                }
+
+                InMemoryUserRepository.save(
+                        new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email")));
+                log.info("savedUser = {}", InMemoryUserRepository.findByAccount(userInfo.get("account")));
+
+                requestPath = "/index.html";
+                statusCode = 302;
+                statusMessage = "Found";
+            }
 
             String contentType = "text/html;";
             if (requestUri.endsWith(".css")) {

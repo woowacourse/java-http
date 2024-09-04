@@ -39,7 +39,11 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String urlPath = reader.readLine().split(" ")[1];
             if(urlPath.equals("/index.html")) {
-                printIndexHtmlFile(outputStream);
+                printFileResource("static/index.html", outputStream);
+                return;
+            }
+            if(urlPath.startsWith("/css") || urlPath.startsWith("/js") || urlPath.startsWith("/assets")) {
+                printFileResource("static" + urlPath, outputStream);
                 return;
             }
 
@@ -59,17 +63,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void printIndexHtmlFile(OutputStream outputStream) {
-        final String fileName = "static/index.html";
+    private void printFileResource(String fileName, OutputStream outputStream) {
         final URL url = getClass().getClassLoader().getResource(fileName);
         final File file = new File(url.getPath());
         final Path path = file.toPath();
 
         try {
+            String contentType = "text/html";
+            if(fileName.endsWith("css")) {
+                contentType = "text/css";
+            }
             final var responseBody = String.join("\n", Files.readAllLines(path));
             final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                String.format("Content-Type: %s;charset=utf-8 ", contentType),
                 "Content-Length: " + responseBody.length() + " ",
                 "",
                 responseBody);

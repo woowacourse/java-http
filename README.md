@@ -18,3 +18,13 @@
 1. [File, I/O Stream](study/src/test/java/study)
 2. [HTTP Cache](study/src/test/java/cache)
 3. [Thread](study/src/test/java/thread)
+
+
+### 구현할 기능 목록
+- [ ] GET /index.html 응답하기
+  - [ ] http://localhost:8080/index.html에 접근 가능하다.
+- [ ] CSS 지원하기
+  - [ ] CSS인 경우 응답 헤더의 Content-Type을 text/css로 전송한다.
+- [ ] Query String 파싱
+  - [ ] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)를 보여준다.
+  - [ ] 로그인 페이지에 접속했을 때 Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나온다.

@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +25,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Http11ResourceFinder resourceFinder;
 
-    private final Http11ContentTypeFinder contentTypeFinder;
-
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.resourceFinder = new Http11ResourceFinder();
-        this.contentTypeFinder = new Http11ContentTypeFinder();
     }
 
     @Override
@@ -67,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
         sendStaticResourceResponse(path, outputStream);
     }
 
-    private void login(Http11Request request, OutputStream outputStream) {
+    private void login(Http11Request request, OutputStream outputStream) throws IOException {
         Http11Method http11Method = request.method();
         if (http11Method.equals(Http11Method.GET)) {
             return;
@@ -87,24 +84,17 @@ public class Http11Processor implements Runnable, Processor {
         sendRedirect("/401.html", outputStream);
     }
 
-    private void sendRedirect(String uri, OutputStream outputStream) {
-        String statusLine = "HTTP/1.1 302 Found ";
-        String location = "Location: %s".formatted(uri);
-        var response = String.join("\r\n", statusLine, location, "");
-        try (outputStream) {
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+    private void sendRedirect(String uri, OutputStream outputStream) throws IOException {
+        Http11Response response = Http11Response.found(uri);
+        outputStream.write(response.toBytes());
+        outputStream.flush();
     }
 
-    private void register(Http11Request request, OutputStream outputStream) {
+    private void register(Http11Request request, OutputStream outputStream) throws IOException {
         Http11Method http11Method = request.method();
         if (http11Method.equals(Http11Method.GET)) {
             return;
         }
-
         LinkedHashMap<String, String> requestBody = request.body();
         String account = requestBody.getOrDefault("account", "");
         String password = requestBody.getOrDefault("password", "");
@@ -116,23 +106,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void sendStaticResourceResponse(Path path, OutputStream outputStream) throws IOException {
-        String contentTypes = contentTypeFinder.find(path);
-
-        List<String> fileLines = Files.readAllLines(path);
-        var responseBody = String.join("\n", fileLines);
-
-        String statusLine = "HTTP/1.1 200 OK ";
-        String contentType = "Content-Type: %s;charset=utf-8 ".formatted(contentTypes);
-        String contentLength = "Content-Length: " + responseBody.getBytes().length + " ";
-        String empty = "";
-        var response = String.join("\r\n",
-                statusLine,
-                contentType,
-                contentLength,
-                empty,
-                responseBody);
-
-        outputStream.write(response.getBytes());
+        Http11Response response = Http11Response.ok(new ArrayList<>(), new ArrayList<>(), path);
+        outputStream.write(response.toBytes());
         outputStream.flush();
     }
 }

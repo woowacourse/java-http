@@ -4,6 +4,6 @@ public record Http11Header(String key, String value) {
 
     @Override
     public String toString() {
-        return "%s=%s".formatted(key, value);
+        return "%s:%s".formatted(key, value);
     }
 }

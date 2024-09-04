@@ -44,7 +44,12 @@ class Http11RequestParser {
     Http11Method parseMethod(String requestMessage) {
         String startLine = parseStartLine(requestMessage);
         String rawMethod = startLine.split(" ")[0];
-        return Http11Method.valueOf(rawMethod.toUpperCase());
+        try {
+
+            return Http11Method.valueOf(rawMethod.toUpperCase());
+        } catch (Exception e) {
+            return Http11Method.GET;
+        }
     }
 
     List<Http11Header> parseHeaders(String requestMessage) {

@@ -22,3 +22,5 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 
 
 * bufferedReader.lines().toList()로는 안불러지고 bufferedReader.readline()으로 해결
+* 리다이렉트 하기 위해서 Location을 지정해주는데 302일 때는 제대로 되고 401일 때는 리다이렉트가 안됨 
+  * 어떤 메서드에서만 리다이렉트가 가능한가?

@@ -64,21 +64,24 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = getResponseBody(fileName);
             } else if (uri.startsWith("/login")) {
                 int parameterStartingIndex = uri.indexOf("?");
-                List<String> queryParameterPairs = Arrays.stream(uri.substring(parameterStartingIndex + 1).split("&"))
-                        .toList();
-                Map<String, String> queryParameters = queryParameterPairs.stream().map(s -> s.split("="))
-                        .collect(Collectors.toMap(
-                                keyValue -> keyValue[0],
-                                keyValue -> keyValue[1]
-                        ));
-                String account = queryParameters.get("account");
-                String password = queryParameters.get("password");
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
-                if (!user.checkPassword(password)) {
-                    throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                if (parameterStartingIndex > 0) {
+                    List<String> queryParameterPairs = Arrays.stream(
+                                    uri.substring(parameterStartingIndex + 1).split("&"))
+                            .toList();
+                    Map<String, String> queryParameters = queryParameterPairs.stream().map(s -> s.split("="))
+                            .collect(Collectors.toMap(
+                                    keyValue -> keyValue[0],
+                                    keyValue -> keyValue[1]
+                            ));
+                    String account = queryParameters.get("account");
+                    String password = queryParameters.get("password");
+                    User user = InMemoryUserRepository.findByAccount(account)
+                            .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
+                    if (!user.checkPassword(password)) {
+                        throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                    }
+                    log.info("user: " + user);
                 }
-                log.info("user: " + user);
                 final String fileName = "static/login.html";
                 responseBody = getResponseBody(fileName);
             }

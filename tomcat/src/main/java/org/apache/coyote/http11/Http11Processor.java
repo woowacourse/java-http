@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemorySessionRepository;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -9,6 +10,7 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import org.apache.coyote.Processor;
@@ -38,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+//        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -48,12 +50,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
             Http11Request request = Http11Request.parse(requestLines);
-            log.debug(request.toString());
 
             for (final var processor : processors.entrySet()) {
                 if (processor.getKey().test(request)) {
+//                    log.debug(request.toString());
                     Http11Response response = processor.getValue().apply(request);
-                    log.debug(response.toString());
+//                    log.debug(response.toString());
                     outputStream.write(response.toMessage());
                     outputStream.flush();
                     return;
@@ -61,7 +63,6 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             Http11Response response = defaultProcessor.apply(request);
-            log.debug(response.toString());
             outputStream.write(response.toMessage());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -77,15 +78,37 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response processLoginPage(Http11Request request) {
+        final String sessionCookieName = "JSESSIONID";
+
+        if (request.cookies().containsKey(sessionCookieName)) {
+            String sessionId = request.cookies().get(sessionCookieName);
+            Optional<String> optionalUserAccount = InMemorySessionRepository.findBySessionId(sessionId);
+            if (optionalUserAccount.isPresent()) {
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(optionalUserAccount.get());
+                if (optionalUser.isPresent()) {
+                    log.info("세션 로그인 성공! - 아이디 : {}, 세션 ID : {}", optionalUser.get().getAccount(), sessionId);
+                    return Http11Response.builder(Status.FOUND)
+                            .location("/index.html")
+                            .build();
+                }
+            }
+        }
+
         if (request.parameters().containsKey("account") && request.parameters().containsKey("password")) {
             String account = request.parameters().get("account");
             String password = request.parameters().get("password");
 
             Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
             if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-                log.info("로그인 성공! - 아이디 : " + optionalUser.get().getAccount());
+                User user = optionalUser.get();
+                String sessionId = UUID.randomUUID().toString();
+                InMemorySessionRepository.save(sessionId, user.getAccount());
+
+                log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
+
                 return Http11Response.builder(Status.FOUND)
                         .location("/index.html")
+                        .addCookie(sessionCookieName, sessionId)
                         .build();
             }
 

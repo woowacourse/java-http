@@ -8,9 +8,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record Http11Request(String method, String path, Map<String, String> parameters, Map<String, String> headers,
-                            String protocolVersion,
-                            String body) {
+public record Http11Request(
+        String method,
+        String path,
+        Map<String, String> parameters,
+        Map<String, String> headers,
+        Map<String, String> cookies,
+        String protocolVersion,
+        String body) {
 
     public static Http11Request parse(List<String> lines) {
         String[] startLineParts = lines.getFirst().split(" ");
@@ -18,6 +23,7 @@ public record Http11Request(String method, String path, Map<String, String> para
         String path = "";
         Map<String, String> parameters = Map.of();
         Map<String, String> headers = extractHeaders(lines);
+        Map<String, String> cookies = extractCookies(headers.get("Cookie"));
         String protocolVersion = startLineParts[2];
         String body = null;
 
@@ -33,7 +39,28 @@ public record Http11Request(String method, String path, Map<String, String> para
             body = lines.getLast();
         }
 
-        return new Http11Request(method, path, parameters, headers, protocolVersion, body);
+        return new Http11Request(method, path, parameters, headers, cookies, protocolVersion, body);
+    }
+
+    private static Map<String, String> extractCookies(String cookieMessage) {
+        if (cookieMessage == null) {
+            return Map.of();
+        }
+
+        Map<String, String> cookies = new HashMap<>();
+
+        for (String entry : cookieMessage.split("; ")) {
+            int delimiterIndex = entry.indexOf("=");
+            if (delimiterIndex == -1) {
+                continue;
+            }
+
+            String key = entry.substring(0, delimiterIndex).trim();
+            String value = entry.substring(delimiterIndex + 1).trim();
+            cookies.put(key, value);
+        }
+
+        return cookies;
     }
 
     private static Map<String, String> extractHeaders(List<String> lines) {
@@ -68,6 +95,6 @@ public record Http11Request(String method, String path, Map<String, String> para
     }
 
     public Http11Request updatePath(String path) {
-        return new Http11Request(method, path, parameters, headers, protocolVersion, body);
+        return new Http11Request(method, path, parameters, headers, cookies, protocolVersion, body);
     }
 }

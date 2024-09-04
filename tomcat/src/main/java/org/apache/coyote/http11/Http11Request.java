@@ -36,7 +36,10 @@ public class Http11Request {
 
         Http11StartLine startLine = Http11StartLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = HttpHeaders.of(createHttpHeaderMap(bufferedReader), HEADER_FILTER);
-        return new Http11Request(startLine, httpHeaders, createBody(bufferedReader));
+        if (startLine.getMethod().hasBody()) {
+            return new Http11Request(startLine, httpHeaders, createBody(bufferedReader));
+        }
+        return new Http11Request(startLine, httpHeaders, null);
     }
 
     private static Map<String, List<String>> createHttpHeaderMap(BufferedReader bufferedReader) throws IOException {

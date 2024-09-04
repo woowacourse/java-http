@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +11,9 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -70,11 +75,27 @@ public class Http11Processor implements Runnable, Processor {
         String httpVersion = params[2];
         validateFormat(method, requestUri, httpVersion);
 
-        if (method.equals("GET") && requestUri.equals("/")) {
+        String endpoint = parseEndpoint(requestUri);
+        Map<String, String> queryParams = parseQueryParams(requestUri);
+
+        if (method.equals("GET") && endpoint.equals("/")) {
             return makeOkResponseMessage("Hello world!");
         }
 
-        return makeOkResponseMessage(readBody(requestUri.substring(1)));
+        if (method.equals("GET") && endpoint.equals("/login")) {
+            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                    .orElseThrow(() -> new UncheckedServletException("아이디 혹은 비밀번호가 일치하지 않습니다."));
+
+            if (!user.checkPassword(queryParams.get("password"))) {
+                throw new UncheckedServletException("아이디 혹은 비밀번호가 일치하지 않습니다.");
+            }
+
+            log.info(user.toString());
+
+            return makeOkResponseMessage(readBody("login.html"));
+        }
+
+        return makeOkResponseMessage(readBody(endpoint.substring(1)));
     }
 
     private static void validateParamCount(String[] params) {
@@ -99,6 +120,31 @@ public class Http11Processor implements Runnable, Processor {
         if (!httpVersion.equals(HTTP_1_1)) {
             throw new UncheckedServletException(String.format("HTTP 버전은 %s만 허용됩니다. 입력값 = %s", HTTP_1_1, httpVersion));
         }
+    }
+
+    private String parseEndpoint(String requestUri) {
+        return requestUri.split("\\?")[0];
+    }
+
+    private Map<String, String> parseQueryParams(String requestUri) {
+        String[] substrings = requestUri.split("\\?");
+
+        if (substrings.length == 1) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> queryParams = new HashMap<>();
+        String rawQueryParams = requestUri.split("\\?")[1];
+
+        for (String entry : rawQueryParams.split("&")) {
+            String[] data = entry.split("=");
+            if (data.length != 2) {
+                return Collections.emptyMap();
+            }
+            queryParams.put(data[0], data[1]);
+        }
+
+        return queryParams;
     }
 
     private String readBody(String fileName) {

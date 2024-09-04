@@ -38,11 +38,15 @@ public class HttpRequest {
     }
 
     public boolean isUriNotEqualWith(Uri uri) {
-        return uri.equals(getUri());
+        return !uri.equals(getUri());
     }
 
     public boolean isUriHome() {
         return getUri().equals(new Uri("/"));
+    }
+
+    public boolean isUriNotStartsWith(Uri uri) {
+        return !getUri().isStartsWith(uri);
     }
 
     public String getHeaderValue(String key) {

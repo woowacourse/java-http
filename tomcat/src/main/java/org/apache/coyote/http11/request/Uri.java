@@ -4,14 +4,21 @@ import java.util.Objects;
 
 public class Uri {
 
-    private final String uri;
+    private final String path;
 
-    public Uri(final String uri) {
-        this.uri = uri;
+    public Uri(final String path) {
+        this.path = path;
+    }
+
+    public boolean isStartsWith(Uri uri) {
+        if (path.startsWith(uri.path)) {
+            return true;
+        }
+        return false;
     }
 
     public String getPath() {
-        return uri;
+        return path;
     }
 
     @Override
@@ -22,12 +29,12 @@ public class Uri {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Uri uri1 = (Uri) o;
-        return Objects.equals(uri, uri1.uri);
+        final Uri uri = (Uri) o;
+        return Objects.equals(path, uri.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri);
+        return Objects.hash(path);
     }
 }

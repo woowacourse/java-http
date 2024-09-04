@@ -10,7 +10,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class GreetingHandler implements HttpRequestHandler {
 
     private static final Method SUPPORTING_METHOD = Method.GET;
-    private static final Uri SUPPORTING_URI = new Uri("");
+    private static final Uri SUPPORTING_URI = new Uri("/");
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
 
 

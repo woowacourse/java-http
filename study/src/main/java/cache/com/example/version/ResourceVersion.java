@@ -1,10 +1,9 @@
 package cache.com.example.version;
 
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceVersion {
@@ -13,6 +12,11 @@ public class ResourceVersion {
 
     private String version;
 
+    private static String now() {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT);
+        return LocalDateTime.now().format(formatter);
+    }
+
     @PostConstruct
     public void init() {
         this.version = now();
@@ -20,10 +24,5 @@ public class ResourceVersion {
 
     public String getVersion() {
         return version;
-    }
-
-    private static String now() {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT);
-        return LocalDateTime.now().format(formatter);
     }
 }

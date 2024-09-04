@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.apache.coyote.util.FileExtension;
 
 public class HttpRequest {
 
@@ -74,7 +75,7 @@ public class HttpRequest {
     }
 
     public boolean isFileRequest() {
-        return Extension.isFileExtension(path);
+        return FileExtension.isFileExtension(path);
     }
 
     public String getMethod() {

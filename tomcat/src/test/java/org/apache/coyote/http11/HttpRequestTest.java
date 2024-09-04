@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("HTTP 요청 테스트")
 class HttpRequestTest {
 
     @DisplayName("HTTP 요청의 메서드, 경로, 버전을 파싱한다.")

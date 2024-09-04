@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("확장자 테스트")
-class ExtensionTest {
+@DisplayName("파일 확장자 테스트")
+class FileExtensionTest {
 
     @DisplayName("파일 확장자인지 확인한다.")
     @Test
@@ -18,8 +18,8 @@ class ExtensionTest {
 
         // when & then
         assertAll(
-                () -> assertThat(Extension.isFileExtension(file1)).isTrue(),
-                () -> assertThat(Extension.isFileExtension(file2)).isFalse()
+                () -> assertThat(FileExtension.isFileExtension(file1)).isTrue(),
+                () -> assertThat(FileExtension.isFileExtension(file2)).isFalse()
         );
     }
 }

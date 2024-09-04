@@ -11,13 +11,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.ResponseContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -98,7 +101,29 @@ public class Http11Processor implements Runnable, Processor {
         if (url.equals("/")) {
             return DEFAULT_PAGE;
         }
+        if (url.contains("?")) {
+            return getResponseBodyUsedQuery(url);
+        }
         return getResponseBodyByFileName(url);
+    }
+
+    private String getResponseBodyUsedQuery(String url) {
+        String path = url.split("\\?")[0];
+        String[] queryString = url.split("\\?")[1].split("&");
+        if (path.startsWith("/login")) {
+            if (queryString[0].startsWith("account=") && queryString[1].startsWith("password=")) {
+                checkAuth(queryString[0].split("=")[1], queryString[1].split("=")[1]);
+            }
+            return getResponseBodyByFileName("/login.html");
+        }
+        throw new RuntimeException("정의되지 않은 URL 입니다.");
+    }
+
+    private void checkAuth(String account, String password) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            log.info("user : " + user.get());
+        }
     }
 
     private String getResponseBodyByFileName(String fileName) {

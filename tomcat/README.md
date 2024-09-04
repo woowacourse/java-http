@@ -1,7 +1,7 @@
 ## 기능 요구 사항
 ### 1. GET /index.html 응답하기
-- [ ] 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있다.
-- [ ] `Http11ProcessorTest` 테스트 클래스의 모든 테스트를 통과한다.
+- [x] 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있다.
+- [x] `Http11ProcessorTest` 테스트 클래스의 모든 테스트를 통과한다.
 
 브라우저에서 요청한 HTTP Request Header
 ```

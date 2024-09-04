@@ -34,7 +34,7 @@ class HttpRequestTest {
 
         // then
         assertAll(
-                () -> assertThat(request.getMethod()).isEqualTo(method),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(request.getPath()).isEqualTo(path),
                 () -> assertThat(request.getVersion()).isEqualTo(version)
         );

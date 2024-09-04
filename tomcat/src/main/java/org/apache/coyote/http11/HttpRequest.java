@@ -19,7 +19,7 @@ public class HttpRequest {
 
     private final Map<String, String> queryMap = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
-    private String method;
+    private HttpMethod method;
     private String url;
     private String version;
     private String path;
@@ -36,7 +36,7 @@ public class HttpRequest {
     private void parseRequestLine(String requestLine) {
         String[] requestLineToken = requestLine.split(" ");
 
-        method = requestLineToken[0];
+        method = HttpMethod.from(requestLineToken[0]);
         url = requestLineToken[1];
         version = requestLineToken[2];
     }
@@ -74,7 +74,7 @@ public class HttpRequest {
         return stringJoiner.toString();
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

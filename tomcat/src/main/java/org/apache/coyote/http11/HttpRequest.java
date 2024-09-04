@@ -16,14 +16,12 @@ public class HttpRequest {
     private static final String QUERY_DELIMITER = "&";
     private static final String PARAM_DELIMITER = "=";
     private static final String QUERY_START = "\\?";
-
+    private final Map<String, String> queryMap = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
     private String method;
     private String url;
     private String version;
     private String path;
-
-    private final Map<String, String> queryMap = new HashMap<>();
-    private final Map<String, String> headers = new HashMap<>();
 
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -42,6 +40,21 @@ public class HttpRequest {
         version = requestLineToken[2];
     }
 
+    private void parseQueryParameter() {
+        if (!url.contains("?")) {
+            path = url;
+            return;
+        }
+        String[] urlParts = url.split(QUERY_START);
+        path = urlParts[0];
+        String queryLine = urlParts[1];
+        String[] queryList = queryLine.split(QUERY_DELIMITER);
+        for (String query : queryList) {
+            String[] queryParam = query.split(PARAM_DELIMITER);
+            queryMap.put(queryParam[0], queryParam[1]);
+        }
+    }
+
     private void parseHeader(BufferedReader bufferedReader) throws IOException {
         String header = bufferedReader.readLine();
         while (header != null && !header.equals("")) {
@@ -58,21 +71,6 @@ public class HttpRequest {
             stringJoiner.add(value.strip());
         }
         return stringJoiner.toString();
-    }
-
-    private void parseQueryParameter() {
-        if (!url.contains("?")) {
-            path = url;
-            return;
-        }
-        String[] urlParts = url.split(QUERY_START);
-        path = urlParts[0];
-        String queryLine = urlParts[1];
-        String[] queryList = queryLine.split(QUERY_DELIMITER);
-        for (String query : queryList) {
-            String[] queryParam = query.split(PARAM_DELIMITER);
-            queryMap.put(queryParam[0], queryParam[1]);
-        }
     }
 
     public String getMethod() {

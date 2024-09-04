@@ -23,8 +23,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_PAGE = "Hello world!";
-    private static final String HTML_PREFIX = "static/";
+    private static final String RESOURCE_PATH_PREFIX = "static";
     private static final String CONTENT_TYPE_HTML = "text/html";
+    public static final String ACCEPT = "Accept:";
 
     private final Socket connection;
 
@@ -43,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             List<String> headerSentences = new ArrayList<>();
             String sentence = reader.readLine();
-            while(sentence != null && !sentence.isBlank()) {
+            while (sentence != null && !sentence.isBlank()) {
                 headerSentences.add(sentence);
                 sentence = reader.readLine();
             }
@@ -65,11 +66,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private void loadGetHttpMethod(List<String> sentences) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            ResponseContent responseContent = getHtmlResponseContent(sentences.getFirst());
+            ResponseContent responseContent = checkFileType(sentences);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: "+ responseContent.getContentType() +";charset=utf-8 ",
+                    "Content-Type: " + responseContent.getContentType() + ";charset=utf-8 ",
                     "Content-Length: " + responseContent.getContentLength() + " ",
                     "",
                     responseContent.getBody());
@@ -81,17 +82,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseContent getHtmlResponseContent(String firstSentence) {
-        String[] s = firstSentence.split(" ");
-        if (s[1].equals("/")) {
-            return new ResponseContent(CONTENT_TYPE_HTML, DEFAULT_PAGE);
+    private ResponseContent checkFileType(List<String> sentences) {
+        String accept = sentences.stream()
+                .filter(sentence -> sentence.startsWith(ACCEPT))
+                .findAny()
+                .orElse(ACCEPT + " " + CONTENT_TYPE_HTML)
+                .split(" ")[1]
+                .split(",")[0];
+
+        String headerFirstLine = sentences.getFirst().split(" ")[1];
+        return new ResponseContent(accept, getHtmlResponseContent(headerFirstLine));
+    }
+
+    private String getHtmlResponseContent(String url) {
+        if (url.equals("/")) {
+            return DEFAULT_PAGE;
         }
-        return new ResponseContent(CONTENT_TYPE_HTML, getResponseBodyByFileName(s[1]));
+        return getResponseBodyByFileName(url);
     }
 
     private String getResponseBodyByFileName(String fileName) {
-        String changedFileName = fileName.replace("/", HTML_PREFIX);
-        URL resource = getClass().getClassLoader().getResource(changedFileName);
+        URL resource = getClass().getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
         if (resource == null) {
             throw new RuntimeException("페이지를 찾을 수 없습니다.");
         }

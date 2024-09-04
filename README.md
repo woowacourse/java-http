@@ -26,8 +26,9 @@
 - [x] GET /index.html 응답하기
    - 인덱스 페이지(http://localhost:8080/index.html)에 접근
    - Http11ProcessorTest 테스트 클래스의 모든 테스트를 통과
-- [ ] CSS 지원하기
-   -  사용자가 페이지를 열었을 때 CSS 파일을 호출하는 기능 추가
+- [x] CSS 지원하기
+   - 사용자가 페이지를 열었을 때 CSS 파일을 호출하는 기능 추가
+   - Accept를 분석해서 반환 content-type 설정
 - Query String 파싱 
    - [ ] 로그인 페이지 접속 (login.html)
    - [ ] Query String을 파싱 후 아이디/비밀번호 일치 확인

@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-public record Http11Response(String protocolVersion, int statusCode, String statusText,
-                             Map<String, String> headers, Map<String, String> cookies, byte[] body) {
+public record HttpResponse(String protocolVersion, int statusCode, String statusText,
+                           Map<String, String> headers, Map<String, String> cookies, byte[] body) {
 
     public static Builder builder(Status status) {
         return new Builder()
@@ -97,8 +97,8 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
             return this;
         }
 
-        public Http11Response build() {
-            return new Http11Response(protocolVersion, statusCode, statusText, headers, cookies, body);
+        public HttpResponse build() {
+            return new HttpResponse(protocolVersion, statusCode, statusText, headers, cookies, body);
         }
 
         @Override

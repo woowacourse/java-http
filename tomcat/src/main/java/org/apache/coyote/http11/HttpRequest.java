@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.apache.catalina.session.JSession;
 import org.apache.catalina.session.SessionManager;
 
-public record Http11Request(
+public record HttpRequest(
         String method,
         String path,
         Map<String, String> parameters,
@@ -20,7 +20,7 @@ public record Http11Request(
         String protocolVersion,
         String body) {
 
-    public static Http11Request parse(List<String> lines) {
+    public static HttpRequest parse(List<String> lines) {
         String[] startLineParts = lines.getFirst().split(" ");
         String method = startLineParts[0];
         String path = "";
@@ -42,7 +42,7 @@ public record Http11Request(
             body = lines.getLast();
         }
 
-        return new Http11Request(method, path, parameters, headers, cookies, protocolVersion, body);
+        return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
     }
 
     private static Map<String, String> extractCookies(String cookieMessage) {
@@ -111,7 +111,7 @@ public record Http11Request(
         return sessionManager.findSession(sessionId);
     }
 
-    public Http11Request updatePath(String path) {
-        return new Http11Request(method, path, parameters, headers, cookies, protocolVersion, body);
+    public HttpRequest updatePath(String path) {
+        return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
     }
 }

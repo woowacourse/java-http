@@ -27,8 +27,8 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final SessionManager sessionManager;
     private final StaticResourceReader staticResourceReader;
-    private final Function<Http11Request, Http11Response> defaultProcessor;
-    private final Map<Predicate<Http11Request>, Function<Http11Request, Http11Response>> processors;
+    private final Function<HttpRequest, HttpResponse> defaultProcessor;
+    private final Map<Predicate<HttpRequest>, Function<HttpRequest, HttpResponse>> processors;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -54,12 +54,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
-            Http11Request request = Http11Request.parse(requestLines);
+            HttpRequest request = HttpRequest.parse(requestLines);
 
             for (final var processor : processors.entrySet()) {
                 if (processor.getKey().test(request)) {
 //                    log.debug(request.toString());
-                    Http11Response response = processor.getValue().apply(request);
+                    HttpResponse response = processor.getValue().apply(request);
 //                    log.debug(response.toString());
                     outputStream.write(response.toMessage());
                     outputStream.flush();
@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            Http11Response response = defaultProcessor.apply(request);
+            HttpResponse response = defaultProcessor.apply(request);
             outputStream.write(response.toMessage());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -75,14 +75,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response processRootPage(Http11Request request) {
-        return Http11Response.builder(Status.OK)
+    private HttpResponse processRootPage(HttpRequest request) {
+        return HttpResponse.builder(Status.OK)
                 .addHeader("Content-Type", "text/html;charset=utf-8")
                 .body("Hello world!".getBytes())
                 .build();
     }
 
-    private Http11Response processLoginPage(Http11Request request) {
+    private HttpResponse processLoginPage(HttpRequest request) {
         if (request.cookies().containsKey(JSession.COOKIE_NAME)) {
             HttpSession session = request.getSession(sessionManager);
             if (session != null) {
@@ -90,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 log.info("세션 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
 
-                return Http11Response.builder(Status.FOUND)
+                return HttpResponse.builder(Status.FOUND)
                         .location("/index.html")
                         .build();
             }
@@ -110,13 +110,13 @@ public class Http11Processor implements Runnable, Processor {
 
                 log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
 
-                return Http11Response.builder(Status.FOUND)
+                return HttpResponse.builder(Status.FOUND)
                         .location("/index.html")
                         .addCookie(JSession.COOKIE_NAME, sessionId)
                         .build();
             }
 
-            return Http11Response.builder(Status.FOUND)
+            return HttpResponse.builder(Status.FOUND)
                     .location("/401.html")
                     .build();
         }
@@ -124,48 +124,48 @@ public class Http11Processor implements Runnable, Processor {
         return processStaticResource(request.updatePath("login.html"));
     }
 
-    private Http11Response processRegisterPage(Http11Request request) {
+    private HttpResponse processRegisterPage(HttpRequest request) {
         return processStaticResource(request.updatePath("register.html"));
     }
 
-    private Http11Response processRegister(Http11Request request) {
-        Map<String, String> body = Http11Request.extractParameters(request.body());
+    private HttpResponse processRegister(HttpRequest request) {
+        Map<String, String> body = HttpRequest.extractParameters(request.body());
 
         if (!body.containsKey("account") ||
                 !body.containsKey("password") ||
                 !body.containsKey("email")) {
-            return Http11Response.builder(Status.BAD_REQUEST)
+            return HttpResponse.builder(Status.BAD_REQUEST)
                     .build();
         }
 
         String account = body.get("account");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return Http11Response.builder(Status.CONFLICT)
+            return HttpResponse.builder(Status.CONFLICT)
                     .build();
         }
 
         InMemoryUserRepository.save(new User(account, body.get("password"), body.get("email")));
-        return Http11Response.builder(Status.FOUND)
+        return HttpResponse.builder(Status.FOUND)
                 .location("/index.html")
                 .build();
     }
 
-    private Http11Response processStaticResource(Http11Request request) {
+    private HttpResponse processStaticResource(HttpRequest request) {
         String contentType = URLConnection.guessContentTypeFromName(request.path());
         final byte[] responseBody;
         try {
             responseBody = staticResourceReader.read(request.path());
             if (responseBody == null) {
-                return Http11Response.builder(Status.NOT_FOUND)
+                return HttpResponse.builder(Status.NOT_FOUND)
                         .build();
             }
-            return Http11Response.builder(Status.OK)
+            return HttpResponse.builder(Status.OK)
                     .contentType(contentType)
                     .body(responseBody)
                     .build();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return Http11Response.builder(Status.INTERNAL_SERVER_ERROR)
+            return HttpResponse.builder(Status.INTERNAL_SERVER_ERROR)
                     .build();
         }
     }

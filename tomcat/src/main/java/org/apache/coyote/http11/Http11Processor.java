@@ -1,14 +1,15 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
+import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.ResourceFileLoader;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -30,19 +31,37 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            String request = br.readLine();
+            StringTokenizer st = new StringTokenizer(request);
 
-            final var responseBody = "Hello world!";
+            String requestMethodType = st.nextToken();
+            String requestPath = st.nextToken();
+            String contentType = "";
+            log.info("request: " + request);
 
-            String responseBody2;
+            if (requestPath.equals("/")) {
+                requestPath = "/index.html";
+            }
 
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            responseBody2 = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            String extension = requestPath.split("\\.")[1];
+            if(extension.equals("html")){
+                contentType = "text/html";
+            }
+            if (extension.equals("css")){
+                contentType = "text/css";
+            }
+            if (extension.equals("js")) {
+                contentType = "text/javascript";
+            }
+
+            String responseBody = ResourceFileLoader.loadFileToString("static" + requestPath);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody2.getBytes().length + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
-                    responseBody2);
+                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

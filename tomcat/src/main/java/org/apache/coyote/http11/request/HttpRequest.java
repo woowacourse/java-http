@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 public class HttpRequest {
 
     private final String content;
 
-    public HttpRequest(String content) {
+    public HttpRequest(String content) {//TODO byte[]로 받기
         this.content = content;
     }
 

@@ -36,6 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String responseBody = "Hello world!";
+            String contentType = "text/html;charset=utf-8";
             String uri = "/";
             String requestLine = bufferedReader.readLine();
             if (requestLine != null) {
@@ -61,11 +62,31 @@ public class Http11Processor implements Runnable, Processor {
                     }
                     responseBody = htmlContent.toString();
                 }
+            } else if (uri.endsWith(".css") || uri.endsWith(".js")) {
+                contentType = "text/css";
+                if (uri.endsWith(".js")) {
+                    contentType = "application/javascript";
+                }
+                final String fileName = "static" + uri;
+                final URL url = getClass().getClassLoader().getResource(fileName);
+                if (url != null) {
+                    final File file = new File(url.getFile());
+                    final Path path = file.toPath();
+
+                    final StringBuilder htmlContent = new StringBuilder();
+                    try (BufferedReader htmlBufferedReader = new BufferedReader(new FileReader(path.toString()))) {
+                        String line;
+                        while ((line = htmlBufferedReader.readLine()) != null) {
+                            htmlContent.append(line).append("\n");
+                        }
+                    }
+                    responseBody = htmlContent.toString();
+                }
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

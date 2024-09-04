@@ -14,6 +14,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,7 +44,20 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String page = getPage(firstLine);
+            Map<String, String> httpRequestHeaders = new HashMap<>();
+
+            while (!firstLine.isEmpty()) {
+                String line = bufferedReader.readLine();
+                if (line.isEmpty()) {
+                    break;
+                }
+                String[] headerParts = line.split(": ");
+                httpRequestHeaders.put(headerParts[0], headerParts[1]);
+            }
+
+            String httpMethod = firstLine.split(" ")[0];
+            String page = firstLine.split(" ")[1];
+
             String responseBody = "";
             String response = "";
             if (page.equals("/")) {
@@ -75,6 +90,24 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody = new String(Files.readAllBytes(path));
                     response = generate302Response(responseBody, "text/html", "/401.html");
                 }
+            } else if (page.equals("/register") && httpMethod.equals("POST")) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+                String account = requestBody.split("&")[0].split("=")[1];
+                String email = requestBody.split("&")[1].split("=")[1];
+                String password = requestBody.split("&")[2].split("=")[1];
+                InMemoryUserRepository.save(new User(account, email, password));
+
+                URL url = getClass().getClassLoader().getResource("static/index.html");
+                if (url == null) {
+                    return;
+                }
+
+                Path path = Path.of(url.toURI());
+                responseBody = new String(Files.readAllBytes(path));
+                response = generate302Response(responseBody, "text/html", "/index.html");
             } else if (page.startsWith("/css/")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
@@ -92,7 +125,6 @@ public class Http11Processor implements Runnable, Processor {
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
                 response = generate200Response(responseBody, "text/javascript");
-                System.out.println("response = " + response);
             } else if (page.endsWith(".html")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
@@ -120,10 +152,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getPage(String firstLine) {
-        return firstLine.split(" ")[1];
     }
 
     private String generate200Response(String responseBody, String contentType) {

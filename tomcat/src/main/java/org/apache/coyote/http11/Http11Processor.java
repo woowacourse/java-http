@@ -43,26 +43,46 @@ public class Http11Processor implements Runnable, Processor {
 
             String page = getPage(firstLine);
             String responseBody = "";
-
+            String response = "";
             if (page.equals("/")) {
                 responseBody = "Hello world!";
-            } else {
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
+            else if(page.startsWith("/css/")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
-
                 if (url == null) {
                     return;
                 }
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
             }
+            else {
+                URL url = getClass().getClassLoader().getResource("static" + page);
+                if (url == null) {
+                    return;
+                }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+                Path path = Path.of(url.toURI());
+                responseBody = new String(Files.readAllBytes(path));
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

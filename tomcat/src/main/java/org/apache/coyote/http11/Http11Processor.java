@@ -1,16 +1,29 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient.Version;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_RESOURCE_PATH = "static/";
 
     private final Socket connection;
 
@@ -26,12 +39,14 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest httpRequest = readHttpRequest(bufferedReader);
 
-            final var response = String.join("\r\n",
+            final String responseBody = "Hello world!";
+            final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -43,5 +58,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
+        final var requestLines = bufferedReader.readLine();
+
+        final var requestStartLine = requestLines.split(" ");
+        final var requestMethod = requestStartLine[0];
+        final var requestEndPoint = requestStartLine[1];
+        final var requestVersion = requestStartLine[2]
+                .replace("/", "_")
+                .replace(".", "_");
+
+        // TODO: GET, OPTION 이 아닌 경우 BODYPUBLISH
+        return HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080" + requestEndPoint))
+                .version(Version.valueOf(requestVersion))
+                .method(requestMethod, BodyPublishers.noBody())
+                .build();
     }
 }

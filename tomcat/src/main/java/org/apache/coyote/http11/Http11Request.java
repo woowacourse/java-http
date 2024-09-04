@@ -8,18 +8,16 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record Http11Request(String method, String path, Map<String, String> parameters, String protocolVersion,
+public record Http11Request(String method, String path, Map<String, String> parameters, Map<String, String> headers,
+                            String protocolVersion,
                             String body) {
-
-    public Http11Request(String method, String path, Map<String, String> parameters, String protocolVersion) {
-        this(method, path, parameters, protocolVersion, null);
-    }
 
     public static Http11Request parse(List<String> lines) {
         String[] startLineParts = lines.getFirst().split(" ");
         String method = startLineParts[0];
         String path = "";
         Map<String, String> parameters = Map.of();
+        Map<String, String> headers = extractHeaders(lines);
         String protocolVersion = startLineParts[2];
         String body = null;
 
@@ -35,7 +33,20 @@ public record Http11Request(String method, String path, Map<String, String> para
             body = lines.getLast();
         }
 
-        return new Http11Request(method, path, parameters, protocolVersion, body);
+        return new Http11Request(method, path, parameters, headers, protocolVersion, body);
+    }
+
+    private static Map<String, String> extractHeaders(List<String> lines) {
+        Map<String, String> headers = new HashMap<>();
+
+        for (int i = 1; i < lines.size() - 2; i++) {
+            String[] lineParts = lines.get(i).trim().split(": ");
+            if (lineParts.length >= 2) {
+                headers.put(lineParts[0], lineParts[1]);
+            }
+        }
+
+        return headers;
     }
 
     public static Map<String, String> extractParameters(String query) {
@@ -54,5 +65,9 @@ public record Http11Request(String method, String path, Map<String, String> para
         }
 
         return parameters;
+    }
+
+    public Http11Request updatePath(String path) {
+        return new Http11Request(method, path, parameters, headers, protocolVersion, body);
     }
 }

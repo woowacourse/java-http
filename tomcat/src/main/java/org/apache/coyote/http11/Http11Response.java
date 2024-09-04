@@ -3,9 +3,11 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public record Http11Response(String protocolVersion, int statusCode, String statusText,
-                             Map<String, String> headers, byte[] body) {
+                             Map<String, String> headers, Map<String, String> cookies, byte[] body) {
 
     public static Builder builder(Status status) {
         return new Builder()
@@ -28,6 +30,11 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
         builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append(" ");
         headers.forEach((key, value) -> builder.append("\r\n").append(key).append(": ").append(value).append(" "));
 
+        String cookiesMessage = cookies.entrySet().stream()
+                .map(Entry::toString)
+                .collect(Collectors.joining("; "));
+        builder.append("\r\n").append("Set-Cookie: ").append(cookiesMessage).append(" ");
+
         if (body != null && body.length > 0) {
             builder.append("\r\n").append("Content-Length: ").append(body.length).append(" ");
             builder.append("\r\n\r\n");
@@ -39,6 +46,7 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
 
     public static class Builder {
         private final Map<String, String> headers;
+        private final Map<String, String> cookies;
         private String protocolVersion;
         private int statusCode;
         private String statusText;
@@ -46,6 +54,7 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
 
         private Builder() {
             headers = new HashMap<>();
+            cookies = new HashMap<>();
         }
 
         public Builder protocolVersion(String protocolVersion) {
@@ -68,6 +77,11 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
             return this;
         }
 
+        public Builder addCookie(String key, String value) {
+            cookies.put(key, value);
+            return this;
+        }
+
         public Builder contentType(String value) {
             headers.put("Content-Type", value + ";charset=utf-8");
             return this;
@@ -84,16 +98,17 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
         }
 
         public Http11Response build() {
-            return new Http11Response(protocolVersion, statusCode, statusText, headers, body);
+            return new Http11Response(protocolVersion, statusCode, statusText, headers, cookies, body);
         }
 
         @Override
         public String toString() {
-            return "Http11ServletResponseBuilder{" +
-                    "protocolVersion='" + protocolVersion + '\'' +
+            return "Builder{" +
+                    "headers=" + headers +
+                    ", cookies=" + cookies +
+                    ", protocolVersion='" + protocolVersion + '\'' +
                     ", statusCode=" + statusCode +
                     ", statusText='" + statusText + '\'' +
-                    ", headers=" + headers +
                     ", body=" + Arrays.toString(body) +
                     '}';
         }

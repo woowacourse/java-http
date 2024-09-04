@@ -94,21 +94,11 @@ public class Http11Processor implements Runnable, Processor {
                     .build();
         }
 
-        return processStaticResource(new Http11Request(
-                request.method(),
-                "login.html",
-                request.parameters(),
-                request.protocolVersion()
-        ));
+        return processStaticResource(request.updatePath("login.html"));
     }
 
     private Http11Response processRegisterPage(Http11Request request) {
-        return processStaticResource(new Http11Request(
-                request.method(),
-                "register.html",
-                request.parameters(),
-                request.protocolVersion()
-        ));
+        return processStaticResource(request.updatePath("register.html"));
     }
 
     private Http11Response processRegister(Http11Request request) {

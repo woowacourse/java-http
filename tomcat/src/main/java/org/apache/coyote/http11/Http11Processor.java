@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,20 +33,37 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
-            final var responseBody = "Hello world!";
+            String requestLine = bufferedReader.readLine();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (!requestLine.isBlank()) {
+                String method = requestLine.split(" ")[0];
+                String url = requestLine.split(" ")[1];
+                String version = requestLine.split(" ")[2];
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+                String responseBody = "Hello world!";
+
+                if (method.equals("GET") && url.equals("/index.html")) {
+                    URL resource = getClass().getClassLoader().getResource("static/index.html");
+
+                    if (resource != null) {
+                        responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                        responseBody = responseBody.replace("\r\n", "\n");
+                    }
+                }
+
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                        "",
+                        responseBody);
+
+                bufferedWriter.write(response);
+                bufferedWriter.flush();
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

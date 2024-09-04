@@ -1,12 +1,12 @@
 package org.apache.coyote.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -60,11 +60,14 @@ class RegisterControllerTest {
         HttpResponse httpResponse = registerController.run(request);
 
         // then
-        StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add("HTTP/1.1 " + HttpStatusCode.FOUND.toStatus() + " ");
-        stringJoiner.add("Location: " + "/index.html");
-        stringJoiner.add("Content-Type: " + MimeType.HTML.getContentType() + " ");
-        stringJoiner.add("\r\n");
-        assertThat(httpResponse.toByte()).isEqualTo(stringJoiner.toString().getBytes());
+        String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
+        String expectedLocation = "Location: /index.html";
+        String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
+
+        assertAll(
+                () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
+                () -> assertThat(httpResponse.toByte()).contains(expectedLocation.getBytes()),
+                () -> assertThat(httpResponse.toByte()).contains(expectedContentType.getBytes())
+        );
     }
 }

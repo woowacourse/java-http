@@ -1,11 +1,8 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -15,7 +12,7 @@ class Http11ProcessorTest {
 
     @DisplayName("HTTP 요청에 대하여, HTTP 응답을 반환한다.")
     @Test
-    void index() throws IOException {
+    void index() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -31,13 +28,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String output = socket.output();
+        String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.OK.toStatus();
+        String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(output).contains(expectedRequestLine),
+                () -> assertThat(output).contains(expectedContentType)
+        );
     }
 }

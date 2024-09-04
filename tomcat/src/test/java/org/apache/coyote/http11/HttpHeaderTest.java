@@ -22,7 +22,7 @@ class HttpHeaderTest {
 
         // when
         header.setContentLength(contentLength);
-        header.setContentType(mimeType.getContentType());
+        header.setContentType(mimeType);
 
         // then
         assertThat(header.toHeaderString()).isEqualTo(expected);

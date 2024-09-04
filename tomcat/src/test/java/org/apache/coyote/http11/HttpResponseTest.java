@@ -18,7 +18,9 @@ class HttpResponseTest {
         String bodyContent = "<html><body>Hello, World!</body></html>";
         byte[] body = bodyContent.getBytes(StandardCharsets.UTF_8);
 
-        HttpResponse httpResponse = new HttpResponse(stateCode, MimeType.HTML, body);
+        HttpHeader header = new HttpHeader();
+        header.setContentType(MimeType.HTML);
+        HttpResponse httpResponse = new HttpResponse(stateCode, header, body);
 
         // when
         byte[] responseBytes = httpResponse.toByte();

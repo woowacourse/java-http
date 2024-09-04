@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -21,9 +22,14 @@ public class NotFoundController implements Controller {
             Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());
             MimeType mimeType = MimeType.from(FileExtension.from(path));
             byte[] body = Files.readAllBytes(filePath);
-            return new HttpResponse(HttpStatusCode.NOT_FOUND, mimeType, body);
+
+            HttpHeader header = new HttpHeader();
+            header.setContentType(mimeType);
+            return new HttpResponse(HttpStatusCode.NOT_FOUND, header, body);
         } catch (URISyntaxException | IOException e) {
-            return new HttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, "Something Went Wrong".getBytes());
+            HttpHeader header = new HttpHeader();
+            header.setContentType(MimeType.OTHER);
+            return new HttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, header, "Something Went Wrong".getBytes());
         }
     }
 }

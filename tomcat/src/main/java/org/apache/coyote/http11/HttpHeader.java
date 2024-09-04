@@ -16,8 +16,8 @@ public class HttpHeader {
         addHeader("Location", location);
     }
 
-    public void setContentType(String contentType) {
-        addHeader("Content-Type", contentType);
+    public void setContentType(MimeType mimeType) {
+        addHeader("Content-Type", mimeType.getContentType());
     }
 
     public void setContentLength(String contentLength) {

@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -42,7 +43,10 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse redirectLoginPage() {
-        return new HttpResponse(HttpStatusCode.FOUND, "/login.html", MimeType.HTML);
+        HttpHeader header = new HttpHeader();
+        header.setLocation("/login.html");
+        header.setContentType(MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private Map<String, String> parseBody(String query) {
@@ -69,10 +73,16 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse redirectUnauthorizedPage() {
-        return new HttpResponse(HttpStatusCode.FOUND, "/401.html", MimeType.HTML);
+        HttpHeader header = new HttpHeader();
+        header.setLocation("/401.html");
+        header.setContentType(MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private HttpResponse redirectDefaultPage() {
-        return new HttpResponse(HttpStatusCode.FOUND, "/index.html", MimeType.HTML);
+        HttpHeader header = new HttpHeader();
+        header.setLocation("/index.html");
+        header.setContentType(MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 }

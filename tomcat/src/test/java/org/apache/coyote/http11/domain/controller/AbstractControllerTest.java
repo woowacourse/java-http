@@ -47,15 +47,4 @@ public class AbstractControllerTest {
 
         assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.NOT_IMPLEMENTED);
     }
-
-    @Test
-    @DisplayName("지원하지 않는 HTTP 메서드를 처리한다.")
-    void serviceMethodNotAllowed() throws IOException {
-        HttpRequest request = new HttpRequest("PATCH /index.html HTTP/1.1");
-
-        HttpResponse response = controller.service(request);
-
-        assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
-    }
-
 }

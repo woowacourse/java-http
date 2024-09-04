@@ -34,10 +34,14 @@ public class LoginController implements Controller {
             throw new IllegalArgumentException("비밀 번호 오류");
         }
 
-        return new HttpResponse(HttpStateCode.FOUND, "/index.html", MimeType.HTML);
+        return redirectDefaultPage();
     }
 
     private HttpResponse redirectLoginPage() {
         return new HttpResponse(HttpStateCode.FOUND, "/login.html", MimeType.HTML);
+    }
+
+    private HttpResponse redirectDefaultPage() {
+        return new HttpResponse(HttpStateCode.FOUND, "/index.html", MimeType.HTML);
     }
 }

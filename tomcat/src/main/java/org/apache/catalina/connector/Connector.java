@@ -6,7 +6,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.domain.controller.RequestMapping;
-import org.apache.coyote.http11.domain.controller.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,6 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private final RequestMapping requestMapping;
-    private final StaticResourceHandler staticResourceHandler;
     private boolean stopped;
 
     public Connector() {
@@ -29,7 +27,6 @@ public class Connector implements Runnable {
     public Connector(final int port, final int acceptCount) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.requestMapping = new RequestMapping();
-        this.staticResourceHandler = new StaticResourceHandler();
         this.stopped = false;
     }
 
@@ -71,7 +68,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, requestMapping, staticResourceHandler);
+        var processor = new Http11Processor(connection, requestMapping);
         new Thread(processor).start();
     }
 

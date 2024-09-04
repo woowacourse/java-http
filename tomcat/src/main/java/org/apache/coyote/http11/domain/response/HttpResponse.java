@@ -3,6 +3,9 @@ package org.apache.coyote.http11.domain.response;
 import java.util.Map;
 
 public class HttpResponse {
+
+    private static final String LOCATION_HEADER_KEY = "location";
+
     private final HttpStatus httpStatus;
     private final Map<String, String> responseHeaders;
     private final String messageBody;
@@ -15,6 +18,10 @@ public class HttpResponse {
 
     public static HttpResponseBuilder status(HttpStatus httpStatus) {
         return new HttpResponseBuilder().withHttpStatus(httpStatus);
+    }
+
+    public static HttpResponseBuilder redirect(String location) {
+        return status(HttpStatus.FOUND).header(LOCATION_HEADER_KEY, location);
     }
 
     public HttpStatus getHttpStatus() {

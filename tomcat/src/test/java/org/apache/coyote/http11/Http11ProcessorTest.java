@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.domain.controller.RequestMapping;
-import org.apache.coyote.http11.domain.controller.StaticResourceHandler;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -17,8 +16,7 @@ class Http11ProcessorTest {
     void process() throws IOException {
         final var socket = new StubSocket();
         final var requestMapping = new RequestMapping();
-        final var staticResourceHandler = new StaticResourceHandler();
-        final var processor = new Http11Processor(socket, requestMapping, staticResourceHandler);
+        final var processor = new Http11Processor(socket, requestMapping);
 
         processor.process(socket);
 
@@ -43,8 +41,7 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final var requestMapping = new RequestMapping();
-        final var staticResourceHandler = new StaticResourceHandler();
-        final Http11Processor processor = new Http11Processor(socket, requestMapping, staticResourceHandler);
+        final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         processor.process(socket);
 

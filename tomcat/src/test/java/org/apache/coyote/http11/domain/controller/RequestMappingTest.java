@@ -35,13 +35,13 @@ class RequestMappingTest {
     }
 
     @Test
-    @DisplayName("요청을 처리할 수 있는 컨트롤러가 없으면 null을 반환한다.")
+    @DisplayName("요청을 처리할 수 있는 컨트롤러가 없으면 ResourceController 를 반환한다.")
     void getControllerNoMatchedController() throws IOException {
         RequestMapping requestMapping = new RequestMapping(Map.of());
         HttpRequest request = new HttpRequest("GET /not/matched HTTP/1.1");
 
         Controller controller = requestMapping.getController(request);
 
-        assertThat(controller).isNull();
+        assertThat(controller).isInstanceOf(ResourceController.class);
     }
 }

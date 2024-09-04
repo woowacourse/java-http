@@ -20,9 +20,14 @@ public class ContentTypeResolver {
             "text/xml"
     );
 
-    public static String getContentType(String filePath) throws IOException {
+    public static String getContentType(String filePath) {
         Path path = Paths.get(filePath);
-        String contentType = Files.probeContentType(path);
+        String contentType;
+        try {
+            contentType = Files.probeContentType(path);
+        } catch (IOException e) {
+            return DEFAULT_MIME_TYPE;
+        }
 
         if (contentType == null) {
             contentType = DEFAULT_MIME_TYPE;

@@ -7,26 +7,27 @@ import org.apache.coyote.http11.domain.response.ContentTypeResolver;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;
 
-public class StaticResourceHandler {
+public class ResourceController extends AbstractController {
 
     private static final String ROOT_PATH = "/";
     private static final String INDEX_FILE = "/index.html";
     private static final String STATIC_PATH = "static";
 
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        String path = httpRequest.getPath();
+    @Override
+    protected HttpResponse doGet(HttpRequest request) {
+        String path = request.getPath();
 
         if (isIndexPageRequest(path)) {
-            return handleStaticResource(INDEX_FILE);
+            return getStaticResponse(INDEX_FILE);
         }
-        return handleStaticResource(path);
+        return getStaticResponse(path);
     }
 
     private boolean isIndexPageRequest(String path) {
         return ROOT_PATH.equals(path) || INDEX_FILE.equals(path);
     }
 
-    private HttpResponse handleStaticResource(String path) throws IOException {
+    private HttpResponse getStaticResponse(String path) {
         String staticFilePath = STATIC_PATH + path;
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
 
@@ -34,14 +35,16 @@ public class StaticResourceHandler {
             return HttpResponse.status(HttpStatus.NOT_FOUND).build();
         }
 
-        String responseBody = new String(inputStream.readAllBytes());
+        try {
+            String responseBody = new String(inputStream.readAllBytes());
+            return HttpResponse.status(HttpStatus.OK)
+                    .contentType(ContentTypeResolver.getContentType(staticFilePath))
+                    .body(responseBody)
+                    .build();
 
-        return HttpResponse.status(HttpStatus.OK)
-                .contentType(ContentTypeResolver.getContentType(staticFilePath))
-                .contentLength(String.valueOf(responseBody.getBytes().length))
-                .body(responseBody)
-                .build();
+        } catch (IOException e) {
+            return HttpResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 }
 

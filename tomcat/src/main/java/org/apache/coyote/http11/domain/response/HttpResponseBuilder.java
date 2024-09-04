@@ -26,18 +26,13 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder contentLength(String contentLength) {
-        this.responseHeaders.put(CONTENT_LENGTH, contentLength);
-        return this;
-    }
-
-
     public HttpResponseBuilder headers(Map<String, String> headers) {
         this.responseHeaders.putAll(headers);
         return this;
     }
 
     public HttpResponseBuilder body(String messageBody) {
+        this.responseHeaders.put(CONTENT_LENGTH, String.valueOf(messageBody.getBytes().length));
         this.messageBody = messageBody;
         return this;
     }

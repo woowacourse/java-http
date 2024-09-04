@@ -9,8 +9,11 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.ResponseContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +22,9 @@ import com.techcourse.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String DEFAULT_PAGE = "Hello world!";
+    private static final String DEFAULT_PAGE = "Hello world!";
+    private static final String HTML_PREFIX = "static/";
+    private static final String CONTENT_TYPE_HTML = "text/html";
 
     private final Socket connection;
 
@@ -36,32 +41,38 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            String firstHeaderSentence = reader.readLine();
-            if (firstHeaderSentence == null) {
+            List<String> headerSentences = new ArrayList<>();
+            String sentence = reader.readLine();
+            while(sentence != null && !sentence.isBlank()) {
+                headerSentences.add(sentence);
+                sentence = reader.readLine();
+            }
+            if (headerSentences.isEmpty()) {
                 throw new IllegalArgumentException("요청 header가 존재하지 않습니다.");
             }
-            checkHttpMethodAndLoad(firstHeaderSentence);
+            checkHttpMethodAndLoad(headerSentences);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void checkHttpMethodAndLoad(String firstHeaderSentence) {
+    private void checkHttpMethodAndLoad(List<String> sentences) {
+        String firstHeaderSentence = sentences.getFirst();
         if (firstHeaderSentence.startsWith("GET")) {
-            loadGetHttpMethod(firstHeaderSentence);
+            loadGetHttpMethod(sentences);
         }
     }
 
-    private void loadGetHttpMethod(String firstHeaderSentence) {
+    private void loadGetHttpMethod(List<String> sentences) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String responseBody = findResponseBody(firstHeaderSentence);
+            ResponseContent responseContent = getHtmlResponseContent(sentences.getFirst());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Type: "+ responseContent.getContentType() +";charset=utf-8 ",
+                    "Content-Length: " + responseContent.getContentLength() + " ",
                     "",
-                    responseBody);
+                    responseContent.getBody());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -70,16 +81,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String findResponseBody(String firstSentence) {
+    private ResponseContent getHtmlResponseContent(String firstSentence) {
         String[] s = firstSentence.split(" ");
         if (s[1].equals("/")) {
-            return DEFAULT_PAGE;
+            return new ResponseContent(CONTENT_TYPE_HTML, DEFAULT_PAGE);
         }
-        return getResponseBodyByFileName(s[1]);
+        return new ResponseContent(CONTENT_TYPE_HTML, getResponseBodyByFileName(s[1]));
     }
 
     private String getResponseBodyByFileName(String fileName) {
-        String changedFileName = fileName.replace("/", "static/");
+        String changedFileName = fileName.replace("/", HTML_PREFIX);
         URL resource = getClass().getClassLoader().getResource(changedFileName);
         if (resource == null) {
             throw new RuntimeException("페이지를 찾을 수 없습니다.");

@@ -1,13 +1,17 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -28,7 +32,10 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL url = getClass().getClassLoader().getResource(fileName);
+//        URL url2 = ClassLoader.getSystemClassLoader().getResource(fileName);
+//        URL url3 = getClass().getResource("/" + fileName);
+        final String actual = Objects.requireNonNull(url).getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,15 +47,18 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
+        final URL resource = ClassLoader.getSystemClassLoader().getResource(fileName);
+
+        final Path path = Path.of(resource.toURI());
 
         // todo
-        final Path path = null;
-
-        // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        try(BufferedReader br = Files.newBufferedReader(path)){
+            List<String> actual = br.lines().toList();
+            assertThat(actual).containsOnly("nextstep");
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 }

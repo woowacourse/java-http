@@ -20,7 +20,7 @@ public class Connector implements Runnable {
     private boolean stopped;
 
     public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT); // 기본 포트, count 값을 가진 connector 반환
     }
 
     public Connector(final int port, final int acceptCount) {
@@ -30,8 +30,8 @@ public class Connector implements Runnable {
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
         try {
-            final int checkedPort = checkPort(port);
-            final int checkedAcceptCount = checkAcceptCount(acceptCount);
+            final int checkedPort = checkPort(port); //포트 범위 검증
+            final int checkedAcceptCount = checkAcceptCount(acceptCount); //최대 acceptCount 검증
             return new ServerSocket(checkedPort, checkedAcceptCount);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

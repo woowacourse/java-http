@@ -28,7 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
+            // TODO : 요청 메시지를 읽고 처리한다
             final var responseBody = "Hello world!";
 
             final var response = String.join("\r\n",

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.request.Http11RequestTarget;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.util.QueryStringParser;
@@ -63,11 +62,15 @@ public class Http11Processor implements Runnable, Processor {
         String endpoint = request.getEndpoint();
         HttpMethod method = request.getMethod();
         if (method == HttpMethod.GET && "/login".equals(endpoint)) {
+            viewLogin(response);
+            return;
+        }
+        if (method == HttpMethod.POST && "/login".equals(endpoint)) {
             login(request, response);
             return;
         }
         if (method == HttpMethod.GET && "/register".equals(endpoint)) {
-            viewRegist(request, response);
+            viewRegist(response);
             return;
         }
         if (method == HttpMethod.POST && "/register".equals(endpoint)) {
@@ -94,29 +97,30 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Accept", "text/html");
     }
 
-    private void login(Http11Request request, Http11Response response) throws IOException {
-        Http11RequestTarget requestTarget = request.getRequestTarget();
-        if (requestTarget.hasParam("account")) {
-            String account = requestTarget.getParam("account");
-            String password = requestTarget.getParam("password");
-
-            try {
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
-                if (!user.checkPassword(password)) {
-                    throw new IllegalArgumentException("잘못된 비밀번호입니다.");
-                }
-                log.info("user {}", user);
-                response.redirect("/index.html");
-            } catch (IllegalArgumentException e) {
-                response.redirect("/401.html");
-            }
-            return;
-        }
+    private void viewLogin(Http11Response response) throws IOException {
         getView("/login.html", response);
     }
 
-    private void viewRegist(Http11Request request, Http11Response response) throws IOException {
+    private void login(Http11Request request, Http11Response response) {
+        String body = request.getBody();
+        Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
+        String account = queryStrings.get("account").get(0);
+        String password = queryStrings.get("password").get(0);
+
+        try {
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+            if (!user.checkPassword(password)) {
+                throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+            }
+            log.info("user {}", user);
+            response.redirect("/index.html");
+        } catch (IllegalArgumentException e) {
+            response.redirect("/401.html");
+        }
+    }
+
+    private void viewRegist(Http11Response response) throws IOException {
         getView("/register.html", response);
     }
 

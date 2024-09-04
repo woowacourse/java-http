@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,11 +77,17 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        // when && then
-        // TODO 예외 캐치하지 말고 에외 페이지 반환확인
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("존재하지 않는 회원입니다.");
+        final var expected = "HTTP/1.1 302 FOUND \r\n" +
+                             "Content-Type: text/html;charset=utf-8 \r\n" +
+                             "Content-Length: 3862 \r\n" +
+                             "Location: 401.html\r\n" +
+                             "\r\n";
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(expected);
     }
 
     @Test
@@ -98,11 +103,16 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+        final var expected = "HTTP/1.1 302 FOUND \r\n" +
+                             "Content-Type: text/html;charset=utf-8 \r\n" +
+                             "Content-Length: 3862 \r\n" +
+                             "Location: 401.html\r\n" +
+                             "\r\n";
 
-        // when && then
-        // TODO 예외 캐치하지 말고 에외 페이지 반환확인
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호가 일치하지 않습니다.");
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains(expected);
     }
 }

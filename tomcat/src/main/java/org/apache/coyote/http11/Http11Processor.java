@@ -44,42 +44,53 @@ public class Http11Processor implements Runnable, Processor {
             final var method = texts[0];
             final var path = texts[1];
             log.info("{} 요청 = {}", method, requestMethodAndUrl);
-
             final Request request = new Request(path);
             log.info("request = {}", request);
             final URL resource = request.getUrl();
             final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            var response = "";
+            final Response response = new Response();
             if (request.getQueryString().containsKey("account")) {
-                final var queryString = request.getQueryString();
-                final String account = queryString.get("account");
-                final User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-                final String password = queryString.get("password");
-                if (!user.checkPassword(password)) {
-                    throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-                }
-                log.info("user = {}", user);
-                response = String.join("\r\n", "HTTP/1.1 302 FOUND ",
-                        "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
-                        "Content-Length: " + result.getBytes().length + " ",
-                        "Location: " + "index.html",
-                        "",
-                        result);
-
+                //TODO 여기 리팩터링
+                createResponse(request, response, result);
             } else {
-                response = String.join("\r\n", "HTTP/1.1 200 OK ",
-                        "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
-                        "Content-Length: " + result.getBytes().length + " ",
-                        "",
-                        result);
+                generateOKResponse(response, request, result);
             }
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void generateOKResponse(final Response response, final Request request, final String result) {
+        response.setSc("OK");
+        response.setStatusCode(200);
+        response.setContentType(request.getContentType());
+        response.setContentLength(result.getBytes().length);
+        response.setSourceCode(result);
+    }
+
+    private void createResponse(final Request request, final Response response, final String result) {
+        final var queryString = request.getQueryString();
+        final String account = queryString.get("account");
+        try {
+            response.setStatusCode(302);
+            response.setSc("FOUND");
+            response.setContentType(request.getContentType());
+            response.setContentLength(result.getBytes().length);
+            response.setSourceCode(result);
+            final User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            final String password = queryString.get("password");
+            if (!user.checkPassword(password)) {
+                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            }
+            response.setLocation("index.html");
+            log.info("user = {}", user);
+        } catch (final IllegalArgumentException e) {
+            log.warn(e.getMessage());
+            response.setLocation("401.html");
         }
     }
 }

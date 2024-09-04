@@ -63,8 +63,11 @@ public class RequestHandler {
 
     private String handleLogin(final HttpRequest httpRequest) throws IOException {
         String query = httpRequest.uri().getQuery();
-        String[] params = query.split("&");
+        if (query == null) {
+            return handleSimpleResource("login.html");
+        }
 
+        String[] params = query.split("&");
         String account = params[0].split("=")[1];
         String password = params[1].split("=")[1];
 
@@ -76,6 +79,7 @@ public class RequestHandler {
         User user = userOptional.get();
         if (user.checkPassword(password)) {
             log.info(user.toString());
+            return handleSimpleResource("login.html");
         }
 
         return handleSimpleResource("401.html");

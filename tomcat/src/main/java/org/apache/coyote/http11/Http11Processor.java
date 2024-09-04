@@ -2,17 +2,17 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestHandler;
+import org.apache.coyote.handler.CSSRequestHandler;
+import org.apache.coyote.handler.HTMLRequestHandler;
+import org.apache.coyote.handler.JSRequestHandler;
+import org.apache.coyote.handler.RootRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +22,22 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_RESOURCE_BASE_URL = "static";
 
     private final Socket connection;
+    private final List<RequestHandler> requestHandlers;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestHandlers = findImplementations();
     }
+
+    private List<RequestHandler> findImplementations() {
+        return List.of(
+                new CSSRequestHandler(),
+                new HTMLRequestHandler(),
+                new JSRequestHandler(),
+                new RootRequestHandler()
+        );
+    }
+
 
     @Override
     public void run() {
@@ -40,27 +52,21 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final List<String> lines = new LinkedList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                lines.add(line);
-            }
+            final List<String> lines = getLines(bufferedReader);
             final Http11Request request = new Http11Request(lines);
-            final String fileName = request.parsePath();
-            //response body 추출
-            String responseBody = "Hello world!";
-            if (fileName.endsWith("html")) {
-                URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_BASE_URL + fileName);
-                final File file = new File(resource.getFile());
-                final Path path = file.toPath();
-                responseBody = Files.readString(path, StandardCharsets.UTF_8);
+            String contentType = "";
+            String responseBody = "";
+            for (RequestHandler requestHandler : requestHandlers) {
+                if (requestHandler.canHandling(request)) {
+                    contentType = requestHandler.getContentType(request);
+                    responseBody = requestHandler.getResponseBody(request);
+                    break;
+                }
             }
-
-            //final var responseBody = "Hello world!";
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -71,5 +77,14 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
 
+    }
+
+    private List<String> getLines(BufferedReader bufferedReader) throws IOException {
+        final List<String> lines = new LinkedList<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            lines.add(line);
+        }
+        return lines;
     }
 }

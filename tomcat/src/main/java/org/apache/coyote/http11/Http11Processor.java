@@ -2,13 +2,13 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private  Map<String, String> getQueryParams(String requestUrl) {
+    private Map<String, String> getQueryParams(String requestUrl) {
         Map<String, String> queryParams = new HashMap<>();
 
         if (requestUrl.contains("?")) {
@@ -83,12 +83,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void checkLoginUser(Map<String, String> queryParams) {
-        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
 
-        if (user.checkPassword(queryParams.get("password"))) {
-            log.info("user : {}", user);
-        }
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent(user -> {
+                    if (user.checkPassword(password)) {
+                        log.info("user : {}", user);
+                    }
+                });
     }
 
     private String getResponse(String requestUrl) throws IOException {
@@ -113,6 +116,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         URL resourceUrl = getResourceUrl(path);
+
         Path resourcePath = Path.of(resourceUrl.getPath());
         return Files.readString(resourcePath);
     }

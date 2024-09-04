@@ -50,11 +50,12 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: "+ bytes.length +" \r\n" +
                 "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(bytes);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

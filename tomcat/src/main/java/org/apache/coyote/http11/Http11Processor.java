@@ -56,10 +56,19 @@ public class Http11Processor implements Runnable, Processor {
             final String endpoint = elements[1];
 
             String responseBody = "";
+            String contentType = "text/html";
             if (endpoint.equals("/")) {
                 responseBody = "Hello world!";
             } else {
+                if (endpoint.length() > 3) {
+                    if (endpoint.substring(endpoint.length()-3, endpoint.length()).equals("css")) {
+                        contentType = "text/css";
+                    }
+                }
                 final URL resource = Http11Processor.class.getResource("/static" + endpoint);
+                if (resource == null) {
+                    return;
+                }
                 final Path path = Paths.get(resource.toURI()).toFile().toPath();
 
                 responseBody = Files.readString(path);
@@ -67,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

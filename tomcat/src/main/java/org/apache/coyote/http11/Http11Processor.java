@@ -23,10 +23,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final RequestMapping requestMapping;
+    private final StaticResourceHandler staticResourceHandler;
 
-    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
+    public Http11Processor(
+            Socket connection,
+            RequestMapping requestMapping,
+            StaticResourceHandler staticResourceHandler
+    ) {
         this.connection = connection;
         this.requestMapping = requestMapping;
+        this.staticResourceHandler = staticResourceHandler;
     }
 
     @Override
@@ -56,7 +62,6 @@ public class Http11Processor implements Runnable, Processor {
             Controller controller = requestMapping.getController(httpRequest);
             return controller.service(httpRequest);
         }
-        StaticResourceHandler handler = new StaticResourceHandler();
-        return handler.handle(httpRequest);
+        return staticResourceHandler.handle(httpRequest);
     }
 }

@@ -91,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "image/jpeg \r\n";
             }
 
-            final var response = String.join("\r\n",
+            var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType +
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -105,8 +105,14 @@ public class Http11Processor implements Runnable, Processor {
                 User user = InMemoryUserRepository.findByAccount(account)
                         .orElseThrow();
                 if (user.checkPassword(password)) {
+                    response = String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: " + "/index.html");
                     log.info(user.toString());
                 } else {
+                    response = String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: " + "/401.html");
                     log.error("비밀번호 불일치");
                 }
             }

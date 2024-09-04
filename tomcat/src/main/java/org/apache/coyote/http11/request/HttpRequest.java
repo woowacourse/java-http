@@ -18,7 +18,7 @@ public class HttpRequest {
 
         Method method = Method.from(requestElements[0]);
         URI uri = URI.create(requestElements[1]);
-        String protocol = requestElements[2];
+        HttpProtocol protocol = HttpProtocol.from(requestElements[2]);
 
         return new HttpRequest(new RequestLine(method, uri, protocol));
     }

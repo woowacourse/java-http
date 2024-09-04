@@ -6,9 +6,9 @@ public class RequestLine {
 
     private final Method method;
     private final URI uri;
-    private final String protocol;
+    private final HttpProtocol protocol;
 
-    public RequestLine(final Method method, final URI uri, final String protocol) {
+    public RequestLine(final Method method, final URI uri, final HttpProtocol protocol) {
         this.method = method;
         this.uri = uri;
         this.protocol = protocol;
@@ -26,7 +26,7 @@ public class RequestLine {
         return uri.getPath();
     }
 
-    public String getProtocol() {
-        return protocol;
+    public String getProtocolMessage() {
+        return protocol.getHttpMessage();
     }
 }

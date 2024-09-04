@@ -1,6 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.net.URL;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +34,31 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            byte[] buffer = new byte[4096];
+            int read = inputStream.read(buffer);
+            HttpRequest request = new HttpRequest(new String(buffer));
+            String target = request.getTarget();
+            URL responseURL = getClass().getClassLoader().getResource("static" + target);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            String responseBody = getFileContent(responseURL);
+            HttpResponse response = new HttpResponse(responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getFileContent(URL resourceURL) throws IOException {
+        if (resourceURL != null) {
+            File file = new File(resourceURL.getFile());
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String collect = reader.lines().collect(Collectors.joining("\n"));
+                return collect + "\n";
+            } catch (IOException e) {
+                return "Hello world!";
+            }
+        }
+        return "";
     }
 }

@@ -5,6 +5,7 @@ import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
+import org.apache.coyote.common.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,15 +16,15 @@ public class LoginHandler implements Handler {
 
     @Override
     public Response handle(Request request) {
-        if (!isInvalidParameters(request)) {
+        if (isInvalidParameters(request)) {
             return StaticResourceHandler.getInstance().handle(request);
         }
         try {
             login(request);
         } catch (IllegalArgumentException e) {
-            return StaticResourceHandler.getInstance().handle(request, "401 Unauthorized");
+            return StaticResourceHandler.getInstance().handle(request, StatusCode.UNAUTHORIZED);
         }
-        return new Response("302 Found", Map.of("Location", "/index.html"), null);
+        return new Response(StatusCode.FOUND, Map.of("Location", "/index.html"), null);
     }
 
     private boolean isInvalidParameters(Request request) {

@@ -7,9 +7,11 @@ import java.util.Map;
 import org.apache.coyote.common.ContentType;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
+import org.apache.coyote.common.StatusCode;
 
 public class StaticResourceHandler implements Handler {
 
+    private static final String STATIC_RESOURCE_PATH = "static";
     private static final StaticResourceHandler INSTANCE = new StaticResourceHandler();
 
     private StaticResourceHandler() {
@@ -21,15 +23,15 @@ public class StaticResourceHandler implements Handler {
 
     @Override
     public Response handle(Request request) {
-        return handle(request, "200 OK");
+        return handle(request, StatusCode.OK);
     }
 
-    public Response handle(Request request, String responseStatus) {
+    public Response handle(Request request, StatusCode statusCode) {
         File responseBody = getStaticResource(request.getUri());
         try {
-            return makeResponse(responseBody, responseStatus);
+            return makeResponse(responseBody, statusCode);
         } catch (IOException e) {
-            return new Response("500 Internal Server Error", Map.of(), null);
+            return new Response(StatusCode.INTERNAL_SERVER_ERROR, Map.of(), null);
         }
     }
 
@@ -42,16 +44,16 @@ public class StaticResourceHandler implements Handler {
         }
         File file;
         try {
-            file = new File(getClass().getClassLoader().getResource("static" + location).getFile());
+            file = new File(getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + location).getFile());
         } catch (NullPointerException e) {
-            file = new File(getClass().getClassLoader().getResource("static/404.html").getFile());
+            file = new File(getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + "/404.html").getFile());
         }
         return file;
     }
 
-    private Response makeResponse(File resource, String status) throws IOException {
+    private Response makeResponse(File resource, StatusCode statusCode) throws IOException {
         byte[] responseBody = Files.readAllBytes(resource.toPath());
-        return new Response(status,
+        return new Response(statusCode,
                             Map.of("Content-Type", getContentType(resource),
                                    "Content-Length", getResponseLength(responseBody)),
                             new String(responseBody));
@@ -62,6 +64,6 @@ public class StaticResourceHandler implements Handler {
     }
 
     private String getResponseLength(byte[] responseBody) {
-        return "Content-Length: " + responseBody.length + " ";
+        return String.valueOf(responseBody.length);
     }
 }

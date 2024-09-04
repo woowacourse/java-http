@@ -11,18 +11,18 @@ public class Response {
     private static final String BLANK_SPACE = " ";
 
     private final String protocol;
-    private final String status;
+    private final StatusCode status;
     private final Map<String, String> headers;
     private final String body;
 
-    private Response(String protocol, String status, Map<String, String> headers, String body) {
+    private Response(String protocol, StatusCode status, Map<String, String> headers, String body) {
         this.protocol = protocol;
         this.status = status;
         this.headers = headers;
         this.body = body;
     }
 
-    public Response(String status, Map<String, String> headers, String body) {
+    public Response(StatusCode status, Map<String, String> headers, String body) {
         this(DEFAULT_PROTOCOL, status, headers, body);
     }
 
@@ -34,10 +34,10 @@ public class Response {
         return String.join(
                 LINE_SEPARATOR,
                 Stream.concat(Stream.of(statusLine),
-                        Stream.concat(
-                                headerLines.stream(),
-                                Stream.of(bodyLines)
-                        )
+                              Stream.concat(
+                                      headerLines.stream(),
+                                      Stream.of(bodyLines)
+                              )
                 ).toArray(String[]::new)
         ).getBytes();
     }
@@ -49,7 +49,7 @@ public class Response {
     private List<String> getHeaderLines() {
         return headers.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .map(entry -> entry.getKey() + ": " + entry.getValue()).toList();
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + BLANK_SPACE).toList();
     }
 
     private String getBodyLines() {
@@ -61,7 +61,7 @@ public class Response {
         return "Response{" +
                "protocol='" + protocol + '\'' +
                ", status='" + status + '\'' +
-               ", headers=" + headers +
+               ", headers=" + headers + '\'' +
                ", body='" + body + '\'' +
                '}';
     }

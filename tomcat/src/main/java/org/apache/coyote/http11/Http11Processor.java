@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import org.apache.coyote.Processor;
@@ -29,9 +30,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = parseRequest(inputStream);
+             final var outputStream = connection.getOutputStream();
+             final var requestReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String startLine = requestReader.readLine();
+            final var responseBody = parseStartLine(startLine);
 
             final var response = String.join("\r\n",
                                              "HTTP/1.1 200 OK ",
@@ -47,13 +49,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequest(InputStream inputStream) throws IOException {
-        String request = new String(inputStream.readAllBytes());
-        if (request.contains("GET") && !request.contains(" / ")) {
-            String fileName = request.split(" ")[1];
-            File file = new File(getClass().getClassLoader().getResource("static" + fileName).getFile());
-            return new String(Files.readAllBytes(file.toPath()));
+    private String parseStartLine(String startLine) throws IOException {
+        String resourse = startLine.split(" ")[1];
+        if (resourse.equals("/")) {
+            return "Hello world!";
         }
-        return "Hello world!";
+        File file = new File(getClass().getClassLoader().getResource("static" + resourse).getFile());
+        return new String(Files.readAllBytes(file.toPath()));
     }
 }

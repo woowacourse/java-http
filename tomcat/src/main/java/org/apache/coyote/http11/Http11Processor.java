@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.RequestStartLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String startLine = readStartLine(reader);
+            RequestStartLine startLine = readStartLine(reader);
+            log.info("start line = {}", startLine);
 
             String response = makeDefaultResponse();
             outputStream.write(response.getBytes());
@@ -42,8 +44,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readStartLine(BufferedReader reader) throws IOException {
-        return readLine(reader);
+    private RequestStartLine readStartLine(BufferedReader reader) throws IOException {
+        String[] startLine = readLine(reader).split(" ");
+        if (startLine.length != 3) {
+            throw new UncheckedServletException("요청 시작 라인의 형식이 일치하지 않습니다.");
+        }
+
+        return new RequestStartLine(startLine[0], startLine[1], startLine[2]);
     }
 
     private String readLine(BufferedReader reader) throws IOException {

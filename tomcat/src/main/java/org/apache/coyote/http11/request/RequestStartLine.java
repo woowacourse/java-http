@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.util.StringJoiner;
 
 public class RequestStartLine {
     private static final String AVAILABLE_VERSION = "HTTP/1.1";
@@ -23,5 +24,13 @@ public class RequestStartLine {
 
     public String getPath() {
         return path.getPath();
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RequestStartLine.class.getSimpleName() + "[", "]")
+                .add("method=" + method)
+                .add("path=" + path)
+                .toString();
     }
 }

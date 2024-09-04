@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
 
-            final String responseBody = "Hello world!";
+            final String responseBody = readStaticResource(httpRequest);
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
@@ -76,5 +76,12 @@ public class Http11Processor implements Runnable, Processor {
                 .version(Version.valueOf(requestVersion))
                 .method(requestMethod, BodyPublishers.noBody())
                 .build();
+    }
+
+    private String readStaticResource(HttpRequest httpRequest) throws IOException {
+        final String fileName = httpRequest.uri().getPath().replace("/", STATIC_RESOURCE_PATH);
+        final URL resourceURL = getClass().getClassLoader().getResource(fileName);
+
+        return Files.readString(Path.of(resourceURL.getPath()));
     }
 }

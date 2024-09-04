@@ -1,6 +1,5 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.common;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

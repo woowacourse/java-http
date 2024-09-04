@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.common;
 
 import java.util.List;
 import java.util.Map;

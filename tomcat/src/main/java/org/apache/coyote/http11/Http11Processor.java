@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.ContentType;
+import org.apache.coyote.common.Request;
+import org.apache.coyote.common.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

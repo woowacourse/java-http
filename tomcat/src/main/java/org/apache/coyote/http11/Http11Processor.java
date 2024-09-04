@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +41,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = parseRequest(requestReader);
             log.info("request: {}", request);
-            final var responseBody = getStaticResource(request.getUri());
-            final var response = makeResponse(responseBody);
+            final var response = getResponse(request);
             log.info("response: {}", response);
 
             outputStream.write(response.getBytes());
@@ -48,6 +49,19 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Response getResponse(Request request) throws IOException {
+        if ("/login".equals(request.getUri())) {
+            String account = request.getParameters().get("account");
+            String password = request.getParameters().get("password");
+            User findUser = InMemoryUserRepository.findByAccount(account)
+                    .filter(user -> user.checkPassword(password))
+                    .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
+            log.info("user: {}", findUser);
+        }
+        File responseBody = getStaticResource(request.getUri());
+        return makeResponse(responseBody);
     }
 
     private Request parseRequest(BufferedReader reader) throws IOException {
@@ -60,6 +74,9 @@ public class Http11Processor implements Runnable, Processor {
     private File getStaticResource(String location) throws IOException {
         if (location.equals("/")) {
             location = "/hello.html";
+        }
+        if (!location.contains(".")) {
+            location += ".html";
         }
         File file;
         try {

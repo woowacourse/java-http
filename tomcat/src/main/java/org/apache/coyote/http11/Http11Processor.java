@@ -1,20 +1,18 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
+import jakarta.activation.MimeTypeEntry;
+
+import org.apache.coyote.HttpRequestParser;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +42,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = readHttpRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequestParser.parseRequest(inputStream);
             final String response = processResponse(httpRequest);
 
             outputStream.write(response.getBytes());
@@ -55,24 +52,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final var requestLines = bufferedReader.readLine();
-
-        final var requestStartLine = requestLines.split(" ");
-        final var requestMethod = requestStartLine[0];
-        final var requestEndPoint = requestStartLine[1];
-        final var requestVersion = requestStartLine[2]
-                .replace("/", "_")
-                .replace(".", "_");
-
-        // TODO: GET, OPTION 이 아닌 경우 BODYPUBLISH
-        return HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080" + requestEndPoint))
-                .version(Version.valueOf(requestVersion))
-                .method(requestMethod, BodyPublishers.noBody())
-                .build();
     }
 
     private String processResponse(final HttpRequest httpRequest) throws IOException {
@@ -116,9 +95,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String findResourcePath(final String resourcePath) {
         final String[] fileNames = resourcePath.split("\\.");
+        final String extension = fileNames[1];
 
-        if (STATIC_RESOURCE_EXTENSIONS.contains(fileNames[1])) {
-            return STATIC_RESOURCE_ROOT_PATH.concat(fileNames[1]).concat(PATH_DELIMITER).concat(resourcePath);
+        if (STATIC_RESOURCE_EXTENSIONS.contains(extension)) {
+            return STATIC_RESOURCE_ROOT_PATH.concat(extension).concat(PATH_DELIMITER).concat(resourcePath);
         }
 
         return STATIC_RESOURCE_ROOT_PATH.concat(resourcePath);

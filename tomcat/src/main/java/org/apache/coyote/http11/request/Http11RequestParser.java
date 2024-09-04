@@ -38,7 +38,6 @@ class Http11RequestParser {
             int readByte = inputStream.available();
             return new String(inputStream.readNBytes(readByte));
         } catch (IOException e) {
-            //Todo 커스텀 예외?
             throw new IllegalArgumentException("잘못된 연결에서 읽기 요청이 발생했습니다.", e);
         }
     }
@@ -47,7 +46,6 @@ class Http11RequestParser {
         String startLine = parseStartLine(requestMessage);
         String rawMethod = startLine.split(" ")[0];
         try {
-
             return Http11Method.valueOf(rawMethod.toUpperCase());
         } catch (Exception e) {
             return Http11Method.GET;

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Cookie;
@@ -19,7 +20,7 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
 
         byte[] responseBody = Files.readAllBytes(path);
 
-        List<Http11Header> copyHeader = new java.util.ArrayList<>(List.copyOf(headers));
+        List<Http11Header> copyHeader = new ArrayList<>(List.copyOf(headers));
         copyHeader.add(new Http11Header("Content-Length", responseBody.length + ""));
         copyHeader.add(new Http11Header("Content-Type", contentTypes + ";charset=utf-8"));
 
@@ -39,22 +40,32 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
     }
 
     public byte[] toBytes() {
-        String headers = this.headers.stream()
-                .map(Http11Header::toString)
-                .collect(Collectors.joining(CRLF));
-        String cookies = this.cookies.stream()
-                .map(Cookie::toString)
-                .collect(Collectors.joining(";"));
-        String cookieHeader = "Set-Cookie: %s".formatted(cookies) + CRLF;
-        if (cookieHeader.equals("Set-Cookie: " + CRLF)) {
-            cookieHeader = "";
-        }
+        String headers = makeHeaders();
+        String cookieHeader = makeCookieHeader();
         String startAndHeadersString = "HTTP/1.1 %s".formatted(statusCode) + CRLF
                 + headers + CRLF
                 + cookieHeader
                 + CRLF;
         byte[] startLineAndHeaders = startAndHeadersString.getBytes();
         return makeResponseBytes(startLineAndHeaders);
+    }
+
+    private String makeHeaders() {
+        return this.headers.stream()
+                .map(Http11Header::toString)
+                .collect(Collectors.joining(CRLF));
+    }
+
+    private String makeCookieHeader() {
+        String rawCookies = cookies.stream()
+                .map(Cookie::toString)
+                .collect(Collectors.joining(";"));
+
+        String cookieHeader = "Set-Cookie: %s".formatted(rawCookies) + CRLF;
+        if (cookieHeader.equals("Set-Cookie: " + CRLF)) {
+            cookieHeader = "";
+        }
+        return cookieHeader;
     }
 
     private byte[] makeResponseBytes(byte[] startLineAndHeaders) {

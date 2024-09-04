@@ -18,9 +18,9 @@ public class Request {
     }
 
     public Request(final String path) {
-        this.url = getClass().getClassLoader().getResource("static" + path);
-
         if (path.contains("?")) {
+            this.url = getClass().getClassLoader()
+                    .getResource("static" + path.substring(0, path.indexOf("?")) + ".html");
             final var query = path.substring(path.indexOf('?') + 1);
             this.queryString = new HashMap<>();
             final String[] queryParams = query.split("&");
@@ -31,6 +31,7 @@ public class Request {
             this.extension = "html";
             return;
         }
+        this.url = getClass().getClassLoader().getResource("static" + path);
         this.extension = path.substring(path.lastIndexOf(".") + 1);
         this.queryString = new HashMap<>();
     }

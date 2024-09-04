@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.http.HttpHeaders;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.http11.request.Http11Request;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

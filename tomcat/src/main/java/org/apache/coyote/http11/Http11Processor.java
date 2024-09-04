@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.catalina.mapper.Mapper;
 import org.apache.coyote.Processor;
@@ -39,6 +40,8 @@ public class Http11Processor implements Runnable, Processor {
             byte[] buffer = new byte[4096]; // TODO: 요청 준 것만큼 읽어야함
             int read = inputStream.read(buffer);
             HttpRequest request = new HttpRequest(new String(buffer));
+            Map<String, String> params = request.getParams();
+            log.info(params.toString());
 
             URL fileURL = Mapper.mapToFileURL(request.getPath());
 

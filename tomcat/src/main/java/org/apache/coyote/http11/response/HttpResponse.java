@@ -17,7 +17,7 @@ public class HttpResponse {
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
     }
 
-    public void setContentType(String extentions) {
+    public void setContentType(String extentions) {// TODO 동적으로 만들어야 할 듯
         if (extentions.equals("html")) {
             headers.put("Content-Type", "text/html;charset=utf-8");
         }

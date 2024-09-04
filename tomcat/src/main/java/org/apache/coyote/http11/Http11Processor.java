@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -124,6 +125,23 @@ public class Http11Processor implements Runnable, Processor {
                 return InMemoryUserRepository.findByAccountAndPassword(account, password)
                         .map(user -> makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND))
                         .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED));
+            }
+        }
+
+        if (method.equals("POST") && endpoint.equals("/register")) {
+            if (requestData.containsKey("account")
+                    && requestData.containsKey("email")
+                    && requestBody.contains("password")
+            ) {
+                String account = requestData.get("account");
+                String email = requestData.get("email");
+                String password = requestData.get("password");
+
+                if (!InMemoryUserRepository.existsByAccount(account)) {
+                    InMemoryUserRepository.save(new User(account, password, email));
+                }
+
+                return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND);
             }
         }
 

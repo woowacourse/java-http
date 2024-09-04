@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -83,14 +82,13 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (method.equals("GET") && endpoint.equals("/login")) {
-            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                    .orElseThrow(() -> new UncheckedServletException("아이디 혹은 비밀번호가 일치하지 않습니다."));
+            if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
+                String account = queryParams.get("account");
+                String password = queryParams.get("password");
 
-            if (!user.checkPassword(queryParams.get("password"))) {
-                throw new UncheckedServletException("아이디 혹은 비밀번호가 일치하지 않습니다.");
+                InMemoryUserRepository.findByAccountAndPassword(account, password)
+                        .ifPresent(user -> log.info(user.toString()));
             }
-
-            log.info(user.toString());
 
             return makeOkResponseMessage("login.html");
         }

@@ -2,6 +2,10 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.request.line.HttpProtocol;
+import org.apache.coyote.http11.request.line.Method;
+import org.apache.coyote.http11.request.line.RequestLine;
+import org.apache.coyote.http11.request.line.Uri;
 
 public class HttpRequest {
 

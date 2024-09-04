@@ -1,18 +1,18 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.controller;
 
 import java.io.IOException;
-import org.apache.coyote.http11.request.HttpProtocol;
+import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Method;
-import org.apache.coyote.http11.request.Uri;
+import org.apache.coyote.http11.request.line.HttpProtocol;
+import org.apache.coyote.http11.request.line.Method;
+import org.apache.coyote.http11.request.line.Uri;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class GreetingHandler implements HttpRequestHandler {
+public class GreetingController implements HttpRequestHandler {
 
     private static final Method SUPPORTING_METHOD = Method.GET;
     private static final Uri SUPPORTING_URI = new Uri("/");
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
-
 
     @Override
     public boolean supports(final HttpRequest request) {

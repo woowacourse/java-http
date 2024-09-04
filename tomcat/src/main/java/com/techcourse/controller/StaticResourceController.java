@@ -1,13 +1,14 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.controller;
 
 import java.io.IOException;
-import org.apache.coyote.http11.request.HttpProtocol;
+import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.request.line.HttpProtocol;
+import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.util.FileUtils;
 
-public class StaticResourceHandler implements HttpRequestHandler {
+public class StaticResourceController implements HttpRequestHandler {
 
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final Method SUPPORTING_METHOD = Method.GET;

@@ -1,13 +1,12 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.GreetingController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.LoginPageController;
+import com.techcourse.controller.StaticResourceController;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.handler.GreetingHandler;
-import org.apache.coyote.http11.handler.HttpRequestHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.LoginPageHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class Dispatcher {
@@ -18,10 +17,10 @@ public class Dispatcher {
 
     private Dispatcher() {
         handlers = new ArrayList<>();
-        handlers.add(new StaticResourceHandler());
-        handlers.add(new GreetingHandler());
-        handlers.add(new LoginPageHandler());
-        handlers.add(new LoginHandler());
+        handlers.add(new StaticResourceController());
+        handlers.add(new GreetingController());
+        handlers.add(new LoginPageController());
+        handlers.add(new LoginController());
     }
 
     public static Dispatcher getInstance() {

@@ -1,16 +1,18 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.request.HttpProtocol;
+import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.Method;
-import org.apache.coyote.http11.request.Uri;
+import org.apache.coyote.http11.request.line.HttpProtocol;
+import org.apache.coyote.http11.request.line.Method;
+import org.apache.coyote.http11.request.line.Uri;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler implements HttpRequestHandler {
+public class LoginController implements HttpRequestHandler {
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";

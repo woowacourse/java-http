@@ -73,6 +73,10 @@ public class HttpRequest {
         return stringJoiner.toString();
     }
 
+    public boolean isFileRequest() {
+        return Extension.isFileExtension(path);
+    }
+
     public String getMethod() {
         return method;
     }

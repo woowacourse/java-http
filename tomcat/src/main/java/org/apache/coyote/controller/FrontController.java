@@ -15,15 +15,18 @@ public class FrontController {
     }
 
     public HttpResponse dispatch(HttpRequest request) {
-        String path = request.getPath();
-        String resourcePath = "static" + path;
-        try {
-            Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());
-            byte[] body = Files.readAllBytes(filePath);
-            return new HttpResponse(HttpStateCode.OK, body);
-        } catch (URISyntaxException | IOException e) {
-
+        if (request.isFileRequest()) {
+            String path = request.getPath();
+            System.out.println(path);
+            String resourcePath = "static" + path;
+            try {
+                Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());
+                byte[] body = Files.readAllBytes(filePath);
+                return new HttpResponse(HttpStateCode.OK, body);
+            } catch (URISyntaxException | IOException e) {
+                return new HttpResponse(HttpStateCode.OK, "No File Found".getBytes());
+            }
         }
-        return new HttpResponse(HttpStateCode.OK, "No File Found".getBytes());
+        return new HttpResponse(HttpStateCode.OK, "Hello world!".getBytes());
     }
 }

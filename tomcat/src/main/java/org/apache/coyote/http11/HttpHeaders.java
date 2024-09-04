@@ -8,9 +8,8 @@ import org.slf4j.LoggerFactory;
 
 public class HttpHeaders {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpHeaders.class);
     private static final String DELIMITER = ": ";
-
     private final Map<String, String> headers;
 
     public HttpHeaders(List<String> headers) {

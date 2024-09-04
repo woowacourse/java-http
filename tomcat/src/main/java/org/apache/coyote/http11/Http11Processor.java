@@ -1,12 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.Controller;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +13,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Controller controller;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.controller = new Controller();
     }
 
     @Override
@@ -31,20 +30,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpStartLine startLine = new HttpStartLine(httpRequestReader.readLine());
-            List<String> headers = new ArrayList<>();
-            while (httpRequestReader.ready()) {
-                String header = httpRequestReader.readLine();
-                if (header.isBlank()) {
-                    break;
-                }
-                headers.add(header);
-            }
-            HttpHeaders httpHeaders = new HttpHeaders(headers);
-            HttpRequest request = new HttpRequest(startLine, httpHeaders);
-
-            String response = request.createResponse();
+            HttpRequest request = HttpRequest.parse(inputStream);
+            HttpResponse response = controller.service(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

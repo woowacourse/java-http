@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.net.URL;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,19 +8,14 @@ import org.slf4j.LoggerFactory;
 public class HttpStartLine {
 
     private static final Logger log = LoggerFactory.getLogger(HttpStartLine.class);
-    private static final String HTTP_METHOD = "HTTP Method";
-    private static final String REQUEST_TARGET = "Request Target";
-    private static final String HTTP_VERSION = "HTTP Version";
 
-    private final Map<String, String> startLine;
+    private final HttpMethod httpMethod;
+    private final RequestTarget requestTarget;
 
     public HttpStartLine(String startLine) {
         String[] separatedStartLine = validateAndSplit(startLine);
-        this.startLine = Map.of(
-                HTTP_METHOD, separatedStartLine[0],
-                REQUEST_TARGET, separatedStartLine[1],
-                HTTP_VERSION, separatedStartLine[2]
-        );
+        this.httpMethod = new HttpMethod(separatedStartLine[0]);
+        this.requestTarget = new RequestTarget(separatedStartLine[1]);
     }
 
     private String[] validateAndSplit(String startLine) {
@@ -35,12 +31,19 @@ public class HttpStartLine {
         throw exception;
     }
 
-    public String getRequestTarget() {
-        return "static" + startLine.get(REQUEST_TARGET);
+    public Map<String, String> parseQueryString() {
+        return requestTarget.parseQueryString();
     }
 
     public String getTargetExtension() {
-        String requestTarget = startLine.get(REQUEST_TARGET);
-        return requestTarget.substring(requestTarget.lastIndexOf(".") + 1);
+        return requestTarget.getTargetExtension();
+    }
+
+    public boolean targetStartsWith(String path) {
+        return requestTarget.startsWith(path);
+    }
+
+    public URL getTargetUrl() {
+        return requestTarget.getUrl();
     }
 }

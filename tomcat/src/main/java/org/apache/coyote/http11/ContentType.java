@@ -6,7 +6,7 @@ public enum ContentType {
 
     TEXT_HTML(".html", "text/html"),
     TEXT_JS(".js", "text/javascript"),
-    TEXT_CSS(".css", "text/javascript"),
+    TEXT_CSS(".css", "text/css"),
     ;
 
     private final String extension;

@@ -1,31 +1,34 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String RESOURCE_PATH = "static/";
+    private static final String RESOURCE_PATH = "static";
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -43,6 +46,11 @@ public class Http11Processor implements Runnable, Processor {
             List<String> request = getRequest(inputStream);
             String requestUrl = request.getFirst()
                     .split(" ")[1];
+            Map<String, String> queryParams = getQueryParams(requestUrl);
+
+            if (requestUrl.startsWith("/login") && !queryParams.isEmpty()) {
+                checkLoginUser(queryParams);
+            }
 
             outputStream.write(getResponse(requestUrl).getBytes());
             outputStream.flush();
@@ -62,6 +70,27 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
+    private  Map<String, String> getQueryParams(String requestUrl) {
+        Map<String, String> queryParams = new HashMap<>();
+
+        if (requestUrl.contains("?")) {
+            String queryString = requestUrl.split("\\?")[1];
+            queryParams = Arrays.stream(queryString.split("&"))
+                    .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
+        }
+
+        return queryParams;
+    }
+
+    private void checkLoginUser(Map<String, String> queryParams) {
+        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (user.checkPassword(queryParams.get("password"))) {
+            log.info("user : {}", user);
+        }
+    }
+
     private String getResponse(String requestUrl) throws IOException {
         String responseBody = getResponseBody(requestUrl);
 
@@ -78,8 +107,13 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
+        String path = requestUrl.split("\\?")[0];
+        if (!path.contains(".")) {
+            path += ".html";
+        }
+
         return Files.readString(Path.of(getClass().getClassLoader()
-                .getResource(RESOURCE_PATH + requestUrl)
+                .getResource(RESOURCE_PATH + path)
                 .getPath()));
     }
 }

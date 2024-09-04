@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -12,14 +13,16 @@ import java.util.StringJoiner;
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ":";
+    private static final String QUERY_DELIMITER = "&";
+    private static final String PARAM_DELIMITER = "=";
+    private static final String QUERY_START = "\\?";
 
     private String method;
     private String url;
     private String version;
     private String path;
 
-    private Map<String, String> queryMap = new HashMap<>();
-
+    private final Map<String, String> queryMap = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
 
     public HttpRequest(InputStream in) throws IOException {
@@ -43,16 +46,16 @@ public class HttpRequest {
         String header = bufferedReader.readLine();
         while (header != null && !header.equals("")) {
             String[] headerToken = header.split(HEADER_DELIMITER);
-            String value = reconstructHeaderValue(headerToken);
+            String value = reconstructHeaderValue(Arrays.copyOfRange(headerToken, 1, headerToken.length));
             headers.put(headerToken[0], value);
             header = bufferedReader.readLine();
         }
     }
 
-    private String reconstructHeaderValue(String[] headerToken) {
+    private String reconstructHeaderValue(String[] headerValues) {
         StringJoiner stringJoiner = new StringJoiner(HEADER_DELIMITER);
-        for (int i = 1; i < headerToken.length; i++) {
-            stringJoiner.add(headerToken[i].strip());
+        for (String value : headerValues) {
+            stringJoiner.add(value.strip());
         }
         return stringJoiner.toString();
     }
@@ -62,11 +65,13 @@ public class HttpRequest {
             path = url;
             return;
         }
-        String queryLine = url.split("\\?")[1];
-        path = url.split("\\?")[0];
-        String[] queryList = queryLine.split("&");
+        String[] urlParts = url.split(QUERY_START);
+        path = urlParts[0];
+        String queryLine = urlParts[1];
+        String[] queryList = queryLine.split(QUERY_DELIMITER);
         for (String query : queryList) {
-            queryMap.put(query.split("=")[0], query.split("=")[1]);
+            String[] queryParam = query.split(PARAM_DELIMITER);
+            queryMap.put(queryParam[0], queryParam[1]);
         }
     }
 

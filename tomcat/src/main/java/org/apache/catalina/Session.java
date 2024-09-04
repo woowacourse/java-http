@@ -14,6 +14,10 @@ public class Session {
         values = new HashMap<>();
     }
 
+    public boolean hasAttribute(String id) {
+        return values.containsKey(id);
+    }
+
     public String getId() {
         return id;
     }

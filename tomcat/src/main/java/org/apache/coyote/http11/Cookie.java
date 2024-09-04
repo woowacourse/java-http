@@ -8,6 +8,10 @@ public record Cookie(String key, String value) {
         return new Cookie("JSESSIONID", UUID.randomUUID().toString());
     }
 
+    public boolean isSessionCookie() {
+        return key.equals("JSESSIONID");
+    }
+
     @Override
     public String toString() {
         return "%s=%s".formatted(key, value);

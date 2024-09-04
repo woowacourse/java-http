@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Http11Header;
 
@@ -30,5 +31,11 @@ public record Http11Request(Http11Method method, String requestUri, List<Http11Q
         return cookies.stream()
                 .map(Cookie::key)
                 .anyMatch(key -> key.equals("JSESSIONID"));
+    }
+
+    public Optional<Cookie> findSessionCookie() {
+        return cookies.stream()
+                .filter(Cookie::isSessionCookie)
+                .findAny();
     }
 }

@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
@@ -29,12 +30,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Http11ResourceFinder resourceFinder;
 
-    private final Manager sessionManager;
+    private static final Manager SESSION_MANAGER = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.resourceFinder = new Http11ResourceFinder();
-        sessionManager = new SessionManager();
     }
 
     @Override
@@ -72,22 +72,40 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void login(Http11Request request, OutputStream outputStream) throws IOException {
-        Http11Method http11Method = request.method();
-        if (http11Method.equals(Http11Method.GET)) {
+        Optional<Cookie> sessionCookie = request.findSessionCookie();
+        if (sessionCookie.isEmpty()) {
             return;
         }
+
+        String sessionId = sessionCookie.get().value();
+        Session session = SESSION_MANAGER.findSession(sessionId);
+        if (session == null) { // 쿠키를 만료시켜야 함
+            SESSION_MANAGER.add(new Session(sessionId));
+            session = SESSION_MANAGER.findSession(sessionId);
+        }
+
+        if (session.hasAttribute("user")) { // 로그인 되어있음
+            sendRedirect("/index.html", outputStream);
+            return;
+        }
+
+        Http11Method http11Method = request.method();
+        if (http11Method.equals(Http11Method.GET)) { // 페이지 요청임
+            return;
+        }
+
         LinkedHashMap<String, String> requestBody = request.body();
         String account = requestBody.getOrDefault("account", "");
         String password = requestBody.getOrDefault("password", "");
 
-        boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
-
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        boolean loginSuccess = user.isPresent() && user.get().checkPassword(password);
         if (loginSuccess) {
+            session.setAttribute("user", user);
             sendRedirect("/index.html", outputStream);
             return;
         }
+
         sendRedirect("/401.html", outputStream);
     }
 
@@ -98,6 +116,23 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void register(Http11Request request, OutputStream outputStream) throws IOException {
+        Optional<Cookie> sessionCookie = request.findSessionCookie();
+        if (sessionCookie.isEmpty()) {
+            return;
+        }
+
+        String sessionId = sessionCookie.get().value();
+        Session session = SESSION_MANAGER.findSession(sessionId);
+        if (session == null) { // 쿠키를 만료시켜야 함
+            SESSION_MANAGER.add(new Session(sessionId));
+            session = SESSION_MANAGER.findSession(sessionId);
+        }
+
+        if (session.hasAttribute("user")) { // 로그인 되어있음
+            sendRedirect("/index.html", outputStream);
+            return;
+        }
+
         Http11Method http11Method = request.method();
         if (http11Method.equals(Http11Method.GET)) {
             return;
@@ -117,7 +152,7 @@ public class Http11Processor implements Runnable, Processor {
         Http11Response response = Http11Response.ok(new ArrayList<>(), new ArrayList<>(), path);
         if (!request.hasSessionCookie() && response.isHtml()) {
             Cookie sessionCookie = Cookie.sessionCookie();
-            sessionManager.add(new Session(sessionCookie.key()));
+            SESSION_MANAGER.add(new Session(sessionCookie.value()));
             response = Http11Response.ok(new ArrayList<>(), List.of(sessionCookie), path);
         }
         outputStream.write(response.toBytes());

@@ -40,20 +40,17 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final String requestMethodAndUrl = bufferedReader.readLine();
 
-            log.info("GET 요청 = {}", requestMethodAndUrl);
             final String[] texts = requestMethodAndUrl.split(" ");
+            final var method = texts[0];
             final var path = texts[1];
+            log.info("{} 요청 = {}", method, requestMethodAndUrl);
 
             final Request request = new Request(path);
             log.info("request = {}", request);
             final URL resource = request.getUrl();
             final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            final var response = String.join("\r\n", "HTTP/1.1 200 OK ",
-                    "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
-                    "Content-Length: " + result.getBytes().length + " ",
-                    "",
-                    result);
 
+            var response = "";
             if (request.getQueryString().containsKey("account")) {
                 final var queryString = request.getQueryString();
                 final String account = queryString.get("account");
@@ -64,6 +61,19 @@ public class Http11Processor implements Runnable, Processor {
                     throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
                 }
                 log.info("user = {}", user);
+                response = String.join("\r\n", "HTTP/1.1 302 FOUND ",
+                        "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
+                        "Content-Length: " + result.getBytes().length + " ",
+                        "Location: " + "index.html",
+                        "",
+                        result);
+
+            } else {
+                response = String.join("\r\n", "HTTP/1.1 200 OK ",
+                        "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
+                        "Content-Length: " + result.getBytes().length + " ",
+                        "",
+                        result);
             }
 
             outputStream.write(response.getBytes());

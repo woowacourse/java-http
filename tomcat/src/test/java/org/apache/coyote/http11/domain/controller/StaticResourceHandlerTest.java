@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.http11.domain.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

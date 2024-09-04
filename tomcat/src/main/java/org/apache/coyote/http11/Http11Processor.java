@@ -1,18 +1,21 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemorySessionRepository;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import org.apache.catalina.session.JSession;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +25,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager;
     private final StaticResourceReader staticResourceReader;
     private final Function<Http11Request, Http11Response> defaultProcessor;
     private final Map<Predicate<Http11Request>, Function<Http11Request, Http11Response>> processors;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionManager = new SessionManager();
         this.staticResourceReader = new StaticResourceReader();
         this.defaultProcessor = this::processStaticResource;
         this.processors = Map.of(
@@ -78,19 +83,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response processLoginPage(Http11Request request) {
-        final String sessionCookieName = "JSESSIONID";
+        if (request.cookies().containsKey(JSession.COOKIE_NAME)) {
+            HttpSession session = request.getSession(sessionManager);
+            if (session != null) {
+                User user = (User) Objects.requireNonNull(session).getAttribute("user");
 
-        if (request.cookies().containsKey(sessionCookieName)) {
-            String sessionId = request.cookies().get(sessionCookieName);
-            Optional<String> optionalUserAccount = InMemorySessionRepository.findBySessionId(sessionId);
-            if (optionalUserAccount.isPresent()) {
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(optionalUserAccount.get());
-                if (optionalUser.isPresent()) {
-                    log.info("세션 로그인 성공! - 아이디 : {}, 세션 ID : {}", optionalUser.get().getAccount(), sessionId);
-                    return Http11Response.builder(Status.FOUND)
-                            .location("/index.html")
-                            .build();
-                }
+                log.info("세션 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
+
+                return Http11Response.builder(Status.FOUND)
+                        .location("/index.html")
+                        .build();
             }
         }
 
@@ -102,13 +104,15 @@ public class Http11Processor implements Runnable, Processor {
             if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
                 User user = optionalUser.get();
                 String sessionId = UUID.randomUUID().toString();
-                InMemorySessionRepository.save(sessionId, user.getAccount());
+                JSession session = new JSession(sessionId);
+                session.setAttribute("user", user);
+                sessionManager.add(session);
 
                 log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
 
                 return Http11Response.builder(Status.FOUND)
                         .location("/index.html")
-                        .addCookie(sessionCookieName, sessionId)
+                        .addCookie(JSession.COOKIE_NAME, sessionId)
                         .build();
             }
 

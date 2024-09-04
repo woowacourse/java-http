@@ -21,7 +21,7 @@ public class RequestTarget {
     private final String endPoint;
     private final Map<String, List<String>> queryStrings;
 
-    public RequestTarget(String endPoint, Map<String, List<String>> queryStrings) {
+    private RequestTarget(String endPoint, Map<String, List<String>> queryStrings) {
         this.endPoint = endPoint;
         this.queryStrings = queryStrings;
     }
@@ -44,6 +44,17 @@ public class RequestTarget {
         }
 
         return queryStrings;
+    }
+
+    public boolean hasParam(String key) {
+        return queryStrings.containsKey(key);
+    }
+
+    public String getParam(String key) {
+        if (hasParam(key)) {
+            return queryStrings.get(key).get(0);
+        }
+        return "";
     }
 
     public String getEndPoint() {

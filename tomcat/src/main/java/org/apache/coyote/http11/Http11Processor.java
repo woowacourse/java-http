@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -34,12 +35,39 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            String fileName = getFileName(inputStream);
-            var responseBody = getStaticFileContent(fileName);
+            String uri = getUri(inputStream);
+            String path = uri;
+
+            // TODO: 메서드 분리, /login 요청이 아닐 때 쿼리파라미터 처리 고민
+            int questionMarkIndex = uri.indexOf("?");
+            if (questionMarkIndex != -1) {
+                path = uri.substring(0, questionMarkIndex) + ".html";
+
+                String queryString = uri.substring(questionMarkIndex + 1);
+                int ampersandIndex = queryString.indexOf("&");
+
+                String accountKeyValue = queryString.substring(0, ampersandIndex);
+                int accountEqualsIndex = accountKeyValue.indexOf("=");
+                String accountKey = accountKeyValue.substring(0, accountEqualsIndex);
+                String accountValue = accountKeyValue.substring(accountEqualsIndex + 1);
+                if ("account".equals(accountKey)) {
+                    InMemoryUserRepository.findByAccount(accountValue).ifPresent(user -> {
+                        String passwordKeyValue = queryString.substring(ampersandIndex + 1);
+                        int passwordEqualsIndex = passwordKeyValue.indexOf("=");
+                        String passwordKey = passwordKeyValue.substring(0, passwordEqualsIndex);
+                        String passwordValue = passwordKeyValue.substring(passwordEqualsIndex + 1);
+                        if ("password".equals(passwordKey) && user.checkPassword(passwordValue)) {
+                            log.info("user : {}", user);
+                        }
+                    });
+                }
+            }
+
+            var responseBody = getStaticFileContent(path);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + getFileExtension(fileName) + ";charset=utf-8 ",
+                    "Content-Type: text/" + getFileExtension(path) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -51,28 +79,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getFileName(InputStream inputStream) throws IOException {
+    private String getUri(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         return bufferedReader.readLine().split(" ")[1];
     }
 
-    private String getStaticFileContent(String fileName) throws IOException {
-        if (Objects.equals(fileName, "/")) {
+    private String getStaticFileContent(String path) throws IOException {
+        if (Objects.equals(path, "/")) {
             return "Hello world!";
         }
-        String staticFileName = "static/" + fileName;
+        String staticPath = "static/" + path;
 
-        File file = new File(getClass().getClassLoader().getResource(staticFileName).getPath());
+        File file = new File(getClass().getClassLoader().getResource(staticPath).getPath());
         return new String(Files.readAllBytes(file.toPath()));
     }
 
-    private String getFileExtension(String fileName) {
-        if (Objects.equals(fileName, "/")) {
+    private String getFileExtension(String path) {
+        if (Objects.equals(path, "/")) {
             return "html";
         }
-        String[] splitFileName = fileName.split("\\.");
-        return splitFileName[splitFileName.length - 1];
+        String[] splitPath = path.split("\\.");
+        return splitPath[splitPath.length - 1];
     }
 }

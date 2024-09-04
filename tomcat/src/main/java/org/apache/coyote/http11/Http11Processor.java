@@ -2,19 +2,19 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String STATIC_PATH = "/static";
 
     private final Socket connection;
 
@@ -34,23 +34,42 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String firstLine = bufferedReader.readLine();
-            String requestURI = firstLine.split(" ")[1];
 
-            final Path path = Path.of(getClass().getResource("/static" + requestURI).getPath());
-
+            Path path = Path.of("");
             StringBuilder responseBody = new StringBuilder();
-            if (requestURI.equals("/")) {
-                responseBody.append("Hello world!");
+            String contentType = "";
+
+            while (bufferedReader.ready()) {  // TODO: 404 추가하기
+                String line = bufferedReader.readLine();
+                if (line.startsWith("GET")) {
+                    String resourceURI = line.split(" ")[1];
+                    if (resourceURI.equals("/")) {
+                        contentType = "text/html; charset=utf-8 ";
+                        path = Path.of(getClass().getResource(STATIC_PATH + "/index.html").getPath());
+                    }
+                    if (resourceURI.endsWith(".html")) {
+                        contentType = "text/html; charset=utf-8 ";
+                        path = Path.of(getClass().getResource(STATIC_PATH + resourceURI).getPath());
+                    }
+                    if (resourceURI.endsWith(".css")) {
+                        contentType = "text/css; charset=utf-8 ";
+                        path = Path.of(getClass().getResource(STATIC_PATH + resourceURI).getPath());
+
+                    }
+                    if (resourceURI.endsWith(".js")) {
+                        contentType = "application/javascript ";
+                        path = Path.of(getClass().getResource(STATIC_PATH + resourceURI).getPath());
+
+                    }
+                }
             }
             Files.readAllLines(path)
                     .stream()
                     .forEach(line -> responseBody.append(line).append("\n"));
 
-
-            final var response = String.join("\r\n",
+            var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType,
                     "Content-Length: " + responseBody.toString().getBytes().length + " ",
                     "",
                     responseBody);

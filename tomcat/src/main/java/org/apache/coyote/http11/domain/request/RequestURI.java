@@ -29,7 +29,10 @@ public class RequestURI {
 
     private void parseQuery(String query) {
         Arrays.stream(query.split(PARAMETER_DELIMITER))
+                .filter(param -> param.contains(KEY_VALUE_DELIMITER))
                 .map(param -> param.split(KEY_VALUE_DELIMITER))
+                .filter(param -> param.length == 2)
+                .filter(param -> !param[0].isEmpty())
                 .forEach(param -> queryParameters.put(param[0], param[1]));
     }
 

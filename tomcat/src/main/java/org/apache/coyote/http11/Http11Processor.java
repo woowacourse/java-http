@@ -63,9 +63,11 @@ public class Http11Processor implements Runnable, Processor {
         final Path path = Path.of(resource);
         byte[] fileBytes = Files.readAllBytes(path);
 
+        String contentType = requestURL.split("\\.")[1];
+
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + fileBytes.length + " ",
                 "",
                 "");

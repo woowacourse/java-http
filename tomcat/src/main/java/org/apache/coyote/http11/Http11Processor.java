@@ -28,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String HTTP_1_1 = "HTTP/1.1";
     private static final String STATIC_DIRNAME = "static";
     private static final String NOT_FOUND_FILENAME = "404.html";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
 
@@ -48,7 +49,17 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             final String requestLine = readRequestLine(reader);
-            final String response = makeResponse(requestLine);
+            Map<String, String> headers = readHeaders(reader);
+            String requestBody = null;
+
+            if (headers.containsKey(CONTENT_LENGTH)) {
+                int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
+                char[] buffer = new char[contentLength];
+                reader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+            }
+
+            final String response = makeResponse(requestLine, requestBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -65,7 +76,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(String requestLine) {
+    private Map<String, String> readHeaders(BufferedReader reader) {
+        Map<String, String> headers = new HashMap<>();
+
+        try {
+            while (reader.ready()) {
+                String line = reader.readLine();
+
+                if (line.isBlank()) {
+                    break;
+                }
+
+                String[] entry = line.split(": ");
+
+                if (entry.length == 2) {
+                    headers.put(entry[0], entry[1]);
+                }
+            }
+            return headers;
+        } catch (IOException e) {
+            throw new UncheckedServletException(e);
+        }
+    }
+
+    private String makeResponse(String requestLine, String requestBody) {
         String[] params = requestLine.split(" ");
         validateParamCount(params);
 
@@ -76,22 +110,21 @@ public class Http11Processor implements Runnable, Processor {
 
         String endpoint = parseEndpoint(requestUri);
         Map<String, String> queryParams = parseQueryParams(requestUri);
+        Map<String, String> requestData = parseRequestBody(requestBody);
 
         if (method.equals("GET") && endpoint.equals("/")) {
             return makeResponseMessageFromText("Hello world!", HttpStatusCode.OK);
         }
 
-        if (method.equals("GET") && endpoint.equals("/login")) {
-            if (queryParams.containsKey("account") && queryParams.containsKey("password")) {
-                String account = queryParams.get("account");
-                String password = queryParams.get("password");
+        if (method.equals("POST") && endpoint.equals("/login")) {
+            if (requestData.containsKey("account") && requestData.containsKey("password")) {
+                String account = requestData.get("account");
+                String password = requestData.get("password");
 
                 return InMemoryUserRepository.findByAccountAndPassword(account, password)
                         .map(user -> makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND))
                         .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED));
             }
-
-            return makeResponseMessageFromFile("login.html", HttpStatusCode.OK);
         }
 
         return makeResponseMessageFromFile(endpoint.substring(1), HttpStatusCode.OK);
@@ -146,6 +179,23 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
+    private Map<String, String> parseRequestBody(String requestBody) {
+        if (requestBody == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> requestData = new HashMap<>();
+
+        for (String entry : requestBody.split("&")) {
+            String[] data = entry.split("=");
+            if (data.length == 2) {
+                requestData.put(data[0], data[1]);
+            }
+        }
+
+        return requestData;
+    }
+
     private String makeResponseMessageFromText(String content, HttpStatusCode statusCode) {
         return String.join(
                 "\r\n",
@@ -158,6 +208,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeResponseMessageFromFile(String fileName, HttpStatusCode statusCode) {
+        if (!fileName.contains(".")) {
+            fileName += ".html";
+        }
         String responseBody = readBody(fileName);
         String contentType = "";
 

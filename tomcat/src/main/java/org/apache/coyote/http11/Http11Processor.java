@@ -8,10 +8,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Queries;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -25,10 +24,10 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Set<String> endpoints = Set.of(
-            "login",
-            "register",
-            "index"
+    private static final Set<String> SERVING_PATHS = Set.of(
+            "/login",
+            "/register",
+            "/index"
     );
 
     private final Socket connection;
@@ -49,13 +48,7 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> lines = new ArrayList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-                lines.add(line);
-            }
-            log.info("HTTP Request: " + lines);
-            HttpRequest request = HttpRequest.of(lines);
+            HttpRequest request = HttpRequest.of(bufferedReader);
             HttpResponse response = getResponse(request);
             String formattedResponse = response.toResponse();
 
@@ -69,14 +62,26 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse getResponse(HttpRequest request) throws IOException {
         String requestPath = request.getPath();
 
+        if (SERVING_PATHS.contains(requestPath) && request.isQueriesEmpty() && request.getMethod() == HttpMethod.GET) {
+            requestPath += ".html";
+        }
+        if (requestPath.contains(".")) {
+            return getFileResponse(requestPath);
+        }
         if (requestPath.equals("/login")) {
             return login(request);
         }
+        if (requestPath.equals("/register") && request.getMethod() == HttpMethod.POST) {
+            return register(request);
+        }
+        throw new IllegalArgumentException("요청을 처리할 수 없습니다.");
+    }
 
+    private HttpResponse getFileResponse(String requestPath) {
         try {
             URL resource = getClass().getClassLoader().getResource("static/" + requestPath);
             if (resource == null) {
-                throw new IllegalArgumentException("존재하지 않는 자원입니다.");
+                throw new IllegalArgumentException("존재하지 않는 자원입니다: " + requestPath);
             }
             ResponseFile responseFile = ResponseFile.of(resource);
             return HttpResponse.createFileResponse(responseFile);
@@ -89,26 +94,29 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse login(HttpRequest request) throws IOException {
-        if (request.isQueriesEmpty()) {
-            URL resource = getClass().getClassLoader().getResource("static/login.html");
-            ResponseFile responseFile = ResponseFile.of(resource);
+    private HttpResponse register(HttpRequest request) {
+        Queries queries = Queries.of(request.getBody());
+        String account = queries.get("account");
 
-            return HttpResponse.createFileResponse(responseFile);
+        User user = new User(account, queries.get("password"), queries.get("email"));
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            String message = "이미 존재하는 사용자입니다: " + account;
+            log.warn(message);
+            return HttpResponse.createTextResponse(HttpStatus.CONFLICT, message);
         }
+        InMemoryUserRepository.save(user);
+        return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/index.html");
+    }
+
+    private HttpResponse login(HttpRequest request) {
         Queries queries = request.getQueries();
         String account = queries.get("account");
         String password = queries.get("password");
         if (isValidUser(account, password)) {
-            return HttpResponse.createRedirectResponse(
-                    HttpStatus.FOUND,
-                    "/index.html"
-            );
+            return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/index.html");
         }
-        return HttpResponse.createRedirectResponse(
-                HttpStatus.FOUND,
-                "/401.html"
-        );
+        return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
     }
 
     private boolean isValidUser(String account, String password) {

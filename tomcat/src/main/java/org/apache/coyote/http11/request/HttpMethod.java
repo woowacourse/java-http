@@ -3,7 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 
 public enum HttpMethod {
-    GET;
+    GET,
+    POST;
 
     private boolean isSameMethod(String method) {
         return name().equals(method);

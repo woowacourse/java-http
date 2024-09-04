@@ -36,6 +36,19 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse createTextResponse(HttpStatus httpStatus, String responseBody) {
+        Map<String, String> headers = new HashMap<>();
+        int contentLength = responseBody.getBytes().length;
+        headers.put("Content-Type", "text/plain;charset=utf-8 ");
+        headers.put("Content-Length", String.valueOf(contentLength));
+
+        return new HttpResponse(
+                httpStatus,
+                headers,
+                responseBody
+        );
+    }
+
     public static HttpResponse createFileResponse(ResponseFile responseFile) {
         Map<String, String> headers = new HashMap<>();
         String responseBody = responseFile.getContent();

@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import com.techcourse.application.UserService;
@@ -42,35 +43,24 @@ public class Http11Processor implements Runnable, Processor {
                 final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream()
         ) {
-            String line = readHeaders(inputStream);
-            String uri = line.split(" ")[1];
-            String queryString = "";
-            int queryIndex = uri.indexOf("?");
-            if (queryIndex != -1) {
-                queryString = uri.substring(queryIndex + 1);
-                uri = uri.substring(0, queryIndex);
-            }
-            String fileExtension = "";
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            int index = uri.lastIndexOf(".");
-            String fileName = uri;
-            if (index == -1) {
-                fileExtension = "html";
-            } else {
-                fileName = uri.substring(0, index);
-                fileExtension = uri.substring(index + 1);
+            HttpRequest httpRequest = readHttpRequest(bufferedReader);
+            if (httpRequest == null) {
+                return;
             }
 
-            // URI가 '/'일 때 "hello world" 응답 추가
             String responseBody;
             String contentType;
 
-            if ("/".equals(uri)) {
+            if ("/".equals(httpRequest.getPath())) {
                 responseBody = "Hello world!";
                 contentType = "text/html;charset=utf-8";
             } else {
-                Map<String, String> params = parseQueryString(queryString);
-                URL resource = getClass().getClassLoader().getResource("static" + fileName + "." + fileExtension);
+                Map<String, String> queryString = httpRequest.getQueryString();
+                String resourcePath = "static" + httpRequest.getPath() + "." + httpRequest.getExtension();
+                URL resource = getClass().getClassLoader().getResource(resourcePath);
                 if (resource == null) {
                     // 리소스가 없을 경우 404 처리
                     responseBody = "404 Not Found";
@@ -78,13 +68,16 @@ public class Http11Processor implements Runnable, Processor {
                 } else {
                     Path path = Paths.get(resource.getPath());
                     responseBody = new String(Files.readAllBytes(path));
-                    contentType = createContentType(fileExtension);
+                    contentType = createContentType(httpRequest.getExtension());
                 }
 
-                // 로그인 처리
-                if (uri.startsWith("/login") && params.containsKey("account") && params.containsKey("password")) {
-                    String account = params.get("account");
-                    String password = params.get("password");
+                if (
+                        httpRequest.getPath().startsWith("/login") &&
+                        queryString.containsKey("account") &&
+                        queryString.containsKey("password")
+                ) {
+                    String account = queryString.get("account");
+                    String password = queryString.get("password");
                     log.debug("account: {}, password: {}", account, password);
                     User user = new UserService().login(account, password);
                     log.debug("user: {}", user);
@@ -103,6 +96,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        if (requestLine == null) {
+            return null;
+        }
+        List<String> headers = bufferedReader.lines()
+                .takeWhile(s -> !s.isBlank())
+                .toList();
+
+        return new HttpRequest(requestLine, headers);
     }
 
 

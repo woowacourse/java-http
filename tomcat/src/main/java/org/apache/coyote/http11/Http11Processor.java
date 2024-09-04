@@ -37,15 +37,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             var result = "";
-            final String line = bufferedReader.readLine();
-            log.info("GET 메서드 호출");
-            final String[] texts = line.split(" ");
+            final String requestMethodAndUrl = bufferedReader.readLine();
+            final String host = bufferedReader.readLine();
+            final String accept = bufferedReader.readLine();
+
+            log.info("GET 요청 = {}", requestMethodAndUrl);
+            log.info("HOST = {}", host);
+            log.info("ACCEPT = {}", accept);
+            final String[] texts = requestMethodAndUrl.split(" ");
             final var path = texts[1];
+            final var extension = path.substring(path.lastIndexOf(".") + 1);
             final URL resource = getClass().getClassLoader().getResource("static" + path);
             result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             final var response = String.join("\r\n", "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + extension + ";charset=utf-8 ",
                     "Content-Length: " + result.getBytes().length + " ",
                     "",
                     result);

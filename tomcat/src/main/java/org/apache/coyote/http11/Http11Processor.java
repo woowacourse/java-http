@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,6 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String firstLine = bufferedReader.readLine();
-
             if (firstLine == null) {
                 return;
             }
@@ -46,14 +47,28 @@ public class Http11Processor implements Runnable, Processor {
             String response = "";
             if (page.equals("/")) {
                 responseBody = "Hello world!";
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            }
-            else if(page.startsWith("/css/")) {
+                response = generateResponse(responseBody, "text/html");
+            } else if (page.startsWith("/login?")) {
+                int index = page.indexOf("?");
+                String paths = page.substring(0, index);
+                String queryString = page.substring(index + 1);
+                String account = queryString.split("&")[0].split("=")[1];
+                String password = queryString.split("&")[1].split("=")[1];
+
+                User user = InMemoryUserRepository.findByAccount(account).get();
+                if (user.checkPassword(password)) {
+                    log.info("user : {}", user);
+                }
+
+                URL url = getClass().getClassLoader().getResource("static" + paths + ".html");
+                if (url == null) {
+                    return;
+                }
+
+                Path path = Path.of(url.toURI());
+                responseBody = new String(Files.readAllBytes(path));
+                response = generateResponse(responseBody, "text/html");
+            } else if (page.startsWith("/css/")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
                     return;
@@ -61,14 +76,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/css;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            }
-            else {
+                response = generateResponse(responseBody, "text/css");
+            } else {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
                     return;
@@ -76,12 +85,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
+                response = generateResponse(responseBody, "text/html");
             }
 
             outputStream.write(response.getBytes());
@@ -95,5 +99,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getPage(String firstLine) {
         return firstLine.split(" ")[1];
+    }
+
+    private String generateResponse(String responseBody, String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

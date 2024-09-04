@@ -10,7 +10,7 @@ public class RequestLine {
 
     HttpMethod method;
     RequestURI requestURI;
-    String HttpVersion;
+    String httpVersion;
 
     public RequestLine(String line) {
         List<String> tokens = Arrays.stream(line.split(StringUtils.SPACE)).toList();
@@ -18,7 +18,7 @@ public class RequestLine {
 
         this.method = HttpMethod.ofName(tokens.get(0));
         this.requestURI = new RequestURI(tokens.get(1));
-        this.HttpVersion = tokens.get(2);
+        this.httpVersion = tokens.get(2);
     }
 
     private void validate(List<String> tokens) {
@@ -44,6 +44,6 @@ public class RequestLine {
     }
 
     public String getHttpVersion() {
-        return HttpVersion;
+        return httpVersion;
     }
 }

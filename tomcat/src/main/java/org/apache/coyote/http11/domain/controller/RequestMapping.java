@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.domain.controller;
 
+import com.techcourse.controller.HomeController;
 import com.techcourse.controller.LoginController;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class RequestMapping {
         this.controllers = new HashMap<>();
         this.resourceController = new ResourceController();
 
+        controllers.put("/", new HomeController());
         controllers.put("/login", new LoginController());
     }
 

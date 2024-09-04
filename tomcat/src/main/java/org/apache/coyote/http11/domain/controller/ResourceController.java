@@ -9,26 +9,11 @@ import org.apache.coyote.http11.domain.response.HttpStatus;
 
 public class ResourceController extends AbstractController {
 
-    private static final String ROOT_PATH = "/";
-    private static final String INDEX_FILE = "/index.html";
     private static final String STATIC_PATH = "static";
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        String path = request.getPath();
-
-        if (isIndexPageRequest(path)) {
-            return getStaticResponse(INDEX_FILE);
-        }
-        return getStaticResponse(path);
-    }
-
-    private boolean isIndexPageRequest(String path) {
-        return ROOT_PATH.equals(path) || INDEX_FILE.equals(path);
-    }
-
-    private HttpResponse getStaticResponse(String path) {
-        String staticFilePath = STATIC_PATH + path;
+        String staticFilePath = STATIC_PATH + request.getPath();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
 
         if (inputStream == null) {
@@ -46,5 +31,6 @@ public class ResourceController extends AbstractController {
             return HttpResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 }
 

@@ -6,6 +6,10 @@ import java.util.StringJoiner;
 
 public class HttpHeader {
 
+    private final String LOCATION = "Location";
+    private final String CONTENT_TYPE = "Content-Type";
+    private final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> header;
 
     public HttpHeader() {
@@ -13,7 +17,7 @@ public class HttpHeader {
     }
 
     public void setLocation(String location) {
-        addHeader("Location", location);
+        addHeader(LOCATION, location);
     }
 
     public void addHeader(String key, String value) {
@@ -21,11 +25,11 @@ public class HttpHeader {
     }
 
     public void setContentType(MimeType mimeType) {
-        addHeader("Content-Type", mimeType.getContentType());
+        addHeader(CONTENT_TYPE, mimeType.getContentType());
     }
 
     public boolean hasContentLength() {
-        return header.containsKey("Content-Length");
+        return header.containsKey(CONTENT_LENGTH);
     }
 
     public String toHeaderString() {
@@ -37,11 +41,11 @@ public class HttpHeader {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(header.get("Content-Length"));
+        return Integer.parseInt(header.get(CONTENT_LENGTH));
     }
 
     public void setContentLength(String contentLength) {
-        addHeader("Content-Length", contentLength);
+        addHeader(CONTENT_LENGTH, contentLength);
     }
 
     @Override

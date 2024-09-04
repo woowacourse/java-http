@@ -45,11 +45,11 @@ public class HttpRequest {
         return requestMessage;
     }
 
-    public String getQueryParameter(String key) {
+    public String getParameter(String key) {
         return requestLine.getQueryParameter(key);
     }
 
-    public Map<String, String> getQueryParameters() {
+    public Map<String, String> getParameters() {
         return requestLine.getQueryParameters();
     }
 

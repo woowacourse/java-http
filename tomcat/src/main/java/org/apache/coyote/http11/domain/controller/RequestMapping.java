@@ -2,6 +2,7 @@ package org.apache.coyote.http11.domain.controller;
 
 import com.techcourse.controller.HomeController;
 import com.techcourse.controller.LoginController;
+import com.techcourse.service.LoginService;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.domain.request.HttpRequest;
@@ -16,7 +17,7 @@ public class RequestMapping {
         this.resourceController = new ResourceController();
 
         controllers.put("/", new HomeController());
-        controllers.put("/login", new LoginController());
+        controllers.put("/login", new LoginController(new LoginService()));
     }
 
     public RequestMapping(Map<String, Controller> controllers) {

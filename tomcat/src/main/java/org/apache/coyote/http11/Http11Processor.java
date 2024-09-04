@@ -2,17 +2,15 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.util.Map;
 import org.apache.coyote.Processor;
-import org.apache.coyote.common.ContentType;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
+import org.apache.coyote.handler.Handler;
 import org.apache.coyote.handler.HandlerMapper;
+import org.apache.coyote.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +49,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response getResponse(Request request) throws IOException {
-        HandlerMapper.findHandler(request.getMethod(), request.getUri()).handle(request);
-        File responseBody = getStaticResource(request.getUri());
-        return makeResponse(responseBody);
+        Handler handler = HandlerMapper.findHandler(request.getMethod(), request.getUri());
+        if (handler != null) {
+            return handler.handle(request);
+        }
+        // todo: GET 메서드가 아닌 경우 405 Method Not Allowed 응답을 반환
+        return StaticResourceHandler.getInstance().handle(request);
     }
 
     private Request parseRequest(BufferedReader reader) throws IOException {
@@ -61,37 +62,5 @@ public class Http11Processor implements Runnable, Processor {
         String[] token = startLine.split(" ");
         String[] headers = reader.lines().takeWhile(line -> !line.isEmpty()).toArray(String[]::new);
         return new Request(token[0], token[1], token[2], headers, null);
-    }
-
-    private File getStaticResource(String location) throws IOException {
-        if (location.equals("/")) {
-            location = "/hello.html";
-        }
-        if (!location.contains(".")) {
-            location += ".html";
-        }
-        File file;
-        try {
-            file = new File(getClass().getClassLoader().getResource("static" + location).getFile());
-        } catch (NullPointerException e) {
-            file = new File(getClass().getClassLoader().getResource("static/404.html").getFile());
-        }
-        return file;
-    }
-
-    private Response makeResponse(File resource) throws IOException {
-        byte[] responseBody = Files.readAllBytes(resource.toPath());
-        return new Response("200 OK",
-                            Map.of("Content-Type", getContentType(resource),
-                                   "Content-Length", getResponseLength(responseBody)),
-                            new String(responseBody));
-    }
-
-    private String getContentType(File resource) {
-        return ContentType.of(resource).getMimeType();
-    }
-
-    private String getResponseLength(byte[] responseBody) {
-        return "Content-Length: " + responseBody.length + " ";
     }
 }

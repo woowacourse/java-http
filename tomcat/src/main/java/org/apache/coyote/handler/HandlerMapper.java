@@ -21,6 +21,6 @@ public enum HandlerMapper {
                 .filter(handlerMapper -> handlerMapper.method.equals(method) && handlerMapper.path.equals(path))
                 .map(handlerMapper -> handlerMapper.handler)
                 .findFirst()
-                .orElse(EmptyHandler.getInstance());
+                .orElse(null);
     }
 }

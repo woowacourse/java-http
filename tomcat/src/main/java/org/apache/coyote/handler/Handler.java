@@ -1,7 +1,8 @@
 package org.apache.coyote.handler;
 
 import org.apache.coyote.common.Request;
+import org.apache.coyote.common.Response;
 
 public interface Handler {
-    void handle(Request request);
+    Response handle(Request request);
 }

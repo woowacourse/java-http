@@ -17,10 +17,18 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿈
   * [참고](https://www.baeldung.com/convert-input-stream-to-string)
 * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
-  * DEFAULT_BUFFER_SIZE = 8192
+  * DEFAULT_BUFFER_SIZE = 8192 (2^13)
 * while (true) 대신 for(; ;) 사용하는 이유가 뭘까? [코드](java.io.BufferedInputStream.implRead(byte[], int, int))
 
 
 * bufferedReader.lines().toList()로는 안불러지고 bufferedReader.readline()으로 해결
 * 리다이렉트 하기 위해서 Location을 지정해주는데 302일 때는 제대로 되고 401일 때는 리다이렉트가 안됨 
   * 어떤 메서드에서만 리다이렉트가 가능한가?
+  * 몰리왈 3xx만 리다이렉트
+    * 하지만 아니었고
+    * 301과 302 됨
+    * 300 안됨
+    * 308 하니까 에러뜸
+  * 
+  * ![img_1.png](img_1.png)
+  * ![img_2.png](img_2.png)

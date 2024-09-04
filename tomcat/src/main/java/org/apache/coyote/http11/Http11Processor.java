@@ -6,7 +6,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.http.HttpHeaders;
 import java.nio.file.Files;
+import java.util.HashMap;
+
+import jakarta.servlet.HttpMethodConstraintElement;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -41,9 +48,44 @@ public class Http11Processor implements Runnable, Processor {
             final String requestMethodAndUrl = bufferedReader.readLine();
 
             final String[] texts = requestMethodAndUrl.split(" ");
+            var line = " ";
+
+            var httpRequestHeaders = new HashMap<String, String>();
+            while (!line.isEmpty()) {
+                line = bufferedReader.readLine();
+                if (line == null || line.isBlank()) {
+                    break;
+                }
+                final String[] split = line.split(":");
+                httpRequestHeaders.put(split[0], split[1]);
+            }
             final var method = texts[0];
             final var path = texts[1];
             log.info("{} 요청 = {}", method, requestMethodAndUrl);
+            if (method.equals("POST")) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length").strip());
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+                log.info("requestBody = {}", requestBody);
+
+                var body = new HashMap<String, String>();
+                final String[] params = requestBody.split("&");
+                for (final String param : params) {
+                    body.put(param.split("=")[0], param.split("=")[1]);
+                }
+                final User user = new User(body.get("account"), body.get("password"), body.get("email"));
+                InMemoryUserRepository.save(user);
+
+                final Response response = new Response();
+                response.setSc("Multiple Choices");
+                response.setStatusCode(300);
+                response.setLocation("index.html");
+                response.setContentType("text/html");
+                outputStream.write(response.toHttpResponse().getBytes());
+                outputStream.flush();
+                return;
+            }
             final Request request = new Request(path);
             log.info("request = {}", request);
             final URL resource = request.getUrl();

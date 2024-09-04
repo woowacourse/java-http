@@ -5,8 +5,15 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.Objects;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,10 +33,9 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
+            var responseBody = getStaticFileContent(inputStream);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -43,5 +49,19 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getStaticFileContent(InputStream inputStream) throws IOException {
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        String fileName = bufferedReader.readLine().split(" ")[1];
+        if (Objects.equals(fileName, "/")) {
+            return "Hello world!";
+        }
+        String staticFileName = "static/" + fileName;
+
+        File file = new File(getClass().getClassLoader().getResource(staticFileName).getPath());
+        return new String(Files.readAllBytes(file.toPath()));
     }
 }

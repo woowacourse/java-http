@@ -5,15 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.techcourse.application.UserService;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,16 +61,35 @@ public class Http11Processor implements Runnable, Processor {
                 fileExtension = uri.substring(index + 1);
             }
 
-            // uri는 /index.html도 가능하고, /login도 가능하다
-            log.debug("uri: {}, fileExtension: {}, queryString: {}", uri, fileExtension, queryString);
+            // URI가 '/'일 때 "hello world" 응답 추가
+            String responseBody;
+            String contentType;
 
-            Map<String, String> params = parseQueryString(queryString);
+            if ("/".equals(uri)) {
+                responseBody = "Hello world!";
+                contentType = "text/html;charset=utf-8";
+            } else {
+                Map<String, String> params = parseQueryString(queryString);
+                URL resource = getClass().getClassLoader().getResource("static" + fileName + "." + fileExtension);
+                if (resource == null) {
+                    // 리소스가 없을 경우 404 처리
+                    responseBody = "404 Not Found";
+                    contentType = "text/plain;charset=utf-8";
+                } else {
+                    Path path = Paths.get(resource.getPath());
+                    responseBody = new String(Files.readAllBytes(path));
+                    contentType = createContentType(fileExtension);
+                }
 
-            Path filePath = Paths.get(getClass().getClassLoader().getResource("static" + fileName + "." + fileExtension).getPath());
-            List<String> requestHeaders = Files.readAllLines(filePath);
+                // 로그인 처리
+                if (uri.startsWith("/login")) {
+                    String account = params.get("account");
+                    String password = params.get("password");
+                    User user = new UserService().login(account, password);
+                    log.debug("user: {}", user);
+                }
+            }
 
-            final String responseBody = String.join("\r\n", requestHeaders);
-            String contentType = createContentType(fileExtension);
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + " ",
@@ -83,13 +104,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractFileExtension(String requestUri) {
-        int index = requestUri.lastIndexOf(".");
-        if (index == -1) {
-            return "html";
-        }
-        return requestUri.substring(index + 1);
-    }
 
     private String readHeaders(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

@@ -69,7 +69,7 @@ class Http11RequestParser {
     }
 
     List<Cookie> parseCookies(String requestMessage) {
-        String rawHeaders = requestMessage.split("\r\n\r\n")[0]
+        String rawHeaders = requestMessage.split("\r\n")[0]
                 .replace(parseStartLine(requestMessage), "")
                 .replaceFirst("\r\n", "");
 

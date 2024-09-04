@@ -25,6 +25,10 @@ public enum FileExtension {
         return false;
     }
 
+    public String getExtension() {
+        return extension;
+    }
+
     public static FileExtension from(String path) {
         for (FileExtension ext : values()) {
             if (path.endsWith(ext.getExtension())) {
@@ -32,9 +36,5 @@ public enum FileExtension {
             }
         }
         throw new IllegalArgumentException();
-    }
-
-    public String getExtension() {
-        return extension;
     }
 }

@@ -96,7 +96,6 @@ class HttpRequestTest {
                 "",
                 "");
 
-
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
 
         // when

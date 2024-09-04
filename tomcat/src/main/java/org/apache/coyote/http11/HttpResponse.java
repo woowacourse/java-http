@@ -8,14 +8,14 @@ public class HttpResponse {
     private final MimeType mimeType;
     private final byte[] body;
 
+    public HttpResponse(HttpStateCode stateCode, byte[] body) {
+        this(stateCode, MimeType.OTHER, body);
+    }
+
     public HttpResponse(HttpStateCode stateCode, MimeType mimeType, byte[] body) {
         this.stateCode = stateCode;
         this.mimeType = mimeType;
         this.body = body;
-    }
-
-    public HttpResponse(HttpStateCode stateCode, byte[] body) {
-        this(stateCode, MimeType.OTHER, body);
     }
 
     public byte[] toByte() {

@@ -40,6 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String responseBody = "Hello world!";
+            MediaType mediaType = MediaType.HTML;
             String[] splitLine = firstLine.split(" ");
             String httpMethod = splitLine[0];
             String requestUri = splitLine[1];
@@ -50,11 +51,13 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
                 File file = new File(resource.getFile());
+                String extension = extractExtension(file.getName());
+                mediaType = MediaType.from(extension);
                 responseBody = new String(Files.readAllBytes(file.toPath()));
             }
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + mediaType.getValue() + " ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -64,5 +67,13 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractExtension(String uri) {
+        int lastIndex = uri.lastIndexOf('.');
+        if (lastIndex == -1 && lastIndex == uri.length() - 1) {
+            return "";
+        }
+        return uri.substring(lastIndex);
     }
 }

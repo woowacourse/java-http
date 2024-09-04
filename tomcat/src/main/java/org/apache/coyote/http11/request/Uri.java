@@ -17,6 +17,11 @@ public class Uri {
         return false;
     }
 
+    public String getQueryString() {
+        int index = path.indexOf("?");
+        return path.substring(index + 1);
+    }
+
     public String getPath() {
         return path;
     }

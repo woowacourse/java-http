@@ -19,7 +19,7 @@ public class HttpRequest {
     private static final String QUERY_START = "\\?";
 
     private final Map<String, String> queryMap = new HashMap<>();
-    private final Map<String, String> headers = new HashMap<>();
+    private final HttpHeader header;
     private final Optional<String> body;
     private HttpMethod method;
     private String url;
@@ -32,7 +32,7 @@ public class HttpRequest {
 
         parseRequestLine(requestLine);
         parseQueryParameter();
-        parseHeader(bufferedReader);
+        this.header = parseHeader(bufferedReader);
         this.body = parseBody(bufferedReader);
     }
 
@@ -59,24 +59,26 @@ public class HttpRequest {
         }
     }
 
-    private void parseHeader(BufferedReader bufferedReader) throws IOException {
-        String header = bufferedReader.readLine();
-        while (header != null && !header.equals("")) {
-            String[] headerToken = header.split(HEADER_DELIMITER);
+    private HttpHeader parseHeader(BufferedReader bufferedReader) throws IOException {
+        HttpHeader header = new HttpHeader();
+        String readLine = bufferedReader.readLine();
+        while (readLine != null && !readLine.equals("")) {
+            String[] headerToken = readLine.split(HEADER_DELIMITER);
             String value = reconstructHeaderValue(Arrays.copyOfRange(headerToken, 1, headerToken.length));
-            headers.put(headerToken[0], value);
-            header = bufferedReader.readLine();
+            header.addHeader(headerToken[0], value);
+            readLine = bufferedReader.readLine();
         }
+        return header;
     }
 
     private Optional<String> parseBody(BufferedReader bufferedReader) throws IOException {
         StringBuilder stringBody = new StringBuilder();
 
-        if (!headers.containsKey("Content-Length")) {
+        if (!header.hasContentLength()) {
             return Optional.empty();
         }
 
-        for (int i = 0; i < Integer.parseInt(headers.get("Content-Length")); i++) {
+        for (int i = 0; i < header.getContentLength(); i++) {
             stringBody.append((char) bufferedReader.read());
         }
 
@@ -107,8 +109,8 @@ public class HttpRequest {
         return version;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public HttpHeader getHeaders() {
+        return header;
     }
 
     public Map<String, String> getQueryMap() {
@@ -123,7 +125,7 @@ public class HttpRequest {
     public String toString() {
         return "HttpRequest{" +
                 "queryMap=" + queryMap +
-                ", headers=" + headers +
+                ", headers=" + header +
                 ", body=" + body +
                 ", method=" + method +
                 ", url='" + url + '\'' +

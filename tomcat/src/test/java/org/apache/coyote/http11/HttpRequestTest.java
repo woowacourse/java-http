@@ -44,15 +44,12 @@ class HttpRequestTest {
     @Test
     void httpRequestHeaderParse() throws IOException {
         // given
-        String hostKey = "Host";
-        String hostValue = "localhost:8080";
-        String connectionKey = "Connection";
-        String connectionValue = "keep-alive";
+        String contentLengthKey = "Content-Length";
+        String contentLengthValue = "123";
 
         String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
-                hostKey + ": " + hostValue,
-                connectionKey + ": " + connectionValue,
+                contentLengthKey + ": " + contentLengthValue,
                 "",
                 "");
 
@@ -62,10 +59,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(inputStream);
 
         // then
-        assertAll(
-                () -> assertThat(request.getHeaders().get(hostKey)).isEqualTo(hostValue),
-                () -> assertThat(request.getHeaders().get(connectionKey)).isEqualTo(connectionValue)
-        );
+        assertThat(request.getHeaders().getContentLength()).isEqualTo(Integer.parseInt(contentLengthValue));
     }
 
     @DisplayName("쿼리 파라미터 파싱에 성공한다.")

@@ -16,16 +16,16 @@ public class HttpHeader {
         addHeader("Location", location);
     }
 
+    public void addHeader(String key, String value) {
+        header.put(key, value);
+    }
+
     public void setContentType(MimeType mimeType) {
         addHeader("Content-Type", mimeType.getContentType());
     }
 
-    public void setContentLength(String contentLength) {
-        addHeader("Content-Length", contentLength);
-    }
-
-    private void addHeader(String key, String value) {
-        header.put(key, value);
+    public boolean hasContentLength() {
+        return header.containsKey("Content-Length");
     }
 
     public String toHeaderString() {
@@ -34,6 +34,14 @@ public class HttpHeader {
             headerJoiner.add(entry.getKey() + ": " + entry.getValue() + " ");
         }
         return headerJoiner.toString();
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(header.get("Content-Length"));
+    }
+
+    public void setContentLength(String contentLength) {
+        addHeader("Content-Length", contentLength);
     }
 
     @Override

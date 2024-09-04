@@ -8,6 +8,10 @@ public class HttpResponse {
     private final HttpHeader header;
     private final byte[] body;
 
+    public HttpResponse(HttpStatusCode statusCode, HttpHeader header) {
+        this(statusCode, header, null);
+    }
+
     public HttpResponse(HttpStatusCode statusCode, HttpHeader header, byte[] body) {
         this.statusCode = statusCode;
         this.header = header;
@@ -15,10 +19,6 @@ public class HttpResponse {
         if (body != null) {
             header.setContentLength(String.valueOf(body.length));
         }
-    }
-
-    public HttpResponse(HttpStatusCode statusCode, HttpHeader header) {
-        this(statusCode, header, null);
     }
 
     public byte[] toByte() {

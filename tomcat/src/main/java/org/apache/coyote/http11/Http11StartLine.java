@@ -16,6 +16,9 @@ public class Http11StartLine {
     }
 
     public static Http11StartLine from(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("startLine이 없습니다.");
+        }
         String[] values = value.split(" ");
 
         validateVersion(values[HTTP_VERSION_INDEX]);

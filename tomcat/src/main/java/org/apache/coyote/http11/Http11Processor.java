@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -80,9 +81,12 @@ public class Http11Processor implements Runnable, Processor {
                         return;
                     }
 
+                    UUID jSessionId = UUID.randomUUID();
+
                     Path path = Path.of(url.toURI());
                     responseBody = new String(Files.readAllBytes(path));
-                    response = generate302Response(responseBody, "text/html", "/index.html");
+                    response = generate302ResponseWithCookie(responseBody, "text/html",
+                            "/index.html", jSessionId.toString());
                 } else {
                     URL url = getClass().getClassLoader().getResource("static/401.html");
                     if (url == null) {
@@ -172,6 +176,18 @@ public class Http11Processor implements Runnable, Processor {
                 "Location: " + redirectUrl,
                 "Content-Type: " + contentType + ";charset=utf-8",
                 "Content-Length: " + responseBody.getBytes().length,
+                "",
+                responseBody);
+    }
+
+    private String generate302ResponseWithCookie(String responseBody, String contentType,
+                                                 String redirectUrl, String jSessionID) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + redirectUrl,
+                "Content-Type: " + contentType + ";charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
+                "Set-Cookie: JSESSIONID=" + jSessionID + "; Path=/; HttpOnly",
                 "",
                 responseBody);
     }

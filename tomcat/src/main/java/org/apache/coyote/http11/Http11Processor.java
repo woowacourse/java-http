@@ -44,11 +44,19 @@ public class Http11Processor implements Runnable, Processor {
             URL resource = getClass().getClassLoader().getResource(resourceName);
             Path path = new File(resource.getPath()).toPath();
             byte[] bytes = Files.readAllBytes(path);
+            
+            String contentType = "text/html;";
+            if (requestUri.endsWith(".css")) {
+                contentType = "text/css;";
+            }
+            if (requestUri.endsWith(".js")) {
+                contentType = "application/javascript;";
+            }
 
             final var responseBody = new String(bytes);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

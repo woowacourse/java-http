@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStateCode;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 
 public class RegisterController implements Controller {
@@ -39,7 +39,7 @@ public class RegisterController implements Controller {
     }
 
     private HttpResponse redirectRegisterPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/register.html", MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, "/register.html", MimeType.HTML);
     }
 
     private Map<String, String> parseBody(String query) {
@@ -57,6 +57,6 @@ public class RegisterController implements Controller {
     }
 
     private HttpResponse redirectDefaultPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/index.html", MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, "/index.html", MimeType.HTML);
     }
 }

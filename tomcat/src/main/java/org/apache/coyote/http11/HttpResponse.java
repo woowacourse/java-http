@@ -1,24 +1,30 @@
 package org.apache.coyote.http11;
 
-import java.util.Arrays;
 import java.util.StringJoiner;
 
 public class HttpResponse {
 
     private final HttpStatusCode stateCode;
-    private final String location;
-    private final MimeType mimeType;
+    private final HttpHeader header;
     private final byte[] body;
-
-    public HttpResponse(HttpStatusCode stateCode, MimeType mimeType, byte[] body) {
-        this(stateCode, null, mimeType, body);
-    }
 
     public HttpResponse(HttpStatusCode stateCode, String location, MimeType mimeType, byte[] body) {
         this.stateCode = stateCode;
-        this.location = location;
-        this.mimeType = mimeType;
+        this.header = new HttpHeader();
+        if (location != null) {
+            header.setLocation(location);
+        }
+        if (mimeType != null) {
+            header.setContentType(mimeType.getContentType());
+        }
         this.body = body;
+        if (body != null) {
+            header.setContentLength(String.valueOf(body.length));
+        }
+    }
+
+    public HttpResponse(HttpStatusCode stateCode, MimeType mimeType, byte[] body) {
+        this(stateCode, null, mimeType, body);
     }
 
     public HttpResponse(HttpStatusCode stateCode, byte[] body) {
@@ -33,32 +39,20 @@ public class HttpResponse {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
 
         stringJoiner.add("HTTP/1.1 " + stateCode.toStatus() + " ");
-        if (stateCode.equals(HttpStatusCode.FOUND)) {
-            stringJoiner.add("Location: " + location);
-            stringJoiner.add("Content-Type: " + mimeType.getContentType() + " ");
-            stringJoiner.add("\r\n");
-            return stringJoiner.toString().getBytes();
-        }
-        stringJoiner.add("Content-Type: " + mimeType.getContentType() + " ");
-        stringJoiner.add("Content-Length: " + body.length + " ");
+        stringJoiner.add(header.toHeaderString());
         stringJoiner.add("\r\n");
 
         byte[] headerBytes = stringJoiner.toString().getBytes();
-        byte[] response = new byte[headerBytes.length + body.length];
+        if (body != null) {
+            byte[] response = new byte[headerBytes.length + body.length];
 
-        System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
-        System.arraycopy(body, 0, response, headerBytes.length, body.length);
+            System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
+            System.arraycopy(body, 0, response, headerBytes.length, body.length);
 
-        return response;
+            return response;
+        }
+        return headerBytes;
     }
 
-    @Override
-    public String toString() {
-        return "HttpResponse{" +
-                "stateCode=" + stateCode +
-                ", location='" + location + '\'' +
-                ", mimeType=" + mimeType +
-                ", body=" + Arrays.toString(body) +
-                '}';
-    }
+
 }

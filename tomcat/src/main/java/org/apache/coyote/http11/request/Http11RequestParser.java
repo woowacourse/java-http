@@ -11,8 +11,9 @@ import org.apache.coyote.http11.Http11Header;
 class Http11RequestParser {
 
     /*
-    https://www.rfc-editor.org/rfc/rfc2616#section-5 이 문서에서 이 메서드가 반환하는 것을 Request-URI라 지칭합니다.
-     */
+        https://www.rfc-editor.org/rfc/rfc2616#section-5 이 문서에서 이 메서드가 반환하는 것을 Request-URI라 지칭합니다.
+         */
+
     String parseRequestURI(String requestMessage) {
         String startLine = parseStartLine(requestMessage);
         validateStartLine(startLine);
@@ -69,12 +70,12 @@ class Http11RequestParser {
     }
 
     List<Cookie> parseCookies(String requestMessage) {
-        String rawHeaders = requestMessage.split("\r\n")[0]
-                .replace(parseStartLine(requestMessage), "")
+        String rawHeaders = requestMessage.replace(parseStartLine(requestMessage), "")
                 .replaceFirst("\r\n", "");
 
         return Arrays.stream(rawHeaders.split("\r\n"))
                 .filter(rawHeader -> rawHeader.startsWith("Cookie"))
+                .map(this::removeHeaderKey)
                 .flatMap(rawCookies -> {
                     String[] split = rawCookies.split(";");
                     return Arrays.stream(split);
@@ -82,6 +83,12 @@ class Http11RequestParser {
                 .map(String::trim)
                 .map(this::parseCookie)
                 .toList();
+    }
+
+    private String removeHeaderKey(String rawHeader) {
+        int startIndex = rawHeader.indexOf(":") + 1;
+        String headerKeyRemoved = rawHeader.substring(startIndex);
+        return headerKeyRemoved.trim();
     }
 
     private Cookie parseCookie(String rawCookie) {

@@ -20,6 +20,10 @@ public enum ContentType {
         this.rawContentType = rawContentType;
     }
 
+    public boolean isSame(String rawContentType) {
+        return this.rawContentType.equals(rawContentType);
+    }
+
     public String getRawContentType() {
         return rawContentType;
     }

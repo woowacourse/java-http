@@ -3,9 +3,9 @@ package org.apache.coyote.http11.response;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Http11ContentTypeFinder;
 import org.apache.coyote.http11.Http11Header;
@@ -27,9 +27,16 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
         return new Http11Response(Http11StatusCode.OK, copyHeader, cookies, responseBody);
     }
 
-    public static Http11Response found(String uri) {
+    public static Http11Response found(String uri, Cookie... cookies) {
         List<Http11Header> headers = List.of(new Http11Header("Location", uri));
-        return new Http11Response(Http11StatusCode.FOUND, headers, new ArrayList<>(), new byte[0]);
+        return new Http11Response(Http11StatusCode.FOUND, headers, List.of(cookies), new byte[0]);
+    }
+
+    public boolean isHtml() {
+        return headers.stream()
+                .filter(header -> header.key().equals("Content-Type"))
+                .map(Http11Header::value)
+                .anyMatch(value -> value.contains(ContentType.HTML.getRawContentType()));
     }
 
     public byte[] toBytes() {

@@ -26,7 +26,9 @@ public record Http11Request(Http11Method method, String requestUri, List<Http11Q
         return new Http11Request(http11Method, requestUri, http11Queries, http11Headers, cookies, body);
     }
 
-    public String getRequestUriWithOurQueries() {
-        return requestUri.split("\\?")[0];
+    public boolean hasSessionCookie() {
+        return cookies.stream()
+                .map(Cookie::key)
+                .anyMatch(key -> key.equals("JSESSIONID"));
     }
 }

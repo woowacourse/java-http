@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -40,11 +42,25 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             String requestUri = input.split(" ")[1];
-            String resourceName = "static" + requestUri;
-            URL resource = getClass().getClassLoader().getResource(resourceName);
-            Path path = new File(resource.getPath()).toPath();
-            byte[] bytes = Files.readAllBytes(path);
-            
+
+            String requestPath = requestUri;
+            int index = requestUri.indexOf("?");
+            if (index >= 0) {
+                requestPath = requestUri.substring(0, index);
+                String queryString = requestUri.substring(index + 1);
+                String[] queries = queryString.split("&");
+                String[] account = queries[0].split("=");
+                String[] password = queries[1].split("=");
+
+                User user = InMemoryUserRepository.findByAccount(account[1])
+                        .orElseThrow(IllegalArgumentException::new);
+                if (!user.checkPassword(password[1])) {
+                    return;
+                }
+                log.info("user : {}", user);
+            }
+
+
             String contentType = "text/html;";
             if (requestUri.endsWith(".css")) {
                 contentType = "text/css;";
@@ -52,6 +68,14 @@ public class Http11Processor implements Runnable, Processor {
             if (requestUri.endsWith(".js")) {
                 contentType = "application/javascript;";
             }
+
+            String resourceName = "static" + requestPath;
+            if (contentType.equals("text/html;") && !resourceName.endsWith(".html")) {
+                resourceName += ".html";
+            }
+            URL resource = getClass().getClassLoader().getResource(resourceName);
+            Path path = new File(resource.getPath()).toPath();
+            byte[] bytes = Files.readAllBytes(path);
 
             final var responseBody = new String(bytes);
             final var response = String.join("\r\n",

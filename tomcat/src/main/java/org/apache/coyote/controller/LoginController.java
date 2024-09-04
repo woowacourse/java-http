@@ -30,14 +30,22 @@ public class LoginController implements Controller {
         String account = queryMap.get(ACCOUNT_KEY);
         String password = queryMap.get(PASSWORD_KEY);
 
-        User user = userRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
-
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("비밀 번호 오류");
+        try {
+            login(account, password);
+        } catch (IllegalArgumentException e) {
+            return redirectUnauthorizedPage();
         }
 
         return redirectDefaultPage();
+    }
+
+    private void login(String account, String password) {
+        User user = userRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("비밀번호 오류가 발생했습니다.");
+        }
     }
 
     private HttpResponse redirectLoginPage() {
@@ -46,5 +54,9 @@ public class LoginController implements Controller {
 
     private HttpResponse redirectDefaultPage() {
         return new HttpResponse(HttpStateCode.FOUND, "/index.html", MimeType.HTML);
+    }
+
+    private HttpResponse redirectUnauthorizedPage() {
+        return new HttpResponse(HttpStateCode.FOUND, "/401.html", MimeType.HTML);
     }
 }

@@ -23,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
             Set.of("GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH");
     private static final String HTTP_1_1 = "HTTP/1.1";
     private static final String STATIC_DIRNAME = "static";
+    private static final String NOT_FOUND_FILENAME = "404.html";
 
     private final Socket connection;
 
@@ -106,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
             Path path = Paths.get(uri);
             return Files.readString(path);
         } catch (NullPointerException e) {
-            throw new UncheckedServletException("존재하지 않는 리소스입니다.");
+            return readBody(NOT_FOUND_FILENAME);
         } catch (Exception e) {
             throw new UncheckedServletException(e);
         }

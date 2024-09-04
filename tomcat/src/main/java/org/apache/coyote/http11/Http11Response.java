@@ -7,11 +7,33 @@ import java.util.Map;
 public record Http11Response(String protocolVersion, int statusCode, String statusText,
                              Map<String, String> headers, byte[] body) {
 
-    public static Http11Response.Http11ServletResponseBuilder builder() {
-        return new Http11Response.Http11ServletResponseBuilder();
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
+    public static Builder builder(int statusCode) {
+        if (statusCode == 200) {
+            return new Builder()
+                    .protocolVersion("HTTP/1.1")
+                    .statusCode(statusCode)
+                    .statusText("OK");
+        }
+        if (statusCode == 404) {
+            return new Builder()
+                    .protocolVersion("HTTP/1.1")
+                    .statusCode(statusCode)
+                    .statusText("Not Found");
+        }
+        if (statusCode == 500) {
+            return new Builder()
+                    .protocolVersion("HTTP/1.1")
+                    .statusCode(statusCode)
+                    .statusText("Internal Server Error");
+        }
+        return builder();
+    }
+
+    private static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
         byte[] mergedArray = new byte[array1.length + array2.length];
 
         System.arraycopy(array1, 0, mergedArray, 0, array1.length);
@@ -22,50 +44,55 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
 
     public byte[] toMessage() {
         StringBuilder builder = new StringBuilder();
-        builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append("\r\n")
-                .append(headers.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()))
-                .append("\r\n");
+        builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append(" ");
+        headers.forEach((key, value) -> builder.append("\r\n").append(key).append(": ").append(value).append(" "));
 
         if (body != null && body.length > 0) {
-            builder.append("\r\n");
+            builder.append("\r\n").append("Content-Length: ").append(body.length).append(" ");
+            builder.append("\r\n\r\n");
             return mergeByteArrays(builder.toString().getBytes(), body);
         }
 
         return builder.toString().getBytes();
     }
 
-    public static class Http11ServletResponseBuilder {
+    public static class Builder {
+        private final Map<String, String> headers;
         private String protocolVersion;
         private int statusCode;
         private String statusText;
-        private Map<String, String> headers;
         private byte[] body;
 
-        Http11ServletResponseBuilder() {
+        private Builder() {
             headers = new HashMap<>();
         }
 
-        public Http11Response.Http11ServletResponseBuilder protocolVersion(String protocolVersion) {
+        public Builder protocolVersion(String protocolVersion) {
             this.protocolVersion = protocolVersion;
             return this;
         }
 
-        public Http11Response.Http11ServletResponseBuilder statusCode(int statusCode) {
+        public Builder statusCode(int statusCode) {
             this.statusCode = statusCode;
             return this;
         }
 
-        public Http11Response.Http11ServletResponseBuilder statusText(String statusText) {
+        public Builder statusText(String statusText) {
             this.statusText = statusText;
             return this;
         }
 
-        public Http11Response.Http11ServletResponseBuilder addHeader(String key, String value) {
+        public Builder addHeader(String key, String value) {
             headers.put(key, value);
             return this;
         }
 
-        public Http11Response.Http11ServletResponseBuilder body(byte[] body) {
+        public Builder contentType(String value) {
+            headers.put("Content-Type", value + ";charset=utf-8");
+            return this;
+        }
+
+        public Builder body(byte[] body) {
             this.body = body;
             return this;
         }

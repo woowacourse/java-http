@@ -2,10 +2,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final StaticResourceReader staticResourceReader;
+    private final Function<Http11Request, Http11Response> defaultProcessor;
+    private final Map<String, Function<Http11Request, Http11Response>> processors;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.staticResourceReader = new StaticResourceReader();
+        this.defaultProcessor = this::processStaticResource;
+        this.processors = Map.of(
+                "/", this::processRootPage,
+                "/login", this::processLoginPage
+        );
     }
 
     @Override
@@ -36,65 +44,56 @@ public class Http11Processor implements Runnable, Processor {
             Http11Request servletRequest = Http11Request.parse(requestLines);
             log.debug(servletRequest.toString());
 
-            if (servletRequest.path().equals("/")) {
-                processRootPath(outputStream);
-                return;
+            for (final var processor : processors.entrySet()) {
+                if (servletRequest.path().equals(processor.getKey())) {
+                    Http11Response response = processor.getValue().apply(servletRequest);
+                    outputStream.write(response.toMessage());
+                    outputStream.flush();
+                    return;
+                }
             }
 
-            if (servletRequest.path().equals("/login")) {
-                processLoginPage(outputStream);
-                return;
-            }
-
-            processStaticResource(servletRequest, outputStream);
+            Http11Response response = defaultProcessor.apply(servletRequest);
+            outputStream.write(response.toMessage());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void processRootPath(OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private Http11Response processRootPage(Http11Request servletRequest) {
+        return Http11Response.builder(200)
+                .addHeader("Content-Type", "text/html;charset=utf-8")
+                .body("Hello world!".getBytes())
+                .build();
     }
 
-    private void processLoginPage(OutputStream outputStream) throws IOException {
-        String loginResourcePath = "login.html";
-        String contentType = URLConnection.guessContentTypeFromName(loginResourcePath);
-        final var responseBody = staticResourceReader.read(loginResourcePath);
-        final var response = responseBody == null ?
-                "HTTP/1.1 404 Not Found" :
-                String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "",
-                        new String(responseBody));
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private Http11Response processLoginPage(Http11Request servletRequest) {
+        return processStaticResource(new Http11Request(
+                servletRequest.method(),
+                "login.html",
+                servletRequest.parameters(),
+                servletRequest.protocolVersion()
+        ));
     }
 
-    private void processStaticResource(Http11Request servletRequest, OutputStream outputStream)
-            throws IOException {
+    private Http11Response processStaticResource(Http11Request servletRequest) {
         String contentType = URLConnection.guessContentTypeFromName(servletRequest.path());
-        final var responseBody = staticResourceReader.read(servletRequest.path());
-        final var response = responseBody == null ?
-                "HTTP/1.1 404 Not Found" :
-                String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: " + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.length + " ",
-                        "",
-                        new String(responseBody));
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        final byte[] responseBody;
+        try {
+            responseBody = staticResourceReader.read(servletRequest.path());
+            if (responseBody == null) {
+                return Http11Response.builder(404)
+                        .build();
+            }
+            return Http11Response.builder(200)
+                    .contentType(contentType)
+                    .body(responseBody)
+                    .build();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return Http11Response.builder(500)
+                    .build();
+        }
     }
 }

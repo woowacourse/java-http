@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -39,8 +41,21 @@ public class Http11Processor implements Runnable, Processor {
             // parse request
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder sb = new StringBuilder();
-            while (bufferedReader.ready()) {
-                sb.append(bufferedReader.readLine()).append("\r\n");
+
+            int contentLength = -1;
+            String s;
+            while ((s = bufferedReader.readLine()) != null && !s.isEmpty()) {
+                sb.append(s).append("\r\n");
+                if (s.contains("Content-Length")) {
+                    contentLength = Integer.parseInt(s.split(":")[1].strip());
+                }
+            }
+
+            String requestBody = null;
+            if (contentLength != -1) {
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
             }
 
             if (sb.isEmpty()) {
@@ -49,6 +64,13 @@ public class Http11Processor implements Runnable, Processor {
 
             // handle request
             String request = sb.toString().split("\r\n")[0];
+
+            // handle post
+            if (request.contains("POST")) {
+                outputStream.write(handleStaticPostRequest(request, requestBody));
+                outputStream.flush();
+                return;
+            }
 
             log.info("request = {}", request);
 
@@ -60,6 +82,44 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private byte[] handleStaticPostRequest(String request, String requestBody) {
+
+        String[] requestBodySplit = requestBody.split("&");
+        Map<String, String> requestBodyMap = new HashMap<>();
+        for (int i = 0; i < requestBodySplit.length; i++) {
+            String[] split = requestBodySplit[i].split("=");
+            requestBodyMap.put(split[0], split[1]);
+        }
+        if(request.contains("login")){
+            if (InMemoryUserRepository.findByAccount(requestBodyMap.get("account")).isEmpty()) {
+                throw new IllegalArgumentException("account already exists");
+            }
+            return String.join("\r\n",
+                            "HTTP/1.1 " + "302 Found" + " ",
+                            "Content-Type: " + "text/html" + " ",
+                            "Location: /index.html" + " ")
+                    .getBytes();
+        }
+
+        if (InMemoryUserRepository.findByAccount(requestBodyMap.get("account")).isPresent()) {
+            throw new IllegalArgumentException("account already exists");
+        }
+
+        InMemoryUserRepository.save(
+                new User(
+                        requestBodyMap.get("account"),
+                        requestBodyMap.get("password"),
+                        requestBodyMap.get("email")
+                )
+        );
+
+        return String.join("\r\n",
+                        "HTTP/1.1 " + "302 Found" + " ",
+                        "Content-Type: " + "text/html" + " ",
+                        "Location: /index.html" + " ")
+                .getBytes();
     }
 
     private byte[] handleStaticRequest(String request) throws URISyntaxException, IOException {
@@ -110,6 +170,16 @@ public class Http11Processor implements Runnable, Processor {
                 statusCode = "401 Unauthorized";
             }
         }
+
+//        if (fileName.equals("/register.html")) {
+////            System.out.println();
+//            statusCode = "302 Found";
+//            return String.join("\r\n",
+//                            "HTTP/1.1 " + statusCode + " ",
+//                            "Content-Type: " + "text/html" + " ",
+//                            "Location: /index.html" + " ")
+//                    .getBytes();
+//        }
 
         String extension = fileName.split("\\.")[1];
         if (extension.equals("js")) {

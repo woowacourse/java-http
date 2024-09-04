@@ -88,11 +88,9 @@ public class Http11Processor implements Runnable, Processor {
                 Path path = file.toPath();
                 responseBody = new String(Files.readAllBytes(path));
                 response = getOKResponse(mimeType, responseBody);
-            } else if (firstLines[1].startsWith("/login?")) {
-                int index = firstLines[1].indexOf("?");
-                String queryString = firstLines[1].substring(index + 1);
-                String account = queryString.split("&")[0].split("=")[1];
-                String password = queryString.split("&")[1].split("=")[1];
+            } else if (firstLines[1].startsWith("/login") && firstLines[0].equals("POST")) {
+                String account = requestBody.split("&")[0].split("=")[1];
+                String password = requestBody.split("&")[1].split("=")[1];
 
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                 if (optionalUser.isPresent()) {

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
+import java.util.List;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;
@@ -28,7 +29,9 @@ public class AbstractControllerTest {
     @Test
     @DisplayName("구현한 HTTP 메서드를 처리한다.")
     void service() throws IOException {
-        HttpRequest request = new HttpRequest("GET /index.html HTTP/1.1");
+        String requestLine = "GET /index.html HTTP/1.1";
+        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
+        HttpRequest request = new HttpRequest(requestLine, headerLines);
 
         HttpResponse response = controller.service(request);
 
@@ -41,7 +44,9 @@ public class AbstractControllerTest {
     @Test
     @DisplayName("구현하지 않은 HTTP 메서드를 처리한다.")
     void serviceMethodNotImplemented() throws IOException {
-        HttpRequest request = new HttpRequest("POST /index.html HTTP/1.1");
+        String requestLine = "POST /index.html HTTP/1.1";
+        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
+        HttpRequest request = new HttpRequest(requestLine, headerLines);
 
         HttpResponse response = controller.service(request);
 

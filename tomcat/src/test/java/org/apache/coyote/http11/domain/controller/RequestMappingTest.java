@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
@@ -24,7 +25,9 @@ class RequestMappingTest {
                     }
                 }
         ));
-        HttpRequest request = new HttpRequest("GET /test HTTP/1.1");
+        String requestLine = "GET /test HTTP/1.1";
+        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
+        HttpRequest request = new HttpRequest(requestLine, headerLines);
 
         HttpResponse response = requestMapping.getController(request).service(request);
 
@@ -38,7 +41,9 @@ class RequestMappingTest {
     @DisplayName("요청을 처리할 수 있는 컨트롤러가 없으면 ResourceController 를 반환한다.")
     void getControllerNoMatchedController() throws IOException {
         RequestMapping requestMapping = new RequestMapping(Map.of());
-        HttpRequest request = new HttpRequest("GET /not/matched HTTP/1.1");
+        String requestLine = "GET /not/matched HTTP/1.1";
+        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
+        HttpRequest request = new HttpRequest(requestLine, headerLines);
 
         Controller controller = requestMapping.getController(request);
 

@@ -2,7 +2,6 @@ package org.apache.coyote.http11.view;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.commons.lang3.StringUtils;
 
 public class InputView {
 
@@ -20,8 +19,8 @@ public class InputView {
     }
 
     private void validateLineEmpty(String line) {
-        if (StringUtils.isEmpty(line)) {
-            throw new IllegalArgumentException("Line is Empty");
+        if (line == null) {
+            throw new IllegalArgumentException("Line is Null");
         }
     }
 }

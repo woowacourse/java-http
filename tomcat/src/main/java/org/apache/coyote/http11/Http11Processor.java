@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.controller.Controller;
 import org.apache.coyote.http11.domain.controller.RequestMapping;
@@ -42,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             InputView inputView = new InputView(new BufferedReader(new InputStreamReader(inputStream)));
-            HttpRequest httpRequest = new HttpRequest(inputView.readLine());
+            HttpRequest httpRequest = readHttpRequest(inputView);
 
             Controller controller = requestMapping.getController(httpRequest);
             HttpResponse httpResponse = controller.service(httpRequest);
@@ -52,6 +54,24 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readHttpRequest(InputView inputView) throws IOException {
+        String requestLine = inputView.readLine();
+        readHttpHeaders(inputView);
+        List<String> headerLines = List.of();
+        return new HttpRequest(requestLine, headerLines);
+    }
+
+    private List<String> readHttpHeaders(InputView inputView) throws IOException {
+        ArrayList<String> headerLines = new ArrayList<>();
+        String line = inputView.readLine();
+        while (!line.isEmpty()) {
+            headerLines.add(line);
+            line = inputView.readLine();
+        }
+        
+        return headerLines;
     }
 
 }

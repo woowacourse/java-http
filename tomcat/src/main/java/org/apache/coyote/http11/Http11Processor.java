@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,27 +40,41 @@ public class Http11Processor implements Runnable, Processor {
             Path path = Path.of("");
             StringBuilder responseBody = new StringBuilder();
             String contentType = "";
-
             while (bufferedReader.ready()) {  // TODO: 404 추가하기
                 String line = bufferedReader.readLine();
                 if (line.startsWith("GET")) {
-                    String resourceURI = line.split(" ")[1];
-                    if (resourceURI.equals("/")) {
+                    String uri = line.split(" ")[1];
+                    if (uri.equals("/")) {
                         contentType = "text/html; charset=utf-8 ";
                         path = Path.of(getClass().getResource(STATIC_PATH + "/index.html").getPath());
                     }
-                    if (resourceURI.endsWith(".html")) {
+                    if (uri.startsWith("/login")) {
                         contentType = "text/html; charset=utf-8 ";
-                        path = Path.of(getClass().getResource(STATIC_PATH + resourceURI).getPath());
+                        path = Path.of(getClass().getResource(STATIC_PATH + "/login.html").getPath());
+
+                        int index = uri.indexOf("?");
+                        String queryString = uri.substring(index + 1);
+                        String[] userInfo = queryString.split("&");
+                        String account = userInfo[0].split("=")[1];
+                        String password = userInfo[1].split("=")[1];
+                        User user = InMemoryUserRepository.findByAccount(account)
+                                .orElseThrow();
+                        if (user.checkPassword(password)) {
+                            log.info(user.toString());
+                        }
                     }
-                    if (resourceURI.endsWith(".css")) {
+                    if (uri.endsWith(".html")) {
+                        contentType = "text/html; charset=utf-8 ";
+                        path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
+                    }
+                    if (uri.endsWith(".css")) {
                         contentType = "text/css; charset=utf-8 ";
-                        path = Path.of(getClass().getResource(STATIC_PATH + resourceURI).getPath());
+                        path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
 
                     }
-                    if (resourceURI.endsWith(".js")) {
+                    if (uri.endsWith(".js")) {
                         contentType = "application/javascript ";
-                        path = Path.of(getClass().getResource(STATIC_PATH + resourceURI).getPath());
+                        path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
 
                     }
                 }
@@ -81,3 +97,4 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 }
+

@@ -25,6 +25,7 @@ public class HttpRequestParser {
                 .uri(URI.create("http://localhost:8080" + requestStartLine[1]))
                 .version(getHttpVersion(requestStartLine[2]))
                 .build();
+
     }
 
     private static Version getHttpVersion(String version) {

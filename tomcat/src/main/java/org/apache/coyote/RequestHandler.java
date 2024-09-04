@@ -39,7 +39,7 @@ public class RequestHandler {
 
     private String handleRoot() {
         final String responseBody = "Hello world!";
-        return getResponse("text/html", responseBody);
+        return HttpResponseGenerator.getOkResponse("text/html", responseBody);
     }
 
     private String handleSimpleResource(final String resourceName) throws IOException {
@@ -48,7 +48,7 @@ public class RequestHandler {
         final String responseBody = Files.readString(resourcePath);
         final String mimeType = Files.probeContentType(resourcePath);
 
-        return getResponse(mimeType, responseBody);
+        return HttpResponseGenerator.getOkResponse(mimeType, responseBody);
     }
 
     // TOOD: change naming
@@ -78,20 +78,10 @@ public class RequestHandler {
 
         User user = userOptional.get();
         if (user.checkPassword(password)) {
-            log.info(user.toString());
-            return handleSimpleResource("login.html");
+            return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
         }
 
         return handleSimpleResource("401.html");
-    }
-
-    private String getResponse(String mimeType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + mimeType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 
     private String findResourcePath(final String resourcePath) {

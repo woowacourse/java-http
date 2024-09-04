@@ -37,7 +37,7 @@ public class Http11Request {
         Http11StartLine startLine = Http11StartLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = HttpHeaders.of(createHttpHeaderMap(bufferedReader), HEADER_FILTER);
         if (startLine.getMethod().hasBody()) {
-            return new Http11Request(startLine, httpHeaders, createBody(bufferedReader));
+            return new Http11Request(startLine, httpHeaders, createBody(bufferedReader, getContentLength(httpHeaders)));
         }
         return new Http11Request(startLine, httpHeaders, null);
     }
@@ -64,14 +64,15 @@ public class Http11Request {
         return httpHeaders;
     }
 
-    private static String createBody(BufferedReader bufferedReader) throws IOException {
-//        List<String> body = new ArrayList<>();
-//        String line;
-//        while ((line = bufferedReader.readLine()) != null && !line.equals("")) {
-//            body.add(line);
-//        }
-//        return String.join("\r\n", body);
-        return "";
+    private static int getContentLength(HttpHeaders httpHeaders) {
+        return httpHeaders.firstValue("Content-Length").map(Integer::parseInt).orElse(0);
+    }
+
+    private static String createBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     public boolean isStaticResourceRequest() {

@@ -1,16 +1,16 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
-import java.net.URI;
 import org.apache.coyote.http11.request.HttpProtocol;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.request.Uri;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class GreetingHandler implements HttpRequestHandler {
 
     private static final Method SUPPORTING_METHOD = Method.GET;
-    private static final URI SUPPORTING_URI = URI.create("");
+    private static final Uri SUPPORTING_URI = new Uri("");
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
 
 

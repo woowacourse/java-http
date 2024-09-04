@@ -1,14 +1,12 @@
 package org.apache.coyote.http11.request;
 
-import java.net.URI;
-
 public class RequestLine {
 
     private final Method method;
-    private final URI uri;
+    private final Uri uri;
     private final HttpProtocol protocol;
 
-    public RequestLine(final Method method, final URI uri, final HttpProtocol protocol) {
+    public RequestLine(final Method method, final Uri uri, final HttpProtocol protocol) {
         this.method = method;
         this.uri = uri;
         this.protocol = protocol;
@@ -18,7 +16,7 @@ public class RequestLine {
         return method;
     }
 
-    public URI getUri() {
+    public Uri getUri() {
         return uri;
     }
 

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +16,7 @@ public class HttpRequest {
         String[] requestElements = requestLine.split(" ");
 
         Method method = Method.from(requestElements[0]);
-        URI uri = URI.create(requestElements[1]);
+        Uri uri = new Uri(requestElements[1]);
         HttpProtocol protocol = HttpProtocol.from(requestElements[2]);
 
         return new HttpRequest(new RequestLine(method, uri, protocol));
@@ -38,12 +37,12 @@ public class HttpRequest {
         return !httpProtocol.equals(getHttpProtocol());
     }
 
-    public boolean isUriNotEqualWith(URI uri) {
+    public boolean isUriNotEqualWith(Uri uri) {
         return uri.equals(getUri());
     }
 
     public boolean isUriHome() {
-        return getUri().equals(URI.create("/"));
+        return getUri().equals(new Uri("/"));
     }
 
     public String getHeaderValue(String key) {
@@ -54,7 +53,7 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public URI getUri() {
+    public Uri getUri() {
         return requestLine.getUri();
     }
 

@@ -11,6 +11,29 @@ public record Http11ServletResponse(String protocolVersion, int statusCode, Stri
         return new Http11ServletResponse.Http11ServletResponseBuilder();
     }
 
+    public static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
+        byte[] mergedArray = new byte[array1.length + array2.length];
+
+        System.arraycopy(array1, 0, mergedArray, 0, array1.length);
+        System.arraycopy(array2, 0, mergedArray, array1.length, array2.length);
+
+        return mergedArray;
+    }
+
+    public byte[] toMessage() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append("\r\n")
+                .append(headers.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()))
+                .append("\r\n");
+
+        if (body != null && body.length > 0) {
+            builder.append("\r\n");
+            return mergeByteArrays(builder.toString().getBytes(), body);
+        }
+
+        return builder.toString().getBytes();
+    }
+
     public static class Http11ServletResponseBuilder {
         private String protocolVersion;
         private int statusCode;

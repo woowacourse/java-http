@@ -42,7 +42,7 @@ public class FrontController {
     public Controller getController(String path) {
         Controller controller = controllers.get(path);
         if (controller == null) {
-            throw new IllegalArgumentException("Not Found");
+            return new NotFoundController();
         }
         return controllers.get(path);
     }

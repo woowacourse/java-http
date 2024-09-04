@@ -8,6 +8,7 @@ public enum FileExtension {
     ICO("ico"),
     PNG("png"),
     JPG("jpeg"),
+    SVG("svg"),
     ;
 
     private final String extension;

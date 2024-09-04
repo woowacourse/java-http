@@ -10,6 +10,7 @@ public enum MimeType {
     ICO("image/x-ico", FileExtension.ICO),
     PNG("image/png", FileExtension.PNG),
     JPG("image/jpeg", FileExtension.JPG),
+    SVG("image/svg+xml", FileExtension.SVG),
     OTHER("text/plain", null),
     ;
 

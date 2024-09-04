@@ -68,4 +68,16 @@ public class HttpRequest {
     public String getUriPath() {
         return requestLine.getUriPath();
     }
+
+    public String getQueryParameter(final String paramterName) {
+        String queryString = getUri().getQueryString();
+        Map<String, String> queryParams = new HashMap<>();
+
+        String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            queryParams.put(keyValue[0], keyValue[1]);
+        }
+        return queryParams.get(paramterName);
+    }
 }

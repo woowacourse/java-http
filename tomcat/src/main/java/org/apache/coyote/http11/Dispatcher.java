@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.handler.GreetingHandler;
 import org.apache.coyote.http11.handler.HttpRequestHandler;
+import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.LoginPageHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -20,6 +21,7 @@ public class Dispatcher {
         handlers.add(new StaticResourceHandler());
         handlers.add(new GreetingHandler());
         handlers.add(new LoginPageHandler());
+        handlers.add(new LoginHandler());
     }
 
     public static Dispatcher getInstance() {

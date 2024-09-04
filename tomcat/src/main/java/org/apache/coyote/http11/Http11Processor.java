@@ -82,9 +82,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 // 로그인 처리
-                if (uri.startsWith("/login")) {
+                if (uri.startsWith("/login") && params.containsKey("account") && params.containsKey("password")) {
                     String account = params.get("account");
                     String password = params.get("password");
+                    log.debug("account: {}, password: {}", account, password);
                     User user = new UserService().login(account, password);
                     log.debug("user: {}", user);
                 }

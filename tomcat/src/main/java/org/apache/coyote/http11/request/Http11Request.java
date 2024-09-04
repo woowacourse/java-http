@@ -10,25 +10,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiPredicate;
+import org.apache.coyote.cookie.Cookies;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Request {
 
     private static final BiPredicate<String, String> HEADER_FILTER = (a, b) -> true;
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final String HEADER_DETAIL_DELIMITER = ";";
-    private static final String HEADER_FIELD_DELIMITER = ",";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
+    private static final Logger log = LoggerFactory.getLogger(Http11Request.class);
 
     private final Http11RequestStartLine startLine;
     private final HttpHeaders headers;
     private final String body;
+    private final SessionManager sessionManager;
 
     public Http11Request(Http11RequestStartLine startLine, HttpHeaders headers, String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+        this.sessionManager = new SessionManager();
     }
 
     public static Http11Request from(InputStream inputStream) throws IOException {
@@ -53,12 +61,7 @@ public class Http11Request {
             String key = header[HEADER_KEY_INDEX];
             String value = header[HEADER_VALUE_INDEX];
 
-            if (value.contains(HEADER_DETAIL_DELIMITER)) {
-                int endIndex = value.indexOf(HEADER_DETAIL_DELIMITER);
-                value = value.substring(0, endIndex);
-            }
-
-            List<String> values = Arrays.stream(value.split(HEADER_FIELD_DELIMITER)).map(String::trim).toList();
+            List<String> values = Arrays.stream(value.split(HEADER_DETAIL_DELIMITER)).map(String::trim).toList();
             httpHeaders.put(key, values);
         }
         return httpHeaders;
@@ -75,8 +78,37 @@ public class Http11Request {
         return new String(buffer);
     }
 
+    public boolean hasSession() {
+        Cookies cookies = Cookies.from(headers.allValues("Cookie"));
+        Optional<String> optionalSessionId = cookies.getValue("JSESSIONID");
+        if (optionalSessionId.isPresent()) {
+            String sessionId = optionalSessionId.get();
+            try {
+                sessionManager.findSession(sessionId);
+                return true;
+            } catch (IllegalArgumentException e) {
+                log.info("Invalid Session ID = {}", sessionId);
+                return false;
+            }
+        }
+        return false;
+    }
+
     public boolean isStaticResourceRequest() {
         return startLine.getMethod() == HttpMethod.GET && startLine.getEndPoint().contains(".");
+    }
+
+    public Session getSession(boolean hasNotSession) {
+        if (hasNotSession) {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
+        }
+        Cookies cookies = Cookies.from(headers.allValues("Cookie"));
+        String sessionId = cookies.getValue("JSESSIONID")
+                .orElseThrow(() -> new IllegalArgumentException("세션 ID가 존재하지 않습니다."));
+
+        return sessionManager.findSession(sessionId);
     }
 
     public HttpMethod getMethod() {
@@ -87,14 +119,6 @@ public class Http11Request {
         return startLine.getEndPoint();
     }
 
-    public Http11RequestTarget getRequestTarget() {
-        return startLine.getRequestTarget();
-    }
-
-    public Http11RequestStartLine getStartLine() {
-        return startLine;
-    }
-
     public HttpHeaders getHeaders() {
         return headers;
     }
@@ -103,7 +127,7 @@ public class Http11Request {
         return body;
     }
 
-    public Optional<String> getHeader(String key) {
+    public Optional<String> getHeaderFirstValue(String key) {
         return headers.firstValue(key);
     }
 

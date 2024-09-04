@@ -12,11 +12,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.session.Session;
 import org.apache.util.QueryStringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,10 @@ public class Http11Processor implements Runnable, Processor {
         String endpoint = request.getEndpoint();
         HttpMethod method = request.getMethod();
         if (method == HttpMethod.GET && "/login".equals(endpoint)) {
+            if (request.hasSession()) {
+                response.sendRedirect("/index.html");
+                return;
+            }
             viewLogin(response);
             return;
         }
@@ -84,8 +89,10 @@ public class Http11Processor implements Runnable, Processor {
     private void getStaticResource(Http11Request request, Http11Response response) throws IOException {
         getView(request.getEndpoint(), response);
 
-        String accept = request.getHeader("Accept")
+        String accept = request.getHeaderFirstValue("Accept")
+                .map(value -> value.split(",")[0])
                 .orElse("text/html");
+
         response.addHeader("Accept", accept);
     }
 
@@ -108,19 +115,18 @@ public class Http11Processor implements Runnable, Processor {
         String account = queryStrings.get("account").get(0);
         String password = queryStrings.get("password").get(0);
 
-        try {
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
-            if (!user.checkPassword(password)) {
-                throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.checkPassword(password)) {
+                Session session = request.getSession(true);
+                session.setAttribute("user", user);
+                response.addCookie("JSESSIONID", session.getId());
+                response.sendRedirect("/index.html");
+                return;
             }
-            log.info("user {}", user);
-
-            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
-            response.redirect("/index.html");
-        } catch (IllegalArgumentException e) {
-            response.redirect("/401.html");
         }
+        response.sendRedirect("/401.html");
     }
 
     private void viewRegist(Http11Response response) throws IOException {
@@ -137,6 +143,6 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
 
         InMemoryUserRepository.save(user);
-        response.redirect("/index.html");
+        response.sendRedirect("/index.html");
     }
 }

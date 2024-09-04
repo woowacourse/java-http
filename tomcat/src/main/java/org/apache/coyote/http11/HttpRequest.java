@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * HTTP Request object. see <a href=https://datatracker.ietf.org/doc/html/rfc2616#section-5>RFC 2616, section 5</a>
@@ -14,15 +12,13 @@ import java.util.Map;
 public class HttpRequest {
 
     private static final String SP = " ";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String HEADER_DELIMITER = ":";
     private static final int BUFFER_SIZE = 64;
 
     private final HttpMethod method;
     private final URI uri;
     private final String version;
-    // Header field names are case-insensitive
-    private final Map<String, String> header = new HashMap<>();
+    private final HttpHeader header = new HttpHeader();
     private final String body;
 
     public HttpRequest(InputStream inputStream) {
@@ -40,15 +36,14 @@ public class HttpRequest {
             String headerLine;
             while (!(headerLine = bufferedReader.readLine()).isEmpty()) {
                 String[] headerToken = headerLine.split(HEADER_DELIMITER, 2);
-                this.header.put(headerToken[0].trim(), headerToken[1].trim());
+                header.put(headerToken[0].trim(), headerToken[1].trim());
             }
 
             // Parse Body, it should consider all character including escape characters
-            long contentLength = Long.parseLong(header.getOrDefault(CONTENT_LENGTH, "0"));
             StringBuilder bodyBuilder = new StringBuilder();
             char[] buffer = new char[BUFFER_SIZE];
             int readBytes = 0;
-            while (readBytes < contentLength) {
+            while (readBytes < header.getContentLength()) {
                 readBytes += bufferedReader.read(buffer);
                 bodyBuilder.append(buffer, 0, readBytes);
             }
@@ -73,7 +68,7 @@ public class HttpRequest {
         return version;
     }
 
-    public Map<String, String> getHeader() {
+    public HttpHeader getHeader() {
         return header;
     }
 

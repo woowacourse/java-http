@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +56,22 @@ public class Http11Processor implements Runnable, Processor {
                 mimeType = "text/css";
 
                 URL resource = getClass().getClassLoader().getResource("static" + lines[1]);
+                File file = new File(resource.getFile());
+                Path path = file.toPath();
+                responseBody = new String(Files.readAllBytes(path));
+            } else if (lines[1].startsWith("/login?")) {
+                int index = lines[1].indexOf("?");
+                String loginPath = lines[1].substring(0, index);
+                String queryString = lines[1].substring(index + 1);
+                String account = queryString.split("&")[0].split("=")[1];
+                String password = queryString.split("&")[1].split("=")[1];
+
+                User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+                if (user.checkPassword(password)) {
+                    log.info(user.toString());
+                }
+
+                URL resource = getClass().getClassLoader().getResource("static" + loginPath + ".html");
                 File file = new File(resource.getFile());
                 Path path = file.toPath();
                 responseBody = new String(Files.readAllBytes(path));

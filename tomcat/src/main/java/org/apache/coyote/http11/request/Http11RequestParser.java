@@ -9,6 +9,7 @@ import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.Http11Header;
 
 class Http11RequestParser {
+    private static final String CRLF = "\r\n";
 
     /*
         https://www.rfc-editor.org/rfc/rfc2616#section-5 이 문서에서 이 메서드가 반환하는 것을 Request-URI라 지칭합니다.
@@ -28,7 +29,7 @@ class Http11RequestParser {
     }
 
     private String parseStartLine(String requestMessage) {
-        return requestMessage.split("\r\n")[0];
+        return requestMessage.split(CRLF)[0];
     }
 
     String readAsString(InputStream inputStream) {
@@ -54,11 +55,11 @@ class Http11RequestParser {
     }
 
     List<Http11Header> parseHeaders(String requestMessage) {
-        String rawHeaders = requestMessage.split("\r\n\r\n")[0]
+        String rawHeaders = requestMessage.split(CRLF + CRLF)[0]
                 .replace(parseStartLine(requestMessage), "")
-                .replaceFirst("\r\n", "");
+                .replaceFirst(CRLF, "");
 
-        return Arrays.stream(rawHeaders.split("\r\n"))
+        return Arrays.stream(rawHeaders.split(CRLF))
                 .filter(rawHeader -> !rawHeader.startsWith("Cookie"))
                 .map(rawHeader -> {
                     String[] split = rawHeader.split(":");
@@ -71,9 +72,9 @@ class Http11RequestParser {
 
     List<Cookie> parseCookies(String requestMessage) {
         String rawHeaders = requestMessage.replace(parseStartLine(requestMessage), "")
-                .replaceFirst("\r\n", "");
+                .replaceFirst(CRLF, "");
 
-        return Arrays.stream(rawHeaders.split("\r\n"))
+        return Arrays.stream(rawHeaders.split(CRLF))
                 .filter(rawHeader -> rawHeader.startsWith("Cookie"))
                 .map(this::removeHeaderKey)
                 .flatMap(rawCookies -> {
@@ -99,7 +100,7 @@ class Http11RequestParser {
     }
 
     LinkedHashMap<String, String> parseBody(String requestMessage) {
-        int startIndex = requestMessage.indexOf("\r\n\r\n");
+        int startIndex = requestMessage.indexOf(CRLF + CRLF);
         if (startIndex == -1) {
             return new LinkedHashMap<>();
         }

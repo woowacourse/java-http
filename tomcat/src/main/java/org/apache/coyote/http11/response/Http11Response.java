@@ -12,6 +12,7 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
                              byte[] body) {
 
     private static final Http11ContentTypeFinder contentTypeFinder = new Http11ContentTypeFinder();
+    private static final String CRLF = "\r\n";
 
     public static Http11Response ok(List<Http11Header> headers, List<Cookie> cookies, Path path) throws IOException {
         String contentTypes = contentTypeFinder.find(path);
@@ -40,18 +41,18 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
     public byte[] toBytes() {
         String headers = this.headers.stream()
                 .map(Http11Header::toString)
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(CRLF));
         String cookies = this.cookies.stream()
                 .map(Cookie::toString)
                 .collect(Collectors.joining(";"));
-        String cookieHeader = "Set-Cookie: %s\r\n".formatted(cookies);
-        if (cookieHeader.equals("Set-Cookie: \r\n")) {
+        String cookieHeader = "Set-Cookie: %s".formatted(cookies) + CRLF;
+        if (cookieHeader.equals("Set-Cookie: " + CRLF)) {
             cookieHeader = "";
         }
-        String startAndHeadersString = "HTTP/1.1 %s\r\n".formatted(statusCode)
-                + "%s\r\n".formatted(headers)
+        String startAndHeadersString = "HTTP/1.1 %s".formatted(statusCode) + CRLF
+                + headers + CRLF
                 + cookieHeader
-                + "\r\n";
+                + CRLF;
         byte[] startLineAndHeaders = startAndHeadersString.getBytes();
         return makeResponseBytes(startLineAndHeaders);
     }

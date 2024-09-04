@@ -9,11 +9,8 @@ import java.util.stream.Collectors;
 public record HttpResponse(String protocolVersion, int statusCode, String statusText,
                            Map<String, String> headers, Map<String, String> cookies, byte[] body) {
 
-    public static Builder builder(Status status) {
-        return new Builder()
-                .protocolVersion("HTTP/1.1")
-                .statusCode(status.getCode())
-                .statusText(status.getMessage());
+    public static Builder builder() {
+        return new Builder().protocolVersion("HTTP/1.1");
     }
 
     private static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
@@ -62,13 +59,9 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
             return this;
         }
 
-        public Builder statusCode(int statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public Builder statusText(String statusText) {
-            this.statusText = statusText;
+        public Builder status(Status status) {
+            this.statusCode = status.getCode();
+            this.statusText = status.getMessage();
             return this;
         }
 

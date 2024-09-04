@@ -1,17 +1,17 @@
 package com.techcourse.controller;
 
 import com.techcourse.exception.AuthenticationException;
-import com.techcourse.service.LoginService;
+import com.techcourse.service.UserService;
 import org.apache.coyote.http11.domain.controller.AbstractController;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
-    private final LoginService loginService;
+    private final UserService userService;
 
-    public LoginController(LoginService loginService) {
-        this.loginService = loginService;
+    public LoginController(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class LoginController extends AbstractController {
         }
 
         try {
-            loginService.login(account, password);
+            userService.login(account, password);
         } catch (AuthenticationException e) {
             return HttpResponse.redirect("/401.html").build();
         }

@@ -6,14 +6,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginServiceTest {
+class UserServiceTest {
 
     @Test
     @DisplayName("로그인을 한다.")
     void login() {
-        LoginService loginService = new LoginService();
+        UserService userService = new UserService();
 
-        UserResponse userResponse = loginService.login("gugu", "password");
+        UserResponse userResponse = userService.login("gugu", "password");
 
         assertThat(userResponse.email()).isEqualTo("hkkang@woowahan.com");
     }
@@ -21,9 +21,9 @@ class LoginServiceTest {
     @Test
     @DisplayName("계정을 찾을 수 없으면 예외를 던진다.")
     void loginWithInvalidAccount() {
-        LoginService loginService = new LoginService();
+        UserService userService = new UserService();
 
-        assertThatThrownBy(() -> loginService.login("invalid", "password"))
+        assertThatThrownBy(() -> userService.login("invalid", "password"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("사용자를 찾을 수 없습니다.");
     }
@@ -31,9 +31,9 @@ class LoginServiceTest {
     @Test
     @DisplayName("비밀번호가 일치하지 않으면 예외를 던진다.")
     void loginWithInvalidPassword() {
-        LoginService loginService = new LoginService();
+        UserService userService = new UserService();
 
-        assertThatThrownBy(() -> loginService.login("gugu", "invalid"))
+        assertThatThrownBy(() -> userService.login("gugu", "invalid"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
     }

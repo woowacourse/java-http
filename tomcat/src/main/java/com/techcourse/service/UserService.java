@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.AuthenticationException;
 import com.techcourse.model.User;
 
-public class LoginService {
+public class UserService {
 
     public UserResponse login(String id, String password) {
         User user = InMemoryUserRepository.findByAccount(id)

@@ -1,15 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.Arrays;
 
-public enum ContentType {
+enum ContentType {
     HTML("text/html"),
     CSS("text/css"),
     JS("text/js");
 
     private final String rawContentType;
 
-    public static ContentType[] fromResourceName(String resourceName) {
+    static ContentType[] fromResourceName(String resourceName) {
         String fileExtension = resourceName.split("\\.")[1];
         return Arrays.stream(values())
                 .filter(contentType -> contentType.rawContentType.contains(fileExtension))
@@ -18,10 +18,6 @@ public enum ContentType {
 
     ContentType(String rawContentType) {
         this.rawContentType = rawContentType;
-    }
-
-    public boolean isSame(String rawContentType) {
-        return this.rawContentType.equals(rawContentType);
     }
 
     public String getRawContentType() {

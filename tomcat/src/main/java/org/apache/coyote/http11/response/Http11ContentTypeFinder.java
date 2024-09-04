@@ -1,11 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public class Http11ContentTypeFinder {
+class Http11ContentTypeFinder {
 
-    public String find(Path resourcePath) {
+    String find(Path resourcePath) {
         String fileName = getFileName(resourcePath);
         ContentType[] contentTypes = ContentType.fromResourceName(fileName);
         String[] rawContentTypes = Arrays.stream(contentTypes)

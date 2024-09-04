@@ -5,9 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Cookie;
-import org.apache.coyote.http11.Http11ContentTypeFinder;
 import org.apache.coyote.http11.Http11Header;
 
 public record Http11Response(Http11StatusCode statusCode, List<Http11Header> headers, List<Cookie> cookies,

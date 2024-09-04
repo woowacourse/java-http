@@ -70,10 +70,10 @@ public class Http11Processor implements Runnable, Processor {
         validateFormat(method, requestUri, httpVersion);
 
         if (method.equals("GET") && requestUri.equals("/")) {
-            return makeOkResponseMessageWithBody("Hello world!");
+            return makeOkResponseMessage("Hello world!");
         }
 
-        return makeOkResponseMessageWithBody(readResponseBodyFromFileName(requestUri.substring(1)));
+        return makeOkResponseMessage(readBody(requestUri.substring(1)));
     }
 
     private static void validateParamCount(String[] params) {
@@ -100,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readResponseBodyFromFileName(String fileName) {
+    private String readBody(String fileName) {
         try {
             URI uri = getClass().getClassLoader().getResource(STATIC_DIRNAME + "/" + fileName).toURI();
             Path path = Paths.get(uri);
@@ -112,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeOkResponseMessageWithBody(String responseBody) {
+    private String makeOkResponseMessage(String responseBody) {
         return String.join(
                 "\r\n",
                 "HTTP/1.1 200 OK ",

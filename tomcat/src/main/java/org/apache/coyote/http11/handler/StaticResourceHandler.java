@@ -1,10 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class StaticResourceHandler implements HttpRequestHandler {
 
@@ -14,7 +15,7 @@ public class StaticResourceHandler implements HttpRequestHandler {
     public boolean supports(HttpRequest request) {
         try {
             final String fileName = request.getUriPath();
-            final String filePath = getClass().getClassLoader().getResource(fileName).getFile();
+            final String filePath = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName).getFile();
         } catch (NullPointerException e) {
             return false;
         }

@@ -35,11 +35,11 @@ public class HttpResponse {
         stringJoiner.add("HTTP/1.1 " + stateCode.toStatus() + " ");
         if (stateCode.equals(HttpStateCode.FOUND)) {
             stringJoiner.add("Location: " + location);
-            stringJoiner.add("Content-Type: " + mimeType.getValue() + " ");
+            stringJoiner.add("Content-Type: " + mimeType.getContentType() + " ");
             stringJoiner.add("\r\n");
             return stringJoiner.toString().getBytes();
         }
-        stringJoiner.add("Content-Type: " + mimeType.getValue() + " ");
+        stringJoiner.add("Content-Type: " + mimeType.getContentType() + " ");
         stringJoiner.add("Content-Length: " + body.length + " ");
         stringJoiner.add("\r\n");
 

@@ -62,7 +62,7 @@ class LoginControllerTest {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add("HTTP/1.1 " + HttpStateCode.FOUND.toStatus() + " ");
         stringJoiner.add("Location: " + "/index.html");
-        stringJoiner.add("Content-Type: " + MimeType.HTML.getValue() + " ");
+        stringJoiner.add("Content-Type: " + MimeType.HTML.getContentType() + " ");
         stringJoiner.add("\r\n");
         assertThat(httpResponse.toByte()).isEqualTo(stringJoiner.toString().getBytes());
     }
@@ -105,7 +105,7 @@ class LoginControllerTest {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
         stringJoiner.add("HTTP/1.1 " + HttpStateCode.FOUND.toStatus() + " ");
         stringJoiner.add("Location: " + "/index.html");
-        stringJoiner.add("Content-Type: " + MimeType.HTML.getValue() + " ");
+        stringJoiner.add("Content-Type: " + MimeType.HTML.getContentType() + " ");
         stringJoiner.add("\r\n");
         assertThat(httpResponse.toByte()).isEqualTo(stringJoiner.toString().getBytes());
     }

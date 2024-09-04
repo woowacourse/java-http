@@ -14,11 +14,11 @@ public enum MimeType {
     OTHER("text/plain", null),
     ;
 
-    private final String value;
+    private final String contentType;
     private final FileExtension extension;
 
-    MimeType(String value, FileExtension extension) {
-        this.value = value;
+    MimeType(String contentType, FileExtension extension) {
+        this.contentType = contentType;
         this.extension = extension;
     }
 
@@ -31,7 +31,7 @@ public enum MimeType {
         throw new IllegalArgumentException();
     }
 
-    public String getValue() {
-        return value;
+    public String getContentType() {
+        return contentType;
     }
 }

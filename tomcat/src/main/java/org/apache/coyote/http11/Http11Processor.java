@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParams = parseQueryParams(requestUri);
 
         if (method.equals("GET") && endpoint.equals("/")) {
-            return makeResponseMessage("Hello world!", HttpStatusCode.OK);
+            return makeResponseMessageFromText("Hello world!", HttpStatusCode.OK);
         }
 
         if (method.equals("GET") && endpoint.equals("/login")) {
@@ -86,14 +86,15 @@ public class Http11Processor implements Runnable, Processor {
                 String account = queryParams.get("account");
                 String password = queryParams.get("password");
 
-                InMemoryUserRepository.findByAccountAndPassword(account, password)
-                        .ifPresent(user -> log.info(user.toString()));
+                return InMemoryUserRepository.findByAccountAndPassword(account, password)
+                        .map(user -> makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND))
+                        .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED));
             }
 
-            return makeResponseMessage("login.html", HttpStatusCode.OK);
+            return makeResponseMessageFromFile("login.html", HttpStatusCode.OK);
         }
 
-        return makeResponseMessage(endpoint.substring(1), HttpStatusCode.OK);
+        return makeResponseMessageFromFile(endpoint.substring(1), HttpStatusCode.OK);
     }
 
     private static void validateParamCount(String[] params) {
@@ -145,7 +146,18 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private String makeResponseMessage(String fileName, HttpStatusCode statusCode) {
+    private String makeResponseMessageFromText(String content, HttpStatusCode statusCode) {
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 " + statusCode.getValue() + " ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " ",
+                "",
+                content
+        );
+    }
+
+    private String makeResponseMessageFromFile(String fileName, HttpStatusCode statusCode) {
         String responseBody = readBody(fileName);
         String contentType = "";
 

@@ -23,7 +23,7 @@
 
 ### 1단계 
 
-- [ ] GET /index.html 응답하기
+- [x] GET /index.html 응답하기
    - 인덱스 페이지(http://localhost:8080/index.html)에 접근
    - Http11ProcessorTest 테스트 클래스의 모든 테스트를 통과
 - [ ] CSS 지원하기

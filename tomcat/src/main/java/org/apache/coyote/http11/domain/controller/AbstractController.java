@@ -10,9 +10,12 @@ import org.apache.coyote.http11.domain.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
+    protected final StaticResourceHandler staticResourceHandler;
     private final Map<HttpMethod, Function<HttpRequest, HttpResponse>> methods = new EnumMap<>(HttpMethod.class);
 
     public AbstractController() {
+        this.staticResourceHandler = new StaticResourceHandler();
+
         methods.put(HttpMethod.GET, this::doGet);
         methods.put(HttpMethod.POST, this::doPost);
         methods.put(HttpMethod.HEAD, this::doHead);

@@ -69,16 +69,11 @@ public class Http11Processor implements Runnable, Processor {
         String httpVersion = params[2];
         validateFormat(method, requestUri, httpVersion);
 
-        String responseBody = "";
-        if (requestUri.equals("/")) {
-            responseBody = "Hello world!";
+        if (method.equals("GET") && requestUri.equals("/")) {
+            return makeOkResponseMessageWithBody("Hello world!");
         }
 
-        if (requestUri.equals("/index.html")) {
-            responseBody = readResponseBodyFromFileName("index.html");
-        }
-
-        return makeOkResponseMessageWithBody(responseBody);
+        return makeOkResponseMessageWithBody(readResponseBodyFromFileName(requestUri.substring(1)));
     }
 
     private static void validateParamCount(String[] params) {

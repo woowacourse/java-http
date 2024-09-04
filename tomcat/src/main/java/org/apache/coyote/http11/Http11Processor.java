@@ -4,15 +4,16 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URL;
-import java.util.stream.Collectors;
-import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
+import java.util.stream.Collectors;
+import org.apache.catalina.mapper.Mapper;
+import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -35,16 +36,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[4096]; // TODO: 요청 준 것만큼 읽어야함
             int read = inputStream.read(buffer);
             HttpRequest request = new HttpRequest(new String(buffer));
-            String target = request.getTarget();
-            URL responseURL = getClass().getClassLoader().getResource("static" + target);
 
-            String responseBody = getFileContent(responseURL);
+            URL fileURL = Mapper.mapToFileURL(request.getPath());
+
+            String responseBody = getFileContent(fileURL);
             HttpResponse response = new HttpResponse(responseBody);
 
-            String extension = getFileExtension(responseURL);
+            String extension = getFileExtension(fileURL);
             response.setContentType(extension);
             outputStream.write(response.getBytes());
             outputStream.flush();

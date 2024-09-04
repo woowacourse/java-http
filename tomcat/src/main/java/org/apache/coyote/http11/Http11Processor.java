@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.StaticResourceHandler;
+import org.apache.coyote.http11.domain.controller.Controller;
+import org.apache.coyote.http11.domain.controller.RequestMapping;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.dto.HttpResponseDto;
@@ -20,9 +22,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -38,14 +42,21 @@ public class Http11Processor implements Runnable, Processor {
             InputView inputView = new InputView(new BufferedReader(new InputStreamReader(inputStream)));
             HttpRequest httpRequest = new HttpRequest(inputView.readLine());
 
-            // requestMapping -> 적절한 컨트롤러 호출
-            StaticResourceHandler handler = new StaticResourceHandler();
-            HttpResponse httpResponse = handler.handle(httpRequest);
+            HttpResponse httpResponse = handle(httpRequest);
 
             OutputView outputView = new OutputView(outputStream);
             outputView.write(HttpResponseDto.from(httpResponse));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse handle(HttpRequest httpRequest) throws IOException {
+        if (requestMapping.canHandle(httpRequest)) {
+            Controller controller = requestMapping.getController(httpRequest);
+            return controller.service(httpRequest);
+        }
+        StaticResourceHandler handler = new StaticResourceHandler();
+        return handler.handle(httpRequest);
     }
 }

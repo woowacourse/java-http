@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -83,16 +86,59 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (acceptHeader.startsWith("text/javascript")) {
-            contentType = "text/javascript;charset=utf-8";
+            contentType = "text/html;charset=utf-8";
         }
 
         final var requestResource = startLines[1];
-        final var resourcePath = getClass().getClassLoader().getResource("static/" + requestResource).getPath();
+        var resourceUrl = getClass().getClassLoader().getResource("static/" + requestResource);
+        var resourcePath = "";
+
+        // 존재하지 않는 리소스 요청
+        if (resourceUrl == null) {
+            if (requestResource.contains("login")) {
+                processLogin(httpRequestData);
+                resourcePath = getClass().getClassLoader().getResource("static/login.html").getPath();
+            }
+        } else {
+            resourcePath = resourceUrl.getPath();
+        }
+
         final var bufferedInputStream = new BufferedInputStream(new FileInputStream(resourcePath));
         final var responseBody = bufferedInputStream.readAllBytes();
         bufferedInputStream.close();
 
         return new HttpResponseData(responseBody, contentType);
+    }
+
+    private void processLogin(HttpRequestData httpRequestData) {
+        final var startLine = httpRequestData.startLine;
+        final var split = startLine.split(" ");
+        final var resourcePath = split[1];
+
+        final var isQueryStringExists = resourcePath.contains("?");
+        final var queryStringMap = new HashMap<String, String>();
+        if (isQueryStringExists) {
+            int indexOf = resourcePath.indexOf("?");
+            final var queryParameterString = resourcePath.substring(indexOf + 1);
+            final var values = queryParameterString.split("&");
+            for (final var value : values) {
+                final var keyValue = value.split("=");
+                queryStringMap.put(keyValue[0], keyValue[1]);
+            }
+        }
+
+        checkUser(queryStringMap);
+    }
+
+    private void checkUser(Map<String, String> queryStringMap) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(queryStringMap.getOrDefault("account", ""));
+
+        if (user.isPresent()) {
+            boolean isSame = user.get().checkPassword(queryStringMap.getOrDefault("password", ""));
+            if (isSame) {
+                log.info("{}", user.get());
+            }
+        }
     }
 
     private String createHttpResponse(HttpResponseData httpResponseData) {

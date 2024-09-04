@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -30,6 +31,11 @@ public class Http11Response {
 
     public void addHeader(String key, String value) {
         headers.put(key, List.of(value));
+    }
+
+    public void addCookie(String key, String value) {
+        headers.computeIfAbsent("Set-Cookie", k -> new ArrayList<>())
+                .add(key + "=" + value);
     }
 
     public void addBody(String body) {
@@ -64,7 +70,7 @@ public class Http11Response {
         }
 
         return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + String.join(",", entry.getValue()) + " ")
+                .map(entry -> entry.getKey() + ": " + String.join(";", entry.getValue()) + " ")
                 .collect(Collectors.joining("\r\n"));
     }
 }

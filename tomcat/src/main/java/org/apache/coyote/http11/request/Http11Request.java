@@ -16,8 +16,8 @@ public class Http11Request {
 
     private static final BiPredicate<String, String> HEADER_FILTER = (a, b) -> true;
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
-    private static final String HEADER_VALUES_END = ";";
-    private static final String HEADER_VALUES_DELIMITER = ",";
+    private static final String HEADER_DETAIL_DELIMITER = ";";
+    private static final String HEADER_FIELD_DELIMITER = ",";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
@@ -53,12 +53,12 @@ public class Http11Request {
             String key = header[HEADER_KEY_INDEX];
             String value = header[HEADER_VALUE_INDEX];
 
-            if (value.contains(HEADER_VALUES_END)) {
-                int endIndex = value.indexOf(HEADER_VALUES_END);
+            if (value.contains(HEADER_DETAIL_DELIMITER)) {
+                int endIndex = value.indexOf(HEADER_DETAIL_DELIMITER);
                 value = value.substring(0, endIndex);
             }
 
-            List<String> values = Arrays.stream(value.split(HEADER_VALUES_DELIMITER)).map(String::trim).toList();
+            List<String> values = Arrays.stream(value.split(HEADER_FIELD_DELIMITER)).map(String::trim).toList();
             httpHeaders.put(key, values);
         }
         return httpHeaders;

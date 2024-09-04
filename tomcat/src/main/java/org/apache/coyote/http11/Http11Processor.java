@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = parseRequest(requestReader);
             log.info("request: {}", request);
-            final var responseBody = getStaticResource(request);
+            final var responseBody = getStaticResource(request.getUri());
             final var response = makeResponse(responseBody);
             log.info("response: {}", response);
 
@@ -54,12 +54,16 @@ public class Http11Processor implements Runnable, Processor {
         return new Request(token[0], token[1], token[2], headers, null);
     }
 
-    private String getStaticResource(Request request) throws IOException {
-        String uri = request.getUri();
-        if (uri.equals("/")) {
+    private String getStaticResource(String location) throws IOException {
+        if (location.equals("/")) {
             return "Hello world!";
         }
-        File file = new File(getClass().getClassLoader().getResource("static" + uri).getFile());
+        File file;
+        try {
+            file = new File(getClass().getClassLoader().getResource("static" + location).getFile());
+        } catch (NullPointerException e) {
+            file = new File(getClass().getClassLoader().getResource("static/404.html").getFile());
+        }
         return new String(Files.readAllBytes(file.toPath()));
     }
 

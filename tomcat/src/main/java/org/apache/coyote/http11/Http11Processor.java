@@ -41,21 +41,21 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()
         ) {
             StringBuilder request = getRequest(bufferedReader);
-
             String endpoint = extractEndpoint(request.toString());
             log.info("Requested endpoint: {}", endpoint);
 
             String response;
             try {
-                String fileName = endpoint.substring(1);
+                String fileName = getFileName(endpoint);
                 String responseBody = getResponseBody(fileName);
+                MimeType mimeType = MimeType.getMimeType(fileName);
 
-                response = createResponse(HttpStatus.OK, responseBody);
+                response = createResponse(HttpStatus.OK, responseBody, mimeType);
             } catch (UncheckedServletException e) {
                 log.error("Error processing request for endpoint: {}", endpoint, e);
 
                 String responseBody = getResponseBody("404.html");
-                response = createResponse(HttpStatus.NOT_FOUND, responseBody);
+                response = createResponse(HttpStatus.NOT_FOUND, responseBody, MimeType.HTML);
             }
 
             outputStream.write(response.getBytes());
@@ -78,14 +78,20 @@ public class Http11Processor implements Runnable, Processor {
         return request.split(" ")[ENDPOINT_POSITION];
     }
 
-    private String getResponseBody(String fileName) throws IOException {
+    private String getFileName(String endpoint) {
+        String fileName = endpoint.substring(1);
         if (fileName.isEmpty()) {
-            return "Hello world!";
+            fileName = "hello.html";
         }
+        return fileName;
+    }
+
+    private String getResponseBody(String fileName) throws IOException {
         URL resource = findResource(fileName);
         if (Objects.isNull(resource)) {
             throw new UncheckedServletException("Cannot find resource with name: " + fileName);
         }
+        log.info("Loading resource from: {}", resource);
         Path path = new File(resource.getFile()).toPath();
         return Files.readString(path);
     }
@@ -94,10 +100,10 @@ public class Http11Processor implements Runnable, Processor {
         return getClass().getClassLoader().getResource("static/" + fileName);
     }
 
-    private static String createResponse(HttpStatus status, String responseBody) {
+    private static String createResponse(HttpStatus status, String responseBody, MimeType mimeType) {
         return String.join("\r\n",
                 "HTTP/1.1 " + status.getValue() + " ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + mimeType.getType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

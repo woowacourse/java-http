@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,6 +11,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,40 +54,33 @@ public class Http11Processor implements Runnable, Processor {
 
             if (uri.equals("/index.html")) {
                 final String fileName = "static/index.html";
-                final URL url = getClass().getClassLoader().getResource(fileName);
-                if (url != null) {
-                    final File file = new File(url.getFile());
-                    final Path path = file.toPath();
-
-                    final StringBuilder htmlContent = new StringBuilder();
-                    try (BufferedReader htmlBufferedReader = new BufferedReader(new FileReader(path.toString()))) {
-                        String line;
-                        while ((line = htmlBufferedReader.readLine()) != null) {
-                            htmlContent.append(line).append("\n");
-                        }
-                    }
-                    responseBody = htmlContent.toString();
-                }
+                responseBody = getResponseBody(fileName);
             } else if (uri.endsWith(".css") || uri.endsWith(".js")) {
                 contentType = "text/css";
                 if (uri.endsWith(".js")) {
                     contentType = "application/javascript";
                 }
                 final String fileName = "static" + uri;
-                final URL url = getClass().getClassLoader().getResource(fileName);
-                if (url != null) {
-                    final File file = new File(url.getFile());
-                    final Path path = file.toPath();
-
-                    final StringBuilder htmlContent = new StringBuilder();
-                    try (BufferedReader htmlBufferedReader = new BufferedReader(new FileReader(path.toString()))) {
-                        String line;
-                        while ((line = htmlBufferedReader.readLine()) != null) {
-                            htmlContent.append(line).append("\n");
-                        }
-                    }
-                    responseBody = htmlContent.toString();
+                responseBody = getResponseBody(fileName);
+            } else if (uri.startsWith("/login")) {
+                int parameterStartingIndex = uri.indexOf("?");
+                List<String> queryParameterPairs = Arrays.stream(uri.substring(parameterStartingIndex + 1).split("&"))
+                        .toList();
+                Map<String, String> queryParameters = queryParameterPairs.stream().map(s -> s.split("="))
+                        .collect(Collectors.toMap(
+                                keyValue -> keyValue[0],
+                                keyValue -> keyValue[1]
+                        ));
+                String account = queryParameters.get("account");
+                String password = queryParameters.get("password");
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
+                if (!user.checkPassword(password)) {
+                    throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
                 }
+                log.info("user: " + user);
+                final String fileName = "static/login.html";
+                responseBody = getResponseBody(fileName);
             }
 
             final var response = String.join("\r\n",
@@ -96,5 +95,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseBody(String fileName) throws IOException {
+        final URL url = getClass().getClassLoader().getResource(fileName);
+        if (url != null) {
+            final File file = new File(url.getFile());
+            final Path path = file.toPath();
+
+            final StringBuilder htmlContent = new StringBuilder();
+            try (BufferedReader htmlBufferedReader = new BufferedReader(new FileReader(path.toString()))) {
+                String line;
+                while ((line = htmlBufferedReader.readLine()) != null) {
+                    htmlContent.append(line).append("\n");
+                }
+            }
+            return htmlContent.toString();
+        }
+        return "Hello world!";
     }
 }

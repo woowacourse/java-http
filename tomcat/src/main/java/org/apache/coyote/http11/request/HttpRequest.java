@@ -6,15 +6,11 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final Method method;
-    private final URI uri;
-    private final String protocol;
+    private final RequestLine requestLine;
     private final Map<String, String> headers = new HashMap<>();
 
-    private HttpRequest(final Method method, final URI uri, final String protocol) {
-        this.method = method;
-        this.uri = uri;
-        this.protocol = protocol;
+    public HttpRequest(final RequestLine requestLine) {
+        this.requestLine = requestLine;
     }
 
     public static HttpRequest from(String requestLine) {
@@ -24,7 +20,7 @@ public class HttpRequest {
         URI uri = URI.create(requestElements[1]);
         String protocol = requestElements[2];
 
-        return new HttpRequest(method, uri, protocol);
+        return new HttpRequest(new RequestLine(method, uri, protocol));
     }
 
     public void addHeader(String headerLine) {
@@ -39,14 +35,14 @@ public class HttpRequest {
     }
 
     public Method getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public URI getUri() {
-        return uri;
+        return requestLine.getUri();
     }
 
     public String getUriPath() {
-        return uri.getPath();
+        return requestLine.getUriPath();
     }
 }

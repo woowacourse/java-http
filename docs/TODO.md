@@ -10,4 +10,6 @@
 
 ### 2. CSS 지원하기
 
+- '.css' 파일을 받았을 경우, `Content-Type: text/html;charset=utf-8;`로 설정
+
 ### 3. Query String 파싱

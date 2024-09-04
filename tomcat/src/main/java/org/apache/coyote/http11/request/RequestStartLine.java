@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 public class RequestStartLine {
@@ -24,6 +25,23 @@ public class RequestStartLine {
 
     public String getPath() {
         return path.getPath();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        RequestStartLine that = (RequestStartLine) object;
+        return method == that.method && Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(method, path);
     }
 
     @Override

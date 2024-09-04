@@ -12,7 +12,9 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -36,7 +38,6 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            var result = "";
             final String requestMethodAndUrl = bufferedReader.readLine();
 
             log.info("GET 요청 = {}", requestMethodAndUrl);
@@ -45,12 +46,24 @@ public class Http11Processor implements Runnable, Processor {
 
             final Request request = new Request(path);
             final URL resource = request.getUrl();
-            result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             final var response = String.join("\r\n", "HTTP/1.1 200 OK ",
                     "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
                     "Content-Length: " + result.getBytes().length + " ",
                     "",
                     result);
+
+            if (request.getQueryString().containsKey("account")) {
+                final var queryString = request.getQueryString();
+                final String account = queryString.get("account");
+                final User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                final String password = queryString.get("password");
+                if (!user.checkPassword(password)) {
+                    throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                }
+                log.info("user = {}", user);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

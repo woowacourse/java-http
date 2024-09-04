@@ -78,12 +78,7 @@ public class Http11Processor implements Runnable, Processor {
             responseBody = readResponseBodyFromFileName("index.html");
         }
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return makeOkResponseMessageWithBody(responseBody);
     }
 
     private static void validateParamCount(String[] params) {
@@ -120,5 +115,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             throw new UncheckedServletException(e);
         }
+    }
+
+    private String makeOkResponseMessageWithBody(String responseBody) {
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
     }
 }

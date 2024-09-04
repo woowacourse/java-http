@@ -48,6 +48,9 @@ public class FrontController {
         for (String key : request.getQueryMap().keySet()) {
             log.info("key = {}, value = {}", key, request.getQueryMap().get(key));
         }
+        if (request.getBody().isPresent()) {
+            log.info(request.getBody().get());
+        }
     }
 
 

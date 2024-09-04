@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -22,13 +23,14 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse run(HttpRequest request) {
 
-        Map<String, String> queryMap = request.getQueryMap();
-        if (!queryMap.containsKey(ACCOUNT_KEY) || !queryMap.containsKey(PASSWORD_KEY)) {
+        if (request.getBody().isEmpty()) {
             return redirectLoginPage();
         }
+        String body = request.getBody().get();
+        Map<String, String> parsedBody = parseBody(body);
 
-        String account = queryMap.get(ACCOUNT_KEY);
-        String password = queryMap.get(PASSWORD_KEY);
+        String account = parsedBody.get(ACCOUNT_KEY);
+        String password = parsedBody.get(PASSWORD_KEY);
 
         try {
             login(account, password);
@@ -41,6 +43,20 @@ public class LoginController implements Controller {
 
     private HttpResponse redirectLoginPage() {
         return new HttpResponse(HttpStateCode.FOUND, "/login.html", MimeType.HTML);
+    }
+
+    private Map<String, String> parseBody(String query) {
+        Map<String, String> result = new HashMap<>();
+        String[] pairs = query.split("&");
+
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=", 2);
+            String key = keyValue[0];
+            String value = keyValue[1];
+            result.put(key, value);
+        }
+
+        return result;
     }
 
     private void login(String account, String password) {

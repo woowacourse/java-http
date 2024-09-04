@@ -38,6 +38,10 @@ public class RegisterController implements Controller {
         return redirectDefaultPage();
     }
 
+    private HttpResponse redirectRegisterPage() {
+        return new HttpResponse(HttpStateCode.FOUND, "/register.html", MimeType.HTML);
+    }
+
     private Map<String, String> parseBody(String query) {
         Map<String, String> result = new HashMap<>();
         String[] pairs = query.split("&");
@@ -50,10 +54,6 @@ public class RegisterController implements Controller {
         }
 
         return result;
-    }
-
-    private HttpResponse redirectRegisterPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/register.html", MimeType.HTML);
     }
 
     private HttpResponse redirectDefaultPage() {

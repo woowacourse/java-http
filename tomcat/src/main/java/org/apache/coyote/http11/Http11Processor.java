@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> queryParams = parseQueryParams(requestUri);
 
         if (method.equals("GET") && endpoint.equals("/")) {
-            return makeOkResponseMessage("Hello world!");
+            return makeResponseMessage("Hello world!", HttpStatusCode.OK);
         }
 
         if (method.equals("GET") && endpoint.equals("/login")) {
@@ -90,10 +90,10 @@ public class Http11Processor implements Runnable, Processor {
                         .ifPresent(user -> log.info(user.toString()));
             }
 
-            return makeOkResponseMessage("login.html");
+            return makeResponseMessage("login.html", HttpStatusCode.OK);
         }
 
-        return makeOkResponseMessage(endpoint.substring(1));
+        return makeResponseMessage(endpoint.substring(1), HttpStatusCode.OK);
     }
 
     private static void validateParamCount(String[] params) {
@@ -145,7 +145,7 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
-    private String makeOkResponseMessage(String fileName) {
+    private String makeResponseMessage(String fileName, HttpStatusCode statusCode) {
         String responseBody = readBody(fileName);
         String contentType = "";
 
@@ -163,7 +163,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join(
                 "\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode.getValue() + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

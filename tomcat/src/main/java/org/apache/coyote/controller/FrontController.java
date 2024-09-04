@@ -12,16 +12,21 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStateCode;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.util.FileExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FrontController {
 
+    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
     private final Map<String, Controller> controllers = new HashMap<>();
 
     public FrontController() {
         controllers.put("/login", new LoginController());
+        controllers.put("/register", new RegisterController());
     }
 
     public HttpResponse dispatch(HttpRequest request) {
+        log.info("method = {}, path = {}, url = {}", request.getMethod(), request.getPath(), request.getUrl());
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
             String resourcePath = "static" + path;

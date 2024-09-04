@@ -92,10 +92,10 @@ public class Http11Processor implements Runnable, Processor {
 
             log.info(user.toString());
 
-            return makeOkResponseMessage(readBody("login.html"));
+            return makeOkResponseMessage("login.html");
         }
 
-        return makeOkResponseMessage(readBody(endpoint.substring(1)));
+        return makeOkResponseMessage(endpoint.substring(1));
     }
 
     private static void validateParamCount(String[] params) {
@@ -147,6 +147,32 @@ public class Http11Processor implements Runnable, Processor {
         return queryParams;
     }
 
+    private String makeOkResponseMessage(String fileName) {
+        String responseBody = readBody(fileName);
+        String contentType = "";
+
+        if (fileName.endsWith(".html")) {
+            contentType = "text/html";
+        }
+
+        if (fileName.endsWith(".css")) {
+            contentType = "text/css";
+        }
+
+        if (fileName.endsWith(".svg")) {
+            contentType = "image/svg+xml";
+        }
+
+        return String.join(
+                "\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+    }
+
     private String readBody(String fileName) {
         try {
             URI uri = getClass().getClassLoader().getResource(STATIC_DIRNAME + "/" + fileName).toURI();
@@ -157,16 +183,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             throw new UncheckedServletException(e);
         }
-    }
-
-    private String makeOkResponseMessage(String responseBody) {
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
     }
 }

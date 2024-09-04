@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public interface HttpRequestHandler {
 
     boolean supports(HttpRequest request);
 
-    HttpServletResponse handle(HttpRequest request);
+    String handle(HttpRequest request) throws IOException;
 }

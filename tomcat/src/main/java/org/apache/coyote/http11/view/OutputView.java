@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.view;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.dto.HttpResponseDto;
 
 public class OutputView {
@@ -10,10 +11,10 @@ public class OutputView {
     private static final String STATUS_LINE = "HTTP/1.1 %d %s";
     private static final String HEADER_LINE = "%s: %s";
 
-    private final OutputStream outputStream;
+    private final OutputStreamWriter outputStreamWriter;
 
-    public OutputView(OutputStream outputStream) {
-        this.outputStream = outputStream;
+    public OutputView(OutputStreamWriter outputStreamWriter) {
+        this.outputStreamWriter = outputStreamWriter;
     }
 
     public void write(HttpResponseDto httpResponse) throws IOException {
@@ -21,12 +22,12 @@ public class OutputView {
         writeHeaders(httpResponse.responseHeaders());
         writeNewLine();
         writeMessageBody(httpResponse.messageBody());
-        outputStream.flush();
+        outputStreamWriter.flush();
     }
 
     private void writeStatusLine(int httpStatusCode, String reasonPhrase) throws IOException {
         String statusLine = String.format(STATUS_LINE, httpStatusCode, reasonPhrase);
-        outputStream.write(statusLine.getBytes());
+        outputStreamWriter.write(statusLine);
         writeNewLine();
     }
 
@@ -38,12 +39,13 @@ public class OutputView {
 
     private void writeHeader(String key, String value) throws IOException {
         String headerLine = String.format(HEADER_LINE, key, value);
-        outputStream.write(headerLine.getBytes());
+        outputStreamWriter.write(headerLine);
         writeNewLine();
     }
 
     private void writeNewLine() throws IOException {
-        outputStream.write("\r\n".getBytes());
+        outputStreamWriter.write(StringUtils.CR);
+        outputStreamWriter.write(StringUtils.LF);
     }
 
     private void writeMessageBody(String messageBody) throws IOException {
@@ -51,6 +53,6 @@ public class OutputView {
             return;
         }
 
-        outputStream.write(messageBody.getBytes());
+        outputStreamWriter.write(messageBody);
     }
 }

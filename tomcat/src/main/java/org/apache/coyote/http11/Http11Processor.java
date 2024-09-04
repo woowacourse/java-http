@@ -4,6 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +43,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            InputView inputView = new InputView(new BufferedReader(new InputStreamReader(inputStream)));
+        try (final var inputStreamReader = new InputStreamReader(connection.getInputStream());
+             final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream())) {
+            InputView inputView = new InputView(new BufferedReader(inputStreamReader));
             HttpRequest httpRequest = readHttpRequest(inputView);
 
             Controller controller = requestMapping.getController(httpRequest);
             HttpResponse httpResponse = controller.service(httpRequest);
 
-            OutputView outputView = new OutputView(outputStream);
+            OutputView outputView = new OutputView(outputStreamWriter);
             outputView.write(HttpResponseDto.from(httpResponse));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

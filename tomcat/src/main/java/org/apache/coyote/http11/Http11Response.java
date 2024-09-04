@@ -7,36 +7,11 @@ import java.util.Map;
 public record Http11Response(String protocolVersion, int statusCode, String statusText,
                              Map<String, String> headers, byte[] body) {
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder builder(int statusCode) {
-        if (statusCode == 200) {
-            return new Builder()
-                    .protocolVersion("HTTP/1.1")
-                    .statusCode(statusCode)
-                    .statusText("OK");
-        }
-        if (statusCode == 302) {
-            return new Builder()
-                    .protocolVersion("HTTP/1.1")
-                    .statusCode(statusCode)
-                    .statusText("Found");
-        }
-        if (statusCode == 404) {
-            return new Builder()
-                    .protocolVersion("HTTP/1.1")
-                    .statusCode(statusCode)
-                    .statusText("Not Found");
-        }
-        if (statusCode == 500) {
-            return new Builder()
-                    .protocolVersion("HTTP/1.1")
-                    .statusCode(statusCode)
-                    .statusText("Internal Server Error");
-        }
-        return builder();
+    public static Builder builder(Status status) {
+        return new Builder()
+                .protocolVersion("HTTP/1.1")
+                .statusCode(status.getCode())
+                .statusText(status.getMessage());
     }
 
     private static byte[] mergeByteArrays(byte[] array1, byte[] array2) {

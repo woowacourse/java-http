@@ -31,7 +31,8 @@ public class Http11Processor implements Runnable, Processor {
         this.processors = Map.of(
                 req -> req.method().equals("GET") && req.path().equals("/"), this::processRootPage,
                 req -> req.method().equals("GET") && req.path().equals("/login"), this::processLoginPage,
-                req -> req.method().equals("GET") && req.path().equals("/register"), this::processRegisterPage
+                req -> req.method().equals("GET") && req.path().equals("/register"), this::processRegisterPage,
+                req -> req.method().equals("POST") && req.path().equals("/register"), this::processRegister
         );
     }
 
@@ -69,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response processRootPage(Http11Request request) {
-        return Http11Response.builder(200)
+        return Http11Response.builder(Status.OK)
                 .addHeader("Content-Type", "text/html;charset=utf-8")
                 .body("Hello world!".getBytes())
                 .build();
@@ -82,12 +83,13 @@ public class Http11Processor implements Runnable, Processor {
 
             Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
             if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
-                return Http11Response.builder(302)
+                log.info("로그인 성공! - 아이디 : " + optionalUser.get().getAccount());
+                return Http11Response.builder(Status.FOUND)
                         .location("/index.html")
                         .build();
             }
 
-            return Http11Response.builder(302)
+            return Http11Response.builder(Status.FOUND)
                     .location("/401.html")
                     .build();
         }
@@ -109,22 +111,44 @@ public class Http11Processor implements Runnable, Processor {
         ));
     }
 
+    private Http11Response processRegister(Http11Request request) {
+        Map<String, String> body = Http11Request.extractParameters(request.body());
+
+        if (!body.containsKey("account") ||
+                !body.containsKey("password") ||
+                !body.containsKey("email")) {
+            return Http11Response.builder(Status.BAD_REQUEST)
+                    .build();
+        }
+
+        String account = body.get("account");
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return Http11Response.builder(Status.CONFLICT)
+                    .build();
+        }
+
+        InMemoryUserRepository.save(new User(account, body.get("password"), body.get("email")));
+        return Http11Response.builder(Status.FOUND)
+                .location("/index.html")
+                .build();
+    }
+
     private Http11Response processStaticResource(Http11Request request) {
         String contentType = URLConnection.guessContentTypeFromName(request.path());
         final byte[] responseBody;
         try {
             responseBody = staticResourceReader.read(request.path());
             if (responseBody == null) {
-                return Http11Response.builder(404)
+                return Http11Response.builder(Status.NOT_FOUND)
                         .build();
             }
-            return Http11Response.builder(200)
+            return Http11Response.builder(Status.OK)
                     .contentType(contentType)
                     .body(responseBody)
                     .build();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return Http11Response.builder(500)
+            return Http11Response.builder(Status.INTERNAL_SERVER_ERROR)
                     .build();
         }
     }

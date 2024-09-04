@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -114,6 +115,8 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IllegalArgumentException("잘못된 비밀번호입니다.");
             }
             log.info("user {}", user);
+
+            response.addCookie("JSESSIONID", UUID.randomUUID().toString());
             response.redirect("/index.html");
         } catch (IllegalArgumentException e) {
             response.redirect("/401.html");

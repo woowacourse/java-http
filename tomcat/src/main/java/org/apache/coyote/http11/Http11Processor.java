@@ -63,14 +63,18 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             requestPath = requestUri;
-            int index = requestUri.indexOf("?");
-            if (index >= 0 && requestUri.substring(0, index).equals("/login")) {
-                requestPath = requestUri.substring(0, index);
-                String queryString = requestUri.substring(index + 1);
-                String[] queries = queryString.split("&");
-                String[] account = queries[0].split("=");
-                String[] password = queries[1].split("=");
-                login(account[1], password[1]);
+            if (requestUri.equals("/login") && headerFirstLine[0].equals("POST")) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+
+                Map<String, String> userInfo = new HashMap<>();
+                for (String request : requestBody.split("&")) {
+                    String[] input = request.split("=");
+                    userInfo.put(input[0], input[1]);
+                }
+                login(userInfo.get("account"), userInfo.get("password"));
             }
 
 

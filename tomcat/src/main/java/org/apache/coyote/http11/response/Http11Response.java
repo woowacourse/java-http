@@ -24,7 +24,7 @@ public class Http11Response {
         this.body = body;
     }
 
-    public void redirect(String url) {
+    public void sendRedirect(String url) {
         this.startLine = new Http11ResponseStartLine(HttpStatusCode.FOUND);
         headers.put("Location", List.of(url));
     }

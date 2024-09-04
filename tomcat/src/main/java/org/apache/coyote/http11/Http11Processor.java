@@ -13,6 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -24,8 +25,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String STATIC_RESOURCE_PATH = "static/";
-    private static final String ROOT_PATH = "/";
+    private static final Set<String> STATIC_RESOURCE_EXTENSIONS = Set.of("css", "js", "ico");
+    private static final String STATIC_RESOURCE_ROOT_PATH = "static/";
+    private static final String PATH_DELIMITER = "/";
 
     private final Socket connection;
 
@@ -46,14 +48,7 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
-
-            final String responseBody = findResponseBody(httpRequest);
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = processResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -62,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
+    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final var requestLines = bufferedReader.readLine();
 
         final var requestStartLine = requestLines.split(" ");
@@ -80,15 +75,52 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private String findResponseBody(HttpRequest httpRequest) throws IOException {
-        String endPoint = httpRequest.uri().getPath();
-        if (endPoint.equals(ROOT_PATH)) {
-            return "Hello world!";
+    private String processResponse(final HttpRequest httpRequest) throws IOException {
+        final String endPoint = httpRequest.uri().getPath();
+        final String[] paths = endPoint.split(PATH_DELIMITER);
+
+        if (paths.length == 0) {
+            return processRootResponse();
         }
 
-        final String fileName = endPoint.replace(ROOT_PATH, STATIC_RESOURCE_PATH);
-        final URL resourceURL = getClass().getClassLoader().getResource(fileName);
+        final String resourceName = paths[paths.length - 1];
+        if (resourceName.contains(".")) {
+            return processStaticResponse(resourceName);
+        }
 
-        return Files.readString(Path.of(resourceURL.getPath()));
+        return processRootResponse();
+    }
+
+    private String processStaticResponse(final String resourceName) throws IOException {
+        final URL resourceURL = getClass().getClassLoader().getResource(findResourcePath(resourceName));
+        final Path resourcePath = Path.of(resourceURL.getPath());
+        final String responseBody = Files.readString(resourcePath);
+        final String mimeType = Files.probeContentType(resourcePath);
+
+        return getResponse(mimeType, responseBody);
+    }
+
+    private String processRootResponse() {
+        final String responseBody = "Hello world!";
+        return getResponse("text/html", responseBody);
+    }
+
+    private String getResponse(String mimeType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + mimeType +";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String findResourcePath(final String resourcePath) {
+        final String[] fileNames = resourcePath.split("\\.");
+
+        if (STATIC_RESOURCE_EXTENSIONS.contains(fileNames[1])) {
+            return STATIC_RESOURCE_ROOT_PATH.concat(fileNames[1]).concat(PATH_DELIMITER).concat(resourcePath);
+        }
+
+        return STATIC_RESOURCE_ROOT_PATH.concat(resourcePath);
     }
 }

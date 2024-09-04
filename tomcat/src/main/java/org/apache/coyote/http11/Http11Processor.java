@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.common.ContentType;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
+import org.apache.coyote.handler.HandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,14 +51,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response getResponse(Request request) throws IOException {
-        if ("/login".equals(request.getUri())) {
-            String account = request.getParameters().get("account");
-            String password = request.getParameters().get("password");
-            User findUser = InMemoryUserRepository.findByAccount(account)
-                    .filter(user -> user.checkPassword(password))
-                    .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
-            log.info("user: {}", findUser);
-        }
+        HandlerMapper.findHandler(request.getMethod(), request.getUri()).handle(request);
         File responseBody = getStaticResource(request.getUri());
         return makeResponse(responseBody);
     }

@@ -50,6 +50,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    // TODO: header를 생성하는 부분
     private Map<String, String> createHeaders(BufferedReader clientReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         while (true) {
@@ -77,6 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         var acceptHeader = headers.getOrDefault("Accept", "text/html;charset=utf-8");
         var contentType = acceptHeader;
 
+        // TODO: acceptHeader를 읽어 적절한 contentType을 생성하는 부분
         if (acceptHeader.startsWith("text/html")) {
             contentType = "text/html;charset=utf-8";
         }
@@ -93,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         var resourceUrl = getClass().getClassLoader().getResource("static/" + requestResource);
         var resourcePath = "";
 
-        // 존재하지 않는 리소스 요청
+        // TODO: 존재하지 않는 정적 리소스 요청이라면 동적으로 생성하는 부분
         if (resourceUrl == null) {
             if (requestResource.contains("login")) {
                 processLogin(httpRequestData);
@@ -115,6 +117,7 @@ public class Http11Processor implements Runnable, Processor {
         final var split = startLine.split(" ");
         final var resourcePath = split[1];
 
+        // TODO: 쿼리 스트링을 읽는 부분
         final var isQueryStringExists = resourcePath.contains("?");
         final var queryStringMap = new HashMap<String, String>();
         if (isQueryStringExists) {
@@ -127,6 +130,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
+        // TODO: path에 해당되는 처리기를 찾는 부분
         checkUser(queryStringMap);
     }
 

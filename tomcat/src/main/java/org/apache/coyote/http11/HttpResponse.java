@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
 import java.util.StringJoiner;
 
 public class HttpResponse {
@@ -49,5 +50,15 @@ public class HttpResponse {
         System.arraycopy(body, 0, response, headerBytes.length, body.length);
 
         return response;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "stateCode=" + stateCode +
+                ", location='" + location + '\'' +
+                ", mimeType=" + mimeType +
+                ", body=" + Arrays.toString(body) +
+                '}';
     }
 }

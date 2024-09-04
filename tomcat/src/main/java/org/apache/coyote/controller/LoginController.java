@@ -39,6 +39,10 @@ public class LoginController implements Controller {
         return redirectDefaultPage();
     }
 
+    private HttpResponse redirectLoginPage() {
+        return new HttpResponse(HttpStateCode.FOUND, "/login.html", MimeType.HTML);
+    }
+
     private void login(String account, String password) {
         User user = userRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -48,15 +52,11 @@ public class LoginController implements Controller {
         }
     }
 
-    private HttpResponse redirectLoginPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/login.html", MimeType.HTML);
+    private HttpResponse redirectUnauthorizedPage() {
+        return new HttpResponse(HttpStateCode.FOUND, "/401.html", MimeType.HTML);
     }
 
     private HttpResponse redirectDefaultPage() {
         return new HttpResponse(HttpStateCode.FOUND, "/index.html", MimeType.HTML);
-    }
-
-    private HttpResponse redirectUnauthorizedPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/401.html", MimeType.HTML);
     }
 }

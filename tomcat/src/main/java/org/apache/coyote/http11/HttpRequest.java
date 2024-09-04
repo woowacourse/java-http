@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 public class HttpRequest {
@@ -19,6 +20,7 @@ public class HttpRequest {
 
     private final Map<String, String> queryMap = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
+    private final Optional<String> body;
     private HttpMethod method;
     private String url;
     private String version;
@@ -31,6 +33,7 @@ public class HttpRequest {
         parseRequestLine(requestLine);
         parseQueryParameter();
         parseHeader(bufferedReader);
+        this.body = parseBody(bufferedReader);
     }
 
     private void parseRequestLine(String requestLine) {
@@ -66,6 +69,20 @@ public class HttpRequest {
         }
     }
 
+    private Optional<String> parseBody(BufferedReader bufferedReader) throws IOException {
+        StringBuilder stringBody = new StringBuilder();
+
+        if (!headers.containsKey("Content-Length")) {
+            return Optional.empty();
+        }
+
+        for (int i = 0; i < Integer.parseInt(headers.get("Content-Length")); i++) {
+            stringBody.append((char) bufferedReader.read());
+        }
+
+        return Optional.of(stringBody.toString());
+    }
+
     private String reconstructHeaderValue(String[] headerValues) {
         StringJoiner stringJoiner = new StringJoiner(HEADER_DELIMITER);
         for (String value : headerValues) {
@@ -96,5 +113,22 @@ public class HttpRequest {
 
     public Map<String, String> getQueryMap() {
         return queryMap;
+    }
+
+    public Optional<String> getBody() {
+        return body;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "queryMap=" + queryMap +
+                ", headers=" + headers +
+                ", body=" + body +
+                ", method=" + method +
+                ", url='" + url + '\'' +
+                ", version='" + version + '\'' +
+                ", path='" + path + '\'' +
+                '}';
     }
 }

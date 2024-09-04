@@ -26,7 +26,7 @@ public class FrontController {
     }
 
     public HttpResponse dispatch(HttpRequest request) {
-        log.info("method = {}, path = {}, url = {}", request.getMethod(), request.getPath(), request.getUrl());
+        log(request);
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
             String resourcePath = "static" + path;
@@ -41,6 +41,13 @@ public class FrontController {
         }
         Controller controller = getController(path);
         return controller.run(request);
+    }
+
+    private static void log(HttpRequest request) {
+        log.info("method = {}, path = {}, url = {}", request.getMethod(), request.getPath(), request.getUrl());
+        for (String key : request.getQueryMap().keySet()) {
+            log.info("key = {}, value = {}", key, request.getQueryMap().get(key));
+        }
     }
 
 

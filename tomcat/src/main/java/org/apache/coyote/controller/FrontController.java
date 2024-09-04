@@ -22,7 +22,6 @@ public class FrontController {
     }
 
     public HttpResponse dispatch(HttpRequest request) {
-
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
             String resourcePath = "static" + path;

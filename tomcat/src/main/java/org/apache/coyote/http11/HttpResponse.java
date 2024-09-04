@@ -9,15 +9,15 @@ public class HttpResponse {
     private final MimeType mimeType;
     private final byte[] body;
 
+    public HttpResponse(HttpStateCode stateCode, MimeType mimeType, byte[] body) {
+        this(stateCode, null, mimeType, body);
+    }
+
     public HttpResponse(HttpStateCode stateCode, String location, MimeType mimeType, byte[] body) {
         this.stateCode = stateCode;
         this.location = location;
         this.mimeType = mimeType;
         this.body = body;
-    }
-
-    public HttpResponse(HttpStateCode stateCode, MimeType mimeType, byte[] body) {
-        this(stateCode, null, mimeType, body);
     }
 
     public HttpResponse(HttpStateCode stateCode, byte[] body) {

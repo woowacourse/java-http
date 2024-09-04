@@ -7,6 +7,7 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.print.DocFlavor.READER;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -125,7 +126,14 @@ public class Http11Processor implements Runnable, Processor {
         if (queryParams.containsKey("account")) {
             User user = InMemoryUserRepository.findByAccount(queryParams.get("account").getFirst()).get();
             log.info("user : {}", user);
-
+            if (!queryParams.containsKey("password")) {
+                return;
+            }
+            if (user.checkPassword(queryParams.get("password").getFirst())) {
+                processFiles(outputStream, "/index.html");
+                return;
+            }
+            processFiles(outputStream, "/js/401.html");
         }
 
         outputStream.write(response.getBytes());

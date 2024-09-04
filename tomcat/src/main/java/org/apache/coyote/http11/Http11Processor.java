@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
-            Http11ServletRequest servletRequest = Http11ServletRequest.parse(requestLines);
+            Http11Request servletRequest = Http11Request.parse(requestLines);
             log.debug(servletRequest.toString());
 
             if (servletRequest.path().equals("/")) {
@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void processStaticResource(Http11ServletRequest servletRequest, OutputStream outputStream)
+    private void processStaticResource(Http11Request servletRequest, OutputStream outputStream)
             throws IOException {
         String contentType = URLConnection.guessContentTypeFromName(servletRequest.path());
         final var responseBody = staticResourceReader.read(servletRequest.path());

@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public record Http11ServletResponse(String protocolVersion, int statusCode, String statusText,
-                                    Map<String, String> headers, byte[] body) {
+public record Http11Response(String protocolVersion, int statusCode, String statusText,
+                             Map<String, String> headers, byte[] body) {
 
-    public static Http11ServletResponse.Http11ServletResponseBuilder builder() {
-        return new Http11ServletResponse.Http11ServletResponseBuilder();
+    public static Http11Response.Http11ServletResponseBuilder builder() {
+        return new Http11Response.Http11ServletResponseBuilder();
     }
 
     public static byte[] mergeByteArrays(byte[] array1, byte[] array2) {
@@ -45,33 +45,33 @@ public record Http11ServletResponse(String protocolVersion, int statusCode, Stri
             headers = new HashMap<>();
         }
 
-        public Http11ServletResponse.Http11ServletResponseBuilder protocolVersion(String protocolVersion) {
+        public Http11Response.Http11ServletResponseBuilder protocolVersion(String protocolVersion) {
             this.protocolVersion = protocolVersion;
             return this;
         }
 
-        public Http11ServletResponse.Http11ServletResponseBuilder statusCode(int statusCode) {
+        public Http11Response.Http11ServletResponseBuilder statusCode(int statusCode) {
             this.statusCode = statusCode;
             return this;
         }
 
-        public Http11ServletResponse.Http11ServletResponseBuilder statusText(String statusText) {
+        public Http11Response.Http11ServletResponseBuilder statusText(String statusText) {
             this.statusText = statusText;
             return this;
         }
 
-        public Http11ServletResponse.Http11ServletResponseBuilder addHeader(String key, String value) {
+        public Http11Response.Http11ServletResponseBuilder addHeader(String key, String value) {
             headers.put(key, value);
             return this;
         }
 
-        public Http11ServletResponse.Http11ServletResponseBuilder body(byte[] body) {
+        public Http11Response.Http11ServletResponseBuilder body(byte[] body) {
             this.body = body;
             return this;
         }
 
-        public Http11ServletResponse build() {
-            return new Http11ServletResponse(protocolVersion, statusCode, statusText, headers, body);
+        public Http11Response build() {
+            return new Http11Response(protocolVersion, statusCode, statusText, headers, body);
         }
 
         @Override

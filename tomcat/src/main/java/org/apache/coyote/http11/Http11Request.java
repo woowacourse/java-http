@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record Http11ServletRequest(String method, String path, Map<String, String> parameters, String protocolVersion) {
+public record Http11Request(String method, String path, Map<String, String> parameters, String protocolVersion) {
 
-    public static Http11ServletRequest parse(List<String> lines) {
+    public static Http11Request parse(List<String> lines) {
         String[] startLineParts = lines.getFirst().split(" ");
         String method = startLineParts[0];
         String path = "";
@@ -37,6 +37,6 @@ public record Http11ServletRequest(String method, String path, Map<String, Strin
             }
         }
 
-        return new Http11ServletRequest(method, path, parameters, protocolVersion);
+        return new Http11Request(method, path, parameters, protocolVersion);
     }
 }

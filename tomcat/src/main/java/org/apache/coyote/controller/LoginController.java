@@ -10,6 +10,9 @@ import org.apache.coyote.http11.MimeType;
 
 public class LoginController implements Controller {
 
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
+
     private final InMemoryUserRepository userRepository;
 
     public LoginController() {
@@ -20,12 +23,12 @@ public class LoginController implements Controller {
     public HttpResponse run(HttpRequest request) {
 
         Map<String, String> queryMap = request.getQueryMap();
-        if (!queryMap.containsKey("account") || !queryMap.containsKey("password")) {
+        if (!queryMap.containsKey(ACCOUNT_KEY) || !queryMap.containsKey(PASSWORD_KEY)) {
             return redirectLoginPage();
         }
 
-        String account = queryMap.get("account");
-        String password = queryMap.get("password");
+        String account = queryMap.get(ACCOUNT_KEY);
+        String password = queryMap.get(PASSWORD_KEY);
 
         User user = userRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);

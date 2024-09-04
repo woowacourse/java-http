@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +51,6 @@ public class Http11Processor implements Runnable, Processor {
 
             String response = response(httpRequest.getPath());
 
-            System.out.println(response);
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -58,14 +60,40 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String response(String path) throws URISyntaxException, IOException {
+    private String response(String uri) throws URISyntaxException, IOException {
         String responseBody;
         String contentType = "text/html;charset=utf-8 ";
 
-        if (path.equals("/")) {
+        if (uri.equals("/")) {
             responseBody = "Hello world!";
         } else {
+            int index = uri.indexOf("?");
+            String path = uri;
+            String queryString = "";
+            if (index >= 0) {
+                path = uri.substring(0, index);
+                queryString = uri.substring(index + 1);
+            }
+            Map<String, String> map = new HashMap<>();
+
+            if (!queryString.isEmpty()) {
+                String[] strings = queryString.split("&");
+                for (String string : strings) {
+                    String[] keyValue = string.split("=");
+                    map.put(keyValue[0], keyValue[1]);
+                }
+
+                User user = InMemoryUserRepository.findByAccount(map.get("account"))
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                System.out.println(user);
+            }
+
+            if (path.contains("login")) {
+                path += ".html";
+            }
+
             path = "static" + path;
+            System.out.println(path);
             URL resource = getClass().getClassLoader().getResource(path);
             if (resource.getPath().endsWith(".css")) {
                 contentType = "text/css;charset=utf-8 ";

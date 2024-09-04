@@ -13,10 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,9 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/")) {
                 processHome(outputStream);
             }
-            if (path.equals("/index.html")) {
-                processIndexPage(outputStream);
-            }
+            processFiles(outputStream, path);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -63,6 +58,14 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
+    private String readFileType(String path) {
+        int lastDotIndex = path.lastIndexOf('.');
+        if (lastDotIndex == -1 || lastDotIndex == path.length() - 1) {
+            return "";
+        }
+        return path.substring(lastDotIndex + 1);
+    }
+
     private void processHome(OutputStream outputStream) throws IOException {
         final var responseBody = "Hello world!";
 
@@ -77,18 +80,22 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void processIndexPage(OutputStream outputStream) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+    private void processFiles(OutputStream outputStream, String path) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + path);
+        if (resource == null) {
+            return;
+        }
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/" + readFileType(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
+
     }
 }

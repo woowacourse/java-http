@@ -45,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             final var path = texts[1];
 
             final Request request = new Request(path);
+            log.info("request = {}", request);
             final URL resource = request.getUrl();
             final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             final var response = String.join("\r\n", "HTTP/1.1 200 OK ",

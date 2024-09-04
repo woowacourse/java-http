@@ -31,8 +31,14 @@ public class Request {
             this.extension = "html";
             return;
         }
-        this.url = getClass().getClassLoader().getResource("static" + path);
-        this.extension = path.substring(path.lastIndexOf(".") + 1);
+        if (path.contains(".")) {
+            this.url = getClass().getClassLoader().getResource("static" + path);
+            this.extension = path.substring(path.lastIndexOf(".") + 1);
+            this.queryString = new HashMap<>();
+            return;
+        }
+        this.url = getClass().getClassLoader().getResource("static" + path + ".html");
+        this.extension = "html";
         this.queryString = new HashMap<>();
     }
 

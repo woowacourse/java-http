@@ -31,18 +31,30 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            HttpRequest httpRequest = HttpRequest.from(bufferedReader.readLine());
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream();
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            HttpRequest httpRequest = parseHttpRequest(bufferedReader);
             HttpRequestHandler httpRequestHandler = dispatcher.mappedHandler(httpRequest);
+            HttpResponse httpResponse = httpRequestHandler.handle(httpRequest);
 
-            String responseBody = httpRequestHandler.handle(httpRequest);
-            HttpResponse httpResponse = HttpResponse.htmlResourceOkResponse(outputStream, responseBody);
-            httpResponse.flush();
+            httpResponse.flush(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest parseHttpRequest(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        HttpRequest httpRequest = HttpRequest.from(requestLine);
+
+        String headerLine;
+        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isEmpty()) {
+            httpRequest.addHeader(headerLine);
+        }
+
+        return httpRequest;
     }
 }

@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.util.FileUtils;
 
 public class StaticResourceHandler implements HttpRequestHandler {
 
@@ -23,9 +25,10 @@ public class StaticResourceHandler implements HttpRequestHandler {
     }
 
     @Override
-    public String handle(HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         final String fileName = request.getUriPath();
-        return readFile(fileName);
+        String fileContent = readFile(fileName);
+        return HttpResponse.ok(fileContent, FileUtils.getFileExtension(fileName));
     }
 
     private String readFile(final String fileName) throws IOException {

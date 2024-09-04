@@ -5,26 +5,24 @@ import java.io.OutputStream;
 
 public class HttpResponse {
 
-    private final OutputStream connectionOutputStream;
     private final String response;
 
-    public HttpResponse(final OutputStream connectionOutputStream, final String response) {
-        this.connectionOutputStream = connectionOutputStream;
+    public HttpResponse(final String response) {
         this.response = response;
     }
 
-    public static HttpResponse htmlResourceOkResponse(OutputStream outputStream, String responseBody) {
+    public static HttpResponse ok(String responseBody, String contentType) {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-        return new HttpResponse(outputStream, response);
+        return new HttpResponse(response);
     }
 
-    public void flush() throws IOException {
-        connectionOutputStream.write(response.getBytes());
-        connectionOutputStream.flush();
+    public void flush(OutputStream outputStream) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

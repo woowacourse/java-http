@@ -16,6 +16,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -36,37 +38,59 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
 
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(inputStreamReader);
 
-            String line = br.readLine();
+            Map<String, String> httpRequestHeaders = new HashMap<>();
+            String firstLine = br.readLine();
             String mimeType = "";
+            String requestBody = "";
             String responseBody = "";
             String response = "";
 
-            if (line == null) {
+            if (firstLine == null) {
                 return;
             }
 
-            String[] lines = line.split(" ");
-            if (lines[1].equals("/")) {
+            String[] firstLines = firstLine.split(" ");
+            httpRequestHeaders.put(firstLines[0], firstLines[1]);
+
+            while (true) {
+                String line = br.readLine();
+
+                if ("".equals(line)) {
+                    break;
+                }
+
+                String[] strings = line.split(": ");
+                httpRequestHeaders.put(strings[0], strings[1]);
+            }
+
+            if (firstLines[0].equals("POST")) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+            }
+
+            if (firstLines[1].equals("/")) {
                 mimeType = "text/html";
                 responseBody = "Hello world!";
                 response = getOKResponse(mimeType, responseBody);
-            } else if (lines[1].startsWith("/css")) {
+            } else if (firstLines[1].startsWith("/css")) {
                 mimeType = "text/css";
 
-                URL resource = getClass().getClassLoader().getResource("static" + lines[1]);
+                URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
                 File file = new File(resource.getFile());
                 Path path = file.toPath();
                 responseBody = new String(Files.readAllBytes(path));
                 response = getOKResponse(mimeType, responseBody);
-            } else if (lines[1].startsWith("/login?")) {
-                int index = lines[1].indexOf("?");
-                String queryString = lines[1].substring(index + 1);
+            } else if (firstLines[1].startsWith("/login?")) {
+                int index = firstLines[1].indexOf("?");
+                String queryString = firstLines[1].substring(index + 1);
                 String account = queryString.split("&")[0].split("=")[1];
                 String password = queryString.split("&")[1].split("=")[1];
 
@@ -82,22 +106,25 @@ public class Http11Processor implements Runnable, Processor {
                 } else {
                     response = getRedirectResponse(responseBody, "/401.html");
                 }
+            } else if (firstLines[1].equals("/register") && firstLines[0].equals("POST")) {
+                String account = requestBody.split("&")[0].split("=")[1];
+                String password = requestBody.split("&")[1].split("=")[1];
+                String email = requestBody.split("&")[2].split("=")[1];
+
+                InMemoryUserRepository.save(new User(account, password, email));
+                response = getRedirectResponse(responseBody, "/index.html");
             } else {
                 mimeType = "text/html";
 
-                if (lines[1].equals("/login")) {
-                    lines[1] = "/login.html";
+                if (firstLines[1].equals("/login") || firstLines[1].equals("/register")) {
+                    firstLines[1] = firstLines[1] + ".html";
                 }
 
-                URL resource = getClass().getClassLoader().getResource("static" + lines[1]);
+                URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
                 File file = new File(resource.getFile());
                 Path path = file.toPath();
                 responseBody = new String(Files.readAllBytes(path));
                 response = getOKResponse(mimeType, responseBody);
-            }
-
-            while (!"".equals(line)) {
-                line = br.readLine();
             }
 
             outputStream.write(response.getBytes());

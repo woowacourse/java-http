@@ -55,7 +55,7 @@ class FileTest {
         // todo
         URL resource = getClass().getClassLoader().getResource(fileName);
         File file = new File(resource.getPath());
-        final Path path = file.toPath();
+        final Path path = file.toPath(); // TODO 이거 왜 굳이굳이 path 로 변환해야하는지 아라보자~
         System.out.println((Files.isReadable(path)));
 
         // todo

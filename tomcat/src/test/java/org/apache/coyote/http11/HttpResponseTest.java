@@ -14,7 +14,7 @@ class HttpResponseTest {
     @Test
     void toByte() {
         // given
-        HttpStateCode stateCode = HttpStateCode.OK;
+        HttpStatusCode stateCode = HttpStatusCode.OK;
         String bodyContent = "<html><body>Hello, World!</body></html>";
         byte[] body = bodyContent.getBytes(StandardCharsets.UTF_8);
 

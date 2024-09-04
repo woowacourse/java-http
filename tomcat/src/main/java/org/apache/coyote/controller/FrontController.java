@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStateCode;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.util.FileExtension;
 import org.slf4j.Logger;
@@ -34,9 +34,9 @@ public class FrontController {
                 Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());
                 MimeType mimeType = MimeType.from(FileExtension.from(path));
                 byte[] body = Files.readAllBytes(filePath);
-                return new HttpResponse(HttpStateCode.OK, mimeType, body);
+                return new HttpResponse(HttpStatusCode.OK, mimeType, body);
             } catch (URISyntaxException | IOException e) {
-                return new HttpResponse(HttpStateCode.OK, "No File Found".getBytes());
+                return new HttpResponse(HttpStatusCode.OK, "No File Found".getBytes());
             }
         }
         Controller controller = getController(path);

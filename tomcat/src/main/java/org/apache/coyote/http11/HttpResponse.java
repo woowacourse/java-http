@@ -5,27 +5,27 @@ import java.util.StringJoiner;
 
 public class HttpResponse {
 
-    private final HttpStateCode stateCode;
+    private final HttpStatusCode stateCode;
     private final String location;
     private final MimeType mimeType;
     private final byte[] body;
 
-    public HttpResponse(HttpStateCode stateCode, MimeType mimeType, byte[] body) {
+    public HttpResponse(HttpStatusCode stateCode, MimeType mimeType, byte[] body) {
         this(stateCode, null, mimeType, body);
     }
 
-    public HttpResponse(HttpStateCode stateCode, String location, MimeType mimeType, byte[] body) {
+    public HttpResponse(HttpStatusCode stateCode, String location, MimeType mimeType, byte[] body) {
         this.stateCode = stateCode;
         this.location = location;
         this.mimeType = mimeType;
         this.body = body;
     }
 
-    public HttpResponse(HttpStateCode stateCode, byte[] body) {
+    public HttpResponse(HttpStatusCode stateCode, byte[] body) {
         this(stateCode, null, MimeType.OTHER, body);
     }
 
-    public HttpResponse(HttpStateCode stateCode, String location, MimeType mimeType) {
+    public HttpResponse(HttpStatusCode stateCode, String location, MimeType mimeType) {
         this(stateCode, location, mimeType, null);
     }
 
@@ -33,7 +33,7 @@ public class HttpResponse {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
 
         stringJoiner.add("HTTP/1.1 " + stateCode.toStatus() + " ");
-        if (stateCode.equals(HttpStateCode.FOUND)) {
+        if (stateCode.equals(HttpStatusCode.FOUND)) {
             stringJoiner.add("Location: " + location);
             stringJoiner.add("Content-Type: " + mimeType.getContentType() + " ");
             stringJoiner.add("\r\n");

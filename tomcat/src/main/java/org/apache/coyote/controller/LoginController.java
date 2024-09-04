@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStateCode;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 
 public class LoginController implements Controller {
@@ -42,7 +42,7 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse redirectLoginPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/login.html", MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, "/login.html", MimeType.HTML);
     }
 
     private Map<String, String> parseBody(String query) {
@@ -69,10 +69,10 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse redirectUnauthorizedPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/401.html", MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, "/401.html", MimeType.HTML);
     }
 
     private HttpResponse redirectDefaultPage() {
-        return new HttpResponse(HttpStateCode.FOUND, "/index.html", MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, "/index.html", MimeType.HTML);
     }
 }

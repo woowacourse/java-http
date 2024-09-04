@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStateCode;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,7 +61,7 @@ class RegisterControllerTest {
 
         // then
         StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add("HTTP/1.1 " + HttpStateCode.FOUND.toStatus() + " ");
+        stringJoiner.add("HTTP/1.1 " + HttpStatusCode.FOUND.toStatus() + " ");
         stringJoiner.add("Location: " + "/index.html");
         stringJoiner.add("Content-Type: " + MimeType.HTML.getContentType() + " ");
         stringJoiner.add("\r\n");

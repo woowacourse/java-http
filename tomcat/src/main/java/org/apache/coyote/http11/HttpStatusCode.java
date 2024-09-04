@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum HttpStateCode {
+public enum HttpStatusCode {
     OK(200, "OK"),
     CREATED(201, "Created"),
     ACCEPTED(202, "Accepted"),
@@ -24,7 +24,7 @@ public enum HttpStateCode {
     private final int code;
     private final String message;
 
-    HttpStateCode(int code, String message) {
+    HttpStatusCode(int code, String message) {
         this.code = code;
         this.message = message;
     }

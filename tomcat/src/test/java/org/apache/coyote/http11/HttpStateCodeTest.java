@@ -12,7 +12,7 @@ class HttpStateCodeTest {
     @Test
     void toStatus() {
         // given
-        HttpStateCode stateCode = HttpStateCode.OK;
+        HttpStatusCode stateCode = HttpStatusCode.OK;
         String expected = stateCode.getCode() + " " + stateCode.getMessage();
 
         // when & then

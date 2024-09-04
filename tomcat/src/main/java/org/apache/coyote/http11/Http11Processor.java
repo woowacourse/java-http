@@ -20,6 +20,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private String requestPath;
+    private int statusCode = 200;
+    private String statusMessage = "OK";
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -42,22 +45,15 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             String requestUri = input.split(" ")[1];
-
-            String requestPath = requestUri;
+            requestPath = requestUri;
             int index = requestUri.indexOf("?");
-            if (index >= 0) {
+            if (index >= 0 && requestUri.substring(0, index).equals("/login")) {
                 requestPath = requestUri.substring(0, index);
                 String queryString = requestUri.substring(index + 1);
                 String[] queries = queryString.split("&");
                 String[] account = queries[0].split("=");
                 String[] password = queries[1].split("=");
-
-                User user = InMemoryUserRepository.findByAccount(account[1])
-                        .orElseThrow(IllegalArgumentException::new);
-                if (!user.checkPassword(password[1])) {
-                    return;
-                }
-                log.info("user : {}", user);
+                login(account[1], password[1]);
             }
 
 
@@ -78,8 +74,8 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = Files.readAllBytes(path);
 
             final var responseBody = new String(bytes);
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+            String response = String.join("\r\n",
+                    "HTTP/1.1" + " " + statusCode + " " + statusMessage + " ",
                     "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
@@ -90,5 +86,20 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void login(String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(IllegalArgumentException::new);
+        if (!user.checkPassword(password)) {
+            requestPath = "/401";
+            statusCode = 401;
+            statusMessage = "Unauthorized";
+            return;
+        }
+        requestPath = "/index.html";
+        statusCode = 302;
+        statusMessage = "Found";
+        log.info("user : {}", user);
     }
 }

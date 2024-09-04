@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
-import org.apache.coyote.util.FileExtension;
 
 public class HttpRequest {
 
@@ -17,6 +16,7 @@ public class HttpRequest {
     private static final String QUERY_DELIMITER = "&";
     private static final String PARAM_DELIMITER = "=";
     private static final String QUERY_START = "\\?";
+
     private final Map<String, String> queryMap = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
     private String method;
@@ -72,10 +72,6 @@ public class HttpRequest {
             stringJoiner.add(value.strip());
         }
         return stringJoiner.toString();
-    }
-
-    public boolean isFileRequest() {
-        return FileExtension.isFileExtension(path);
     }
 
     public String getMethod() {

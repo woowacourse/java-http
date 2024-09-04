@@ -13,27 +13,6 @@ import support.StubSocket;
 @DisplayName("HTTP 프로세서 테스트")
 class Http11ProcessorTest {
 
-    @DisplayName("적절한 페이지가 없을 경우, Hello world를 반환한다.")
-    @Test
-    void process() {
-        // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/plain ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
     @DisplayName("HTTP 요청에 대하여, HTTP 응답을 반환한다.")
     @Test
     void index() throws IOException {

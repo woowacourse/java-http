@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStateCode;
@@ -13,7 +15,10 @@ import org.apache.coyote.util.FileExtension;
 
 public class FrontController {
 
+    private final Map<String, Controller> controllers = new HashMap<>();
+
     public FrontController() {
+        controllers.put("/login", new LoginController());
     }
 
     public HttpResponse dispatch(HttpRequest request) {
@@ -30,6 +35,16 @@ public class FrontController {
                 return new HttpResponse(HttpStateCode.OK, "No File Found".getBytes());
             }
         }
-        return new HttpResponse(HttpStateCode.OK, "Hello world!".getBytes());
+        Controller controller = getController(path);
+        return controller.run(request);
+    }
+
+
+    public Controller getController(String path) {
+        Controller controller = controllers.get(path);
+        if (controller == null) {
+            throw new IllegalArgumentException("Not Found");
+        }
+        return controllers.get(path);
     }
 }

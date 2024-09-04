@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +55,9 @@ public class Http11Processor implements Runnable, Processor {
         return new Request(token[0], token[1], token[2], headers, null);
     }
 
-    private String getStaticResource(String location) throws IOException {
+    private File getStaticResource(String location) throws IOException {
         if (location.equals("/")) {
-            return "Hello world!";
+            location = "/hello.html";
         }
         File file;
         try {
@@ -64,13 +65,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (NullPointerException e) {
             file = new File(getClass().getClassLoader().getResource("static/404.html").getFile());
         }
-        return new String(Files.readAllBytes(file.toPath()));
+        return file;
     }
 
-    private Response makeResponse(String responseBody) {
+    private Response makeResponse(File resource) throws IOException {
+        byte[] responseBody = Files.readAllBytes(resource.toPath());
         return new Response("200 OK",
-                            Map.of("Content-Type", "text/html;charset=utf-8 ",
-                                   "Content-Length", responseBody.getBytes().length + " "),
-                            responseBody);
+                            Map.of("Content-Type", getContentType(resource),
+                                   "Content-Length", getResponseLength(responseBody)),
+                            new String(responseBody));
+    }
+
+    private String getContentType(File resource) {
+        return ContentType.of(resource).getMimeType();
+    }
+
+    private String getResponseLength(byte[] responseBody) {
+        return "Content-Length: " + responseBody.length + " ";
     }
 }

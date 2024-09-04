@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private String requestPath;
-
+    private String cookie;
     private int statusCode = 200;
     private String statusMessage = "OK";
 
@@ -107,6 +108,9 @@ public class Http11Processor implements Runnable, Processor {
                 contentType = "application/javascript;";
             }
 
+            if (requestPath.equals("/")) {
+                requestPath = "/index";
+            }
             String resourceName = "static" + requestPath;
             if (contentType.equals("text/html;") && !resourceName.endsWith(".html")) {
                 resourceName += ".html";
@@ -115,9 +119,20 @@ public class Http11Processor implements Runnable, Processor {
             Path path = new File(resource.getPath()).toPath();
             byte[] bytes = Files.readAllBytes(path);
 
+            Map<String, String> cookies = new HashMap<>();
+            if (!httpRequestHeaders.containsKey("Cookie") || !httpRequestHeaders.get("Cookie").contains("JSESSIONID")) {
+                UUID jSessionId = UUID.randomUUID();
+                cookies.put("JSESSIONID", jSessionId.toString());
+            }
+            StringBuilder setCookie = new StringBuilder();
+            for (String cookie : cookies.keySet()) {
+                setCookie.append(cookie).append("=").append(cookies.get(cookie));
+            }
+
             final var responseBody = new String(bytes);
             String response = String.join("\r\n",
                     "HTTP/1.1" + " " + statusCode + " " + statusMessage + " ",
+                    "Set-Cookie: " + setCookie + " ",
                     "Content-Type: " + contentType + "charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",

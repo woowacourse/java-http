@@ -35,9 +35,9 @@ class Http11ProcessorTest {
 
     @Test
     @DisplayName("/ 경로로 요청을 하면, 기본 메세지를 응답한다.")
-    void home() throws IOException {
+    void home() {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET / HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -65,7 +65,7 @@ class Http11ProcessorTest {
     @DisplayName("/index.html 경로로 요청을 하면, /resource/index.html 페이지를 응답한다.")
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -83,7 +83,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -93,7 +93,7 @@ class Http11ProcessorTest {
     @DisplayName("HTTP 함수와 경로에 매칭되는 것이 없으면, 예외 메세지를 보여준다")
     void failedResponse() {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /inde.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

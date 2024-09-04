@@ -1,11 +1,14 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import org.apache.coyote.Processor;
@@ -42,19 +45,21 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             List<String> requestLines = Http11InputStreamReader.read(inputStream);
-            Http11Request servletRequest = Http11Request.parse(requestLines);
-            log.debug(servletRequest.toString());
+            Http11Request request = Http11Request.parse(requestLines);
+            log.debug(request.toString());
 
             for (final var processor : processors.entrySet()) {
-                if (processor.getKey().test(servletRequest)) {
-                    Http11Response response = processor.getValue().apply(servletRequest);
+                if (processor.getKey().test(request)) {
+                    Http11Response response = processor.getValue().apply(request);
+                    log.debug(response.toString());
                     outputStream.write(response.toMessage());
                     outputStream.flush();
                     return;
                 }
             }
 
-            Http11Response response = defaultProcessor.apply(servletRequest);
+            Http11Response response = defaultProcessor.apply(request);
+            log.debug(response.toString());
             outputStream.write(response.toMessage());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -62,27 +67,43 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Http11Response processRootPage(Http11Request servletRequest) {
+    private Http11Response processRootPage(Http11Request request) {
         return Http11Response.builder(200)
                 .addHeader("Content-Type", "text/html;charset=utf-8")
                 .body("Hello world!".getBytes())
                 .build();
     }
 
-    private Http11Response processLoginPage(Http11Request servletRequest) {
+    private Http11Response processLoginPage(Http11Request request) {
+        if (request.parameters().containsKey("account") && request.parameters().containsKey("password")) {
+            String account = request.parameters().get("account");
+            String password = request.parameters().get("password");
+
+            Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+            if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
+                return Http11Response.builder(302)
+                        .location("/index.html")
+                        .build();
+            }
+
+            return Http11Response.builder(302)
+                    .location("/401.html")
+                    .build();
+        }
+
         return processStaticResource(new Http11Request(
-                servletRequest.method(),
+                request.method(),
                 "login.html",
-                servletRequest.parameters(),
-                servletRequest.protocolVersion()
+                request.parameters(),
+                request.protocolVersion()
         ));
     }
 
-    private Http11Response processStaticResource(Http11Request servletRequest) {
-        String contentType = URLConnection.guessContentTypeFromName(servletRequest.path());
+    private Http11Response processStaticResource(Http11Request request) {
+        String contentType = URLConnection.guessContentTypeFromName(request.path());
         final byte[] responseBody;
         try {
-            responseBody = staticResourceReader.read(servletRequest.path());
+            responseBody = staticResourceReader.read(request.path());
             if (responseBody == null) {
                 return Http11Response.builder(404)
                         .build();

@@ -18,6 +18,12 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
                     .statusCode(statusCode)
                     .statusText("OK");
         }
+        if (statusCode == 302) {
+            return new Builder()
+                    .protocolVersion("HTTP/1.1")
+                    .statusCode(statusCode)
+                    .statusText("Found");
+        }
         if (statusCode == 404) {
             return new Builder()
                     .protocolVersion("HTTP/1.1")
@@ -89,6 +95,11 @@ public record Http11Response(String protocolVersion, int statusCode, String stat
 
         public Builder contentType(String value) {
             headers.put("Content-Type", value + ";charset=utf-8");
+            return this;
+        }
+
+        public Builder location(String value) {
+            headers.put("Location", value);
             return this;
         }
 

@@ -47,27 +47,34 @@ public class Http11Processor implements Runnable, Processor {
             String response = "";
             if (page.equals("/")) {
                 responseBody = "Hello world!";
-                response = generateResponse(responseBody, "text/html");
+                response = generate200Response(responseBody, "text/html");
             } else if (page.startsWith("/login?")) {
                 int index = page.indexOf("?");
-                String paths = page.substring(0, index);
                 String queryString = page.substring(index + 1);
                 String account = queryString.split("&")[0].split("=")[1];
                 String password = queryString.split("&")[1].split("=")[1];
-
                 User user = InMemoryUserRepository.findByAccount(account).get();
+
                 if (user.checkPassword(password)) {
                     log.info("user : {}", user);
-                }
+                    URL url = getClass().getClassLoader().getResource("static/index.html");
+                    if (url == null) {
+                        return;
+                    }
 
-                URL url = getClass().getClassLoader().getResource("static" + paths + ".html");
-                if (url == null) {
-                    return;
-                }
+                    Path path = Path.of(url.toURI());
+                    responseBody = new String(Files.readAllBytes(path));
+                    response = generate302Response(responseBody, "text/html", "/index.html");
+                } else {
+                    URL url = getClass().getClassLoader().getResource("static/401.html");
+                    if (url == null) {
+                        return;
+                    }
 
-                Path path = Path.of(url.toURI());
-                responseBody = new String(Files.readAllBytes(path));
-                response = generateResponse(responseBody, "text/html");
+                    Path path = Path.of(url.toURI());
+                    responseBody = new String(Files.readAllBytes(path));
+                    response = generate302Response(responseBody, "text/html", "/401.html");
+                }
             } else if (page.startsWith("/css/")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
@@ -76,8 +83,17 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generateResponse(responseBody, "text/css");
-            } else {
+                response = generate200Response(responseBody, "text/css");
+            } else if (page.contains(".js")) {
+                URL url = getClass().getClassLoader().getResource("static" + page);
+                if (url == null) {
+                    return;
+                }
+                Path path = Path.of(url.toURI());
+                responseBody = new String(Files.readAllBytes(path));
+                response = generate200Response(responseBody, "text/javascript");
+                System.out.println("response = " + response);
+            } else if (page.endsWith(".html")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
                     return;
@@ -85,7 +101,16 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generateResponse(responseBody, "text/html");
+                response = generate200Response(responseBody, "text/html");
+            } else {
+                URL url = getClass().getClassLoader().getResource("static" + page + ".html");
+                if (url == null) {
+                    return;
+                }
+
+                Path path = Path.of(url.toURI());
+                responseBody = new String(Files.readAllBytes(path));
+                response = generate200Response(responseBody, "text/html");
             }
 
             outputStream.write(response.getBytes());
@@ -101,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
         return firstLine.split(" ")[1];
     }
 
-    private String generateResponse(String responseBody, String contentType) {
+    private String generate200Response(String responseBody, String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -109,4 +134,15 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 responseBody);
     }
+
+    private String generate302Response(String responseBody, String contentType, String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: " + redirectUrl,
+                "Content-Type: " + contentType + ";charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
+                "",
+                responseBody);
+    }
+
 }

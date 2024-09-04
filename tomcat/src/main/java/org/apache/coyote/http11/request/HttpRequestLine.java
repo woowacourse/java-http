@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public class HttpStartLine {
+public class HttpRequestLine {
 
     private static final int METHOD_INDEX = 0;
     private static final int PATH_INDEX = 1;
@@ -12,7 +12,7 @@ public class HttpStartLine {
     private final String httpVersion;
 
 
-    public HttpStartLine(String startLine) {
+    public HttpRequestLine(String startLine) {
         this.method = parseMethod(startLine);
         this.path = parsePath(startLine);
         this.httpVersion = parseHttpVersion(startLine);

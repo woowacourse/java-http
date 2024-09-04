@@ -1,6 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpBody;
+import org.apache.coyote.http11.HttpHeader;
 
 public class HttpRequest {
 
@@ -8,12 +10,12 @@ public class HttpRequest {
     private static final int STARTLINE_INDEX = 0;
     private static final int HEADER_INDEX = 1;
 
-    private final HttpStartLine startLine;
+    private final HttpRequestLine startLine;
     private final HttpHeader headers;
     private final HttpBody body;
 
     public HttpRequest(String request) {
-        startLine = new HttpStartLine(parseStartLine(request));
+        startLine = new HttpRequestLine(parseStartLine(request));
         headers = new HttpHeader(parseHeaders(request));
         body = new HttpBody(parseBody(request));
     }
@@ -67,7 +69,7 @@ public class HttpRequest {
         return startLine.getPath();
     }
 
-    public HttpStartLine getStartLine() {
+    public HttpRequestLine getStartLine() {
         return startLine;
     }
 }

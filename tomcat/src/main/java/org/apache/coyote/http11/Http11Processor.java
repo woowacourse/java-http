@@ -20,6 +20,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
+    private final ContentTypeConverter contentTypeConverter = new ContentTypeConverter();
+    private final ResponseBinder responseBinder = new ResponseBinder();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -37,8 +39,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
             final String requestFirstLine = bufferedReader.readLine();
+
             if (GET_METHOD.equals(requestFirstLine.split(" ")[0])) {
                 final var response = bindResponse(requestFirstLine);
                 outputStream.write(response.getBytes());
@@ -52,35 +54,22 @@ public class Http11Processor implements Runnable, Processor {
     private String bindResponse(String requestFirstLine) throws IOException {
         String route = requestFirstLine.split(" ")[1];
         if (DEFAULT_ROUTE.equals(route)) {
-            return buildSuccessfulResponse(DEFAULT_RESPONSE_BODY);
+            return responseBinder.buildSuccessfulResponse(DEFAULT_RESPONSE_BODY);
         }
 
         URL resource = getClass().getClassLoader().getResource("static" + route);
         if (resource == null) {
             URL badRequestURL = getClass().getClassLoader().getResource("static/404.html");
-            return buildFailedResponse(404, "NotFound",
+            return responseBinder.buildFailedResponse(404, "NotFound",
                     new String(Files.readAllBytes(new File(badRequestURL.getFile()).toPath())));
         }
 
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return buildSuccessfulResponse(body);
-    }
-
-    private String buildSuccessfulResponse(String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String buildFailedResponse(int statusCode, String statusMessage, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + statusMessage,
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        String staticResource = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        if (route.split("[.]").length == 0) {
+            return responseBinder.buildSuccessfulResponse(staticResource);
+        }
+        String fileExtension = route.split("[.]")[1];
+        String contentType = contentTypeConverter.mapToContentType(fileExtension);
+        return responseBinder.buildSuccessfulResponse(contentType, staticResource);
     }
 }

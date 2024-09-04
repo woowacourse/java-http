@@ -4,11 +4,12 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -16,7 +17,6 @@ import java.nio.file.Path;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String ACCEPT = "Accept: ";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -33,30 +33,44 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()) {
 
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(inputStreamReader);
 
             String line = br.readLine();
-            Path path = parseResource(line);
             String mimeType = "";
-
-            if (path == null) {
+            String responseBody = "";
+            if (line == null) {
                 return;
+            }
+
+            String[] lines = line.split(" ");
+            if (lines[1].equals("/")) {
+                mimeType = "text/html";
+                responseBody = "Hello world!";
+            } else if (lines[1].startsWith("/css")) {
+                mimeType = "text/css";
+
+                URL resource = getClass().getClassLoader().getResource("static" + lines[1]);
+                File file = new File(resource.getFile());
+                Path path = file.toPath();
+                responseBody = new String(Files.readAllBytes(path));
+            } else {
+                mimeType = "text/html";
+
+                URL resource = getClass().getClassLoader().getResource("static" + lines[1]);
+                File file = new File(resource.getFile());
+                Path path = file.toPath();
+                responseBody = new String(Files.readAllBytes(path));
             }
 
             while (!"".equals(line)) {
                 line = br.readLine();
-
-                if (line.startsWith(ACCEPT)) {
-                    mimeType = parseMimeType(line);
-                }
             }
 
-            final var responseBody = new String(Files.readAllBytes(path));
-            final var response = String.join("\r\n",
+            String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + mimeType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -68,21 +82,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Path parseResource(String requestLine) {
-        if (requestLine == null) return null;
-
-        String[] lines = requestLine.split(" ");
-        URL resource = getClass().getClassLoader().getResource("static" + lines[1]);
-        File file = new File(resource.getFile());
-        return file.toPath();
-    }
-
-    private String parseMimeType(String headerLine) {
-        if (!headerLine.startsWith(ACCEPT)) return null;
-
-        String substring = headerLine.substring(ACCEPT.length());
-        return substring.split(",")[0];
     }
 }

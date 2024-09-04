@@ -1,13 +1,14 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -28,7 +29,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        final String actual = getClass().getClassLoader().getResource(fileName).getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,11 +45,17 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        try {
+            final Path path = Path.of(getClass().getClassLoader().getResource(fileName).toURI());
+            // todo
+            try {
+                final List<String> actual = Files.newBufferedReader(path).lines().toList();
+                assertThat(actual).containsOnly("nextstep");
+            } catch (IOException e) {
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+            }
+        } catch (URISyntaxException e) {
 
-        assertThat(actual).containsOnly("nextstep");
+        }
     }
 }

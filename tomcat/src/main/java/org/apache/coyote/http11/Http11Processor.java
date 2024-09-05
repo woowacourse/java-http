@@ -42,10 +42,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final String requestMessage = parseRequestMessage(bufferedReader);
             final SimpleHttpRequest httpRequest = new SimpleHttpRequest(requestMessage);
-            log.info("request method: {}", httpRequest.getHttpMethod());
-            log.info("request uri: {}", httpRequest.getRequestUri());
-            String requestUri = httpRequest.getRequestUri();
-            sendResponse(outputStream, requestUri);
+            sendResponse(outputStream, httpRequest);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -66,8 +63,8 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private void sendResponse(final OutputStream outputStream, final String requestUri) throws URISyntaxException, IOException {
-        if (requestUri.equals("/")) {
+    private void sendResponse(final OutputStream outputStream, final SimpleHttpRequest httpRequest) throws URISyntaxException, IOException {
+        if (httpRequest.getRequestUri().equals("/")) {
             final String responseBody = "Hello world!";
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -78,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         }
 
-        final File file = getStaticFile(requestUri);
+        final File file = getStaticFile(httpRequest.getRequestUri());
         if (file == null) {
             sendNotFoundResponse(outputStream);
             return;
@@ -87,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
         final String responseBody = readFileContent(file);
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                buildResponseContentTypeHeaderLine(httpRequest.parseStaticFileExtensionType()),
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "", responseBody);
         outputStream.write(response.getBytes());
@@ -116,5 +113,22 @@ public class Http11Processor implements Runnable, Processor {
                 "", responseBody);
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private String buildResponseContentTypeHeaderLine(final FileExtensionType fileExtensionType) {
+        String prefix = "Content-Type: ";
+        if (fileExtensionType == FileExtensionType.CSS) {
+            return prefix + HttpAcceptHeaderType.CSS.getValue();
+        }
+
+        if (fileExtensionType == FileExtensionType.JAVASCRIPT) {
+            return prefix + HttpAcceptHeaderType.JAVASCRIPT.getValue();
+        }
+
+        if (fileExtensionType == FileExtensionType.SVG) {
+            return prefix + HttpAcceptHeaderType.SVG.getValue();
+        }
+
+        return prefix + HttpAcceptHeaderType.HTML.getValue() + ";charset=utf-8";
     }
 }

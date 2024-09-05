@@ -13,16 +13,22 @@ public class RequestExtractor {
         InputStreamReader reader = new InputStreamReader(inputStream);
         BufferedReader br = new BufferedReader(reader);
 
-        String uri = extractUri(br);
+        String requestLine = br.readLine();
+        String httpMethod = extractHttpMethod(requestLine);
+        String uri = extractUri(requestLine);
         Map<String, String> queryParams = extractQueryParams(uri);
         Map<String, String> headers = extractHeaders(br);
+        String body = extractBody(br);
         // TODO: 메서드 호출 순서에 의존
 
-        return new Http11Request(uri, queryParams, headers);
+        return new Http11Request(httpMethod, uri, queryParams, headers, body);
     }
 
-    private static String extractUri(BufferedReader br) throws IOException {
-        String requestLine = br.readLine();
+    private static String extractHttpMethod(String requestLine) {
+        return requestLine.split(" ")[0];
+    }
+
+    private static String extractUri(String requestLine) {
         return requestLine.split(" ")[1];
     }
 
@@ -53,5 +59,15 @@ public class RequestExtractor {
             headers.put(key, value);
         }
         return headers;
+    }
+
+    private static String extractBody(BufferedReader br) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        while (br.ready()) {
+            // 끝 개행이 없어 readLine 대신 read 사용
+            char[] one = Character.toChars(br.read());
+            sb.append(one);
+        }
+        return sb.toString();
     }
 }

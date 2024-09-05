@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -46,13 +47,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void execute(Http11Request request, Http11Response response) throws IOException, URISyntaxException {
+        String httpMethod = request.getHttpMethod();
         String path = request.getPath();
         log.info("request path = {}", path);
 
-        if (path.equals("/login")) {
+        if (path.equals("/login") && httpMethod.equals("GET")) {
             doLogin(request, response);
             return;
-        } // ... etc
+        }
+        if (path.equals("/register") && httpMethod.equals("POST")) {
+            doRegister(request, response);
+            return;
+        }
 
         String responseBody = decideResponseBody(request);
         response.setBody(responseBody);
@@ -86,6 +92,28 @@ public class Http11Processor implements Runnable, Processor {
         }
         log.info("user: {}", user);
         return true;
+    }
+
+    private void doRegister(Http11Request request, Http11Response response) {
+        String requestBody = request.getBody();
+
+        Map<String, String> fields = new HashMap<>();
+        String[] rawFields = requestBody.split("&");
+        for (String rawField : rawFields) {
+            String key = rawField.split("=")[0];
+            String value = rawField.split("=")[1];
+            fields.put(key, value);
+        }
+
+        String account = fields.get("account");
+        String email = fields.get("email");
+        String password = fields.get("password");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        response.setStatusCode(302);
+        response.addHeader("Location", "/index.html");
     }
 
     // 아래는 응답 생성 관련

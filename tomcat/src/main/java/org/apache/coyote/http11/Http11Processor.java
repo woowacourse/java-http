@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.request.RequestParser;
@@ -37,9 +38,10 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (var inputStream = connection.getInputStream();
+             var outputStream = connection.getOutputStream();
+             var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             var bufferedReader = new BufferedReader(inputStreamReader)) {
 
             Request request = requestParser.parse(bufferedReader);
             Response response = httpServlet.service(request);

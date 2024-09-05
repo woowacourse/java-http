@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -114,7 +115,9 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = InMemoryUserRepository.findByAccount(params.get("account")).get();
         if (user.checkPassword(params.get("password"))) {
-            build302Response(outputStream, "/index.html");
+            HttpCookie cookie = new HttpCookie("JSESSIONID=" + UUID.randomUUID());
+            log.info("cookie: {}", cookie.getCookieValue("JSESSIONID"));
+            build302Response(outputStream, "/index.html", cookie);
             log.info("user: {}", user);
             return;
         }
@@ -195,6 +198,18 @@ public class Http11Processor implements Runnable, Processor {
         try (final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
              final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(bufferedOutputStream))) {
             writer.write("HTTP/1.1 302 Found \r\n");
+            writer.write("Location: " + location + " \r\n");
+            writer.write("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void build302Response(final OutputStream outputStream, final String location, final HttpCookie cookie) {
+        try (final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(bufferedOutputStream))) {
+            writer.write("HTTP/1.1 302 Found \r\n");
+            writer.write("Set-Cookie: JSESSIONID=" + cookie.getCookieValue("JSESSIONID") + " \r\n");
             writer.write("Location: " + location + " \r\n");
             writer.write("\r\n");
         } catch (IOException e) {

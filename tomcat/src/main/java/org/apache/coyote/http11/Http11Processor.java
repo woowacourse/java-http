@@ -79,17 +79,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getLoginFileUri(String uri) {
         int questionMarkIndex = uri.indexOf("?");
-        validateContainsQueryString(questionMarkIndex);
+        if (questionMarkIndex == -1) {
+            return uri + ".html";
+        }
         String fileName = uri.substring(0, questionMarkIndex) + ".html";
         checkLoginQueryString(uri.substring(questionMarkIndex + 1));
 
         return fileName;
-    }
-
-    private void validateContainsQueryString(int questionMarkIndex) {
-        if (questionMarkIndex == -1) {
-            throw new IllegalArgumentException("로그인 요청에 쿼리파라미터를 포함시켜주세요.");
-        }
     }
 
     private void checkLoginQueryString(String queryString) {

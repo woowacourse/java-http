@@ -32,19 +32,14 @@ public class InputReader {
     }
 
     public List<String> readHeaders() {
-        return subList(1, emptyLineIndex());
+        int toIndex = requestLines.indexOf(EMPTY_LINE);
+        return requestLines.subList(1, toIndex);
     }
 
     public String readBody() {
-        List<String> bodyLines = subList(emptyLineIndex() + 1, requestLines.size());
+        int fromIndex = requestLines.indexOf(EMPTY_LINE) + 1;
+        List<String> bodyLines = requestLines.subList(fromIndex, requestLines.size());
+
         return String.join(NEWLINE, bodyLines);
-    }
-
-    private List<String> subList(int fromIndex, int toIndex) {
-        return requestLines.subList(fromIndex, toIndex);
-    }
-
-    private int emptyLineIndex() {
-        return requestLines.indexOf(EMPTY_LINE);
     }
 }

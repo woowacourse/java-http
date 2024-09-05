@@ -1,7 +1,7 @@
 ## 기능 요구 사항
 
-- [ ] GET `/index.html` 응답 기능 구현
-    - [ ] `http://localhost:8080/index.html` 접속 시 인덱스 페이지(index.html) 응답 기능 구현
+- [x] GET `/index.html` 응답 기능 구현
+    - [x] `http://localhost:8080/index.html` 접속 시 인덱스 페이지(index.html) 응답 기능 구현
 - 브라우저에서 요청한 HTTP Request Header
 
 ```text

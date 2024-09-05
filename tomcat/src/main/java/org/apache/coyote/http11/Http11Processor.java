@@ -29,7 +29,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            InputReader inputReader = new InputReader(inputStream);
+            HttpRequest request = new HttpRequest(inputReader);
+
+            ResourceHandler resourceHandler = new StaticResourceHandler(request.getUri());
+            FileReader fileReader = new FileReader(resourceHandler);
+            String responseBody = fileReader.read();
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

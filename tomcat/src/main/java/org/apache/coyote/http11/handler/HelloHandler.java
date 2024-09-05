@@ -15,7 +15,7 @@ public class HelloHandler extends AbstractHandler {
     }
 
     @Override
-    protected String forward(HttpRequest httpRequest) {
-        return "hello.html";
+    protected ForwardResult forward(HttpRequest httpRequest) {
+        return new ForwardResult(false, "hello.html");
     }
 }

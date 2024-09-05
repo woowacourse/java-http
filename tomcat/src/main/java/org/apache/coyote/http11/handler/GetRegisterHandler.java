@@ -15,7 +15,7 @@ public class GetRegisterHandler extends AbstractHandler {
     }
 
     @Override
-    protected String forward(HttpRequest httpRequest) {
-        return "register.html";
+    protected ForwardResult forward(HttpRequest httpRequest) {
+        return new ForwardResult(false, "register.html");
     }
 }

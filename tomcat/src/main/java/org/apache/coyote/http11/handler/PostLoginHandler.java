@@ -17,13 +17,13 @@ public class PostLoginHandler extends AbstractHandler {
     }
 
     @Override
-    protected String forward(HttpRequest httpRequest) {
+    protected ForwardResult forward(HttpRequest httpRequest) {
         QueryParameter queryParameter = httpRequest.body();
         if (isLoggedIn(queryParameter)) {
-            return "redirect:index.html";
+            return new ForwardResult(true, "index.html");
         }
 
-        return "redirect:401.html";
+        return new ForwardResult(true, "401.html");
     }
 
     private boolean isLoggedIn(QueryParameter queryParameter) {

@@ -15,7 +15,7 @@ public class GetLoginHandler extends AbstractHandler {
     }
 
     @Override
-    protected String forward(HttpRequest httpRequest) {
-        return "login.html";
+    protected ForwardResult forward(HttpRequest httpRequest) {
+        return new ForwardResult(false, "login.html");
     }
 }

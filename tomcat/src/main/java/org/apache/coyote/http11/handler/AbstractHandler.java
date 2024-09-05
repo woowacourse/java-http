@@ -16,29 +16,20 @@ public abstract class AbstractHandler {
 
     public abstract boolean canHandle(HttpRequest httpRequest);
 
-    protected abstract String forward(HttpRequest httpRequest);
+    protected abstract ForwardResult forward(HttpRequest httpRequest);
 
     public HttpResponse handle(HttpRequest httpRequest) {
-        String result = forward(httpRequest);
-
+        ForwardResult forwardResult = forward(httpRequest);
+        String resourcePath = getClass().getClassLoader().getResource("static/" + forwardResult.path()).getPath();
         List<String> headerTokens = new ArrayList<>();
-        boolean isRedirect = false;
-        if (result.startsWith("redirect:")) {
-            result = result.split(":")[1];
-            headerTokens.add("Location:" + result);
-            isRedirect = true;
+        headerTokens.add("Content-Type: " + determineContentType(resourcePath));
+
+        if (forwardResult.isRedirect()) {
+            headerTokens.add("Location:" + forwardResult.path());
+            return new HttpResponse(HttpStatus.FOUND, new Header(headerTokens), new byte[]{});
         }
 
-        String resourcePath = getClass().getClassLoader().getResource("static/" + result).getPath();
-        String contentType = determineContentType(resourcePath);
-        headerTokens.add("Content-Type: " + contentType);
-        Header header = new Header(headerTokens);
-
-        if (isRedirect) {
-            return new HttpResponse(HttpStatus.FOUND, header, new byte[]{});
-        }
-
-        return new HttpResponse(HttpStatus.OK, header, readStaticResource(resourcePath));
+        return new HttpResponse(HttpStatus.OK, new Header(headerTokens), readStaticResource(resourcePath));
     }
 
     private String determineContentType(String resourcePath) {

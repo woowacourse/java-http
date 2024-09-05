@@ -15,8 +15,9 @@ public class StaticResourceHandler extends AbstractHandler {
     }
 
     @Override
-    public String forward(HttpRequest httpRequest) {
+    public ForwardResult forward(HttpRequest httpRequest) {
         URI uri = httpRequest.getUri();
-        return uri.getPath();
+
+        return new ForwardResult(false, uri.getPath());
     }
 }

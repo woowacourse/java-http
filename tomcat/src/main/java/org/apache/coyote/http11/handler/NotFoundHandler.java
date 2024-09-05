@@ -10,7 +10,7 @@ public class NotFoundHandler extends AbstractHandler {
     }
 
     @Override
-    protected String forward(HttpRequest httpRequest) {
-        return "404.html";
+    protected ForwardResult forward(HttpRequest httpRequest) {
+        return new ForwardResult(false, "404.html");
     }
 }

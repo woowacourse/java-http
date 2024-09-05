@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -56,47 +57,53 @@ public class Http11Processor implements Runnable, Processor {
             final var method = texts[0];
             final var path = texts[1];
             log.info("{} 요청 = {}", method, requestMethodAndUrl);
+            final Request request = new Request(path);
+            log.info("request = {}", request);
+            final URL resource = request.getUrl();
+            final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final Response response = new Response();
+
             if (method.equals("POST")) {
                 final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length").strip());
                 final char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
                 final String requestBody = new String(buffer);
                 log.info("requestBody = {}", requestBody);
+                final var body = parsingBody(requestBody);
 
-                final var body = new HashMap<String, String>();
-                final String[] params = requestBody.split("&");
-                for (final String param : params) {
-                    body.put(param.split("=")[0], param.split("=")[1]);
+                if (path.equals("/login")) {
+                    // POST /login
+                    createResponse(body, request, response, result);
+                } else if (path.equals("/register")) {
+                    // POST /register
+                    final User user = new User(body.get("account"), body.get("password"), body.get("email"));
+                    InMemoryUserRepository.save(user);
+                    response.setSc("FOUND");
+                    response.setStatusCode(302);
+                    response.setLocation("index.html");
+                    response.setContentType("text/html");
                 }
-                final User user = new User(body.get("account"), body.get("password"), body.get("email"));
-                InMemoryUserRepository.save(user);
 
-                final Response response = new Response();
-                response.setSc("Multiple Choices");
-                response.setStatusCode(300);
-                response.setLocation("index.html");
-                response.setContentType("text/html");
                 outputStream.write(response.toHttpResponse().getBytes());
                 outputStream.flush();
                 return;
             }
-            final Request request = new Request(path);
-            log.info("request = {}", request);
-            final URL resource = request.getUrl();
-            final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            final Response response = new Response();
-            if (request.getQueryString().containsKey("account")) {
-                //TODO 여기 리팩터링
-                createResponse(request, response, result);
-            } else {
-                generateOKResponse(response, request, result);
-            }
+            generateOKResponse(response, request, result);
             outputStream.write(response.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HashMap<String, String> parsingBody(final String requestBody) {
+        final var body = new HashMap<String, String>();
+        final String[] params = requestBody.split("&");
+        for (final String param : params) {
+            body.put(param.split("=")[0], param.split("=")[1]);
+        }
+        return body;
     }
 
     private void generateOKResponse(final Response response, final Request request, final String result) {
@@ -107,9 +114,10 @@ public class Http11Processor implements Runnable, Processor {
         response.setSourceCode(result);
     }
 
-    private void createResponse(final Request request, final Response response, final String result) {
-        final var queryString = request.getQueryString();
+    private void createResponse(final Map<String, String> queryString, final Request request, final Response response,
+                                final String result) {
         final String account = queryString.get("account");
+        log.info("account = {}", account);
         try {
             response.setStatusCode(302);
             response.setSc("FOUND");

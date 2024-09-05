@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,15 @@ public class HttpHeader {
         return fields.get(name);
     }
 
+    public void setContentType(ContentType contentType) {
+        fields.put("Content-Type", contentType.getMediaType());
+    }
+
     public long getContentLength() {
         return (long) fields.getOrDefault("Content-Length", 0L);
+    }
+
+    public Map<String, Object> getFields() {
+        return Collections.unmodifiableMap(fields);
     }
 }

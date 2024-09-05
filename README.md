@@ -48,10 +48,8 @@
     - [x] /401.html 로 리다이렉트
 
 - POST 방식으로 회원가입
-  - [x] 회원가입 페이지 접근(http://localhost:8080/register)
-  - [ ] 페이지 로드 -> GET
-  - [ ] 회원가입 버튼 -> POST
-  - [ ] 회원가입 완료 -> /index.html 로 리다이렉트
+  - [x] 회원가입 페이지 접근(http://localhost:8080/register) (페이지 로드 -> GET)
+  - [x] 회원가입 완료 -> 저장 및 /index.html로 리다이렉트 (회원가입 버튼 -> POST)
 
 - Cookie에 JSESSIONID 값 저장하기 : 쿠키를 사용해 서버에 로그인 여부 저장
   - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가

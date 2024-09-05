@@ -8,10 +8,12 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.io.FileReader;
+import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponseContent;
 import org.apache.catalina.response.ResponsePage;
 import org.apache.coyote.Processor;
@@ -48,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             List<String> headerSentences = readRequestHeader(reader);
-            checkHttpMethodAndLoad(headerSentences);
+            checkHttpMethodAndLoad(headerSentences, reader);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -72,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
         return headerSentences;
     }
 
-    private void checkHttpMethodAndLoad(List<String> sentences) {
+    private void checkHttpMethodAndLoad(List<String> sentences, BufferedReader reader) {
         String[] firstHeaderSentence = sentences.getFirst().split(" ");
         if (firstHeaderSentence.length < 2) {
             throw new IllegalArgumentException("요청 header가 적절하지 않습니다.");
@@ -82,6 +84,9 @@ public class Http11Processor implements Runnable, Processor {
 
         if (firstHeaderSentence[0].startsWith("GET")) {
             loadGetHttpMethod(url, fileType);
+        }
+        if (firstHeaderSentence[0].startsWith("POST")) {
+            loadPostHttpMethod(url, fileType, sentences, reader);
         }
     }
 
@@ -113,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         Optional<ResponsePage> responsePage = ResponsePage.fromUrl(url);
-        if(responsePage.isPresent()) {
+        if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             return new ResponseContent(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
         }
@@ -125,9 +130,7 @@ public class Http11Processor implements Runnable, Processor {
         String[] separationUrl = url.split(QUERY_SEPARATOR);
         String path = separationUrl[0];
         String[] queryString = separationUrl[1].split(PARAM_SEPARATOR);
-        boolean validateQuery = Arrays.stream(queryString)
-                .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length < 2);
-        if (validateQuery) {
+        if (!isValidateQuery(queryString)) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
                     FileReader.loadFileContent("/400.html"));
         }
@@ -135,6 +138,11 @@ public class Http11Processor implements Runnable, Processor {
             return login(queryString, accept);
         }
         throw new RuntimeException("'" + url + "'은 정의되지 않은 URL 입니다.");
+    }
+
+    private static boolean isValidateQuery(String[] queryString) {
+        return Arrays.stream(queryString)
+                .noneMatch(query -> query.split(PARAM_ASSIGNMENT).length < 2);
     }
 
     private ResponseContent login(String[] queryString, String accept) {
@@ -145,15 +153,13 @@ public class Http11Processor implements Runnable, Processor {
         String accountParam = queryString[0];
         String passwordParam = queryString[1];
         if (!accountParam.startsWith("account=") || !passwordParam.startsWith("password=")) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
-                    FileReader.loadFileContent("/400.html"));
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
 
         if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {
             return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent("/index.html"));
         }
-        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept,
-                FileReader.loadFileContent("/401.html"));
+        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent("/401.html"));
     }
 
     private boolean checkAuth(String account, String password) {
@@ -165,4 +171,51 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
+    private void loadPostHttpMethod(String url, String fileType, List<String> sentences, BufferedReader reader) {
+        Map<String, String> body = getRequestBody(sentences, reader);
+
+        try (final OutputStream outputStream = connection.getOutputStream()) {
+            String response = "";
+            if (url.equals("/register")) {
+                response = signUp(body, fileType).responseToString();
+            }
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private Map<String, String> getRequestBody(List<String> sentences, BufferedReader reader) {
+        int contentLength = Integer.parseInt(sentences.stream()
+                .filter(sentence -> sentence.startsWith("Content-Length: "))
+                .map(sentence -> sentence.substring("Content-Length: ".length(), sentence.length()).split(",")[0])
+                .findAny()
+                .orElse("0"));
+
+        char[] buffer = new char[contentLength];
+        try {
+            reader.read(buffer, 0, contentLength);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String body = new String(buffer);
+
+        String[] values = body.split("&");
+        return Arrays.stream(values)
+                .map(s -> s.split("=", 2))
+                .filter(parts -> parts.length == 2)
+                .collect(Collectors.toMap(
+                        parts -> parts[0],
+                        parts -> parts[1]
+                ));
+    }
+
+    private ResponseContent signUp(Map<String, String> body, String accept) {
+        if (InMemoryUserRepository.findByAccount(body.get("account")).isPresent()) {
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
+        }
+        InMemoryUserRepository.save(new User(body.get("account"), body.get("email"), body.get("password")));
+        return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent("/index.html"));
+    }
 }

@@ -104,7 +104,8 @@ public class Http11Processor implements Runnable, Processor {
         RequestBody requestBody = request.getRequestBody();
 
         if (request.pointsTo(GET, "/")) {
-            return buildTextMessage("Hello world!", HttpStatusCode.OK);
+            return HttpResponse.ofContent("Hello world!")
+                    .buildMessage();
         }
 
         if (request.pointsTo(GET, "/login")) {
@@ -122,11 +123,6 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK)
                 .cookie(cookie)
                 .buildMessage();
-    }
-
-    private String buildTextMessage(String content, HttpStatusCode statusCode) {
-        HttpResponse httpResponse = new HttpResponse(statusCode, content, ContentType.TEXT_HTML);
-        return httpResponse.buildMessage();
     }
 
     private String getLoginPage(HttpCookie cookie) {

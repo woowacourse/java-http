@@ -24,6 +24,10 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
+    public static HttpResponse ofContent(String content) {
+        return new HttpResponse(HttpStatusCode.OK, content, ContentType.TEXT_HTML);
+    }
+
     public static HttpResponse ofStaticFile(String fileName, HttpStatusCode httpStatusCode) {
         if (!fileName.contains(".")) {
             fileName += ".html";
@@ -63,6 +67,8 @@ public class HttpResponse {
     }
 
     public String buildMessage() {
+        System.out.println("httpStatusCode = " + httpStatusCode.buildMessage());
+
         return String.join("\r\n",
                 httpStatusCode.buildMessage(),
                 responseHeader.buildMessage(),

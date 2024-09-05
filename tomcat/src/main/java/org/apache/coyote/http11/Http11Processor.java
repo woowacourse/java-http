@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,16 +115,24 @@ public class Http11Processor implements Runnable, Processor {
                             }
                         }
 
-                        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(
-                                params.get("account"));
+                        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
 
                         if (optionalUser.isPresent()) {
                             User user = optionalUser.get();
                             if (user.checkPassword(params.get("password"))) {
+                                Cookie cookie = new Cookie(headers.getOrDefault("Cookie", ""));
+                                Optional<String> sessionId = cookie.getJSessionId();
+
+                                if (sessionId.isEmpty()) {
+                                    UUID uuid = UUID.randomUUID();
+                                    cookie.addCookie(Cookie.JSESSIONID, uuid.toString());
+                                }
+
                                 String response = String.join("\r\n",
-                                        "HTTP/1.1 302 FOUND ",
-                                        "Location: /index.html ",
-                                        "Content-Length: 0 ",
+                                        "HTTP/1.1 302 FOUND",
+                                        "Set-Cookie: " + cookie.toCookieHeader(),
+                                        "Location: /index.html",
+                                        "Content-Length: 0",
                                         "");
 
                                 bufferedWriter.write(response);

@@ -21,9 +21,6 @@ public class HttpRequestConvertor {
             String[] headerFirstLine = firstLine.split(" ");
             HttpMethod method = HttpMethod.getHttpMethod(headerFirstLine[0]);
             String path = headerFirstLine[1];
-            if (method.isMethod("GET") && !path.contains(".")) {
-                path += ".html";
-            }
             String version = headerFirstLine[2];
 
             HttpRequestLine httpRequestLine = new HttpRequestLine(method, path, version);

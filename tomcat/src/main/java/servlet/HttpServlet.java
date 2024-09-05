@@ -1,6 +1,7 @@
 package servlet;
 
 import com.techcourse.presentation.LoginController;
+import com.techcourse.presentation.RegisterController;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +30,7 @@ public class HttpServlet {
     public HttpServlet() {
         this.requestMappingInfos = List.of(
                 new RequestMappingInfo("/login", HttpMethod.GET, new LoginController()::getLoginPage),
+                new RequestMappingInfo("/register", HttpMethod.POST, RegisterController.getInstance()::register),
                 new RequestMappingInfo("/", HttpMethod.GET, new WelcomePageHandler())
         );
         this.viewResolver = new ViewResolver();

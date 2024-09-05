@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.Session;
@@ -74,8 +74,8 @@ public class HttpRequest {
         if (cookieString == null) {
             return true;
         }
-        HttpCookie cookie = HttpCookie.from(cookieString);
-        return !cookie.contains(HttpCookie.JSESSIONID);
+        HttpCookies cookie = HttpCookies.from(cookieString);
+        return !cookie.contains(HttpCookies.JSESSIONID);
     }
 
     public Session getSession(boolean createIfNotExists) {
@@ -84,8 +84,8 @@ public class HttpRequest {
             SessionManager.add(session);
             return session;
         }
-        HttpCookie cookie = HttpCookie.from(headers.get(HttpHeaders.COOKIE));
-        String sessionId = cookie.get(HttpCookie.JSESSIONID);
+        HttpCookies cookie = HttpCookies.from(headers.get(HttpHeaders.COOKIE));
+        String sessionId = cookie.get(HttpCookies.JSESSIONID);
         return SessionManager.findSession(sessionId);
     }
 }

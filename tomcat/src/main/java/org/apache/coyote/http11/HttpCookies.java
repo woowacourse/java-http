@@ -5,22 +5,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpCookie {
+public class HttpCookies {
 
     public static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
-    public HttpCookie() {
+    public HttpCookies() {
         this(new HashMap<>());
     }
 
-    private HttpCookie(Map<String, String> cookies) {
+    private HttpCookies(Map<String, String> cookies) {
         this.cookies = new HashMap<>(cookies);
     }
 
-    public static HttpCookie from(String cookie) {
-        return new HttpCookie(parseCookies(cookie));
+    public static HttpCookies from(String cookie) {
+        return new HttpCookies(parseCookies(cookie));
     }
 
     private static Map<String, String> parseCookies(String cookiesString) {

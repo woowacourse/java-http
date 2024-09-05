@@ -55,6 +55,16 @@ public class Http11Processor implements Runnable, Processor {
             httpRequest.addHeader(headerLine);
         }
 
+        String headerValue = httpRequest.getHeaderValue("Content-Length");
+        if (headerValue == null) {
+            return httpRequest;
+        }
+
+        int contentLength = Integer.parseInt(httpRequest.getHeaderValue("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        httpRequest.addFormData(requestBody);
         return httpRequest;
     }
 }

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController implements HttpRequestHandler {
 
     private static final String LOGIN_FAIL_PAGE = "/401.html";
-    private static final String LOGIN_SUCCESS_URI = "http://localhost:8080/index.html";
+    private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
@@ -55,6 +55,6 @@ public class LoginController implements HttpRequestHandler {
         if (found.isEmpty() || !found.get().checkPassword(password)) {
             return HttpResponse.ok(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
         }
-        return HttpResponse.redirect(LOGIN_SUCCESS_URI);
+        return HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
     }
 }

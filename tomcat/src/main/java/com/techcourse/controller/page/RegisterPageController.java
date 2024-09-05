@@ -15,8 +15,7 @@ public class RegisterPageController implements HttpRequestHandler {
     private static final Method SUPPORTING_METHOD = Method.GET;
     private static final Uri SUPPORTING_URI = new Uri("/register");
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
-
-
+    
     @Override
     public boolean supports(final HttpRequest request) {
         if (request.isMethodNotEqualWith(SUPPORTING_METHOD)) {

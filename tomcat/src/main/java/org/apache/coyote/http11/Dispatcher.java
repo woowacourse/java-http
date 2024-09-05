@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.GreetingController;
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
 import com.techcourse.controller.page.LoginPageController;
 import com.techcourse.controller.page.RegisterPageController;
@@ -23,6 +24,7 @@ public class Dispatcher {
         handlers.add(new LoginPageController());
         handlers.add(new LoginController());
         handlers.add(new RegisterPageController());
+        handlers.add(new RegisterController());
     }
 
     public static Dispatcher getInstance() {

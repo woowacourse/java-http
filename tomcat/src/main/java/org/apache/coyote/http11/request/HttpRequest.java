@@ -11,6 +11,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> bodies = new HashMap<>();
 
     public HttpRequest(final RequestLine requestLine) {
         this.requestLine = requestLine;
@@ -31,6 +32,17 @@ public class HttpRequest {
         String key = headerParts[0];
         String value = headerParts[1];
         headers.put(key, value);
+    }
+
+    public void addFormData(String bodyLine) {
+        String[] pairs = bodyLine.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            if (keyValue.length != 2) {
+                continue;
+            }
+            bodies.put(keyValue[0], keyValue[1]);
+        }
     }
 
     public boolean isMethodNotEqualWith(Method method) {
@@ -83,5 +95,9 @@ public class HttpRequest {
             queryParams.put(keyValue[0], keyValue[1]);
         }
         return queryParams.get(paramterName);
+    }
+
+    public String getFormData(final String name) {
+        return bodies.get(name);
     }
 }

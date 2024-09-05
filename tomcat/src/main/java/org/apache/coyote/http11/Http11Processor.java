@@ -24,7 +24,26 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
     private static final String DEFAULT_PAGE_CONTENT = "Hello world!";
+    private static final String ROOT_PATH = "/";
+    private static final String LOGIN_PATH = "/login";
+    private static final String REGISTER_PATH = "/register";
+    private static final String NOT_FOUND_PAGE = "/404.html";
+    private static final String BAD_REQUEST_PAGE = "/400.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
+    private static final String INDEX_PAGE = "/index.html";
+
+    private static final String HTTP_METHOD = "HttpMethod";
+    private static final String URL = "Url";
+    private static final String ACCEPT = "Accept";
+    private static final String IS_QUERY_PARAM = "IsQueryParam";
+    private static final String QUERY_PARAM_SIZE = "QueryParamSize";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
+    private static final String EMAIL = "email";
 
     private final Socket connection;
 
@@ -49,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRequestMethod(BufferedReader reader, Map<String, String> headers) {
-        String httpMethod = headers.get("HttpMethod");
+        String httpMethod = headers.get(HTTP_METHOD);
         if ("GET".equalsIgnoreCase(httpMethod)) {
             handleGetRequest(headers);
         } else if ("POST".equalsIgnoreCase(httpMethod)) {
@@ -70,12 +89,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private ResponseContent generateResponseForUrl(Map<String, String> headers) {
-        String url = headers.get("Url");
-        String accept = headers.get("Accept");
-        if ("/".equals(url)) {
+        String url = headers.get(URL);
+        String accept = headers.get(ACCEPT);
+        if (ROOT_PATH.equals(url)) {
             return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
-        if ("true".equals(headers.get("IsQueryParam"))) {
+        if ("true".equals(headers.get(IS_QUERY_PARAM))) {
             return generateResponseForQueryParam(headers);
         }
 
@@ -89,28 +108,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private ResponseContent generateResponseForQueryParam(Map<String, String> headers) {
-        String url = headers.get("Url");
-        if ("/login".equals(url)) {
+        String url = headers.get(URL);
+        if (LOGIN_PATH.equals(url)) {
             return handleLoginRequest(headers);
         }
         throw new RuntimeException("'" + url + "'는 정의되지 않은 URL입니다.");
     }
 
     private ResponseContent handleLoginRequest(Map<String, String> queryParams) {
-        String accept = queryParams.get("Accept");
-        if (Integer.parseInt(queryParams.get("QueryParamSize")) < 2) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
+        String accept = queryParams.get(ACCEPT);
+        if (Integer.parseInt(queryParams.get(QUERY_PARAM_SIZE)) < 2) {
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
 
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+        String account = queryParams.get(ACCOUNT);
+        String password = queryParams.get(PASSWORD);
         if (account == null || password == null) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
         if (authenticateUser(account, password)) {
-            return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent("/index.html"));
+            return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
         }
-        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent("/401.html"));
+        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
 
     private boolean authenticateUser(String account, String password) {
@@ -123,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handlePostRequest(BufferedReader reader, Map<String, String> headers) {
-        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
         Map<String, String> bodyParams = RequestReader.readBody(reader, contentLength);
 
         try (final OutputStream outputStream = connection.getOutputStream()) {
@@ -136,19 +155,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static ResponseContent generateResponseForUrl(Map<String, String> headers, Map<String, String> bodyParams) {
-        String url = headers.get("Url");
-        String accept = headers.get("Accept");
-        if ("/register".equals(url)) {
+        String url = headers.get(URL);
+        String accept = headers.get(ACCEPT);
+        if (REGISTER_PATH.equals(url)) {
             return handleRegistration(bodyParams, accept);
         }
-        return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/404.html"));
+        return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(NOT_FOUND_PAGE));
     }
 
     private static ResponseContent handleRegistration(Map<String, String> bodyParams, String accept) {
-        if (InMemoryUserRepository.findByAccount(bodyParams.get("account")).isPresent()) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
+        if (InMemoryUserRepository.findByAccount(bodyParams.get(ACCOUNT)).isPresent()) {
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
-        InMemoryUserRepository.save(new User(bodyParams.get("account"), bodyParams.get("email"), bodyParams.get("password")));
-        return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent("/index.html"));
+        InMemoryUserRepository.save(new User(bodyParams.get(ACCOUNT), bodyParams.get(EMAIL), bodyParams.get(PASSWORD)));
+        return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent(INDEX_PAGE));
     }
 }

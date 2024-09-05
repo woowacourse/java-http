@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import com.techcourse.exception.UncheckedServletException;
@@ -20,18 +18,6 @@ public class Http11Helper {
 
     public static Http11Helper getInstance() {
         return instance;
-    }
-
-    public Map<String, String> parseRequestBody(String body) {
-        Map<String, String> bodyParams = new HashMap<>();
-        String[] pairs = body.split("&");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                bodyParams.put(keyValue[0], keyValue[1]);
-            }
-        }
-        return bodyParams;
     }
 
     public String getFileName(String endpoint) {

@@ -15,7 +15,7 @@ public class HttpRequest {
     private final String uri;
     private final String version;
     private final Map<String, String> headers;
-    private final String body;
+    private final Body body;
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         Map<String, String> requestLine = extractRequestLine(bufferedReader);
@@ -55,7 +55,7 @@ public class HttpRequest {
         return headerMap;
     }
 
-    public String extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+    public Body extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
         StringBuilder body = new StringBuilder();
 
         int contentLength = 0;
@@ -66,7 +66,7 @@ public class HttpRequest {
             body.append(buffer);
         }
 
-        return body.toString();
+        return new Body(body.toString());
     }
 
     public String getURI() {
@@ -77,7 +77,7 @@ public class HttpRequest {
         return method;
     }
 
-    public String getBody() {
+    public Body getBody() {
         return body;
     }
 }

@@ -26,7 +26,7 @@ public class LoginController extends Controller {
 
     @Override
     protected String doPost(HttpRequest request) throws IOException {
-        Map<String, String> requestBody = http11Helper.parseRequestBody(request.getBody());
+        Map<String, String> requestBody = request.getBody().parseRequestBody();
         String account = requestBody.get("account");
         String password = requestBody.get("password");
 

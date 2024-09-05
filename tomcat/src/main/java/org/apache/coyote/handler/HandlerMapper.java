@@ -3,7 +3,7 @@ package org.apache.coyote.handler;
 import java.util.Arrays;
 
 public enum HandlerMapper {
-    LOGIN("GET", "/login", new LoginHandler()),
+    LOGIN("POST", "/login", new LoginHandler()),
     REGISTER("POST", "/register", new RegisterHandler()),
     ;
 

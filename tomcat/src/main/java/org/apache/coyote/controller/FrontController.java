@@ -58,8 +58,8 @@ public class FrontController {
         for (String key : request.getHeaders().getCookies().getCookies().keySet()) {
             log.info("COOKIE: key = {}, value = {}", key, request.getHeaders().getCookies().getCookies().get(key));
         }
-        if (request.getBody().isPresent()) {
-            log.info(request.getBody().get());
+        if (!request.isBodyEmpty()) {
+            log.info(request.getBody());
         }
     }
 

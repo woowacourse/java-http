@@ -27,7 +27,7 @@ public class RegisterController implements Controller {
         if (request.getBody().isEmpty()) {
             return redirectRegisterPage();
         }
-        String body = request.getBody().get();
+        String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
         String account = parsedBody.get(ACCOUNT_KEY);

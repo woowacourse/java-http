@@ -28,10 +28,10 @@ public class LoginController implements Controller {
 
     @Override
     public HttpResponse run(HttpRequest request) {
-        if (request.getBody().isEmpty()) {
+        if (request.isBodyEmpty()) {
             return redirectLoginPage();
         }
-        String body = request.getBody().get();
+        String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
         String account = parsedBody.get(ACCOUNT_KEY);

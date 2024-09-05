@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
 import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.HttpMethod;
@@ -18,7 +17,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeader header;
-    private final Optional<String> body;
+    private final RequestBody body;
 
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -41,18 +40,18 @@ public class HttpRequest {
         return header;
     }
 
-    private Optional<String> parseBody(BufferedReader bufferedReader) throws IOException {
+    private RequestBody parseBody(BufferedReader bufferedReader) throws IOException {
         StringBuilder stringBody = new StringBuilder();
 
         if (!header.hasContentLength()) {
-            return Optional.empty();
+            return RequestBody.empty();
         }
 
         for (int i = 0; i < header.getContentLength(); i++) {
             stringBody.append((char) bufferedReader.read());
         }
 
-        return Optional.of(stringBody.toString());
+        return new RequestBody(stringBody.toString());
     }
 
     private String reconstructHeaderValue(String[] headerValues) {
@@ -87,8 +86,12 @@ public class HttpRequest {
         return requestLine.getQueryParams();
     }
 
-    public Optional<String> getBody() {
-        return body;
+    public boolean isBodyEmpty() {
+        return body.isEmpty();
+    }
+
+    public String getBody() {
+        return body.getBodyValue();
     }
 
     @Override

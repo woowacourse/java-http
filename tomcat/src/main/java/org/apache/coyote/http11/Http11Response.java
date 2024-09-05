@@ -1,23 +1,20 @@
 package org.apache.coyote.http11;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class Http11Response {
 
-    private final Map<String, String> headers;
-    private final String body;
+    private final Map<String, String> headers = new LinkedHashMap<>();
+    private int statusCode = 200;
+    private String body;
 
-    public Http11Response(Map<String, String> headers, String body) {
-        this.headers = headers;
-        this.body = body;
+    public Http11Response() {
     }
 
-    public String getResponse() {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                parseHeaders(),
-                body);
+    private String parseResponseLine() {
+        return String.format("HTTP/1.1 %d OK ", statusCode);
     }
 
     private String parseHeaders() {
@@ -30,5 +27,28 @@ public class Http11Response {
             sb.append("\r\n");
         }
         return sb.toString();
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public String getResponse() {
+        return String.join("\r\n",
+                parseResponseLine(),
+                parseHeaders(),
+                body);
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

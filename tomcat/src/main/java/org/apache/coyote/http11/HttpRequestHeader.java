@@ -49,6 +49,10 @@ public class HttpRequestHeader {
         return map;
     }
 
+    public int getContentLength() {
+        return Integer.parseInt(headers.get("Content-Length"));
+    }
+
     public String getHttpMethod() {
         return this.httpMethod;
     }

@@ -11,11 +11,10 @@ public class HttpRequestReceiver {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        HttpRequestHeader header = new HttpRequestHeader(receiveRequestLines(bufferedReader));
+        HttpRequestHeader header = new HttpRequestHeader(receiveRequestHeader(bufferedReader));
+        int contentLength = header.getContentLength();
+
         HttpRequestBody body = null;
-
-        int contentLength = Integer.parseInt(header.getHeader("content-length"));
-
         if ("POST".equals(header.getHttpMethod()) || "PUT".equals(header.getHttpMethod())) {
             body = new HttpRequestBody(receiveRequestBody(bufferedReader, contentLength));
         }
@@ -23,7 +22,7 @@ public class HttpRequestReceiver {
         return new HttpRequest(header, body);
     }
 
-    private static String receiveRequestLines(BufferedReader bufferedReader) throws IOException {
+    private static String receiveRequestHeader(BufferedReader bufferedReader) throws IOException {
         StringBuilder sb = new StringBuilder();
         while (true) {
             String input = bufferedReader.readLine();

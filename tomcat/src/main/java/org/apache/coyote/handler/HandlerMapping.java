@@ -3,7 +3,6 @@ package org.apache.coyote.handler;
 import java.util.Map;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.LogInController;
-import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.http11.HttpRequestHeader;
 
 public class HandlerMapping {
@@ -13,7 +12,6 @@ public class HandlerMapping {
     );
 
     public Controller getController(HttpRequestHeader request) {
-        return HANDLER_MAPPER.get(
-                new RequestMapping(request.getHttpMethod(), request.getPath()));
+        return HANDLER_MAPPER.get(new RequestMapping(request.getHttpMethod(), request.getPath()));
     }
 }

@@ -104,7 +104,12 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public String getQueryString() {
-        return "";
+        String path = getStartLine().split(" ")[1];
+        int i = path.lastIndexOf("?");
+        if (i == -1) {
+            return "";
+        }
+        return path.substring(i + 1);
     }
 
     @Override
@@ -299,7 +304,7 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     @Override
-    public Map<String, String[]> getParameterMap() {
+    public Map<String, String[]> getParameterMap() { // TODO getRequestURL 잘못 쓰임
         Map<String, String[]> map = new LinkedHashMap<>();
         String target = getRequestURL().toString();
         int i = target.indexOf('?');

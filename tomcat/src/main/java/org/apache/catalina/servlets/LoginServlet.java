@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.apache.catalina.core.HttpResponse;
 import org.slf4j.Logger;
@@ -35,15 +34,29 @@ public class LoginServlet extends HttpServlet {
         response.setContentLength(fileContent.getBytes().length);
         setResponseBody(response, fileContent);
 
-        String account = request.getParameter("account");
-        if (account == null) {
+        if (request.getQueryString().isEmpty()) {
             return;
         }
 
-        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchElementException::new);
-        if (user.checkPassword(request.getParameter("password"))) {
-            response.sendRedirect("/index.html");
-            log.info("user : {}", user);
+        String account = request.getParameter("account");
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(user -> login(request, response, user), () -> redirectTo("/401.html", response));
+    }
+
+    private void login(HttpServletRequest request, HttpServletResponse response, User value) {
+        if (value.checkPassword(request.getParameter("password"))) {
+            log.info("user : {}", value);
+            redirectTo("/index.html", response);
+            return;
+        }
+        redirectTo("/401.html", response);
+    }
+
+    private void redirectTo(String url, HttpServletResponse response) {
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

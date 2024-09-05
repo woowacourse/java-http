@@ -35,13 +35,17 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            String responseBody = parseStartLine(inputStream);
+            String resourceName = getResourceName(inputStream);
+            String responseBody = parseStartLine(resourceName);
+            String resourceExtension = getExtension(resourceName);
+
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + resourceExtension + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
-                    responseBody);
+                    responseBody
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -50,12 +54,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseStartLine(InputStream inputStream) throws URISyntaxException, IOException {
+    private String getExtension(String resourceName) {
+        int extensionIndex = resourceName.indexOf('.') + 1;
+        if (extensionIndex == 0) {
+            return "html";
+        }
+        return resourceName.substring(extensionIndex);
+    }
+
+    private String getResourceName(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String startLine = bufferedReader.readLine();
-        String[] tokens = startLine.split(" ");
+        return startLine.split(" ")[1];
+    }
+
+    private String parseStartLine(String resourceName) throws URISyntaxException, IOException {
         URL resource = getClass().getClassLoader()
-                .getResource("static" + tokens[1]);
+                .getResource("static" + resourceName);
 
         try {
             return Files.readString(Paths.get(resource.toURI()));

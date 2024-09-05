@@ -5,10 +5,10 @@ import java.io.IOException;
 
 public class RequestBody {
 
-    private final String requestBody;
+    private final String content;
 
-    public RequestBody(String requestBody) {
-        this.requestBody = requestBody;
+    public RequestBody(String content) {
+        this.content = content;
     }
 
     public static RequestBody read(BufferedReader reader, int contentLength) {
@@ -19,5 +19,9 @@ public class RequestBody {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String getContent() {
+        return content;
     }
 }

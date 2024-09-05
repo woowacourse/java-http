@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.servlets.LoginServlet;
+import org.apache.catalina.servlets.RegisterServlet;
 
 /**
  * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.(동적 파일만)
@@ -15,7 +16,8 @@ public class Mapper {// TODO 싱글톤
     private static final Map<Pattern, Servlet> mapper = Map.of(
             Pattern.compile(".*\\..*"), new DefaultServlet(),
             Pattern.compile("/"), new DefaultServlet(),
-            Pattern.compile("^/login$"), new LoginServlet()
+            Pattern.compile("^/login$"), new LoginServlet(),
+            Pattern.compile("^/register$"), new RegisterServlet()
     );
 
     public Servlet getServlet(String url) {

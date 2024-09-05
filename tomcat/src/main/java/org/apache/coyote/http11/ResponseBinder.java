@@ -1,5 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+
 class ResponseBinder {
 
     String buildSuccessfulResponse(String responseBody) {
@@ -15,9 +20,12 @@ class ResponseBinder {
                 responseBody);
     }
 
-    String buildFailedResponse(int statusCode, String statusMessage, String responseBody) {
+    String buildNotFoundResponse() throws IOException {
+        URL badRequestURL = getClass().getClassLoader().getResource("static/404.html");
+        String responseBody = new String(Files.readAllBytes(new File(badRequestURL.getFile()).toPath()));
+
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " " + statusMessage,
+                "HTTP/1.1 404 NOT_FOUND ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

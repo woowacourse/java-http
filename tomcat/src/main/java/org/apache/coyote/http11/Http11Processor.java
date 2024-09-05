@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -53,14 +52,10 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
             if ("POST".equals(httpMethod)) {
-                while (true) {
-                    String header = bufferedReader.readLine();
-                    if (header.isBlank()) {
-                        break;
-                    }
-                }
+                Map<String, String> headers = getHeaders(bufferedReader);
+                String requestBody = getRequestBody(headers, bufferedReader);
                 if (uri.startsWith("/login")) {
-                    handleLogin(bufferedReader.readLine().trim(), outputStream);
+                    handleLogin(requestBody, outputStream);
                     return;
                 }
                 // TODO: POST /register 구현
@@ -77,6 +72,27 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: 0 \r\n" +
                 "\r\n";
         writeResponse(outputStream, response);
+    }
+
+    private Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        while (true) {
+            String header = bufferedReader.readLine();
+            if (header.isBlank()) {
+                break;
+            }
+            String[] splitHeader = header.split(":");
+            headers.put(splitHeader[0].trim(), splitHeader[1].trim());
+        }
+        return headers;
+    }
+
+    private String getRequestBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     private void handleLogin(String requestBody, OutputStream outputStream) throws IOException {

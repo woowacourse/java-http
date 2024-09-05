@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -53,13 +54,14 @@ public class Http11Processor implements Runnable, Processor {
             String requestUrl = request.getFirst()
                     .split(" ")[1];
 
-            String response = getResponse(requestUrl, HttpStatus.OK);
+            HttpHeader responseHeader = new HttpHeader();
+            String response = getResponse(requestUrl, HttpStatus.OK, responseHeader);
             if (requestUrl.startsWith("/login") && method.equals("POST")) {
-                response = login(body);
+                response = login(body, HttpCookie.from(request), responseHeader);
             }
 
             if (requestUrl.startsWith("/register") && method.equals("POST")) {
-                response = register(body);
+                response = register(body, responseHeader);
             }
 
             outputStream.write(response.getBytes());
@@ -100,19 +102,19 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
     }
 
-    private String getResponse(String requestUrl, HttpStatus httpStatus) throws IOException {
+    private String getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
         String responseBody = getResponseBody(requestUrl);
 
-        String responseHeader = String.join("\r\n",
-                "HTTP/1.1 " + httpStatus.toHttpHeader() + " ",
-                "Content-Type: " + ContentType.findContentType(requestUrl) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ");
+        String responseLine = String.join("\r\n", "HTTP/1.1 " + httpStatus.toHttpHeader() + " ");
+
+        responseHeader.addHeader("Content-Type", ContentType.findContentType(requestUrl) + ";charset=utf-8");
+        responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         if (httpStatus.isFound()) {
-            return String.join("\r\n", responseHeader, "Location: " + requestUrl + " ");
+            responseHeader.addHeader("Location", requestUrl);
         }
 
-        return String.join("\r\n", responseHeader, "", responseBody);
+        return String.join("\r\n", responseLine, responseHeader.toHttpHeader(), "", responseBody);
     }
 
     private String getResponseBody(String requestUrl) throws IOException {
@@ -143,25 +145,29 @@ public class Http11Processor implements Runnable, Processor {
         return resourceUrl;
     }
 
-    private String login(Map<String, String> body) throws IOException {
+    private String login(Map<String, String> body, HttpCookie cookie, HttpHeader responseHeader) throws IOException {
         String account = body.get("account");
         String password = body.get("password");
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return getResponse("/401.html", HttpStatus.FOUND);
+            return getResponse("/401.html", HttpStatus.FOUND, responseHeader);
+        }
+
+        if (!cookie.isContains("JSESSIONID")) {
+            responseHeader.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
         }
 
         log.info("로그인 성공 :: account = {}", user.get().getAccount());
-        return getResponse("/index.html", HttpStatus.FOUND);
+        return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
     }
 
-    private String register(Map<String, String> body) throws IOException {
+    private String register(Map<String, String> body, HttpHeader responseHeader) throws IOException {
         User user = new User(body.get("account"), body.get("password"), body.get("email"));
         InMemoryUserRepository.save(user);
 
         log.info("회원 가입 성공 :: account = {}", user.getAccount());
-        return getResponse("/index.html", HttpStatus.FOUND);
+        return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
     }
 }

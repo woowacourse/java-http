@@ -91,10 +91,9 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    //TODO: 로그가 제대로 찍히는 지 테스트 하기
-    @DisplayName("GET /login?account=gugu&password=password 요청이 오면 로그를 찍고 login.html을 반환한다.")
+    @DisplayName("올바른 회원 정보와 함께 로그인 요청이 오면 /index.html로 리다이렉트한다.")
     @Test
-    void loginWithQueryString() throws IOException {
+    void loginWithValidQueryString() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -110,13 +109,33 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080/index.html \r\n" +
+                "\r\n";
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 
+    @DisplayName("올바르지 않은 회원 정보와 함께 로그인 요청이 오면 /401.html로 리다이렉트한다.")
+    @Test
+    void loginWithInvalidQueryString() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080/401.html \r\n" +
+                "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

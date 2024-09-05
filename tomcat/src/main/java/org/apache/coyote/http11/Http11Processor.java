@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,16 +49,12 @@ public class Http11Processor implements Runnable, Processor {
             }
             
             if (uri.startsWith("/login")) {
-                uri = getLoginFileUri(uri);
+                handleLoginRequest(uri, outputStream);
+                return;
             }
-            var responseBody = getStaticFileContent(uri);
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + getFileExtension(uri) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-            writeResponse(outputStream, response);
+
+            // 200과 함께 파일 내보내는 메서드도 추출
+            writeStaticFileResponse(uri, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -69,37 +68,41 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleFaviconRequest(OutputStream outputStream) throws IOException {
-        final var response = String.join("\r\n",
-                "HTTP/1.1 204 No Content",
-                "Content-Length: 0",
-                "",
-                "");
+        final var response = "HTTP/1.1 204 No Content \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
         writeResponse(outputStream, response);
     }
 
-    private String getLoginFileUri(String uri) {
+    private void handleLoginRequest(String uri, OutputStream outputStream) throws IOException {
         int questionMarkIndex = uri.indexOf("?");
         if (questionMarkIndex == -1) {
-            return uri + ".html";
+            writeStaticFileResponse(uri + ".html", outputStream);
+            return;
         }
-        String fileName = uri.substring(0, questionMarkIndex) + ".html";
-        checkLoginQueryString(uri.substring(questionMarkIndex + 1));
-
-        return fileName;
+        handleLoginQueryString(uri.substring(questionMarkIndex + 1), outputStream);
     }
 
-    private void checkLoginQueryString(String queryString) {
+    private void handleLoginQueryString(String queryString, OutputStream outputStream) throws IOException {
         Map<String, String> queryStringPairs = getQueryStringPairs(queryString);
 
         String account = queryStringPairs.get("account");
         String password = queryStringPairs.get("password");
         if (account != null & password != null) {
-            InMemoryUserRepository.findByAccount(account).ifPresent(user -> {
-                if ("password".equals(password)) {
-                    log.info("user : {}", user);
-                }
-            });
+            Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
+            if (foundUser.isPresent() && "password".equals(password)) {
+                writeRedirectResponse("/index.html", outputStream);
+                return;
+            }
         }
+        writeRedirectResponse("/401.html", outputStream);
+    }
+
+    private void writeRedirectResponse(String location, OutputStream outputStream) throws IOException {
+        final var response = "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080" + location + " \r\n" +
+                "\r\n";
+        writeResponse(outputStream, response);
     }
 
     private Map<String, String> getQueryStringPairs(String queryString) {
@@ -112,6 +115,17 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryStringPairs;
+    }
+
+    private void writeStaticFileResponse(String uri, OutputStream outputStream) throws IOException {
+        var responseBody = getStaticFileContent(uri);
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/" + getFileExtension(uri) + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        writeResponse(outputStream, response);
     }
 
     private String getStaticFileContent(String path) throws IOException {

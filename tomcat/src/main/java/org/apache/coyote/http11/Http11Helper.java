@@ -44,16 +44,11 @@ public class Http11Helper {
 
     public Map<String, String> extractRequestBody(String request) {
         Map<String, String> bodyParams = new HashMap<>();
-        String[] parts = request.split("\r\n\r\n", 2);
-
-        if (parts.length > 1) {
-            String body = parts[1];
-            String[] pairs = body.split("&");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split("=");
-                if (keyValue.length == 2) {
-                    bodyParams.put(keyValue[0], keyValue[1]);
-                }
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            if (keyValue.length == 2) {
+                bodyParams.put(keyValue[0], keyValue[1]);
             }
         }
         return bodyParams;

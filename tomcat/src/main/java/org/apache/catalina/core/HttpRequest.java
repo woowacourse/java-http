@@ -19,7 +19,10 @@ import jakarta.servlet.http.PushBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -157,6 +160,10 @@ public class HttpRequest implements HttpServletRequest {
 
     private String getStartLine() {
         return request.split("\n")[0];
+    }
+
+    private String getRequestBody() {
+        return request.split("\r\n\r\n")[1];
     }
 
     @Override
@@ -306,22 +313,44 @@ public class HttpRequest implements HttpServletRequest {
     @Override
     public Map<String, String[]> getParameterMap() { // TODO getRequestURL 잘못 쓰임
         Map<String, String[]> map = new LinkedHashMap<>();
-        String target = getRequestURL().toString();
-        int i = target.indexOf('?');
-        if (i == -1) {
+        if (getMethod().equals("GET")) {
+            addRequestBodyParam(map);
+            addQueryStringParam(map);
             return map;
         }
+        if (getMethod().equals("POST")) {
+            addQueryStringParam(map);
+            addRequestBodyParam(map);
+            return map;
+        }
+        return map;
+    }
 
-        String query = target.substring(i + 1);
+    private void addRequestBodyParam(Map<String, String[]> map) {
+        String requestBody = getRequestBody();
+        parseParam(requestBody, map);
+    }
+
+    private void addQueryStringParam(Map<String, String[]> map) {
+        String requestUrl = getRequestURL().toString();
+        int i = requestUrl.indexOf('?');
+        if (i == -1) {
+            return;
+        }
+        String query = requestUrl.substring(i + 1);
+        parseParam(query, map);
+    }
+
+    private void parseParam(String query, Map<String, String[]> map) {
         String[] params = query.split("&");
         for (String param : params) {
             String[] split = param.split("=");
             String key = split[0];
-            String[] values = split[1].split(",");
+            String[] values = Arrays.stream(split[1].split(","))
+                    .map(value -> URLDecoder.decode(value, StandardCharsets.UTF_8))
+                    .toArray(String[]::new);
             map.put(key, values);
         }
-
-        return map;
     }
 
     @Override

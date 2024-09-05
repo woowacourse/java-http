@@ -1,5 +1,7 @@
 package org.apache.catalina.servlets;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServlet;
@@ -44,5 +46,20 @@ public class RegisterServlet extends HttpServlet {
     private void setResponseBody(ServletResponse response, String fileContent) {
         HttpResponse httpResponse = (HttpResponse) response;
         httpResponse.setResponseBody(fileContent);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        super.doPost(request, response);
+
+        String account = request.getParameter("account");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        InMemoryUserRepository.save(new User(account, email, password));
+
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.sendRedirect("/index.html");
     }
 }

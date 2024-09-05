@@ -25,13 +25,13 @@ public class LoginController implements Controller {
     @Override
     public String handle(RequestLine requestLine) {
         if (requestLine.isQueryStringRequest()) {
-            checkLogin(requestLine);
+            return checkLogin(requestLine);
         }
 
         return "/login.html";
     }
 
-    private void checkLogin(RequestLine requestLine) {
+    private String checkLogin(RequestLine requestLine) {
         Map<String, String> parameters = requestLine.getParameters();
         String account = parameters.get("account");
         String password = parameters.get("password");
@@ -39,10 +39,11 @@ public class LoginController implements Controller {
                 .orElseThrow(NoSuchElementException::new);
 
         if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException(account + " " + password + "잘못된 유저 요청입니다.");
+            return "/401.html";
         }
 
         log.info("user : {}", user);
+        return "/index.html";
     }
 
 

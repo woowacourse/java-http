@@ -36,6 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = createRequest(inputStream);
+            log.info("[REQUEST] = {}", request);
             final var responseBody = createResponseBody(request.getUri());
 
             Map<String, String> header = new LinkedHashMap<>();

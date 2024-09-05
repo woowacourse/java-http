@@ -24,20 +24,24 @@ public class HttpRequestParser {
             for (int j = i + 1; j < lines.length; j++) {
                 bodyBuilder.append(lines[j]).append("\r\n");
             }
-            bodyBuilder.toString().trim();
+            body = bodyBuilder.toString().trim();
         }
 
+        String url = requestLineParts[1];
         return new HttpRequest(requestLineParts[0],
-                parseUrl(requestLineParts[1]),
+                parseUrl(url),
                 requestLineParts[2],
                 headers,
                 body);
     }
 
     private static String parseUrl(String rawUrl) {
-        if (rawUrl.endsWith(".html")) {
+        if (rawUrl.endsWith(".html") || rawUrl.endsWith(".css") || rawUrl.endsWith(".js")) {
             return "static/" + rawUrl.substring(1);
         }
-        return rawUrl.substring(1);
+        if (rawUrl.equals("/")) {
+            return "static/index.html";
+        }
+        return rawUrl.substring(1) + ".html";
     }
 }

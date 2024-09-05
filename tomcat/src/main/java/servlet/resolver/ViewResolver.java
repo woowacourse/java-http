@@ -8,17 +8,19 @@ public class ViewResolver {
     private static final String CLASS_PATH = "static";
 
     public File resolveViewName(String viewName) {
-        URL resource = this.getClass().getClassLoader().getResource("%s%s".formatted(CLASS_PATH, convert(viewName)));
-        if (resource == null) {
-            throw new IllegalArgumentException("Not found file: %s".formatted(viewName));
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        URL viewResource = classLoader.getResource(convert(viewName));
+        if (viewResource == null) {
+            viewResource = classLoader.getResource(convert("/404")); // todo status code 404
         }
-        return new File(resource.getFile());
+        return new File(viewResource.getFile());
     }
 
-    public String convert(String viewName) {
-        if (!viewName.contains(".")) {
-            return "%s.html".formatted(viewName);
+    private String convert(String viewName) {
+        String classPathViewName = "%s%s".formatted(CLASS_PATH, viewName);
+        if (!classPathViewName.contains(".")) {
+            return "%s.html".formatted(classPathViewName);
         }
-        return viewName;
+        return classPathViewName;
     }
 }

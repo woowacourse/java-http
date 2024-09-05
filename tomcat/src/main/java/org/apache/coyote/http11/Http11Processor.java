@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.ViewController;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.exception.UnsupportedMethodException;
 
@@ -21,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final LoginController loginController = new LoginController();
     private final RegisterController registerController = new RegisterController();
+    private final ViewController viewController = new ViewController();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
     public Http11Processor(final Socket connection) {
@@ -48,13 +50,10 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 if (endpoint.startsWith("/login")) {
                     response = loginController.login(request);
-                }
-                else if (endpoint.startsWith("/register")) {
+                } else if (endpoint.startsWith("/register")) {
                     response = registerController.register(request);
-                }
-                else {
-                    String fileName = http11Helper.getFileName(endpoint);
-                    response = http11Helper.createResponse(HttpStatus.OK, fileName);
+                } else {
+                    response = viewController.show(request);
                 }
             } catch (UncheckedServletException e) {
                 log.error("Error processing request for endpoint: {}", endpoint, e);

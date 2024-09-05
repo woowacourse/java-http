@@ -11,7 +11,7 @@
 
 2. CSS 지원하기
 
-- [ ] 인덱스 페이지 열었을 때 CSS 파일도 호출하도록 만들기 (GET `/css/style.css`)
+- [x] 인덱스 페이지 열었을 때 CSS 파일도 호출하도록 만들기 (GET `/css/style.css`)
 
 3. Query String 파싱
 

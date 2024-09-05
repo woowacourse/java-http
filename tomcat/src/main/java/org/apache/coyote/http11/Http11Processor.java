@@ -5,6 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -39,15 +40,16 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequest.from(inputStream);
 
+            String version = httpRequest.getVersion();
             Map<String, String> httpRequestHeaders = httpRequest.getHeaders();
             String httpMethod = httpRequest.getHttpMethod();
             String page = httpRequest.getPath();
+            HttpResponse httpResponse;
 
             String responseBody = "";
-            String response = "";
             if (page.equals("/")) {
                 responseBody = "Hello world!";
-                response = generate200Response(responseBody, "text/html");
+                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
             } else if (page.startsWith("/login") && httpMethod.equals("POST")) {
                 String requestBody = httpRequest.getBody();
                 String account = requestBody.split("&")[0].split("=")[1];
@@ -72,8 +74,9 @@ public class Http11Processor implements Runnable, Processor {
                     sessionManager.add(session);
                     Path path = Path.of(url.toURI());
                     responseBody = new String(Files.readAllBytes(path));
-                    response = generate302ResponseWithCookie(responseBody, "text/html",
-                            "/index.html", jSessionId.toString());
+                    httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                    httpResponse.addHeader("Location", "/index.html");
+                    httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
                 } else {
                     URL url = getClass().getClassLoader().getResource("static/401.html");
                     if (url == null) {
@@ -82,7 +85,8 @@ public class Http11Processor implements Runnable, Processor {
 
                     Path path = Path.of(url.toURI());
                     responseBody = new String(Files.readAllBytes(path));
-                    response = generate302Response(responseBody, "text/html", "/401.html");
+                    httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                    httpResponse.addHeader("Location", "/401.html");
                 }
             } else if (page.startsWith("/login") && httpMethod.equals("GET")) {
                 SessionManager sessionManager = new SessionManager();
@@ -100,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
 
                         Path path = Path.of(url.toURI());
                         responseBody = new String(Files.readAllBytes(path));
-                        response = generate200Response(responseBody, "text/html");
+                        httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
                     } else {
                         URL url = getClass().getClassLoader().getResource("static" + page + ".html");
                         if (url == null) {
@@ -109,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
 
                         Path path = Path.of(url.toURI());
                         responseBody = new String(Files.readAllBytes(path));
-                        response = generate200Response(responseBody, "text/html");
+                        httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
                     }
                 } else {
                     URL url = getClass().getClassLoader().getResource("static" + page + ".html");
@@ -119,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
 
                     Path path = Path.of(url.toURI());
                     responseBody = new String(Files.readAllBytes(path));
-                    response = generate200Response(responseBody, "text/html");
+                    httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
                 }
             } else if (page.equals("/register") && httpMethod.equals("POST")) {
                 String requestBody = httpRequest.getBody();
@@ -135,7 +139,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generate302Response(responseBody, "text/html", "/index.html");
+                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                httpResponse.addHeader("Location", "/index.html");
             } else if (page.startsWith("/css/")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
@@ -144,7 +149,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generate200Response(responseBody, "text/css");
+                httpResponse = HttpResponse.of(version,200, "text/css", responseBody);
             } else if (page.contains(".js")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
@@ -152,7 +157,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generate200Response(responseBody, "text/javascript");
+                httpResponse = HttpResponse.of(version,200, "text/javascript", responseBody);
             } else if (page.endsWith(".html")) {
                 URL url = getClass().getClassLoader().getResource("static" + page);
                 if (url == null) {
@@ -161,7 +166,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generate200Response(responseBody, "text/html");
+                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
             } else {
                 URL url = getClass().getClassLoader().getResource("static" + page + ".html");
                 if (url == null) {
@@ -170,47 +175,13 @@ public class Http11Processor implements Runnable, Processor {
 
                 Path path = Path.of(url.toURI());
                 responseBody = new String(Files.readAllBytes(path));
-                response = generate200Response(responseBody, "text/html");
+                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
             }
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            httpResponse.send(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
-
-    private String generate200Response(String responseBody, String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String generate302Response(String responseBody, String contentType, String redirectUrl) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + redirectUrl,
-                "Content-Type: " + contentType + ";charset=utf-8",
-                "Content-Length: " + responseBody.getBytes().length,
-                "",
-                responseBody);
-    }
-
-    private String generate302ResponseWithCookie(String responseBody, String contentType,
-                                                 String redirectUrl, String jSessionID) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found",
-                "Location: " + redirectUrl,
-                "Content-Type: " + contentType + ";charset=utf-8",
-                "Content-Length: " + responseBody.getBytes().length,
-                "Set-Cookie: JSESSIONID=" + jSessionID + "; Path=/; HttpOnly",
-                "",
-                responseBody);
-    }
-
 }

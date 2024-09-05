@@ -73,16 +73,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void checkHttpMethodAndLoad(List<String> sentences) {
-        String firstHeaderSentence = sentences.getFirst();
-        if (firstHeaderSentence.startsWith("GET")) {
-            loadGetHttpMethod(sentences);
+        String[] firstHeaderSentence = sentences.getFirst().split(" ");
+        if (firstHeaderSentence.length < 2) {
+            throw new IllegalArgumentException("요청 header가 적절하지 않습니다.");
+        }
+        String url = firstHeaderSentence[1];
+        String fileType = getFileType(sentences);
+
+        if (firstHeaderSentence[0].startsWith("GET")) {
+            loadGetHttpMethod(url, fileType);
         }
     }
 
-    private void loadGetHttpMethod(List<String> sentences) {
+    private void loadGetHttpMethod(String url, String fileType) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String fileType = getFileType(sentences);
-            String url = sentences.getFirst().split(" ")[1];
             String response = getResponseContentForUrl(url, fileType).responseToString();
 
             outputStream.write(response.getBytes());
@@ -122,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
         String path = separationUrl[0];
         String[] queryString = separationUrl[1].split(PARAM_SEPARATOR);
         boolean validateQuery = Arrays.stream(queryString)
-                .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length != 2);
+                .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length < 2);
         if (validateQuery) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
                     FileReader.loadFileContent("/400.html"));

@@ -60,4 +60,8 @@ public class HttpRequest {
     public Map<String, String> getParams() {
         return requestBody.getParams();
     }
+
+    public Map<String, String> getHeaders() {
+        return headers.getHeaders();
+    }
 }

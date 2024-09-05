@@ -25,6 +25,7 @@ public class FrontController {
         RequestHandler handler = handlers.get(request.getPath());
         log.debug("Request Line: {}", request.getRequestLine());
         log.debug("Body: {}", request.getParams());
+
         if (handler != null) {
             handler.handle(request, response);
             return;

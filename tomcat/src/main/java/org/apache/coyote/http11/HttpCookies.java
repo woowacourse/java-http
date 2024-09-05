@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 
 public class HttpCookies {
 
-    public static final String JSESSIONID = "JSESSIONID";
-
     private final Map<String, String> cookies;
 
     public HttpCookies() {

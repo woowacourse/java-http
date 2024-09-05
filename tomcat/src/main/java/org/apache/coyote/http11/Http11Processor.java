@@ -1,16 +1,14 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.List;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.FrontController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +35,7 @@ public class Http11Processor implements Runnable, Processor {
                 InputStream inputStream = connection.getInputStream();
                 OutputStream outputStream = connection.getOutputStream()
         ) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            HttpRequest httpRequest = readHttpRequest(bufferedReader);
+            HttpRequest httpRequest = HttpRequestFactory.create(inputStream);
             if (httpRequest == null) {
                 return;
             }
@@ -51,32 +46,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest readHttpRequest(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-        if (requestLine == null) {
-            return null;
-        }
-        List<String> headers = reader.lines()
-                .takeWhile(s -> !s.isBlank())
-                .toList();
-
-        HttpRequest httpRequest = new HttpRequest(requestLine, headers);
-        setRequestBodyIfPresent(reader, httpRequest);
-        return httpRequest;
-    }
-
-    private void setRequestBodyIfPresent(BufferedReader reader, HttpRequest httpRequest) throws IOException {
-        int contentLength = httpRequest.getContentLength();
-        if (contentLength == 0) {
-            return;
-        }
-
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-
-        httpRequest.setRequestBody(requestBody);
     }
 }

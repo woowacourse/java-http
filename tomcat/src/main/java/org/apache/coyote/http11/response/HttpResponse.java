@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpResponse {
@@ -43,14 +44,33 @@ public class HttpResponse {
         );
     }
 
-    /**
-     * rawPath: /hello
-     * extension: html
-     */
+    public void sendRedirect(String path) {
+        setHttpStatus(HttpStatus.FOUND);
+        setHeader(HttpHeaders.LOCATION, path);
+    }
+
+    public void addCookie(Cookie cookie) {
+        headers.addHeader(HttpHeaders.SET_COOKIE, cookie.getCookieString());
+    }
+
+    public void write() {
+        String contentLength = String.valueOf(body.getBytes().length);
+        headers.addHeader(HttpHeaders.CONTENT_LENGTH, contentLength);
+
+        String response = buildHttpResponse();
+
+        try {
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("쓰기에 실패했습니다.", e);
+        }
+    }
+
     public void setStaticResourceResponse(String pathWithExtension) throws IOException {
         Path path = buildPath(pathWithExtension);
         String responseBody = new String(Files.readAllBytes(path));
-        String extension = pathWithExtension.substring(pathWithExtension.lastIndexOf("."));
+        String extension = pathWithExtension.substring(pathWithExtension.lastIndexOf(".") + 1);
         String contentType = createContentType(extension);
         headers.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
         this.body = responseBody;
@@ -66,19 +86,13 @@ public class HttpResponse {
     }
 
     private String createContentType(String fileExtension) {
-        String contentType;
-        if (fileExtension.endsWith("html")) {
-            contentType = "text/html;charset=utf-8";
-        } else if (fileExtension.endsWith("css")) {
-            contentType = "text/css;charset=utf-8";
-        } else if (fileExtension.endsWith("js")) {
-            contentType = "text/javascript;charset=utf-8";
-        } else if (fileExtension.endsWith("svg")) {
-            contentType = "image/svg+xml;charset=utf-8";
-        } else {
-            contentType = "text/plain;charset=utf-8";
-        }
-        return contentType;
+        return switch (fileExtension) {
+            case "html" -> "text/html;charset=utf-8";
+            case "css" -> "text/css;charset=utf-8";
+            case "js" -> "text/javascript;charset=utf-8";
+            case "svg" -> "image/svg+xml;charset=utf-8";
+            default -> "text/plain;charset=utf-8";
+        };
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {
@@ -91,24 +105,5 @@ public class HttpResponse {
 
     public void setResponseBody(String body) {
         this.body = body;
-    }
-
-    public void sendRedirect(String path) {
-        setHttpStatus(HttpStatus.FOUND);
-        setHeader(HttpHeaders.LOCATION, path);
-    }
-
-    public void write() {
-        String contentLength = String.valueOf(body.getBytes().length);
-        headers.addHeader(HttpHeaders.CONTENT_LENGTH, contentLength);
-
-        String response = buildHttpResponse();
-
-        try {
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("쓰기에 실패했습니다.", e);
-        }
     }
 }

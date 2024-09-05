@@ -89,4 +89,32 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("잘못된 메서드로 요청하면 405 응답을 반환한다.")
+    @Test
+    void wrongMethod() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "DELETE /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/405.html");
+        var expected = "HTTP/1.1 405 METHOD NOT ALLOWED \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2190 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

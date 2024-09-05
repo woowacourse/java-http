@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.catalina.Manager;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
@@ -37,10 +38,10 @@ public class LoginController implements Controller {
         String account = parsedBody.get(ACCOUNT_KEY);
         String password = parsedBody.get(PASSWORD_KEY);
 
-        User user = userRepository.findByAccount(account)
-                .orElseThrow();
+        Optional<User> optionalUser = userRepository.findByAccount(account);
 
-        if (user.checkPassword(password)) {
+        if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
+            User user = optionalUser.get();
             ResponseHeader header = new ResponseHeader();
             Manager manager = SessionManager.getInstance();
 

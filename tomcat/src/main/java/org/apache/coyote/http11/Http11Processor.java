@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,10 +42,10 @@ public class Http11Processor implements Runnable, Processor {
             int readByteCount = inputStream.read(bytes);
             String data = new String(bytes, 0, readByteCount, StandardCharsets.UTF_8);
 
-            String referer = extractReferer(data);
+            String uri = extractReferer(data);
 
             // default page
-            if (referer.equals("/")) {
+            if (uri.equals("/")) {
                 final var responseBody = "Hello world!";
 
                 final var response = String.join("\r\n",
@@ -59,47 +60,95 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            // index.html file read
-            String fileName = referer.substring(1);
+            // static file page
+            if (uri.endsWith(".html")) {
+                String fileName = uri.substring(1);
 
-            System.out.println(fileName);
-            URL resource = getClass().getResource("/static/" + fileName);
+                URL resource = getClass().getResource("/static/" + fileName);
 
-            Path path = null;
-            try {
-                path = Path.of(resource.toURI());
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
+                Path pt = null;
+                try {
+                    pt = Path.of(resource.toURI());
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+
+                try (BufferedReader bufferedReader = Files.newBufferedReader(pt)) {
+                    List<String> actual = bufferedReader.lines().toList();
+
+                    String collect = actual.stream()
+                            .collect(Collectors.joining("\n")) + "\n";
+
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + collect.getBytes().length + " ",
+                            "",
+                            collect);
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+
+                    return;
+                } catch (Exception e) {
+                }
             }
 
-            try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-                List<String> actual = bufferedReader.lines().toList();
+            // query string parse
+            if (uri.startsWith("/login")) {
+                int index = uri.indexOf("?");
+                String fileName = uri.substring(1, index) + ".html";
+                String queryString = uri.substring(index + 1);
 
-                String collect = actual.stream()
-                        .collect(Collectors.joining("\n")) + "\n";
+                URL resource = getClass().getResource("/static/" + fileName);
 
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + collect.getBytes().length + " ",
-                        "",
-                        collect);
+                Path pt = null;
+                try {
+                    pt = Path.of(resource.toURI());
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
 
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } catch (Exception e) {
+                try (BufferedReader bufferedReader = Files.newBufferedReader(pt)) {
+                    List<String> actual = bufferedReader.lines().toList();
+
+                    String collect = actual.stream()
+                            .collect(Collectors.joining("\n")) + "\n";
+
+                    final var response = String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + collect.getBytes().length + " ",
+                            "",
+                            collect);
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+
+                } catch (Exception e) {
+                }
+
+                int index2 = queryString.indexOf("&");
+                String accountValue = queryString.substring("account=".length(), index2);
+                String passwordValue = queryString.substring(index2 + 1 + "password=".length());
+
+                InMemoryUserRepository.findByAccount(accountValue)
+                        .ifPresent(savedUser -> {
+                            log.info("user : {}", savedUser);
+                        });
             }
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        }
+        } catch(IOException |UncheckedServletException e)
+    {
+        log.error(e.getMessage(), e);
     }
+}
 
-    private static String extractReferer(String httpRequest) {
-        String firstLine = httpRequest.split("\n")[0];
-        String[] split = firstLine.split(" ");
-        if (split[0].equals("GET")) {
-            return split[1];
-        }
-        throw new IllegalArgumentException("GET 요청만 처리 가능..");
+private static String extractReferer(String httpRequest) {
+    String firstLine = httpRequest.split("\n")[0];
+    String[] split = firstLine.split(" ");
+    if (split[0].equals("GET")) {
+        return split[1];
     }
+    throw new IllegalArgumentException("GET 요청만 처리 가능..");
+}
 }

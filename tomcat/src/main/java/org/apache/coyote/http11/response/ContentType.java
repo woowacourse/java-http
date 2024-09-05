@@ -25,10 +25,9 @@ enum ContentType {
     }
 
     private static ContentType[] findContentTypes(String fileExtension) {
-        ContentType[] result = Arrays.stream(values())
+        return Arrays.stream(values())
                 .filter(contentType -> contentType.rawContentType.contains(fileExtension))
                 .toArray(ContentType[]::new);
-        return result;
     }
 
     ContentType(String rawContentType) {

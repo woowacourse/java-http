@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -100,7 +101,12 @@ public class RequestHandler {
     }
 
     private String processRegisterPostRequest(final HttpRequest httpRequest) {
-        return "string";
+        String[] body = httpRequest.getBody().split("&");
+        String account = body[0].split("=")[1];
+        String password = body[1].split("=")[1];
+        String email = body[2].split("=")[1];
+        InMemoryUserRepository.save(new User(account, password, email));
+        return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
     }
 
     private String findResourcePath(final String resourcePath) {

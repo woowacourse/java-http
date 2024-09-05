@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final String ACCEPT_PREFIX = "Accept: ";
     public static final String QUERY_SEPARATOR = "\\?";
     public static final String PARAM_SEPARATOR = "&";
+    public static final String PARAM_ASSIGNMENT = "=";
 
     private final Socket connection;
 
@@ -97,42 +99,60 @@ public class Http11Processor implements Runnable, Processor {
                 .findAny()
                 .orElse(CONTENT_TYPE_HTML);
 
-        String headerFirstLine = sentences.getFirst().split(" ")[1];
-        return new ResponseContent(HttpStatus.OK, accept, getHtmlResponseContent(headerFirstLine));
+        String url = sentences.getFirst().split(" ")[1];
+        return getHtmlResponseContent(url, accept);
     }
 
-    private String getHtmlResponseContent(String url) {
+    private ResponseContent getHtmlResponseContent(String url, String accept) {
         if (url.equals("/")) {
-            return DEFAULT_PAGE;
+            return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE);
         }
         if (url.contains("?")) {
-            return getResponseBodyUsedQuery(url);
+            return getResponseBodyUsedQuery(url, accept);
         }
-        return getResponseBodyByFileName(url);
+        return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName(url));
     }
 
-    private String getResponseBodyUsedQuery(String url) {
+    private ResponseContent getResponseBodyUsedQuery(String url, String accept) {
         String[] separationUrl = url.split(QUERY_SEPARATOR);
         String path = separationUrl[0];
         String[] queryString = separationUrl[1].split(PARAM_SEPARATOR);
+        boolean validateQuery = Arrays.stream(queryString)
+                .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length != 2);
+        if (validateQuery) {
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, "요청된 파라미터가 올바르지 않습니다.");
+        }
+
         if (path.startsWith("/login")) {
-            return login(queryString);
+            return login(queryString, accept);
         }
         throw new RuntimeException("'" + url + "'은 정의되지 않은 URL 입니다.");
     }
 
-    private String login(String[] queryString) {
-        if (queryString[0].startsWith("account=") && queryString[1].startsWith("password=")) {
-            checkAuth(queryString[0].split("=")[1], queryString[1].split("=")[1]);
+    private ResponseContent login(String[] queryString, String accept) {
+        if (queryString.length < 2) {
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, "요청된 파라미터가 올바르지 않습니다.");
         }
-        return getResponseBodyByFileName("/login.html");
+        String accountParam = queryString[0];
+        String passwordParam = queryString[1];
+        if (!accountParam.startsWith("account=") || !passwordParam.startsWith("password=")) {
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, "요청된 파라미터가 올바르지 않습니다.");
+        }
+
+        if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {
+            return new ResponseContent(HttpStatus.FOUND, accept, getResponseBodyByFileName("/login.html"));
+        }
+        return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName("/login.html"));
     }
 
-    private void checkAuth(String account, String password) {
+
+    private boolean checkAuth(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("user : " + user.get());
+            return true;
         }
+        return false;
     }
 
     private String getResponseBodyByFileName(String fileName) {

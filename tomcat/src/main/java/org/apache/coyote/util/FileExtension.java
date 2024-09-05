@@ -36,6 +36,6 @@ public enum FileExtension {
         return Arrays.stream(values())
                 .filter(ext -> path.endsWith(ext.getExtension()))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("알 수 없는 파일 형식입니다. path = " + path));
     }
 }

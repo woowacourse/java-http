@@ -14,6 +14,6 @@ public enum HttpMethod {
         return Arrays.stream(HttpMethod.values())
                 .filter(value -> value.name().equalsIgnoreCase(method))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid HTTP method: " + method));
+                .orElseThrow(() -> new IllegalArgumentException("허용되지 않는 HTTP 메서드입니다. method = " + method));
     }
 }

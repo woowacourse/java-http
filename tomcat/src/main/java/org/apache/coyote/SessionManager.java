@@ -10,6 +10,7 @@ public class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private SessionManager() {
+        throw new IllegalArgumentException("인스턴스를 생성할 수 없습니다.");
     }
 
     public static SessionManager getInstance() {

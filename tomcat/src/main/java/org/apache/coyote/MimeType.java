@@ -27,7 +27,7 @@ public enum MimeType {
         return Arrays.stream(MimeType.values())
                 .filter(mime -> mime.extension != null && mime.extension == fileExtension)
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("허용되지 않는 타입입니다. type = " + fileExtension));
     }
 
     public String getContentType() {

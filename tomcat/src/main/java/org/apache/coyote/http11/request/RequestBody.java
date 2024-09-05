@@ -24,7 +24,7 @@ public class RequestBody {
 
     public String getBodyValue() {
         if (body.isEmpty()) {
-            throw new IllegalArgumentException("Body is Empty");
+            throw new IllegalArgumentException("Body가 존재하지 않습니다.");
         }
         return body.get();
     }

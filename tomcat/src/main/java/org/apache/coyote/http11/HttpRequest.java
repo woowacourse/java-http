@@ -22,21 +22,19 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(List<String> request) {
-        String[] requestLine = request.getFirst().split(" ");
+    public static HttpRequest of(List<String> header, String rawBody) {
+        String[] requestLine = header.getFirst().split(" ");
         HttpMethod method = HttpMethod.valueOf(requestLine[0]);
         String requestUrl = requestLine[1];
 
-        Map<String, String> body = getBody(request);
-        HttpHeader httpHeader = HttpHeader.from(request);
+        Map<String, String> body = getBody(rawBody);
+        HttpHeader httpHeader = HttpHeader.from(header);
         HttpCookie httpCookie = HttpCookie.from(httpHeader.getHeader("Cookie"));
 
         return new HttpRequest(httpHeader, method, requestUrl, httpCookie, body);
     }
 
-    private static Map<String, String> getBody(List<String> request) {
-        String rawBody = request.getLast();
-
+    private static Map<String, String> getBody(String rawBody) {
         if (rawBody.isEmpty()) {
             return new HashMap<>();
         }
@@ -51,10 +49,6 @@ public class HttpRequest {
 
     public String getRequestUrl() {
         return requestUrl;
-    }
-
-    public HttpHeader getHeader() {
-        return header;
     }
 
     public Map<String, String> getBody() {

@@ -46,10 +46,8 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = getRequest(inputStream);
-            HttpMethod method = request.getMethod();
-            String requestUrl = request.getRequestUrl();
+            HttpResponse response = dispatch(request);
 
-            HttpResponse response = dispatch(requestUrl, method, request);
             outputStream.write(response.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -58,26 +56,27 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest getRequest(InputStream inputStream) throws IOException {
-        List<String> request = new ArrayList<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         int contentLength = 0;
 
+        List<String> header = new ArrayList<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             if (line.toLowerCase().startsWith("content-length")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
             }
-            request.add(line);
+            header.add(line);
         }
 
         char[] body = new char[contentLength];
         bufferedReader.read(body, 0, contentLength);
 
-        request.add(new String(body));
-        return HttpRequest.from(request);
+        return HttpRequest.of(header, new String(body));
     }
 
-    private HttpResponse dispatch(String requestUrl, HttpMethod method, HttpRequest request) throws IOException {
+    private HttpResponse dispatch(HttpRequest request) throws IOException {
+        HttpMethod method = request.getMethod();
+        String requestUrl = request.getRequestUrl();
         HttpHeader responseHeader = new HttpHeader();
 
         if (requestUrl.startsWith("/login") && method.isPost()) {
@@ -109,9 +108,7 @@ public class Http11Processor implements Runnable, Processor {
             path += ".html";
         }
 
-        URL resourceUrl = getResourceUrl(path);
-        Path resourcePath = Path.of(resourceUrl.getPath());
-
+        Path resourcePath = getResourcePath(path);
         String body = Files.readString(resourcePath);
         String contentType = Files.probeContentType(resourcePath);
 
@@ -121,16 +118,15 @@ public class Http11Processor implements Runnable, Processor {
         return body;
     }
 
-    private URL getResourceUrl(String path) {
-        URL resourceUrl = getClass().getClassLoader()
-                .getResource(RESOURCE_PATH + path);
+    private Path getResourcePath(String path) {
+        ClassLoader classLoader = getClass().getClassLoader();
 
+        URL resourceUrl = classLoader.getResource(RESOURCE_PATH + path);
         if (resourceUrl == null) {
-            return getClass().getClassLoader()
-                    .getResource(RESOURCE_PATH + "/404.html");
+            resourceUrl = classLoader.getResource(RESOURCE_PATH + "/404.html");
         }
 
-        return resourceUrl;
+        return Path.of(resourceUrl.getPath());
     }
 
     private HttpResponse getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
@@ -147,9 +143,14 @@ public class Http11Processor implements Runnable, Processor {
         String account = body.get("account");
         String password = body.get("password");
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        Optional<User> result = InMemoryUserRepository.findByAccount(account);
+        if (result.isEmpty()) {
+            responseHeader.addHeader("Location", "/401.html");
+            return new HttpResponse(responseHeader, HttpStatus.FOUND);
+        }
 
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
+        User user = result.get();
+        if (!user.checkPassword(password)) {
             responseHeader.addHeader("Location", "/401.html");
             return new HttpResponse(responseHeader, HttpStatus.FOUND);
         }
@@ -160,11 +161,11 @@ public class Http11Processor implements Runnable, Processor {
             responseHeader.addHeader("Set-Cookie", JSESSIONID + "=" + sessionId);
 
             HttpSession httpSession = new HttpSession(sessionId);
-            httpSession.setAttribute("user", user.get());
+            httpSession.setAttribute("user", user);
             HTTP_SESSION_MANGER.add(httpSession);
         }
 
-        log.info("로그인 성공 :: account = {}", user.get().getAccount());
+        log.info("로그인 성공 :: account = {}", user.getAccount());
         responseHeader.addHeader("Location", "/index.html");
         return new HttpResponse(responseHeader, HttpStatus.FOUND);
     }

@@ -9,15 +9,18 @@ import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.ResourceFileLoader;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ResourceProcessor resourceProcessor;
+    private final ApiProcessor apiProcessor;
 
     public Http11Processor(final Socket connection) {
+        this.resourceProcessor = new ResourceProcessor();
+        this.apiProcessor = new ApiProcessor();
         this.connection = connection;
     }
 
@@ -37,34 +40,20 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestMethodType = st.nextToken();
             String requestPath = st.nextToken();
-            String contentType = "";
-            log.info("request: " + request);
-
             if (requestPath.equals("/")) {
                 requestPath = "/index.html";
             }
+            RequestPathType requestPathType = RequestPathType.reqeustPathToRequestPathType(requestPath);
 
-            String extension = requestPath.split("\\.")[1];
-            if(extension.equals("html")){
-                contentType = "text/html";
+            log.debug("request: " + request);
+            log.debug("requestPathType: " + requestPathType.toString());
+            if (requestPathType.isAPI()) {
+                apiProcessor.process(connection, requestPath);
             }
-            if (extension.equals("css")){
-                contentType = "text/css";
-            }
-            if (extension.equals("js")) {
-                contentType = "text/javascript";
+            if (requestPathType.isResource()) {
+                resourceProcessor.process(connection, requestPath);
             }
 
-            String responseBody = ResourceFileLoader.loadFileToString("static" + requestPath);
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

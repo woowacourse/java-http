@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,7 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +63,29 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            Map<String, String> query = new HashMap<>();
+            if (requestURI.contains("?")) {
+                int index = requestURI.indexOf("?");
+                String queryString = requestURI.substring(index + 1);
+                for (String eachQueryString : queryString.split("&")) {
+                    String[] parsedEachQueryString = eachQueryString.split("=");
+                    query.put(parsedEachQueryString[0], parsedEachQueryString[1]);
+                }
+            }
+
             String contentType = "text/html";
+            if (requestURI.contains("/login")) {
+                requestURI = "/login.html";
+
+                String account = query.get("account");
+                String password = query.get("password");
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new IllegalArgumentException("계정 정보가 틀렸습니다."));
+                if (!user.checkPassword(password)) {
+                    throw new IllegalArgumentException("계정 정보가 틀렸습니다.");
+                }
+                log.info("user: {}", user);
+            }
             if (requestURI.contains(".")) {
                 contentType = "text/" + requestURI.split("\\.")[1];
                 requestURI = "static" + requestURI;

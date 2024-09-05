@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-class HttpRequest {
+public class HttpRequest {
 
     private final String httpMethod;
     private final String path;
@@ -22,6 +22,7 @@ class HttpRequest {
         if (url.contains("?")) {
             return url.split("[?]")[0];
         }
+
         return url;
     }
 

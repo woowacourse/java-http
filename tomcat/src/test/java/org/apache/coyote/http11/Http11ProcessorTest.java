@@ -15,6 +15,12 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    public static final String FAIL_PAGE_EXPECTED = "HTTP/1.1 302 FOUND \r\n" +
+                                                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                                                    "Content-Length: 3863 \r\n" +
+                                                    "Location: 401.html\r\n" +
+                                                    "\r\n";
+
     @Test
     @Disabled
     void process() {
@@ -68,26 +74,24 @@ class Http11ProcessorTest {
     void invalidAccount() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=zeze&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 3863",
+                "Content-Type: application/x-www.form-urlencoded ",
+                "Accept: */* ",
                 "",
+                "account=zeze&password=password ",
                 "");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        final var expected = "HTTP/1.1 302 FOUND \r\n" +
-                             "Content-Type: text/html;charset=utf-8 \r\n" +
-                             "Content-Length: 3862 \r\n" +
-                             "Location: 401.html\r\n" +
-                             "\r\n";
-
         // when
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
     }
 
     @Test
@@ -95,24 +99,23 @@ class Http11ProcessorTest {
     void invalidPassword() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=redddy&password=486 HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 3863",
+                "Content-Type: application/x-www.form-urlencoded ",
+                "Accept: */* ",
                 "",
+                "account=redddy&password=486 ",
                 "");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
-        final var expected = "HTTP/1.1 302 FOUND \r\n" +
-                             "Content-Type: text/html;charset=utf-8 \r\n" +
-                             "Content-Length: 3862 \r\n" +
-                             "Location: 401.html\r\n" +
-                             "\r\n";
 
         // when
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
     }
 }

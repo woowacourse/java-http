@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpRequest {
+
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
@@ -39,7 +43,6 @@ public class HttpRequest {
     }
 
     private static void validateRequestHead(List<String> requestLines) {
-        System.out.println("requestLines = " + requestLines);
         if (requestLines.isEmpty()) {
             throw new IllegalArgumentException("올바르지 않은 HTTP 요청 형식입니다.");
         }
@@ -82,5 +85,15 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        RequestCookies requestCookies = RequestCookies.of(headers.get("Cookie"));
+        String sessionId = requestCookies.get("JSESSIONID");
+        Session session = SESSION_MANAGER.findSession(sessionId);
+        if (session == null) {
+            return Session.create();
+        }
+        return session;
     }
 }

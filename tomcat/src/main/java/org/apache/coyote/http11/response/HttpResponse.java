@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.ResponseFile;
 
 public class HttpResponse {
 
@@ -93,4 +92,11 @@ public class HttpResponse {
         }
         return String.join(LINE_SEPARATOR, formattedHeaders);
     }
+
+//    public void addSession(Session session) {
+//        if (headers.containsKey("JSESSIONID")) {
+//            return;
+//        }
+//        headers.put("JSESSIONID", session.getId());
+//    }
 }

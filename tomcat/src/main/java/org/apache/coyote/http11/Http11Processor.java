@@ -8,13 +8,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Queries;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseCookie;
+import org.apache.coyote.http11.response.ResponseFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +35,7 @@ public class Http11Processor implements Runnable, Processor {
             "/register",
             "/index"
     );
+    private final static SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
 
@@ -61,20 +68,27 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getResponse(HttpRequest request) throws IOException {
         String requestPath = request.getPath();
-
+        if (requestPath.equals("/login") && request.getMethod() == HttpMethod.GET && isLoginUser(request)) {
+            return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/index.html");
+        }
         if (SERVING_PATHS.contains(requestPath) && request.isQueriesEmpty() && request.getMethod() == HttpMethod.GET) {
             requestPath += ".html";
         }
         if (requestPath.contains(".")) {
             return getFileResponse(requestPath);
         }
-        if (requestPath.equals("/login")) {
+        if (requestPath.equals("/login") && request.getMethod() == HttpMethod.POST) {
             return login(request);
         }
         if (requestPath.equals("/register") && request.getMethod() == HttpMethod.POST) {
             return register(request);
         }
         throw new IllegalArgumentException("요청을 처리할 수 없습니다.");
+    }
+
+    private boolean isLoginUser(HttpRequest request) {
+        Session session = request.getSession();
+        return session.contains("user");
     }
 
     private HttpResponse getFileResponse(String requestPath) {
@@ -110,31 +124,33 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse login(HttpRequest request) {
-        Queries queries = request.getQueries();
+        String requestBody = request.getBody();
+        Queries queries = Queries.of(requestBody);
         String account = queries.get("account");
         String password = queries.get("password");
-        if (isValidUser(account, password)) {
-            return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/index.html");
+        validateLoginRequest(account, password);
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (user.checkPassword(password)) {
+            Session session = request.getSession();
+            session.setAttribute("user", user);
+            SESSION_MANAGER.add(session);
+            ResponseCookie sessionCookie = ResponseCookie.of(session);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Location", "/index.html");
+            headers.put("Set-Cookie", sessionCookie.toResponse());
+            return new HttpResponse(HttpStatus.FOUND, headers);
         }
         return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
     }
 
-    private boolean isValidUser(String account, String password) {
-        if (account == null || password == null) {
-            return false;
+    private void validateLoginRequest(String account, String password) {
+        if (account == null || account.isEmpty()) {
+            throw new IllegalArgumentException("account는 비어 있을 수 없습니다.");
         }
-        return InMemoryUserRepository.findByAccount(account)
-                .map(user -> authenticateUser(user, password))
-                .orElse(false);
-    }
-
-    private boolean authenticateUser(User user, String password) {
-        if (user.checkPassword(password)) {
-            log.info("User authenticated: " + user);
-            return true;
-        } else {
-            log.warn("Authentication failed for user: " + user.getAccount());
-            return false;
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("password는 비어 있을 수 없습니다.");
         }
     }
 }

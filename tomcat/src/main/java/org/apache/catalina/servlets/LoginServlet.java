@@ -24,7 +24,6 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         super.doGet(request, response);
 
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");
@@ -33,31 +32,6 @@ public class LoginServlet extends HttpServlet {
         response.setContentType("text/html");
         response.setContentLength(fileContent.getBytes().length);
         setResponseBody(response, fileContent);
-
-        if (request.getQueryString().isEmpty()) {
-            return;
-        }
-
-        String account = request.getParameter("account");
-        InMemoryUserRepository.findByAccount(account)
-                .ifPresentOrElse(user -> login(request, response, user), () -> redirectTo("/401.html", response));
-    }
-
-    private void login(HttpServletRequest request, HttpServletResponse response, User value) {
-        if (value.checkPassword(request.getParameter("password"))) {
-            log.info("user : {}", value);
-            redirectTo("/index.html", response);
-            return;
-        }
-        redirectTo("/401.html", response);
-    }
-
-    private void redirectTo(String url, HttpServletResponse response) {
-        try {
-            response.sendRedirect(url);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     // TODO: 리팩토링 필요 중복 발생
@@ -77,5 +51,31 @@ public class LoginServlet extends HttpServlet {
     private void setResponseBody(ServletResponse response, String fileContent) {
         HttpResponse httpResponse = (HttpResponse) response;
         httpResponse.setResponseBody(fileContent);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        super.doPost(request, response);
+
+        String account = request.getParameter("account");
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(user -> login(request, response, user), () -> redirectTo("/401.html", response));
+    }
+
+    private void login(HttpServletRequest request, HttpServletResponse response, User user) {
+        if (user.checkPassword(request.getParameter("password"))) {
+            log.info("user : {}", user);
+            redirectTo("/index.html", response);
+            return;
+        }
+        redirectTo("/401.html", response);
+    }
+
+    private void redirectTo(String url, HttpServletResponse response) {
+        try {
+            response.sendRedirect(url);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

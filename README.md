@@ -30,8 +30,8 @@
   - [x] `/login` 페이지에서 아이디는 `gugu`, 비밀번호는 `password`를 입력
   - [x] 로그인에 성공하면 응답 헤더에 http status code를 `302`로 반환하고 `/index.html`로 리다이렉트
   - [x] 로그인에 실패하면 `401.html`로 리다이렉트한다.
-- [ ] http://localhost:8080/register 으로 접속하면 회원가입 페이지`register.html` 반환
+- [x] http://localhost:8080/register 으로 접속하면 회원가입 페이지`register.html` 반환
   - [x] 회원가입 페이지를 보여줄 때는 `GET`을 사용
   - [X] 회원가입을 버튼을 누르면 HTTP method를 `GET`이 아닌 `POST`를 사용
   - [X] 회원가입을 완료하면 `index.html`로 리다이렉트
-  - [ ] 로그인 페이지도 버튼을 눌렀을 때 `GET` 방식에서 `POST` 방식으로 전송하도록 변경
+  - [x] 로그인 페이지도 버튼을 눌렀을 때 `GET` 방식에서 `POST` 방식으로 전송하도록 변경

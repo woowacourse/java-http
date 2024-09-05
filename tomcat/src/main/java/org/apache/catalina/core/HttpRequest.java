@@ -163,7 +163,11 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     private String getRequestBody() {
-        return request.split("\r\n\r\n")[1];
+        String[] requestContent = request.split("\r\n\r\n");
+        if (requestContent.length > 1) {
+            return requestContent[1];
+        }
+        return "";
     }
 
     @Override
@@ -342,6 +346,10 @@ public class HttpRequest implements HttpServletRequest {
     }
 
     private void parseParam(String query, Map<String, String[]> map) {
+        if (query.isEmpty()) {
+            return;
+        }
+
         String[] params = query.split("&");
         for (String param : params) {
             String[] split = param.split("=");

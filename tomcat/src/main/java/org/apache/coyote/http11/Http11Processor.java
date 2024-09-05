@@ -11,12 +11,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,7 +53,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> httpRequestHeader = readHttpRequestHeader(bufferedReader);
 
-            final String responseBody = getResponseBody(httpRequestHeader);
+            final String requestUrl = getRequestUrl(httpRequestHeader);
+            if (requestUrl.contains("?")) {
+                final int index = requestUrl.indexOf("?");
+                String path = requestUrl.substring(0, index);
+                String queryString = requestUrl.substring(index + 1);
+                if (!path.contains(".")) {
+                    String new_path = path + "." + DEFAULT_CONTENT_TYPE;
+                    String requestUri = httpRequestHeader.get(URI_HEADER_KEY);
+                    requestUri = requestUri.replace(requestUrl, new_path);
+                    httpRequestHeader.put(URI_HEADER_KEY, requestUri);
+                }
+                printUserIfExist(queryString);
+            }
+
+            final String responseBody = getResponseBody(httpRequestHeader);;
             final String mimeType = getMimeType(httpRequestHeader);
 
             final var response = String.join("\r\n",
@@ -85,12 +103,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final Map<String, String> httpRequestHeader) throws IOException {
-        final String requestUrl = getRequestUrl(httpRequestHeader);
+        String requestUrl = getRequestUrl(httpRequestHeader);
         if (requestUrl.equals("/")) {
             return DEFAULT_MESSAGE;
         }
 
         final URL resourceUrl = getClass().getClassLoader().getResource(STATIC_PATH + requestUrl);
+
         if (resourceUrl == null) {
             return "";
         }
@@ -122,5 +141,33 @@ public class Http11Processor implements Runnable, Processor {
             return DEFAULT_CONTENT_TYPE;
         }
         return Arrays.asList(requestUrl.split("\\.")).getLast();
+    }
+
+    private boolean isRequestUrlQueryString(final String requestUrl) {
+        return requestUrl.contains("?");
+    }
+
+    private void printUserIfExist(String queryString) {
+        Map<String, String> userInformation = Arrays.stream(queryString.split("&"))
+                .map(line -> line.split("="))
+                .collect(Collectors.toMap(
+                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[1]
+                ));
+
+        if (!userInformation.containsKey("account") || !userInformation.containsKey("password")) {
+            return;
+        }
+
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(userInformation.get("account"));
+
+        optionalUser.ifPresent(
+                user -> {
+                    String password = userInformation.get("password");
+                    if (user.checkPassword(password)) {
+                        System.out.println(user);
+                    }
+                }
+        );
     }
 }

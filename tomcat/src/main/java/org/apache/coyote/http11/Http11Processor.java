@@ -43,21 +43,29 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line = reader.readLine();
             String urlPath = line.split(" ")[1];
-            if(urlPath.equals("/index.html")) {
-                printFileResource("static/index.html", outputStream);
+            if(urlPath.endsWith("html")) {
+                printFileResource("static" + urlPath,  outputStream);
                 return;
             }
             if(urlPath.startsWith("/login")) {
+                if(urlPath.equals("/login")) {
+                    printFileResource("static" + urlPath +".html",  outputStream);
+                    return;
+                }
                 String parameters = urlPath.substring(7);
                 String account = parameters.split("&")[0].split("=")[1];
                 String password = parameters.split("&")[1].split("=")[1];
+
                 User user = InMemoryUserRepository.findByAccount(account)
                     .orElse(new User("guest", "guest", "guest"));
                 if(user.checkPassword(password)) {
-                    System.out.println("user : " + user);
+                    redirect("http://localhost:8080/index.html", outputStream);
+                    return;
                 }
-                printFileResource("static/login.html", outputStream);
+                redirect("http://localhost:8080/401.html", outputStream);
+                return;
             }
+
             if(urlPath.startsWith("/css") || urlPath.startsWith("/js") || urlPath.startsWith("/assets")) {
                 printFileResource("static" + urlPath, outputStream);
                 return;
@@ -105,4 +113,19 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
     }
+
+    private void redirect(String location, OutputStream outputStream) {
+        try {
+            String contentType = "text/html";
+            var response = "HTTP/1.1 302 Found \r\n" +
+                "Location: " + location + "\r\n" +
+                String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+                "Content-Length: 0";
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+		}
+	}
 }

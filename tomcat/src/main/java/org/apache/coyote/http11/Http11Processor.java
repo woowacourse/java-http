@@ -13,13 +13,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,28 +45,22 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()
         ) {
-            List<String> request = getRequest(inputStream);
-            Map<String, String> body = getBody(request);
-            HttpCookie httpCookie = HttpCookie.from(request);
-
-            String method = request.getFirst()
-                    .split(" ")[0];
-            String requestUrl = request.getFirst()
-                    .split(" ")[1];
+            HttpRequest request = getRequest(inputStream);
+            String method = request.getMethod();
+            String requestUrl = request.getRequestUrl();
 
             HttpHeader responseHeader = new HttpHeader();
-
             String response = getResponse(requestUrl, HttpStatus.OK, responseHeader);
             if (requestUrl.startsWith("/login") && method.equals("POST")) {
-                response = login(body, httpCookie, responseHeader);
+                response = login(request.getBody(), request.getCookie(), responseHeader);
             }
 
             if (requestUrl.startsWith("/login") && method.equals("GET")) {
-                response = getLoginPage(httpCookie, responseHeader);
+                response = getLoginPage(request.getCookie(), responseHeader);
             }
 
             if (requestUrl.startsWith("/register") && method.equals("POST")) {
-                response = register(body, responseHeader);
+                response = register(request.getBody(), responseHeader);
             }
 
             outputStream.write(response.getBytes());
@@ -79,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getRequest(InputStream inputStream) throws IOException {
+    private HttpRequest getRequest(InputStream inputStream) throws IOException {
         List<String> request = new ArrayList<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         int contentLength = 0;
@@ -96,24 +87,13 @@ public class Http11Processor implements Runnable, Processor {
         bufferedReader.read(body, 0, contentLength);
 
         request.add(new String(body));
-        return request;
-    }
-
-    private Map<String, String> getBody(List<String> request) {
-        String rawBody = request.getLast();
-
-        if (rawBody.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        return Arrays.stream(rawBody.split("&"))
-                .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
+        return HttpRequest.from(request);
     }
 
     private String getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
         String responseBody = getResponseBody(requestUrl);
 
-        String responseLine = String.join("\r\n", "HTTP/1.1 " + httpStatus.toHttpHeader() + " ");
+        String responseLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
 
         responseHeader.addHeader("Content-Type", ContentType.findContentType(requestUrl) + ";charset=utf-8");
         responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
@@ -174,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
         if (!cookie.isContains(JSESSIONID)) {
             String sessionId = String.valueOf(UUID.randomUUID());
             cookie.addCookie(JSESSIONID, sessionId);
-            responseHeader.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+            responseHeader.addHeader("Set-Cookie", JSESSIONID + "=" + sessionId);
 
             HttpSession httpSession = new HttpSession(sessionId);
             httpSession.setAttribute("user", user.get());

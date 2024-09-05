@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +32,13 @@ public class Controller {
 		return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
 	}
 
-	public boolean login(String account, String password) {
+	public UUID login(String account, String password) {
 		Optional<User> user = InMemoryUserRepository.findByAccount(account);
 		if (user.isPresent()) {
 			log.info(user.get().getAccount());
-			return true;
+			return UUID.randomUUID();
 		}
-		return false;
+		throw new IllegalArgumentException("login fail");
 	}
 
 	public boolean register(String account, String password, String email) {

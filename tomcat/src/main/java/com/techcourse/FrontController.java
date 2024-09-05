@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class FrontController {
 
@@ -39,16 +40,22 @@ public class FrontController {
 	public String processPostRequest(String uri, Map<String, String> params) {
 		if (uri.startsWith("/login")) {
 			var redirectUri = "/401.html";
-
-			boolean isSucceed = controller.login(params.get("account"), params.get("password"));
-			if (isSucceed) {
+			UUID uuid;
+			try {
+				uuid = controller.login(params.get("account"), params.get("password"));
 				redirectUri = "/index.html";
-			}
 
-			var response = "HTTP/1.1 302 Found \r\n";
-			response += String.join("\r\n", getResponseHeaders(uri, redirectUri, "302"));
-			response += "\r\n" + "\r\n" + redirectUri;
-			return response;
+				var response = "HTTP/1.1 302 Found \r\n";
+				response += String.join("\r\n", getResponseHeaders(uri, redirectUri, "302"));
+				response += "\r\n" + "Set-Cookie: JSESSIONID=" + uuid;
+				response += "\r\n" + "\r\n" + redirectUri;
+				return response;
+			} catch (RuntimeException exception) {
+				var response = "HTTP/1.1 302 Found \r\n";
+				response += String.join("\r\n", getResponseHeaders(uri, redirectUri, "302"));
+				response += "\r\n" + "\r\n" + redirectUri;
+				return response;
+			}
 		}
 
 		if (uri.startsWith("/register")) {

@@ -1,22 +1,25 @@
 package org.apache.catalina.mapper;
 
-import java.net.URL;
+import jakarta.servlet.Servlet;
+import java.util.Map;
+import java.util.regex.Pattern;
+import org.apache.catalina.servlets.DefaultServlet;
 
 /**
- * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.
+ * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.(동적 파일만)
  */
-public class Mapper {
+public class Mapper {// TODO 싱글톤
 
-    private static final String STATIC_PATH = "static";
+    // TODO: 클래스 로더를 통해서 servlet을 가져옴?
+    private static final Map<Pattern, Servlet> mapper = Map.of(
+            Pattern.compile(".*\\..*"), new DefaultServlet(),
+            Pattern.compile("/"), new DefaultServlet()
+    );
 
-    private Mapper() {}
-
-    public static URL mapToFileURL(String path) { // login.html, login, login.css
-        if (path.contains(".")) {
-            return Mapper.class.getClassLoader().getResource(STATIC_PATH + path);
-        }
-
-        // FIXME: css 내부에 있는 값은 html 확장자를 가질 일이 없음.
-        return Mapper.class.getClassLoader().getResource(STATIC_PATH + path + ".html");
+    public Servlet getServlet(String url) {
+        Pattern key = mapper.keySet().stream()
+                .filter(urlPattern -> urlPattern.matcher(url).matches())
+                .findFirst().orElseThrow();// TODO servlet이 없다면 예외 발생
+        return mapper.get(key);
     }
 }

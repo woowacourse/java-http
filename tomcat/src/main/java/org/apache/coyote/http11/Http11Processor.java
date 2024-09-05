@@ -1,18 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.apache.catalina.core.HttpRequest;
+import org.apache.catalina.core.HttpResponse;
 import org.apache.catalina.mapper.Mapper;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,42 +32,21 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             byte[] buffer = new byte[4096]; // TODO: 요청 준 것만큼 읽어야함
             int read = inputStream.read(buffer);
-            HttpRequest request = new HttpRequest(new String(buffer));
-            Map<String, String> params = request.getParams();
-            log.info(params.toString());
+            HttpRequest request = new HttpRequest(new String(buffer, 0, read));
 
-            URL fileURL = Mapper.mapToFileURL(request.getPath());
+            Servlet servlet = new Mapper().getServlet(request.getRequestURI());
 
-            String responseBody = getFileContent(fileURL);
-            HttpResponse response = new HttpResponse(responseBody);
+            HttpResponse response = new HttpResponse();
+            servlet.service(request, response);
 
-            String extension = getFileExtension(fileURL);
-            response.setContentType(extension);
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | ServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getFileContent(URL resourceURL) throws IOException {
-        if (resourceURL != null) {
-            File file = new File(resourceURL.getFile());
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String collect = reader.lines().collect(Collectors.joining("\n"));
-                return collect + "\n";
-            } catch (IOException e) {
-                return "Hello world!";
-            }
-        }
-        return "";
-    }
-
-    private String getFileExtension(URL resourceURL) {
-        return resourceURL.getPath().substring(resourceURL.getPath().lastIndexOf('.') + 1);
-    }
 
 }

@@ -11,7 +11,6 @@ public class HttpRequestLine {
     private final String path;
     private final String httpVersion;
 
-
     public HttpRequestLine(String startLine) {
         this.method = parseMethod(startLine);
         this.path = parsePath(startLine);

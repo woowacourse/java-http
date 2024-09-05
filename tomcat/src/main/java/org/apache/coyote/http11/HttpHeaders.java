@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHeader {
+public class HttpHeaders {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -12,8 +12,12 @@ public class HttpHeader {
 
     private final Map<String, String> headers;
 
-    public HttpHeader(String headers) {
+    public HttpHeaders(String headers) {
         this.headers = parseHeaders(headers);
+    }
+
+    public HttpHeaders() {
+        this.headers = new HashMap<>();
     }
 
     private Map<String, String> parseHeaders(String header) {
@@ -29,5 +33,22 @@ public class HttpHeader {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+    }
+
+    public void setHeaders(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(LINE_FEED);
+        }
+        return sb.toString();
     }
 }

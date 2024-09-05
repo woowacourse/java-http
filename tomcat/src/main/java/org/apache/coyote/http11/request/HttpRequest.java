@@ -1,8 +1,9 @@
 package org.apache.coyote.http11.request;
 
+import java.net.SocketOption;
 import java.util.Map;
 import org.apache.coyote.http11.HttpBody;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
 
@@ -11,12 +12,18 @@ public class HttpRequest {
     private static final int HEADER_INDEX = 1;
 
     private final HttpRequestLine startLine;
-    private final HttpHeader headers;
+    private final HttpHeaders headers;
     private final HttpBody body;
+
+    public HttpRequest(HttpRequestLine startLine, HttpHeaders headers, HttpBody body) {
+        this.startLine = startLine;
+        this.headers = headers;
+        this.body = body;
+    }
 
     public HttpRequest(String request) {
         startLine = new HttpRequestLine(parseStartLine(request));
-        headers = new HttpHeader(parseHeaders(request));
+        headers = new HttpHeaders(parseHeaders(request));
         body = new HttpBody(parseBody(request));
     }
 
@@ -71,5 +78,9 @@ public class HttpRequest {
 
     public HttpRequestLine getStartLine() {
         return startLine;
+    }
+
+    public HttpMethod getMethod() {
+        return startLine.getMethod();
     }
 }

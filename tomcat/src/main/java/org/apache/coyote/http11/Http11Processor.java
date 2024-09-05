@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import org.apache.coyote.AbstractController;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestMapping;
 import org.apache.coyote.http11.message.request.HttpRequest;

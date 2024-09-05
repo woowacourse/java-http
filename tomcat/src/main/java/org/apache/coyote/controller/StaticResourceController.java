@@ -1,8 +1,9 @@
-package org.apache.coyote;
+package org.apache.coyote.controller;
 
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 

@@ -59,10 +59,19 @@ public class HttpRequestConvertor {
         String line;
         Map<String, String> headers = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] requestLine = line.split(": ");
-            headers.put(requestLine[0], requestLine[1]);
+            String[] requestLine = line.split(":");
+            headers.put(requestLine[0], parseHeaderValue(requestLine));
         }
 
         return headers;
+    }
+
+    private static String parseHeaderValue(String[] requestLine) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < requestLine.length; i++) {
+            sb.append(requestLine[i].strip());
+        }
+
+        return sb.toString();
     }
 }

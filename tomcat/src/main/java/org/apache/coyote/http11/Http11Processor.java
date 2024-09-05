@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.Header;
 import org.apache.coyote.common.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
@@ -43,10 +43,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            Reader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader clientReader = new BufferedReader(inputStreamReader);
-
-            HttpRequestData httpRequestData = createHttpRequestData(clientReader);
+            HttpRequestData httpRequestData = createHttpRequestData(inputStream);
             String httpResponse = createHttpResponseMessage(responseResource(httpRequestData));
 
             outputStream.write(httpResponse.getBytes());
@@ -56,61 +53,48 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestData createHttpRequestData(BufferedReader clientReader) throws IOException {
-        String requestStartLine = clientReader.readLine();
-        Map<String, String> requestHeader = createHeaders(clientReader);
+    private HttpRequestData createHttpRequestData(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String requestLine = bufferedReader.readLine();
+        List<String> headerTokens = new ArrayList<>();
 
-        return new HttpRequestData(requestStartLine, requestHeader);
-    }
-
-    // TODO: header를 생성하는 부분
-    private Map<String, String> createHeaders(BufferedReader clientReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        while (true) {
-            final var readLine = clientReader.readLine();
-            if (readLine.isBlank()) {
-                break;
-            }
-
-            final var header = readLine.split(":");
-            headers.put(header[0].trim(), header[1].trim());
+        String nowLine = bufferedReader.readLine();
+        while (!nowLine.isBlank()) {
+            headerTokens.add(nowLine);
+            nowLine = bufferedReader.readLine();
         }
 
-        return headers;
+        return new HttpRequestData(requestLine, new Header(headerTokens));
     }
 
     private HttpResponseData responseResource(HttpRequestData httpRequestData) throws IOException {
-        final var startLines = httpRequestData.startLine.split(" ");
-        log.info("{}", httpRequestData.headers);
+        final var uri = URI.create(httpRequestData.startLine.split(" ")[1]);
 
-        if ("/".equals(startLines[1])) {
+        if ("/".equals(uri.getPath())) {
             return new HttpResponseData("Hello world!".getBytes(), "text/html;charset=utf-8");
         }
 
-        final var headers = httpRequestData.headers();
-        var acceptHeader = headers.getOrDefault("Accept", "text/html;charset=utf-8");
-        var contentType = acceptHeader;
-
+        var contentType = "";
+        String path = uri.getPath();
         // TODO: acceptHeader를 읽어 적절한 contentType을 생성하는 부분
-        if (acceptHeader.startsWith("text/html")) {
+        if (path.endsWith(".html")) {
             contentType = "text/html;charset=utf-8";
         }
 
-        if (acceptHeader.startsWith("text/css")) {
+        if (path.endsWith(".css")) {
             contentType = "text/css;charset=utf-8";
         }
 
-        if (acceptHeader.startsWith("text/javascript")) {
+        if (path.endsWith(".js")) {
             contentType = "text/javascript;charset=utf-8";
         }
 
-        final var requestResource = startLines[1];
-        var resourceUrl = getClass().getClassLoader().getResource("static/" + requestResource);
+        var resourceUrl = getClass().getClassLoader().getResource("static/" + path);
         var resourcePath = "";
 
         // TODO: 존재하지 않는 정적 리소스 요청이라면 동적으로 생성하는 부분
         if (resourceUrl == null) {
-            if (requestResource.contains("login")) {
+            if (path.contains("login")) {
                 processLogin(httpRequestData);
                 resourcePath = getClass().getClassLoader().getResource("static/login.html").getPath();
             }
@@ -157,7 +141,7 @@ public class Http11Processor implements Runnable, Processor {
                 new String(httpResponseData.responseBody, StandardCharsets.UTF_8));
     }
 
-    private record HttpRequestData(String startLine, Map<String, String> headers) {
+    private record HttpRequestData(String startLine, Header header) {
     }
 
     private record HttpResponseData(byte[] responseBody, String contentType) {

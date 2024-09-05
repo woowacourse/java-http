@@ -52,14 +52,23 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             final Map<String, String> httpRequestHeader = readHttpRequestHeader(bufferedReader);
+            final Map<String, String> httpResponseHeader = new HashMap<>();
 
             final String requestUrl = getRequestUrl(httpRequestHeader);
             String path = requestUrl;
-            if (isRequestUrlQueryString(httpRequestHeader)) {
+            boolean isQueryString = isRequestUrlQueryString(httpRequestHeader);
+
+            httpResponseHeader.put("Status", "200 OK");
+            if (isQueryString) {
                 final int index = requestUrl.indexOf("?");
                 path = requestUrl.substring(0, index);
                 String queryString = requestUrl.substring(index + 1);
-                printUserIfExist(queryString);
+
+                httpResponseHeader.put("Status", "302 Found");
+                httpResponseHeader.put("Location", "/401.html");
+                if (isCorrectUser(queryString)) {
+                    httpResponseHeader.put("Location", "/index.html");
+                }
             }
             if (!path.equals("/") && !path.contains(".")) {
                 String new_path = path + "." + DEFAULT_CONTENT_TYPE;
@@ -68,15 +77,14 @@ public class Http11Processor implements Runnable, Processor {
                 httpRequestHeader.put(URI_HEADER_KEY, requestUri);
             }
 
-            final String responseBody = getResponseBody(httpRequestHeader);
-            final String mimeType = getMimeType(httpRequestHeader);
+            String responseBody = "";
+            if (!isQueryString) {
+                responseBody = getResponseBody(httpRequestHeader);
+                httpResponseHeader.put("Content-Type", getMimeType(httpRequestHeader) + ";charset=utf-8");
+                httpResponseHeader.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + mimeType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = makeHttpResponseHeader(httpResponseHeader, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -103,12 +111,27 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequestHeader;
     }
 
+    private String makeHttpResponseHeader(Map<String, String> httpResponseHeader, String responseBody) {
+        StringBuilder response = new StringBuilder();
+        String statusLine = "HTTP/1.1 " + httpResponseHeader.get("Status") + " \r\n";
+        response.append(statusLine);
+
+        httpResponseHeader.entrySet().stream()
+                .filter(entry -> !"Status".equals(entry.getKey()))
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + " \r\n")
+                .forEach(response::append);
+        response.append("\r\n");
+        response.append(responseBody);
+
+        return response.toString();
+    }
+
     private boolean isRequestUrlQueryString(Map<String, String> httpRequestHeader) {
         final String requestUrl = getRequestUrl(httpRequestHeader);
         return requestUrl.contains("?");
     }
 
-    private void printUserIfExist(String queryString) {
+    private boolean isCorrectUser(String queryString) {
         Map<String, String> userInformation = Arrays.stream(queryString.split("&"))
                 .map(line -> line.split("="))
                 .collect(Collectors.toMap(
@@ -117,18 +140,15 @@ public class Http11Processor implements Runnable, Processor {
                 ));
 
         if (!userInformation.containsKey("account") || !userInformation.containsKey("password")) {
-            return;
+            return false;
         }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(userInformation.get("account"));
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+        User user = optionalUser.get();
 
-        optionalUser.ifPresent(
-                user -> {
-                    String password = userInformation.get("password");
-                    if (user.checkPassword(password)) {
-                        System.out.println(user);
-                    }
-                }
-        );
+        return user.checkPassword(userInformation.get("password"));
     }
 
     private String getResponseBody(final Map<String, String> httpRequestHeader) throws IOException {

@@ -160,27 +160,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var responseBody = new String(Files.readAllBytes(path));
-            String cookie = httpRequestHeader.get("Cookie");
-            if(cookie != null && cookie.contains("JSESSIONID")) {
-                var response = "HTTP/1.1 200 OK \r\n" +
-                    String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
-                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                    "\r\n"+
-                    responseBody;
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            } else {
-                var response = "HTTP/1.1 200 OK \r\n" +
-                    "Set-Cookie: " + sessionId + " \r\n" +
-                    String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
-                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                    "\r\n"+
-                    responseBody;
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-
-            }
-
+            var response = "HTTP/1.1 200 OK \r\n" +
+                String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n"+
+                responseBody;
+            outputStream.write(response.getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

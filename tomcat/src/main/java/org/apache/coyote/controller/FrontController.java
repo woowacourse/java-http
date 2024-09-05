@@ -26,8 +26,6 @@ public class FrontController {
         controllers.put("/register", new RegisterController());
     }
 
-    // TODO: static
-
     public HttpResponse dispatch(HttpRequest request) {
         log(request);
         String path = request.getPath();

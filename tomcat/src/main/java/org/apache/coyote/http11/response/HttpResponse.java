@@ -21,6 +21,15 @@ public class HttpResponse {
         return new HttpResponse(response);
     }
 
+    public static HttpResponse redirect(String uri) {
+        final var response = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + uri,
+                "Content-Type: text/html; charset=utf-8 ",
+                "Content-Length: 0 ");
+        return new HttpResponse(response);
+    }
+
     public void flush(OutputStream outputStream) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();

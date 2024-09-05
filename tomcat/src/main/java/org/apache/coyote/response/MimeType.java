@@ -7,7 +7,9 @@ public enum MimeType {
     HTML("text/html"),
     CSS("text/css"),
     JS("application/javascript"),
-    SVG("image/svg+xml");
+    SVG("image/svg+xml"),
+    ICO("image/x-icon"),
+    ;
 
     private final String type;
 

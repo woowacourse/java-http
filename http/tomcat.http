@@ -1,14 +1,46 @@
 ### 인덱스 페이지
-GET {{base-url}}/index.html HTTP/1.1
+GET /index.html HTTP/1.1
+Host: {{base-url}}
 Connection: keep-alive
 Accept: */*
 
 ### CSS 파일
-GET {{base-url}}/css/styles.css HTTP/1.1
+GET /css/styles.css HTTP/1.1
+Host: {{base-url}}
 Connection: keep-alive
 Accept: text/css,*/*;q=0.1
 
 ### 로그인 페이지
-GET {{base-url}}/login?account=gugu&password=password HTTP/1.1
+GET /login
+Host: {{base-url}}
 Connection: keep-alive
 Accept: */*
+
+### 로그인
+POST /login HTTP/1.1
+Host: {{base-url}}
+Connection: keep-alive
+Content-Length: 80
+Content-Type: application/x-www-form-urlencoded
+Accept: */*
+
+account = gugu &
+password = password
+
+### 회원가입 페이지
+GET /register
+Host: {{base-url}}
+Connection: keep-alive
+Accept: */*
+
+### 회원가입
+POST /register HTTP/1.1
+Host: {{base-url}}
+Connection: keep-alive
+Content-Length: 80
+Content-Type: application/x-www-form-urlencoded
+Accept: */*
+
+account = gugu &
+password = password &
+email = hkkang%40woowahan.com

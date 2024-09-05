@@ -23,5 +23,4 @@
 ### 1단계 - HTTP 서버 구현하기
 - [x] 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있다.
 - [x] CSS 지원
-- [ ] String Query 파싱
-- 
+- [x] String Query 파싱

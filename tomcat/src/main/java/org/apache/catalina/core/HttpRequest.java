@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -275,22 +276,40 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public String getParameter(String s) {
-        return "";
+        return getParameterValues(s)[0];
     }
 
     @Override
     public Enumeration<String> getParameterNames() {
-        return null;
+        Map<String, String[]> map = getParameterMap();
+        return Collections.enumeration(map.keySet());
     }
 
     @Override
     public String[] getParameterValues(String s) {
-        return new String[0];
+        Map<String, String[]> map = getParameterMap();
+        return map.get(s);
     }
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        return Map.of();
+        Map<String, String[]> map = new LinkedHashMap<>();
+        String target = getRequestURL().toString();
+        int i = target.indexOf('?');
+        if (i == -1) {
+            return map;
+        }
+
+        String query = target.substring(i + 1);
+        String[] params = query.split("&");
+        for (String param : params) {
+            String[] split = param.split("=");
+            String key = split[0];
+            String[] values = split[1].split(",");
+            map.put(key, values);
+        }
+
+        return map;
     }
 
     @Override
@@ -417,25 +436,5 @@ public class HttpRequest implements HttpServletRequest {
     @Override
     public DispatcherType getDispatcherType() {
         return null;
-    }
-
-    public Map<String, String> getParams() {
-        Map<String, String> map = new LinkedHashMap<>();
-        String target = getRequestURL().toString();
-        int i = target.indexOf('?');
-        if (i == -1) {
-            return map;
-        }
-
-        String query = target.substring(i + 1);
-        String[] params = query.split("&");
-        for (String param : params) {
-            String[] split = param.split("=");
-            String key = split[0];
-            String value = split[1];
-            map.put(key, value);
-        }
-
-        return map;
     }
 }

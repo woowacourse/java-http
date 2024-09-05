@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String RESOURCE_PATH = "static";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final HttpSessionManger HTTP_SESSION_MANGER = new HttpSessionManger();
+    private static final String RESOURCE_PATH = "static";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -153,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
-        if (httpCookie.isContains("JSESSIONID")) {
+        if (httpCookie.isContains(JSESSIONID)) {
             return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
         }
 
@@ -170,9 +171,9 @@ public class Http11Processor implements Runnable, Processor {
             return getResponse("/401.html", HttpStatus.FOUND, responseHeader);
         }
 
-        if (!cookie.isContains("JSESSIONID")) {
+        if (!cookie.isContains(JSESSIONID)) {
             String sessionId = String.valueOf(UUID.randomUUID());
-            cookie.addCookie("JSESSIONID", sessionId);
+            cookie.addCookie(JSESSIONID, sessionId);
             responseHeader.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
 
             HttpSession httpSession = new HttpSession(sessionId);

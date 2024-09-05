@@ -39,7 +39,7 @@
 
 ### 2딘계
 
-- [ ] HTTP Status Code 302 : 로그인 페이지에서 로그인 시도에 따른 응답 처리
+- [x] HTTP Status Code 302 : 로그인 페이지에서 로그인 시도에 따른 응답 처리
   - 로그인 성공 시,
     - [x] http status code 302
     - [x] /index.html 로 리다이렉트

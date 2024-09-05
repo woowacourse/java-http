@@ -21,7 +21,8 @@ public enum MimeType {
         return Arrays.stream(values())
                 .filter(mimeType -> fileName.endsWith(mimeType.name().toLowerCase()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown mime type for file: " + fileName));
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 파일 확장자 입니다. fileName: %s"
+                        .formatted(fileName)));
     }
 
     public String getType() {

@@ -6,6 +6,7 @@ import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,6 +24,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final String REQUEST_HEADER_SUFFIX = "";
+    private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String SUCCESS_STATUS_CODE = "200 OK";
+    private static final String HTML_CONTENT_TYPE = "text/html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -41,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            // requestHeader 읽기
             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             List<String> lines = new ArrayList<>();
             String line = br.readLine();
@@ -52,63 +57,85 @@ public class Http11Processor implements Runnable, Processor {
                 line = br.readLine();
             }
 
-            String[] startLine = lines.get(0).split(" ");
+            // requestHeader의 startLine 파싱
+            final String[] startLine = lines.get(0).split(" ");
             if (startLine.length != 3) {
                 return;
             }
-            String httpMethod = startLine[0];
-            String requestURI = startLine[1];
-            String httpVersion = startLine[2];
-            if (!"GET".equals(httpMethod) || !"HTTP/1.1".equals(httpVersion)) {
+            final String httpMethodName = startLine[0];
+            final String requestURI = startLine[1];
+            final String httpVersion = startLine[2];
+            if (!HTTP_VERSION.equals(httpVersion)) {
                 return;
             }
 
-            Map<String, String> query = new HashMap<>();
-            if (requestURI.contains("?")) {
-                int index = requestURI.indexOf("?");
-                String queryString = requestURI.substring(index + 1);
-                for (String eachQueryString : queryString.split("&")) {
-                    String[] parsedEachQueryString = eachQueryString.split("=");
-                    query.put(parsedEachQueryString[0], parsedEachQueryString[1]);
+            // startLine의 httpMethod, requestURI 값에 따라 처리
+            HttpMethod httpMethod = HttpMethod.findByName(httpMethodName);
+            if (HttpMethod.GET.equals(httpMethod)) {
+                Map<String, String> queryString = parseQueryString(requestURI);
+                if (requestURI.contains("/login")) {
+                    login(queryString.get("account"), queryString.get("password"));
+                    createResponse(outputStream, SUCCESS_STATUS_CODE, HTML_CONTENT_TYPE, "static/login.html");
+                    return;
                 }
-            }
-
-            String contentType = "text/html";
-            if (requestURI.contains("/login")) {
-                requestURI = "/login.html";
-
-                String account = query.get("account");
-                String password = query.get("password");
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("계정 정보가 틀렸습니다."));
-                if (!user.checkPassword(password)) {
-                    throw new IllegalArgumentException("계정 정보가 틀렸습니다.");
+                if (requestURI.contains(".")) {
+                    String type = "text/" + requestURI.split("\\.")[1];
+                    String path = "static" + requestURI;
+                    createResponse(outputStream, SUCCESS_STATUS_CODE, type, path);
+                    return;
                 }
-                log.info("user: {}", user);
+                createResponse(outputStream, SUCCESS_STATUS_CODE, HTML_CONTENT_TYPE, requestURI);
+                return;
             }
-            if (requestURI.contains(".")) {
-                contentType = "text/" + requestURI.split("\\.")[1];
-                requestURI = "static" + requestURI;
+            if (HttpMethod.POST.equals(httpMethod)) {
+                createResponse(outputStream, SUCCESS_STATUS_CODE, HTML_CONTENT_TYPE, requestURI);
             }
-
-            String responseBody = "Hello world!";
-            final URL resource = getClass().getClassLoader().getResource(requestURI);
-            if (resource != null) {
-                final Path path = Paths.get(resource.toURI());
-                responseBody = Files.readString(path);
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void createResponse(OutputStream outputStream, String statusCode, String contentType, String path)
+            throws IOException, URISyntaxException {
+        final String responseBody = createResponseBody(path);
+        final var response = String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private String createResponseBody(String resourcePath) throws IOException, URISyntaxException {
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
+        if (resource != null) {
+            final Path path = Paths.get(resource.toURI());
+            return Files.readString(path);
+        }
+        return "Hello world!";
+    }
+
+    private Map<String, String> parseQueryString(String requestURI) {
+        Map<String, String> queries = new HashMap<>();
+        if (requestURI.contains("?")) {
+            int index = requestURI.indexOf("?");
+            String queryString = requestURI.substring(index + 1);
+            for (String eachQueryString : queryString.split("&")) {
+                String[] parsedEachQueryString = eachQueryString.split("=");
+                queries.put(parsedEachQueryString[0], parsedEachQueryString[1]);
+            }
+        }
+        return queries;
+    }
+
+    private void login(String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("계정 정보가 틀렸습니다."));
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("계정 정보가 틀렸습니다.");
+        }
+        log.info("user: {}", user);
     }
 }

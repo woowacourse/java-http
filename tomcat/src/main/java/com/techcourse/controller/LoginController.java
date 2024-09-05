@@ -19,20 +19,20 @@ public class LoginController {
         log.info("Query Parameters: {}", request.getQueryParameters());
         MediaType mediaType = MediaType.fromAcceptHeader(request.getAccept());
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(request.getQueryParameter("account"));
-        user.ifPresentOrElse(this::logUser, () -> log.info("User not found"));
+        Optional<String> userAccount = request.getQueryParameter("account");
+        Optional<String> userPassword = request.getQueryParameter("password");
 
-        String fileContent = StaticResourceManager.read(STATIC_RESOURCE_PATH);
-        return new HttpResponse(1.1, 200, "OK")
-                .addHeader("Content-Type", mediaType.getValue())
-                .setBody(fileContent);
-    }
-
-    private void logUser(User user) {
-        if (user.checkPassword("password")) {
-            log.info("User: {}", user);
-            return;
+        if (userAccount.isEmpty() || userPassword.isEmpty()) {
+            return new HttpResponse(200, "OK")
+                    .addHeader("Content-Type", mediaType.getValue())
+                    .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
         }
-        log.info("Login Fail");
+
+        return userAccount.map(InMemoryUserRepository::findByAccount)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(user -> user.checkPassword(userPassword.get()))
+                .map(user -> HttpResponse.redirect("index.html"))
+                .orElse(HttpResponse.redirect("401.html"));
     }
 }

@@ -4,19 +4,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
+    private static final double VERSION = 1.1;
 
-    private final double version;
     private final int statusCode;
     private final String statusMessage;
     private final Map<String, String> headers;
     private String body;
 
-    public HttpResponse(double version, int statusCode, String statusMessage) {
-        this.version = version;
+    public HttpResponse(int statusCode, String statusMessage) {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
         this.headers = new HashMap<>();
         this.body = "";
+    }
+
+    public static HttpResponse redirect(String location) {
+        return new HttpResponse(302, "Found")
+                .addHeader("Location", location)
+                .setBody("");
     }
 
     public HttpResponse addHeader(String key, String value) {
@@ -32,7 +37,7 @@ public class HttpResponse {
 
     public String toHttpMessage() {
         final var response = new StringBuilder();
-        response.append("HTTP/").append(version).append(" ").append(statusCode).append(" ").append(statusMessage).append("\r\n");
+        response.append("HTTP/").append(VERSION).append(" ").append(statusCode).append(" ").append(statusMessage).append("\r\n");
         headers.forEach((key, value) -> response.append(key).append(": ").append(value).append("\r\n"));
         response.append("\r\n");
         response.append(body);

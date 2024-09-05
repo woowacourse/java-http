@@ -2,6 +2,7 @@ package org.apache.coyote;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class HttpRequest {
     private static final String CRLF = "\r\n";
@@ -38,15 +39,18 @@ public class HttpRequest {
         if (pathAndQuery.length == 2) {
             String[] params = pathAndQuery[1].split("&");
             for (String param : params) {
-                String[] keyValue = param.split("=");
+                String[] keyValue = param.split("=", -1);
                 result.put(keyValue[0], keyValue[1]);
             }
         }
         return result;
     }
 
-    public String getQueryParameter(String key) {
-        return queryParameters.getOrDefault(key, "");
+    public Optional<String> getQueryParameter(String key) {
+        if (!queryParameters.containsKey(key)) {
+            return Optional.empty();
+        }
+        return Optional.of(queryParameters.get(key));
     }
 
     public Map<String, String> getQueryParameters() {

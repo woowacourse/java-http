@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("Requested MediaType: {}", mediaType);
 
         String responseBody = StaticResourceManager.read("static" + request.getPath());
-        return new HttpResponse(1.1, 200, "OK")
+        return new HttpResponse(200, "OK")
                 .addHeader("Content-Type", mediaType.getValue())
                 .setBody(responseBody);
     }

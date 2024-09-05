@@ -8,11 +8,12 @@ import org.apache.catalina.Manager;
 import org.apache.coyote.Session;
 import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseHeader;
 
 public class LoginController implements Controller {
 
@@ -40,7 +41,7 @@ public class LoginController implements Controller {
                 .orElseThrow();
 
         if (user.checkPassword(password)) {
-            HttpHeader header = new HttpHeader();
+            ResponseHeader header = new ResponseHeader();
             Manager manager = SessionManager.getInstance();
 
             if (!isSessionExists(request)) {
@@ -55,7 +56,7 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse redirectLoginPage() {
-        HttpHeader header = new HttpHeader();
+        ResponseHeader header = new ResponseHeader();
         header.setLocation("/login.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);
@@ -75,18 +76,18 @@ public class LoginController implements Controller {
     }
 
     private boolean isSessionExists(HttpRequest request) {
-        HttpHeader requestHeaders = request.getHeaders();
+        RequestHeader requestHeaders = request.getHeaders();
         return requestHeaders.existsSession();
     }
 
-    private HttpResponse redirectDefaultPage(HttpHeader header) {
+    private HttpResponse redirectDefaultPage(ResponseHeader header) {
         header.setLocation("/index.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private HttpResponse redirectUnauthorizedPage() {
-        HttpHeader header = new HttpHeader();
+        ResponseHeader header = new ResponseHeader();
         header.setLocation("/401.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);

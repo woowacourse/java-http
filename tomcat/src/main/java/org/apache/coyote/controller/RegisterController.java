@@ -4,11 +4,11 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseHeader;
 
 public class RegisterController implements Controller {
 
@@ -40,7 +40,7 @@ public class RegisterController implements Controller {
     }
 
     private HttpResponse redirectRegisterPage() {
-        HttpHeader header = new HttpHeader();
+        ResponseHeader header = new ResponseHeader();
         header.setLocation("/register.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);
@@ -61,7 +61,7 @@ public class RegisterController implements Controller {
     }
 
     private HttpResponse redirectDefaultPage() {
-        HttpHeader header = new HttpHeader();
+        ResponseHeader header = new ResponseHeader();
         header.setLocation("/index.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);

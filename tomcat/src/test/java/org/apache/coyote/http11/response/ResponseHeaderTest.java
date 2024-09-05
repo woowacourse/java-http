@@ -1,12 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.MimeType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("HTTP 헤더 테스트")
-class HttpHeaderTest {
+@DisplayName("응답 헤더 테스트")
+class ResponseHeaderTest {
 
     @DisplayName("HTTP 헤더 생성에 성공한다.")
     @Test
@@ -18,7 +19,7 @@ class HttpHeaderTest {
                 "Content-Length: 12 ",
                 "Content-Type: " + mimeType.getContentType() + " "
         );
-        HttpHeader header = new HttpHeader();
+        ResponseHeader header = new ResponseHeader();
 
         // when
         header.setContentLength(contentLength);

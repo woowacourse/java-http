@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
@@ -13,10 +14,11 @@ public class RequestLine {
     private final HttpMethod method;
     private final String path;
     private final String url;
-    private final String version;
+    private final HttpVersion version;
     private final Map<String, String> queryParams;
 
-    public RequestLine(HttpMethod method, String path, String url, String version, Map<String, String> queryParams) {
+    public RequestLine(
+            HttpMethod method, String path, String url, HttpVersion version, Map<String, String> queryParams) {
         this.method = method;
         this.path = path;
         this.url = url;
@@ -29,7 +31,7 @@ public class RequestLine {
 
         HttpMethod method = HttpMethod.from(requestLineToken[0]);
         String url = requestLineToken[1];
-        String version = requestLineToken[2];
+        HttpVersion version = HttpVersion.fromString(requestLineToken[2]);
         String path = parsePath(url);
         Map<String, String> queryParams = parseQueryParameter(url);
 
@@ -72,7 +74,7 @@ public class RequestLine {
         return path;
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 

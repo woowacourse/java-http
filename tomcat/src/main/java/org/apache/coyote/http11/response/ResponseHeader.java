@@ -1,20 +1,21 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.MimeType;
 
-public class HttpHeader {
+public class ResponseHeader {
 
     private final String LOCATION = "Location";
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_LENGTH = "Content-Length";
     private final String SET_COOKIE = "Set-Cookie";
-    private final String COOKIE = "Cookie";
 
     private final Map<String, String> header;
 
-    public HttpHeader() {
+    public ResponseHeader() {
         this.header = new HashMap<>();
     }
 
@@ -30,10 +31,6 @@ public class HttpHeader {
         addHeader(CONTENT_TYPE, mimeType.getContentType());
     }
 
-    public boolean hasContentLength() {
-        return header.containsKey(CONTENT_LENGTH);
-    }
-
     public String toHeaderString() {
         StringJoiner headerJoiner = new StringJoiner("\r\n");
         for (Map.Entry<String, String> entry : header.entrySet()) {
@@ -42,32 +39,12 @@ public class HttpHeader {
         return headerJoiner.toString();
     }
 
-    public int getContentLength() {
-        return Integer.parseInt(header.get(CONTENT_LENGTH));
-    }
-
     public void setContentLength(String contentLength) {
         addHeader(CONTENT_LENGTH, contentLength);
     }
 
     public void setCookie(String cookie) {
         addHeader(SET_COOKIE, cookie);
-    }
-
-    public boolean existsSession() {
-        if (!header.containsKey(COOKIE)) {
-            return false;
-        }
-
-        HttpCookie cookies = getCookies();
-        if (cookies.containsJSessionId()) {
-            return true;
-        }
-        return false;
-    }
-
-    public HttpCookie getCookies() {
-        return new HttpCookie(header.get(COOKIE));
     }
 
     @Override

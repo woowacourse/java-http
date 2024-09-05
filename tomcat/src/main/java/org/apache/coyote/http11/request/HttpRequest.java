@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.HttpVersion;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
@@ -17,7 +17,7 @@ public class HttpRequest {
     private static final String HEADER_DELIMITER = ":";
 
     private final RequestLine requestLine;
-    private final HttpHeader header;
+    private final RequestHeader header;
     private final Optional<String> body;
 
     public HttpRequest(InputStream in) throws IOException {
@@ -29,8 +29,8 @@ public class HttpRequest {
         this.body = parseBody(bufferedReader);
     }
 
-    private HttpHeader parseHeader(BufferedReader bufferedReader) throws IOException {
-        HttpHeader header = new HttpHeader();
+    private RequestHeader parseHeader(BufferedReader bufferedReader) throws IOException {
+        RequestHeader header = new RequestHeader();
         String readLine = bufferedReader.readLine();
         while (readLine != null && !readLine.equals("")) {
             String[] headerToken = readLine.split(HEADER_DELIMITER);
@@ -75,11 +75,11 @@ public class HttpRequest {
         return requestLine.getUrl();
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return requestLine.getVersion();
     }
 
-    public HttpHeader getHeaders() {
+    public RequestHeader getHeaders() {
         return header;
     }
 

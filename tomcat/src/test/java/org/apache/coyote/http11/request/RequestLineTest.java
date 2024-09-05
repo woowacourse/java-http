@@ -24,7 +24,7 @@ class RequestLineTest {
         assertAll(
                 () -> assertThat(line.getMethod()).isEqualTo(HttpMethod.GET),
                 () -> assertThat(line.getUrl()).isEqualTo("/index.html"),
-                () -> assertThat(line.getVersion()).isEqualTo("HTTP/1.1")
+                () -> assertThat(line.getVersion().getVersionString()).isEqualTo("HTTP/1.1")
         );
     }
 

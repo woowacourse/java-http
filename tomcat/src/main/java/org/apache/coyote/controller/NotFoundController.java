@@ -5,11 +5,11 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.util.FileExtension;
 
 public class NotFoundController implements Controller {
@@ -23,11 +23,11 @@ public class NotFoundController implements Controller {
             MimeType mimeType = MimeType.from(FileExtension.from(path));
             byte[] body = Files.readAllBytes(filePath);
 
-            HttpHeader header = new HttpHeader();
+            ResponseHeader header = new ResponseHeader();
             header.setContentType(mimeType);
             return new HttpResponse(HttpStatusCode.NOT_FOUND, header, body);
         } catch (URISyntaxException | IOException e) {
-            HttpHeader header = new HttpHeader();
+            ResponseHeader header = new ResponseHeader();
             header.setContentType(MimeType.OTHER);
             return new HttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, header, "Something Went Wrong".getBytes());
         }

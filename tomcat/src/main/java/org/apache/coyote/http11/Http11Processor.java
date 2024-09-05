@@ -15,6 +15,7 @@ import org.apache.coyote.handler.LoginRequestHandler;
 import org.apache.coyote.handler.NotFoundHandler;
 import org.apache.coyote.handler.ResourceRequestHandler;
 import org.apache.coyote.handler.RootRequestHandler;
+import org.apache.coyote.handler.SignupRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class Http11Processor implements Runnable, Processor {
         return List.of(
                 new RootRequestHandler(),
                 new LoginRequestHandler(),
+                new SignupRequestHandler(),
                 new ResourceRequestHandler()
         );
     }
@@ -52,8 +54,7 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final List<String> lines = getLines(bufferedReader);
-            final Http11Request request = new Http11Request(lines);
+            final Http11Request request = readRequest(bufferedReader);
             boolean handled = false;
             for (RequestHandler requestHandler : requestHandlers) {
                 if (requestHandler.canHandling(request)) {
@@ -75,12 +76,35 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private List<String> getLines(BufferedReader bufferedReader) throws IOException {
+    private Http11Request readRequest(BufferedReader bufferedReader) throws IOException {
+        final Http11RequestLine requestLine = getLine(bufferedReader);
+        final Http11RequestHeaders requestHeaders = getHeaders(bufferedReader);
+        final Http11RequestBody requestBody = getBody(bufferedReader, requestHeaders.getValue("Content-Length"));
+        final Http11Request request = new Http11Request(requestLine, requestHeaders, requestBody);
+        return request;
+    }
+
+    private Http11RequestLine getLine(BufferedReader bufferedReader) throws IOException {
+        return new Http11RequestLine(bufferedReader.readLine());
+    }
+
+    private Http11RequestHeaders getHeaders(BufferedReader bufferedReader) throws IOException {
         final List<String> lines = new LinkedList<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             lines.add(line);
         }
-        return lines;
+        return new Http11RequestHeaders(lines);
+    }
+
+    private Http11RequestBody getBody(BufferedReader bufferedReader, String contentLength) throws IOException {
+        try {
+            int bodyLength = Integer.parseInt(contentLength);
+            char[] buffer = new char[bodyLength];
+            bufferedReader.read(buffer, 0, bodyLength);
+            return new Http11RequestBody(new String(buffer));
+        } catch (NumberFormatException e) {
+            return new Http11RequestBody("");
+        }
     }
 }

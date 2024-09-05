@@ -16,5 +16,9 @@ public interface HttpRequest {
 
     boolean existsQueryParam();
 
+    boolean existsBody();
+
     Map<String, String> getQueryParam();
+
+    String getBody();
 }

@@ -9,31 +9,22 @@ public class Http11Request implements HttpRequest {
 
     private final Http11RequestLine requestLine;
     private final Http11RequestHeaders headers;
+    private final Http11RequestBody body;
 
-    public Http11Request(List<String> lines) {
-        validate(lines);
-        this.requestLine = parseRequestLine(lines);
-        this.headers = parseHeaders(lines);
+    public Http11Request(
+            Http11RequestLine requestLine,
+            Http11RequestHeaders headers,
+            Http11RequestBody body
+    ) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
     }
 
     private void validate(List<String> lines) {
         if (lines.isEmpty()) {
             throw new UncheckedServletException(new IllegalArgumentException("빈 요청입니다."));
         }
-    }
-
-    private Http11RequestLine parseRequestLine(List<String> lines) {
-        String line = lines.get(0);
-        lines.removeFirst();
-        return new Http11RequestLine(line);
-    }
-
-    private Http11RequestHeaders parseHeaders(List<String> lines) {
-        List<String> headers = lines.stream()
-                .filter(line -> !line.isEmpty())
-                .toList();
-        return new Http11RequestHeaders(headers);
-
     }
 
     @Override
@@ -69,5 +60,15 @@ public class Http11Request implements HttpRequest {
     @Override
     public Map<String, String> getQueryParam() {
         return requestLine.getQueryParam();
+    }
+
+    @Override
+    public boolean existsBody() {
+        return !getBody().isEmpty();
+    }
+
+    @Override
+    public String getBody() {
+        return body.getValue();
     }
 }

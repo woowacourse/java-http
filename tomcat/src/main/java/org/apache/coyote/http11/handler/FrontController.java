@@ -19,6 +19,7 @@ public class FrontController {
         handlers.put("/index", new IndexHandler());
         handlers.put("/login", new LoginHandler());
         handlers.put("/register", new RegisterHandler());
+        handlers.put("/user", new UserHandler());
     }
 
     public void handleRequest(HttpRequest request, HttpResponse response) throws IOException {

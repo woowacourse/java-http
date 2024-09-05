@@ -6,7 +6,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -105,9 +104,5 @@ public class HttpResponse {
         } catch (Exception e) {
             throw new IllegalArgumentException("쓰기에 실패했습니다.", e);
         }
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers.getHeaders();
     }
 }

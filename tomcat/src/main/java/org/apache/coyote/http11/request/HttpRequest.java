@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 
 public class HttpRequest {
 
@@ -73,6 +75,17 @@ public class HttpRequest {
             return true;
         }
         HttpCookie cookie = HttpCookie.from(cookieString);
-        return !cookie.contains("JSESSIONID");
+        return !cookie.contains(HttpCookie.JSESSIONID);
+    }
+
+    public Session getSession(boolean createIfNotExists) {
+        if (sessionNotExists() && createIfNotExists) {
+            Session session = new Session();
+            SessionManager.add(session);
+            return session;
+        }
+        HttpCookie cookie = HttpCookie.from(headers.get(HttpHeaders.COOKIE));
+        String sessionId = cookie.get(HttpCookie.JSESSIONID);
+        return SessionManager.findSession(sessionId);
     }
 }

@@ -2,11 +2,11 @@ package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -37,8 +37,10 @@ public class LoginHandler extends AbstractRequestHandler {
             log.debug("user: {}", user);
 
             if (request.sessionNotExists()) {
+                Session session = request.getSession(true);
+                session.setAttribute("user", user);
                 HttpCookie cookie = new HttpCookie();
-                cookie.setCookie("JSESSIONID", UUID.randomUUID().toString());
+                cookie.setCookie(HttpCookie.JSESSIONID, session.getId());
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.getCookieString());
             }
             response.sendRedirect("/index.html");

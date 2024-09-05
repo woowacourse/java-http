@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_DIRNAME = "static";
     private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -52,6 +58,7 @@ public class Http11Processor implements Runnable, Processor {
             final String requestLine = readRequestLine(reader);
             Map<String, String> headers = readHeaders(reader);
             String requestBody = null;
+            HttpCookie cookie = null;
 
             if (headers.containsKey(CONTENT_LENGTH)) {
                 int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
@@ -60,7 +67,11 @@ public class Http11Processor implements Runnable, Processor {
                 requestBody = new String(buffer);
             }
 
-            final String response = makeResponse(requestLine, requestBody);
+            if (headers.containsKey(COOKIE)) {
+                cookie = new HttpCookie(headers.get(COOKIE));
+            }
+
+            final String response = makeResponse(requestLine, requestBody, cookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -100,7 +111,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(String requestLine, String requestBody) {
+    private String makeResponse(String requestLine, String requestBody, HttpCookie cookie) {
         String[] params = requestLine.split(" ");
         validateParamCount(params);
 
@@ -123,15 +134,15 @@ public class Http11Processor implements Runnable, Processor {
                 String password = requestData.get("password");
 
                 return InMemoryUserRepository.findByAccountAndPassword(account, password)
-                        .map(user -> makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND))
-                        .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED));
+                        .map(user -> makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie))
+                        .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED, cookie));
             }
         }
 
         if (method.equals("POST") && endpoint.equals("/register")) {
             if (requestData.containsKey("account")
-                    && requestData.containsKey("email")
-                    && requestBody.contains("password")
+                && requestData.containsKey("email")
+                && requestBody.contains("password")
             ) {
                 String account = requestData.get("account");
                 String email = requestData.get("email");
@@ -141,11 +152,11 @@ public class Http11Processor implements Runnable, Processor {
                     InMemoryUserRepository.save(new User(account, password, email));
                 }
 
-                return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND);
+                return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie);
             }
         }
 
-        return makeResponseMessageFromFile(endpoint.substring(1), HttpStatusCode.OK);
+        return makeResponseMessageFromFile(endpoint.substring(1), HttpStatusCode.OK, cookie);
     }
 
     private static void validateParamCount(String[] params) {
@@ -218,14 +229,14 @@ public class Http11Processor implements Runnable, Processor {
         return String.join(
                 "\r\n",
                 "HTTP/1.1 " + statusCode.getValue() + " ",
-                "Content-Type: text/html;charset=utf-8 ",
+                CONTENT_TYPE + ": text/html;charset=utf-8 ",
                 "Content-Length: " + content.getBytes().length + " ",
                 "",
                 content
         );
     }
 
-    private String makeResponseMessageFromFile(String fileName, HttpStatusCode statusCode) {
+    private String makeResponseMessageFromFile(String fileName, HttpStatusCode statusCode, HttpCookie cookie) {
         if (!fileName.contains(".")) {
             fileName += ".html";
         }
@@ -248,14 +259,23 @@ public class Http11Processor implements Runnable, Processor {
             contentType = "text/javascript";
         }
 
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 " + statusCode.getValue() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, contentType + ";charset=utf-8 ");
+        headers.put(CONTENT_LENGTH, responseBody.getBytes().length + " ");
+
+        if (cookie == null || !cookie.hasCookieWithName(JSESSIONID)) {
+            HttpCookie httpCookie = new HttpCookie();
+            httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
+            headers.put(SET_COOKIE, httpCookie.getCookiesAsString());
+        }
+
+        String startLineText = "HTTP/1.1 " + statusCode.getValue() + " ";
+
+        String headerText = headers.keySet().stream()
+                .map(headerName -> headerName + ": " + headers.get(headerName))
+                .collect(Collectors.joining(("\r\n")));
+
+        return String.join("\r\n", startLineText, headerText, "", responseBody);
     }
 
     private String readBody(String fileName) {

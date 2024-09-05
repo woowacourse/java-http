@@ -29,7 +29,7 @@ public class ResponseHeader {
 
     public static ResponseHeader basicResponseHeader(int length) {
         Header header = new Header();
-        header.addHeader(CONTENT_TYPE, "text/plain");
+        header.addHeader(CONTENT_TYPE, MimeType.HTML.getContentType());
         header.addHeader(CONTENT_LENGTH, String.valueOf(length));
         return new ResponseHeader(header);
     }

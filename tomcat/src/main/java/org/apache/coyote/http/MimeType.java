@@ -18,9 +18,13 @@ public enum MimeType {
     }
 
     public static String getContentTypeFromExtension(String extension) {
-        return Arrays.stream(MimeType.values()).filter(mimeType -> extension.contains(mimeType.extension))
+        return Arrays.stream(MimeType.values()).filter(mimeType -> extension.endsWith(mimeType.extension))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(extension + " didn't match"))
                 .contentType;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 }

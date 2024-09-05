@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             HttpRequest request = new HttpRequest(bufferedReader);
             String endpoint = request.getURI();
-            log.info("Requested endpoint: {}", endpoint);
+            log.info("Requested endpoint: {}, Method: {}", endpoint, request.getHttpMethod());
 
             String response;
             try {
@@ -61,6 +61,7 @@ public class Http11Processor implements Runnable, Processor {
                 response = http11Helper.createResponse(HttpStatus.UNAUTHORIZED, "401.html");
             } catch (UnsupportedMethodException e) {
                 log.error("Error processing request for endpoint: {}", endpoint, e);
+
                 response = http11Helper.createResponse(HttpStatus.METHOD_NOT_ALLOWED, "405.html");
             }
 

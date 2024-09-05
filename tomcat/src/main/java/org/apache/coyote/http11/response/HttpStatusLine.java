@@ -2,12 +2,19 @@ package org.apache.coyote.http11.response;
 
 public class HttpStatusLine {
 
+    private static final String DEFAULT_VERSION = "HTTP/1.1";
+
     private final String httpVersion;
     private HttpStatus httpStatus;
 
-    public HttpStatusLine(HttpStatus httpStatus) {
-        this.httpVersion = "HTTP/1.1";
+
+    public HttpStatusLine(String httpVersion, HttpStatus httpStatus) {
+        this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
+    }
+
+    public HttpStatusLine(HttpStatus httpStatus) {
+        this(DEFAULT_VERSION, httpStatus);
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {
@@ -16,6 +23,6 @@ public class HttpStatusLine {
 
     @Override
     public String toString() {
-        return httpVersion + " " + httpStatus.getStatusCode()+ " " + httpStatus.getMessage();
+        return httpVersion + " " + httpStatus.getStatusCode() + " " + httpStatus.getMessage();
     }
 }

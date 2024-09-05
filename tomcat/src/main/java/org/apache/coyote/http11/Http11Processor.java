@@ -23,7 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
     }
@@ -41,25 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            // startline 읽기
-            String startLine = reader.readLine();
-            HttpRequestLine httpRequestLine = new HttpRequestLine(startLine);
-
-            // header 읽기
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while (StringUtils.isNoneBlank(line = reader.readLine())) {
-                builder.append(line).append("\n");
-            }
-            HttpHeaders httpHeaders = new HttpHeaders(builder.toString());
-
-            // body 읽기
-            int contentLength = httpHeaders.getContentLength();
-            char[] bodyBuffer = new char[contentLength];
-            reader.read(bodyBuffer, 0, contentLength);
-            HttpBody httpBody = new HttpBody(new String(bodyBuffer));
-
-            HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders, httpBody);
+            HttpRequest httpRequest = HttpRequest.from(reader);
             HttpResponse httpResponse = new HttpResponse();
 
             AbstractController controller = RequestMapping.getController(httpRequest.getPath());

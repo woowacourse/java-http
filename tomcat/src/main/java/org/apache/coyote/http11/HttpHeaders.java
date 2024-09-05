@@ -12,15 +12,19 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
+    public HttpHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
     public HttpHeaders(String headers) {
-        this.headers = parseHeaders(headers);
+        this(parseHeaders(headers));
     }
 
     public HttpHeaders() {
-        this.headers = new HashMap<>();
+        this(new HashMap<>());
     }
 
-    private Map<String, String> parseHeaders(String header) {
+    private static Map<String, String> parseHeaders(String header) {
         Map<String, String> map = new HashMap<>();
 
         String[] headers = header.split(LINE_FEED);
@@ -47,7 +51,7 @@ public class HttpHeaders {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(LINE_FEED);
+            sb.append(entry.getKey()).append(HEADER_REGEX).append(entry.getValue()).append(LINE_FEED);
         }
         return sb.toString();
     }

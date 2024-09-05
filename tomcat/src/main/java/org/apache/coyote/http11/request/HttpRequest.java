@@ -1,15 +1,13 @@
 package org.apache.coyote.http11.request;
 
-import java.net.SocketOption;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpRequest {
-
-    private static final String LINE_FEED = "\n";
-    private static final int STARTLINE_INDEX = 0;
-    private static final int HEADER_INDEX = 1;
 
     private final HttpRequestLine startLine;
     private final HttpHeaders headers;
@@ -21,47 +19,31 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public HttpRequest(String request) {
-        startLine = new HttpRequestLine(parseStartLine(request));
-        headers = new HttpHeaders(parseHeaders(request));
-        body = new HttpBody(parseBody(request));
+    public static HttpRequest from(BufferedReader reader) throws IOException {
+        HttpRequestLine httpRequestLine = new HttpRequestLine(parseStartLine(reader));
+        HttpHeaders httpHeaders = new HttpHeaders(parseHeaders(reader));
+        HttpBody httpBody = new HttpBody(parseBody(reader, httpHeaders.getContentLength()));
+
+        return new HttpRequest(httpRequestLine, httpHeaders, httpBody);
     }
 
-    private String parseStartLine(String request) {
-        String[] messages = parseMessage(request);
-        return messages[STARTLINE_INDEX];
+    private static String parseStartLine(BufferedReader reader) throws IOException {
+        return reader.readLine();
     }
 
-    private String parseHeaders(String request) {
-        String[] messages = parseMessage(request);
+    private static String parseHeaders(BufferedReader reader) throws IOException {
         StringBuilder builder = new StringBuilder();
-
-        for (int i = HEADER_INDEX; i < messages.length; i++) {
-            if (messages[i].isEmpty()) {
-                break;
-            }
-            builder.append(messages[i]).append(LINE_FEED);
+        String line;
+        while (StringUtils.isNoneBlank(line = reader.readLine())) {
+            builder.append(line).append(System.lineSeparator());
         }
         return builder.toString();
     }
 
-    private String parseBody(String request) {
-        String[] messages = parseMessage(request);
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = HEADER_INDEX; i < messages.length; i++) {
-            if (messages[i].isEmpty()) {
-                for (int j = i; j < messages.length; j++) {
-                    builder.append(messages[j]).append(LINE_FEED);
-                }
-                break;
-            }
-        }
-        return builder.toString();
-    }
-
-    private String[] parseMessage(String request) {
-        return request.split(LINE_FEED);
+    private static String parseBody(BufferedReader reader, int countLength) throws IOException {
+        char[] buffer = new char[countLength];
+        reader.read(buffer, 0, countLength);
+        return new String(buffer);
     }
 
     public Map<String, String> getHeaders() {
@@ -73,7 +55,7 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return startLine.getPath();
+        return startLine.getUri();
     }
 
     public HttpRequestLine getStartLine() {

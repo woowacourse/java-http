@@ -64,10 +64,6 @@ public class HttpRequest {
         return requestBody.getParams();
     }
 
-    public Map<String, String> getHeaders() {
-        return headers.getHeaders();
-    }
-
     public boolean sessionNotExists() {
         Map<String, String> headersMap = headers.getHeaders();
         String cookieString = headersMap.get(HttpHeaders.COOKIE);

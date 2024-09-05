@@ -12,25 +12,9 @@ public class StatusLine {
         this(HTTP_VERSION, HttpStatus.OK);
     }
 
-    public StatusLine(HttpStatus status) {
-        this(HTTP_VERSION, status);
-    }
-
     public StatusLine(String httpVersion, HttpStatus status) {
         this.httpVersion = httpVersion;
         this.status = status;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public int getStatusCode() {
-        return status.getCode();
-    }
-
-    public String getStatusMessage() {
-        return status.getMessage();
     }
 
     public String buildStatusLineResponse() {

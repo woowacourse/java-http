@@ -73,6 +73,8 @@ public class HttpResponse {
             contentType = "text/css;charset=utf-8";
         } else if (fileExtension.endsWith("js")) {
             contentType = "text/javascript;charset=utf-8";
+        } else if (fileExtension.endsWith("svg")) {
+            contentType = "image/svg+xml;charset=utf-8";
         } else {
             contentType = "text/plain;charset=utf-8";
         }

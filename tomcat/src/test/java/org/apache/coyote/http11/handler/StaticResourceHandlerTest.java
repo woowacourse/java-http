@@ -46,7 +46,7 @@ class StaticResourceHandlerTest {
 
     @Test
     @DisplayName("GET '/index' 요청에 대한 응답은 처리되지 않고, '/404.html'로 리다이렉트한다.")
-    void index_redirect() throws IOException {
+    void index_redirect() {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /index HTTP/1.1 ",
@@ -154,6 +154,118 @@ class StaticResourceHandlerTest {
                 "",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())
         ));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("GET '/error-404-monochrome.svg' 요청에 대한 응답이 정상적으로 처리된다.")
+    void svg() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/assets/img/error-404-monochrome.svg");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                          "Content-Type: image/svg+xml;charset=utf-8 \r\n" +
+                          "Content-Length: 6119 \r\n" +
+                          "\r\n" +
+                          new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("GET '/400.html' 요청에 대한 응답이 정상적으로 처리된다.")
+    void badRequest() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /400.html HTTP/1.1 ",
+                "Host: localhost:2519 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/400.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                          "Content-Type: text/html;charset=utf-8 \r\n" +
+                          "Content-Length: 2059 \r\n" +
+                          "\r\n" +
+                          new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("GET '/401.html' 요청에 대한 응답이 정상적으로 처리된다.")
+    void unauthorized() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /401.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                          "Content-Type: text/html;charset=utf-8 \r\n" +
+                          "Content-Length: 2426 \r\n" +
+                          "\r\n" +
+                          new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("GET '/404.html' 요청에 대한 응답이 정상적으로 처리된다.")
+    void notFound() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /404.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                          "Content-Type: text/html;charset=utf-8 \r\n" +
+                          "Content-Length: 2426 \r\n" +
+                          "\r\n" +
+                          new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

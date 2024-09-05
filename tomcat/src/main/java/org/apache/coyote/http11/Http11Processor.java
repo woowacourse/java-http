@@ -91,7 +91,12 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final URL resourceUrl = getClass().getClassLoader().getResource(STATIC_PATH + requestUrl);
-        return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
+        if (resourceUrl == null) {
+            return "";
+        }
+
+        final File file = new File(resourceUrl.getFile());
+        return new String(Files.readAllBytes(file.toPath()));
     }
 
     private String getMimeType(final Map<String, String> httpRequestHeader) throws IOException {

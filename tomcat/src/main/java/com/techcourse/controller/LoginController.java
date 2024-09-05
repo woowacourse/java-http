@@ -19,9 +19,16 @@ public class LoginController extends Controller {
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
     public String login(HttpRequest request) throws IOException {
-        String response = operate(request);
+        try {
+            String response = operate(request);
 
-        return response;
+            return response;
+        } catch (UnauthorizedException e) {
+            log.error("Error processing request for endpoint: {}", request.getURI(), e);
+
+            String response = http11Helper.createResponse(HttpStatus.UNAUTHORIZED, "401.html");
+            return response;
+        }
     }
 
     @Override

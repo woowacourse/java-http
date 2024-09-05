@@ -55,10 +55,6 @@ public class Http11Processor implements Runnable, Processor {
                 log.error("Error processing request for endpoint: {}", endpoint, e);
 
                 response = http11Helper.createResponse(HttpStatus.NOT_FOUND, "404.html");
-            } catch (UnauthorizedException e) {
-                log.error("Error processing request for endpoint: {}", endpoint, e);
-
-                response = http11Helper.createResponse(HttpStatus.UNAUTHORIZED, "401.html");
             } catch (UnsupportedMethodException e) {
                 log.error("Error processing request for endpoint: {}", endpoint, e);
 

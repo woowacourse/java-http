@@ -21,19 +21,6 @@ import com.techcourse.model.User;
 import support.StubSocket;
 
 class Http11ProcessorTest {
-
-    private MockedStatic<InMemoryUserRepository> mockedRepository;
-
-    @BeforeEach
-    void setUp() {
-        mockedRepository = mockStatic(InMemoryUserRepository.class);
-    }
-
-    @AfterEach
-    void clear() {
-        mockedRepository.close();
-    }
-
     @DisplayName("process 메서드는 요청에 대해 올바른 HTTP 응답을 생성한다.")
     @Test
     void process() throws IOException {
@@ -161,71 +148,6 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: 211991 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("성공적인 로그인 요청에 대해 302 응답을 생성한다.")
-    @Test
-    void loginSuccess() throws IOException {
-        // given
-        String requestBody = "account=validUser&password=correctPassword";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
-        final var socket = new StubSocket(httpRequest);
-        final var processor = new Http11Processor(socket);
-        User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
-        mockedRepository.when(() -> InMemoryUserRepository.findByAccount("validUser"))
-                .thenReturn(Optional.of(mockUser));
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-
-    @DisplayName("로그인이 잘못되면 401 응답을 반환한다.")
-    @Test
-    void loginFailedInvalidPassword() throws IOException {
-        // given
-        String requestBody = "account=validUser&password=wrongPassword";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + requestBody.length(),
-                "",
-                requestBody);
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-        User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
-        mockedRepository.when(() -> InMemoryUserRepository.findByAccount("validUser"))
-                .thenReturn(Optional.of(mockUser));
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        var expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2426 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

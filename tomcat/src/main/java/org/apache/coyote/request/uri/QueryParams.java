@@ -15,7 +15,10 @@ public class QueryParams {
                 .collect(toMap(p -> p[0], p -> p[1]));
     }
 
-    public Map<String, String> getQueryParams() {
-        return this.queryParams;
+    public String getValue(String key) {
+        if (!queryParams.containsKey(key)) {
+            throw new IllegalArgumentException("Query param not found");
+        }
+        return queryParams.get(key);
     }
 }

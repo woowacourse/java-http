@@ -37,8 +37,8 @@ public class RequestLine {
         return uri.getPath();
     }
 
-    protected Map<String, String> getQueryParams() {
-        return uri.getQueryParams();
+    protected String getQueryParamValue(String key) {
+        return uri.getQueryParamValue(key);
     }
 
     protected String getHttpVersion() {

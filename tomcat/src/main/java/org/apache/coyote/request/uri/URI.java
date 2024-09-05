@@ -1,7 +1,5 @@
 package org.apache.coyote.request.uri;
 
-import java.util.Map;
-
 public class URI {
 
     private final PathVariable pathVariable;
@@ -25,7 +23,7 @@ public class URI {
         return this.pathVariable.getPath();
     }
 
-    public Map<String, String> getQueryParams() {
-        return this.queryParams.getQueryParams();
+    public String getQueryParamValue(String key) {
+        return this.queryParams.getValue(key);
     }
 }

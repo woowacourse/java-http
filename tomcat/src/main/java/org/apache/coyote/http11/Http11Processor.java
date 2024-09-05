@@ -1,9 +1,13 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +32,38 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(Socket connection) {
         try (var inputStream = connection.getInputStream();
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              var outputStream = connection.getOutputStream()) {
-            var responseBody = "Hello world!";
 
-            var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            BufferedReader requestBufferedReader = new BufferedReader(inputStreamReader);
+            Request request = Request.parseFrom(requestBufferedReader.lines().toList());
 
+            String response = getResponseString(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseString(Request request) {
+        if (request.getMethod() == Method.GET) {
+            String content = getContent(request);
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + content.getBytes().length + " ",
+                    "",
+                    content);
+        }
+        return null;
+    }
+
+    private String getContent(Request request) {
+        if (request.getTarget().equals("/")) {
+            return "Hello world!";
+        }
+        return null;
     }
 }

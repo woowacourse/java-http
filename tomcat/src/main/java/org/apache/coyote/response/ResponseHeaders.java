@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,8 +8,16 @@ public class ResponseHeaders implements Assemblable {
 
     private final Map<String, String> headers;
 
-    protected ResponseHeaders() {
-        this.headers = new HashMap<>();
+    public ResponseHeaders() {
+        this.headers = new LinkedHashMap<>();
+    }
+
+    public void contentType(String contentType) {
+        headers.put("Content-Type", "%s;charset=utf-8".formatted(contentType));
+    }
+
+    public void contentLength(int contentLength) {
+        headers.put("Content-Length", String.valueOf(contentLength));
     }
 
     @Override
@@ -17,9 +25,10 @@ public class ResponseHeaders implements Assemblable {
         for (Entry<String, String> entry : headers.entrySet()) {
             builder.append(convert(entry));
         }
+        builder.append("\r\n");
     }
 
     private String convert(Entry<String, String> entry) {
-        return "%s: %s\r\n".formatted(entry.getKey(), entry.getValue());
+        return "%s: %s \r\n".formatted(entry.getKey(), entry.getValue());
     }
 }

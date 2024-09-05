@@ -34,7 +34,8 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     private String getContentType(HttpRequest httpRequest) {
         if (httpRequest.getHeader("Accept") == null) {
-            return "";
+            int index = httpRequest.getRequestURI().indexOf(".");
+            return "text/" + httpRequest.getRequestURI().substring(index + 1) + ";charset=utf-8 ";
         }
         return httpRequest.getHeader("Accept").split(",")[0];
     }

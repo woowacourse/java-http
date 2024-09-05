@@ -1,5 +1,7 @@
 package com.techcourse.service;
 
+import java.util.Objects;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.InvalidRegisterException;
 import com.techcourse.exception.UnauthorizedException;
@@ -8,7 +10,7 @@ import com.techcourse.model.User;
 public class UserService {
 
     public User login(String account, String password) {
-        if (account.isEmpty() || password.isEmpty()) {
+        if (Objects.isNull(account) || Objects.isNull(password)) {
             throw new UnauthorizedException("Values for authorization is missing.");
         }
 
@@ -22,7 +24,7 @@ public class UserService {
     }
 
     public User register(String account, String password, String email) {
-        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+        if (Objects.isNull(account) || Objects.isNull(password) || Objects.isNull(email)) {
             throw new InvalidRegisterException("Values for register is missing.");
         }
         User user = new User(account, password, email);

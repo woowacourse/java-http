@@ -74,7 +74,7 @@ class UserServiceTest {
     @Test
     void cannotLoginWithoutInformation() {
         // given
-        String account = "";
+        String account = null;
         String password = user.getPassword();
 
         // when & then
@@ -108,7 +108,7 @@ class UserServiceTest {
         // given
         String account = "account";
         String password = "password";
-        String email = "";
+        String email = null;
 
         // when & then
         assertThatThrownBy(() -> userService.register(account, password, email))

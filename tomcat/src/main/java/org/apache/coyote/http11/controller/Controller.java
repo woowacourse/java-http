@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.controller;
 
-import java.nio.file.Path;
+
+import java.util.Map;
 import org.apache.coyote.http11.RequestLine;
 
 public interface Controller {
     boolean canHandle(String url);
 
-    String handle(RequestLine requestLine);
+    Map<String, String> handle(RequestLine requestLine);
+
 }

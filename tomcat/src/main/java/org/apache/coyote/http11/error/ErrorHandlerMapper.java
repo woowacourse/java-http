@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.error;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import org.apache.coyote.http11.error.errorhandler.Error401Handler;
@@ -19,12 +20,12 @@ public enum ErrorHandlerMapper {
 
     public static boolean hasErrorHandler(Class<? extends Exception> exception) {
         return Stream.of(values())
-                .anyMatch(handler -> handler.exceptionClass.isInstance(exception));
+                .anyMatch(handler -> handler.exceptionClass == exception);
     }
 
-    public static String handleError(Class<? extends Exception> exception) {
+    public static Map<String, String> handleError(Class<? extends Exception> exception) {
         return Stream.of(values())
-                .filter(handler -> handler.exceptionClass.isInstance(exception))
+                .filter(handler -> handler.exceptionClass == exception)
                 .findAny()
                 .orElseThrow(()-> new NoSuchElementException("에러 핸들러가 존재하지 않습니다."))
                 .errorHandler

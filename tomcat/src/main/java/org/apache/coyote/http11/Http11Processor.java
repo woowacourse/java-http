@@ -7,8 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
@@ -39,40 +38,48 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
 
-            String body = makeResponseBody(requestLine);
-
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + findResponseContentType(requestLine.getRequestURI()) + ";charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "",
-                    body);
+            String response = makeResponse(requestLine);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
         }
     }
 
-    private String makeResponseBody(RequestLine requestLine) throws IOException {
+    private String makeResponse(RequestLine requestLine) throws IOException {
         try {
             if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
-                Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
-                return findResponseFile(controller.handle(requestLine));
+                return resolveHandlerResponse(requestLine);
             }
-            return findResponseFile(requestLine.getRequestURI());
+            return ResponseResolver.resolveViewResponse(
+                    requestLine.getRequestURI(),
+                    findResponseContentType(requestLine.getRequestURI())
+            );
         } catch (Exception e) {
             if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
-                return findResponseFile(ErrorHandlerMapper.handleError(e.getClass()));
+                return resolveErrorHandlerResponse(requestLine, e);
             }
             throw new UncheckedServletException(e);
         }
     }
 
-    private static String findResponseFile(String viewUri) throws IOException {
-        Path path = new ViewResolver().findViewPath(viewUri);
-        return Files.readString(path);
+    private String resolveErrorHandlerResponse(RequestLine requestLine, Exception e) {
+        Map<String, String> parameters = ErrorHandlerMapper.handleError(e.getClass());
+        return ResponseResolver.resolveResponse(
+                parameters,
+                findResponseContentType(requestLine.getRequestURI())
+        );
+    }
+
+    private String resolveHandlerResponse(RequestLine requestLine) {
+        Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
+        Map<String, String> responseParameters = controller.handle(requestLine);
+        return ResponseResolver.resolveResponse(
+                responseParameters,
+                findResponseContentType(requestLine.getRequestURI())
+        );
     }
 
     private String findResponseContentType(String url) {

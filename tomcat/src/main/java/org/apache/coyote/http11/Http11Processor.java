@@ -35,14 +35,14 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (
+                final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream()
+        ) {
             var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            HttpRequest httpRequest = HttpRequestConvertor.convertHttpRequest(bufferedReader);
 
-            HttpRequest httpRequest = new HttpRequest(bufferedReader);
-            System.out.println(httpRequest);
-
-            if (httpRequest.getHttpRequestHeader().getMethod().equals("POST") && httpRequest.getHttpRequestHeader().getPath().equals("/register")) {
+            if (httpRequest.isMethod("POST") && httpRequest.isPath("/register")) {
                 String requestBody = httpRequest.getHttpRequestBody().getBody();
                 String[] token = requestBody.split("&");
                 String account = token[0].split("=")[1];
@@ -54,14 +54,11 @@ public class Http11Processor implements Runnable, Processor {
 
             var responseBody = "";
             var contentType = "text/html;charset=utf-8 \r\n";
-            if (!httpRequest.getHttpRequestHeader().getPath().equals("/") && !httpRequest.getHttpRequestHeader().getPath().contains(".") && httpRequest.getHttpRequestHeader().getMethod().equals("GET")) {
-                httpRequest.getHttpRequestHeader().setDefaultPath();
-            }
 
-            if (httpRequest.getHttpRequestHeader().getPath().equals("/")) {
+            if (httpRequest.isPath("/")) {
                 responseBody = "Hello world!";
-            } else if (httpRequest.getHttpRequestHeader().getMethod().equals("GET")) {
-                String fileName = "static" + httpRequest.getHttpRequestHeader().getPath();
+            } else if (httpRequest.isMethod("GET")) {
+                String fileName = "static" + httpRequest.getPath();
                 var resourceUrl = getClass().getClassLoader().getResource(fileName);
                 if (resourceUrl == null) {
                     final var response = String.join("\r\n",
@@ -77,15 +74,15 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(filePath));
             }
 
-            if (httpRequest.getHttpRequestHeader().getPath().endsWith(".css")) {
+            if (httpRequest.getPath().endsWith(".css")) {
                 contentType = "text/css;charset=utf-8 \r\n";
-            } else if (httpRequest.getHttpRequestHeader().getPath().endsWith(".js")) {
+            } else if (httpRequest.getPath().endsWith(".js")) {
                 contentType = "application/javascript;charset=utf-8 \r\n";
-            } else if (httpRequest.getHttpRequestHeader().getPath().endsWith(".html")) {
+            } else if (httpRequest.getPath().endsWith(".html")) {
                 contentType = "text/html;charset=utf-8 \r\n";
-            } else if (httpRequest.getHttpRequestHeader().getPath().endsWith(".png")) {
+            } else if (httpRequest.getPath().endsWith(".png")) {
                 contentType = "image/png \r\n";
-            } else if (httpRequest.getHttpRequestHeader().getPath().endsWith(".jpg") || httpRequest.getHttpRequestHeader().getPath().endsWith(".jpeg")) {
+            } else if (httpRequest.getPath().endsWith(".jpg")) {
                 contentType = "image/jpeg \r\n";
             }
 
@@ -95,8 +92,8 @@ public class Http11Processor implements Runnable, Processor {
                             "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-            if (httpRequest.getHttpRequestHeader().getMethod().equals("POST") && httpRequest.getHttpRequestHeader().getPath().equals("/login")) {
-                String requestBody = httpRequest.getHttpRequestBody().getBody();
+            if (httpRequest.isMethod("POST") && httpRequest.isPath("/login")) {
+                String requestBody = httpRequest.getBody();
                 String[] token = requestBody.split("&");
                 String account = token[0].split("=")[1];
                 String password = token[1].split("=")[1];
@@ -118,14 +115,14 @@ public class Http11Processor implements Runnable, Processor {
                     log.error("비밀번호 불일치");
                 }
             }
-            if (httpRequest.getHttpRequestHeader().getMethod().equals("POST") && httpRequest.getHttpRequestHeader().getPath().equals("/register")) {
+            if (httpRequest.isMethod("POST") && httpRequest.isPath("/register")) {
                 response = String.join("\r\n",
                         "HTTP/1.1 302 Found ",
                         "Location: " + "/index.html");
             }
-            if (httpRequest.getHttpRequestHeader().getMethod().equals("GET") && httpRequest.getHttpRequestHeader().getPath().equals("/login.html")) {
-                if (!httpRequest.getHttpRequestHeader().containsKey("Cookie")) {
-                    String[] cookies = httpRequest.getHttpRequestHeader().getValue("Cookie").split("; ");
+            if (httpRequest.isMethod("GET") && httpRequest.isPath("/login.html")) {
+                if (httpRequest.containsKey("Cookie")) {
+                    String[] cookies = httpRequest.getValue("Cookie").split("; ");
                     String cookie = "";
                     for (String c : cookies) {
                         if (c.contains("JSESSIONID")) {

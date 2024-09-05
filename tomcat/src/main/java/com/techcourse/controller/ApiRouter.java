@@ -11,8 +11,10 @@ public class ApiRouter {
     private static final RegisterController registerController = new RegisterController();
 
     private static final Map<MethodAndPath, Function<HttpRequest, HttpResponse>> routingTable = Map.of(
-            new MethodAndPath("GET", "/login"), loginController::login,
-            new MethodAndPath("GET", "/register"), registerController::doGet
+            new MethodAndPath("GET", "/login"), loginController::doGet,
+            new MethodAndPath("POST", "/login"), loginController::doPost,
+            new MethodAndPath("GET", "/register"), registerController::doGet,
+            new MethodAndPath("POST", "/register"), registerController::doPost
     );
 
     public static HttpResponse route(String method, String path, HttpRequest request) {

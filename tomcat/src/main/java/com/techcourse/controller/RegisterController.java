@@ -1,6 +1,9 @@
 package com.techcourse.controller;
 
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import com.techcourse.util.StaticResourceManager;
+import java.util.Map;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.slf4j.Logger;
@@ -14,5 +17,17 @@ public class RegisterController {
         return new HttpResponse(200, "OK")
                 .addHeader("Content-Type", "text/html")
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
+    }
+
+    public HttpResponse doPost(HttpRequest httpRequest) {
+        Map<String, String> body = httpRequest.parseFormBody();
+
+        String account = body.get("account");
+        String password = body.get("password");
+        String email = body.get("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return HttpResponse.redirect("index.html");
     }
 }

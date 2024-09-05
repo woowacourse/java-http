@@ -49,11 +49,25 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder sb = new StringBuilder();
 
-        String line = reader.readLine();
-        while (line != null && !line.isEmpty()) {
-            sb.append(line).append("\r\n");
-            line = reader.readLine();
+        byte[] buffer = new byte[8192];  // TODO: buffer size의 배수만큼 요청이 오면 문제가 생김
+        while (true) {
+            int read = inputStream.read(buffer);
+            if (read == 0) {
+                break;
+            }
+            sb.append(new String(buffer, 0, read));
+//            System.out.println(sb);
+            if (read < buffer.length) {
+                break;
+            }
         }
+
+//        String line = reader.readLine();
+//        while (!line.isBlank()) {
+//            sb.append(line).append("\r\n");
+//            line = reader.readLine();
+//            System.out.println(line);
+//        }
 
         return new HttpRequest(sb.toString());
     }

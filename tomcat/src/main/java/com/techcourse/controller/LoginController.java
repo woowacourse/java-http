@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import com.techcourse.util.StaticResourceManager;
 import java.util.Optional;
 import org.apache.coyote.HttpRequest;
@@ -15,18 +14,18 @@ public class LoginController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String STATIC_RESOURCE_PATH = "static/login.html";
 
-    public HttpResponse login(HttpRequest request) {
-        log.info("Query Parameters: {}", request.getQueryParameters());
+    public HttpResponse doGet(HttpRequest request) {
         MediaType mediaType = MediaType.fromAcceptHeader(request.getAccept());
+        return new HttpResponse(200, "OK")
+                .addHeader("Content-Type", mediaType.getValue())
+                .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
+    }
 
-        Optional<String> userAccount = request.getQueryParameter("account");
-        Optional<String> userPassword = request.getQueryParameter("password");
+    public HttpResponse doPost(HttpRequest request) {
+        log.info("Query Parameters: {}", request.parseFormBody());
 
-        if (userAccount.isEmpty() || userPassword.isEmpty()) {
-            return new HttpResponse(200, "OK")
-                    .addHeader("Content-Type", mediaType.getValue())
-                    .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
-        }
+        Optional<String> userAccount = request.getFormValue("account");
+        Optional<String> userPassword = request.getFormValue("password");
 
         return userAccount.map(InMemoryUserRepository::findByAccount)
                 .filter(Optional::isPresent)

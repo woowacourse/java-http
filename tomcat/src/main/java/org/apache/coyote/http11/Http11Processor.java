@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestUrl = request.getRequestUrl();
 
             HttpResponse response = dispatch(requestUrl, method, request);
-            outputStream.write(response.toString().getBytes());
+            outputStream.write(response.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -92,17 +92,16 @@ public class Http11Processor implements Runnable, Processor {
             return register(request.getBody(), responseHeader);
         }
 
-        return getResponse(requestUrl, HttpStatus.OK, responseHeader);
-    }
-
-    private HttpResponse getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
         String responseBody = getResponseBody(requestUrl, responseHeader);
-        return new HttpResponse(responseHeader, httpStatus, responseBody);
+        return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
     }
 
     private String getResponseBody(String requestUrl, HttpHeader responseHeader) throws IOException {
         if (requestUrl.equals("/")) {
-            return "Hello world!";
+            String body = "Hello world!";
+            responseHeader.addHeader("Content-Type", "text/html;charset=utf-8");
+            responseHeader.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+            return body;
         }
 
         String path = requestUrl.split("\\?")[0];
@@ -137,13 +136,14 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
         if (httpCookie.isContains(JSESSIONID)) {
             responseHeader.addHeader("Location", "/index.html");
-            return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
+            return new HttpResponse(responseHeader, HttpStatus.FOUND);
         }
 
-        return getResponse("/login.html", HttpStatus.OK, responseHeader);
+        String responseBody = getResponseBody("/login.html",responseHeader);
+        return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
     }
 
-    private HttpResponse login(Map<String, String> body, HttpCookie cookie, HttpHeader responseHeader) throws IOException {
+    private HttpResponse login(Map<String, String> body, HttpCookie cookie, HttpHeader responseHeader) {
         String account = body.get("account");
         String password = body.get("password");
 
@@ -151,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             responseHeader.addHeader("Location", "/401.html");
-            return getResponse("/401.html", HttpStatus.FOUND, responseHeader);
+            return new HttpResponse(responseHeader, HttpStatus.FOUND);
         }
 
         if (!cookie.isContains(JSESSIONID)) {
@@ -166,15 +166,15 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("로그인 성공 :: account = {}", user.get().getAccount());
         responseHeader.addHeader("Location", "/index.html");
-        return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
+        return new HttpResponse(responseHeader, HttpStatus.FOUND);
     }
 
-    private HttpResponse register(Map<String, String> body, HttpHeader responseHeader) throws IOException {
+    private HttpResponse register(Map<String, String> body, HttpHeader responseHeader) {
         User user = new User(body.get("account"), body.get("password"), body.get("email"));
         InMemoryUserRepository.save(user);
 
         log.info("회원 가입 성공 :: account = {}", user.getAccount());
         responseHeader.addHeader("Location", "/index.html");
-        return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
+        return new HttpResponse(responseHeader, HttpStatus.FOUND);
     }
 }

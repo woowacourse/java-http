@@ -12,9 +12,16 @@ public class HttpResponse {
         this.body = body;
     }
 
-    @Override
-    public String toString() {
+    public HttpResponse(HttpHeader httpHeader, HttpStatus httpStatus) {
+        this(httpHeader, httpStatus, null);
+    }
+
+    public String toHttpResponse() {
         String responseLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
+
+        if (body == null) {
+            return String.join("\r\n", responseLine, httpHeader.toHttpHeader(), "");
+        }
         return String.join("\r\n", responseLine, httpHeader.toHttpHeader(), "", body);
     }
 }

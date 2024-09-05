@@ -16,7 +16,7 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.controller.UserController;
 import com.techcourse.exception.DashboardException;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -28,6 +28,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_EXTENSION = MimeType.HTML.getExtension();
 
     private final Socket connection;
+    private final UserController userController = new UserController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -53,7 +54,9 @@ public class Http11Processor implements Runnable, Processor {
             String response;
             try {
                 if (endpoint.startsWith("/login")) {
-                    handleLogin(endpoint);
+                    Map<String, String> queryParams = parseQueryString(endpoint);
+                    User user = userController.login(queryParams);
+                    log.info("User found: {}", user);
                 }
                 String fileName = getFileName(endpoint);
                 String responseBody = getResponseBody(fileName);
@@ -123,23 +126,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private URL findResource(String fileName) {
         return getClass().getClassLoader().getResource("static/" + fileName);
-    }
-
-    private void handleLogin(String endpoint) {
-        Map<String, String> queryParams = parseQueryString(endpoint);
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-
-        if (Objects.nonNull(account) && Objects.nonNull(password)) {
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new DashboardException("Invalid account or password."));
-
-            if (!user.checkPassword(password)) {
-                log.info("Invalid account or password.");
-                throw new DashboardException("Invalid account or password.");
-            }
-            log.info("User found: {}", user);
-        }
     }
 
     private Map<String, String> parseQueryString(String endpoint) {

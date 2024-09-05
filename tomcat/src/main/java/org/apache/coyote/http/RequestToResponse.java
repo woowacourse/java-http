@@ -1,6 +1,7 @@
-package com.techcourse.model;
+package org.apache.coyote.http;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,30 +11,35 @@ import java.util.List;
 
 public class RequestToResponse {
 
+    private static final String BASIC_RESPONSE_BODY = "Hello world!";
+    private static final String BASIC_RESPONSE = String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: " + BASIC_RESPONSE_BODY.getBytes().length + " ",
+            "",
+            BASIC_RESPONSE_BODY);
+    private static final String STATIC = "static";
+    private static final String INDEX = "/index.html";
+
     public String build(HttpRequest request) throws IOException {
-        return responseBuilder(request);
-    }
+        String path = request.getRequestLine().getPath();
 
-    private String responseBuilder(HttpRequest request) throws IOException {
-        final String BASIC_RESPONSE_BODY = "Hello world!";
-        final String BASIC_RESPONSE = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + BASIC_RESPONSE_BODY.getBytes().length + " ",
-                "",
-                BASIC_RESPONSE_BODY);
+        if (path.equals("/")) {
+            return BASIC_RESPONSE;
+        }
 
-
-        if (request.getRequestLine().getPath().equals("/index.html")) {
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        if (path.equals(INDEX)) {
+            final URL resource = getClass().getClassLoader().getResource(STATIC.concat(INDEX));
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "", responseBody
-            );
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            Header header = Header.of(List.of(
+                    "Content-Type: text/html;charset=utf-8",
+                    "Content-Length: ".concat(String.valueOf(responseBody.getBytes().length))
+            ));
+
+            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+            return response.toResponse();
         }
 
         if (request.getRequestLine().getPath().equals("/css/styles.css")) {
@@ -42,7 +48,7 @@ public class RequestToResponse {
 
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;*/*;q=0.1 ",
+                    "Content-Type: text/css ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "", responseBody
             );
@@ -64,7 +70,10 @@ public class RequestToResponse {
             return login(request.getRequestLine());
         }
 
-        return BASIC_RESPONSE;
+        return String.join("\r\n",
+                "HTTP/1.1 404 NOT FOUND ",
+                "Content-Type: text/plain;charset=utf-8 ",
+                "Content-Length: 0 ");
     }
 
     private String login(RequestLine requestLine) throws IOException {

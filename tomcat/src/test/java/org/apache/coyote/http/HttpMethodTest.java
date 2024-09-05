@@ -1,5 +1,6 @@
 package org.apache.coyote.http;
 
+import org.apache.coyote.http.request.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,7 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
+
+import org.apache.coyote.http.Header;
+import org.apache.coyote.http.MimeType;
 
 public class ResponseHeader {
 

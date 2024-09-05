@@ -1,4 +1,6 @@
-package org.apache.coyote.http;
+package org.apache.coyote.http.response;
+
+import org.apache.coyote.http.HttpVersion;
 
 import static org.apache.coyote.http.Constants.CRLF;
 import static org.apache.coyote.http.Constants.SPACE;

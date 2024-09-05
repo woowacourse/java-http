@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.RequestToResponse;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;

@@ -1,18 +1,17 @@
 package org.apache.coyote.request;
 
-import java.util.Map;
-
 public class Request {
 
     private final RequestLine requestLine;
 
-    private final Map<String, String> headers; // todo object
+    private final RequestHeaders headers;
 
-    // todo body
+    private final RequestBody body;
 
-    public Request(RequestLine requestLine, Map<String, String> headers) {
+    public Request(RequestLine requestLine, RequestHeaders headers, RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
+        this.body = body;
     }
 
     public HttpMethod getHttpMethod() {
@@ -29,5 +28,9 @@ public class Request {
 
     public String getHttpVersion() {
         return requestLine.getHttpVersion();
+    }
+
+    public String getBodyValue(String key) {
+        return body.getValue(key);
     }
 }

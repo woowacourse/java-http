@@ -1,5 +1,6 @@
 package org.apache.coyote.request.uri;
 
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
@@ -13,10 +14,9 @@ public class QueryParams {
     private final Map<String, String> queryParams;
 
     public static QueryParams from(String queryParams) {
-        Map<String, String> queryParamMap = Arrays.stream(queryParams.split("&"))
-                .map(params -> params.split("="))
-                .collect(toMap(p -> p[0], p -> p[1]));
-        return new QueryParams(queryParamMap);
+        return Arrays.stream(queryParams.split("&"))
+                .map(params -> params.split("=", 2))
+                .collect(collectingAndThen(toMap(p -> p[0], p -> p[1]), QueryParams::new));
     }
 
     private QueryParams(Map<String, String> queryParams) {

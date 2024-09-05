@@ -10,7 +10,7 @@ public class RequestLine {
 
     private final HttpMethod httpMethod;
 
-    private final URI uri; // todo object
+    private final URI uri;
 
     private final String httpVersion;
 

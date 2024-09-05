@@ -126,6 +126,16 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Location", "/index.html");
     }
 
+    private void refresh(Http11Request request, Http11Response response) {
+        Map<String, String> headers = request.getHeaders();
+        String rawCookies = headers.get("Cookie");
+        Http11Cookie cookie = new Http11Cookie(rawCookies);
+
+        if (!cookie.containsKey("JSESSIONID")) {
+            response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+        }
+    }
+
     // 아래는 응답 생성 관련
 
     private String decideResponseBody(Http11Request request) throws IOException, URISyntaxException {

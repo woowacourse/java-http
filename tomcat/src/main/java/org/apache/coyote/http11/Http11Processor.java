@@ -73,26 +73,40 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
         }
-        if (method.equals("GET") && hasQueryParam(uri)) {
-            final var path = uri.substring(0, uri.indexOf('?'));
-            final var resource = getClass().getClassLoader().getResource("static" + path + ".html");
+        if (method.equals("GET") && uri.contains("login") && hasQueryParam(uri)) {
+            final var resource = getClass().getClassLoader().getResource("static/index.html");
             final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
             final var responseBody = new String(fileContent);
 
             final var queryString = uri.substring(uri.indexOf('?') + 1);
             final var queryParams = parseQueryParam(queryString);
-            InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                    .filter(user -> user.checkPassword(queryParams.get("password")))
-                    .ifPresent(user -> log.info("user : {}", user));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + ContentMimeType.getMimeByExtension("html") + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (isAuthenticateUser(queryParams)) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /index.html ",
+                        "Content-Length: 0 ",
+                        "Connection: close ",
+                        "",
+                        responseBody);
+            } else {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /401.html ",
+                        "Content-Length: 0 ",
+                        "Connection: close ",
+                        "",
+                        responseBody);
+            }
         }
-        throw new IllegalArgumentException("접근할 수 없습니다.");
+        final var resource = getClass().getClassLoader().getResource("static" + uri + ".html");
+        final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final var responseBody = new String(fileContent);
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + ContentMimeType.getMimeByExtension("html") + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private boolean hasQueryParam(final String uri) {
@@ -107,5 +121,15 @@ public class Http11Processor implements Runnable, Processor {
             result.put(keyValue[0], keyValue[1]);
         }
         return result;
+    }
+
+    private boolean isAuthenticateUser(final Map<String, String> queryParams) {
+        return InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                .filter(user -> user.checkPassword(queryParams.get("password")))
+                .map(user -> {
+                    log.info("user : {}", user);
+                    return true;
+                })
+                .orElseGet(() -> false);
     }
 }

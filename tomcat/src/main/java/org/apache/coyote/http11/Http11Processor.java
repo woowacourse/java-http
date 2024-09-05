@@ -78,6 +78,18 @@ public class Http11Processor implements Runnable, Processor {
                             responseBody);
                 }
 
+                if (path.endsWith("svg")) {
+                    final URL resource = getClass().getClassLoader().getResource("static" + path);
+                    final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+                    return String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: image/svg+xml ",
+                            "Content-Length: " + responseBody.getBytes().length + " ",
+                            "",
+                            responseBody);
+                }
+
                 if (!path.contains(".")) {
                     path += ".html";
                 }
@@ -110,6 +122,12 @@ public class Http11Processor implements Runnable, Processor {
                                     "");
                         }
                     }
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: http://localhost:8080/404.html ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: 0 ",
+                            "");
                 }
 
                 return String.join("\r\n",

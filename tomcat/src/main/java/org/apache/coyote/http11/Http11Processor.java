@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
         RequestLine requestLine = httpRequest.getRequestLine();
         try {
             if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
-                return resolveHandlerResponse(requestLine);
+                return resolveHandlerResponse(httpRequest);
             }
             return ResponseResolver.resolveViewResponse(
                     requestLine.getRequestURI(),

@@ -18,7 +18,7 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(BufferedReader bufferedReader){
+    public static HttpRequest from(BufferedReader bufferedReader) {
         try {
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
             HttpHeaders httpHeader = HttpHeaders.readRequestHeader(bufferedReader);
@@ -35,17 +35,25 @@ public class HttpRequest {
             RequestLine requestLine,
             HttpHeaders httpHeader
     ) {
-        if(!(requestLine.getMethod() == HttpMethod.POST)){
+        if (!(requestLine.getMethod() == HttpMethod.POST)) {
             return Optional.empty();
         }
         return Optional.of(RequestBody.read(reader, httpHeader.contentLength()));
+    }
+
+    public boolean isMethod(HttpMethod method) {
+        return method == requestLine.getMethod();
     }
 
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
-    public String getRequestUri(){
+    public String getRequestUri() {
         return requestLine.getRequestURI();
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody.orElseThrow(() -> new IllegalStateException("requestBody is null"));
     }
 }

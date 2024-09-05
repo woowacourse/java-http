@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -44,16 +43,21 @@ public class HttpResponse {
         );
     }
 
-    public void setStaticResourceResponse(HttpRequest httpRequest) throws IOException {
-        Path path = buildPath(httpRequest);
+    /**
+     * rawPath: /hello
+     * extension: html
+     */
+    public void setStaticResourceResponse(String pathWithExtension) throws IOException {
+        Path path = buildPath(pathWithExtension);
         String responseBody = new String(Files.readAllBytes(path));
-        String contentType = createContentType(httpRequest.getExtension());
+        String extension = pathWithExtension.substring(pathWithExtension.lastIndexOf("."));
+        String contentType = createContentType(extension);
         headers.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
         this.body = responseBody;
     }
 
-    private Path buildPath(HttpRequest httpRequest) {
-        String resourcePath = String.format("static%s.%s", httpRequest.getPath(), httpRequest.getExtension());
+    private Path buildPath(String pathWithExtension) {
+        String resourcePath = String.format("static%s", pathWithExtension);
         if (getClass().getClassLoader().getResource(resourcePath) == null) {
             resourcePath = "static/404.html";
         }
@@ -79,7 +83,7 @@ public class HttpResponse {
         this.statusLine.setHttpStatus(httpStatus);
     }
 
-    public void addHeader(String key, String value) {
+    public void setHeader(String key, String value) {
         this.headers.addHeader(key, value);
     }
 
@@ -89,7 +93,7 @@ public class HttpResponse {
 
     public void sendRedirect(String path) {
         setHttpStatus(HttpStatus.FOUND);
-        addHeader(HttpHeaders.LOCATION, path);
+        setHeader(HttpHeaders.LOCATION, path);
     }
 
     public void write() {

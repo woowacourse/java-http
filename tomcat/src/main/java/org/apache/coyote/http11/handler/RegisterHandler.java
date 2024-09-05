@@ -11,8 +11,7 @@ public class RegisterHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.setStaticResourceResponse(request);
-
+        response.setStaticResourceResponse("/register.html");
         response.write();
     }
 

@@ -11,7 +11,7 @@ public class IndexHandler extends AbstractRequestHandler {
         String responseBody = "Hello world!";
 
         response.setResponseBody(responseBody);
-        response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html;charset=utf-8");
+        response.setHeader(HttpHeaders.CONTENT_TYPE, "text/html;charset=utf-8");
         response.write();
     }
 }

@@ -7,8 +7,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class StaticResourceHandler extends AbstractRequestHandler {
 
     @Override
-    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        httpResponse.setStaticResourceResponse(httpRequest);
-        httpResponse.write();
+    public void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        String pathWithExtension = String.format("%s.%s", request.getPath(), request.getExtension());
+
+        response.setStaticResourceResponse(pathWithExtension);
+        response.write();
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -13,13 +14,15 @@ public class UserHandler extends AbstractRequestHandler {
         Session session = request.getSession(true);
 
         User user = (User) session.getAttribute("user");
-        if (user == null) {
-            response.setResponseBody("로그인 상태가 아닙니다.");
+        if (user != null) {
+            response.setResponseBody("User: " + user);
+            response.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain;charset=utf-8");
             response.write();
             return;
         }
 
-        response.setResponseBody("User: " + user);
+        response.setResponseBody("로그인 상태가 아닙니다.");
+        response.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain;charset=utf-8");
         response.write();
     }
 }

@@ -18,8 +18,7 @@ public class LoginHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.setStaticResourceResponse(request);
-        response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html;charset=utf-8");
+        response.setStaticResourceResponse("/login.html");
         response.write();
     }
 
@@ -41,7 +40,7 @@ public class LoginHandler extends AbstractRequestHandler {
                 session.setAttribute("user", user);
                 HttpCookies cookie = new HttpCookies();
                 cookie.setCookie(HttpCookies.JSESSIONID, session.getId());
-                response.addHeader(HttpHeaders.SET_COOKIE, cookie.getCookieString());
+                response.setHeader(HttpHeaders.SET_COOKIE, cookie.getCookieString());
             }
             response.sendRedirect("/index.html");
         } catch (IllegalArgumentException e) {

@@ -167,7 +167,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("성공적인 로그인 요청에 대해 200 응답을 생성한다.")
+    @DisplayName("성공적인 로그인 요청에 대해 302 응답을 생성한다.")
     @Test
     void loginSuccess() throws IOException {
         // given
@@ -187,14 +187,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expectedResponse = "HTTP/1.1 200 OK \r\n" +
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expectedResponse);
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
 

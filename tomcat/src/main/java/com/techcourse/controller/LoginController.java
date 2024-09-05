@@ -30,9 +30,7 @@ public class LoginController {
         User user = userService.login(account, password);
         log.info("User found: {}", user);
 
-        String fileName = http11Helper.getFileName(endpoint);
-
-        String response = http11Helper.createResponse(HttpStatus.OK, fileName);
+        String response = http11Helper.createResponse(HttpStatus.FOUND, "index.html");
 
         return response;
     }

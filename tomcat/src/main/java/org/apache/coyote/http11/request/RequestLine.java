@@ -2,8 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpVersion;
-import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
 

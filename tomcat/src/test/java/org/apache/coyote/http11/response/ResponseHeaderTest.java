@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.MimeType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

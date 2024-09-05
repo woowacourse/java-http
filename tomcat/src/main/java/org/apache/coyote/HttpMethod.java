@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.util.Arrays;
 
@@ -7,7 +7,8 @@ public enum HttpMethod {
     POST,
     PUT,
     DELETE,
-    PATCH;
+    PATCH,
+    ;
 
     public static HttpMethod from(String method) {
         return Arrays.stream(HttpMethod.values())

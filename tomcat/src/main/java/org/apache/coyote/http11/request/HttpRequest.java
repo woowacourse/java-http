@@ -8,8 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpVersion;
-import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 

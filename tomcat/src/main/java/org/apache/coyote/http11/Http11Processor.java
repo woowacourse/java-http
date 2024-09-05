@@ -37,13 +37,11 @@ public class Http11Processor implements Runnable, Processor {
 
             final var request = createRequest(inputStream);
             log.info("[REQUEST] = {}", request);
+
             final var responseBody = createResponseBody(request.getUri());
+            Map<String, String> header = createHeader(request, responseBody.getBytes().length);
 
-            Map<String, String> header = new LinkedHashMap<>();
-            header.put("Content-Type", ContentType.HTML.getValue() + ";" + "charset=utf-8 ");
-            header.put("Content-Length", responseBody.getBytes().length + " ");
             HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header, responseBody);
-
             final var response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());
@@ -51,16 +49,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String createResponseBody(String uri) throws IOException {
-        URL resource = Http11Processor.class.getClassLoader().getResource(uri);
-        if (resource == null) {
-            log.warn("Bad Request uri = {}", uri);
-            throw new IllegalArgumentException("No Resource Exception");
-        }
-        File file = new File(resource.getFile());
-        return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
     }
 
     private HttpRequest createRequest(InputStream inputStream) {
@@ -73,5 +61,22 @@ public class Http11Processor implements Runnable, Processor {
             log.error("IO Exception occur during make request object");
         }
         return null;
+    }
+
+    private String createResponseBody(String uri) throws IOException {
+        URL resource = Http11Processor.class.getClassLoader().getResource(uri);
+        if (resource == null) {
+            log.warn("Bad Request uri = {}", uri);
+            throw new IllegalArgumentException("No Resource Exception");
+        }
+        File file = new File(resource.getFile());
+        return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+    }
+
+    private static Map<String, String> createHeader(HttpRequest request, int length) {
+        Map<String, String> header = new LinkedHashMap<>();
+        header.put("Content-Type", ContentType.findByUrl(request.getUri()).getValue() + ";" + "charset=utf-8 ");
+        header.put("Content-Length", length + " ");
+        return header;
     }
 }

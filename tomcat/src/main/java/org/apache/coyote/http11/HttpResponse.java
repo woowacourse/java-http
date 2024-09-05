@@ -17,11 +17,11 @@ public class HttpResponse {
 
     public String getResponse() {
         List<String> response = new ArrayList<>();
-        response.add("HTTP/1.1 " + status.getCode() + " " + status.name());
+        response.add("HTTP/1.1 " + status.getCode() + " " + status.name() + " ");
         for (String key : headers.keySet()) {
             response.add(key + ": " + headers.get(key));
         }
-        response.add("\n");
+        response.add("");
         response.add(body);
         return String.join("\r\n", response);
     }

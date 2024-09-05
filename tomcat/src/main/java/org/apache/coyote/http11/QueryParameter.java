@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-class QueryParameter {
+public class QueryParameter {
 
     private static final String PAIR_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";

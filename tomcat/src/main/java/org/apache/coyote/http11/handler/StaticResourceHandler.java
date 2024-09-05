@@ -1,9 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
+
+import org.apache.coyote.http11.HttpRequest;
 
 import java.net.URI;
 import java.net.URL;
 
-class StaticResourceHandler extends AbstractHandler {
+public class StaticResourceHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {

@@ -2,6 +2,10 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.AbstractHandler;
+import org.apache.coyote.http11.handler.IndexHandler;
+import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,21 +67,18 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(requestLine, new Header(headerTokens));
     }
 
-    private HttpResponse responseResource(HttpRequest httpRequestData) throws IOException {
-        final var uri = httpRequestData.getUri();
+    private HttpResponse responseResource(HttpRequest httpRequest) throws IOException {
+        AbstractHandler indexHandler = new IndexHandler();
+        AbstractHandler staticResourceHandler = new StaticResourceHandler();
+        AbstractHandler loginHandler = new LoginHandler();
 
-        if ("/".equals(uri.getPath())) {
-            return new HttpResponse("Hello world!".getBytes(), "text/html;charset=utf-8");
-        }
+        List<AbstractHandler> handlers = List.of(indexHandler, staticResourceHandler, loginHandler);
+        AbstractHandler targetHandler = handlers.stream()
+                .filter(it -> it.canHandle(httpRequest))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
 
-        StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
-        LoginHandler loginHandler = new LoginHandler();
-
-        if (staticResourceHandler.canHandle(httpRequestData)) {
-            return staticResourceHandler.handle(httpRequestData);
-        } else {
-            return loginHandler.handle(httpRequestData);
-        }
+        return targetHandler.handle(httpRequest);
     }
 
     private String createHttpResponseMessage(HttpResponse httpResponseData) {

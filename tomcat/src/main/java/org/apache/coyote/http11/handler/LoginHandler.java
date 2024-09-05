@@ -1,14 +1,16 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Optional;
 
-class LoginHandler extends AbstractHandler {
+public class LoginHandler extends AbstractHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 

@@ -1,12 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
+
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-abstract class AbstractHandler {
+public abstract class AbstractHandler {
 
-    protected abstract boolean canHandle(HttpRequest httpRequest);
+    public abstract boolean canHandle(HttpRequest httpRequest);
 
     protected abstract String forward(HttpRequest httpRequest);
 

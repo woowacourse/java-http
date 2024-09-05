@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-class Header {
+public class Header {
 
     private static final String PAIR_DELIMITER = ":";
 

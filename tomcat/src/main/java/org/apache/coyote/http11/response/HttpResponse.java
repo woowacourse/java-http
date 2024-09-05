@@ -6,16 +6,12 @@ import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpResponse {
 
-    private final HttpStatusCode statusCode;
+    private final StatusLine statusLine;
     private final HttpHeader header;
     private final byte[] body;
 
-    public HttpResponse(HttpStatusCode statusCode, HttpHeader header) {
-        this(statusCode, header, null);
-    }
-
     public HttpResponse(HttpStatusCode statusCode, HttpHeader header, byte[] body) {
-        this.statusCode = statusCode;
+        this.statusLine = new StatusLine("HTTP/1.1", statusCode);
         this.header = header;
         this.body = body;
         if (body != null) {
@@ -23,10 +19,14 @@ public class HttpResponse {
         }
     }
 
+    public HttpResponse(HttpStatusCode statusCode, HttpHeader header) {
+        this(statusCode, header, null);
+    }
+
     public byte[] toByte() {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
 
-        stringJoiner.add("HTTP/1.1 " + statusCode.toStatus() + " ");
+        stringJoiner.add(statusLine.getReponseString());
         stringJoiner.add(header.toHeaderString());
         stringJoiner.add("\r\n");
 

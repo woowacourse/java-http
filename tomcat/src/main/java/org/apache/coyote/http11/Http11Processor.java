@@ -16,7 +16,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final FrontController frontController = new FrontController();
+    private final FrontController frontController = FrontController.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;

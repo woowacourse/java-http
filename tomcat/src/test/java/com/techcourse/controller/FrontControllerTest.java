@@ -19,7 +19,7 @@ class FrontControllerTest {
 
     @BeforeEach
     void setUp() {
-        frontController = new FrontController();
+        frontController = FrontController.getInstance();
     }
 
     @DisplayName("올바른 리소스에 대해 200 응답을 반환한다.")

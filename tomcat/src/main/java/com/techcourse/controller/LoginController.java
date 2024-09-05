@@ -14,9 +14,18 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
 public class LoginController extends Controller {
+    private static final LoginController instance = new LoginController();
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
     private final UserService userService = new UserService();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        return instance;
+    }
 
     @Override
     public String handle(HttpRequest request) throws IOException {

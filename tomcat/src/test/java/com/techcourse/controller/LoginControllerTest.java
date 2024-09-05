@@ -27,7 +27,7 @@ class LoginControllerTest {
 
     @BeforeEach
     void setUp() {
-        loginController = new LoginController();
+        loginController = LoginController.getInstance();
         mockedRepository = mockStatic(InMemoryUserRepository.class);
     }
 

@@ -25,7 +25,7 @@ class RegisterControllerTest {
 
     @BeforeEach
     void setUp() {
-        registerController = new RegisterController();
+        registerController = RegisterController.getInstance();
         mockedRepository = mockStatic(InMemoryUserRepository.class);
     }
 

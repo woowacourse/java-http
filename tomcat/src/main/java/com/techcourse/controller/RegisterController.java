@@ -14,9 +14,17 @@ import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
 public class RegisterController extends Controller {
+    private static final RegisterController instance = new RegisterController();
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private final UserService userService = new UserService();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
+
+    private RegisterController() {
+    }
+
+    public static RegisterController getInstance() {
+        return instance;
+    }
 
     @Override
     public String handle(HttpRequest request) throws IOException {

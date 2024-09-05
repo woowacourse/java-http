@@ -9,7 +9,16 @@ import org.apache.coyote.http11.HttpStatus;
 import com.techcourse.exception.UnsupportedMethodException;
 
 public class ViewController extends Controller {
+    private static final ViewController instance = new ViewController();
+
     private final Http11Helper http11Helper = Http11Helper.getInstance();
+
+    private ViewController() {
+    }
+
+    public static ViewController getInstance() {
+        return instance;
+    }
 
     @Override
     public String handle(HttpRequest request) throws IOException {

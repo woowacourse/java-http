@@ -14,21 +14,26 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.exception.UnsupportedMethodException;
 
 public class FrontController extends Controller {
+    private static final FrontController instance = new FrontController();
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
 
     private final Http11Helper http11Helper = Http11Helper.getInstance();
     private final Map<String, Controller> handlerMappings = new HashMap<>();
 
-    public FrontController() {
+    public static FrontController getInstance() {
+        return instance;
+    }
+
+    private FrontController() {
         initHandlerMappings();
     }
 
     private void initHandlerMappings() {
-        handlerMappings.put("/", new ViewController());
-        handlerMappings.put("/hello", new ViewController());
-        handlerMappings.put("/index", new ViewController());
-        handlerMappings.put("/login", new LoginController());
-        handlerMappings.put("/register", new RegisterController());
+        handlerMappings.put("/", ViewController.getInstance());
+        handlerMappings.put("/hello", ViewController.getInstance());
+        handlerMappings.put("/index", ViewController.getInstance());
+        handlerMappings.put("/login", LoginController.getInstance());
+        handlerMappings.put("/register", RegisterController.getInstance());
     }
 
     @Override

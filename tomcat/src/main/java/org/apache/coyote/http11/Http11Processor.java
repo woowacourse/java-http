@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +13,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
+import org.apache.coyote.MediaType;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,20 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = readRequest(inputStream);
-
-            URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getPath());
-            Path path = Optional.ofNullable(resource)
-                    .map(URL::getPath)
-                    .map(Path::of)
-                    .orElseThrow(() -> new RuntimeException(httpRequest.getPath() + " not found"));
-            List<String> strings = Files.readAllLines(path);
-
-            String responseBody = httpRequest.getPath().endsWith(".html") ? String.join("\r\n", strings) : "Hello world!";
-            HttpResponse response = new HttpResponse(1.1, 200, "OK")
-                    .addHeader("Content-Type", "text/html;charset=utf-8")
-                    .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
-                    .setBody(responseBody);
-
+            HttpResponse response = createResponse(httpRequest);
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -71,6 +59,30 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return new HttpRequest(sb.toString());
+    }
+
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
+        // 정적 리소스 중 어떤 타입을 요청하는지 확장자를 통해 확인
+        String pathStr = request.getPath();
+        String requestedExtension = pathStr.substring(pathStr.lastIndexOf(".") + 1);
+        MediaType mediaType = MediaType.ofExtension(requestedExtension);
+        log.info("Requested MediaType: {}", mediaType);
+
+        // 정적 리소스 읽어옴
+        URL resource = getClass().getClassLoader().getResource("static" + request.getPath());
+        Path path = Optional.ofNullable(resource)
+                .map(URL::getPath)
+                .map(Path::of)
+                .orElseThrow(() -> new RuntimeException(request.getPath() + " not found"));
+
+        List<String> strings = Files.readAllLines(path);
+        String responseBody = String.join("\r\n", strings);
+        HttpResponse response = new HttpResponse(1.1, 200, "OK")
+                .addHeader("Content-Type", mediaType.getValue())
+                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                .setBody(responseBody);
+
+        return response;
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {

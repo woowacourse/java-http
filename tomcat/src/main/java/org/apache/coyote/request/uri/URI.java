@@ -2,21 +2,23 @@ package org.apache.coyote.request.uri;
 
 public class URI {
 
+    private static final int EMPTY_QUERY_PARAMS = 1;
+
     private final PathVariable pathVariable;
 
     private final QueryParams queryParams;
 
-    public URI(String url) {
-        String[] uriParts = url.split("\\?");
+    public URI(String uri) {
+        String[] uriParts = uri.split("\\?");
         this.pathVariable = new PathVariable(uriParts[0]);
         this.queryParams = createQueryParams(uriParts);
     }
 
     private QueryParams createQueryParams(String[] uriParts) {
-        if (uriParts.length == 1) {
-            return new QueryParams("");
+        if (uriParts.length == EMPTY_QUERY_PARAMS) {
+            return QueryParams.EMPTY;
         }
-        return new QueryParams(uriParts[1]);
+        return QueryParams.from(uriParts[1]);
     }
 
     public String getPath() {

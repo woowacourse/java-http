@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.controller.ApiRouter;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.util.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,19 +70,17 @@ public class Http11Processor implements Runnable, Processor {
         MediaType mediaType = MediaType.ofExtension(requestedExtension);
         log.info("Requested MediaType: {}", mediaType);
 
-        // 정적 리소스 읽어옴
-        URL resource = getClass().getClassLoader().getResource("static" + request.getPath());
-        Path path = Optional.ofNullable(resource)
-                .map(URL::getPath)
-                .map(Path::of)
-                .orElseThrow(() -> new RuntimeException(request.getPath() + " not found"));
-
-        List<String> strings = Files.readAllLines(path);
-        String responseBody = String.join("\r\n", strings);
-        HttpResponse response = new HttpResponse(1.1, 200, "OK")
-                .addHeader("Content-Type", mediaType.getValue())
-                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
-                .setBody(responseBody);
+        // 정적 리소스부터 읽어옴
+        HttpResponse response;
+        try {
+            String responseBody = FileReader.read("static" + request.getPath());
+            response = new HttpResponse(1.1, 200, "OK")
+                    .addHeader("Content-Type", mediaType.getValue())
+                    .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                    .setBody(responseBody);
+        } catch (RuntimeException e) {
+            response = ApiRouter.route(request.getMethod(), request.getPath(), request);
+        }
 
         return response;
     }

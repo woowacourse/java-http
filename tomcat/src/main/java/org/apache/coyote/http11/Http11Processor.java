@@ -78,19 +78,26 @@ public class Http11Processor implements Runnable, Processor {
                 requestBody = new String(buffer);
             }
 
-            if (firstLines[1].equals("/")) {
-                mimeType = "text/html";
-                responseBody = "Hello world!";
-                response = getOKResponse(mimeType, responseBody);
-            } else if (firstLines[1].startsWith("/css")) {
-                mimeType = "text/css";
+            if (firstLines[0].equals("GET")) {
+                if (firstLines[1].equals("/login") || firstLines[1].equals("/register")) {
+                    firstLines[1] = firstLines[1] + ".html";
+                }
+
+                if (firstLines[1].equals("/")) {
+                    firstLines[1] = "text/html";
+                }
+
+                String fileExtension = firstLines[1].split("\\.")[1];
+                mimeType = "text/" + fileExtension;
 
                 URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
                 File file = new File(resource.getFile());
                 Path path = file.toPath();
                 responseBody = new String(Files.readAllBytes(path));
                 response = getOKResponse(mimeType, responseBody);
-            } else if (firstLines[1].startsWith("/login") && firstLines[0].equals("POST")) {
+            }
+
+            if (firstLines[1].startsWith("/login") && firstLines[0].equals("POST")) {
                 String account = requestBody.split("&")[0].split("=")[1];
                 String password = requestBody.split("&")[1].split("=")[1];
 
@@ -117,43 +124,6 @@ public class Http11Processor implements Runnable, Processor {
 
                 InMemoryUserRepository.save(new User(account, password, email));
                 response = getRedirectResponse(UUID.randomUUID().toString(), responseBody, "/index.html");
-            } else {
-                mimeType = "text/html";
-
-                if (firstLines[1].equals("/login") || firstLines[1].equals("/register")) {
-                    if (httpRequestHeaders.containsKey("Cookie")) {
-                        String[] cookies = httpRequestHeaders.get("Cookie").split(";");
-
-                        for (String cookie : cookies) {
-                            if (cookie.trim().startsWith("JSESSIONID")) {
-                                String uuid = cookie.split("=")[1];
-                                if (SessionManager.findSession(uuid) != null) {
-                                    response = getRedirectResponse(uuid, mimeType, responseBody);
-                                } else {
-                                    firstLines[1] = firstLines[1] + ".html";
-                                    URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
-                                    File file = new File(resource.getFile());
-                                    Path path = file.toPath();
-                                    responseBody = new String(Files.readAllBytes(path));
-                                    response = getOKResponse(mimeType, responseBody);
-                                }
-                            }
-                        }
-                    } else {
-                        firstLines[1] = firstLines[1] + ".html";
-                        URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
-                        File file = new File(resource.getFile());
-                        Path path = file.toPath();
-                        responseBody = new String(Files.readAllBytes(path));
-                        response = getOKResponse(mimeType, responseBody);
-                    }
-                } else {
-                    URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
-                    File file = new File(resource.getFile());
-                    Path path = file.toPath();
-                    responseBody = new String(Files.readAllBytes(path));
-                    response = getOKResponse(mimeType, responseBody);
-                }
             }
 
             outputStream.write(response.getBytes());

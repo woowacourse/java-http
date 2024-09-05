@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.RequestLine;
 import org.apache.coyote.http11.header.Headers;
 
 import java.io.BufferedReader;

@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.header.Headers;
 
 public class HttpResponse {

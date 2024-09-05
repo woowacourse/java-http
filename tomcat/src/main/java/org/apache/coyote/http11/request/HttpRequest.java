@@ -1,5 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.Path;
+import org.apache.coyote.http11.RequestLine;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.queryparam.QueryParams;

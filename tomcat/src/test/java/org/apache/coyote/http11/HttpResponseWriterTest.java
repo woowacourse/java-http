@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseWriter;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;

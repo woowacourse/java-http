@@ -1,7 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.file;
 
 public class NotSupportFileExtensionException extends RuntimeException {
-    public NotSupportFileExtensionException(String message) {
+    public NotSupportFileExtensionException(final String message) {
         super(message);
     }
 }

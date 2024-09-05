@@ -19,32 +19,23 @@ public class HttpRequest {
     private static final String QUERY_START = "\\?";
 
     private final Map<String, String> queryMap = new HashMap<>();
+    private final RequestLine requestLine;
     private final HttpHeader header;
     private final Optional<String> body;
-    private HttpMethod method;
-    private String url;
-    private String version;
     private String path;
 
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         String requestLine = bufferedReader.readLine();
 
-        parseRequestLine(requestLine);
+        this.requestLine = RequestLine.from(requestLine);
         parseQueryParameter();
         this.header = parseHeader(bufferedReader);
         this.body = parseBody(bufferedReader);
     }
 
-    private void parseRequestLine(String requestLine) {
-        String[] requestLineToken = requestLine.split(" ");
-
-        method = HttpMethod.from(requestLineToken[0]);
-        url = requestLineToken[1];
-        version = requestLineToken[2];
-    }
-
     private void parseQueryParameter() {
+        String url = requestLine.getUrl();
         if (!url.contains("?")) {
             path = url;
             return;
@@ -94,7 +85,7 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
@@ -102,11 +93,11 @@ public class HttpRequest {
     }
 
     public String getUrl() {
-        return url;
+        return requestLine.getUrl();
     }
 
     public String getVersion() {
-        return version;
+        return requestLine.getVersion();
     }
 
     public HttpHeader getHeaders() {
@@ -125,11 +116,9 @@ public class HttpRequest {
     public String toString() {
         return "HttpRequest{" +
                 "queryMap=" + queryMap +
-                ", headers=" + header +
+                ", requestLine=" + requestLine +
+                ", header=" + header +
                 ", body=" + body +
-                ", method=" + method +
-                ", url='" + url + '\'' +
-                ", version='" + version + '\'' +
                 ", path='" + path + '\'' +
                 '}';
     }

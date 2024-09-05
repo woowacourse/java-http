@@ -42,6 +42,7 @@ public class Http11Processor implements Runnable, Processor {
 
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             String firstLine = new BufferedReader(inputStreamReader).readLine();
+            log.info(firstLine);
 
             StringTokenizer stringTokenizer = new StringTokenizer(firstLine);
 
@@ -54,10 +55,47 @@ public class Http11Processor implements Runnable, Processor {
             if(method.equals("GET") && requestUrl.equals("/index.html")){
                 responseIndex(outputStream);
             }
+            if(method.equals("GET") && requestUrl.contains(".css")){
+                responseCss(outputStream, requestUrl);
+            }
+            if(method.equals("GET") && requestUrl.contains(".js")){
+                responseJs(outputStream, requestUrl);
+            }
+
 
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void responseJs(OutputStream outputStream, String requestUrl) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + requestUrl);
+        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+
+        final var response = String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/js;charset=utf-8 ",
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseCss(OutputStream outputStream, String requestUrl) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + requestUrl);
+        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+
+        final var response = String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/css;charset=utf-8 ",
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private void responseIndex(OutputStream outputStream) throws IOException {

@@ -5,13 +5,10 @@ import com.techcourse.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
-class LoginHandler implements ResourceHandler {
+class LoginHandler extends AbstractHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
@@ -24,14 +21,11 @@ class LoginHandler implements ResourceHandler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    protected String forward(HttpRequest httpRequest) {
         QueryParameter queryParameter = new QueryParameter(httpRequest.getUri().getQuery());
         checkUser(queryParameter);
 
-        String resourcePath = getClass().getClassLoader().getResource("static/login.html").getPath();
-        byte[] bytes = readStaticResource(resourcePath);
-
-        return new HttpResponse(bytes, "text/html;charset=utf8");
+        return "static/login.html";
     }
 
     private void checkUser(QueryParameter queryParameter) {
@@ -43,14 +37,6 @@ class LoginHandler implements ResourceHandler {
             if (isSame) {
                 log.info("{}", user.get());
             }
-        }
-    }
-
-    private byte[] readStaticResource(String resourcePath) {
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(resourcePath))) {
-            return bufferedInputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

@@ -1,8 +1,9 @@
 package org.apache.coyote.handler;
 
-import java.io.IOException;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
+import org.apache.coyote.http11.Http11Response;
 
 public class RootRequestHandler implements RequestHandler {
 
@@ -12,12 +13,13 @@ public class RootRequestHandler implements RequestHandler {
     }
 
     @Override
-    public String getContentType(HttpRequest httpRequest) {
-        return "text/html;charset=utf-8 ";
-    }
-
-    @Override
-    public String getResponseBody(HttpRequest httpRequest) throws IOException {
-        return "Hello world!";
+    public HttpResponse handle(HttpRequest httpRequest) {
+        return Http11Response.builder()
+                .protocol(httpRequest.getVersionOfProtocol())
+                .statusCode(200)
+                .statusMessage("OK")
+                .appendHeader("Content-Type", "text/html;charset=utf-8 ")
+                .body("Hello world!")
+                .build();
     }
 }

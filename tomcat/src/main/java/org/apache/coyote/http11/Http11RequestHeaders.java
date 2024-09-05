@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,7 @@ public class Http11RequestHeaders {
 
 
     public Http11RequestHeaders(List<String> headers) {
-        this.headers = new HashMap<>();
+        this.headers = new LinkedHashMap<>();
         for (String header : headers) {
             validateHeader(header);
             this.headers.put(header.split(HEADER_DELIMITER)[0], header.split(": ")[1]);

@@ -1,18 +1,18 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
+import org.apache.coyote.Serializer;
+import org.apache.coyote.handler.LoginRequestHandler;
+import org.apache.coyote.handler.NotFoundHandler;
 import org.apache.coyote.handler.ResourceRequestHandler;
 import org.apache.coyote.handler.RootRequestHandler;
 import org.slf4j.Logger;
@@ -33,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
     private List<RequestHandler> findImplementations() {
         return List.of(
                 new RootRequestHandler(),
+                new LoginRequestHandler(),
                 new ResourceRequestHandler()
         );
     }
@@ -53,29 +54,21 @@ public class Http11Processor implements Runnable, Processor {
 
             final List<String> lines = getLines(bufferedReader);
             final Http11Request request = new Http11Request(lines);
-            String contentType = "";
-            String responseBody = "";
+            boolean handled = false;
             for (RequestHandler requestHandler : requestHandlers) {
                 if (requestHandler.canHandling(request)) {
-                    contentType = requestHandler.getContentType(request);
-                    responseBody = requestHandler.getResponseBody(request);
+                    HttpResponse response = requestHandler.handle(request);
+                    outputStream.write(Serializer.serialize(response));
+                    outputStream.flush();
+                    handled = true;
                     break;
                 }
             }
-            if (request.existsQueryParam()) {
-                Map<String, String> queryParam = request.getQueryParam();
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryParam.get("account"));
-                log.info(user.get().toString());
+            if (!handled) {
+                HttpResponse response = new NotFoundHandler().handle(request);
+                outputStream.write(Serializer.serialize(response));
+                outputStream.flush();
             }
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

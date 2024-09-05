@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.UncheckedServletException;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.HttpRequest;
@@ -17,7 +18,7 @@ public class Http11Request implements HttpRequest {
 
     private void validate(List<String> lines) {
         if (lines.isEmpty()) {
-            throw new IllegalArgumentException();
+            throw new UncheckedServletException(new IllegalArgumentException("빈 요청입니다."));
         }
     }
 
@@ -33,6 +34,16 @@ public class Http11Request implements HttpRequest {
                 .toList();
         return new Http11RequestHeaders(headers);
 
+    }
+
+    @Override
+    public String getMethod() {
+        return requestLine.getMethod();
+    }
+
+    @Override
+    public String getVersionOfProtocol() {
+        return requestLine.getVersionOfProtocol();
     }
 
     @Override

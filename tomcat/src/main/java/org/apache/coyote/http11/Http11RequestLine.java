@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 
+import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class Http11RequestLine {
 
     private void validate(String line) {
         if (StringUtils.isBlank(line) || line.split(" ").length != REQUEST_LINE_LENGTH) {
-            throw new IllegalArgumentException();
+            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP RequestLine이 아닙니다."));
         }
         validateMethod(line);
         validateProtocol(line);
@@ -39,21 +40,25 @@ public class Http11RequestLine {
     private void validateMethod(String startLine) {
         String method = startLine.split(" ")[0];
         if (!METHODS.contains(method)) {
-            throw new IllegalArgumentException();
+            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP Method가 아닙니다."));
         }
     }
 
     private void validateProtocol(String startLine) {
         String protocol = startLine.split(" ")[2];
         if (protocol.split(VERSION_OF_PROTOCOL_DELIMITER).length != VERSION_OF_PROTOCOL_LENGTH) {
-            throw new IllegalArgumentException();
+            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP 프로토콜 형식이 아닙니다."));
         }
         if (!PROTOCOL.equals(protocol.split(VERSION_OF_PROTOCOL_DELIMITER)[0])) {
-            throw new IllegalArgumentException();
+            throw new UncheckedServletException(new IllegalArgumentException("요청이 HTTP 프로토콜이 아닙니다."));
         }
         if (!PROTOCOL_VERSION.equals(protocol.split(VERSION_OF_PROTOCOL_DELIMITER)[1])) {
-            throw new IllegalArgumentException();
+            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP 프로토콜 버전이 아닙니다."));
         }
+    }
+
+    public String getVersionOfProtocol() {
+        return line.get("Protocol");
     }
 
     public String getMethod() {
@@ -74,7 +79,7 @@ public class Http11RequestLine {
     }
 
     public boolean existsQueryString() {
-        return getURI().contains("?");
+        return getURI().contains(QUERY_STRING_DELIMITER);
     }
 
     public Map<String, String> getQueryParam() {
@@ -82,7 +87,7 @@ public class Http11RequestLine {
             throw new UnsupportedOperationException();
         }
         Map<String, String> queryParam = new HashMap<>();
-        int index = getURI().indexOf("?");
+        int index = getURI().indexOf(QUERY_STRING_DELIMITER);
         String queryString = getURI().substring(index + 1);
         for (String query : queryString.split("&")) {
             String key = query.split("=")[0];

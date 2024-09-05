@@ -21,4 +21,11 @@ public class Request {
     public String getTarget() {
         return requestLine.target();
     }
+
+    @Override
+    public String toString() {
+        return "Request{" +
+                "requestLine=" + requestLine +
+                '}';
+    }
 }

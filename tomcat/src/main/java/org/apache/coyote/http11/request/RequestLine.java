@@ -10,4 +10,13 @@ public record RequestLine (
         String[] token = requestLineText.split(" ");
         return new RequestLine(Method.findByName(token[0]), token[1], token[2]);
     }
+
+    @Override
+    public String toString() {
+        return "RequestLine{" +
+                "method=" + method +
+                ", target='" + target + '\'' +
+                ", httpVersion='" + httpVersion + '\'' +
+                '}';
+    }
 }

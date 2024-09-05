@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -49,6 +50,8 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "text/html;charset=utf-8";
             String uri = "/";
             String redirectUrl = null;
+            Map<String, String> responseCookies = new HashMap<>();
+
             String startLine = bufferedReader.readLine();
             if (startLine != null) {
                 String[] requestParts = startLine.split(" ");
@@ -106,6 +109,8 @@ public class Http11Processor implements Runnable, Processor {
                         redirectUrl = "/401.html";
                     }
                     statusCode = "302 Found";
+                    UUID uuid = UUID.randomUUID();
+                    responseCookies.put("JSESSIONID", uuid.toString());
                 } else if (httpMethod.equals("GET")) {
                     String fileName = "static/login.html";
                     responseBody = getHtmlResponseBody(fileName);
@@ -136,8 +141,14 @@ public class Http11Processor implements Runnable, Processor {
             headers.add("HTTP/1.1 " + statusCode + " ");
             headers.add("Content-Type: " + contentType + " ");
             headers.add("Content-Length: " + responseBody.getBytes().length + " ");
+            String cookies = responseCookies.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
+                    .collect(Collectors.joining("; "));
             if (redirectUrl != null) {
                 headers.add("Location: " + redirectUrl);
+            }
+            if (!cookies.isEmpty()) {
+                headers.add("Set-Cookie: " + cookies);
             }
 
             var response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;

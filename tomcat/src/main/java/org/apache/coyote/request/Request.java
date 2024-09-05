@@ -23,6 +23,10 @@ public class Request {
         return requestLine.getPath();
     }
 
+    public Map<String, String> getQueryParams() {
+        return requestLine.getQueryParams();
+    }
+
     public String getHttpVersion() {
         return requestLine.getHttpVersion();
     }

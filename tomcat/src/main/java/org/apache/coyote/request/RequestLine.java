@@ -1,5 +1,8 @@
 package org.apache.coyote.request;
 
+import java.util.Map;
+import org.apache.coyote.request.uri.URI;
+
 public class RequestLine {
 
     private static final String DELIMITER = " ";
@@ -7,7 +10,7 @@ public class RequestLine {
 
     private final HttpMethod httpMethod;
 
-    private final String path; // todo object
+    private final URI uri; // todo object
 
     private final String httpVersion;
 
@@ -16,7 +19,7 @@ public class RequestLine {
         validLength(requestLines);
 
         this.httpMethod = HttpMethod.from(requestLines[0]);
-        this.path = requestLines[1];
+        this.uri = new URI(requestLines[1]);
         this.httpVersion = requestLines[2];
     }
 
@@ -31,7 +34,11 @@ public class RequestLine {
     }
 
     protected String getPath() {
-        return this.path;
+        return uri.getPath();
+    }
+
+    protected Map<String, String> getQueryParams() {
+        return uri.getQueryParams();
     }
 
     protected String getHttpVersion() {

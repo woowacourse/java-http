@@ -108,26 +108,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handle(HttpRequest httpRequest) {
-        HttpCookie cookie = new HttpCookie(httpRequest.getHeader(COOKIE));
+    private String handle(HttpRequest request) {
+        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
+        RequestBody requestBody = request.getRequestBody();
 
-        if (httpRequest.is(GET, "/")) {
+        if (request.is(GET, "/")) {
             return buildTextMessage("Hello world!", HttpStatusCode.OK);
         }
 
-        if (httpRequest.is(GET, "/login")) {
-            return getLoginPage(httpRequest);
+        if (request.is(GET, "/login")) {
+            return getLoginPage(cookie);
         }
 
-        if (httpRequest.is(POST, "/login")) {
-            return login(httpRequest);
+        if (request.is(POST, "/login")) {
+            return login(cookie, requestBody);
         }
 
-        if (httpRequest.is(POST, "/register")) {
-            return saveUser(httpRequest);
+        if (request.is(POST, "/register")) {
+            return saveUser(cookie, requestBody);
         }
 
-        return buildMessage(httpRequest.getPath(), HttpStatusCode.OK, cookie);
+        return buildMessage(request.getPath(), HttpStatusCode.OK, cookie);
     }
 
     private String buildTextMessage(String content, HttpStatusCode statusCode) {
@@ -135,9 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpResponse.buildMessage();
     }
 
-    private String getLoginPage(HttpRequest request) {
-        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
-
+    private String getLoginPage(HttpCookie cookie) {
         if (cookie.contains(JSESSIONID)) {
             if (sessionManager.hasId(cookie.get(JSESSIONID))) {
                 return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
@@ -147,10 +146,7 @@ public class Http11Processor implements Runnable, Processor {
         return buildMessage("login.html", HttpStatusCode.OK, cookie);
     }
 
-    private String login(HttpRequest request) {
-        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
-        RequestBody requestBody = request.getRequestBody();
-
+    private String login(HttpCookie cookie, RequestBody requestBody) {
         if (requestBody.containsAll("account", "password")) {
             String account = requestBody.get("account");
             String password = requestBody.get("password");
@@ -169,10 +165,7 @@ public class Http11Processor implements Runnable, Processor {
         throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
     }
 
-    private String saveUser(HttpRequest request) {
-        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
-        RequestBody requestBody = request.getRequestBody();
-
+    private String saveUser(HttpCookie cookie, RequestBody requestBody) {
         if (requestBody.containsAll("account", "email", "password")) {
             String account = requestBody.get("account");
             String email = requestBody.get("email");

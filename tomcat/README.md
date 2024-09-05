@@ -11,6 +11,27 @@
     - [x] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)가 보여진다.
     - [x] 로그인 페이지 접속 시, Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나온다.
 
+## 2. 로그인 구현
+
+- [ ] 로그인 여부에 따른 페이지 이동
+    - [ ] 성공 : 응답 헤더에 http status code를 302로 반환하고 `/index.html`로 리다이렉트 한다.
+    - [ ] 실패 : `401.html`로 리다이렉트 한다.
+- [ ] POST 방식으로 회원가입
+    - [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)가 보여진다.(GET)
+    - [ ] 회원가입 버튼을 눌러 회원가입할 수 있다.(POST)
+        - 회원가입 완료 시, `index.html`로 리다이렉트한다.(GET)
+    - [ ] 로그인 버튼을 눌러 로그인할 수 있다.(POST)
+        - 로그인 완료 시, `index.html`로 리다이렉트한다.(GET)
+- [ ] Cookie에 JSESSIONID 값 저장하기
+    - Cookie 클래스를 추가한다.
+    - HTTP Request Header의 Cookie에 JSESSIONID가 없으면 Response Header에 Set-Cookie를 반환한다.
+- [ ] Session 구현하기
+    - JSESSIONID의 값으로 로그인 여부를 체크한다.
+    - 성공 : Session 객체의 값으로 User 객체를 저장한다.
+    - [ ] 로그인된 상태에서 `/login` 페이지에 접근하면, `index.html` 페이지로 리다이렉트 한다.
+
+---
+
 ### 생각해보기 🤔
 
 > index.html 페이지만 접근했는데 CSS 같은 정적 파일들은 어떻게 호출된걸까?

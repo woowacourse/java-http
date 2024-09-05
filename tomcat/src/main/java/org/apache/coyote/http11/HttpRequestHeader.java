@@ -1,56 +1,68 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class HttpRequestHeader {
+public record HttpRequestHeader(
+        String httpMethod,
+        String path,
+        Map<String, String> queryString,
+        Map<String, String> headers) {
 
-    private final String httpMethod;
-    private final String path;
-    private final Map<String, String> queryString;
-    private final Map<String, String> headers;
-
-    public HttpRequestHeader(String requestHeader) {
-        String[] firstLineArgs = requestHeader.split(System.lineSeparator())[0].split(" ");
-        this.httpMethod = firstLineArgs[0];
-        this.path = initializePath(firstLineArgs[1]);
-        this.queryString = initializeQueryString(firstLineArgs[1]);
-        this.headers = initializeHeaders(requestHeader);
+    public HttpRequestHeader(String request) {
+        this(
+                extractHttpMethod(request),
+                extractPath(request),
+                extractQueryString(request),
+                extractHeaders(request)
+        );
     }
 
-    private String initializePath(String url) {
-        if (url.contains("?")) {
-            return url.split("[?]")[0];
-        }
-
-        return url;
+    private static String extractHttpMethod(String request) {
+        return request
+                .split(System.lineSeparator())[0]
+                .split(" ")[0];
     }
 
-    private Map<String, String> initializeQueryString(String url) {
+    private static String extractPath(String request) {
+        String url = request
+                .split(System.lineSeparator())[0]
+                .split(" ")[1];
+
+        return url.split("[?]")[0];
+    }
+
+    private static Map<String, String> extractQueryString(String request) {
+        String url = request
+                .split(System.lineSeparator())[0]
+                .split(" ")[1];
+
         Map<String, String> map = new HashMap<>();
         if (url.contains("?")) {
-            String[] queryStringArgs = url.split("[?]")[1].split("[&=]");
-            for (int i = 0; i < queryStringArgs.length / 2; i++) {
-                map.put(queryStringArgs[i * 2], queryStringArgs[i * 2 + 1]);
-            }
+            String[] queryStringArgs = url
+                    .split("[?]")[1]
+                    .split("&");
+            Arrays.stream(queryStringArgs)
+                    .map(param -> param.split("="))
+                    .filter(parts -> parts.length == 2)
+                    .forEach(parts -> map.put(parts[0], parts[1]));
         }
-
         return map;
     }
 
-    private Map<String, String> initializeHeaders(String requestHeader) {
-        Map<String, String> map = new HashMap<>();
+    private static Map<String, String> extractHeaders(String requestHeader) {
         String[] lines = requestHeader.split(System.lineSeparator());
-        for (int i = 1; i < lines.length; i++) {
-            String[] headerArgs = lines[i].split(": ");
-            map.put(headerArgs[0], headerArgs[1]);
-        }
-
-        return map;
+        return Arrays.stream(lines)
+                .skip(1)
+                .map(line -> line.split(": "))
+                .filter(parts -> parts.length == 2)
+                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.get("Content-Length"));
+        return Integer.parseInt(headers.get("content-length"));
     }
 
     public String getHttpMethod() {

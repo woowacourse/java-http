@@ -12,10 +12,10 @@ public class HttpRequestReceiver {
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         HttpRequestHeader header = new HttpRequestHeader(receiveRequestHeader(bufferedReader));
-        int contentLength = header.getContentLength();
 
         HttpRequestBody body = null;
         if ("POST".equals(header.getHttpMethod()) || "PUT".equals(header.getHttpMethod())) {
+            int contentLength = header.getContentLength();
             body = new HttpRequestBody(receiveRequestBody(bufferedReader, contentLength));
         }
 

@@ -15,7 +15,11 @@ public class ViewResolver {
     private final ResponseBuilder responseBuilder = new ResponseBuilder();
     private final ContentTypeConverter contentTypeConverter = new ContentTypeConverter();
 
-    String handle(HttpRequest request) throws IOException {
+    public String resolve(String view) throws IOException {
+        return handleGetRequest(view);
+    }
+
+    public String resolve(HttpRequest request) throws IOException {
         if (GET_METHOD.equals(request.getHttpMethod())) {
             return handleGetRequest(request.getPath());
         }

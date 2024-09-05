@@ -36,9 +36,11 @@ public class LoginHandler extends AbstractRequestHandler {
 
             log.debug("user: {}", user);
 
-            HttpCookie cookie = new HttpCookie();
-            cookie.setCookie("JSESSIONID", UUID.randomUUID().toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.getCookieString());
+            if (request.sessionNotExists()) {
+                HttpCookie cookie = new HttpCookie();
+                cookie.setCookie("JSESSIONID", UUID.randomUUID().toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, cookie.getCookieString());
+            }
             response.sendRedirect("/index.html");
         } catch (IllegalArgumentException e) {
             response.sendRedirect("/401.html");

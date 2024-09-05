@@ -45,4 +45,8 @@ public class HttpCookie {
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));
     }
+
+    public boolean contains(String key) {
+        return cookies.containsKey(key);
+    }
 }

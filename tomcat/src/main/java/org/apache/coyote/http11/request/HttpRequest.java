@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 
@@ -63,5 +64,15 @@ public class HttpRequest {
 
     public Map<String, String> getHeaders() {
         return headers.getHeaders();
+    }
+
+    public boolean sessionNotExists() {
+        Map<String, String> headersMap = headers.getHeaders();
+        String cookieString = headersMap.get(HttpHeaders.COOKIE);
+        if (cookieString == null) {
+            return true;
+        }
+        HttpCookie cookie = HttpCookie.from(cookieString);
+        return !cookie.contains("JSESSIONID");
     }
 }

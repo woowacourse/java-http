@@ -1,6 +1,15 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +38,22 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            String requestUriSource = br.readLine().split(" ")[1];
+            URI requestUri = new URI(requestUriSource);
+            String responseBody = "Hello world!";
+            if (!requestUri.toString().equals("/")) {
+                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+                final Path path = Path.of(resource.toURI());
+                List<String> actual = Files.readAllLines(path);
+                StringBuilder sb = new StringBuilder();
+                for (String s : actual) {
+                    sb.append(s);
+                    sb.append(System.lineSeparator());
+                }
+
+                responseBody = sb.toString();
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -38,9 +62,10 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
 
+
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }

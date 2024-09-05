@@ -7,16 +7,16 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private final Socket connection;
 
@@ -33,48 +33,56 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            final StringBuilder requestHeader = new StringBuilder();
-            while (true) {
-                String readLine = bufferedReader.readLine();
-                if (readLine == null || readLine.isEmpty()) {
-                    break;
-                }
-                log.info("request line : {}", readLine);
-                requestHeader.append(readLine).append(LINE_SEPARATOR);
-            }
+            HttpRequest httpRequest = new HttpRequest(reader);
+            HttpResponse httpResponse = new HttpResponse();
 
-            String[] requestLines = requestHeader.toString().split(LINE_SEPARATOR);
-            String[] requestLineParts = requestLines[0].split(" ");
-            String requestUri = requestLineParts[1];
-            log.info("request URI: {}", requestUri);
+            String path = httpRequest.getRequestLine().getPath();
+            String accept = httpRequest.getHeaders().get("Accept");
+            log.info("request accept: {}", accept);
 
-            String statusLine = "HTTP/1.1 200 OK ";
-            String responseBody;
+            if (path.equals("/")) {
+                httpResponse.setResponseBodyByText("Hello world!");
+                httpResponse.setStatus200();
+                httpResponse.setContentTypeHtml();
 
-            if (requestUri.equals("/")) {
-                responseBody = "Hello world!";
+            } else if (path.contains("/login")) {
+                URL resource = getClass().getClassLoader().getResource("static/login.html");
+                httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
+                httpResponse.setStatus200();
+                httpResponse.setContentTypeHtml();
+                log.info("response resource : {}", resource.toURI());
 
             } else {
-                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
 
-                if (resource != null) {
+                URL resource = getClass().getClassLoader().getResource("static" + path);
+                log.info("response resource : {}", resource);
+
+                if (resource == null) {
+                    URL notFoundResource = getClass().getClassLoader().getResource("static/404.html");
+                    httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
+                    httpResponse.setStatus404();
+                    httpResponse.setContentTypeHtml();
+                    log.info("response resource : {}", notFoundResource.toURI());
+
+                } else if (accept != null && accept.contains("text/css")) {
+                    httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
+                    httpResponse.setStatus200();
+                    httpResponse.setContentTypeCss();
                     log.info("response resource : {}", resource.toURI());
-                    responseBody = new String(Files.readAllBytes(Path.of(resource.toURI())));
+
                 } else {
-                    statusLine = "HTTP/1.1 404 Not Found ";
-                    responseBody = new String(Files.readAllBytes(Path.of("./static/404.html")));
+                    httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
+                    httpResponse.setStatus200();
+                    httpResponse.setContentTypeHtml();
+                    log.info("response resource : {}", resource.toURI());
+
                 }
             }
 
-            final var response = String.join(LINE_SEPARATOR,
-                    statusLine,
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

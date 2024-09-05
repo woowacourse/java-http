@@ -24,28 +24,37 @@ public class RequestParser {
 
     private RequestHeaders getRequestHeaders(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
-
-        while (true) {
-            String header = reader.readLine();
-            if (header == null || header.isEmpty()) {
-                break;
-            }
-            String[] parts = header.split(": ");
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("올바르지 않은 Request header 포맷입니다. header: %s".formatted(header));
-            }
-            headers.put(parts[0], parts[1]);
+        String header = reader.readLine();
+        while (isDataRemaining(header)) {
+            putHeader(headers, header);
+            header = reader.readLine();
         }
         return new RequestHeaders(headers);
     }
 
+    private boolean isDataRemaining(String header) {
+        return header != null && !header.isEmpty();
+    }
+
+    private void putHeader(Map<String, String> headers, String header) {
+        String[] headerParts = header.split(": ");
+        if (headerParts.length != 2) {
+            throw new IllegalArgumentException("올바르지 않은 Request header 포맷입니다. header: %s".formatted(header));
+        }
+        headers.put(headerParts[0], headerParts[1]);
+    }
+
     private RequestBody getRequestBody(BufferedReader reader, String contentLength) throws IOException {
-        if (contentLength == null || !reader.ready()) {
+        if (isEmptyBody(reader, contentLength)) {
             return RequestBody.EMPTY;
         }
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         reader.read(buffer, 0, length);
         return RequestBody.from(new String(buffer));
+    }
+
+    private boolean isEmptyBody(BufferedReader reader, String contentLength) throws IOException {
+        return contentLength == null || !reader.ready();
     }
 }

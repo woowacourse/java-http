@@ -5,44 +5,38 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.StringJoiner;
 
 public class HttpRequestParser {
 
     public HttpRequest extractRequest(InputStream inputStream) throws IOException {
         final String requestStrings = extractStrings(inputStream);
+        int bodyIndex = requestStrings.indexOf("\r\n\r\n");
+        String requestBody = "";
+        if (bodyIndex != -1) {
+            requestBody = requestStrings.substring(bodyIndex + 4);
+        }
         String[] requestLine = parseRequestLine(requestStrings);
         String httpMethod = requestLine[0];
         String uri = requestLine[1];
-        String path = "";
-        String queryParams;
         String protocol = requestLine[2];
-        String headers = parseHeaders(requestStrings.split("\r\n"));
-        String[] pairs = new String[0];
         int resourceIndex = uri.indexOf("/");
-        path = uri.substring(resourceIndex + 1);
-        if (uri.contains("?")) {
-            int queryIndex = uri.indexOf("?");
-            queryParams = uri.substring(queryIndex + 1);
-            pairs = queryParams.split("&");
-            path = uri.substring(resourceIndex + 1, queryIndex);
-        }
-        return new HttpRequest(httpMethod, uri, path, pairs, protocol, headers);
+        String path = uri.substring(resourceIndex + 1);
+        String headers = parseHeaders(requestStrings.split("\r\n"));
+        String[] pairs = requestBody.split("&");
+
+        return new HttpRequest(httpMethod, uri, path, pairs, protocol, headers, requestBody);
     }
 
     public String extractStrings(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-        final StringJoiner stringJoiner = new StringJoiner("\r\n");
-
-        String str = br.readLine();
-        while (br.ready()) {
-            stringJoiner.add(str);
-            str = br.readLine();
+        StringBuilder str = new StringBuilder();
+        int ascii;
+        while (br.ready() && (ascii = br.read()) != -1) {
+            str.append((char) ascii);
         }
-        stringJoiner.add("");
 
-        return stringJoiner.toString();
+        return str.toString();
     }
 
     private String[] parseRequestLine(String httpRequest) {

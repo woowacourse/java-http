@@ -3,13 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.List;
+import org.apache.coyote.Controller;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.common.HttpStatus;
-import org.apache.coyote.util.FileReader;
-import org.apache.coyote.util.HttpResponseBuilder;
+import org.apache.coyote.global.ControllerDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +14,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpRequestParser parser = new HttpRequestParser();
+    private final HttpRequestParser parser;
+    private final HttpResponse response;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        parser = new HttpRequestParser();
+        this.response = new HttpResponse();
     }
 
     @Override
@@ -36,30 +35,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = parser.extractRequest(inputStream);
-            final String fileName = getFilePath(request.getPath());
-            final Path filePath = FileReader.parseFilePath(fileName);
 
-            final List<String> contentLines = FileReader.readAllLines(filePath);
+            final Controller controller = ControllerDispatcher.dispatch(request.getMethod(), request.getPath());
+            controller.service(request, response);
 
-            final HttpResponse response = HttpResponseBuilder.build(
-                    getFilePath(request.getPath()),
-                    contentLines,
-                    HttpStatus.OK
-            );
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    public String getFilePath(String path) {
-        if (path.isEmpty()) {
-            return "index.html";
-        }
-        if (!path.contains(".")) {
-            return path + ".html";
-        }
-        return path;
     }
 }

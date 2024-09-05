@@ -13,14 +13,19 @@ public class HttpRequest {
     private final Map<String, String> params = new HashMap<>();
     private final String protocol;
     private final String headers;
+    private final String body;
 
-    public HttpRequest(String method, String uri, String path, String[] paramStrings, String protocol, String headers) {
+    public HttpRequest(
+            String method, String uri, String path, String[] paramStrings, String protocol, String headers,
+            String body
+    ) {
         this.method = HttpMethod.valueOf(method);
         this.uri = uri;
         this.path = path;
         mapQueryParams(paramStrings);
         this.protocol = protocol;
         this.headers = headers;
+        this.body = body;
     }
 
     private void mapQueryParams(String[] pairs) {
@@ -51,5 +56,18 @@ public class HttpRequest {
             throw new UnexpectQueryParamException();
         }
         return paramValue;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "body='" + body + '\'' +
+                ", method=" + method +
+                ", uri='" + uri + '\'' +
+                ", path='" + path + '\'' +
+                ", params=" + params +
+                ", protocol='" + protocol + '\'' +
+                ", headers='" + headers + '\'' +
+                '}';
     }
 }

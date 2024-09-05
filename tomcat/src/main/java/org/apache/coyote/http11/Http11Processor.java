@@ -18,12 +18,16 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private static final Map<String, String> httpRequestHeader = new HashMap<>();
+    private static final String sessionId = "JSESSIONID=sessionId";
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -42,9 +46,15 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+
             String line = reader.readLine();
             String httpMethod = line.split(" ")[0];
             String urlPath = line.split(" ")[1];
+
+            while((line = reader.readLine()) != null && !line.isEmpty()) {
+                httpRequestHeader.put(line.split(":")[0].trim(), line.split(":")[1].trim());
+            }
+
             if(urlPath.endsWith("html")) {
                 printFileResource("static" + urlPath,  outputStream);
                 return;
@@ -109,14 +119,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseBody(BufferedReader reader) throws IOException {
-        String line;
-        int contentLength = 0;
-        while((line = reader.readLine()) != null && !line.isEmpty()) {
-            if(line.startsWith("Content-Length")) {
-                contentLength = Integer.parseInt(line.split(":")[1].trim());
-            }
-        }
-
+        int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
         if(contentLength > 0) {
             char[] body = new char[contentLength];
             reader.read(body, 0, contentLength);
@@ -139,14 +142,26 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var responseBody = new String(Files.readAllBytes(path));
-            var response = "HTTP/1.1 200 OK \r\n" +
-                String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n"+
-                responseBody;
+            if(httpRequestHeader.get("Cookie").contains("JSESSIONID")) {
+                var response = "HTTP/1.1 200 OK \r\n" +
+                    String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                    "\r\n"+
+                    responseBody;
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            } else {
+                var response = "HTTP/1.1 200 OK \r\n" +
+                    "Set-Cookie: " + sessionId + " \r\n" +
+                    String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+                    "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                    "\r\n"+
+                    responseBody;
+                outputStream.write(response.getBytes());
+                outputStream.flush();
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -169,7 +184,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private void redirectWithSetCookie(String location, OutputStream outputStream) {
         try {
-            String sessionId = "JSESSIONID=sessionId";
             String contentType = "text/html";
             var response = "HTTP/1.1 302 Found \r\n" +
                 "Set-Cookie: " + sessionId + " \r\n" +

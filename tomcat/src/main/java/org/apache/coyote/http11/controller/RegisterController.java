@@ -17,7 +17,7 @@ import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected HttpResponse servicePost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         String requestBody = httpRequest.getBody();
         String[] token = requestBody.split("&");
         String account = token[0].split("=")[1];
@@ -34,7 +34,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse serviceGet(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
             HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
 

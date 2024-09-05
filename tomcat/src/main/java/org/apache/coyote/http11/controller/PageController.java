@@ -15,12 +15,12 @@ import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 public class PageController extends AbstractController {
 
     @Override
-    protected HttpResponse servicePost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         return null;
     }
 
     @Override
-    protected HttpResponse serviceGet(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
             HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
 

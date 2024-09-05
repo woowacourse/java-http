@@ -19,6 +19,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class Http11ProcessorTest {
 
@@ -151,6 +152,42 @@ class Http11ProcessorTest {
                     "HTTP/1.1 302 Found \r\n",
                     "Location: /401.html \r\n"
             );
+        }
+    }
+
+    @Nested
+    class RegisterTest {
+
+        @DisplayName("회원 가입 시 올바르게 응답을 보낸다.")
+        @Test
+        void register() {
+            String sessionId = "sessionId";
+            String account = "account";
+            User user = new User(account, "password", "kkk@gmail.com");
+            Session session = new Session(sessionId);
+            String body = "account=account&password=password&email=kkk@gmail.com";
+            int contentLength = body.getBytes().length;
+            String httpRequest = String.join("\r\n",
+                    "POST /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: " + contentLength,
+                    "",
+                    body);
+
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket, () -> session);
+
+            processor.process(socket);
+
+            assertAll(
+                    () -> assertThat(socket.output()).contains(
+                            "HTTP/1.1 302 Found \r\n",
+                            "Location: /index.html \r\n"
+                    ),
+                    () -> assertThat(InMemoryUserRepository.findByAccount(account)).isNotEmpty()
+            );
+            InMemoryUserRepository.delete(user);
         }
     }
 }

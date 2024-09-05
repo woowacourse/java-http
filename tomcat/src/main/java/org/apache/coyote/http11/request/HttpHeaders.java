@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,9 +7,14 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    private final Map<String, String> payLoads = new HashMap<>();
+    private final Map<String, String> payLoads;
 
-    public HttpHeaders(BufferedReader bufferedReader) throws IOException {
+    public HttpHeaders(Map<String, String> payLoads) {
+        this.payLoads = payLoads;
+    }
+
+    public static HttpHeaders readRequestHeader(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> payLoads = new HashMap<>();
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             if (line.isBlank()) {
@@ -26,6 +31,8 @@ public class HttpHeaders {
             String value = split[1].trim();
             payLoads.put(key, value);
         }
+
+        return new HttpHeaders(payLoads);
     }
 
     public Map<String, String> getPayLoads() {

@@ -4,7 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

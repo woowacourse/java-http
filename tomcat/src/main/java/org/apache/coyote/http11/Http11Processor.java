@@ -12,6 +12,8 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.error.ErrorHandlerMapper;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.ResponseResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

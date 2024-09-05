@@ -28,6 +28,20 @@ public abstract class AbstractHandler {
 
     private String determineContentType(String resourcePath, String acceptHeader) {
         String encodedContentType = "%s;charset=utf-8";
+        if (acceptHeader.startsWith("*/*")) {
+            if (resourcePath.endsWith(".html")) {
+                return String.format(encodedContentType, "text/html");
+            }
+
+            if (resourcePath.endsWith(".css")) {
+                return String.format(encodedContentType, "text/css");
+            }
+
+            if (resourcePath.endsWith(".js")) {
+                return String.format(encodedContentType, "text/javascript");
+            }
+        }
+
         if (acceptHeader.startsWith("text/html") && resourcePath.endsWith(".html")) {
             return String.format(encodedContentType, "text/html");
         }

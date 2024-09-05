@@ -2,6 +2,8 @@ package org.apache.coyote.http;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +12,8 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class RequestToResponse {
+
+    private static final Logger log = LoggerFactory.getLogger(RequestToResponse.class);
 
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
     private static final String BASIC_RESPONSE = String.join("\r\n",
@@ -88,7 +92,7 @@ public class RequestToResponse {
         List<String> passwords = List.of(infos.get(1).split("="));
         User user = InMemoryUserRepository.findByAccount(ids.get(1)).get();
         if (user.checkPassword(passwords.get(1))) {
-            //log.info(user.toString());
+            log.info(user.toString());
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",

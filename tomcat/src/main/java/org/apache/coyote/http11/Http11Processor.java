@@ -12,6 +12,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ public class Http11Processor implements Runnable, Processor {
         final var parts = requestLine.split(" ");
         final var method = parts[0];
         final var uri = parts[1];
+        final var requestHeader = parseRequestHeader(reader);
 
         if (method.equals("GET") && uri.equals("/")) {
             final var responseBody = "Hello world!";
@@ -76,10 +78,20 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody);
         }
         if (method.equals("POST") && uri.contains("login")) {
-            final var responseBody = getResponseBody(reader);
+            final var responseBody = getResponseBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
             if (isAuthenticateUser(responseBody)) {
+                HttpCookie cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
+                if (cookie.hasJSESSIONID()) {
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: /index.html ",
+                            "Content-Length: 0 ",
+                            "Connection: close ",
+                            "");
+                }
                 return String.join("\r\n",
                         "HTTP/1.1 302 Found ",
+                        "Set-Cookie: JSESSIONID=" + cookie.generateJSESSIONID() + " ",
                         "Location: /index.html ",
                         "Content-Length: 0 ",
                         "Connection: close ",
@@ -94,7 +106,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         if (method.equals("POST") && uri.contains("register")) {
-            final var responseBody = getResponseBody(reader);
+            final var responseBody = getResponseBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
             final var newUser = new User(responseBody.get("account"), responseBody.get("password"), responseBody.get("email"));
             InMemoryUserRepository.save(newUser);
             return String.join("\r\n",
@@ -115,9 +127,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private Map<String, String> getResponseBody(BufferedReader reader) throws IOException {
-        final var requestHeader = parseRequestHeader(reader);
-        int contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
+    private Map<String, String> getResponseBody(final BufferedReader reader, final int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         final var requestBody = new String(buffer);

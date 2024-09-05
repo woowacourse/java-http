@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,17 +38,16 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequestData = createHttpRequestData(inputStream);
-            String httpResponse = createHttpResponseMessage(responseResource(httpRequestData));
-
-            outputStream.write(httpResponse.getBytes());
+            HttpRequest httpRequest = createHttpRequest(inputStream);
+            HttpResponse httpResponse = respondResource(httpRequest);
+            outputStream.write(httpResponse.serialize());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest createHttpRequestData(InputStream inputStream) throws IOException {
+    private HttpRequest createHttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestLine = bufferedReader.readLine();
         List<String> headerTokens = new ArrayList<>();
@@ -63,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(requestLine, new Header(headerTokens));
     }
 
-    private HttpResponse responseResource(HttpRequest httpRequest) throws IOException {
+    private HttpResponse respondResource(HttpRequest httpRequest) throws IOException {
         AbstractHandler helloHandler = new HelloHandler();
         AbstractHandler staticResourceHandler = new StaticResourceHandler();
         AbstractHandler loginHandler = new LoginHandler();
@@ -75,14 +73,5 @@ public class Http11Processor implements Runnable, Processor {
                 .orElseThrow(IllegalArgumentException::new);
 
         return targetHandler.handle(httpRequest);
-    }
-
-    private String createHttpResponseMessage(HttpResponse httpResponseData) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpResponseData.contentType() + " ",
-                "Content-Length: " + httpResponseData.responseBody().length + " ",
-                "",
-                new String(httpResponseData.responseBody(), StandardCharsets.UTF_8));
     }
 }

@@ -62,7 +62,7 @@ public record HttpRequestHeader(
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.get("content-length"));
+        return Integer.parseInt(headers.get("Content-Length"));
     }
 
     public String getHttpMethod() {

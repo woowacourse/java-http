@@ -6,6 +6,7 @@ import java.util.Map;
 public class HttpHeaders {
 
     private static final String HEADER_DELIMETER = ": ";
+
     private final Map<String, String> headers = new HashMap<>();
 
     public HttpHeaders() {

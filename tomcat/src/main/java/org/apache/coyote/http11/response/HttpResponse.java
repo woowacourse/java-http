@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.UUID;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMessageBody;
 import org.apache.coyote.http11.response.line.ResponseLine;
@@ -51,5 +52,9 @@ public class HttpResponse {
         String bodyMessage = httpMessageBody.resolveBodyMessage();
 
         return String.join("\r\n", lineMessage, headersMessage, bodyMessage);
+    }
+
+    public void setJsessionCookie() {
+        httpHeaders.putHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
     }
 }

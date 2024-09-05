@@ -55,6 +55,8 @@ public class LoginController implements HttpRequestHandler {
         if (found.isEmpty() || !found.get().checkPassword(password)) {
             return HttpResponse.ok(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
         }
-        return HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
+        HttpResponse response = HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
+        response.setJsessionCookie();
+        return response;
     }
 }

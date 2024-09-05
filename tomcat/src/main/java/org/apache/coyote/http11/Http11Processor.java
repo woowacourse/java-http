@@ -244,6 +244,10 @@ public class Http11Processor implements Runnable, Processor {
             contentType = "image/svg+xml";
         }
 
+        if (fileName.endsWith(".js")) {
+            contentType = "text/javascript";
+        }
+
         return String.join(
                 "\r\n",
                 "HTTP/1.1 " + statusCode.getValue() + " ",

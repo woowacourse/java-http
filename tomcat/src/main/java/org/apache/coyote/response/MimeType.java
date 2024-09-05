@@ -18,6 +18,10 @@ public enum MimeType {
     }
 
     public static MimeType from(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalArgumentException("파일명이 비어있습니다.");
+        }
+
         return Arrays.stream(values())
                 .filter(mimeType -> fileName.endsWith(mimeType.name().toLowerCase()))
                 .findFirst()

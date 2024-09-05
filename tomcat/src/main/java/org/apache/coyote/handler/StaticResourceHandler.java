@@ -8,6 +8,7 @@ import org.apache.coyote.common.ContentType;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
 import org.apache.coyote.common.StatusCode;
+import org.apache.coyote.session.Session;
 
 public class StaticResourceHandler implements Handler {
 
@@ -23,6 +24,14 @@ public class StaticResourceHandler implements Handler {
 
     @Override
     public Response handle(Request request) {
+        Session session = request.getSession();
+        if (request.getUri().contains("/login") && session.getAttribute("user") != null) {
+            return new Response(
+                    StatusCode.FOUND,
+                    Map.of("Location", "/index.html",
+                           "Set-Cookie", "JSESSIONID=" + request.getSession().getId()),
+                    null);
+        }
         return handle(request, StatusCode.OK);
     }
 

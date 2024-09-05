@@ -30,4 +30,12 @@ public class Session {
 
     public void invalidate() {
     }
+
+    @Override
+    public String toString() {
+        return "Session{" +
+               "id='" + id + '\'' +
+               ", values=" + values +
+               '}';
+    }
 }

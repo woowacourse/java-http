@@ -125,6 +125,7 @@ public class Request {
                ", parameters=" + parameters +
                ", cookie=" + cookie +
                ", body='" + body + '\'' +
+               ", session=" + session.toString() +
                '}';
     }
 }

@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +16,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 public class Http11Processor implements Runnable, Processor {
@@ -39,6 +45,8 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line = reader.readLine();
 
+            System.out.println(line);
+
             // TODO : 한 줄이 아닌 전체로 읽도록 수정
 //            while ((line = reader.readLine()) != null) {
 //                System.out.println(line);  // 라인 단위로 출력
@@ -63,13 +71,9 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = getResponseBody(pattern);
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(pattern) + ";charset=utf-8 ",
-                    "Content-Length: " + calculateContentLength(responseBody) + " ",
-                    "",
-                    responseBody);
-
+            var response = "HTTP/1.1 " + getStatusCode(pattern) + " OK \r\n";
+            response += String.join("\r\n", getHeaders(pattern, responseBody));
+            response += "\r\n" + "\r\n" + responseBody;
 
 
             outputStream.write(response.getBytes());
@@ -77,6 +81,18 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> getHeaders(String pattern, String responseBody) {
+        List<String> headers = new ArrayList<>();
+        headers.add("Content-Type: " + getContentType(pattern) + ";charset=utf-8 ");
+        headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
+
+        if (getStatusCode(pattern).equals("302")) {
+            headers.add("Location: " + responseBody);
+        }
+
+        return headers;
     }
 
     private int calculateContentLength (String content){
@@ -88,10 +104,24 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        if (pattern.startsWith("/css")) {
-            URL resource = getClass().getClassLoader().getResource("static/css" + pattern.substring(4));
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
-        }
+        if (pattern.startsWith("/login") && !pattern.endsWith(".html")) {
+            String uri = pattern;
+            int index = uri.indexOf("?");
+            // String path = uri.substring(0, index);
+            String queryString = uri.substring(index + 1);
+            int separatorIndex = queryString.indexOf("&");
+            String accountQuery = queryString.substring(0, separatorIndex);
+            String passwordQuery = queryString.substring(separatorIndex + 1);
+            String account = accountQuery.substring(8);
+
+            Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
+
+            if (byAccount.isPresent()) {
+                log.info(byAccount.get().getAccount());
+                return "/index.html";
+            }
+            return "/401.html";
+		}
 
         URL resource = getClass().getClassLoader().getResource("static" + pattern);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
@@ -102,5 +132,12 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css";
         }
         return "text/html";
+    }
+
+    private String getStatusCode(String pattern) {
+        if (pattern.startsWith("/login") && !pattern.endsWith(".html")) {
+            return "302";
+        }
+        return "200";
     }
 }

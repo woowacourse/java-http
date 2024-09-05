@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
 
             Http11Request request = Http11Request.from(inputStream);
             log.info("http request : {}", request);
-            Http11Response response = new Http11Response();
+            Http11Response response = Http11Response.create();
 
             controll(request, response);
 
@@ -89,11 +89,9 @@ public class Http11Processor implements Runnable, Processor {
     private void getStaticResource(Http11Request request, Http11Response response) throws IOException {
         getView(request.getEndpoint(), response);
 
-        String accept = request.getHeaderFirstValue("Accept")
-                .map(value -> value.split(",")[0])
-                .orElse("text/html");
+        String accept = request.getAccept();
 
-        response.addHeader("Accept", accept);
+        response.addContentType(accept);
     }
 
     private void getView(String view, Http11Response response) throws IOException {
@@ -102,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("존재하지 않는 자원입니다.");
         }
         response.addBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-        response.addHeader("Accept", "text/html");
+        response.addContentType("text/html");
     }
 
     private void viewLogin(Http11Response response) throws IOException {
@@ -112,8 +110,8 @@ public class Http11Processor implements Runnable, Processor {
     private void login(Http11Request request, Http11Response response) {
         String body = request.getBody();
         Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
-        String account = queryStrings.get("account").get(0);
-        String password = queryStrings.get("password").get(0);
+        String account = queryStrings.get("account").getFirst();
+        String password = queryStrings.get("password").getFirst();
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isPresent()) {
@@ -136,9 +134,9 @@ public class Http11Processor implements Runnable, Processor {
     private void regist(Http11Request request, Http11Response response) {
         String body = request.getBody();
         Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
-        String account = queryStrings.get("account").get(0);
-        String email = queryStrings.get("email").get(0);
-        String password = queryStrings.get("password").get(0);
+        String account = queryStrings.get("account").getFirst();
+        String email = queryStrings.get("email").getFirst();
+        String password = queryStrings.get("password").getFirst();
 
         User user = new User(account, password, email);
 

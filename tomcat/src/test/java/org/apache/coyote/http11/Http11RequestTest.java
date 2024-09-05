@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.http.HttpHeaders;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.Http11RequestHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,12 +27,12 @@ class Http11RequestTest {
         );
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
         Http11Request http11Request = Http11Request.from(inputStream);
-        HttpHeaders headers = http11Request.getHeaders();
+        Http11RequestHeader headers = http11Request.getHeaders();
 
         assertThat(headers.map())
                 .containsExactlyInAnyOrderEntriesOf(Map.of(
                         "Host", List.of("localhost:8080"),
-                        "Accept", List.of("text/css", "*/*"),
+                        "Accept", List.of("text/css,*/*;q=0.1"),
                         "Connection", List.of("keep-alive")
                 ));
     }
@@ -42,9 +42,10 @@ class Http11RequestTest {
     void createBody() throws IOException {
         String httpRequest = String.join(
                 "\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
+                "Content-Length: 30",
                 "Connection: keep-alive ",
                 "",
                 "account=gugu&password=password"

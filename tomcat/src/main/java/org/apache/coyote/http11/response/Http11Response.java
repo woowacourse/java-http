@@ -14,14 +14,18 @@ public class Http11Response {
     private final Map<String, List<String>> headers;
     private String body;
 
-    public Http11Response() {
-        this(Http11ResponseStartLine.defaultLine(), new TreeMap<>(CASE_INSENSITIVE_ORDER), null);
-    }
-
-    public Http11Response(Http11ResponseStartLine startLine, Map<String, List<String>> headers, String body) {
+    private Http11Response(Http11ResponseStartLine startLine, Map<String, List<String>> headers, String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+    }
+
+    public static Http11Response create() {
+        Http11ResponseStartLine startLine = Http11ResponseStartLine.defaultLine();
+        Map<String, List<String>> headers = new TreeMap<>(CASE_INSENSITIVE_ORDER);
+        Http11Response response = new Http11Response(startLine, headers, null);
+        response.addContentType("text/html");
+        return response;
     }
 
     public void sendRedirect(String url) {
@@ -36,6 +40,10 @@ public class Http11Response {
     public void addCookie(String key, String value) {
         headers.computeIfAbsent("Set-Cookie", k -> new ArrayList<>())
                 .add(key + "=" + value);
+    }
+
+    public void addContentType(String accept) {
+        addHeader("Content-Type", accept + ";charset=utf-8");
     }
 
     public void addBody(String body) {

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.line;
+package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;

@@ -1,9 +1,9 @@
 package com.techcourse.controller.page;
 
 import java.io.IOException;
+import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.HttpRequestHandler;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.line.HttpProtocol;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.Uri;
 import org.apache.coyote.http11.response.HttpResponse;

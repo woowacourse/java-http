@@ -9,6 +9,10 @@ public class HttpHeader {
 
     private final Map<String, String> headers;
 
+    public HttpHeader(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
     public HttpHeader(List<String> rawHeaders) {
         this.headers = rawHeaders.stream()
                 .peek(rawHeader -> {
@@ -28,5 +32,15 @@ public class HttpHeader {
 
     public boolean contains(String name) {
         return headers.containsKey(name);
+    }
+
+    public void add(String name, String value) {
+        headers.put(name, value);
+    }
+
+    public String buildMessage() {
+        return headers.keySet().stream()
+                .map(key -> key + ": " + headers.get(key))
+                .collect(Collectors.joining("\r\n"));
     }
 }

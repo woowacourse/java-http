@@ -15,11 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -27,6 +24,8 @@ import org.apache.coyote.request.HttpHeader;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
+import org.apache.coyote.response.ContentType;
+import org.apache.coyote.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, requestBody);
 
-            final String response = makeResponse(httpRequest);
+            final String response = handle(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -108,11 +107,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(HttpRequest httpRequest) {
+    private String handle(HttpRequest httpRequest) {
         HttpCookie cookie = new HttpCookie(httpRequest.getHeader(COOKIE));
 
         if (httpRequest.is(GET, "/")) {
-            return makeResponseMessageFromText("Hello world!", HttpStatusCode.OK);
+            return buildTextMessage("Hello world!", HttpStatusCode.OK);
         }
 
         if (httpRequest.is(GET, "/login")) {
@@ -120,11 +119,11 @@ public class Http11Processor implements Runnable, Processor {
                 SessionManager sessionManager = SessionManager.getInstance();
                 String sessionId = cookie.get(JSESSIONID);
                 if (sessionManager.findSession(sessionId).isPresent()) {
-                    return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie);
+                    return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
                 }
             }
 
-            return makeResponseMessageFromFile("login.html", HttpStatusCode.OK, cookie);
+            return buildMessage("login.html", HttpStatusCode.OK, cookie);
         }
 
         if (httpRequest.is(POST, "/login")) {
@@ -140,9 +139,9 @@ public class Http11Processor implements Runnable, Processor {
                             Session session = new Session();
                             session.setAttribute("user", user);
                             sessionManager.add(cookie.get(JSESSIONID), session);
-                            return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie);
+                            return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
                         })
-                        .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED, cookie));
+                        .orElseGet(() -> buildMessage("401.html", HttpStatusCode.UNAUTHORIZED, cookie));
             }
 
             throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
@@ -160,64 +159,36 @@ public class Http11Processor implements Runnable, Processor {
                     InMemoryUserRepository.save(new User(account, password, email));
                 }
 
-                return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie);
+                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
             }
         }
 
-        return makeResponseMessageFromFile(httpRequest.getPath(), HttpStatusCode.OK, cookie);
+        return buildMessage(httpRequest.getPath(), HttpStatusCode.OK, cookie);
     }
 
-    private String makeResponseMessageFromText(String content, HttpStatusCode statusCode) {
-        return String.join(
-                "\r\n",
-                "HTTP/1.1 " + statusCode.getValue() + " ",
-                CONTENT_TYPE + ": " + "text/html;charset=utf-8 ",
-                CONTENT_LENGTH + ": " + content.getBytes().length + " ",
-                "",
-                content
-        );
+    private String buildTextMessage(String content, HttpStatusCode statusCode) {
+        HttpResponse httpResponse = new HttpResponse(statusCode, content, ContentType.TEXT_HTML);
+        return httpResponse.buildMessage();
     }
 
-    private String makeResponseMessageFromFile(String fileName, HttpStatusCode statusCode, HttpCookie cookie) {
+    private String buildMessage(String fileName, HttpStatusCode statusCode, HttpCookie cookie) {
         if (!fileName.contains(".")) {
             fileName += ".html";
         }
+
         String responseBody = readBody(fileName);
-        String contentType = "";
+        ContentType contentType = ContentType.fromFileExtension(
+                fileName.substring(fileName.lastIndexOf(".")));
 
-        if (fileName.endsWith(".html")) {
-            contentType = "text/html";
-        }
-
-        if (fileName.endsWith(".css")) {
-            contentType = "text/css";
-        }
-
-        if (fileName.endsWith(".svg")) {
-            contentType = "image/svg+xml";
-        }
-
-        if (fileName.endsWith(".js")) {
-            contentType = "text/javascript";
-        }
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, contentType + ";charset=utf-8 ");
-        headers.put(CONTENT_LENGTH, responseBody.getBytes().length + " ");
+        HttpResponse httpResponse = new HttpResponse(statusCode, responseBody, contentType);
 
         if (cookie == null || !cookie.hasCookieWithName(JSESSIONID)) {
             HttpCookie httpCookie = new HttpCookie();
             httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
-            headers.put(SET_COOKIE, httpCookie.getCookiesAsString());
+            httpResponse.addHeader(SET_COOKIE, httpCookie.getCookiesAsString());
         }
 
-        String startLineText = "HTTP/1.1 " + statusCode.getValue() + " ";
-
-        String headerText = headers.keySet().stream()
-                .map(headerName -> headerName + ": " + headers.get(headerName))
-                .collect(Collectors.joining(("\r\n")));
-
-        return String.join("\r\n", startLineText, headerText, "", responseBody);
+        return httpResponse.buildMessage();
     }
 
     private String readBody(String fileName) {

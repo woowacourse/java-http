@@ -1,13 +1,5 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
-
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
                 Map<String, String> headers = getHeaders(bufferedReader);
                 String requestBody = getRequestBody(headers, bufferedReader);
                 if ("/login".equals(uri)) {
-                    handleLogin(requestBody, outputStream);
+                    handleLogin(headers.get("Cookie"), requestBody, outputStream);
                     return;
                 }
                 if ("/register".equals(uri)) {
@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private void handleLogin(String requestBody, OutputStream outputStream) throws IOException {
+    private void handleLogin(String cookie, String requestBody, OutputStream outputStream) throws IOException {
         Map<String, String> pairs = getPairs(requestBody);
 
         String account = pairs.get("account");
@@ -109,12 +109,29 @@ public class Http11Processor implements Runnable, Processor {
                 User user = foundUser.get();
                 if (user.checkPassword(password)) {
                     log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
+                    String jsessionId = getJsessionId(cookie);
+                    if (jsessionId == null) {
+                        writeRedirectResponseWithCookie(HttpCookie.getJsessionId(account), "/index.html", outputStream);
+                        return;
+                    }
                     writeRedirectResponse("/index.html", outputStream);
                     return;
                 }
             }
         }
         writeRedirectResponse("/401.html", outputStream);
+    }
+
+    private String getJsessionId(String cookie) {
+        if (cookie == null) {
+            return null;
+        }
+        Map<String, String> cookiePairs = new HashMap<>();
+        for (String rawCookiePair : cookie.split(";")) {
+            String[] cookiePair = rawCookiePair.split("=");
+            cookiePairs.put(cookiePair[0], cookiePair[1]);
+        }
+        return cookiePairs.get("JSESSIONID");
     }
 
     private void handleRegister(String requestBody, OutputStream outputStream) throws IOException {
@@ -134,6 +151,14 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryStringPairs;
+    }
+
+    private void writeRedirectResponseWithCookie(String jsessionId, String location, OutputStream outputStream) throws IOException {
+        final var response = "HTTP/1.1 302 Found \r\n" +
+                "Set-Cookie: JSESSIONID=" + jsessionId + " \r\n" +
+                "Location: http://localhost:8080" + location + " \r\n" +
+                "\r\n";
+        writeResponse(outputStream, response);
     }
 
     private void writeRedirectResponse(String location, OutputStream outputStream) throws IOException {

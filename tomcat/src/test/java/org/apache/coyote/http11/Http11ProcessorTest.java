@@ -99,9 +99,9 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("올바른 회원 정보와 함께 로그인 요청이 오면 /index.html로 리다이렉트한다.")
+    @DisplayName("올바른 회원 정보와 함께 로그인 요청이 오면 쿠키를 설정해주고 /index.html로 리다이렉트한다.")
     @Test
-    void loginWithValidQueryString() {
+    void login() {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
@@ -121,15 +121,16 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
-                "\r\n";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(socket.output()).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(socket.output()).contains("Set-Cookie: JSESSIONID="),
+                () -> assertThat(socket.output()).contains("Location: http://localhost:8080/index.html")
+        );
     }
 
     @DisplayName("올바르지 않은 회원 정보와 함께 로그인 요청이 오면 /401.html로 리다이렉트한다.")
     @Test
-    void loginWithInvalidQueryString() {
+    void invalidLogin() {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",

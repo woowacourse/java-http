@@ -17,4 +17,8 @@ public class HttpRequest {
     public HttpRequestBody getBody() {
         return body;
     }
+
+    public String getQueryStringValue(String key) {
+        return header.getQueryStringValue(key);
+    }
 }

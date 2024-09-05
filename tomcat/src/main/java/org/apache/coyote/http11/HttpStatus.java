@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public enum HttpStatusCode {
+public enum HttpStatus {
     OK("200 OK"),
     FOUND("302 Found"),
     UNAUTHORIZED("401 Unauthorized"),
@@ -8,7 +8,7 @@ public enum HttpStatusCode {
 
     private final String value;
 
-    HttpStatusCode(String value) {
+    HttpStatus(String value) {
         this.value = value;
     }
 

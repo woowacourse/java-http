@@ -10,17 +10,24 @@ public class HttpHeaders {
 
     private static final Logger log = LoggerFactory.getLogger(HttpHeaders.class);
     private static final String DELIMITER = ": ";
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> headers;
+    private final HttpCookies cookies;
 
     public HttpHeaders(List<String> headers) {
         this.headers = headers.stream()
+                .filter(header -> !header.startsWith("Cookie: "))
                 .map(HttpHeaders::validateAndSplit)
                 .collect(Collectors.toMap(
                         header -> header[0],
                         header -> header[1]
                 ));
+        this.cookies = HttpCookies.parse(
+                headers.stream()
+                        .filter(header -> header.startsWith("Cookie: "))
+                        .findAny()
+                        .orElse("")
+        );
     }
 
     private static String[] validateAndSplit(String header) {
@@ -35,9 +42,13 @@ public class HttpHeaders {
 
     public String get(HttpHeader header) {
         String value = headers.get(header.getValue());
-        if(value == null) {
+        if (value == null) {
             throw new IllegalArgumentException("Header " + header.getValue() + " not found");
         }
         return value;
+    }
+
+    public boolean containsSession() {
+        return cookies.containsSession();
     }
 }

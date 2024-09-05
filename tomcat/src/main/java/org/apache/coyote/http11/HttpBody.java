@@ -31,7 +31,7 @@ public class HttpBody {
 
     public String get(String key) {
         String value = body.get(key);
-        if(value == null) {
+        if (value == null) {
             throw new IllegalArgumentException("key " + key + " not found");
         }
         return value;

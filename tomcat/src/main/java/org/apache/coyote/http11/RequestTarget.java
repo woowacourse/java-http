@@ -15,7 +15,7 @@ public class RequestTarget {
     }
 
     public Map<String, String> parseQueryString() {
-        if(containsQueryParameter()) {
+        if (containsQueryParameter()) {
             String query = SubstringGenerator.splitByFirst("?", value).getLast();
             return parseQueryParameters(query);
         }
@@ -41,7 +41,7 @@ public class RequestTarget {
     }
 
     public String getTargetExtension() {
-        if(value.contains(".")) {
+        if (value.contains(".")) {
             return SubstringGenerator.splitByLast(".", value).getLast();
         }
         return "html";
@@ -49,7 +49,7 @@ public class RequestTarget {
 
     public URL getUrl() {
         String path = value;
-        if(!path.contains(".")) {
+        if (!path.contains(".")) {
             path = path + ".html";
         }
         return getClass().getClassLoader().getResource("static" + path);

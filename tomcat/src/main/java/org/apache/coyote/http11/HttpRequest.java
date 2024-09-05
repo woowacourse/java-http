@@ -30,7 +30,9 @@ public class HttpRequest {
         List<String> headers = new ArrayList<>();
         while (httpRequestReader.ready()) {
             String header = httpRequestReader.readLine();
-            if (header.isBlank()) break;
+            if (header.isBlank()) {
+                break;
+            }
             headers.add(header);
         }
         HttpHeaders httpHeaders = new HttpHeaders(headers);
@@ -69,6 +71,10 @@ public class HttpRequest {
         return httpBody.isNotEmpty();
     }
 
+    public boolean containsSession() {
+        return httpHeaders.containsSession();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpStartLine.getHttpMethod();
     }
@@ -77,7 +83,7 @@ public class HttpRequest {
         return httpStartLine.getTargetExtension();
     }
 
-    public Path getPath(){
+    public Path getPath() {
         URL resource = httpStartLine.getTargetUrl();
         try {
             return Path.of(resource.toURI());

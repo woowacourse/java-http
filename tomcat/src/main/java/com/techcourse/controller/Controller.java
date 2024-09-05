@@ -11,11 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,21 +25,27 @@ public class Controller {
     private static final String DELIMITER = "\r\n";
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
 
+    private static boolean isRegisterRequest(HttpRequest request) {
+        return request.getHttpMethod() == HttpMethod.POST
+                && request.containsBody()
+                && request.targetStartsWith("/register");
+    }
+
     public HttpResponse service(HttpRequest request) {
-        if(request.isTargetBlank()) {
-            return getResponse(HttpStatusCode.OK, "text/html", BASIC_RESPONSE_BODY);
+        if (request.isTargetBlank()) {
+            return HttpResponse.generate(request, HttpStatus.OK, "text/html", BASIC_RESPONSE_BODY);
         }
-        if(request.isTargetStatic()) {
-            return createStaticResponse(HttpStatusCode.OK, request.getPath(), request.getTargetExtension());
+        if (request.isTargetStatic()) {
+            return createStaticResponse(request, HttpStatus.OK, request.getPath(), request.getTargetExtension());
         }
         return createDynamicResponse(request);
     }
 
     private HttpResponse createDynamicResponse(HttpRequest request) {
-        if(isLoginRequest(request)) {
+        if (isLoginRequest(request)) {
             return createLoginResponse(request);
         }
-        if(isRegisterRequest(request)) {
+        if (isRegisterRequest(request)) {
             return createRegisterResponse(request);
         }
         return null;
@@ -57,15 +62,8 @@ public class Controller {
         Optional<User> nullableUser = InMemoryUserRepository.findByAccount(parameters.get("account"));
         return nullableUser
                 .filter(user -> user.checkPassword(parameters.get("password")))
-                .map(user -> redirectToIndex())
-                .orElseGet(this::redirectTo401);
-
-    }
-
-    private static boolean isRegisterRequest(HttpRequest request) {
-        return request.getHttpMethod() == HttpMethod.POST
-                && request.containsBody()
-                && request.targetStartsWith("/register");
+                .map(user -> redirectToIndex(request))
+                .orElseGet(() -> redirectTo401(request));
     }
 
     private HttpResponse createRegisterResponse(HttpRequest request) {
@@ -74,43 +72,44 @@ public class Controller {
                 request.getFromBody("password"),
                 request.getFromBody("email"));
         InMemoryUserRepository.save(user);
-        return redirectToIndex();
+        return redirectToIndex(request);
     }
 
-    private HttpResponse redirectToIndex() {
+    private HttpResponse redirectToIndex(HttpRequest request) {
         try {
             Path path = Path.of(getClass().getClassLoader().getResource("static/index.html").toURI());
-            return createStaticResponse(HttpStatusCode.FOUND, path, "html");
+            return createStaticResponse(request, HttpStatus.FOUND, path, "html");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
         }
     }
 
-    private HttpResponse redirectTo401() {
+    private HttpResponse redirectTo401(HttpRequest request) {
         try {
             Path path = Path.of(getClass().getClassLoader().getResource("static/401.html").toURI());
-            return createStaticResponse(HttpStatusCode.UNAUTHORIZED, path, "html");
+            return createStaticResponse(request, HttpStatus.UNAUTHORIZED, path, "html");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
         }
     }
 
-    public HttpResponse createStaticResponse(HttpStatusCode httpStatusCode, Path path, String targetExtension) {
+    public HttpResponse createStaticResponse(HttpRequest request, HttpStatus httpStatus,
+                                             Path path, String targetExtension) {
         try {
             if (Files.exists(path)) {
                 String contentType = getContentType(targetExtension);
                 String responseBody = readFile(path);
-                return getResponse(httpStatusCode, contentType, responseBody);
+                return HttpResponse.generate(request, httpStatus, contentType, responseBody);
             }
             throw new FileNotFoundException(path.toString());
         } catch (NullPointerException | IOException e) {
             log.error(e.getMessage());
-            return getResponse(HttpStatusCode.OK, "text/html", BASIC_RESPONSE_BODY);
+            throw new IllegalArgumentException("invalid path: " + path.toString());
         }
     }
 
     private String getContentType(String targetExtension) {
-        if(targetExtension.equals("ico") || targetExtension.equals("png") || targetExtension.equals("jpg")) {
+        if (targetExtension.equals("ico") || targetExtension.equals("png") || targetExtension.equals("jpg")) {
             return "image/" + targetExtension;
         }
         return "text/" + targetExtension;
@@ -127,12 +126,5 @@ public class Controller {
         return joiner.toString();
     }
 
-    private HttpResponse getResponse(HttpStatusCode httpStatusCode, String contentType, String responseBody) {
-        return new HttpResponse(String.join(DELIMITER,
-                "HTTP/1.1 " + httpStatusCode.getValue() + " ",
-                HttpHeader.CONTENT_TYPE.getValue() + ": " + contentType + ";charset=utf-8 ",
-                HttpHeader.CONTENT_LENGTH.getValue() + ": " + responseBody.getBytes().length + " ",
-                "",
-                responseBody));
-    }
+
 }

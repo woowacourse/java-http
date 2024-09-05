@@ -11,6 +11,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,26 +40,39 @@ public class Http11Processor implements Runnable, Processor {
              BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
 
             String requestLine = bufferedReader.readLine();
+            if (requestLine == null || requestLine.isBlank()) {
+                return;
+            }
+
+            System.out.println(requestLine);
+
+            List<String> header = new ArrayList<>();
+            String headerLine = bufferedReader.readLine();
+            while (!headerLine.isBlank()) {
+                header.add(headerLine);
+                headerLine = bufferedReader.readLine();
+            }
 
             if (!requestLine.isBlank()) {
-                String method = requestLine.split(" ")[0];
-                String url = requestLine.split(" ")[1];
-                String version = requestLine.split(" ")[2];
+                String[] requestParts = requestLine.split(" ");
+                String method = requestParts[0];
+                String uri = requestParts[1];
+                String version = requestParts[2];
 
                 String responseBody = "Hello world!";
 
-                if (method.equals("GET") && url.equals("/index.html")) {
-                    URL resource = getClass().getClassLoader().getResource("static/index.html");
+                if (!"/".equals(uri)) {
+                    String resourcePath = "static" + uri;
+                    Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
 
-                    if (resource != null) {
-                        responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                        responseBody = responseBody.replace("\r\n", "\n");
+                    if (resource.isPresent()) {
+                        responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
                     }
                 }
 
                 final String response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Type: " + ContentType.findWithCharset(uri) + " ",
                         "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                         "",
                         responseBody);

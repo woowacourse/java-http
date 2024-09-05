@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
@@ -18,10 +17,9 @@ class ContentTypeTest {
         );
     }
 
-    @DisplayName("extension과 일치하는 ContentType이 없으면 예외를 반환한다.")
+    @DisplayName("extension과 일치하는 ContentType이 없으면 text/html을 반환한다.")
     @Test
     void failureFindTest() {
-        assertThatThrownBy(() -> ContentType.findWithCharset("/index.jazz"))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(ContentType.find("/index.html")).isEqualTo(ContentType.HTML);
     }
 }

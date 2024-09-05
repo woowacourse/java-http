@@ -27,7 +27,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(contentType -> path.toLowerCase().endsWith(contentType.getExtension()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 컨텐츠 타입"));
+                .orElse(HTML);
     }
 
     public String getMediaType() {

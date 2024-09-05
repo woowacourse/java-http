@@ -56,10 +56,6 @@ public class Http11Processor implements Runnable, Processor {
 
         String nowLine = bufferedReader.readLine();
         while (!nowLine.isBlank()) {
-            if (nowLine.startsWith("Accept")) {
-                log.info(nowLine);
-            }
-
             headerTokens.add(nowLine);
             nowLine = bufferedReader.readLine();
         }

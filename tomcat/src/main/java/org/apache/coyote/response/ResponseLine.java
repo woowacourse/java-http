@@ -10,7 +10,7 @@ public class ResponseLine implements Assemblable {
 
     @Override
     public void assemble(StringBuilder builder) {
-        builder.append("HTTPS/1.1");
+        builder.append("HTTP/1.1 ");
         statusCode.assemble(builder);
     }
 }

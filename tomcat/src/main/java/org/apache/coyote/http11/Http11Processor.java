@@ -1,20 +1,17 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.catalina.response.HttpStatus;
+import org.apache.catalina.response.FileResponseReader;
 import org.apache.catalina.response.ResponseContent;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -28,7 +25,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_PAGE = "Hello world!";
-    private static final String RESOURCE_PATH_PREFIX = "static";
     private static final String CONTENT_TYPE_HTML = "text/html";
     public static final String ACCEPT_PREFIX = "Accept: ";
     public static final String QUERY_SEPARATOR = "\\?";
@@ -111,9 +107,9 @@ public class Http11Processor implements Runnable, Processor {
             return getResponseBodyUsedQuery(url, accept);
         }
         if (url.equals("/login")) {
-            return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName("/login.html"));
+            return new ResponseContent(HttpStatus.OK, accept, FileResponseReader.loadFileContent("/login.html"));
         }
-        return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName(url));
+        return new ResponseContent(HttpStatus.OK, accept, FileResponseReader.loadFileContent(url));
     }
 
     private ResponseContent getResponseBodyUsedQuery(String url, String accept) {
@@ -123,7 +119,8 @@ public class Http11Processor implements Runnable, Processor {
         boolean validateQuery = Arrays.stream(queryString)
                 .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length != 2);
         if (validateQuery) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
+                    FileResponseReader.loadFileContent("/400.html"));
         }
         if (path.startsWith("/login")) {
             return login(queryString, accept);
@@ -133,18 +130,21 @@ public class Http11Processor implements Runnable, Processor {
 
     private ResponseContent login(String[] queryString, String accept) {
         if (queryString.length < 2) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
+                    FileResponseReader.loadFileContent("/400.html"));
         }
         String accountParam = queryString[0];
         String passwordParam = queryString[1];
         if (!accountParam.startsWith("account=") || !passwordParam.startsWith("password=")) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
+                    FileResponseReader.loadFileContent("/400.html"));
         }
 
         if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {
-            return new ResponseContent(HttpStatus.FOUND, accept, getResponseBodyByFileName("/index.html"));
+            return new ResponseContent(HttpStatus.FOUND, accept, FileResponseReader.loadFileContent("/index.html"));
         }
-        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, getResponseBodyByFileName("/401.html"));
+        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept,
+                FileResponseReader.loadFileContent("/401.html"));
     }
 
     private boolean checkAuth(String account, String password) {
@@ -156,17 +156,4 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private String getResponseBodyByFileName(String fileName) {
-        URL resource = getClass().getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
-        if (resource == null) {
-            throw new RuntimeException("'" + fileName + "'이란 페이지를 찾을 수 없습니다.");
-        }
-        Path path = new File(resource.getPath()).toPath();
-
-        try {
-            return Files.readString(path);
-        } catch (IOException | UncheckedServletException e) {
-            throw new RuntimeException("'" + fileName + "파일을 문자열로 변환하는데 오류가 발생했습니다.");
-        }
-    }
 }

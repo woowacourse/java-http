@@ -120,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
         boolean validateQuery = Arrays.stream(queryString)
                 .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length != 2);
         if (validateQuery) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, "요청된 파라미터가 올바르지 않습니다.");
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
         }
 
         if (path.startsWith("/login")) {
@@ -131,12 +131,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private ResponseContent login(String[] queryString, String accept) {
         if (queryString.length < 2) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, "요청된 파라미터가 올바르지 않습니다.");
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
         }
         String accountParam = queryString[0];
         String passwordParam = queryString[1];
         if (!accountParam.startsWith("account=") || !passwordParam.startsWith("password=")) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, "요청된 파라미터가 올바르지 않습니다.");
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
         }
 
         if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {

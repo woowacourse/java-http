@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.catalina.response.HttpStatus;
+import org.apache.catalina.response.ResponseContent;
 import org.apache.coyote.Processor;
-import org.apache.coyote.ResponseContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,15 +82,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void loadGetHttpMethod(List<String> sentences) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            ResponseContent responseContent = checkFileType(sentences);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + responseContent.getContentType() + ";charset=utf-8 ",
-                    "Content-Length: " + responseContent.getContentLength() + " ",
-                    "",
-                    responseContent.getBody());
-
+            String response = checkFileType(sentences).responseToString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -105,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
                 .orElse(CONTENT_TYPE_HTML);
 
         String headerFirstLine = sentences.getFirst().split(" ")[1];
-        return new ResponseContent(accept, getHtmlResponseContent(headerFirstLine));
+        return new ResponseContent(HttpStatus.OK, accept, getHtmlResponseContent(headerFirstLine));
     }
 
     private String getHtmlResponseContent(String url) {

@@ -1,4 +1,4 @@
-package org.apache.catalina.response;
+package org.apache.catalina.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,11 +8,11 @@ import java.nio.file.Path;
 
 import com.techcourse.exception.UncheckedServletException;
 
-public class FileResponseReader {
+public class FileReader {
     private static final String RESOURCE_PATH_PREFIX = "static";
 
     public static String loadFileContent(String fileName) {
-        URL resource = FileResponseReader.class.getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
+        URL resource = FileReader.class.getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
         if (resource == null) {
             throw new RuntimeException("'" + fileName + "'이란 페이지를 찾을 수 없습니다.");
         }

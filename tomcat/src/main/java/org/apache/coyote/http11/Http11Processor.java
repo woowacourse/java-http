@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.catalina.response.HttpStatus;
-import org.apache.catalina.response.FileResponseReader;
+import org.apache.catalina.io.FileReader;
 import org.apache.catalina.response.ResponseContent;
 import org.apache.catalina.response.ResponsePage;
 import org.apache.coyote.Processor;
@@ -111,10 +111,10 @@ public class Http11Processor implements Runnable, Processor {
         Optional<ResponsePage> responsePage = ResponsePage.fromUrl(url);
         if(responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
-            return new ResponseContent(page.getStatus(), accept, FileResponseReader.loadFileContent(page.getFileName()));
+            return new ResponseContent(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
         }
 
-        return new ResponseContent(HttpStatus.OK, accept, FileResponseReader.loadFileContent(url));
+        return new ResponseContent(HttpStatus.OK, accept, FileReader.loadFileContent(url));
     }
 
     private ResponseContent getResponseBodyUsedQuery(String url, String accept) {
@@ -125,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
                 .anyMatch(query -> query.split(PARAM_ASSIGNMENT).length != 2);
         if (validateQuery) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
-                    FileResponseReader.loadFileContent("/400.html"));
+                    FileReader.loadFileContent("/400.html"));
         }
         if (path.startsWith("/login")) {
             return login(queryString, accept);
@@ -136,20 +136,20 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseContent login(String[] queryString, String accept) {
         if (queryString.length < 2) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
-                    FileResponseReader.loadFileContent("/400.html"));
+                    FileReader.loadFileContent("/400.html"));
         }
         String accountParam = queryString[0];
         String passwordParam = queryString[1];
         if (!accountParam.startsWith("account=") || !passwordParam.startsWith("password=")) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
-                    FileResponseReader.loadFileContent("/400.html"));
+                    FileReader.loadFileContent("/400.html"));
         }
 
         if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {
-            return new ResponseContent(HttpStatus.FOUND, accept, FileResponseReader.loadFileContent("/index.html"));
+            return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent("/index.html"));
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept,
-                FileResponseReader.loadFileContent("/401.html"));
+                FileReader.loadFileContent("/401.html"));
     }
 
     private boolean checkAuth(String account, String password) {

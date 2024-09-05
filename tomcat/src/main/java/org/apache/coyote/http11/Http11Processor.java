@@ -4,17 +4,15 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,27 +35,13 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var outputStream = connection.getOutputStream()) {
 
-            String firstLine = bufferedReader.readLine();
-            if (firstLine == null) {
-                return;
-            }
+            HttpRequest httpRequest = HttpRequest.from(inputStream);
 
-            Map<String, String> httpRequestHeaders = new HashMap<>();
-
-            while (!firstLine.isEmpty()) {
-                String line = bufferedReader.readLine();
-                if (line.isEmpty()) {
-                    break;
-                }
-                String[] headerParts = line.split(": ");
-                httpRequestHeaders.put(headerParts[0], headerParts[1]);
-            }
-
-            String httpMethod = firstLine.split(" ")[0];
-            String page = firstLine.split(" ")[1];
+            Map<String, String> httpRequestHeaders = httpRequest.getHeaders();
+            String httpMethod = httpRequest.getHttpMethod();
+            String page = httpRequest.getPath();
 
             String responseBody = "";
             String response = "";
@@ -65,10 +49,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = "Hello world!";
                 response = generate200Response(responseBody, "text/html");
             } else if (page.startsWith("/login") && httpMethod.equals("POST")) {
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
+                String requestBody = httpRequest.getBody();
                 String account = requestBody.split("&")[0].split("=")[1];
                 String password = requestBody.split("&")[1].split("=")[1];
 
@@ -141,10 +122,7 @@ public class Http11Processor implements Runnable, Processor {
                     response = generate200Response(responseBody, "text/html");
                 }
             } else if (page.equals("/register") && httpMethod.equals("POST")) {
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
+                String requestBody = httpRequest.getBody();
                 String account = requestBody.split("&")[0].split("=")[1];
                 String email = requestBody.split("&")[1].split("=")[1];
                 String password = requestBody.split("&")[2].split("=")[1];

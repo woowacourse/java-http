@@ -4,11 +4,11 @@ public class StartLine {
 
     private static final String START_LINE_DELIMITER = " ";
 
-    private final String httpMethod;
-    private final String requestUri;
-    private final String httpVersion;
+    private final HttpMethod httpMethod;
+    private final RequestUri requestUri;
+    private final HttpVersion httpVersion;
 
-    public StartLine(String httpMethod, String requestUri, String httpVersion) {
+    public StartLine(HttpMethod httpMethod, RequestUri requestUri, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;
@@ -16,19 +16,22 @@ public class StartLine {
 
     public static StartLine from(String startLine) {
         String[] splitStartLine = startLine.split(START_LINE_DELIMITER);
+        String httpMethod = splitStartLine[0];
+        String requestUri = splitStartLine[1];
+        String httpVersion = splitStartLine[2];
 
-        return new StartLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
+        return new StartLine(HttpMethod.from(httpMethod), RequestUri.from(requestUri), HttpVersion.from(httpVersion));
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
     public String getRequestUri() {
-        return requestUri;
+        return requestUri.getRequestUri();
     }
 
     public String getHttpVersion() {
-        return httpVersion;
+        return httpVersion.toString();
     }
 }

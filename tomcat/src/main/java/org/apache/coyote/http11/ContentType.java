@@ -1,20 +1,25 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
+
 public enum ContentType {
-    HTML,
-    CSS
-    ;
+    HTML("text/html"),
+    CSS("text/css");
+
+    private final String contentType;
+
+    ContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
     public static ContentType from(String firstValueAccept) {
-        String contentType = firstValueAccept.split("/")[1];
-        try {
-            return valueOf(contentType.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return HTML;
-        }
+        return Arrays.stream(values())
+                .filter(contentType -> contentType.getValue().equals(firstValueAccept))
+                .findFirst()
+                .orElse(HTML);
     }
 
     public String getValue() {
-        return this.name().toLowerCase();
+        return this.contentType;
     }
 }

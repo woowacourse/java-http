@@ -20,10 +20,33 @@ public class HttpRequestParser {
 
     private static void parseStartLine(BufferedReader reader, HttpRequest request) throws IOException {
         String startLine = reader.readLine();
-        if (startLine != null) {
-            String[] startLineParts = startLine.split(" ");
-            request.setMethod(startLineParts[0]);
-            request.setUri(startLineParts[1]);
+        String[] startLineParts = startLine.split(" ");
+        String method = startLineParts[0];
+        String uri = startLineParts[1];
+
+        request.setMethod(method);
+        request.setUri(uri);
+
+        int queryIndex = uri.indexOf("?");
+        if (queryIndex == -1) {
+            request.setPath(uri);
+            return;
+        }
+        request.setPath(uri.substring(0, queryIndex));
+        String parameterString = uri.substring(queryIndex + 1);
+        parseParameters(request, parameterString);
+    }
+
+    private static void parseParameters(HttpRequest request, String parameterString) {
+        if (parameterString.isBlank()) {
+            return;
+        }
+
+        String[] parameters = parameterString.split("&");
+
+        for (String parameter : parameters) {
+            String[] keyValue = parameter.split("=");
+            request.setParameter(keyValue[0], keyValue[1]);
         }
     }
 

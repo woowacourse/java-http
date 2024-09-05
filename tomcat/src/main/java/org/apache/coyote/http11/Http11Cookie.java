@@ -2,10 +2,10 @@ package org.apache.coyote.http11;
 
 import java.util.UUID;
 
-public record Cookie(String key, String value) {
+public record Http11Cookie(String key, String value) {
 
-    public static Cookie sessionCookie() {
-        return new Cookie("JSESSIONID", UUID.randomUUID().toString());
+    public static Http11Cookie sessionCookie() {
+        return new Http11Cookie("JSESSIONID", UUID.randomUUID().toString());
     }
 
     public boolean isSessionCookie() {

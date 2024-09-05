@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void login(Http11Request request, OutputStream outputStream) throws IOException {
-        Optional<Cookie> sessionCookie = request.findSessionCookie();
+        Optional<Http11Cookie> sessionCookie = request.findSessionCookie();
         if (sessionCookie.isEmpty()) {
             return;
         }
@@ -116,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void register(Http11Request request, OutputStream outputStream) throws IOException {
-        Optional<Cookie> sessionCookie = request.findSessionCookie();
+        Optional<Http11Cookie> sessionCookie = request.findSessionCookie();
         if (sessionCookie.isEmpty()) {
             return;
         }
@@ -151,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         Http11Response response = Http11Response.ok(new ArrayList<>(), new ArrayList<>(), path);
         if (!request.hasSessionCookie() && response.isHtml()) {
-            Cookie sessionCookie = Cookie.sessionCookie();
+            Http11Cookie sessionCookie = Http11Cookie.sessionCookie();
             SESSION_MANAGER.add(new Session(sessionCookie.value()));
             response = Http11Response.ok(new ArrayList<>(), List.of(sessionCookie), path);
         }

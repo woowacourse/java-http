@@ -6,16 +6,17 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11Header;
 
-public record Http11Response(Http11StatusCode statusCode, List<Http11Header> headers, List<Cookie> cookies,
+public record Http11Response(Http11StatusCode statusCode, List<Http11Header> headers, List<Http11Cookie> cookies,
                              byte[] body) {
 
     private static final Http11ContentTypeFinder contentTypeFinder = new Http11ContentTypeFinder();
     private static final String CRLF = "\r\n";
 
-    public static Http11Response ok(List<Http11Header> headers, List<Cookie> cookies, Path path) throws IOException {
+    public static Http11Response ok(List<Http11Header> headers, List<Http11Cookie> cookies, Path path)
+            throws IOException {
         String contentTypes = contentTypeFinder.find(path);
 
         byte[] responseBody = Files.readAllBytes(path);
@@ -27,7 +28,7 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
         return new Http11Response(Http11StatusCode.OK, copyHeader, cookies, responseBody);
     }
 
-    public static Http11Response found(String uri, Cookie... cookies) {
+    public static Http11Response found(String uri, Http11Cookie... cookies) {
         List<Http11Header> headers = List.of(new Http11Header("Location", uri));
         return new Http11Response(Http11StatusCode.FOUND, headers, List.of(cookies), new byte[0]);
     }
@@ -58,7 +59,7 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
 
     private String makeCookieHeader() {
         String rawCookies = cookies.stream()
-                .map(Cookie::toString)
+                .map(Http11Cookie::toString)
                 .collect(Collectors.joining(";"));
 
         String cookieHeader = "Set-Cookie: %s".formatted(rawCookies) + CRLF;

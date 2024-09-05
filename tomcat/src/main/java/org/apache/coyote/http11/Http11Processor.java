@@ -88,21 +88,48 @@ public class Http11Processor implements Runnable, Processor {
                             location = "/index.html";
                         }
                     }
-                    if (uri.endsWith(".html")) {
-                        contentType = "text/html; charset=utf-8 ";
-                        path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-                    }
-                    if (uri.endsWith(".css")) {
-                        contentType = "text/css; charset=utf-8 ";
-                        path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-
-                    }
-                    if (uri.endsWith(".js")) {
-                        contentType = "application/javascript ";
-                        path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-
-                    }
                 }
+                if (uri.startsWith("/register")) {
+                    contentType = "text/html; charset=utf-8 ";
+                    statusCode = "200 OK";
+                    path = Path.of(getClass().getResource(STATIC_PATH + "/register.html").getPath());
+                }
+                if (uri.endsWith(".html")) {
+                    contentType = "text/html; charset=utf-8 ";
+                    statusCode = "200 OK";
+                    path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
+                }
+                if (uri.endsWith(".css")) {
+                    contentType = "text/css; charset=utf-8 ";
+                    statusCode = "200 OK";
+                    path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
+                }
+                if (uri.endsWith(".js")) {
+                    contentType = "application/javascript ";
+                    statusCode = "200 OK";
+                    path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
+
+                }
+            }
+
+            if (header.get("requestLine").startsWith("POST")) {
+                int contentLength = Integer.parseInt(header.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
+                String requestBody = new String(buffer);
+
+                Map<String, String> userInfo = new HashMap<>();
+                String[] body = requestBody.split("&");
+                for (int i = 0; i < body.length; i++) {
+                    String[] info = body[i].split("=");
+                    userInfo.put(info[0], info[1]);
+                }
+                InMemoryUserRepository.save(new User(
+                        userInfo.get("account"), userInfo.get("password"), userInfo.get("email")
+                ));
+
+                statusCode = "302 FOUND ";
+                location = "/index.html";
             }
 
             var response = "";

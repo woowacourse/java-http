@@ -1,23 +1,19 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.HandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +42,9 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-            checkLogin(requestLine);
 
             Map<String, String> requestHeaders = makeRequestHeaders(bufferedReader);
-            String body = makeResponseBody(requestLine.getRequestURI());
-
-            System.out.println(requestLine.getRequestURI());
+            String body = makeResponseBody(requestLine);
 
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -82,56 +75,21 @@ public class Http11Processor implements Runnable, Processor {
         return requestHeaders;
     }
 
-    private String makeResponseBody(String requestUrl) throws IOException {
-        final Path path = findPath(requestUrl);
-        return Files.readString(path);
-    }
-
-    private Path findPath(String url) {
-        try {
-            if (url.equals("/")) {
-                url = DEFAULT_PAGE_URI;
-            }
-
-            if (url.equals("login")) {
-                url = "login.html";
-            }
-
-            URL foundUrl = getClass().getClassLoader().getResource(DEFAULT_DIRECTORY_NAME + url);
-            return Path.of(Objects.requireNonNull(foundUrl).toURI());
-        } catch (URISyntaxException e) {
-            throw new UncheckedServletException(e);
+    private String makeResponseBody(RequestLine requestLine) throws IOException {
+        if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
+            Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
+            Path path = controller.handle(requestLine);
+            return Files.readString(path);
         }
+        Path path = new ViewResolver().findViewPath(requestLine.getRequestURI());
+        return Files.readString(path);
     }
 
     private String findResponseContentType(String url) {
         String[] extension = url.split("\\.");
-        if(extension.length <1) {
+        if (extension.length < 1) {
             return "text/html";
         }
         return "text/" + extension[1];
-    }
-
-    private void checkLogin(RequestLine requestLine) {
-        if(!isLogin(requestLine)){
-            return;
-        }
-
-        Map<String, String> parameters = requestLine.getParameters();
-        String account = parameters.get("account");
-        String password = parameters.get("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(NoSuchElementException::new);
-
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException(account + " " + password + "잘못된 유저 요청입니다.");
-        }
-
-        log.info("user : {}", user);
-    }
-
-    private boolean isLogin(RequestLine requestLine) {
-        String uri = requestLine.getRequestURI();
-        return uri.contains("login");
     }
 }

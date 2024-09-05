@@ -4,9 +4,7 @@ import java.util.List;
 
 public class RequestLine {
 
-    private static final List<String> methods = List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
-
-    private final String method;
+    private final HttpMethod method;
     private final String path;
     private final String version;
 
@@ -21,7 +19,7 @@ public class RequestLine {
         String originVersion = requestLines.get(2);
         validateMethod(originMethod);
         validatePath(originPath);
-        this.method = originMethod;
+        this.method = HttpMethod.findByMethod(originMethod);
         this.path = originPath;
         this.version = originVersion;
     }
@@ -36,7 +34,7 @@ public class RequestLine {
         if (method == null || method.isEmpty()) {
             throw new IllegalArgumentException("Method cannot be null or empty");
         }
-        if (!methods.contains(method)) {
+        if (!HttpMethod.isHttpMethod(method)) {
             throw new IllegalArgumentException("Method " + method + " is not supported");
         }
     }
@@ -50,7 +48,7 @@ public class RequestLine {
         }
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

@@ -1,11 +1,10 @@
 package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 
 import java.net.URI;
 
-public class IndexHandler extends AbstractHandler {
+public class HelloHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
@@ -17,11 +16,6 @@ public class IndexHandler extends AbstractHandler {
 
     @Override
     protected String forward(HttpRequest httpRequest) {
-        return null;
-    }
-
-    @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        return new HttpResponse("Hello world!".getBytes(), "text/html;charset=utf-8");
+        return "static/hello.html";
     }
 }

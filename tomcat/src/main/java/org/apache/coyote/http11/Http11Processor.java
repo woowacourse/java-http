@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.AbstractHandler;
-import org.apache.coyote.http11.handler.IndexHandler;
+import org.apache.coyote.http11.handler.HelloHandler;
 import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
@@ -68,11 +68,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse responseResource(HttpRequest httpRequest) throws IOException {
-        AbstractHandler indexHandler = new IndexHandler();
+        AbstractHandler helloHandler = new HelloHandler();
         AbstractHandler staticResourceHandler = new StaticResourceHandler();
         AbstractHandler loginHandler = new LoginHandler();
 
-        List<AbstractHandler> handlers = List.of(indexHandler, staticResourceHandler, loginHandler);
+        List<AbstractHandler> handlers = List.of(helloHandler, staticResourceHandler, loginHandler);
         AbstractHandler targetHandler = handlers.stream()
                 .filter(it -> it.canHandle(httpRequest))
                 .findFirst()

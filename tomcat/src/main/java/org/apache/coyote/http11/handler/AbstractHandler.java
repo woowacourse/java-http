@@ -16,7 +16,7 @@ public abstract class AbstractHandler {
     public HttpResponse handle(HttpRequest httpRequest) {
         String acceptHeader = httpRequest.header()
                 .get("Accept")
-                .orElseThrow(IllegalArgumentException::new);
+                .orElse("*/*");
 
         String result = forward(httpRequest);
 

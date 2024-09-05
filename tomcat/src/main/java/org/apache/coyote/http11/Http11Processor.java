@@ -49,15 +49,23 @@ public class Http11Processor implements Runnable, Processor {
         while ((line = bufferedReader.readLine()) != null) {
             if (line.startsWith("GET")) {
                 final String requestUri = line.split(" ")[1];
+                final int index = requestUri.indexOf("?");
 
-                if (requestUri.equals("/")) {
+                String path = requestUri;
+                String queryString;
+                if (index != -1) {
+                    path = requestUri.substring(0, index);
+                    queryString = requestUri.substring(index + 1);
+                }
+
+                if (path.equals("/")) {
                     return getRootPage();
                 }
 
-                final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-                final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                if (path.endsWith("css")) {
+                    final URL resource = getClass().getClassLoader().getResource("static" + path);
+                    final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-                if (requestUri.endsWith("css")) {
                     return String.join("\r\n",
                             "HTTP/1.1 200 OK ",
                             "Content-Type: text/css;charset=utf-8 ",
@@ -65,6 +73,12 @@ public class Http11Processor implements Runnable, Processor {
                             "",
                             responseBody);
                 }
+
+                if (!path.contains(".")) {
+                    path += ".html";
+                }
+                final URL resource = getClass().getClassLoader().getResource("static" + path);
+                final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
                 return String.join("\r\n",
                         "HTTP/1.1 200 OK ",

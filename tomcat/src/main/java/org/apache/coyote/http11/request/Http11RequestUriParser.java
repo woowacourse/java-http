@@ -9,8 +9,8 @@ class Http11RequestUriParser {
     }
 
     /*
-            https://www.rfc-editor.org/rfc/rfc2616#section-5 이 문서에서 이 메서드가 반환하는 것을 Request-URI라 지칭합니다.
-        */
+        https://www.rfc-editor.org/rfc/rfc2616#section-5 이 문서에서 이 메서드가 반환하는 것을 Request-URI라 지칭합니다.
+    */
     String parseRequestURI(String requestMessage) {
         String startLine = startLineParser.parseStartLine(requestMessage);
         return startLine.split(" ")[1];

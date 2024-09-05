@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -94,12 +96,20 @@ public class Http11Processor implements Runnable, Processor {
                             password = tokenizer.nextToken();
                         }
                     }
-                    String finalPassword = password;
-                    InMemoryUserRepository.findByAccount(account).ifPresent(user -> {
-                        if (user.checkPassword(finalPassword)) {
+
+                    Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
+                    if (loginUser.isPresent()) {
+                        final User user = loginUser.get();
+                        if (user.checkPassword(password)) {
                             log.info("user : {}", user);
+                            return String.join("\r\n",
+                                    "HTTP/1.1 302 Found ",
+                                    "Location: http://localhost:8080/index.html ",
+                                    "Content-Type: text/html;charset=utf-8 ",
+                                    "Content-Length: 0 ",
+                                    "");
                         }
-                    });
+                    }
                 }
 
                 return String.join("\r\n",

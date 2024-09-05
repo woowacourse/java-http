@@ -97,4 +97,30 @@ class LoginControllerTest {
 
         assertThat(result).isEqualTo(expected);
     }
+
+    @DisplayName("로그인 화면을 응답한다.")
+    @Test
+    void loginPage() throws IOException {
+        // given
+        final String request = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
+
+        // when
+        String result = loginController.handle(httpRequest);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3447 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(result).isEqualTo(expected);
+    }
 }

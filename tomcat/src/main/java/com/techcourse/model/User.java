@@ -22,10 +22,6 @@ public class User {
         return this.password.equals(password);
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public String getAccount() {
         return account;
     }

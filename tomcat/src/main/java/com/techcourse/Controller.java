@@ -32,11 +32,11 @@ public class Controller {
 		return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
 	}
 
-	public UUID login(String account, String password) {
+	public User login(String account, String password) {
 		Optional<User> user = InMemoryUserRepository.findByAccount(account);
 		if (user.isPresent()) {
 			log.info(user.get().getAccount());
-			return UUID.randomUUID();
+			return user.get();
 		}
 		throw new IllegalArgumentException("login fail");
 	}

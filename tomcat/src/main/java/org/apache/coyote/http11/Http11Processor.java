@@ -39,19 +39,7 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IOException("not http1.1 request");
             }
 
-//			Session session;
-//			if (sessionId == null || sessionManager.findSession(sessionId) == null) {
-//				session = sessionManager.createSession();
-//			} else {
-//				session = sessionManager.findSession(sessionId);
-//			}
-
             var response = responseResolver.processRequest(httpRequest);
-
-            // 세션 ID가 없다면 새로 발급한 세션 ID를 Set-Cookie 헤더에 포함
-//			if (sessionId == null) {
-//				outputStream.write(("Set-Cookie: JSESSIONID=" + session.getId() + "; Path=/; HttpOnly\r\n").getBytes());
-//			}
 
             outputStream.write(response.getBytes());
             outputStream.flush();

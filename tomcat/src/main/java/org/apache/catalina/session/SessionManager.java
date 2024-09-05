@@ -2,24 +2,29 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
 
-	// static!
 	private static final Map<String, Session> SESSIONS = new HashMap<>();
+	private static final SessionManager instance = new SessionManager();
 
-	public void add(final Session session) {
-		SESSIONS.put(session.getId(), session);
+	private SessionManager() {
 	}
 
-	public Session findSession(final String id) {
+	public static SessionManager getInstance() {
+		return instance;
+	}
+
+	public Session findSession(String id) {
 		return SESSIONS.get(id);
 	}
 
-	public void remove(final String id) {
+	public void removeSession(String id) {
 		SESSIONS.remove(id);
 	}
 
-	private SessionManager() {
+	public void add(Session session) {
+		SESSIONS.put(session.getId(), session);
 	}
 }

@@ -6,7 +6,7 @@ import java.util.Map;
 public class RequestCookies {
 
     private static final RequestCookies EMPTY_COOKIES = new RequestCookies(Map.of());
-    private static final String COOKIES_SEPARATOR = "; ";
+    private static final String COOKIES_SEPARATOR = ";";
     private static final String COOKIE_SEPARATOR = "=";
 
     private final Map<String, String> properties;
@@ -26,8 +26,8 @@ public class RequestCookies {
                 continue;
             }
             int index = cookie.indexOf(COOKIE_SEPARATOR);
-            String key = cookie.substring(0, index);
-            String value = cookie.substring(index + 1);
+            String key = cookie.substring(0, index).trim();
+            String value = cookie.substring(index + 1).trim();
             cookies.put(key, value);
         }
         return new RequestCookies(cookies);

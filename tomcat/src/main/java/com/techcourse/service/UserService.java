@@ -6,7 +6,7 @@ import com.techcourse.model.User;
 
 public class UserService {
 
-    public User login(String account, String password){
+    public User login(String account, String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new DashboardException("Cannot find account"));
 

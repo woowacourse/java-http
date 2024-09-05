@@ -32,4 +32,51 @@ class RegisterControllerTest {
                 .contains("Content-Type: text/html".getBytes())
                 .contains("<title>회원가입</title>".getBytes());
     }
+
+    @Test
+    @DisplayName("회원가입을 한다.")
+    void register() {
+        // given
+        RequestMapping requestMapping = new RequestMapping();
+        HttpRequest request = HttpRequest.parse(List.of(
+                "POST /register HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=seyang&email=seyang%40woowa.com&password=pw"
+        ));
+        Builder responseBuilder = HttpResponse.builder();
+
+        // when
+        requestMapping.getController(request)
+                .service(request, responseBuilder);
+        HttpResponse response = responseBuilder.build();
+
+        // then
+        assertThat(response.toMessage())
+                .contains("HTTP/1.1 302 Found".getBytes())
+                .contains("Location: /index.html".getBytes());
+    }
+
+    @Test
+    @DisplayName("일부 정보 없이 회원가입 할 경우 400을 반환한다.")
+    void registerWithoutInformation() {
+        // given
+        RequestMapping requestMapping = new RequestMapping();
+        HttpRequest request = HttpRequest.parse(List.of(
+                "POST /register HTTP/1.1",
+                "Content-Type: application/x-www-form-urlencoded",
+                "",
+                "account=seyang&password=pw"
+        ));
+        Builder responseBuilder = HttpResponse.builder();
+
+        // when
+        requestMapping.getController(request)
+                .service(request, responseBuilder);
+        HttpResponse response = responseBuilder.build();
+
+        // then
+        assertThat(response.toMessage())
+                .contains("HTTP/1.1 400 Bad Request".getBytes());
+    }
 }

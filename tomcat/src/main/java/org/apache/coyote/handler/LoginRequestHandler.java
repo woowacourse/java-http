@@ -11,14 +11,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
 import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,9 @@ public class LoginRequestHandler implements RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final List<Http11Method> ALLOWED_METHODS = List.of(POST, GET);
+    private static final String SUCCESS_LOGIN_REDIRECT_PATH = "/index.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
+    private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
@@ -48,23 +51,28 @@ public class LoginRequestHandler implements RequestHandler {
     private Http11Response post(HttpRequest httpRequest) {
         Map<String, String> param = httpRequest.getParsedBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(param.get("account"));
-        String redirectPath = "/401.html";
         if (user.isPresent() && user.get().checkPassword(param.get("password"))) {
-            redirectPath = "/index.html";
             log.info("로그인 성공 : " + user.get().getAccount());
+            Session session = httpRequest.getSession();
+            session.setAttribute("user", user.get());
+            SessionManager.getInstance().add(session);
+            return Http11Response.builder()
+                    .status(HttpStatus.FOUND)
+                    .appendHeader("Set-Cookie", SESSION_ID_COOKIE_NAME + "=" + session.getId())
+                    .appendHeader("Location", SUCCESS_LOGIN_REDIRECT_PATH)
+                    .build();
         }
-        Http11ResponseBuilder responseBuilder = Http11Response.builder();
-        if (httpRequest.isNotExistsCookie("JSESSIONID")) {
-            responseBuilder.appendHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-        }
-        return responseBuilder
-                .status(HttpStatus.FOUND)
-                .appendHeader("Location", redirectPath)
-                .build();
+        return redirect(UNAUTHORIZED_PATH);
     }
 
     private Http11Response get(HttpRequest httpRequest) {
         try {
+            if (httpRequest.isExistsSession()) {
+                Session session = httpRequest.getSession();
+                User user = (User) session.getAttribute("user");
+                log.info("세션 로그인 : " + user.getAccount());
+                return redirect(SUCCESS_LOGIN_REDIRECT_PATH);
+            }
             return Http11Response.builder()
                     .status(HttpStatus.OK)
                     .appendHeader("Content-Type", "text/html;charset=utf-8")
@@ -73,5 +81,12 @@ public class LoginRequestHandler implements RequestHandler {
         } catch (IOException e) {
             throw new UncheckedServletException(new NoSuchFieldException("파일을 찾을 수 없습니다."));
         }
+    }
+
+    private Http11Response redirect(String path) {
+        return Http11Response.builder()
+                .status(HttpStatus.FOUND)
+                .appendHeader("Location", path)
+                .build();
     }
 }

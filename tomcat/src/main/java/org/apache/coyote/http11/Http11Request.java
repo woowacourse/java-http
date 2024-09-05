@@ -1,9 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 
 public class Http11Request implements HttpRequest {
+
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Http11RequestLine requestLine;
     private final Http11RequestHeaders headers;
@@ -35,8 +41,8 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public boolean isNotExistsCookie(String key) {
-        return !headers.existsCookie(key);
+    public boolean isExistsSession() {
+        return headers.existsCookie(JSESSIONID);
     }
 
     @Override
@@ -45,8 +51,19 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
+    public String getCookie(String cookieName) {
+        return headers.getCookie(cookieName);
+    }
+
+    @Override
     public Map<String, String> getParsedBody() {
         return body.parseBody();
+    }
+
+    @Override
+    public Session getSession() {
+        Optional<Session> sessionOptional = SessionManager.getInstance().findSession(getCookie(JSESSIONID));
+        return sessionOptional.orElseGet(() -> new Session(UUID.randomUUID().toString()));
     }
 
 }

@@ -10,6 +10,8 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
@@ -20,6 +22,7 @@ import org.apache.coyote.http11.HttpStatus;
 public class SignupRequestHandler implements RequestHandler {
 
     private static final List<Http11Method> ALLOWED_METHODS = List.of(POST, GET);
+    private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
@@ -43,8 +46,12 @@ public class SignupRequestHandler implements RequestHandler {
         User newUser = new User(param.get("account"), param.get("password"), param.get("email"));
         validateExists(newUser);
         InMemoryUserRepository.save(newUser);
+        Session session = httpRequest.getSession();
+        session.setAttribute("user", newUser);
+        SessionManager.getInstance().add(session);
         return Http11Response.builder()
                 .status(HttpStatus.FOUND)
+                .appendHeader("Set-Cookie", SESSION_ID_COOKIE_NAME + "=" + session.getId())
                 .appendHeader("Location", "/index.html")
                 .build();
     }

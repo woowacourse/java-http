@@ -1,6 +1,7 @@
 package org.apache.coyote;
 
 import java.util.Map;
+import org.apache.catalina.Session;
 
 public interface HttpRequest {
 
@@ -10,9 +11,13 @@ public interface HttpRequest {
 
     String getPath();
 
-    boolean isNotExistsCookie(String key);
+    boolean isExistsSession();
 
     String getHeader(String header);
 
+    String getCookie(String cookieName);
+
     Map<String, String> getParsedBody();
+
+    Session getSession();
 }

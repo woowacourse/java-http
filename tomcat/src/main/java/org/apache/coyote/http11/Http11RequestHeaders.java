@@ -26,7 +26,7 @@ public class Http11RequestHeaders {
 
     private void append(String key, String value) {
         if ("Cookie".equals(key)) {
-            cookie.append(key, value);
+            cookie.setCookie(value);
             return;
         }
         this.headers.put(key, value);
@@ -42,7 +42,11 @@ public class Http11RequestHeaders {
         return headers.get(key);
     }
 
+    public String getCookie(String key) {
+        return cookie.getValue(key);
+    }
+
     public boolean existsCookie(String key) {
-        return cookie.isEmpty() && cookie.isExists(key);
+        return cookie.isExists(key);
     }
 }

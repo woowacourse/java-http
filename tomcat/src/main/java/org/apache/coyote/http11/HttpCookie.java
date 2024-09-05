@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpCookie {
 
@@ -12,8 +11,12 @@ public class HttpCookie {
         this.cookie = new LinkedHashMap<>();
     }
 
-    public void append(String key, String value) {
-        this.cookie.put(key, value);
+    public void setCookie(String value) {
+        for (String cookiePair : value.split("; ")) {
+            String cookieName = cookiePair.split("=")[0];
+            String cookieValue = cookiePair.split("=")[1];
+            cookie.put(cookieName, cookieValue);
+        }
     }
 
     public boolean isExists(String key) {
@@ -22,16 +25,5 @@ public class HttpCookie {
 
     public String getValue(String key) {
         return cookie.get(key);
-    }
-
-    public boolean isEmpty() {
-        return cookie.isEmpty();
-    }
-
-    public String getCookieMessage() {
-        return cookie.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("; "));
     }
 }

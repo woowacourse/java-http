@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -18,10 +19,6 @@ public abstract class AbstractHandler {
     protected abstract String forward(HttpRequest httpRequest);
 
     public HttpResponse handle(HttpRequest httpRequest) {
-        String acceptHeader = httpRequest.header()
-                .get("Accept")
-                .orElse("*/*");
-
         String result = forward(httpRequest);
 
         List<String> headerTokens = new ArrayList<>();
@@ -33,7 +30,7 @@ public abstract class AbstractHandler {
         }
 
         String resourcePath = getClass().getClassLoader().getResource("static/" + result).getPath();
-        String contentType = determineContentType(resourcePath, acceptHeader);
+        String contentType = determineContentType(resourcePath);
         headerTokens.add("Content-Type: " + contentType);
         Header header = new Header(headerTokens);
 
@@ -44,39 +41,15 @@ public abstract class AbstractHandler {
         return new HttpResponse(HttpStatus.OK, header, readStaticResource(resourcePath));
     }
 
-    private String determineContentType(String resourcePath, String acceptHeader) {
-        String encodedContentType = "%s;charset=utf-8";
-        if (acceptHeader.startsWith("*/*")) {
-            if (resourcePath.endsWith(".html")) {
-                return String.format(encodedContentType, "text/html");
-            }
-
-            if (resourcePath.endsWith(".css")) {
-                return String.format(encodedContentType, "text/css");
-            }
-
-            if (resourcePath.endsWith(".js")) {
-                return String.format(encodedContentType, "text/javascript");
+    private String determineContentType(String resourcePath) {
+        String encodedContentTypeFormat = "%s;charset=utf-8";
+        for (ContentType contentType : ContentType.values()) {
+            if (resourcePath.endsWith(contentType.getExtension())) {
+                return String.format(encodedContentTypeFormat, contentType.getName());
             }
         }
 
-        if (acceptHeader.startsWith("text/html") && resourcePath.endsWith(".html")) {
-            return String.format(encodedContentType, "text/html");
-        }
-
-        if (acceptHeader.startsWith("text/css") && resourcePath.endsWith(".css")) {
-            return String.format(encodedContentType, "text/css");
-        }
-
-        if (acceptHeader.startsWith("text/javascript") && resourcePath.endsWith(".js")) {
-            return String.format(encodedContentType, "text/javascript");
-        }
-
-        if(resourcePath.endsWith(".svg")) {
-            return "image/svg+xml";
-        }
-
-        throw new IllegalStateException();
+        return String.format(encodedContentTypeFormat, ContentType.PLAIN.getName());
     }
 
     private byte[] readStaticResource(String resourcePath) {

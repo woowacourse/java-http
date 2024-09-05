@@ -1,9 +1,8 @@
 package com.techcourse.db;
 
+import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
@@ -19,16 +18,22 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static Optional<User> findByAccountAndPassword(String account, String password) {
-        if (database.containsKey(account) && database.get(account).checkPassword(password)) {
-            return Optional.ofNullable(database.get(account));
+    public static boolean existsByAccountAndPassword(String account, String password) {
+        return database.containsKey(account)
+               && database.get(account).checkPassword(password);
+    }
+
+    public static User getByAccount(String account) {
+        if (database.containsKey(account)) {
+            return database.get(account);
         }
-        return Optional.empty();
+        throw new UncheckedServletException("유저가 존재하지 않습니다.");
     }
 
     public static boolean existsByAccount(String account) {
         return database.containsKey(account);
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 }

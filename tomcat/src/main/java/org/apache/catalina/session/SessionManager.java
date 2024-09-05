@@ -33,4 +33,8 @@ public class SessionManager implements Manager {
     public void remove(String id) {
         sessions.remove(id);
     }
+
+    public boolean hasId(String id) {
+        return sessions.containsKey(id);
+    }
 }

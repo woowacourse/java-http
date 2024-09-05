@@ -40,11 +40,14 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String USER_SESSION_NAME = "user";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionManager = SessionManager.getInstance();
     }
 
     @Override
@@ -113,52 +116,15 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpRequest.is(GET, "/login")) {
-            if (cookie.contains(JSESSIONID)) {
-                SessionManager sessionManager = SessionManager.getInstance();
-                String sessionId = cookie.get(JSESSIONID);
-                if (sessionManager.findSession(sessionId).isPresent()) {
-                    return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
-                }
-            }
-
-            return buildMessage("login.html", HttpStatusCode.OK, cookie);
+            return getLoginPage(httpRequest);
         }
 
         if (httpRequest.is(POST, "/login")) {
-            RequestBody requestBody = httpRequest.getRequestBody();
-
-            if (requestBody.containsAll("account", "password")) {
-                String account = requestBody.get("account");
-                String password = requestBody.get("password");
-
-                return InMemoryUserRepository.findByAccountAndPassword(account, password)
-                        .map(user -> {
-                            SessionManager sessionManager = SessionManager.getInstance();
-                            Session session = new Session();
-                            session.setAttribute("user", user);
-                            sessionManager.add(cookie.get(JSESSIONID), session);
-                            return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
-                        })
-                        .orElseGet(() -> buildMessage("401.html", HttpStatusCode.UNAUTHORIZED, cookie));
-            }
-
-            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
+            return login(httpRequest);
         }
 
         if (httpRequest.is(POST, "/register")) {
-            RequestBody requestBody = httpRequest.getRequestBody();
-
-            if (requestBody.containsAll("account", "email", "password")) {
-                String account = requestBody.get("account");
-                String email = requestBody.get("email");
-                String password = requestBody.get("password");
-
-                if (!InMemoryUserRepository.existsByAccount(account)) {
-                    InMemoryUserRepository.save(new User(account, password, email));
-                }
-
-                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
-            }
+            return saveUser(httpRequest);
         }
 
         return buildMessage(httpRequest.getPath(), HttpStatusCode.OK, cookie);
@@ -167,6 +133,60 @@ public class Http11Processor implements Runnable, Processor {
     private String buildTextMessage(String content, HttpStatusCode statusCode) {
         HttpResponse httpResponse = new HttpResponse(statusCode, content, ContentType.TEXT_HTML);
         return httpResponse.buildMessage();
+    }
+
+    private String getLoginPage(HttpRequest request) {
+        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
+
+        if (cookie.contains(JSESSIONID)) {
+            if (sessionManager.hasId(cookie.get(JSESSIONID))) {
+                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
+            }
+        }
+
+        return buildMessage("login.html", HttpStatusCode.OK, cookie);
+    }
+
+    private String login(HttpRequest request) {
+        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
+        RequestBody requestBody = request.getRequestBody();
+
+        if (requestBody.containsAll("account", "password")) {
+            String account = requestBody.get("account");
+            String password = requestBody.get("password");
+
+            if (InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
+                User user = InMemoryUserRepository.getByAccount(account);
+                Session session = new Session();
+                session.setAttribute(USER_SESSION_NAME, user);
+                sessionManager.add(cookie.get(JSESSIONID), session);
+                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
+            }
+
+            return buildMessage("401.html", HttpStatusCode.UNAUTHORIZED, cookie);
+        }
+
+        throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
+    }
+
+    private String saveUser(HttpRequest request) {
+        HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
+        RequestBody requestBody = request.getRequestBody();
+
+        if (requestBody.containsAll("account", "email", "password")) {
+            String account = requestBody.get("account");
+            String email = requestBody.get("email");
+            String password = requestBody.get("password");
+
+            if (!InMemoryUserRepository.existsByAccount(account)) {
+                InMemoryUserRepository.save(new User(account, password, email));
+                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
+            }
+
+            throw new UncheckedServletException("이미 존재하는 ID입니다.");
+        }
+
+        throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
     }
 
     private String buildMessage(String fileName, HttpStatusCode statusCode, HttpCookie cookie) {

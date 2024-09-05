@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
@@ -43,32 +41,22 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e, this);
         }
     }
 
     private HttpRequest receiveRequest(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        StringBuilder sb = new StringBuilder();
-        while(true) {
-            String input = bufferedReader.readLine();
-            if(input == null) {
-                break;
-            }
-            sb.append(input).append(System.lineSeparator());
-        }
-        return new HttpRequest(sb.toString());
+        HttpRequestReceiver httpRequestReceiver = new HttpRequestReceiver();
+        return httpRequestReceiver.receiveRequest(inputStream);
     }
 
     private String getResponse(HttpRequest request) throws IOException {
-        Controller controller = handlerMapping.getController(request);
+        Controller controller = handlerMapping.getController(request.getHeader());
         if (controller != null) {
-            ModelAndView modelAndView = controller.process(request);
+            ModelAndView modelAndView = controller.process(request.getHeader());
             return viewResolver.resolve(modelAndView.getView());
         }
 
-        return viewResolver.resolve(request);
+        return viewResolver.resolve(request.getHeader());
     }
 }

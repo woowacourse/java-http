@@ -45,19 +45,29 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            List<String> headerSentences = new ArrayList<>();
+            List<String> headerSentences = readRequestHeader(reader);
+            checkHttpMethodAndLoad(headerSentences);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private List<String> readRequestHeader(BufferedReader reader) {
+        List<String> headerSentences = new ArrayList<>();
+        try {
             String sentence = reader.readLine();
             while (sentence != null && !sentence.isBlank()) {
                 headerSentences.add(sentence);
                 sentence = reader.readLine();
             }
-            if (headerSentences.isEmpty()) {
-                throw new IllegalArgumentException("요청 header가 존재하지 않습니다.");
-            }
-            checkHttpMethodAndLoad(headerSentences);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+        if (headerSentences.isEmpty()) {
+            throw new IllegalArgumentException("요청 header가 존재하지 않습니다.");
+        }
+
+        return headerSentences;
     }
 
     private void checkHttpMethodAndLoad(List<String> sentences) {

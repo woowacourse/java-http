@@ -22,7 +22,7 @@ public class RequestLine {
         checkNull(requestLine);
         String[] parsedRequestLine = requestLine.split(REQUESTLINE_DELIMITER);
         this.method = HttpMethod.valueOf(parsedRequestLine[HTTP_METHOD_INDEX]);
-        this.requestURI = initializeRequestURI(parsedRequestLine[REQUEST_URI_INDEX]);
+        this.requestURI = initializeRequestURI(parsedRequestLine);
         this.protocol = parseProtocol(parsedRequestLine);
         this.version = parseVersion(parsedRequestLine);
     }
@@ -33,7 +33,12 @@ public class RequestLine {
         }
     }
 
-    private RequestURI initializeRequestURI(String requestUri) {
+    private RequestURI initializeRequestURI(String [] requestLine) {
+        if(requestLine.length < REQUEST_URI_INDEX){
+            return null;
+        }
+
+        String requestUri = requestLine[REQUEST_URI_INDEX];
         if (DEFAULT_REQUEST_URI.equals(requestUri)) {
             return new RequestURI(WELCOME_PAGE_URI);
         }
@@ -64,5 +69,9 @@ public class RequestLine {
 
     public Map<String, String> getParameters() {
         return requestURI.getParameters();
+    }
+
+    public boolean isQueryStringRequest() {
+        return requestURI.isQueryStringUri();
     }
 }

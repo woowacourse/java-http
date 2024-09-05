@@ -10,7 +10,7 @@ public class ViewResolver {
     private static final String DEFAULT_DIRECTORY_NAME = "static";
 
     public Path findViewPath(String url) {
-        URL foundUrl = getClass().getClassLoader().getResource(DEFAULT_DIRECTORY_NAME + url);
+        URL foundUrl = ClassLoader.getSystemClassLoader().getResource(DEFAULT_DIRECTORY_NAME + url);
         try {
             return Path.of(Objects.requireNonNull(foundUrl).toURI());
         } catch (URISyntaxException e) {

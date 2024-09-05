@@ -14,18 +14,22 @@ public class RequestURI {
         this.parameters = parsedParameters(requestUri);
     }
 
-    private String parsedUri(String requestUri){
-        if(queryStringParser.isQueryString(requestUri)){
+    private String parsedUri(String requestUri) {
+        if (queryStringParser.isQueryString(requestUri)) {
             return queryStringParser.parseUri(requestUri);
         }
         return requestUri;
     }
 
-    private Map<String, String> parsedParameters(String requestUri){
-        if(queryStringParser.isQueryString(requestUri)){
+    private Map<String, String> parsedParameters(String requestUri) {
+        if (queryStringParser.isQueryString(requestUri)) {
             return queryStringParser.parseParameters(requestUri);
         }
         return new HashMap<>();
+    }
+
+    public boolean isQueryStringUri() {
+        return queryStringParser.isQueryString(uri);
     }
 
     public String getUri() {

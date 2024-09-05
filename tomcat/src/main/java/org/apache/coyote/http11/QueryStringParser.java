@@ -25,7 +25,7 @@ public class QueryStringParser {
         }
 
         Map<String, String> parameters = new HashMap<>();
-        String queryString  =  parseQueryString(requestUri);
+        String queryString = parseQueryString(requestUri);
         String[] elements = queryString.split(PARAMETER_DELIMITER);
 
         Stream.of(elements)

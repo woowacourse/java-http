@@ -23,14 +23,12 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public Path handle(RequestLine requestLine) {
-        checkLogin(requestLine);
-        URL foundUrl = getClass().getClassLoader().getResource("static/index.html");
-        try {
-            return Path.of(Objects.requireNonNull(foundUrl).toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+    public String handle(RequestLine requestLine) {
+        if (requestLine.isQueryStringRequest()) {
+            checkLogin(requestLine);
         }
+
+        return "/login.html";
     }
 
     private void checkLogin(RequestLine requestLine) {

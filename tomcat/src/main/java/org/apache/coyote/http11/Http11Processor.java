@@ -20,9 +20,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_DIRECTORY_NAME = "static";
-    private static final String DEFAULT_PAGE_URI = "/index.html";
-
 
     private final Socket connection;
 
@@ -67,7 +64,13 @@ public class Http11Processor implements Runnable, Processor {
             if (line.isBlank()) {
                 break;
             }
+
             String[] split = line.split(":");
+
+            if(split.length != 2) {
+                continue;
+            }
+
             String key = split[0].trim();
             String value = split[1].trim();
             requestHeaders.put(key, value);
@@ -78,7 +81,8 @@ public class Http11Processor implements Runnable, Processor {
     private String makeResponseBody(RequestLine requestLine) throws IOException {
         if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
             Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
-            Path path = controller.handle(requestLine);
+            String viewUri = controller.handle(requestLine);
+            Path path = new ViewResolver().findViewPath(viewUri);
             return Files.readString(path);
         }
         Path path = new ViewResolver().findViewPath(requestLine.getRequestURI());
@@ -87,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String findResponseContentType(String url) {
         String[] extension = url.split("\\.");
-        if (extension.length < 1) {
+        if (extension.length < 2) {
             return "text/html";
         }
         return "text/" + extension[1];

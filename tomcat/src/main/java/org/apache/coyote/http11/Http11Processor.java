@@ -55,8 +55,8 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (uri.equals("/index.html")) {
-                final String fileName = "static/index.html";
+            if (uri.endsWith(".html")) {
+                String fileName = "static" + uri;
                 responseBody = getResponseBody(fileName);
             } else if (uri.endsWith(".css") || uri.endsWith(".js")) {
                 contentType = "text/css";
@@ -92,9 +92,6 @@ public class Http11Processor implements Runnable, Processor {
                     statusCode = "302 Found";
                 }
                 final String fileName = "static/login.html";
-                responseBody = getResponseBody(fileName);
-            } else if (uri.endsWith("401.html")) {
-                final String fileName = "static" + uri;
                 responseBody = getResponseBody(fileName);
             }
 

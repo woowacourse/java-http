@@ -28,7 +28,7 @@
 ### 2단계 - 로그인 구현하기
 - [ ] 로그인 여부에 따라 다른 페이지로 이동
   - [x] `/login` 페이지에서 아이디는 `gugu`, 비밀번호는 `password`를 입력
-  - [ ] 로그인에 성공하면 응답 헤더에 http status code를 `302`로 반환하고 `/index.html`로 리다이렉트
+  - [x] 로그인에 성공하면 응답 헤더에 http status code를 `302`로 반환하고 `/index.html`로 리다이렉트
   - [ ] 로그인에 실패하면 `401.html`로 리다이렉트한다.
 - [ ] http://localhost:8080/register 으로 접속하면 회원가입 페이지`register.html` 반환
   - [ ] 회원가입 페이지를 보여줄 때는 `GET`을 사용

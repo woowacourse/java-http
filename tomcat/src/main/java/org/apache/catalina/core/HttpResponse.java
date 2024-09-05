@@ -65,7 +65,8 @@ public class HttpResponse implements HttpServletResponse {
 
     @Override
     public void sendRedirect(String s) throws IOException {
-
+        headers.put("Location", s);
+        setStatus(302);
     }
 
     @Override

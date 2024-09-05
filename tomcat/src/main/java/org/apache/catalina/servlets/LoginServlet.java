@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
 
         User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchElementException::new);
         if (user.checkPassword(request.getParameter("password"))) {
-            response.setStatus(302);
+            response.sendRedirect("/index.html");
             log.info("user : {}", user);
         }
     }

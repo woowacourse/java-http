@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 String responseBody = "Hello world!";
 
-                if (!"/".equals(uri)) {
+                if ("GET".equals(method) && !"/".equals(uri)) {
                     String path = uri;
 
                     if (path.contains("?")) {

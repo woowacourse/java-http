@@ -25,6 +25,10 @@ public enum MediaType {
                 .orElseThrow(IllegalArgumentException::new);
     }
 
+    public String getExtension() {
+        return extension;
+    }
+
     public String getValue() {
         return value;
     }

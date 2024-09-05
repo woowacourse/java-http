@@ -18,7 +18,7 @@ public class Header {
     public static Header of(List<String> splitHeaders) {
         Map<String, String> headers = splitHeaders.stream()
                 .filter(header -> header.contains(COLON))
-                .map(header -> header.split(COLON.concat(SPACE)))
+                .map(header -> header.split(COLON_WITH_SPACE))
                 .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
         return new Header(headers);
     }
@@ -40,7 +40,7 @@ public class Header {
 
     public String toResponse() {
         return headers.entrySet().stream()
-                .map(entry -> entry.getKey().concat(COLON.concat(SPACE)).concat(entry.getValue()).concat(SPACE))
+                .map(entry -> entry.getKey().concat(COLON_WITH_SPACE).concat(entry.getValue()).concat(SPACE))
                 .collect(Collectors.joining(CRLF));
     }
 }

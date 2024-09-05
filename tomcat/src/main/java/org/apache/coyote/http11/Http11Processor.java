@@ -38,6 +38,16 @@ public class Http11Processor implements Runnable, Processor {
             String uri = getUri(inputStream);
             String path = uri;
 
+            if ("/favicon.ico".equals(path)) {
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 204 No Content",
+                        "Content-Length: 0",
+                        "",
+                        "");
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
             // TODO: 메서드 분리, /login 요청이 아닐 때 쿼리파라미터 처리 고민
             int questionMarkIndex = uri.indexOf("?");
             if (questionMarkIndex != -1) {

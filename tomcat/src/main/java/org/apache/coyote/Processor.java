@@ -16,7 +16,9 @@
  */
 package org.apache.coyote;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 
 /**
  * Common interface for processors of all protocols.
@@ -28,5 +30,5 @@ public interface Processor {
      * data arrives) that allows processing to continue for a connection that is
      * not currently being processed.
      */
-    void process(Socket socket);
+    void process(Socket socket) throws URISyntaxException, IOException;
 }

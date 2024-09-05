@@ -26,8 +26,9 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String RESOURCE_PATH = "static";
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HttpSessionManger HTTP_SESSION_MANGER = new HttpSessionManger();
 
     private final Socket connection;
 
@@ -48,6 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             List<String> request = getRequest(inputStream);
             Map<String, String> body = getBody(request);
+            HttpCookie httpCookie = HttpCookie.from(request);
 
             String method = request.getFirst()
                     .split(" ")[0];
@@ -55,9 +57,14 @@ public class Http11Processor implements Runnable, Processor {
                     .split(" ")[1];
 
             HttpHeader responseHeader = new HttpHeader();
+
             String response = getResponse(requestUrl, HttpStatus.OK, responseHeader);
             if (requestUrl.startsWith("/login") && method.equals("POST")) {
-                response = login(body, HttpCookie.from(request), responseHeader);
+                response = login(body, httpCookie, responseHeader);
+            }
+
+            if (requestUrl.startsWith("/login") && method.equals("GET")) {
+                response = getLoginPage(httpCookie, responseHeader);
             }
 
             if (requestUrl.startsWith("/register") && method.equals("POST")) {
@@ -145,6 +152,14 @@ public class Http11Processor implements Runnable, Processor {
         return resourceUrl;
     }
 
+    private String getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
+        if (httpCookie.isContains("JSESSIONID")) {
+            return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
+        }
+
+        return getResponse("/login.html", HttpStatus.OK, responseHeader);
+    }
+
     private String login(Map<String, String> body, HttpCookie cookie, HttpHeader responseHeader) throws IOException {
         String account = body.get("account");
         String password = body.get("password");
@@ -156,7 +171,13 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (!cookie.isContains("JSESSIONID")) {
-            responseHeader.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+            String sessionId = String.valueOf(UUID.randomUUID());
+            cookie.addCookie("JSESSIONID", sessionId);
+            responseHeader.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+
+            HttpSession httpSession = new HttpSession(sessionId);
+            httpSession.setAttribute("user", user.get());
+            HTTP_SESSION_MANGER.add(httpSession);
         }
 
         log.info("로그인 성공 :: account = {}", user.get().getAccount());

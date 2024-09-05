@@ -1,18 +1,49 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-
 public class HttpRequest {
 
     private final HttpRequestHeader httpRequestHeader;
     private HttpRequestBody httpRequestBody;
 
-    public HttpRequest(BufferedReader bufferedReader) {
-        this.httpRequestHeader = new HttpRequestHeader(bufferedReader);
-        if (httpRequestHeader.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
-            this.httpRequestBody = new HttpRequestBody(contentLength, bufferedReader);
-        }
+    public HttpRequest(HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+        this.httpRequestHeader = httpRequestHeader;
+        this.httpRequestBody = httpRequestBody;
+    }
+
+    public HttpRequest(HttpRequestHeader httpRequestHeader) {
+        this(httpRequestHeader, null);
+    }
+
+    public boolean isMethod(String name) {
+        return httpRequestHeader.isMethod(name);
+    }
+
+    public boolean isPath(String path) {
+        return httpRequestHeader.isPath(path);
+    }
+
+    public boolean containsKey(String key) {
+        return httpRequestHeader.containsKey(key);
+    }
+
+    public String getValue(String key) {
+        return httpRequestHeader.getValue(key);
+    }
+
+    public HttpMethod getMethod() {
+        return httpRequestHeader.getMethod();
+    }
+
+    public String getPath() {
+        return httpRequestHeader.getPath();
+    }
+
+    public String getVersion() {
+        return httpRequestHeader.getVersion();
+    }
+
+    public String getBody() {
+        return httpRequestBody.getBody();
     }
 
     public HttpRequestHeader getHttpRequestHeader() {

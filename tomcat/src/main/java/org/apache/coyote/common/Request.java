@@ -46,6 +46,10 @@ public class Request {
                 .collect(HashMap::new, (map, entry) -> map.put(entry[0], entry[1]), HashMap::putAll);
     }
 
+    public void addParameter(String key, String value) {
+        parameters.put(key, value);
+    }
+
     public String getMethod() {
         return method;
     }

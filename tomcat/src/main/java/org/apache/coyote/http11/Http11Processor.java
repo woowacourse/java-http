@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Arrays;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
@@ -61,6 +62,20 @@ public class Http11Processor implements Runnable, Processor {
         String startLine = reader.readLine();
         String[] token = startLine.split(" ");
         String[] headers = reader.lines().takeWhile(line -> !line.isEmpty()).toArray(String[]::new);
-        return new Request(token[0], token[1], token[2], headers, null);
+        Request request = new Request(token[0], token[1], token[2], headers, null);
+        if ("POST".equals(token[0])) {
+            parseFormParameter(reader, request);
+        }
+        return request;
+    }
+
+    private void parseFormParameter(BufferedReader reader, Request request) throws IOException {
+        String s = request.getHeaders().getOrDefault("Content-Length", "0");
+        int contentLength = Integer.parseInt(s);
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        Arrays.stream(requestBody.split("&")).map(param -> param.split("="))
+                .forEach(entry -> request.addParameter(entry[0], entry[1]));
     }
 }

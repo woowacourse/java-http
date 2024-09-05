@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
                 printUserIfExist(queryString);
             }
 
-            final String responseBody = getResponseBody(httpRequestHeader);;
+            final String responseBody = getResponseBody(httpRequestHeader);
             final String mimeType = getMimeType(httpRequestHeader);
 
             final var response = String.join("\r\n",
@@ -141,10 +141,6 @@ public class Http11Processor implements Runnable, Processor {
             return DEFAULT_CONTENT_TYPE;
         }
         return Arrays.asList(requestUrl.split("\\.")).getLast();
-    }
-
-    private boolean isRequestUrlQueryString(final String requestUrl) {
-        return requestUrl.contains("?");
     }
 
     private void printUserIfExist(String queryString) {

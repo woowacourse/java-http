@@ -78,7 +78,6 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        assert resource != null;
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
                 "Content-Length: " + getFileSize(resource) + " \r\n" +
@@ -104,6 +103,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        assert resource != null;
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + getFileSize(resource) + " \r\n" +

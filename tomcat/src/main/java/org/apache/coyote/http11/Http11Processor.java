@@ -85,18 +85,15 @@ public class Http11Processor implements Runnable, Processor {
                 String fileName = "static" + uri;
                 responseBody = getHtmlResponseBody(fileName);
             } else if (uri.startsWith("/login")) {
-                int parameterStartingIndex = uri.indexOf("?");
-                if (parameterStartingIndex > 0) {
-                    List<String> queryParameterPairs = Arrays.stream(
-                                    uri.substring(parameterStartingIndex + 1).split("&"))
-                            .toList();
-                    Map<String, String> queryParameters = queryParameterPairs.stream().map(s -> s.split("="))
+                if (httpMethod.equals("POST")) {
+                    Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))
+                            .map(param -> param.split("=", 2))
                             .collect(Collectors.toMap(
                                     keyValue -> keyValue[0],
                                     keyValue -> keyValue[1]
                             ));
-                    String account = queryParameters.get("account");
-                    String password = queryParameters.get("password");
+                    String account = paramMap.get("account");
+                    String password = paramMap.get("password");
                     redirectUrl = "/index.html";
                     try {
                         User user = InMemoryUserRepository.findByAccount(account)
@@ -109,9 +106,10 @@ public class Http11Processor implements Runnable, Processor {
                         redirectUrl = "/401.html";
                     }
                     statusCode = "302 Found";
+                } else if (httpMethod.equals("GET")) {
+                    String fileName = "static/login.html";
+                    responseBody = getHtmlResponseBody(fileName);
                 }
-                String fileName = "static/login.html";
-                responseBody = getHtmlResponseBody(fileName);
             } else if (uri.equals("/register")) {
                 if (httpMethod.equals("POST")) {
                     Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))

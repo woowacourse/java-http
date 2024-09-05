@@ -132,7 +132,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 3447 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -172,11 +172,11 @@ class Http11ProcessorTest {
     void loginSuccess() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=validUser&password=correctPassword HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "");
+                "account=validUser&password=correctPassword");
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
@@ -203,11 +203,11 @@ class Http11ProcessorTest {
     void loginFailedInvalidPassword() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=validUser&password=wrongPassword HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "");
+                "account=validUser&password=wrongPassword");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");

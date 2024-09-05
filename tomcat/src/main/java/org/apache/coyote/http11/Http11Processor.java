@@ -10,8 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.controller.LoginController;
-import com.techcourse.exception.DashboardException;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.exception.UnsupportedMethodException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -38,14 +39,14 @@ public class Http11Processor implements Runnable, Processor {
                 final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 final var outputStream = connection.getOutputStream()
         ) {
-            StringBuilder request = http11Helper.getRequest(bufferedReader);
-            String endpoint = http11Helper.extractEndpoint(request.toString());
+            String request = http11Helper.getRequest(bufferedReader);
+            String endpoint = http11Helper.extractEndpoint(request);
             log.info("Requested endpoint: {}", endpoint);
 
             String response;
             try {
-                if (endpoint.startsWith("/login") && endpoint.contains("?")) {
-                    response = loginController.login(request.toString());
+                if (endpoint.startsWith("/login")) {
+                    response = loginController.login(request);
                 } else {
                     String fileName = http11Helper.getFileName(endpoint);
                     response = http11Helper.createResponse(HttpStatus.OK, fileName);
@@ -58,6 +59,9 @@ public class Http11Processor implements Runnable, Processor {
                 log.error("Error processing request for endpoint: {}", endpoint, e);
 
                 response = http11Helper.createResponse(HttpStatus.UNAUTHORIZED, "401.html");
+            } catch (UnsupportedMethodException e) {
+                log.error("Error processing request for endpoint: {}", endpoint, e);
+                response = http11Helper.createResponse(HttpStatus.METHOD_NOT_ALLOWED, "405.html");
             }
 
             outputStream.write(response.getBytes());

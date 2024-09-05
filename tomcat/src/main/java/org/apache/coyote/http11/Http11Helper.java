@@ -13,6 +13,7 @@ import java.util.Objects;
 import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Helper {
+    private static final int METHOD_POSITION = 0;
     private static final int ENDPOINT_POSITION = 1;
     private static final String DEFAULT_EXTENSION = MimeType.HTML.getExtension();
     private static final Http11Helper instance = new Http11Helper();
@@ -24,33 +25,38 @@ public class Http11Helper {
         return instance;
     }
 
-    public StringBuilder getRequest(BufferedReader bufferedReader) throws IOException {
+    public String getRequest(BufferedReader bufferedReader) throws IOException {
         StringBuilder request = new StringBuilder();
         String line;
-        while (Objects.nonNull(line = bufferedReader.readLine()) && !line.isEmpty()) {
+        while (Objects.nonNull(line = bufferedReader.readLine())) {
             request.append(line).append(System.lineSeparator());
         }
-        return request;
+        return request.toString().trim();
+    }
+
+    public String extractHttpMethod(String request){
+        return request.split(" ")[METHOD_POSITION];
     }
 
     public String extractEndpoint(String request) {
         return request.split(" ")[ENDPOINT_POSITION];
     }
 
-    public Map<String, String> parseQueryString(String endpoint) {
-        Map<String, String> queryParams = new HashMap<>();
-        int index = endpoint.indexOf("?");
-        if (index != -1) {
-            String queryString = endpoint.substring(index + 1);
-            String[] pairs = queryString.split("&");
+    public Map<String, String> extractRequestBody(String request) {
+        Map<String, String> bodyParams = new HashMap<>();
+        String[] parts = request.split("\r\n\r\n", 2);
+
+        if (parts.length > 1) {
+            String body = parts[1];
+            String[] pairs = body.split("&");
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=");
                 if (keyValue.length == 2) {
-                    queryParams.put(keyValue[0], keyValue[1]);
+                    bodyParams.put(keyValue[0], keyValue[1]);
                 }
             }
         }
-        return queryParams;
+        return bodyParams;
     }
 
     public String getFileName(String endpoint) {

@@ -7,6 +7,7 @@ public class ResponseHeader {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private final Header header;
 
@@ -24,6 +25,10 @@ public class ResponseHeader {
 
     public void setContentLength(long contentLength) {
         header.addHeader(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void setLocation(String location) {
+        header.addHeader(LOCATION, location);
     }
 
     public String toResponse() {

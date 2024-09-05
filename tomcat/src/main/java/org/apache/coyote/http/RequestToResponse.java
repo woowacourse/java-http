@@ -53,23 +53,53 @@ public class RequestToResponse {
 
     private String login(RequestLine requestLine) throws IOException {
         String uris = requestLine.getPath().getPath();
-        int index = uris.indexOf("?");
-        String uri = uris.substring(0, index);
-        String queryString = uris.substring(index + 1);
-        final URL resource = getClass().getClassLoader().getResource("static" + uri + ".html");
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        List<String> infos = List.of(queryString.split("&"));
-        List<String> ids = List.of(infos.get(0).split("="));
-        List<String> passwords = List.of(infos.get(1).split("="));
-        User user = InMemoryUserRepository.findByAccount(ids.get(1)).get();
-        if (user.checkPassword(passwords.get(1))) {
-            log.info(user.toString());
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "", responseBody
+        if (!uris.contains("?")) {
+            Path path = requestLine.getPath();
+            final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(".html"));
+            try {
+                final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+                StatusLine statusLine = new StatusLine(HttpStatus.OK);
+                ResponseHeader header = new ResponseHeader();
+                header.setContentType(MimeType.getContentTypeFromExtension(".html"));
+                header.setContentLength(responseBody.getBytes().length);
+
+                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+                return response.toResponse();
+            } catch (NullPointerException e) {
+                return HttpResponse.notFoundResponses().toResponse();
+            }
+        }
+        if (uris.contains("?")) {
+            int index = uris.indexOf("?");
+            String uri = uris.substring(0, index);
+            String queryString = uris.substring(index + 1);
+            final URL resource = getClass().getClassLoader().getResource("static" + uri + ".html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            List<String> infos = List.of(queryString.split("&"));
+            List<String> ids = List.of(infos.get(0).split("="));
+            List<String> passwords = List.of(infos.get(1).split("="));
+            User user = InMemoryUserRepository.findByAccount(ids.get(1)).get();
+            ResponseHeader header = new ResponseHeader();
+            header.setContentType(MimeType.HTML.getContentType());
+            header.setContentLength(responseBody.getBytes().length);
+            if (user.checkPassword(passwords.get(1))) {
+                log.info(user.toString());
+                header.setLocation("/index.html");
+                HttpResponse response = new HttpResponse(
+                        new StatusLine(HttpVersion.HTTP11, HttpStatus.FOUND),
+                        header,
+                        null
+                );
+                return response.toResponse();
+            }
+            header.setLocation("/401.html");
+            HttpResponse response = new HttpResponse(
+                    new StatusLine(HttpVersion.HTTP11, HttpStatus.FOUND),
+                    header,
+                    null
             );
+            return response.toResponse();
         }
         return "";
     }

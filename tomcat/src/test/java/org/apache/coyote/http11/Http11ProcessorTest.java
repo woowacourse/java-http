@@ -67,7 +67,7 @@ class Http11ProcessorTest {
 
     @DisplayName("GET /login과 같이 파일 확장자가 없는 요청이 오면 대응되는 html을 반환한다.")
     @ParameterizedTest
-    @ValueSource(strings = {"login", "register"})
+    @ValueSource(strings = {"/login", "/register"})
     void login(String uri) throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -101,10 +101,14 @@ class Http11ProcessorTest {
     void loginWithValidQueryString() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
+                "account=gugu&password=password ",
                 "");
 
         final var socket = new StubSocket(httpRequest);
@@ -125,10 +129,14 @@ class Http11ProcessorTest {
     void loginWithInvalidQueryString() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
+                "account=gugu&password=invalidPassword ",
                 "");
 
         final var socket = new StubSocket(httpRequest);

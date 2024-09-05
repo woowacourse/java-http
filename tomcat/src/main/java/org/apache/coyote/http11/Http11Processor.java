@@ -41,29 +41,35 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            String uri = getUri(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String[] httpRequestFirstLine = bufferedReader.readLine().split(" ");
+            String httpMethod = httpRequestFirstLine[0];
+            String uri = httpRequestFirstLine[1];
 
-            if ("/favicon.ico".equals(uri)) {
-                handleFaviconRequest(outputStream);
-                return;
+            if ("GET".equals(httpMethod)) {
+                if ("/favicon.ico".equals(uri)) {
+                    handleFaviconRequest(outputStream);
+                    return;
+                }
             }
-            
-            if (uri.startsWith("/login")) {
-                handleLoginRequest(uri, outputStream);
-                return;
+            if ("POST".equals(httpMethod)) {
+                while (true) {
+                    String header = bufferedReader.readLine();
+                    if (header.isBlank()) {
+                        break;
+                    }
+                }
+                if (uri.startsWith("/login")) {
+                    handleLogin(bufferedReader.readLine().trim(), outputStream);
+                    return;
+                }
+                // TODO: POST /register 구현
             }
 
             writeStaticFileResponse(uri, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getUri(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        return bufferedReader.readLine().split(" ")[1];
     }
 
     private void handleFaviconRequest(OutputStream outputStream) throws IOException {
@@ -73,20 +79,11 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, response);
     }
 
-    private void handleLoginRequest(String uri, OutputStream outputStream) throws IOException {
-        int questionMarkIndex = uri.indexOf("?");
-        if (questionMarkIndex == -1) {
-            writeStaticFileResponse(uri, outputStream);
-            return;
-        }
-        handleLoginQueryString(uri.substring(questionMarkIndex + 1), outputStream);
-    }
+    private void handleLogin(String requestBody, OutputStream outputStream) throws IOException {
+        Map<String, String> Pairs = getPairs(requestBody);
 
-    private void handleLoginQueryString(String queryString, OutputStream outputStream) throws IOException {
-        Map<String, String> queryStringPairs = getQueryStringPairs(queryString);
-
-        String account = queryStringPairs.get("account");
-        String password = queryStringPairs.get("password");
+        String account = Pairs.get("account");
+        String password = Pairs.get("password");
         if (account != null & password != null) {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
             if (foundUser.isPresent() && "password".equals(password)) {
@@ -104,9 +101,9 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, response);
     }
 
-    private Map<String, String> getQueryStringPairs(String queryString) {
+    private Map<String, String> getPairs(String requestBody) {
         Map<String, String> queryStringPairs = new HashMap<>();
-        for (String pairs : queryString.split("&")) {
+        for (String pairs : requestBody.split("&")) {
             String[] pair = pairs.split("=");
             if (pair.length == 2) {
                 queryStringPairs.put(pair[0], pair[1]);
@@ -135,12 +132,11 @@ public class Http11Processor implements Runnable, Processor {
         return uri;
     }
 
-    private String getStaticFileContent(String path) throws IOException {
-        if (Objects.equals(path, "/")) {
+    private String getStaticFileContent(String uri) throws IOException {
+        if (Objects.equals(uri, "/")) {
             return "Hello world!";
         }
-        String staticPath = "static/" + path;
-
+        String staticPath = "static" + uri;
         File file = new File(getClass().getClassLoader().getResource(staticPath).getPath());
         return new String(Files.readAllBytes(file.toPath()));
     }

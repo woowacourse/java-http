@@ -16,6 +16,10 @@ import org.apache.coyote.handler.NotFoundHandler;
 import org.apache.coyote.handler.RootRequestHandler;
 import org.apache.coyote.handler.SignupRequestHandler;
 import org.apache.coyote.handler.StaticResourceRequestHandler;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.Http11RequestBody;
+import org.apache.coyote.http11.request.Http11RequestHeaders;
+import org.apache.coyote.http11.request.Http11RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

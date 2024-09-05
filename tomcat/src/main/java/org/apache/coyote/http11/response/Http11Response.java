@@ -1,9 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 public class Http11Response implements HttpResponse {
 

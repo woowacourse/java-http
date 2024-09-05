@@ -5,7 +5,7 @@ import static org.apache.coyote.http11.HttpStatus.OK;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.response.Http11Response;
 
 public class RootRequestHandler implements RequestHandler {
 

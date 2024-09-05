@@ -1,10 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 
 import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.Http11Method;
 
 public class Http11RequestLine {
 

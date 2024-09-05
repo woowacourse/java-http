@@ -1,12 +1,11 @@
 package org.apache.coyote.request;
 
-import java.util.Map;
 import org.apache.coyote.request.uri.URI;
 
 public class RequestLine {
 
     private static final String DELIMITER = " ";
-    private static final int VALID_REQUEST_LENGTH = 3;
+    private static final int VALID_SPLIT_REQUEST_LINE_LENGTH = 3;
 
     private final HttpMethod httpMethod;
 
@@ -24,7 +23,7 @@ public class RequestLine {
     }
 
     private void validLength(String[] requestLines) {
-        if (requestLines.length != VALID_REQUEST_LENGTH) {
+        if (requestLines.length != VALID_SPLIT_REQUEST_LINE_LENGTH) {
             throw new IllegalArgumentException("잘못된 Request line입니다.");
         }
     }

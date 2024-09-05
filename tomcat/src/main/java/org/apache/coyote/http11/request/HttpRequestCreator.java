@@ -13,9 +13,13 @@ public class HttpRequestCreator {
     private HttpRequestCreator() {
     }
 
-    public static RequestStartLine createStartLine(BufferedReader reader) throws IOException {
+    public static HttpRequest createHttpRequest(BufferedReader reader) throws IOException {
+        RequestStartLine startLine = createStartLine(reader);
+        return new HttpRequest(startLine);
+    }
+
+    private static RequestStartLine createStartLine(BufferedReader reader) throws IOException {
         String startLine = readLine(reader);
-        log.info("http request = {}", startLine);
         return createStartLine(startLine);
     }
 

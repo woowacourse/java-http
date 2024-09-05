@@ -10,12 +10,18 @@ import org.junit.jupiter.api.Test;
 class HttpRequestCreatorTest {
 
     @Test
-    void createStartLineTest() throws IOException {
-        String startLine = "GET / HTTP/1.1";
-        BufferedReader reader = new BufferedReader(new StringReader(startLine));
-        RequestStartLine expected = new RequestStartLine("GET", "/", "HTTP/1.1");
+    void createHttpRequestTest() throws IOException {
+        String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");;
+        BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
+        RequestStartLine startLine = new RequestStartLine("GET", "/", "HTTP/1.1");
+        HttpRequest expected = new HttpRequest(startLine);
 
-        RequestStartLine actual = HttpRequestCreator.createStartLine(reader);
+        HttpRequest actual = HttpRequestCreator.createHttpRequest(reader);
 
         assertThat(actual).isEqualTo(expected);
     }

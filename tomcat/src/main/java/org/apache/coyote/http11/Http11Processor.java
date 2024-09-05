@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.request.HttpMethod.GET;
+import static org.apache.coyote.request.HttpMethod.POST;
+
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -11,15 +14,19 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.HttpHeader;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.RequestBody;
+import org.apache.coyote.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +34,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final int REQUEST_LINE_PARAM_COUNT = 3;
-    private static final Set<String> ALLOWED_METHODS =
-            Set.of("GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH");
-    private static final String HTTP_1_1 = "HTTP/1.1";
     private static final String STATIC_DIRNAME = "static";
     private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CONTENT_LENGTH = "Content-Length";
@@ -57,23 +60,36 @@ public class Http11Processor implements Runnable, Processor {
                 final var outputStream = connection.getOutputStream()) {
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            final String requestLine = readRequestLine(reader);
-            Map<String, String> headers = readHeaders(reader);
-            String requestBody = null;
-            HttpCookie cookie = null;
 
-            if (headers.containsKey(CONTENT_LENGTH)) {
-                int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
+            RequestLine requestLine = new RequestLine(reader.readLine());
+
+            List<String> rawHeaders = new ArrayList<>();
+            while (reader.ready()) {
+                String line = reader.readLine();
+                if (line.isBlank()) {
+                    break;
+                }
+                rawHeaders.add(line);
+            }
+            HttpHeader httpHeader = new HttpHeader(rawHeaders);
+
+            RequestBody requestBody = null;
+            if (httpHeader.contains(CONTENT_LENGTH)) {
+                int contentLength = Integer.parseInt(httpHeader.get(CONTENT_LENGTH));
                 char[] buffer = new char[contentLength];
                 reader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
+                requestBody = new RequestBody(new String(buffer));
             }
 
-            if (headers.containsKey(COOKIE)) {
-                cookie = new HttpCookie(headers.get(COOKIE));
+            HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, requestBody);
+
+            HttpCookie cookie = null;
+
+            if (httpHeader.contains(COOKIE)) {
+                cookie = new HttpCookie(httpHeader.get(COOKIE));
             }
 
-            final String response = makeResponse(requestLine, requestBody, cookie);
+            final String response = makeResponse(httpRequest, cookie);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -82,55 +98,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestLine(BufferedReader reader) {
-        try {
-            return reader.readLine();
-        } catch (IOException e) {
-            throw new UncheckedServletException("HTTP 요청의 request line을 읽을 수 없습니다.");
-        }
-    }
-
-    private Map<String, String> readHeaders(BufferedReader reader) {
-        Map<String, String> headers = new HashMap<>();
-
-        try {
-            while (reader.ready()) {
-                String line = reader.readLine();
-
-                if (line.isBlank()) {
-                    break;
-                }
-
-                String[] entry = line.split(": ");
-
-                if (entry.length == 2) {
-                    headers.put(entry[0], entry[1]);
-                }
-            }
-            return headers;
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
-        }
-    }
-
-    private String makeResponse(String requestLine, String requestBody, HttpCookie cookie) {
-        String[] params = requestLine.split(" ");
-        validateParamCount(params);
-
-        String method = params[0];
-        String requestUri = params[1];
-        String httpVersion = params[2];
-        validateFormat(method, requestUri, httpVersion);
-
-        String endpoint = parseEndpoint(requestUri);
-        Map<String, String> queryParams = parseQueryParams(requestUri);
-        Map<String, String> requestData = parseRequestBody(requestBody);
-
-        if (method.equals("GET") && endpoint.equals("/")) {
+    private String makeResponse(HttpRequest httpRequest, HttpCookie cookie) {
+        if (httpRequest.is(GET, "/")) {
             return makeResponseMessageFromText("Hello world!", HttpStatusCode.OK);
         }
 
-        if (method.equals("GET") && endpoint.equals("/login")) {
+        if (httpRequest.is(GET, "/login")) {
             if (cookie != null && cookie.hasCookieWithName(JSESSIONID)) {
                 SessionManager sessionManager = SessionManager.getInstance();
                 String sessionId = cookie.get(JSESSIONID);
@@ -142,10 +115,12 @@ public class Http11Processor implements Runnable, Processor {
             return makeResponseMessageFromFile("login.html", HttpStatusCode.OK, cookie);
         }
 
-        if (method.equals("POST") && endpoint.equals("/login")) {
-            if (requestData.containsKey("account") && requestData.containsKey("password")) {
-                String account = requestData.get("account");
-                String password = requestData.get("password");
+        if (httpRequest.is(POST, "/login")) {
+            RequestBody requestBody = httpRequest.getRequestBody();
+
+            if (requestBody.containsAll("account", "password")) {
+                String account = requestBody.get("account");
+                String password = requestBody.get("password");
 
                 return InMemoryUserRepository.findByAccountAndPassword(account, password)
                         .map(user -> {
@@ -157,16 +132,17 @@ public class Http11Processor implements Runnable, Processor {
                         })
                         .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED, cookie));
             }
+
+            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
         }
 
-        if (method.equals("POST") && endpoint.equals("/register")) {
-            if (requestData.containsKey("account")
-                && requestData.containsKey("email")
-                && requestBody.contains("password")
-            ) {
-                String account = requestData.get("account");
-                String email = requestData.get("email");
-                String password = requestData.get("password");
+        if (httpRequest.is(POST, "/register")) {
+            RequestBody requestBody = httpRequest.getRequestBody();
+
+            if (requestBody.containsAll("account", "email", "password")) {
+                String account = requestBody.get("account");
+                String email = requestBody.get("email");
+                String password = requestBody.get("password");
 
                 if (!InMemoryUserRepository.existsByAccount(account)) {
                     InMemoryUserRepository.save(new User(account, password, email));
@@ -176,73 +152,7 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
 
-        return makeResponseMessageFromFile(endpoint.substring(1), HttpStatusCode.OK, cookie);
-    }
-
-    private static void validateParamCount(String[] params) {
-        if (params.length != REQUEST_LINE_PARAM_COUNT) {
-            throw new UncheckedServletException(
-                    String.format(
-                            "Request line의 인자는 %d개여야 합니다. 입력된 인자 개수 = %d",
-                            REQUEST_LINE_PARAM_COUNT,
-                            params.length
-                    )
-            );
-        }
-    }
-
-    private void validateFormat(String method, String requestUri, String httpVersion) {
-        if (!ALLOWED_METHODS.contains(method)) {
-            throw new UncheckedServletException(String.format("허용되지 않는 HTTP method입니다. 입력값 = %s", method));
-        }
-        if (!requestUri.startsWith("/")) {
-            throw new UncheckedServletException(String.format("Request URI는 /로 시작하여야 합니다. 입력값 = %s", requestUri));
-        }
-        if (!httpVersion.equals(HTTP_1_1)) {
-            throw new UncheckedServletException(String.format("HTTP 버전은 %s만 허용됩니다. 입력값 = %s", HTTP_1_1, httpVersion));
-        }
-    }
-
-    private String parseEndpoint(String requestUri) {
-        return requestUri.split("\\?")[0];
-    }
-
-    private Map<String, String> parseQueryParams(String requestUri) {
-        String[] substrings = requestUri.split("\\?");
-
-        if (substrings.length == 1) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> queryParams = new HashMap<>();
-        String rawQueryParams = requestUri.split("\\?")[1];
-
-        for (String entry : rawQueryParams.split("&")) {
-            String[] data = entry.split("=");
-            if (data.length != 2) {
-                return Collections.emptyMap();
-            }
-            queryParams.put(data[0], data[1]);
-        }
-
-        return queryParams;
-    }
-
-    private Map<String, String> parseRequestBody(String requestBody) {
-        if (requestBody == null) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> requestData = new HashMap<>();
-
-        for (String entry : requestBody.split("&")) {
-            String[] data = entry.split("=");
-            if (data.length == 2) {
-                requestData.put(data[0], data[1]);
-            }
-        }
-
-        return requestData;
+        return makeResponseMessageFromFile(httpRequest.getPath(), HttpStatusCode.OK, cookie);
     }
 
     private String makeResponseMessageFromText(String content, HttpStatusCode statusCode) {

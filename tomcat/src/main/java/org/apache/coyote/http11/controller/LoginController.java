@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,8 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public Map<String, String> handle(RequestLine requestLine) {
+    public Map<String, String> handle(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.getRequestLine();
         if (requestLine.isQueryStringRequest()) {
             return checkLogin(requestLine);
         }

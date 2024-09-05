@@ -38,4 +38,8 @@ public class HttpHeaders {
     public Map<String, String> getPayLoads() {
         return payLoads;
     }
+
+    public int contentLength() {
+        return Integer.parseInt(payLoads.get("Content-Length"));
+    }
 }

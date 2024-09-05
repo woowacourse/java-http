@@ -12,6 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.error.ErrorHandlerMapper;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.ResponseResolver;
 import org.slf4j.Logger;
@@ -38,9 +39,10 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            RequestLine requestLine = new RequestLine(bufferedReader.readLine());
 
-            String response = makeResponse(requestLine);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+
+            String response = makeResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -50,7 +52,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(RequestLine requestLine) throws IOException {
+    private String makeResponse(HttpRequest httpRequest) throws IOException {
+        RequestLine requestLine = httpRequest.getRequestLine();
         try {
             if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
                 return resolveHandlerResponse(requestLine);
@@ -75,12 +78,12 @@ public class Http11Processor implements Runnable, Processor {
         );
     }
 
-    private String resolveHandlerResponse(RequestLine requestLine) {
-        Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
-        Map<String, String> responseParameters = controller.handle(requestLine);
+    private String resolveHandlerResponse(HttpRequest httpRequest) {
+        Controller controller = HandlerMapper.mapTo(httpRequest.getRequestUri());
+        Map<String, String> responseParameters = controller.handle(httpRequest);
         return ResponseResolver.resolveResponse(
                 responseParameters,
-                findResponseContentType(requestLine.getRequestURI())
+                findResponseContentType(httpRequest.getRequestUri())
         );
     }
 

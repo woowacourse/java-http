@@ -1,9 +1,8 @@
-package servlet.resource;
+package servlet.handler;
 
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.StatusCode;
 import servlet.ResponseAndView;
-import servlet.handler.Handler;
 
 public class WelcomePageHandler implements Handler {
 

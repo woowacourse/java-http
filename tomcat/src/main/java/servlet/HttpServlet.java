@@ -19,7 +19,7 @@ import org.apache.coyote.response.StatusCode;
 import servlet.handler.Handler;
 import servlet.resolver.ViewResolver;
 import servlet.handler.ResourceHandler;
-import servlet.resource.WelcomePageHandler;
+import servlet.handler.WelcomePageHandler;
 
 public class HttpServlet {
 

@@ -15,7 +15,7 @@ public enum StatusCode implements Assemblable {
 
     @Override
     public void assemble(StringBuilder builder) {
-        String status = name().replace("_", " ").toLowerCase();
-        builder.append("%s %d\r\n".formatted(status, code));
+        String message = name().replace("_", " ").toLowerCase();
+        builder.append("%d %s\r\n".formatted(code, message));
     }
 }

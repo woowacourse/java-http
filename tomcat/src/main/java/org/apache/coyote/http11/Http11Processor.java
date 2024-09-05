@@ -9,21 +9,14 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.controller.LoginController;
-import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.ViewController;
-import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.exception.UnsupportedMethodException;
+import com.techcourse.controller.FrontController;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final LoginController loginController = new LoginController();
-    private final RegisterController registerController = new RegisterController();
-    private final ViewController viewController = new ViewController();
-    private final Http11Helper http11Helper = Http11Helper.getInstance();
+    private final FrontController frontController = new FrontController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -46,24 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             String endpoint = request.getURI();
             log.info("Requested endpoint: {}, Method: {}", endpoint, request.getHttpMethod());
 
-            String response;
-            try {
-                if (endpoint.startsWith("/login")) {
-                    response = loginController.handle(request);
-                } else if (endpoint.startsWith("/register")) {
-                    response = registerController.handle(request);
-                } else {
-                    response = viewController.handle(request);
-                }
-            } catch (UncheckedServletException e) {
-                log.error("Error processing request for endpoint: {}", endpoint, e);
-
-                response = http11Helper.createResponse(HttpStatus.NOT_FOUND, "404.html");
-            } catch (UnsupportedMethodException e) {
-                log.error("Error processing request for endpoint: {}", endpoint, e);
-
-                response = http11Helper.createResponse(HttpStatus.METHOD_NOT_ALLOWED, "405.html");
-            }
+            String response = frontController.handle(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

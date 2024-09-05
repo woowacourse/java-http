@@ -70,7 +70,7 @@ public class HttpRequest {
     }
 
     public String getURI() {
-        return uri;
+        return uri.split("\\.")[0];
     }
 
     public String getHttpMethod() {

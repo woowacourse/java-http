@@ -34,7 +34,7 @@ public class HttpRequestParser {
         Map<String, String> headers = new HashMap<>();
 
         String headerLine = bufferedReader.readLine();
-        while(!EMPTY_LINE.equals(headerLine) && validateNullLine(headerLine)) {
+        while(!EMPTY_LINE.equals(headerLine)) {
             String[] headerInfo = headerLine.split(DELIMITER_HEADER);
             String key = headerInfo[0];
             String value = headerInfo[1];
@@ -42,9 +42,5 @@ public class HttpRequestParser {
             headerLine = bufferedReader.readLine();
         }
         return new HttpHeaders(headers);
-    }
-
-    boolean validateNullLine(String line) {
-        return line != null;
     }
 }

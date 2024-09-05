@@ -17,4 +17,8 @@ public class HttpRequest {
     public String getHttpRequestPath() {
         return httpRequestPath.uri();
     }
+
+    public String getContentType() {
+        return httpHeaders.getContentType();
+    }
 }

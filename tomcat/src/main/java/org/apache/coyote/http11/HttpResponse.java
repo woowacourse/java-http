@@ -27,10 +27,12 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
         builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append(" ");
         headers.forEach((key, value) -> builder.append("\r\n").append(key).append(": ").append(value).append(" "));
 
-        String cookiesMessage = cookies.entrySet().stream()
-                .map(Entry::toString)
-                .collect(Collectors.joining("; "));
-        builder.append("\r\n").append("Set-Cookie: ").append(cookiesMessage).append(" ");
+        if (!cookies.isEmpty()) {
+            String cookiesMessage = cookies.entrySet().stream()
+                    .map(Entry::toString)
+                    .collect(Collectors.joining("; "));
+            builder.append("\r\n").append("Set-Cookie: ").append(cookiesMessage).append(" ");
+        }
 
         if (body != null && body.length > 0) {
             builder.append("\r\n").append("Content-Length: ").append(body.length).append(" ");

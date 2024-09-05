@@ -13,17 +13,12 @@ public class HttpRequestConvertor {
 
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) {
         try {
-            String firstLine = bufferedReader.readLine();
-            if (firstLine == null) {
+            String requestLine = bufferedReader.readLine();
+            if (requestLine == null) {
                 throw new RuntimeException("요청이 비어 있습니다.");
             }
 
-            String[] headerFirstLine = firstLine.split(" ");
-            HttpMethod method = HttpMethod.getHttpMethod(headerFirstLine[0]);
-            String path = headerFirstLine[1];
-            String version = headerFirstLine[2];
-
-            HttpRequestLine httpRequestLine = new HttpRequestLine(method, path, version);
+            HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
 
             Map<String, String> headers = getHeaders(bufferedReader);
 

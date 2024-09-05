@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.message.common;
 
 import java.util.HashMap;
 import java.util.Map;

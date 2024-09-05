@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.message.response;
 
-import org.apache.coyote.http11.HttpBody;
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.message.common.HttpBody;
+import org.apache.coyote.http11.message.common.HttpHeaders;
 
 public class HttpResponse {
 

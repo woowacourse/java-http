@@ -29,4 +29,8 @@ public class QueryParams {
         }
         return queryParams.get(key);
     }
+
+    public boolean existQueryParams() {
+        return !queryParams.isEmpty();
+    }
 }

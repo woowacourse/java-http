@@ -28,4 +28,8 @@ public class URI {
     public String getQueryParamValue(String key) {
         return this.queryParams.getValue(key);
     }
+
+    public boolean existQueryParams() {
+        return this.queryParams.existQueryParams();
+    }
 }

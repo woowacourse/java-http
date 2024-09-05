@@ -33,4 +33,8 @@ public class Request {
     public String getBodyValue(String key) {
         return body.getValue(key);
     }
+
+    public boolean existQueryParams() {
+        return requestLine.existQueryParams();
+    }
 }

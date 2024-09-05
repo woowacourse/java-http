@@ -99,26 +99,24 @@ public class Http11Processor implements Runnable, Processor {
             queryParams.put(keyAndValue[0], keyAndValue[1]);
         }
 
-        User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .orElseThrow();
-        if (user.checkPassword(queryParams.get("password"))) {
+        try {
+            User user = InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                    .orElseThrow();
+            if (!user.checkPassword(queryParams.get("password"))) {
+                throw new RuntimeException();
+            }
             log.info("user: {}", user);
+        } catch (Exception e) {
+            processRequest("/401.html", outputStream);
         }
 
-        URI resource = getClass().getClassLoader().getResource("static/login.html").toURI();
-        final Path path = Path.of(resource);
-        byte[] fileBytes = Files.readAllBytes(path);
-
         final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + fileBytes.length + " ",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
                 "",
                 "");
 
         outputStream.write(response.getBytes());
-        outputStream.write(fileBytes);
-
         outputStream.flush();
     }
 

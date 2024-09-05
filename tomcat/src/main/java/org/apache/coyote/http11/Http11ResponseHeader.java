@@ -11,10 +11,14 @@ public class Http11ResponseHeader {
     private final ContentType contentType;
     private final int contentLength;
 
-    public Http11ResponseHeader(StatusLine statusLine, ContentType contentType, int contentLength) {
+    private Http11ResponseHeader(StatusLine statusLine, ContentType contentType, int contentLength) {
         this.statusLine = statusLine;
         this.contentType = contentType;
         this.contentLength = contentLength;
+    }
+
+    public static Http11ResponseHeader of(StatusLine statusLine, ContentType contentType, int contentLength) {
+        return new Http11ResponseHeader(statusLine, contentType, contentLength);
     }
 
     @Override

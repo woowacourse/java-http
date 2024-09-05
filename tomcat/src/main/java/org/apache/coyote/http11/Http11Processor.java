@@ -40,11 +40,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static Http11Response getHttp11Response(Http11RequestHeader http11RequestHeader) throws IOException {
+    private Http11Response getHttp11Response(Http11RequestHeader http11RequestHeader) throws IOException {
         RequestUri requestUri = http11RequestHeader.getRequestUri();
         List<String> acceptTypes = http11RequestHeader.getAcceptType();
         StatusLine statusLine = StatusLine.ok(http11RequestHeader.getHttpVersion());
 
-        return Http11Response.of(statusLine, acceptTypes, requestUri);
+        return Http11Response.of(statusLine, acceptTypes, Http11RequestHandler.handle(requestUri));
     }
 }

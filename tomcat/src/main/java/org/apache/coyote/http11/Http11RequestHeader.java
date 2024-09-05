@@ -21,7 +21,7 @@ public class Http11RequestHeader {
     private final StartLine startLine;
     private final HttpHeaders httpHeaders;
 
-    public Http11RequestHeader(StartLine startLine, HttpHeaders httpHeaders) {
+    private Http11RequestHeader(StartLine startLine, HttpHeaders httpHeaders) {
         this.startLine = startLine;
         this.httpHeaders = httpHeaders;
     }

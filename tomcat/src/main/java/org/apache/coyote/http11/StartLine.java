@@ -8,7 +8,7 @@ public class StartLine {
     private final RequestUri requestUri;
     private final HttpVersion httpVersion;
 
-    public StartLine(HttpMethod httpMethod, RequestUri requestUri, HttpVersion httpVersion) {
+    private StartLine(HttpMethod httpMethod, RequestUri requestUri, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
         this.requestUri = requestUri;
         this.httpVersion = httpVersion;

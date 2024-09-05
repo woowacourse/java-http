@@ -14,7 +14,7 @@ public class RequestUri {
     private final String queryString;
     private final Map<String, String> queryParameters;
 
-    public RequestUri(String path, String queryString, Map<String, String> queryParameters) {
+    private RequestUri(String path, String queryString, Map<String, String> queryParameters) {
         this.path = path;
         this.queryString = queryString;
         this.queryParameters = queryParameters;

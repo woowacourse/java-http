@@ -28,7 +28,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_PAGE = "Hello world!";
     private static final String RESOURCE_PATH_PREFIX = "static";
     private static final String CONTENT_TYPE_HTML = "text/html";
-    public static final String ACCEPT = "Accept:";
+    public static final String ACCEPT_PREFIX = "Accept: ";
+    public static final String QUERY_SEPARATOR = "\\?";
+    public static final String PARAM_SEPARATOR = "&";
 
     private final Socket connection;
 
@@ -97,11 +99,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private ResponseContent checkFileType(List<String> sentences) {
         String accept = sentences.stream()
-                .filter(sentence -> sentence.startsWith(ACCEPT))
+                .filter(sentence -> sentence.startsWith(ACCEPT_PREFIX))
+                .map(sentence -> sentence.substring(ACCEPT_PREFIX.length(), sentence.length() - 1).split(",")[0])
                 .findAny()
-                .orElse(ACCEPT + " " + CONTENT_TYPE_HTML)
-                .split(" ")[1]
-                .split(",")[0];
+                .orElse(CONTENT_TYPE_HTML);
 
         String headerFirstLine = sentences.getFirst().split(" ")[1];
         return new ResponseContent(accept, getHtmlResponseContent(headerFirstLine));

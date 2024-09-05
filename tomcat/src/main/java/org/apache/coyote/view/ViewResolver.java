@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpRequestHeader;
 
 public class ViewResolver {
 
@@ -19,7 +19,7 @@ public class ViewResolver {
         return handleGetRequest(view);
     }
 
-    public String resolve(HttpRequest request) throws IOException {
+    public String resolve(HttpRequestHeader request) throws IOException {
         if (GET_METHOD.equals(request.getHttpMethod())) {
             return handleGetRequest(request.getPath());
         }

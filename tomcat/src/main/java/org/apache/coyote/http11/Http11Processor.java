@@ -9,9 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.handler.CSSRequestHandler;
-import org.apache.coyote.handler.HTMLRequestHandler;
-import org.apache.coyote.handler.JSRequestHandler;
+import org.apache.coyote.handler.ResourceRequestHandler;
 import org.apache.coyote.handler.RootRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_RESOURCE_BASE_URL = "static";
 
     private final Socket connection;
     private final List<RequestHandler> requestHandlers;
@@ -31,9 +28,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private List<RequestHandler> findImplementations() {
         return List.of(
-                new CSSRequestHandler(),
-                new HTMLRequestHandler(),
-                new JSRequestHandler(),
+                new ResourceRequestHandler(),
                 new RootRequestHandler()
         );
     }

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public interface RequestHandler {
 
-    boolean canHandling(HttpRequest httpRequest);
+    boolean canHandling(HttpRequest httpRequest) throws IOException;
 
     String getContentType(HttpRequest httpRequest);
 

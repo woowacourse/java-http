@@ -20,6 +20,11 @@ public class Http11Request {
         this.body = body;
     }
 
+    public Http11Cookie getCookies() {
+        String cookies = headers.getOrDefault("Cookie", "");
+        return new Http11Cookie(cookies);
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }

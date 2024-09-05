@@ -52,6 +52,9 @@ public class Http11Processor implements Runnable, Processor {
         String path = request.getPath();
         log.info("request path = {}", path);
 
+        if (path.equals("/login") && httpMethod.equals("GET")) {
+            checkLogin(request, response);
+        }
         if (path.equals("/login") && httpMethod.equals("POST")) {
             doLogin(request, response);
             return;
@@ -68,6 +71,19 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Content-Length", decideContentLengthHeader(response));
     }
 
+    private void checkLogin(Http11Request request, Http11Response response) {
+        Http11Cookie cookies = request.getCookies();
+        if (!cookies.containsCookieKey("JSESSIONID")) {
+            return;
+        }
+        String jSessionId = cookies.getCookieValue("JSESSIONID");
+        boolean isLogin = SessionManager.containsSession(jSessionId);
+        if (isLogin) {
+            response.setStatusCode(302);
+            response.addHeader("Location", "/index.html");
+        }
+    }
+
     private void doLogin(Http11Request request, Http11Response response) throws IOException, URISyntaxException {
         String requestBody = request.getBody();
         Map<String, String> fields = new HashMap<>();
@@ -81,27 +97,27 @@ public class Http11Processor implements Runnable, Processor {
         String account = fields.get("account");
         String password = fields.get("password");
 
-        if (canLogin(account, password)) {
-            response.setStatusCode(302);
-            response.addHeader("Location", "/index.html");
-            response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-            return;
-        }
-        response.setStatusCode(401);
-        response.setBody(FileReader.readResourceFile("401.html"));
-    }
-
-    private boolean canLogin(String account, String password) {
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
         if (rawUser.isEmpty()) {
-            return false;
+            response.setStatusCode(401);
+            response.setBody(FileReader.readResourceFile("401.html"));
+            return;
         }
         User user = rawUser.get();
         if (!user.checkPassword(password)) {
-            return false;
+            response.setStatusCode(401);
+            response.setBody(FileReader.readResourceFile("401.html"));
+            return;
         }
         log.info("user: {}", user);
-        return true;
+        response.setStatusCode(302);
+        response.addHeader("Location", "/index.html");
+
+        UUID jSessionId = UUID.randomUUID();
+        Session session = new Session(jSessionId.toString());
+        session.setAttribute("user", user);
+        SessionManager.addSession(session.getId(), session);
+        response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
     }
 
     private void doRegister(Http11Request request, Http11Response response) {
@@ -128,10 +144,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void refresh(Http11Request request, Http11Response response) {
         Map<String, String> headers = request.getHeaders();
-        String rawCookies = headers.get("Cookie");
+        String rawCookies = headers.getOrDefault("Cookie", "");
         Http11Cookie cookie = new Http11Cookie(rawCookies);
 
-        if (!cookie.containsKey("JSESSIONID")) {
+        if (!cookie.containsCookieKey("JSESSIONID")) {
             response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
         }
     }

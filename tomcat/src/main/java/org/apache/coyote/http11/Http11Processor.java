@@ -1,23 +1,20 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -53,13 +50,41 @@ public class Http11Processor implements Runnable, Processor {
             String filePath = requestUri;
 
             /**
-             * 쿼리 파라미터 추출
+             * path와 queryString 분리
              */
-            String queryParameter = "";
-            int queryParameterIndex = requestUri.indexOf("?");
-            if (queryParameterIndex >= 0) {
-                filePath = requestUri.substring(0, queryParameterIndex);
-                queryParameter = requestUri.substring(queryParameterIndex);
+            String inputQueryString = "";
+            int queryStringIndex = requestUri.indexOf("?");
+            if (queryStringIndex >= 0) {
+                filePath = requestUri.substring(0, queryStringIndex);
+                inputQueryString = requestUri.substring(queryStringIndex)
+                        .replace("?", "");
+            }
+
+            /**
+             * queryString 파싱
+             */
+            Map<String, String> queryParameters = new HashMap<>();
+            Arrays.stream(inputQueryString.split("&"))
+                    .forEach(queryParameterEntry -> {
+                        String[] split = queryParameterEntry.split("=");
+                        if (split.length == 2 && !split[0].isBlank() && !split[1].isBlank()) {
+                            queryParameters.put(split[0], split[1]);
+                        }
+                    });
+
+            /**
+             * queryString을 통해 회원 조회
+             */
+            String inputAccount = queryParameters.get("account");
+            String inputPassword = queryParameters.get("password");
+
+            if (inputAccount != null && inputPassword != null) {
+                InMemoryUserRepository.findByAccount(inputAccount)
+                        .ifPresent(user -> {
+                            if (user.checkPassword(inputPassword)) {
+                                log.info(user.toString());
+                            }
+                        });
             }
 
             /**
@@ -71,8 +96,8 @@ public class Http11Processor implements Runnable, Processor {
                 filePath = filePath + "." + fileExtension;
             }
             if (fileExtensionIndex >= 0) {
-                 fileExtension = filePath.substring(fileExtensionIndex)
-                    .replaceFirst(".", "");
+                fileExtension = filePath.substring(fileExtensionIndex)
+                        .replace(".", "");
             }
             String responseContentType = "text/" + fileExtension;
 

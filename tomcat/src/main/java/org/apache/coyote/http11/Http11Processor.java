@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,14 +99,17 @@ public class Http11Processor implements Runnable, Processor {
                     User user = optionalUser.get();
                     if (user.checkPassword(password)) {
                         log.info(user.toString());
-                        response = getRedirectResponse(UUID.randomUUID().toString(), responseBody, "/index.html");
+                        String uuid = UUID.randomUUID().toString();
+                        Session session = new Session(uuid);
+                        session.setAttribute("user", session);
+                        SessionManager.add(session);
+                        response = getRedirectResponse(uuid, responseBody, "/index.html");
                     } else {
                         response = getRedirectResponse(responseBody, "/401.html");
                     }
                 } else {
                     response = getRedirectResponse(responseBody, "/401.html");
                 }
-
             } else if (firstLines[1].equals("/register") && firstLines[0].equals("POST")) {
                 String account = requestBody.split("&")[0].split("=")[1];
                 String password = requestBody.split("&")[1].split("=")[1];
@@ -117,14 +121,39 @@ public class Http11Processor implements Runnable, Processor {
                 mimeType = "text/html";
 
                 if (firstLines[1].equals("/login") || firstLines[1].equals("/register")) {
-                    firstLines[1] = firstLines[1] + ".html";
-                }
+                    if (httpRequestHeaders.containsKey("Cookie")) {
+                        String[] cookies = httpRequestHeaders.get("Cookie").split(";");
 
-                URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
-                File file = new File(resource.getFile());
-                Path path = file.toPath();
-                responseBody = new String(Files.readAllBytes(path));
-                response = getOKResponse(mimeType, responseBody);
+                        for (String cookie : cookies) {
+                            if (cookie.trim().startsWith("JSESSIONID")) {
+                                String uuid = cookie.split("=")[1];
+                                if (SessionManager.findSession(uuid) != null) {
+                                    response = getRedirectResponse(uuid, mimeType, responseBody);
+                                } else {
+                                    firstLines[1] = firstLines[1] + ".html";
+                                    URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
+                                    File file = new File(resource.getFile());
+                                    Path path = file.toPath();
+                                    responseBody = new String(Files.readAllBytes(path));
+                                    response = getOKResponse(mimeType, responseBody);
+                                }
+                            }
+                        }
+                    } else {
+                        firstLines[1] = firstLines[1] + ".html";
+                        URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
+                        File file = new File(resource.getFile());
+                        Path path = file.toPath();
+                        responseBody = new String(Files.readAllBytes(path));
+                        response = getOKResponse(mimeType, responseBody);
+                    }
+                } else {
+                    URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
+                    File file = new File(resource.getFile());
+                    Path path = file.toPath();
+                    responseBody = new String(Files.readAllBytes(path));
+                    response = getOKResponse(mimeType, responseBody);
+                }
             }
 
             outputStream.write(response.getBytes());

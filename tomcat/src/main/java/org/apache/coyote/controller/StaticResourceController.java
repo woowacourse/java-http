@@ -7,7 +7,7 @@ import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
-public class StaticResourceController extends AbstractController {
+public class StaticResourceController extends FrontController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

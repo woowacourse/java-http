@@ -11,7 +11,7 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
-public class RegisterController extends AbstractController {
+public class RegisterController extends FrontController {
 
 
     @Override

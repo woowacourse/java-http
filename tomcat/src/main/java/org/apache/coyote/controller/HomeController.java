@@ -4,7 +4,7 @@ import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
-public class HomeController extends AbstractController {
+public class HomeController extends FrontController {
 
 
     @Override

@@ -7,12 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.controller.AbstractController;
+import org.apache.coyote.controller.FrontController;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
 
-public class LoginController extends AbstractController {
+public class LoginController extends FrontController {
 
     private SessionManager sessionManager = new SessionManager();
 

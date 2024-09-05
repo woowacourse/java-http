@@ -10,3 +10,9 @@
 - [ ] Query String 파싱
     - http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)가 보여진다.
     - 로그인 페이지 접속 시, Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나온다.
+
+### 생각해보기 🤔
+
+> index.html 페이지만 접근했는데 CSS 같은 정적 파일들은 어떻게 호출된걸까?
+
+index.html 문서에 `<link href="css/styles.css" rel="stylesheet" />` 통해 CSS 정적 파일이 호출되고 있다.

@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String DEFAULT_DIRECTORY_NAME = "static";
+    private static final String DEFAULT_DIRECTORY_NAME = "static";
+    private static final String DEFAULT_PAGE_URI = DEFAULT_DIRECTORY_NAME + "/index.html";
+
 
     private final Socket connection;
 
@@ -43,32 +45,26 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String requestLine = bufferedReader.readLine();
-
-            if (requestLine == null) {
-                return;
-            }
+            RequestLine requestLine = new RequestLine(bufferedReader.readLine());
 
             if (isLogin(requestLine)) {
                 checkLogin(requestLine);
             }
 
             Map<String, String> requestHeaders = makeRequestHeaders(bufferedReader);
-            String[] s = requestLine.split(" ");
-            String body = makeResponseBody(s[1]);
+            String body = makeResponseBody(requestLine.getRequestURI());
 
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + findResponseContentType(s[1]) + ";charset=utf-8 ",
+                    "Content-Type: " + findResponseContentType(requestLine.getRequestURI()) + ";charset=utf-8 ",
                     "Content-Length: " + body.getBytes().length + " ",
                     "",
                     body);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -95,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
     private Path findPath(String url) {
         try {
             if (url.equals("/")) {
-                URL url1 = getClass().getClassLoader().getResource(DEFAULT_DIRECTORY_NAME + "/index.html");
+                URL url1 = getClass().getClassLoader().getResource(DEFAULT_PAGE_URI);
                 return Path.of(Objects.requireNonNull(url1).toURI());
             }
 
@@ -115,30 +111,22 @@ public class Http11Processor implements Runnable, Processor {
         return "text/" + path.toString().split("\\.")[1];
     }
 
-    private String findResponseContentType2(Map<String, String> requestHeaders) {
-        return requestHeaders.get("Accept").split(",")[0];
-    }
-
-    private boolean isLogin(String uri) {
+    private boolean isLogin(RequestLine requestLine) {
+        String uri = requestLine.getRequestURI();
         return uri.contains("login");
     }
 
-    private void checkLogin(String uri) {
-        int index = uri.indexOf("?");
-        String queryString = uri.substring(index + 1);
-
-        String[] elements = queryString.split("&");
-        Map<String, String> map = new HashMap<>();
-
-        for (String element : elements) {
-            String[] k = element.split("=");
-            map.put(k[0], k[1]);
-        }
-        String account = map.get("account");
+    private void checkLogin(RequestLine requestLine) {
+        Map<String, String> parameters = requestLine.getParameters();
+        String account = parameters.get("account");
+        String password = parameters.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NoSuchElementException::new);
 
-        System.out.println("user.getAccount() = " + user.getAccount());
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException(account + " " + password + "잘못된 유저 요청입니다.");
+        }
+
         log.info("user : {}", user);
     }
 }

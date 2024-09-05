@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         String path = request.getPath();
         log.info("request path = {}", path);
 
-        if (path.equals("/login") && httpMethod.equals("GET")) {
+        if (path.equals("/login") && httpMethod.equals("POST")) {
             doLogin(request, response);
             return;
         }
@@ -68,11 +68,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doLogin(Http11Request request, Http11Response response) throws IOException, URISyntaxException {
-        Map<String, String> queryParams = request.getQueryParams();
-        String userAccount = queryParams.get("account");
-        String userPassword = queryParams.get("password");
+        String requestBody = request.getBody();
+        Map<String, String> fields = new HashMap<>();
+        String[] rawFields = requestBody.split("&");
+        for (String rawField : rawFields) {
+            String key = rawField.split("=")[0];
+            String value = rawField.split("=")[1];
+            fields.put(key, value);
+        }
 
-        if (canLogin(userAccount, userPassword)) {
+        String account = fields.get("account");
+        String password = fields.get("password");
+
+        if (canLogin(account, password)) {
             response.setStatusCode(302);
             response.addHeader("Location", "/index.html");
             return;

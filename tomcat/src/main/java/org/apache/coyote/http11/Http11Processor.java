@@ -10,6 +10,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,35 +38,35 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            List<String> lines = new ArrayList<>();
             String line = br.readLine();
-            if (line == null) {
+            if (line.isEmpty()) {
                 return;
             }
+            while (!REQUEST_HEADER_SUFFIX.equals(line)) {
+                lines.add(line);
+                line = br.readLine();
+            }
 
-            String[] startLine = line.split(" ");
+            String[] startLine = lines.get(0).split(" ");
             if (startLine.length != 3) {
                 return;
             }
             String httpMethod = startLine[0];
-            String requestTarget = startLine[1];
+            String requestURI = startLine[1];
             String httpVersion = startLine[2];
-
-            while (!REQUEST_HEADER_SUFFIX.equals(line)) {
-                line = br.readLine();
-            }
-
             if (!"GET".equals(httpMethod) || !"HTTP/1.1".equals(httpVersion)) {
                 return;
             }
 
-            String responseBody = "Hello world!";
             String contentType = "text/html";
-            if (requestTarget.contains(".")) {
-                contentType = "text/" + requestTarget.split("\\.")[1];
-                requestTarget = "static" + requestTarget;
+            if (requestURI.contains(".")) {
+                contentType = "text/" + requestURI.split("\\.")[1];
+                requestURI = "static" + requestURI;
             }
 
-            final URL resource = getClass().getClassLoader().getResource(requestTarget);
+            String responseBody = "Hello world!";
+            final URL resource = getClass().getClassLoader().getResource(requestURI);
             if (resource != null) {
                 final Path path = Paths.get(resource.toURI());
                 responseBody = Files.readString(path);

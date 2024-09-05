@@ -22,12 +22,6 @@ public class HttpResponse {
         this(httpStatusLine, httpResponseHeader, null);
     }
 
-    /*var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType +
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);*/
     public byte[] getBytes() {
         String statusLine = httpStatusLine.getVersion() + " " + httpStatusLine.getHttpStatusCode().getCode() + " "
                 + httpStatusLine.getHttpStatusCode().getMessage();
@@ -49,13 +43,11 @@ public class HttpResponse {
                     statusLine,
                     sb.toString(),
                     responseBody);
-            System.out.println(join);
             return join.getBytes();
         }
         String join = String.join("\r\n",
                 statusLine,
                 sb.toString());
-        System.out.println(join);
         return join.getBytes();
     }
 

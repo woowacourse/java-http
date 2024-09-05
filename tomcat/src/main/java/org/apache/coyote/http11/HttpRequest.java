@@ -18,8 +18,8 @@ public class HttpRequest {
     private static final String PARAM_DELIMITER = "=";
     private static final String QUERY_START = "\\?";
 
-    private final Map<String, String> queryMap = new HashMap<>();
     private final RequestLine requestLine;
+    private final Map<String, String> queryParams = new HashMap<>();
     private final HttpHeader header;
     private final Optional<String> body;
     private String path;
@@ -46,7 +46,7 @@ public class HttpRequest {
         String[] queryList = queryLine.split(QUERY_DELIMITER);
         for (String query : queryList) {
             String[] queryParam = query.split(PARAM_DELIMITER);
-            queryMap.put(queryParam[0], queryParam[1]);
+            queryParams.put(queryParam[0], queryParam[1]);
         }
     }
 
@@ -104,8 +104,8 @@ public class HttpRequest {
         return header;
     }
 
-    public Map<String, String> getQueryMap() {
-        return queryMap;
+    public Map<String, String> getQueryParams() {
+        return queryParams;
     }
 
     public Optional<String> getBody() {
@@ -115,7 +115,7 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "queryMap=" + queryMap +
+                "queryMap=" + queryParams +
                 ", requestLine=" + requestLine +
                 ", header=" + header +
                 ", body=" + body +

@@ -26,6 +26,8 @@ public class FrontController {
         controllers.put("/register", new RegisterController());
     }
 
+    // TODO: static
+
     public HttpResponse dispatch(HttpRequest request) {
         log(request);
         String path = request.getPath();
@@ -50,8 +52,8 @@ public class FrontController {
 
     private void log(HttpRequest request) {
         log.info("method = {}, path = {}, url = {}", request.getMethod(), request.getPath(), request.getUrl());
-        for (String key : request.getQueryMap().keySet()) {
-            log.info("key = {}, value = {}", key, request.getQueryMap().get(key));
+        for (String key : request.getQueryParams().keySet()) {
+            log.info("key = {}, value = {}", key, request.getQueryParams().get(key));
         }
         for (String key : request.getHeaders().getCookies().getCookies().keySet()) {
             log.info("COOKIE: key = {}, value = {}", key, request.getHeaders().getCookies().getCookies().get(key));

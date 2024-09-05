@@ -96,7 +96,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(inputStream);
 
         // then
-        Map<String, String> queryMap = request.getQueryMap();
+        Map<String, String> queryMap = request.getQueryParams();
         assertThat(request.getPath()).isEqualTo(path);
         assertThat(queryMap).containsEntry(queryKey1, queryValue1);
         assertThat(queryMap).containsEntry(queryKey2, queryValue2);

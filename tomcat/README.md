@@ -7,9 +7,9 @@
     - Http11ProcessorTest의 모든 테스트 통과한다.
 - [x] CSS 지원하기
     - 사용자가 페이지를 열었을 때 CSS 파일이 호출된다.
-- [ ] Query String 파싱
+- [x] Query String 파싱
     - [x] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)가 보여진다.
-    - [ ] 로그인 페이지 접속 시, Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나온다.
+    - [x] 로그인 페이지 접속 시, Query String을 파싱해서 아이디, 비밀번호가 일치하면 콘솔창에 로그로 회원을 조회한 결과가 나온다.
 
 ### 생각해보기 🤔
 

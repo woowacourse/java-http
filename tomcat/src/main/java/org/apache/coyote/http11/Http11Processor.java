@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
                 final int index = requestUri.indexOf("?");
 
                 String path = requestUri;
-                String queryString;
+                String queryString = "";
                 if (index != -1) {
                     path = requestUri.substring(0, index);
                     queryString = requestUri.substring(index + 1);
@@ -79,6 +81,26 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 final URL resource = getClass().getClassLoader().getResource("static" + path);
                 final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+                if (path.startsWith("/login") && !queryString.isEmpty()) {
+                    StringTokenizer tokenizer = new StringTokenizer(queryString, "&|=");
+                    String account = "";
+                    String password = "";
+                    while (tokenizer.hasMoreTokens()) {
+                        if (tokenizer.nextToken().equals("account") && tokenizer.hasMoreTokens()) {
+                            account = tokenizer.nextToken();
+                        }
+                        if (tokenizer.nextToken().equals("password") && tokenizer.hasMoreTokens()) {
+                            password = tokenizer.nextToken();
+                        }
+                    }
+                    String finalPassword = password;
+                    InMemoryUserRepository.findByAccount(account).ifPresent(user -> {
+                        if (user.checkPassword(finalPassword)) {
+                            log.info("user : {}", user);
+                        }
+                    });
+                }
 
                 return String.join("\r\n",
                         "HTTP/1.1 200 OK ",

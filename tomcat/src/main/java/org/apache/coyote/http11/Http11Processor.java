@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -14,6 +12,9 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResourceLoader;
+import org.apache.coyote.http11.response.ResponseBody;
 import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
@@ -58,27 +59,16 @@ public class Http11Processor implements Runnable, Processor {
         final var requestHeader = parseRequestHeader(reader);
 
         if (method.equals("GET") && uri.equals("/")) {
-            final var responseBody = "Hello world!";
+            final var response = new HttpResponse(HttpStatus.OK);
+            response.setBody(new ResponseBody("text/html", "Hello world!"));
 
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return response.getResponse();
         }
         if (method.equals("GET") && ContentMimeType.isEndsWithExtension(uri)) {
-            final var resource = getClass().getClassLoader().getResource("static" + uri);
-            final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
-            final var responseBody = new String(fileContent);
-            final var extension = uri.substring(uri.lastIndexOf('.') + 1);
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + ContentMimeType.getMimeByExtension(extension) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var responseBody = ResourceLoader.loadStaticResource(uri);
+            final var response = new HttpResponse(HttpStatus.OK);
+            response.setBody(responseBody);
+            return response.getResponse();
         }
         if (method.equals("GET") && uri.equals("/login")) {
             final var cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
@@ -86,70 +76,49 @@ public class Http11Processor implements Runnable, Processor {
                 final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
                 final var user = (User) session.getAttribute("user");
                 if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
-                    return String.join("\r\n",
-                            "HTTP/1.1 302 Found ",
-                            "Location: /index.html ",
-                            "Content-Length: 0 ",
-                            "Connection: close ",
-                            "");
+                    final var response = new HttpResponse(HttpStatus.FOUND);
+                    response.setRedirect("/index.html");
+                    return response.getResponse();
                 }
             }
         }
         if (method.equals("POST") && uri.equals("/login")) {
-            final var responseBody = getResponseBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
+            final var responseBody = getRequestBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
             if (isAuthenticateUser(responseBody)) {
                 HttpCookie cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
                 if (cookie.hasJSESSIONID()) {
-                    return String.join("\r\n",
-                            "HTTP/1.1 302 Found ",
-                            "Location: /index.html ",
-                            "Content-Length: 0 ",
-                            "Connection: close ",
-                            "");
+                    final var response = new HttpResponse(HttpStatus.FOUND);
+                    response.setRedirect("/index.html");
+                    return response.getResponse();
                 }
 
                 final var session = new Session(UUID.randomUUID().toString());
                 InMemoryUserRepository.findByAccount(responseBody.get("account"))
                         .ifPresent(user -> session.setAttribute("user", user));
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Set-Cookie: JSESSIONID=" + session.getId() + " ",
-                        "Location: /index.html ",
-                        "Content-Length: 0 ",
-                        "Connection: close ",
-                        "");
+                final var response = new HttpResponse(HttpStatus.FOUND);
+                response.setRedirect("/index.html");
+                response.setCookie("JSESSIONID", session.getId());
+                return response.getResponse();
             } else {
-                return String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /401.html ",
-                        "Content-Length: 0 ",
-                        "Connection: close ",
-                        "");
+                final var response = new HttpResponse(HttpStatus.FOUND);
+                response.setRedirect("/401.html");
+                return response.getResponse();
             }
         }
         if (method.equals("POST") && uri.contains("register")) {
-            final var responseBody = getResponseBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
-            final var newUser = new User(responseBody.get("account"), responseBody.get("password"), responseBody.get("email"));
+            final var requestBody = getRequestBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
+            final var newUser = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
             InMemoryUserRepository.save(newUser);
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: /index.html ",
-                    "Content-Length: 0 ",
-                    "Connection: close ",
-                    "");
+            final var response = new HttpResponse(HttpStatus.FOUND);
+            response.setRedirect("/index.html");
+            return response.getResponse();
         }
-        final var resource = getClass().getClassLoader().getResource("static" + uri + ".html");
-        final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
-        final var responseBody = new String(fileContent);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + ContentMimeType.getMimeByExtension("html") + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        final var response = new HttpResponse(HttpStatus.OK);
+        response.setBody(ResourceLoader.loadHtmlResource(uri));
+        return response.getResponse();
     }
 
-    private Map<String, String> getResponseBody(final BufferedReader reader, final int contentLength) throws IOException {
+    private Map<String, String> getRequestBody(final BufferedReader reader, final int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         final var requestBody = new String(buffer);

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +10,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +40,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            List<String> additionalHeaders = new ArrayList<>();
+            String statusCode = "200 OK";
 
             /**
              * HTTP Request start-line 읽기
@@ -79,12 +85,19 @@ public class Http11Processor implements Runnable, Processor {
             String inputPassword = queryParameters.get("password");
 
             if (inputAccount != null && inputPassword != null) {
-                InMemoryUserRepository.findByAccount(inputAccount)
-                        .ifPresent(user -> {
-                            if (user.checkPassword(inputPassword)) {
-                                log.info(user.toString());
-                            }
-                        });
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(inputAccount);
+                if (optionalUser.isEmpty()) {
+                    statusCode = "401 Unauthorized";
+                    filePath = "/401.html";
+                }
+                if (optionalUser.isPresent()) {
+                    User user = optionalUser.get();
+                    if (user.checkPassword(inputPassword)) {
+                        log.info(user.toString());
+                        additionalHeaders.add("Location: /index.html");
+                        statusCode = "302 Found";
+                    }
+                }
             }
 
             /**
@@ -116,12 +129,26 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(fileContents);
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+            /**
+             * 응답 헤더 구성
+             */
+            String responseHeader = String.join("\r\n",
+                    "HTTP/1.1 " + statusCode + " ",
                     "Content-Type: " + responseContentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.getBytes().length + " "
+            );
+            for (String additionalHeader : additionalHeaders) {
+                responseHeader = String.join("\r\n", responseHeader, additionalHeader + " ");
+            }
+
+            /**
+             * Header 및 Body를 통해 HTTP Response Message 구성
+             */
+            String response = String.join("\r\n",
+                    responseHeader,
                     "",
-                    responseBody);
+                    responseBody
+            );
 
             outputStream.write(response.getBytes());
             outputStream.flush();

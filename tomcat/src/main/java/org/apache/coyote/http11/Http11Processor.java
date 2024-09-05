@@ -167,41 +167,30 @@ public class Http11Processor implements Runnable, Processor {
                         }
                     }
 
-                    if ("POST".equals(method) && "/login".equals(path)) {
+                    if ("POST".equals(method) && "/register".equals(path)) {
                         Map<String, String> params = new HashMap<>();
 
                         String[] paramPairs = body.toString().split("&");
                         for (String pair : paramPairs) {
                             String[] keyValue = pair.split("=");
                             if (keyValue.length == 2) {
-                                params.put(URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
-                                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                                params.put(
+                                        URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
+                                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
+                                );
                             }
                         }
 
-                        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(
-                                params.get("account"));
+                        String account = params.get("account");
+                        String password = params.get("password");
+                        String email = params.get("email");
+                        User newUser = new User(account, password, email);
 
-                        if (optionalUser.isPresent()) {
-                            User user = optionalUser.get();
-                            if (user.checkPassword(params.get("password"))) {
-                                log.info("user : {}", user);
-
-                                String response = String.join("\r\n",
-                                        "HTTP/1.1 302 FOUND ",
-                                        "Location: /index.html ",
-                                        "Content-Length: 0 ",
-                                        "");
-
-                                bufferedWriter.write(response);
-                                bufferedWriter.flush();
-                                return;
-                            }
-                        }
+                        InMemoryUserRepository.save(newUser);
 
                         String response = String.join("\r\n",
                                 "HTTP/1.1 302 FOUND ",
-                                "Location: /401.html ",
+                                "Location: /index.html ",
                                 "Content-Length: 0 ",
                                 "");
 

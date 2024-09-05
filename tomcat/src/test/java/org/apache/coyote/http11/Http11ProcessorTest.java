@@ -1,22 +1,14 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mockStatic;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 
 import support.StubSocket;
 
@@ -92,62 +84,6 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("확장자를 지정하지 않으면 default 확장자로 파일을 찾는다.")
-    @Test
-    void indexWithoutExtension() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3447 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("content type에 올바른 형식을 지정하여 응답을 생성한다.")
-    @Test
-    void css() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: 211991 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

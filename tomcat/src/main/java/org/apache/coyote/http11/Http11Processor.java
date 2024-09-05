@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,28 +119,18 @@ public class Http11Processor implements Runnable, Processor {
         final var split = startLine.split(" ");
         final var resourcePath = split[1];
 
-        // TODO: 쿼리 스트링을 읽는 부분
-        final var isQueryStringExists = resourcePath.contains("?");
-        final var queryStringMap = new HashMap<String, String>();
-        if (isQueryStringExists) {
-            int indexOf = resourcePath.indexOf("?");
-            final var queryParameterString = resourcePath.substring(indexOf + 1);
-            final var values = queryParameterString.split("&");
-            for (final var value : values) {
-                final var keyValue = value.split("=");
-                queryStringMap.put(keyValue[0], keyValue[1]);
-            }
-        }
+        URI uri = URI.create(resourcePath);
+        String query = uri.getQuery();
 
-        // TODO: path에 해당되는 처리기를 찾는 부분
-        checkUser(queryStringMap);
+        checkUser(new QueryParameter(query));
     }
 
-    private void checkUser(Map<String, String> queryStringMap) {
-        Optional<User> user = InMemoryUserRepository.findByAccount(queryStringMap.getOrDefault("account", ""));
+    private void checkUser(QueryParameter queryParameter) {
+        String password = queryParameter.get("password").orElse("");
+        Optional<User> user = queryParameter.get("account").flatMap(InMemoryUserRepository::findByAccount);
 
         if (user.isPresent()) {
-            boolean isSame = user.get().checkPassword(queryStringMap.getOrDefault("password", ""));
+            boolean isSame = user.get().checkPassword(password);
             if (isSame) {
                 log.info("{}", user.get());
             }

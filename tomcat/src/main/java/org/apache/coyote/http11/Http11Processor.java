@@ -99,27 +99,27 @@ public class Http11Processor implements Runnable, Processor {
                         }
                     });
 
-            /**
-             * queryString을 통해 회원 조회
-             */
-            String queryStringInputAccount = queryParameters.get("account");
-            String queryStringInputPassword = queryParameters.get("password");
-
-            if (queryStringInputAccount != null && queryStringInputPassword != null) {
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringInputAccount);
-                if (optionalUser.isEmpty()) {
-                    statusCode = "401 Unauthorized";
-                    filePath = "/401.html";
-                }
-                if (optionalUser.isPresent()) {
-                    User user = optionalUser.get();
-                    if (user.checkPassword(queryStringInputPassword)) {
-                        log.info(user.toString());
-                        additionalResponseHeaders.add("Location: /index.html");
-                        statusCode = "302 Found";
-                    }
-                }
-            }
+//            /**
+//             * queryString을 통해 회원 조회
+//             */
+//            String queryStringInputAccount = queryParameters.get("account");
+//            String queryStringInputPassword = queryParameters.get("password");
+//
+//            if (queryStringInputAccount != null && queryStringInputPassword != null) {
+//                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringInputAccount);
+//                if (optionalUser.isEmpty()) {
+//                    statusCode = "401 Unauthorized";
+//                    filePath = "/401.html";
+//                }
+//                if (optionalUser.isPresent()) {
+//                    User user = optionalUser.get();
+//                    if (user.checkPassword(queryStringInputPassword)) {
+//                        log.info(user.toString());
+//                        additionalResponseHeaders.add("Location: /index.html");
+//                        statusCode = "302 Found";
+//                    }
+//                }
+//            }
 
             /**
              * application/x-www-form-urlencoded 타입의 Request Body 파싱
@@ -130,28 +130,53 @@ public class Http11Processor implements Runnable, Processor {
                         String[] split = requestBodyField.split("=");
                         if (split.length == 2 && !split[0].isBlank() && !split[1].isBlank()) {
                             requestBodyFields.put(split[0], split[1]);
-                            System.out.println("fieldKey: " + split[0] + ", fieldValue: " + split[1]);
                         }
                     });
 
             /**
-             * application/x-www-form-urlencoded 타입의 Request Body를 통해 회원 조회
+             * 로그인 - application/x-www-form-urlencoded 타입의 Request Body를 통해 회원 조회
              */
-            String requestBodyInputAccount = requestBodyFields.get("account");
-            String requestBodyInputPassword = requestBodyFields.get("password");
+            if (filePath.equals("/login")) {
+                String requestBodyInputAccount = requestBodyFields.get("account");
+                String requestBodyInputPassword = requestBodyFields.get("password");
 
-            if (requestBodyInputAccount != null && requestBodyInputPassword != null) {
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(requestBodyInputAccount);
-                if (optionalUser.isEmpty()) {
-                    statusCode = "401 Unauthorized";
-                    filePath = "/401.html";
+                if (requestBodyInputAccount != null && requestBodyInputPassword != null) {
+                    Optional<User> optionalUser = InMemoryUserRepository.findByAccount(requestBodyInputAccount);
+                    if (optionalUser.isEmpty()) {
+                        statusCode = "401 Unauthorized";
+                        filePath = "/401.html";
+                    }
+                    if (optionalUser.isPresent()) {
+                        User user = optionalUser.get();
+                        if (user.checkPassword(requestBodyInputPassword)) {
+                            log.info(user.toString());
+                            additionalResponseHeaders.add("Location: /index.html");
+                            statusCode = "302 Found";
+                        }
+                    }
                 }
-                if (optionalUser.isPresent()) {
-                    User user = optionalUser.get();
-                    if (user.checkPassword(requestBodyInputPassword)) {
+            }
+
+            /**
+             * 회원가입 - application/x-www-form-urlencoded 타입의 Request Body를 통해 회원 등록
+             */
+            if (filePath.equals("/register")) {
+                String bodyInputAccount = requestBodyFields.get("account");
+                String bodyInputPassword = requestBodyFields.get("password");
+                String bodyInputEmail = requestBodyFields.get("email");
+
+                if (bodyInputAccount != null && bodyInputPassword != null && bodyInputEmail != null) {
+                    Optional<User> optionalUser = InMemoryUserRepository.findByAccount(bodyInputAccount);
+                    if (optionalUser.isEmpty()) {
+                        User user = new User(bodyInputAccount, bodyInputPassword, bodyInputEmail);
+                        InMemoryUserRepository.save(user);
+
                         log.info(user.toString());
                         additionalResponseHeaders.add("Location: /index.html");
                         statusCode = "302 Found";
+                    }
+                    if (optionalUser.isPresent()) {
+                        statusCode = "400 Bad Request";
                     }
                 }
             }

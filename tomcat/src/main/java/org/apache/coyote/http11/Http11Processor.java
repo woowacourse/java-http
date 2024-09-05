@@ -10,22 +10,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.HttpHeader;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +28,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String STATIC_DIRNAME = "static";
-    private static final String NOT_FOUND_FILENAME = "404.html";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID = "JSESSIONID";
     private static final String USER_SESSION_NAME = "user";
 
@@ -128,7 +119,8 @@ public class Http11Processor implements Runnable, Processor {
             return saveUser(cookie, requestBody);
         }
 
-        return buildMessage(request.getPath(), HttpStatusCode.OK, cookie);
+        return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK, cookie)
+                .buildMessage();
     }
 
     private String buildTextMessage(String content, HttpStatusCode statusCode) {
@@ -138,10 +130,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getLoginPage(HttpCookie cookie) {
         if (cookie.contains(JSESSIONID) && sessionManager.hasId(cookie.get(JSESSIONID))) {
-            return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
+            return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND, cookie)
+                    .buildMessage();
         }
 
-        return buildMessage("login.html", HttpStatusCode.OK, cookie);
+        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK, cookie)
+                .buildMessage();
     }
 
     private String login(HttpCookie cookie, RequestBody requestBody) {
@@ -149,15 +143,15 @@ public class Http11Processor implements Runnable, Processor {
             String account = requestBody.get("account");
             String password = requestBody.get("password");
 
-            if (InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
+            if (InMemoryUserRepository.exists(account, password)) {
                 User user = InMemoryUserRepository.getByAccount(account);
-                Session session = new Session();
-                session.setAttribute(USER_SESSION_NAME, user);
-                sessionManager.add(cookie.get(JSESSIONID), session);
-                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
+                saveSession(cookie, user);
+                return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND, cookie)
+                        .buildMessage();
             }
 
-            return buildMessage("401.html", HttpStatusCode.UNAUTHORIZED, cookie);
+            return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED, cookie)
+                    .buildMessage();
         }
 
         throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
@@ -170,8 +164,11 @@ public class Http11Processor implements Runnable, Processor {
             String password = requestBody.get("password");
 
             if (!InMemoryUserRepository.existsByAccount(account)) {
-                InMemoryUserRepository.save(new User(account, password, email));
-                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
+                User user = new User(account, password, email);
+                InMemoryUserRepository.save(user);
+                saveSession(cookie, user);
+                return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND, cookie)
+                        .buildMessage();
             }
 
             throw new UncheckedServletException("이미 존재하는 ID입니다.");
@@ -180,35 +177,9 @@ public class Http11Processor implements Runnable, Processor {
         throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
     }
 
-    private String buildMessage(String fileName, HttpStatusCode statusCode, HttpCookie cookie) {
-        if (!fileName.contains(".")) {
-            fileName += ".html";
-        }
-
-        String responseBody = readFile(fileName);
-        ContentType contentType = ContentType.fromFileExtension(
-                fileName.substring(fileName.lastIndexOf(".")));
-
-        HttpResponse httpResponse = new HttpResponse(statusCode, responseBody, contentType);
-
-        if (cookie == null || !cookie.contains(JSESSIONID)) {
-            HttpCookie httpCookie = new HttpCookie();
-            httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
-            httpResponse.addHeader(SET_COOKIE, httpCookie.buildMessage());
-        }
-
-        return httpResponse.buildMessage();
-    }
-
-    private String readFile(String fileName) {
-        try {
-            URI uri = getClass().getClassLoader().getResource(STATIC_DIRNAME + "/" + fileName).toURI();
-            Path path = Paths.get(uri);
-            return Files.readString(path);
-        } catch (NullPointerException e) {
-            return readFile(NOT_FOUND_FILENAME);
-        } catch (Exception e) {
-            throw new UncheckedServletException(e);
-        }
+    private void saveSession(HttpCookie cookie, User user) {
+        Session session = new Session();
+        session.setAttribute(USER_SESSION_NAME, user);
+        sessionManager.add(cookie.get(JSESSIONID), session);
     }
 }

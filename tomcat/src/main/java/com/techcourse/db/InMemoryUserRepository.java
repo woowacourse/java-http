@@ -18,7 +18,7 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static boolean existsByAccountAndPassword(String account, String password) {
+    public static boolean exists(String account, String password) {
         return database.containsKey(account)
                && database.get(account).checkPassword(password);
     }

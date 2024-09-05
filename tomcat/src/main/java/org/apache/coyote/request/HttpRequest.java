@@ -1,5 +1,7 @@
 package org.apache.coyote.request;
 
+import org.apache.coyote.http11.HttpHeader;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;

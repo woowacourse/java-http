@@ -18,7 +18,9 @@ public enum ContentType {
         this.name = name;
     }
 
-    public static ContentType fromFileExtension(String fileExtension) {
+    public static ContentType fromFileName(String fileName) {
+        String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+
         return Arrays.stream(values())
                 .filter(contentType -> fileExtension.equals(contentType.fileExtension))
                 .findFirst()

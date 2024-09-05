@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
 public enum HttpStatusCode {
-    OK(200, "OK");
+    OK(200, "OK"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "Not Found"),;
 
     private final int code;
     private final String reasonPhrase;

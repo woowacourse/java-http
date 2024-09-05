@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,29 +43,47 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
+            String httpMethod = null;
             String statusCode = "200 OK";
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
             String uri = "/";
             String redirectUrl = null;
-            String requestLine = bufferedReader.readLine();
-            if (requestLine != null) {
-                String[] requestParts = requestLine.split(" ");
+            String startLine = bufferedReader.readLine();
+            if (startLine != null) {
+                String[] requestParts = startLine.split(" ");
                 if (requestParts.length >= 2) {
+                    httpMethod = requestParts[0].trim();
                     uri = requestParts[1].trim();
                 }
             }
+            Map<String, String> httpHeaders = new HashMap<>();
+            String requestLine = null;
+            while ((requestLine = bufferedReader.readLine()) != null && !requestLine.isEmpty()) {
+                String[] requestParts = requestLine.split(":");
+                if (requestParts.length >= 2) {
+                    httpHeaders.put(requestParts[0].trim(), requestParts[1].trim());
+                }
+            }
+            StringBuilder requestBodyBuilder = new StringBuilder();
+            if (httpHeaders.get("Content-Length") != null) {
+                int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+                char[] bodyChars = new char[contentLength];
+                bufferedReader.read(bodyChars, 0, contentLength);
+                requestBodyBuilder.append(bodyChars);
+            }
+            String requestBody = requestBodyBuilder.toString();
 
             if (uri.endsWith(".html")) {
                 String fileName = "static" + uri;
-                responseBody = getResponseBody(fileName);
+                responseBody = getHtmlResponseBody(fileName);
             } else if (uri.endsWith(".css") || uri.endsWith(".js")) {
                 contentType = "text/css";
                 if (uri.endsWith(".js")) {
                     contentType = "application/javascript";
                 }
                 final String fileName = "static" + uri;
-                responseBody = getResponseBody(fileName);
+                responseBody = getHtmlResponseBody(fileName);
             } else if (uri.startsWith("/login")) {
                 int parameterStartingIndex = uri.indexOf("?");
                 if (parameterStartingIndex > 0) {
@@ -92,7 +111,27 @@ public class Http11Processor implements Runnable, Processor {
                     statusCode = "302 Found";
                 }
                 final String fileName = "static/login.html";
-                responseBody = getResponseBody(fileName);
+                responseBody = getHtmlResponseBody(fileName);
+            } else if (uri.equals("/register")) {
+                if (httpMethod.equals("POST")) {
+                    Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))
+                            .map(param -> param.split("=", 2))
+                            .collect(Collectors.toMap(
+                                    keyValue -> keyValue[0],
+                                    keyValue -> keyValue[1]
+                            ));
+                    statusCode = "302 Found";
+                    try {
+                        User user = new User(paramMap.get("account"), paramMap.get("password"), paramMap.get("email"));
+                        InMemoryUserRepository.save(user);
+                        redirectUrl = "/index.html";
+                    } catch (IllegalArgumentException e) {
+                        redirectUrl = "/400.html";
+                    }
+                } else if (httpMethod.equals("GET")) {
+                    String fileName = "static/register.html";
+                    requestBody = getHtmlResponseBody(fileName);
+                }
             }
 
             List<String> headers = new ArrayList<>();
@@ -112,7 +151,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String fileName) throws IOException {
+    private String getHtmlResponseBody(String fileName) throws IOException {
         final URL url = getClass().getClassLoader().getResource(fileName);
         if (url != null) {
             final File file = new File(url.getFile());

@@ -15,15 +15,18 @@ public class HttpRequest {
 
     private final HttpStartLine httpStartLine;
     private final HttpHeaders httpHeaders;
+    private final HttpBody httpBody;
 
-    private HttpRequest(HttpStartLine httpStartLine, HttpHeaders httpHeaders){
+    private HttpRequest(HttpStartLine httpStartLine, HttpHeaders httpHeaders, HttpBody httpBody) {
         this.httpStartLine = httpStartLine;
         this.httpHeaders = httpHeaders;
+        this.httpBody = httpBody;
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpStartLine startLine = new HttpStartLine(httpRequestReader.readLine());
+
         List<String> headers = new ArrayList<>();
         while (httpRequestReader.ready()) {
             String header = httpRequestReader.readLine();
@@ -31,7 +34,15 @@ public class HttpRequest {
             headers.add(header);
         }
         HttpHeaders httpHeaders = new HttpHeaders(headers);
-        return new HttpRequest(startLine, httpHeaders);
+
+        if (!httpRequestReader.ready()) {
+            return new HttpRequest(startLine, httpHeaders, HttpBody.empty());
+        }
+        int contentLength = Integer.parseInt(httpHeaders.get(HttpHeader.CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        httpRequestReader.read(buffer, 0, contentLength);
+        HttpBody requestBody = HttpBody.parseUrlEncoded(new String(buffer));
+        return new HttpRequest(startLine, httpHeaders, requestBody);
     }
 
     public Map<String, String> parseQueryString() {
@@ -50,6 +61,14 @@ public class HttpRequest {
         return httpStartLine.containsQueryParameter();
     }
 
+    public boolean targetStartsWith(String startsWith) {
+        return httpStartLine.targetStartsWith(startsWith);
+    }
+
+    public boolean containsBody() {
+        return httpBody.isNotEmpty();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpStartLine.getHttpMethod();
     }
@@ -65,5 +84,9 @@ public class HttpRequest {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("cannot convert to URI: " + resource);
         }
+    }
+
+    public String getFromBody(String key) {
+        return httpBody.get(key);
     }
 }

@@ -47,6 +47,10 @@ public class HttpStartLine {
         return requestTarget.containsQueryParameter();
     }
 
+    public boolean targetStartsWith(String startsWith) {
+        return requestTarget.startsWith(startsWith);
+    }
+
     public String getTargetExtension() {
         return requestTarget.getTargetExtension();
     }

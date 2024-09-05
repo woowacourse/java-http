@@ -36,6 +36,10 @@ public class RequestTarget {
         return queries;
     }
 
+    public boolean startsWith(String startsWith) {
+        return value.startsWith(startsWith);
+    }
+
     public String getTargetExtension() {
         if(value.contains(".")) {
             return SubstringGenerator.splitByLast(".", value).getLast();

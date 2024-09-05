@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -36,10 +37,19 @@ public class Controller {
     }
 
     private HttpResponse createDynamicResponse(HttpRequest request) {
-        if(request.getHttpMethod() == HttpMethod.GET && request.containsQueryParameter()) {
+        if(isLoginRequest(request)) {
             return createLoginResponse(request);
         }
+        if(isRegisterRequest(request)) {
+            return createRegisterResponse(request);
+        }
         return null;
+    }
+
+    private boolean isLoginRequest(HttpRequest request) {
+        return request.getHttpMethod() == HttpMethod.GET
+                && request.containsQueryParameter()
+                && request.targetStartsWith("/login");
     }
 
     public HttpResponse createLoginResponse(HttpRequest request) {
@@ -50,6 +60,21 @@ public class Controller {
                 .map(user -> redirectToIndex())
                 .orElseGet(this::redirectTo401);
 
+    }
+
+    private static boolean isRegisterRequest(HttpRequest request) {
+        return request.getHttpMethod() == HttpMethod.POST
+                && request.containsBody()
+                && request.targetStartsWith("/register");
+    }
+
+    private HttpResponse createRegisterResponse(HttpRequest request) {
+        User user = new User(
+                request.getFromBody("account"),
+                request.getFromBody("password"),
+                request.getFromBody("email"));
+        InMemoryUserRepository.save(user);
+        return redirectToIndex();
     }
 
     private HttpResponse redirectToIndex() {
@@ -105,8 +130,8 @@ public class Controller {
     private HttpResponse getResponse(HttpStatusCode httpStatusCode, String contentType, String responseBody) {
         return new HttpResponse(String.join(DELIMITER,
                 "HTTP/1.1 " + httpStatusCode.getValue() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                HttpHeader.CONTENT_TYPE.getValue() + ": " + contentType + ";charset=utf-8 ",
+                HttpHeader.CONTENT_LENGTH.getValue() + ": " + responseBody.getBytes().length + " ",
                 "",
                 responseBody));
     }

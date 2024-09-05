@@ -10,6 +10,8 @@ public class HttpHeaders {
 
     private static final Logger log = LoggerFactory.getLogger(HttpHeaders.class);
     private static final String DELIMITER = ": ";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> headers;
 
     public HttpHeaders(List<String> headers) {
@@ -29,5 +31,13 @@ public class HttpHeaders {
         RuntimeException exception = new IllegalArgumentException("Invalid header: " + header);
         log.error(exception.getMessage(), exception);
         throw exception;
+    }
+
+    public String get(HttpHeader header) {
+        String value = headers.get(header.getValue());
+        if(value == null) {
+            throw new IllegalArgumentException("Header " + header.getValue() + " not found");
+        }
+        return value;
     }
 }

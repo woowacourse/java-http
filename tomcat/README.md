@@ -2,7 +2,7 @@
 
 ## 1. HTTP 서버 구현
 
-- [ ] GET /index.html 응답하기
+- [x] GET /index.html 응답하기
     - 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있다.
     - Http11ProcessorTest의 모든 테스트 통과한다.
 - [ ] CSS 지원하기

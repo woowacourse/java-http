@@ -23,5 +23,9 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
+    public static void delete(User user) {
+        database.remove(user.getAccount());
+    }
+
     private InMemoryUserRepository() {}
 }

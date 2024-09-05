@@ -114,7 +114,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginSuccessWithQueryString() throws IOException {
+    void loginSuccessWithQueryString() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1",

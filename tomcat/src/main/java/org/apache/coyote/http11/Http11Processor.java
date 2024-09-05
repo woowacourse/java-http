@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.Socket;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -109,14 +111,33 @@ public class Http11Processor implements Runnable, Processor {
                     throw new RuntimeException(e);
                 }
 
+                int index2 = queryString.indexOf("&");
+                String accountValue = queryString.substring("account=".length(), index2);
+                String passwordValue = queryString.substring(index2 + 1 + "password=".length());
+
+                boolean isValidPassword = false;
+                Optional<User> savedUser = InMemoryUserRepository.findByAccount(accountValue);
+                if (savedUser.isPresent()) {
+                    log.info("user : {}", savedUser);
+                    isValidPassword = savedUser.get().checkPassword(passwordValue);
+                }
+
                 try (BufferedReader bufferedReader = Files.newBufferedReader(pt)) {
                     List<String> actual = bufferedReader.lines().toList();
 
                     String collect = actual.stream()
                             .collect(Collectors.joining("\n")) + "\n";
 
+//                    final var response = String.join("\r\n",
+//                            "HTTP/1.1 200 OK ",
+//                            "Content-Type: text/html;charset=utf-8 ",
+//                            "Content-Length: " + collect.getBytes().length + " ",
+//                            "",
+//                            collect);
+
                     final var response = String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
+                            "HTTP/1.1 302 Found ",
+                            "Location: http://localhost:8080/" + (isValidPassword ? "index.html" : "401.html"),
                             "Content-Type: text/html;charset=utf-8 ",
                             "Content-Length: " + collect.getBytes().length + " ",
                             "",
@@ -127,28 +148,18 @@ public class Http11Processor implements Runnable, Processor {
 
                 } catch (Exception e) {
                 }
-
-                int index2 = queryString.indexOf("&");
-                String accountValue = queryString.substring("account=".length(), index2);
-                String passwordValue = queryString.substring(index2 + 1 + "password=".length());
-
-                InMemoryUserRepository.findByAccount(accountValue)
-                        .ifPresent(savedUser -> {
-                            log.info("user : {}", savedUser);
-                        });
             }
-        } catch(IOException |UncheckedServletException e)
-    {
-        log.error(e.getMessage(), e);
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
     }
-}
 
-private static String extractReferer(String httpRequest) {
-    String firstLine = httpRequest.split("\n")[0];
-    String[] split = firstLine.split(" ");
-    if (split[0].equals("GET")) {
-        return split[1];
+    private static String extractReferer(String httpRequest) {
+        String firstLine = httpRequest.split("\n")[0];
+        String[] split = firstLine.split(" ");
+        if (split[0].equals("GET")) {
+            return split[1];
+        }
+        throw new IllegalArgumentException("GET 요청만 처리 가능..");
     }
-    throw new IllegalArgumentException("GET 요청만 처리 가능..");
-}
 }

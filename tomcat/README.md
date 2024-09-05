@@ -6,9 +6,9 @@
 
 ## 2단계 - 로그인 구현하기
 
-- [ ] HTTP Status Code 302
-  - [ ] 로그인 성공 시 http status code 302 반환
-  - [ ] 로그인 성공 시 `/index.html`로 리다이렉트, 실패 시 `/401.html`로 리다이렉트
+- [x] HTTP Status Code 302
+  - [x] 로그인 성공 시 http status code 302 반환
+  - [x] 로그인 성공 시 `/index.html`로 리다이렉트, 실패 시 `/401.html`로 리다이렉트
 - [ ] POST 방식으로 회원가입
   - [ ] `/register` 접속하면 회원가입 페이지(register.html) 응답
   - [ ] 회원가입 페이지를 보여줄 때는 GET 사용, 회원가입 버튼을 누르면 POST 사용

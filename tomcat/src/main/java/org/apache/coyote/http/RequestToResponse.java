@@ -29,19 +29,19 @@ public class RequestToResponse {
         }
 
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()));
+        try {
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        if (resource == null) {
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            ResponseHeader header = new ResponseHeader();
+            header.setContentType(MimeType.getContentTypeFromExtension(path.getPath()));
+            header.setContentLength(responseBody.getBytes().length);
+
+            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+            return response.toResponse();
+        } catch (NullPointerException e) {
             return HttpResponse.notFoundResponses().toResponse();
         }
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        StatusLine statusLine = new StatusLine(HttpStatus.OK);
-        ResponseHeader header = new ResponseHeader();
-        header.setContentType(MimeType.getContentTypeFromExtension(path.getPath()));
-        header.setContentLength(responseBody.getBytes().length);
-
-        HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-        return response.toResponse();
     }
 
     private String login(RequestLine requestLine) throws IOException {

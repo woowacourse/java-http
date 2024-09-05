@@ -16,7 +16,7 @@ public record Http11Request(Http11Method method, String requestUri, List<Http11Q
         String rawRequest = requestParser.readAsString(inputStream);
         Http11Method http11Method = requestParser.parseMethod(rawRequest);
         String requestUri = requestParser.parseRequestURI(rawRequest);
-        Http11QueryStringParser queryStringParser = new Http11QueryStringParser();
+        Http11QueryParser queryStringParser = new Http11QueryParser();
         LinkedHashMap<String, String> rawQueries = queryStringParser.parse(requestUri);
 
         List<Http11Query> http11Queries = rawQueries.keySet().stream()

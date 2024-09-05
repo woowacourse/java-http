@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.LinkedHashMap;
 
-class Http11QueryStringParser {
+class Http11QueryParser {
 
     LinkedHashMap<String, String> parse(String requestUri) {
         if (notHasQueryString(requestUri)) {
@@ -31,6 +31,9 @@ class Http11QueryStringParser {
 
     private void putQueryString(String singleQueryString, LinkedHashMap<String, String> result) {
         String[] split = singleQueryString.split("=");
+        if (split.length != 2) {
+            return;
+        }
         result.putLast(split[0], split[1]);
     }
 }

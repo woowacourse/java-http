@@ -8,8 +8,8 @@ public class RequestURI {
     private final String uri;
     private final Map<String, String> parameters;
 
-    public RequestURI(String requestUri, QueryStringParser queryStringParser) {
-        this.queryStringParser = queryStringParser;
+    public RequestURI(String requestUri) {
+        this.queryStringParser = new QueryStringParser();
         this.uri = parsedUri(requestUri);
         this.parameters = parsedParameters(requestUri);
     }

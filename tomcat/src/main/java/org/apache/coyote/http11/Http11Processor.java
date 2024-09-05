@@ -25,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_DIRECTORY_NAME = "static";
-    private static final String DEFAULT_PAGE_URI = DEFAULT_DIRECTORY_NAME + "/index.html";
+    private static final String DEFAULT_PAGE_URI = "/index.html";
 
 
     private final Socket connection;
@@ -46,13 +46,12 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-
-            if (isLogin(requestLine)) {
-                checkLogin(requestLine);
-            }
+            checkLogin(requestLine);
 
             Map<String, String> requestHeaders = makeRequestHeaders(bufferedReader);
             String body = makeResponseBody(requestLine.getRequestURI());
+
+            System.out.println(requestLine.getRequestURI());
 
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -91,12 +90,11 @@ public class Http11Processor implements Runnable, Processor {
     private Path findPath(String url) {
         try {
             if (url.equals("/")) {
-                URL url1 = getClass().getClassLoader().getResource(DEFAULT_PAGE_URI);
-                return Path.of(Objects.requireNonNull(url1).toURI());
+                url = DEFAULT_PAGE_URI;
             }
 
-            if (url.contains("?")) {
-                url = url.substring(0, url.indexOf("?")) + ".html";
+            if (url.equals("login")) {
+                url = "login.html";
             }
 
             URL foundUrl = getClass().getClassLoader().getResource(DEFAULT_DIRECTORY_NAME + url);
@@ -107,16 +105,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String findResponseContentType(String url) {
-        Path path = findPath(url);
-        return "text/" + path.toString().split("\\.")[1];
-    }
-
-    private boolean isLogin(RequestLine requestLine) {
-        String uri = requestLine.getRequestURI();
-        return uri.contains("login");
+        String[] extension = url.split("\\.");
+        if(extension.length <1) {
+            return "text/html";
+        }
+        return "text/" + extension[1];
     }
 
     private void checkLogin(RequestLine requestLine) {
+        if(!isLogin(requestLine)){
+            return;
+        }
+
         Map<String, String> parameters = requestLine.getParameters();
         String account = parameters.get("account");
         String password = parameters.get("password");
@@ -128,5 +128,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info("user : {}", user);
+    }
+
+    private boolean isLogin(RequestLine requestLine) {
+        String uri = requestLine.getRequestURI();
+        return uri.contains("login");
     }
 }

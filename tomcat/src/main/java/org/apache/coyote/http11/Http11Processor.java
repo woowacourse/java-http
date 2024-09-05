@@ -108,6 +108,7 @@ public class Http11Processor implements Runnable, Processor {
             if (foundUser.isPresent()) {
                 User user = foundUser.get();
                 if (user.checkPassword(password)) {
+                    log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
                     writeRedirectResponse("/index.html", outputStream);
                     return;
                 }

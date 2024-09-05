@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -32,6 +33,13 @@ public class FrontController {
             return;
         }
 
-        new StaticResourceHandler().handle(request, response);
+        List<String> staticResources = List.of("css", "js", "png", "jpg", "ico", "html", "svg");
+        if (staticResources.contains(request.getExtension())) {
+            new StaticResourceHandler().handle(request, response);
+            return;
+        }
+
+        response.sendRedirect("/404.html");
+        response.write();
     }
 }

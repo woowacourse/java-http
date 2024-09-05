@@ -30,7 +30,7 @@ public class Headers {
     public List<String> formats() {
         return values.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + DELIMITER + entry.getValue())
+                .map(entry -> entry.getKey() + DELIMITER + entry.getValue()+" ")
                 .toList();
     }
 }

@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.controller.LoginController;
-import com.techcourse.exception.UnauthorizedException;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.exception.UnsupportedMethodException;
 
@@ -20,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final LoginController loginController = new LoginController();
+    private final RegisterController registerController = new RegisterController();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
     public Http11Processor(final Socket connection) {
@@ -47,7 +48,11 @@ public class Http11Processor implements Runnable, Processor {
             try {
                 if (endpoint.startsWith("/login")) {
                     response = loginController.login(request);
-                } else {
+                }
+                else if (endpoint.startsWith("/register")) {
+                    response = registerController.register(request);
+                }
+                else {
                     String fileName = http11Helper.getFileName(endpoint);
                     response = http11Helper.createResponse(HttpStatus.OK, fileName);
                 }

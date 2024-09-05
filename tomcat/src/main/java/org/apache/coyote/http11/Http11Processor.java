@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -62,7 +65,6 @@ public class Http11Processor implements Runnable, Processor {
             final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
             final var responseBody = new String(fileContent);
             final var extension = uri.substring(uri.lastIndexOf('.') + 1);
-            System.out.println("extension = " + extension);
 
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -71,6 +73,39 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
         }
+        if (method.equals("GET") && hasQueryParam(uri)) {
+            final var path = uri.substring(0, uri.indexOf('?'));
+            final var resource = getClass().getClassLoader().getResource("static" + path + ".html");
+            final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
+            final var responseBody = new String(fileContent);
+
+            final var queryString = uri.substring(uri.indexOf('?') + 1);
+            final var queryParams = parseQueryParam(queryString);
+            InMemoryUserRepository.findByAccount(queryParams.get("account"))
+                    .filter(user -> user.checkPassword(queryParams.get("password")))
+                    .ifPresent(user -> log.info("user : {}", user));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: " + ContentMimeType.getMimeByExtension("html") + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
         throw new IllegalArgumentException("접근할 수 없습니다.");
+    }
+
+    private boolean hasQueryParam(final String uri) {
+        return uri.contains("?");
+    }
+
+    private Map<String, String> parseQueryParam(final String queryString) {
+        Map<String, String> result = new HashMap<>();
+        String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=");
+            result.put(keyValue[0], keyValue[1]);
+        }
+        return result;
     }
 }

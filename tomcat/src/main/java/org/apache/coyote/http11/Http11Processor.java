@@ -57,14 +57,16 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
         }
-        if (method.equals("GET") && uri.equals("/index.html")) {
-            final var resource = getClass().getClassLoader().getResource("static/index.html");
+        if (method.equals("GET") && ContentMimeType.isEndsWithExtension(uri)) {
+            final var resource = getClass().getClassLoader().getResource("static" + uri);
             final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
             final var responseBody = new String(fileContent);
+            final var extension = uri.substring(uri.lastIndexOf('.') + 1);
+            System.out.println("extension = " + extension);
 
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + ContentMimeType.getMimeByExtension(extension) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

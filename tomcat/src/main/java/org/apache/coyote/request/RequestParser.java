@@ -44,8 +44,8 @@ public class RequestParser {
             return RequestBody.EMPTY;
         }
         int length = Integer.parseInt(contentLength);
-        char[] body = new char[length];
-        reader.read(body);
-        return RequestBody.from(new String(body));
+        char[] buffer = new char[length];
+        reader.read(buffer, 0, length);
+        return RequestBody.from(new String(buffer));
     }
 }

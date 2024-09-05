@@ -82,10 +82,6 @@ public class HttpRequest {
         return cookie != null && cookie.contains(JSESSIONID_KEY);
     }
 
-    public boolean matchesUrlPath(String urlPath) {
-        return this.httpRequestLine.matchesUrlPath(urlPath);
-    }
-
     public boolean matchesMethod(String method) {
         return this.httpRequestLine.matchesMethod(method);
     }
@@ -100,9 +96,5 @@ public class HttpRequest {
 
     public String getUrlPath() {
         return this.httpRequestLine.getUrlPath();
-    }
-
-    public void setUrlPath(String urlPath) {
-        this.httpRequestLine.setUrlPath(urlPath);
     }
 }

@@ -56,7 +56,7 @@ public class ResponseResolver {
             if (favicon == null) {
                 return HttpResponse.notFound();
             }
-            return HttpResponse.okWithContentType("favicon.ico", favicon, "image/x-icon");
+            return HttpResponse.okWithContentType(favicon, "image/x-icon");
         }
         var responseBody = controller.getUriPage(uri);
         return HttpResponse.ok(uri, responseBody);

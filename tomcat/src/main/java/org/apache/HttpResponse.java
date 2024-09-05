@@ -22,7 +22,7 @@ public class HttpResponse {
         return new HttpResponse(headers, responseBody.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static HttpResponse okWithContentType(String uri, byte[] responseBody, String contentType) {
+    public static HttpResponse okWithContentType(byte[] responseBody, String contentType) {
         List<String> headers = new ArrayList<>();
         headers.add("HTTP/1.1 200 OK ");
         headers.add("Content-Type: " + contentType + " ");

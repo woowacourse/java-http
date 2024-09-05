@@ -1,17 +1,18 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.view;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.coyote.http11.HttpRequest;
 
-class ViewResolver {
+public class ViewResolver {
 
     private static final String GET_METHOD = "GET";
     private static final String DEFAULT_ROUTE = "/";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
-    private final ResponseBinder responseBinder = new ResponseBinder();
+    private final ResponseBuilder responseBuilder = new ResponseBuilder();
     private final ContentTypeConverter contentTypeConverter = new ContentTypeConverter();
 
     String handle(HttpRequest request) throws IOException {
@@ -19,12 +20,12 @@ class ViewResolver {
             return handleGetRequest(request.getPath());
         }
 
-        return responseBinder.buildNotFoundResponse();
+        return responseBuilder.buildNotFoundResponse();
     }
 
     private String handleGetRequest(String path) throws IOException {
         if (DEFAULT_ROUTE.equals(path)) {
-            return responseBinder.buildSuccessfulResponse(DEFAULT_RESPONSE_BODY);
+            return responseBuilder.buildSuccessfulResponse(DEFAULT_RESPONSE_BODY);
         }
 
         URL resource = getClass().getClassLoader().getResource("static" + path);
@@ -32,7 +33,7 @@ class ViewResolver {
             if (path.split("[.]").length == 0) {
                 return handleNoFileExtensionRequest(path);
             }
-            return responseBinder.buildNotFoundResponse();
+            return responseBuilder.buildNotFoundResponse();
         }
 
         return handleFileExtensionRequest(path, resource);
@@ -42,10 +43,10 @@ class ViewResolver {
         path += ".html";
         URL staticResourceUrl = getClass().getClassLoader().getResource("static" + path);
         if (staticResourceUrl == null) {
-            return responseBinder.buildNotFoundResponse();
+            return responseBuilder.buildNotFoundResponse();
         }
 
-        return responseBinder.buildSuccessfulResponse(
+        return responseBuilder.buildSuccessfulResponse(
                 new String(Files.readAllBytes(new File(staticResourceUrl.getFile()).toPath())));
     }
 
@@ -54,6 +55,6 @@ class ViewResolver {
         String fileExtension = path.split("[.]")[1];
         String contentType = contentTypeConverter.mapToContentType(fileExtension);
 
-        return responseBinder.buildSuccessfulResponse(contentType, staticResource);
+        return responseBuilder.buildSuccessfulResponse(contentType, staticResource);
     }
 }

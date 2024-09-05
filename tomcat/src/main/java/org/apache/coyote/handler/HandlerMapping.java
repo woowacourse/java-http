@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.handler;
 
 import java.util.List;
 
-class HandlerMapper {
+public class HandlerMapping {
 
     private static final List<String> nonStaticPaths = List.of("/login");
 

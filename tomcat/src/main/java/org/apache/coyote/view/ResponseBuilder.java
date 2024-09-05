@@ -1,11 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.view;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-class ResponseBinder {
+class ResponseBuilder {
 
     String buildSuccessfulResponse(String responseBody) {
         return this.buildSuccessfulResponse("text/html", responseBody);

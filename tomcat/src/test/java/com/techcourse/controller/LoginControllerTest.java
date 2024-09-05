@@ -54,7 +54,7 @@ class LoginControllerTest {
                 .thenReturn(Optional.of(mockUser));
 
         // when
-        String result = loginController.login(httpRequest);
+        String result = loginController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -85,7 +85,7 @@ class LoginControllerTest {
                 .thenReturn(Optional.of(mockUser));
 
         // when
-        String result = loginController.login(httpRequest);
+        String result = loginController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");

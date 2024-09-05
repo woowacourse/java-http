@@ -18,7 +18,8 @@ public class LoginController extends Controller {
     private final UserService userService = new UserService();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
-    public String login(HttpRequest request) throws IOException {
+    @Override
+    public String handle(HttpRequest request) throws IOException {
         try {
             String response = operate(request);
 

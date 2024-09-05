@@ -49,11 +49,11 @@ public class Http11Processor implements Runnable, Processor {
             String response;
             try {
                 if (endpoint.startsWith("/login")) {
-                    response = loginController.login(request);
+                    response = loginController.handle(request);
                 } else if (endpoint.startsWith("/register")) {
-                    response = registerController.register(request);
+                    response = registerController.handle(request);
                 } else {
-                    response = viewController.show(request);
+                    response = viewController.handle(request);
                 }
             } catch (UncheckedServletException e) {
                 log.error("Error processing request for endpoint: {}", endpoint, e);

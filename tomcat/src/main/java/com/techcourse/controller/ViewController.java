@@ -11,7 +11,8 @@ import com.techcourse.exception.UnsupportedMethodException;
 public class ViewController extends Controller {
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
-    public String show(HttpRequest request) throws IOException {
+    @Override
+    public String handle(HttpRequest request) throws IOException {
         String response = operate(request);
         return response;
     }

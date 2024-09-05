@@ -49,7 +49,7 @@ class RegisterControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = registerController.register(httpRequest);
+        String result = registerController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -77,7 +77,7 @@ class RegisterControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = registerController.register(httpRequest);
+        String result = registerController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/400.html");

@@ -18,7 +18,8 @@ public class RegisterController extends Controller {
     private final UserService userService = new UserService();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
-    public String register(HttpRequest request) throws IOException {
+    @Override
+    public String handle(HttpRequest request) throws IOException {
         try {
             String response = operate(request);
 
@@ -37,10 +38,6 @@ public class RegisterController extends Controller {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
         String email = requestBody.get("email");
-
-        if (account == null || password == null || email == null) {
-            throw new InvalidRegisterException("Values for register is missing.");
-        }
 
         User user = userService.register(account, password, email);
         log.info("User registered: {}", user);

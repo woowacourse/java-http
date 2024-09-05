@@ -63,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
                     User user = InMemoryUserRepository.findByAccount(account)
                         .orElse(new User("guest", "guest", "guest"));
                     if (user.checkPassword(password)) {
-                        redirect("http://localhost:8080/index.html", outputStream);
+                        redirectWithSetCookie("http://localhost:8080/index.html", outputStream);
                         return;
                     }
                 }
@@ -166,4 +166,21 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
 		}
 	}
+
+    private void redirectWithSetCookie(String location, OutputStream outputStream) {
+        try {
+            String sessionId = "JSESSIONID=sessionId";
+            String contentType = "text/html";
+            var response = "HTTP/1.1 302 Found \r\n" +
+                "Set-Cookie: " + sessionId + " \r\n" +
+                "Location: " + location + " \r\n" +
+                String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+                "Content-Length: 0";
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }

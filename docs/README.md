@@ -1,6 +1,6 @@
 ## 기능 명세
 
-- [ ] 1단계 - HTTP 서버 구현하기
+- [X] 1단계 - HTTP 서버 구현하기
   - [x] GET /index.html 응답하기
   - [X] CSS 지원하기
   - [X] Query String 파싱

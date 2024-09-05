@@ -13,9 +13,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.handler.LoginRequestHandler;
 import org.apache.coyote.handler.NotFoundHandler;
-import org.apache.coyote.handler.ResourceRequestHandler;
 import org.apache.coyote.handler.RootRequestHandler;
 import org.apache.coyote.handler.SignupRequestHandler;
+import org.apache.coyote.handler.StaticResourceRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
                 new RootRequestHandler(),
                 new LoginRequestHandler(),
                 new SignupRequestHandler(),
-                new ResourceRequestHandler()
+                new StaticResourceRequestHandler()
         );
     }
 

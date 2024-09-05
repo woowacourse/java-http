@@ -11,11 +11,11 @@ import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.HttpStatus;
 
-public class ResourceRequestHandler implements RequestHandler {
+public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
-        return canRead(httpRequest.getPath()) && Http11Method.GET.equals(httpRequest.getMethod());
+        return canRead(httpRequest.getRequestURI()) && Http11Method.GET.equals(httpRequest.getMethod());
     }
 
     @Override
@@ -23,7 +23,7 @@ public class ResourceRequestHandler implements RequestHandler {
         return Http11Response.builder()
                 .status(HttpStatus.OK)
                 .appendHeader("Content-Type", getContentType(httpRequest))
-                .body(readFile(httpRequest.getPath()))
+                .body(readFile(httpRequest.getRequestURI()))
                 .build();
     }
 

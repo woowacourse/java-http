@@ -129,6 +129,6 @@ public class Http11Processor implements Runnable, Processor {
             return prefix + HttpAcceptHeaderType.SVG.getValue();
         }
 
-        return prefix + HttpAcceptHeaderType.HTML.getValue() + ";charset=utf-8";
+        return prefix + HttpAcceptHeaderType.HTML.getValue() + ";charset=utf-8 ";
     }
 }

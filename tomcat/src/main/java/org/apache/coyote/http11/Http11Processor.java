@@ -5,13 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.catalina.io.FileReader;
-import org.apache.catalina.request.RequestHeaderReader;
+import org.apache.catalina.request.RequestReader;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponseContent;
 import org.apache.catalina.response.ResponsePage;
@@ -27,9 +25,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_PAGE = "Hello world!";
-    public static final String QUERY_SEPARATOR = "\\?";
-    public static final String PARAM_SEPARATOR = "&";
-    public static final String PARAM_ASSIGNMENT = "=";
 
     private final Socket connection;
 
@@ -46,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            Map<String, String> headerSentences = RequestHeaderReader.readHeaders(reader);
+            Map<String, String> headerSentences = RequestReader.readHeaders(reader);
             checkHttpMethodAndLoad(reader, headerSentences);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -79,8 +74,8 @@ public class Http11Processor implements Runnable, Processor {
         if (url.equals("/")) {
             return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE);
         }
-        if (url.contains("?")) {
-            return getResponseBodyUsedQuery(url, accept);
+        if (sentences.get("IsQueryParam").equals("true")) {
+            return getResponseBodyUsedQuery(sentences);
         }
 
         Optional<ResponsePage> responsePage = ResponsePage.fromUrl(url);
@@ -92,37 +87,28 @@ public class Http11Processor implements Runnable, Processor {
         return new ResponseContent(HttpStatus.OK, accept, FileReader.loadFileContent(url));
     }
 
-    private ResponseContent getResponseBodyUsedQuery(String url, String accept) {
-        String[] separationUrl = url.split(QUERY_SEPARATOR);
-        String path = separationUrl[0];
-        String[] queryString = separationUrl[1].split(PARAM_SEPARATOR);
-        if (!isValidateQuery(queryString)) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
-                    FileReader.loadFileContent("/400.html"));
-        }
-        if (path.startsWith("/login")) {
-            return login(queryString, accept);
+    private ResponseContent getResponseBodyUsedQuery(Map<String, String> sentences) {
+        String url = sentences.get("Url");
+        if (url.startsWith("/login")) {
+            return login(sentences);
         }
         throw new RuntimeException("'" + url + "'은 정의되지 않은 URL 입니다.");
     }
 
-    private static boolean isValidateQuery(String[] queryString) {
-        return Arrays.stream(queryString)
-                .noneMatch(query -> query.split(PARAM_ASSIGNMENT).length < 2);
-    }
 
-    private ResponseContent login(String[] queryString, String accept) {
-        if (queryString.length < 2) {
+    private ResponseContent login(Map<String, String> queryString) {
+        String accept = queryString.get("Accept");
+        if (Integer.parseInt(queryString.get("QueryParamSize")) < 2) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
                     FileReader.loadFileContent("/400.html"));
         }
-        String accountParam = queryString[0];
-        String passwordParam = queryString[1];
-        if (!accountParam.startsWith("account=") || !passwordParam.startsWith("password=")) {
+        String accountParam = queryString.get("account");
+        String passwordParam = queryString.get("password");
+        if (accountParam == null || passwordParam == null) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
 
-        if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {
+        if (checkAuth(accountParam, passwordParam)) {
             return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent("/index.html"));
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent("/401.html"));
@@ -142,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
         String fileType = sentences.get("Accept");
         int contentLength = Integer.parseInt(sentences.get("Content-Length"));
 
-        Map<String, String> body = getRequestBody(reader, contentLength);
+        Map<String, String> body = RequestReader.readBody(reader, contentLength);
 
         try (final OutputStream outputStream = connection.getOutputStream()) {
             String response = "";
@@ -154,25 +140,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Map<String, String> getRequestBody(BufferedReader reader, int contentLength) {
-        char[] buffer = new char[contentLength];
-        try {
-            reader.read(buffer, 0, contentLength);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        String body = new String(buffer);
-
-        String[] values = body.split("&");
-        return Arrays.stream(values)
-                .map(s -> s.split("=", 2))
-                .filter(parts -> parts.length == 2)
-                .collect(Collectors.toMap(
-                        parts -> parts[0],
-                        parts -> parts[1]
-                ));
     }
 
     private ResponseContent signUp(Map<String, String> body, String accept) {

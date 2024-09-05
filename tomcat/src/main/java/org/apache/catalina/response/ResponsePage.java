@@ -4,6 +4,7 @@ import java.util.Optional;
 
 public enum ResponsePage {
     LOGIN("/login", HttpStatus.OK, "/login.html"),
+    REGISTER("/register", HttpStatus.OK, "/register.html"),
     ;
 
     private final String url;

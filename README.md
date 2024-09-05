@@ -48,7 +48,7 @@
     - [x] /401.html 로 리다이렉트
 
 - POST 방식으로 회원가입
-  - [ ] 회원가입 페이지 접근(http://localhost:8080/register)
+  - [x] 회원가입 페이지 접근(http://localhost:8080/register)
   - [ ] 페이지 로드 -> GET
   - [ ] 회원가입 버튼 -> POST
   - [ ] 회원가입 완료 -> /index.html 로 리다이렉트

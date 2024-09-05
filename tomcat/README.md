@@ -13,6 +13,7 @@
 - [ ] 회원가입 기능 구현
   - [ ] `localhost:8080/register` 로 GET 요청 시 `register.html` 응답
   - [ ] 회원가입 버튼은 POST 요청 사용
+  - [x] POST 요청 시 Request Body 받음
 - [ ] 쿠키에 JSESSIONID 저장
   - [ ] 응답 헤더에 `Set-Cookie` 키에 `JSESSIONID=...` 값을 저장
 - [ ] Session 구현하기

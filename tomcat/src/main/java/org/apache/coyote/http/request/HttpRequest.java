@@ -10,6 +10,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Header headers;
+    private String body;
 
     public static HttpRequest of(String request) {
         List<String> requests = List.of(request.split(CRLF));
@@ -31,5 +32,13 @@ public class HttpRequest {
 
     public Header getHeaders() {
         return headers;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

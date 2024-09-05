@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.RequestToResponse;
 import org.apache.coyote.Processor;
@@ -37,7 +38,12 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestToResponse requestToResponse = new RequestToResponse();
 
-            final var response = requestToResponse.build(getRequest(bufferedReader));
+            HttpRequest request = getRequestHeader(bufferedReader);
+            if (request.getRequestLine().getMethod().equals(HttpMethod.POST)) {
+                getRequestBody(bufferedReader, request);
+            }
+
+            final var response = requestToResponse.build(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -46,13 +52,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest getRequest(final BufferedReader bufferedReader) throws IOException {
-        List<String> request = new ArrayList<>();
+    private HttpRequest getRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        List<String> requestHeader = new ArrayList<>();
 
-        while (bufferedReader.ready()) {
-            request.add(bufferedReader.readLine());
+        while (true) {
+            String line = bufferedReader.readLine();
+            if (line == null || line.isEmpty()) {
+                break;
+            }
+            requestHeader.add(line);
         }
 
-        return HttpRequest.of(request);
+        return HttpRequest.of(requestHeader);
+    }
+
+    private void getRequestBody(final BufferedReader bufferedReader, final HttpRequest request) throws IOException {
+        int contentLength = Integer.parseInt(request.getHeaders().getKey("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        request.setBody(requestBody);
     }
 }

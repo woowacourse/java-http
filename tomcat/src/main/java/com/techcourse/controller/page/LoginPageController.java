@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package com.techcourse.controller.page;
 
 import java.io.IOException;
 import org.apache.coyote.http11.HttpRequestHandler;

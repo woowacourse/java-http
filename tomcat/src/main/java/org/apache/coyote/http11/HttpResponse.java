@@ -12,11 +12,11 @@ public record HttpResponse(
     private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
 
     public byte[] serialize() {
-        String message = String.join("\r\n", startLine(), getHeaders(), getBody());
+        String message = String.join("\r\n", getStartLine(), getHeaders(), getBody());
         return message.getBytes();
     }
 
-    private String startLine() {
+    private String getStartLine() {
         return "HTTP/1.1 " + httpStatus.getDescription() + " ";
     }
 

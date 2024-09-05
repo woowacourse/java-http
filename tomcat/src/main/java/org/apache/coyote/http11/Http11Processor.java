@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.Controller;
+import com.techcourse.FrontController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -24,141 +25,97 @@ import java.util.StringTokenizer;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Socket connection;
+	private final Socket connection;
 
-    private final Controller controller;
+	private final FrontController frontController;
 
-    public Http11Processor(final Socket connection) {
-        this.connection = connection;
-        this.controller = new Controller();
-    }
+	public Http11Processor(final Socket connection) {
+		this.connection = connection;
+		this.frontController = new FrontController();
+	}
 
-    @Override
-    public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        process(connection);
-    }
+	@Override
+	public void run() {
+		log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+		process(connection);
+	}
 
-    @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+	@Override
+	public void process(final Socket connection) {
+		try (final var inputStream = connection.getInputStream();
+			 final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> headers = new ArrayList<>();
-            String line;
-            int contentLength = 0;
+			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+			List<String> headers = new ArrayList<>();
+			String line;
+			int contentLength = 0;
 
-            // 헤더 읽기
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                headers.add(line);
+			while ((line = reader.readLine()) != null && !line.isEmpty()) {
+				headers.add(line);
 
-                // Content-Length 헤더 확인
-                if (line.startsWith("Content-Length")) {
-                    contentLength = Integer.parseInt(line.split(":")[1].trim());
-                }
-            }
+				if (line.startsWith("Content-Length")) {
+					contentLength = Integer.parseInt(line.split(":")[1].trim());
+				}
+			}
 
+			StringTokenizer tokenizer = new StringTokenizer(headers.get(0));
+			String method = tokenizer.nextToken();
+			String uri = tokenizer.nextToken();
+			String httpVersion = tokenizer.nextToken();
 
-            StringTokenizer tokenizer = new StringTokenizer(headers.get(0));
-            String method = tokenizer.nextToken();
-            String uri = tokenizer.nextToken();
-            String httpVersion = tokenizer.nextToken();
+			if (!httpVersion.equals("HTTP/1.1")) {
+				throw new IOException("not http1.1 request");
+			}
 
-            if (!httpVersion.equals("HTTP/1.1")) {
-                throw new IOException("not http1.1 request");
-            }
+			var response = "";
+			if (method.equals("GET")) {
+				response = processGetRequest(uri);
+			}
+			if (method.equals("POST")) {
+				char[] body = new char[contentLength];
+				if (contentLength > 0) {
+					reader.read(body, 0, contentLength);
+				}
 
-            var response = "";
+				String requestBody = new String(body);
+				String decodedBody = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
 
-            if (method.equals("GET")) {
-                response = processGetRequest(uri);
-            }
-            if (method.equals("POST")) {
-                char[] body = new char[contentLength];
-                if (contentLength > 0) {
-                    reader.read(body, 0, contentLength);
-                }
+				log.info("Decoded Request Body: {}", decodedBody);
+				response = processPostRequest(uri, decodedBody);
+			}
 
-                String requestBody = new String(body);
-                String decodedBody = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
+			outputStream.write(response.getBytes());
+			outputStream.flush();
+		} catch (IOException | UncheckedServletException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
 
-                log.info("Decoded Request Body: {}", decodedBody);
-                response = processPostRequest(uri, decodedBody);
-            }
+	private String processGetRequest(String uri) throws IOException {
+		return frontController.processGetRequest(uri);
+	}
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
+	private String processPostRequest(String uri, String body) {
+		Map<String, String> params = parseQueryString(body);
 
-    private String processGetRequest(String uri) throws IOException {
-        var responseBody = controller.processGetRequest(uri);
+		return frontController.processPostRequest(uri, params);
+	}
 
-        var response = "HTTP/1.1 " + getStatusCode("GET") + " OK \r\n";
-        response += String.join("\r\n", getResponseHeaders(uri, responseBody, "GET"));
-        response += "\r\n" + "\r\n" + responseBody;
-        return response;
-    }
+	private Map<String, String> parseQueryString(String queryString) {
+		Map<String, String> parameters = new HashMap<>();
+		String[] pairs = queryString.split("&");
 
-    private String processPostRequest(String uri, String body) {
-        Map<String, String> params = parseQueryString(body);
+		for (String pair : pairs) {
+			String[] keyValue = pair.split("=", 2);
 
-        var responseBody = controller.processPostRequest(uri, params);
+			String key = keyValue[0];
+			String value = keyValue.length > 1 ? keyValue[1] : "";
 
-        var response = "HTTP/1.1 " + getStatusCode("POST") + " OK \r\n";
-        response += String.join("\r\n", getResponseHeaders(uri, responseBody, "POST"));
-        response += "\r\n" + "\r\n" + responseBody;
-        return response;
-    }
+			parameters.put(key, value);
+		}
 
-    private Map<String, String> parseQueryString(String queryString) {
-        Map<String, String> parameters = new HashMap<>();
-        String[] pairs = queryString.split("&");
-
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=", 2);
-
-            String key = keyValue[0];
-            String value = keyValue.length > 1 ? keyValue[1] : "";
-
-            parameters.put(key, value);
-        }
-
-        return parameters;
-    }
-
-    private List<String> getResponseHeaders(String uri, String responseBody, String method) {
-        List<String> headers = new ArrayList<>();
-        headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
-        headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
-
-        if (getStatusCode(method).equals("302")) {
-            headers.add("Location: " + responseBody);
-        }
-
-        return headers;
-    }
-
-    private int calculateContentLength (String content){
-        return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
-    }
-
-    private String getContentType(String uri) {
-        if (uri.startsWith("/css")) {
-            return "text/css";
-        }
-        return "text/html";
-    }
-
-    private String getStatusCode(String method) {
-        if (method.equals("POST")) {
-            return "302";
-        }
-        return "200";
-    }
+		return parameters;
+	}
 }

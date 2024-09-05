@@ -4,8 +4,12 @@ public class ResponseBody implements Assemblable {
 
     private final String body;
 
-    protected ResponseBody(String body) {
+    public ResponseBody(String body) {
         this.body = body;
+    }
+
+    public int length() {
+        return body.getBytes().length;
     }
 
     @Override

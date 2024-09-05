@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private String requestPath;
-    private String cookie;
     private int statusCode = 200;
     private String statusMessage = "OK";
+    private StringBuilder setCookie;
+    private String  responseBody;
+    private SessionManager sessionManager = SessionManager.getInstance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -63,6 +66,12 @@ public class Http11Processor implements Runnable, Processor {
                 httpRequestHeaders.put(key, value);
             }
 
+            Map<String, String> cookies = new HashMap<>();
+            if (!httpRequestHeaders.containsKey("Cookie") || !httpRequestHeaders.get("Cookie").contains("JSESSIONID")) {
+                UUID jSessionId = UUID.randomUUID();
+                cookies.put("JSESSIONID", jSessionId.toString());
+            }
+
             requestPath = requestUri;
             if (requestUri.equals("/login") && headerFirstLine[0].equals("POST")) {
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
@@ -75,7 +84,31 @@ public class Http11Processor implements Runnable, Processor {
                     String[] input = request.split("=");
                     userInfo.put(input[0], input[1]);
                 }
-                login(userInfo.get("account"), userInfo.get("password"));
+
+                UUID sessionId = UUID.randomUUID();
+                Session session = new Session(sessionId.toString());
+                User user = InMemoryUserRepository.findByAccount(userInfo.get("account"))
+                        .orElseThrow(IllegalArgumentException::new);
+                if (!user.checkPassword(userInfo.get("password"))) {
+                    requestPath = "/401";
+                    statusCode = 401;
+                    statusMessage = "Unauthorized";
+                    return;
+                }
+
+                for (String info : userInfo.keySet()) {
+                    session.setAttribute(info, userInfo.get(info));
+                }
+                sessionManager.add(session);
+
+                requestPath = "/index.html";
+                statusCode = 302;
+                statusMessage = "Found";
+                setCookie = new StringBuilder();
+                for (String cookie : cookies.keySet()) {
+                    setCookie.append(cookie).append("=").append(cookies.get(cookie));
+                }
+                log.info("user : {}", user);
             }
 
 
@@ -119,17 +152,7 @@ public class Http11Processor implements Runnable, Processor {
             Path path = new File(resource.getPath()).toPath();
             byte[] bytes = Files.readAllBytes(path);
 
-            Map<String, String> cookies = new HashMap<>();
-            if (!httpRequestHeaders.containsKey("Cookie") || !httpRequestHeaders.get("Cookie").contains("JSESSIONID")) {
-                UUID jSessionId = UUID.randomUUID();
-                cookies.put("JSESSIONID", jSessionId.toString());
-            }
-            StringBuilder setCookie = new StringBuilder();
-            for (String cookie : cookies.keySet()) {
-                setCookie.append(cookie).append("=").append(cookies.get(cookie));
-            }
-
-            final var responseBody = new String(bytes);
+            responseBody = new String(bytes);
             String response = String.join("\r\n",
                     "HTTP/1.1" + " " + statusCode + " " + statusMessage + " ",
                     "Set-Cookie: " + setCookie + " ",
@@ -143,20 +166,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void login(String account, String password) {
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
-        if (!user.checkPassword(password)) {
-            requestPath = "/401";
-            statusCode = 401;
-            statusMessage = "Unauthorized";
-            return;
-        }
-        requestPath = "/index.html";
-        statusCode = 302;
-        statusMessage = "Found";
-        log.info("user : {}", user);
     }
 }

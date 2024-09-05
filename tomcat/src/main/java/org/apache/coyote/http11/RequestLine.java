@@ -59,6 +59,10 @@ public class RequestLine {
         return Double.valueOf(parsedRequestLine[2].split("/")[1]);
     }
 
+    public boolean isQueryStringRequest() {
+        return requestURI.isQueryStringUri();
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
@@ -69,9 +73,5 @@ public class RequestLine {
 
     public Map<String, String> getParameters() {
         return requestURI.getParameters();
-    }
-
-    public boolean isQueryStringRequest() {
-        return requestURI.isQueryStringUri();
     }
 }

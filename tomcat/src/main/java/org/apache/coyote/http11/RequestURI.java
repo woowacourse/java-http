@@ -29,7 +29,7 @@ public class RequestURI {
     }
 
     public boolean isQueryStringUri() {
-        return queryStringParser.isQueryString(uri);
+        return !parameters.keySet().isEmpty();
     }
 
     public String getUri() {

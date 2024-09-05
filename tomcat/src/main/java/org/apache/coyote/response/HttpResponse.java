@@ -66,7 +66,7 @@ public class HttpResponse {
         responseHeader.add(name, value);
     }
 
-    public String buildMessage() {
+    public String build() {
         System.out.println("httpStatusCode = " + httpStatusCode.buildMessage());
 
         return String.join("\r\n",

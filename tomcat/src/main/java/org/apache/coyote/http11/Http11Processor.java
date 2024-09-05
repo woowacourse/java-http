@@ -18,7 +18,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
-import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpStatusCode;
 import org.slf4j.Logger;
@@ -105,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (request.pointsTo(GET, "/")) {
             return HttpResponse.ofContent("Hello world!")
-                    .buildMessage();
+                    .build();
         }
 
         if (request.pointsTo(GET, "/login")) {
@@ -122,19 +121,19 @@ public class Http11Processor implements Runnable, Processor {
 
         return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK)
                 .cookie(cookie)
-                .buildMessage();
+                .build();
     }
 
     private String getLoginPage(HttpCookie cookie) {
         if (cookie.contains(JSESSIONID) && sessionManager.hasId(cookie.get(JSESSIONID))) {
             return HttpResponse.redirectTo("/index.html")
                     .cookie(cookie)
-                    .buildMessage();
+                    .build();
         }
 
         return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK)
                 .cookie(cookie)
-                .buildMessage();
+                .build();
     }
 
     private String login(HttpCookie cookie, RequestBody requestBody) {
@@ -147,12 +146,12 @@ public class Http11Processor implements Runnable, Processor {
                 saveSession(cookie, user);
                 return HttpResponse.redirectTo("/index.html")
                         .cookie(cookie)
-                        .buildMessage();
+                        .build();
             }
 
             return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED)
                     .cookie(cookie)
-                    .buildMessage();
+                    .build();
         }
 
         throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
@@ -170,7 +169,7 @@ public class Http11Processor implements Runnable, Processor {
                 saveSession(cookie, user);
                 return HttpResponse.redirectTo("/index.html")
                         .cookie(cookie)
-                        .buildMessage();
+                        .build();
             }
 
             throw new UncheckedServletException("이미 존재하는 ID입니다.");

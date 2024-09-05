@@ -25,6 +25,7 @@ public class RequestReader {
         addRequestLineDetails(headerLines.get(0), headers);
         Map<String, String> queryParams = getQueryParams(headers.get("Url"));
         headers.putAll(queryParams);
+        headers.put("Url", headers.get("Url").split(QUERY_SEPARATOR)[0]);
         return headers;
     }
 

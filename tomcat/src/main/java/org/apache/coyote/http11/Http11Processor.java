@@ -89,7 +89,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private ResponseContent getResponseBodyUsedQuery(Map<String, String> sentences) {
         String url = sentences.get("Url");
-        if (url.startsWith("/login")) {
+        if (url.equals("/login")) {
             return login(sentences);
         }
         throw new RuntimeException("'" + url + "'은 정의되지 않은 URL 입니다.");
@@ -99,15 +99,14 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseContent login(Map<String, String> queryString) {
         String accept = queryString.get("Accept");
         if (Integer.parseInt(queryString.get("QueryParamSize")) < 2) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept,
-                    FileReader.loadFileContent("/400.html"));
+            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
+
         String accountParam = queryString.get("account");
         String passwordParam = queryString.get("password");
         if (accountParam == null || passwordParam == null) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
-
         if (checkAuth(accountParam, passwordParam)) {
             return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent("/index.html"));
         }
@@ -117,24 +116,19 @@ public class Http11Processor implements Runnable, Processor {
     private boolean checkAuth(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
-            log.info("user : " + user.get());
+            String userToString = "user : " + user.get();
+            log.info(userToString);
             return true;
         }
         return false;
     }
 
     private void loadPostHttpMethod(BufferedReader reader, Map<String, String> sentences) {
-        String url = sentences.get("Url");
-        String fileType = sentences.get("Accept");
         int contentLength = Integer.parseInt(sentences.get("Content-Length"));
-
         Map<String, String> body = RequestReader.readBody(reader, contentLength);
 
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = "";
-            if (url.equals("/register")) {
-                response = signUp(body, fileType).responseToString();
-            }
+            String response = getResponseContentForUrl(sentences, body).responseToString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -142,7 +136,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseContent signUp(Map<String, String> body, String accept) {
+    private static ResponseContent getResponseContentForUrl(Map<String, String> sentences, Map<String, String> body) {
+        String url = sentences.get("Url");
+        String accept = sentences.get("Accept");
+        if (url.equals("/register")) {
+            return signUp(body, accept);
+        }
+        return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/404.html"));
+    }
+
+    private static ResponseContent signUp(Map<String, String> body, String accept) {
         if (InMemoryUserRepository.findByAccount(body.get("account")).isPresent()) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }

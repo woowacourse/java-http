@@ -12,7 +12,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -37,19 +40,27 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final var clientReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var startLine = clientReader.readLine();
-            final var headers = createHeaders(clientReader);
-            final var response = createHttpResponse(loadStaticFile(new HttpRequestData(startLine, headers)));
+    public void process(Socket connection) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            Reader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader clientReader = new BufferedReader(inputStreamReader);
 
-            outputStream.write(response.getBytes());
+            HttpRequestData httpRequestData = createHttpRequestData(clientReader);
+            String httpResponse = createHttpResponseMessage(responseResource(httpRequestData));
+
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequestData createHttpRequestData(BufferedReader clientReader) throws IOException {
+        String requestStartLine = clientReader.readLine();
+        Map<String, String> requestHeader = createHeaders(clientReader);
+
+        return new HttpRequestData(requestStartLine, requestHeader);
     }
 
     // TODO: header를 생성하는 부분
@@ -68,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
-    private HttpResponseData loadStaticFile(HttpRequestData httpRequestData) throws IOException {
+    private HttpResponseData responseResource(HttpRequestData httpRequestData) throws IOException {
         final var startLines = httpRequestData.startLine.split(" ");
         log.info("{}", httpRequestData.headers);
 
@@ -137,7 +148,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createHttpResponse(HttpResponseData httpResponseData) {
+    private String createHttpResponseMessage(HttpResponseData httpResponseData) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + httpResponseData.contentType + " ",

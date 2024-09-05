@@ -18,13 +18,13 @@ public class RegisterPageController implements HttpRequestHandler {
 
     @Override
     public boolean supports(final HttpRequest request) {
-        if (request.isMethodNotEqualWith(SUPPORTING_METHOD)) {
+        if (request.methodNotEqual(SUPPORTING_METHOD)) {
             return false;
         }
-        if (request.isHttpProtocolNotEqualWith(SUPPORTING_PROTOCOL)) {
+        if (request.protocolNotEqual(SUPPORTING_PROTOCOL)) {
             return false;
         }
-        if (request.isUriNotEqualWith(SUPPORTING_URI)) {
+        if (request.uriNotEqual(SUPPORTING_URI)) {
             return false;
         }
         return true;

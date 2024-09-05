@@ -14,6 +14,11 @@ public class RequestLine {
         this.protocol = protocol;
     }
 
+    public static RequestLine from(String line) {
+        String[] lineParts = line.split(" ");
+        return new RequestLine(Method.from(lineParts[0]), new Uri(lineParts[1]), HttpProtocol.from(lineParts[2]));
+    }
+
     public Method getMethod() {
         return method;
     }
@@ -30,7 +35,27 @@ public class RequestLine {
         return protocol;
     }
 
-    public String getProtocolMessage() {
-        return protocol.getHttpMessage();
+    public String getQueryParameter(String name) {
+        return uri.getQueryParameter(name);
+    }
+
+    public boolean isMethod(Method target) {
+        return method.equals(target);
+    }
+
+    public boolean isHttpProtocol(final HttpProtocol target) {
+        return protocol.equals(target);
+    }
+
+    public boolean isUri(final Uri target) {
+        return uri.equals(target);
+    }
+
+    public boolean isUriHome() {
+        return uri.isHome();
+    }
+
+    public boolean isUriStartsWith(final Uri target) {
+        return uri.isStartsWith(target);
     }
 }

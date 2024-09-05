@@ -28,13 +28,13 @@ public class LoginController implements HttpRequestHandler {
 
     @Override
     public boolean supports(final HttpRequest request) {
-        if (request.isMethodNotEqualWith(SUPPORTING_METHOD)) {
+        if (request.methodNotEqual(SUPPORTING_METHOD)) {
             return false;
         }
-        if (request.isHttpProtocolNotEqualWith(SUPPORTING_PROTOCOL)) {
+        if (request.protocolNotEqual(SUPPORTING_PROTOCOL)) {
             return false;
         }
-        if (request.isUriNotStartsWith(SUPPORTING_URI)) {
+        if (request.uriNotStartsWith(SUPPORTING_URI)) {
             return false;
         }
         if (request.getQueryParameter(ACCOUNT_PARAMETER) == null) {

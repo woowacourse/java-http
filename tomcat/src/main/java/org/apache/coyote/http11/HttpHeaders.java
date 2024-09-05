@@ -15,6 +15,11 @@ public class HttpHeaders {
         headers.put(key, value);
     }
 
+    public void putHeader(String headerLine) {
+        String[] headerParts = headerLine.split(HEADER_DELIMETER);
+        headers.put(headerParts[0], headerParts[1]);
+    }
+
     public String getHeaderValue(String key) {
         return headers.get(key);
     }

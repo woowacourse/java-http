@@ -14,12 +14,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,20 +47,22 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = reader.readLine();
+            List<String> headers = new ArrayList<>();
+            String line;
+            int contentLength = 0;
 
-            System.out.println(line);
+            // 헤더 읽기
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                headers.add(line);
 
-            // TODO : 한 줄이 아닌 전체로 읽도록 수정
-//            while ((line = reader.readLine()) != null) {
-//                System.out.println(line);  // 라인 단위로 출력
-//            }
-
-            if (reader.readLine() == null) {
-                throw new IOException("http request is empty");
+                // Content-Length 헤더 확인
+                if (line.startsWith("Content-Length")) {
+                    contentLength = Integer.parseInt(line.split(":")[1].trim());
+                }
             }
 
-            StringTokenizer tokenizer = new StringTokenizer(line);
+
+            StringTokenizer tokenizer = new StringTokenizer(headers.get(0));
             String method = tokenizer.nextToken();
             String pattern = tokenizer.nextToken();
             String httpVersion = tokenizer.nextToken();
@@ -68,11 +74,23 @@ public class Http11Processor implements Runnable, Processor {
             var responseBody = "";
 
             if (method.equals("GET")) {
-                responseBody = getResponseBody(pattern);
+                responseBody = processGetRequest(pattern);
+            }
+            if (method.equals("POST")) {
+                char[] body = new char[contentLength];
+                if (contentLength > 0) {
+                    reader.read(body, 0, contentLength);
+                }
+
+                String requestBody = new String(body);
+                String decodedBody = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
+
+                log.info("Decoded Request Body: {}", decodedBody);
+                responseBody = processPostRequest(pattern, decodedBody);
             }
 
-            var response = "HTTP/1.1 " + getStatusCode(pattern) + " OK \r\n";
-            response += String.join("\r\n", getHeaders(pattern, responseBody));
+            var response = "HTTP/1.1 " + getStatusCode(pattern, method) + " OK \r\n";
+            response += String.join("\r\n", getHeaders(pattern, responseBody, method));
             response += "\r\n" + "\r\n" + responseBody;
 
 
@@ -83,12 +101,52 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getHeaders(String pattern, String responseBody) {
+    private String processPostRequest(String pattern, String body) {
+
+        if (pattern.startsWith("/register")) {
+            Map<String, String> params = parseQueryString(body);
+            User user = new User(
+                (InMemoryUserRepository.getLastId() + 1),
+                params.get("account"),
+                params.get("password"),
+                params.get("email"));
+            InMemoryUserRepository.save(user);
+
+            log.info(user.toString());
+            return "/index.html";
+        }
+
+        return "";
+    }
+
+    private Map<String, String> parseQueryString(String queryString) {
+        Map<String, String> parameters = new HashMap<>();
+
+        // '&'로 각 키-값 쌍 분리
+        String[] pairs = queryString.split("&");
+
+        for (String pair : pairs) {
+            // '='로 키와 값을 분리
+            String[] keyValue = pair.split("=", 2);
+
+            // 키와 값 저장
+            String key = keyValue[0];
+            String value = keyValue.length > 1 ? keyValue[1] : "";
+
+            // Map에 저장
+            parameters.put(key, value);
+        }
+
+        return parameters;
+    }
+
+
+    private List<String> getHeaders(String pattern, String responseBody, String method) {
         List<String> headers = new ArrayList<>();
         headers.add("Content-Type: " + getContentType(pattern) + ";charset=utf-8 ");
         headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
 
-        if (getStatusCode(pattern).equals("302")) {
+        if (getStatusCode(pattern, method).equals("302")) {
             headers.add("Location: " + responseBody);
         }
 
@@ -99,9 +157,14 @@ public class Http11Processor implements Runnable, Processor {
         return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
     }
 
-    private String getResponseBody(String pattern) throws IOException {
+    private String processGetRequest(String pattern) throws IOException {
         if (pattern.equals("/")) {
             return "Hello world!";
+        }
+
+        if (pattern.equals("/register")) {
+            URL resource = getClass().getClassLoader().getResource("static" + pattern+ ".html");
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
         }
 
         if (pattern.startsWith("/login") && !pattern.endsWith(".html")) {
@@ -134,8 +197,11 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private String getStatusCode(String pattern) {
+    private String getStatusCode(String pattern, String method) {
         if (pattern.startsWith("/login") && !pattern.endsWith(".html")) {
+            return "302";
+        }
+        if (pattern.startsWith("/register") && method.equals("POST")) {
             return "302";
         }
         return "200";

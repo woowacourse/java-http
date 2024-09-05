@@ -5,7 +5,7 @@
 - [x] GET /index.html 응답하기
     - 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있다.
     - Http11ProcessorTest의 모든 테스트 통과한다.
-- [ ] CSS 지원하기
+- [x] CSS 지원하기
     - 사용자가 페이지를 열었을 때 CSS 파일이 호출된다.
 - [ ] Query String 파싱
     - http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html)가 보여진다.

@@ -2,6 +2,7 @@ package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.Optional;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.view.ModelAndView;
 import org.slf4j.Logger;
@@ -14,10 +15,15 @@ public class LogInController extends Controller {
     @Override
     public ModelAndView process(HttpRequest request) {
         String account = request.getQueryStringValue("account");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
-        log.info("user : {}", user);
+        String password = request.getQueryStringValue("password");
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccountAndPassword(account, password);
 
-        return new ModelAndView("/login", null);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            log.info("optionalUser : {}", user);
+            return new ModelAndView("/login", user.toMap());
+        }
+
+        return new ModelAndView("/401.html", null);
     }
 }

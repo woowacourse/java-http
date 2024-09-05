@@ -1,19 +1,24 @@
 package org.apache.coyote.http11.request;
 
-import java.io.InputStream;
-
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.List;
 
 public class Request {
 
-    public Request(InputStream inputStream) {
+    private final RequestLine requestLine;
+
+    private Request(RequestLine requestLine) {
+        this.requestLine = requestLine;
+    }
+
+    public static Request parseFrom(List<String> request) {
+        return new Request(RequestLine.parseFrom(request.getFirst()));
     }
 
     public Method getMethod() {
-        throw new NotImplementedException();
+        return requestLine.method();
     }
 
     public String getTarget() {
-        throw new NotImplementedException();
+        return requestLine.target();
     }
 }

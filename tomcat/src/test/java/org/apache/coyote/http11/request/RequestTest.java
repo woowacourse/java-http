@@ -3,8 +3,11 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,7 +31,9 @@ class RequestTest {
                     """;
 
             //when
-            Request request = new Request(new ByteArrayInputStream(input.getBytes()));
+            InputStream requestStream = new ByteArrayInputStream(input.getBytes());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
+            Request request = Request.parseFrom(bufferedReader.lines().toList());
 
             //then
             assertAll(

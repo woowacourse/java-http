@@ -8,10 +8,11 @@ public class HttpRequestLine {
     private final String path;
     private final String version;
 
-    public HttpRequestLine(HttpMethod method, String path, String version) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
+    public HttpRequestLine(String requestLine) {
+        String[] headerFirstLine = requestLine.split(" ");
+        this.method = HttpMethod.getHttpMethod(headerFirstLine[0]);
+        this.path = headerFirstLine[1];
+        this.version = headerFirstLine[2];
     }
 
     public boolean isMethod(String name) {

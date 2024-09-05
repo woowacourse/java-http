@@ -33,7 +33,6 @@ public class HttpResponse {
 
     public String getResponse() {
         StringBuilder responseBuilder = new StringBuilder();
-        System.out.println("makeStatusLine() = " + makeStatusLine());
         responseBuilder.append(makeStatusLine()).append("\r\n");
         responseBuilder.append(header.getHeaderResponse()).append("\r\n");
         responseBuilder.append("\r\n");

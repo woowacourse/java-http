@@ -4,14 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResourceLoader;
 import org.apache.coyote.http11.response.ResponseBody;
@@ -52,26 +51,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponse(final BufferedReader reader) throws IOException {
-        final var requestLine = reader.readLine();
-        final var parts = requestLine.split(" ");
-        final var method = parts[0];
-        final var uri = parts[1];
-        final var requestHeader = parseRequestHeader(reader);
+        final var request = HttpRequest.of(reader.readLine(), reader);
 
-        if (method.equals("GET") && uri.equals("/")) {
+        if (request.isGet() && request.isSameUri("/")) {
             final var response = new HttpResponse(HttpStatus.OK);
             response.setBody(new ResponseBody("text/html", "Hello world!"));
 
             return response.getResponse();
         }
-        if (method.equals("GET") && ContentMimeType.isEndsWithExtension(uri)) {
-            final var responseBody = ResourceLoader.loadStaticResource(uri);
+        if (request.isGet() && ContentMimeType.isEndsWithExtension(request.getUri())) {
+            final var responseBody = ResourceLoader.loadStaticResource(request.getUri());
             final var response = new HttpResponse(HttpStatus.OK);
             response.setBody(responseBody);
             return response.getResponse();
         }
-        if (method.equals("GET") && uri.equals("/login")) {
-            final var cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
+        if (request.isGet() && request.isSameUri("/login")) {
+            final var cookie = new HttpCookie(request.getCookie());
             if (cookie.hasJSESSIONID()) {
                 final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
                 final var user = (User) session.getAttribute("user");
@@ -82,10 +77,9 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
         }
-        if (method.equals("POST") && uri.equals("/login")) {
-            final var responseBody = getRequestBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
-            if (isAuthenticateUser(responseBody)) {
-                HttpCookie cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
+        if (request.isPost() && request.isSameUri("/login")) {
+            if (isAuthenticateUser(request)) {
+                HttpCookie cookie = new HttpCookie(request.getCookie());
                 if (cookie.hasJSESSIONID()) {
                     final var response = new HttpResponse(HttpStatus.FOUND);
                     response.setRedirect("/index.html");
@@ -93,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
 
                 final var session = new Session(UUID.randomUUID().toString());
-                InMemoryUserRepository.findByAccount(responseBody.get("account"))
+                InMemoryUserRepository.findByAccount(request.findBodyValueByKey("account"))
                         .ifPresent(user -> session.setAttribute("user", user));
                 final var response = new HttpResponse(HttpStatus.FOUND);
                 response.setRedirect("/index.html");
@@ -105,53 +99,22 @@ public class Http11Processor implements Runnable, Processor {
                 return response.getResponse();
             }
         }
-        if (method.equals("POST") && uri.contains("register")) {
-            final var requestBody = getRequestBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
-            final var newUser = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
+        if (request.isPost() && request.isSameUri("/register")) {
+            final var newUser =
+                    new User(request.findBodyValueByKey("account"), request.findBodyValueByKey("password"), request.findBodyValueByKey("email"));
             InMemoryUserRepository.save(newUser);
             final var response = new HttpResponse(HttpStatus.FOUND);
             response.setRedirect("/index.html");
             return response.getResponse();
         }
         final var response = new HttpResponse(HttpStatus.OK);
-        response.setBody(ResourceLoader.loadHtmlResource(uri));
+        response.setBody(ResourceLoader.loadHtmlResource(request.getUri()));
         return response.getResponse();
     }
 
-    private Map<String, String> getRequestBody(final BufferedReader reader, final int contentLength) throws IOException {
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        final var requestBody = new String(buffer);
-        return parseQueryParam(requestBody);
-    }
-
-    private Map<String, String> parseRequestHeader(final BufferedReader reader) throws IOException {
-        final Map<String, String> result = new HashMap<>();
-        String line;
-        while (!(line = reader.readLine()).isBlank()) {
-            String[] parts = line.split(": ", 2);
-            result.put(parts[0], parts[1]);
-        }
-        return result;
-    }
-
-    private boolean hasQueryParam(final String uri) {
-        return uri.contains("?");
-    }
-
-    private Map<String, String> parseQueryParam(final String queryString) {
-        Map<String, String> result = new HashMap<>();
-        String[] pairs = queryString.split("&");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            result.put(keyValue[0], keyValue[1]);
-        }
-        return result;
-    }
-
-    private boolean isAuthenticateUser(final Map<String, String> queryParams) {
-        return InMemoryUserRepository.findByAccount(queryParams.get("account"))
-                .filter(user -> user.checkPassword(queryParams.get("password")))
+    private boolean isAuthenticateUser(final HttpRequest request) {
+        return InMemoryUserRepository.findByAccount(request.findBodyValueByKey("account"))
+                .filter(user -> user.checkPassword(request.findBodyValueByKey("password")))
                 .map(user -> {
                     log.info("user : {}", user);
                     return true;

@@ -1,5 +1,6 @@
 package org.apache.coyote.http;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +22,10 @@ public class Header {
                 .map(header -> header.split(COLON_WITH_SPACE))
                 .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
         return new Header(headers);
+    }
+
+    public Header() {
+        this(new HashMap<>());
     }
 
     private Header(Map<String, String> headers) {

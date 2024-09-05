@@ -41,7 +41,6 @@ public class ApiProcessor {
         if (requestUri.equals("/login")) {
             SessionManager sessionManager = SessionManager.getInstance();
             String jsessionid = requestHeader.get("Cookie").split("=")[1];
-            log.info("jsessionId = " + jsessionid);
             Session session = sessionManager.findSession(jsessionid);
             boolean a = session == null;
             if (methodType == POST) {
@@ -118,15 +117,11 @@ public class ApiProcessor {
         Session session = new Session(user.getId().toString());
         session.setAttribute("user", user);
         SessionManager.getInstance().add(session);
-        String contentType = "text/html";
-        String responseBody = ResourceFileLoader.loadFileToString("static/" + "index" + ".html");
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + HttpStatus.FOUND.getHeaderForm(),
+                "Location: " + " http://localhost:8080/",
                 "Set-Cookie: JSESSIONID=" + user.getId().toString(),
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                "");
 
         outputStream.write(response.getBytes());
         outputStream.flush();

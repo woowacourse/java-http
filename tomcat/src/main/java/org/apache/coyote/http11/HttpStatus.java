@@ -14,6 +14,6 @@ public enum HttpStatus {
     }
 
     public String getHeaderForm() {
-        return this.name() + " " + statusCode;
+        return statusCode + " " + name();
     }
 }

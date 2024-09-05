@@ -9,6 +9,8 @@ import java.nio.file.Files;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import support.StubSocket;
 
@@ -63,12 +65,13 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("GET /login 요청이 오면 login.html을 반환한다.")
-    @Test
-    void login() throws IOException {
+    @DisplayName("GET /login과 같이 파일 확장자가 없는 요청이 오면 대응되는 html을 반환한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"login", "register"})
+    void login(String uri) throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
+                "GET " + uri + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -81,12 +84,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final URL resource = getClass().getClassLoader().getResource("static/" + uri + ".html");
+        byte[] fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
+
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: " + fileContent.length + " \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(fileContent);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

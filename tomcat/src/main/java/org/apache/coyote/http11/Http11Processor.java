@@ -53,7 +53,6 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            // 200과 함께 파일 내보내는 메서드도 추출
             writeStaticFileResponse(uri, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -77,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
     private void handleLoginRequest(String uri, OutputStream outputStream) throws IOException {
         int questionMarkIndex = uri.indexOf("?");
         if (questionMarkIndex == -1) {
-            writeStaticFileResponse(uri + ".html", outputStream);
+            writeStaticFileResponse(uri, outputStream);
             return;
         }
         handleLoginQueryString(uri.substring(questionMarkIndex + 1), outputStream);
@@ -118,6 +117,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void writeStaticFileResponse(String uri, OutputStream outputStream) throws IOException {
+        uri = addHtmlExtension(uri);
         var responseBody = getStaticFileContent(uri);
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -126,6 +126,13 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 responseBody);
         writeResponse(outputStream, response);
+    }
+
+    private String addHtmlExtension(String uri) {
+        if (!"/".equals(uri) && !uri.contains(".")) {
+            return uri + ".html";
+        }
+        return uri;
     }
 
     private String getStaticFileContent(String path) throws IOException {
@@ -138,11 +145,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(file.toPath()));
     }
 
-    private String getFileExtension(String path) {
-        if (Objects.equals(path, "/")) {
+    private String getFileExtension(String uri) {
+        if (Objects.equals(uri, "/")) {
             return "html";
         }
-        String[] splitPath = path.split("\\.");
+        String[] splitPath = uri.split("\\.");
         return splitPath[splitPath.length - 1];
     }
 

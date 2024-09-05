@@ -2,6 +2,7 @@ package com.techcourse;
 
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.HttpRequest;
+import org.apache.HttpResponse;
 import org.apache.catalina.session.SessionManager;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class ResponseResolver {
 		this.sessionManager = SessionManager.getInstance();
 	}
 
-	public String processRequest(HttpRequest httpRequest) throws IOException {
+	public HttpResponse processRequest(HttpRequest httpRequest) throws IOException {
 		if (httpRequest.getMethod().equals("GET")) {
 			return processGetRequest(httpRequest.getUri());
 		}
@@ -32,29 +33,20 @@ public class ResponseResolver {
 		throw new IllegalArgumentException("unexpected http method");
 	}
 
-	private String processGetRequest(String uri) throws IOException {
+	private HttpResponse processGetRequest(String uri) throws IOException {
 		if (uri.equals("/")) {
 			var responseBody = controller.getHomePage();
-			var response = "HTTP/1.1 200 OK \r\n";
-			response += String.join("\r\n", getResponseHeaders(uri, responseBody, "GET"));
-			response += "\r\n" + "\r\n" + responseBody;
-			return response;
+			return HttpResponse.ok(uri, responseBody);
 		}
 		if (uri.equals("/register")) {
 			var responseBody = controller.getRegisterPage();
-			var response = "HTTP/1.1 200 OK \r\n";
-			response += String.join("\r\n", getResponseHeaders(uri, responseBody, "GET"));
-			response += "\r\n" + "\r\n" + responseBody;
-			return response;
+			return HttpResponse.ok(uri, responseBody);
 		}
 		var responseBody = controller.getUriPage(uri);
-		var response = "HTTP/1.1 200 OK \r\n";
-		response += String.join("\r\n", getResponseHeaders(uri, responseBody, "GET"));
-		response += "\r\n" + "\r\n" + responseBody;
-		return response;
+		return HttpResponse.ok(uri, responseBody);
 	}
 
-	private String processPostRequest(String uri, Map<String, String> params) {
+	private HttpResponse processPostRequest(String uri, Map<String, String> params) {
 		if (uri.startsWith("/login")) {
 			var redirectUri = "/401.html";
 			UUID uuid;
@@ -62,16 +54,9 @@ public class ResponseResolver {
 				uuid = controller.login(params.get("account"), params.get("password"));
 				redirectUri = "/index.html";
 
-				var response = "HTTP/1.1 302 Found \r\n";
-				response += String.join("\r\n", getResponseHeaders(uri, redirectUri, "302"));
-				response += "\r\n" + "Set-Cookie: JSESSIONID=" + uuid;
-				response += "\r\n" + "\r\n" + redirectUri;
-				return response;
+				return HttpResponse.redirect(uri, redirectUri);
 			} catch (RuntimeException exception) {
-				var response = "HTTP/1.1 302 Found \r\n";
-				response += String.join("\r\n", getResponseHeaders(uri, redirectUri, "302"));
-				response += "\r\n" + "\r\n" + redirectUri;
-				return response;
+				return HttpResponse.redirect(uri, redirectUri);
 			}
 		}
 
@@ -83,34 +68,9 @@ public class ResponseResolver {
 				redirectUri = "/index.html";
 			}
 
-			var response = "HTTP/1.1 302 Found \r\n";
-			response += String.join("\r\n", getResponseHeaders(uri, redirectUri, "302"));
-			response += "\r\n" + "\r\n" + redirectUri;
-			return response;
+			return HttpResponse.redirect(uri, redirectUri);
 		}
 
 		throw new IllegalArgumentException("undefined POST URI");
-	}
-
-	private List<String> getResponseHeaders(String uri, String responseBody, String status) {
-		List<String> headers = new ArrayList<>();
-		headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
-		headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
-
-		if (status.equals("302")) {
-			headers.add("Location: " + responseBody);
-		}
-		return headers;
-	}
-
-	private int calculateContentLength(String content) {
-		return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
-	}
-
-	private String getContentType(String uri) {
-		if (uri.startsWith("/css")) {
-			return "text/css";
-		}
-		return "text/html";
 	}
 }

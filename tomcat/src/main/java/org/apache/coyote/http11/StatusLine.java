@@ -9,8 +9,8 @@ public class StatusLine {
         this.statusCode = statusCode;
     }
 
-    public static StatusLine ok(String httpVersion) {
-        return new StatusLine(HttpVersion.from(httpVersion), StatusCode.OK);
+    public static StatusLine ok(HttpVersion httpVersion) {
+        return new StatusLine(httpVersion, StatusCode.OK);
     }
 
     @Override

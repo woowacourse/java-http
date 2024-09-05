@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
+import java.util.List;
 
 public class Http11Response {
 
@@ -16,20 +17,19 @@ public class Http11Response {
         this.body = body;
     }
 
-    public static Http11Response of(StatusLine statusLine, String firstValueAccept, String requestUri)
+    public static Http11Response of(StatusLine statusLine, List<String> acceptTypes, RequestUri requestUri)
             throws IOException {
         Http11ResponseBody body = Http11ResponseBody.from(requestUri);
         int contentLength = body.getContentLength();
+        ContentType from = ContentType.from(acceptTypes);
         Http11ResponseHeader header = new Http11ResponseHeader(statusLine,
-                ContentType.from(firstValueAccept),
+                from,
                 contentLength);
 
         return new Http11Response(header, body);
     }
 
     public String getResponse() {
-        String header = this.header.getHeader();
-
-        return String.format(RESPONSE_FORMAT, header, body.getBody());
+        return String.format(RESPONSE_FORMAT, header, body);
     }
 }

@@ -17,7 +17,8 @@ public class Http11ResponseHeader {
         this.contentLength = contentLength;
     }
 
-    public String getHeader() {
-        return String.format(RESPONSE_HEADER_FORMAT, statusLine.toString(), contentType.getValue(), contentLength);
+    @Override
+    public String toString() {
+        return String.format(RESPONSE_HEADER_FORMAT, statusLine, contentType, contentLength);
     }
 }

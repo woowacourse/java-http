@@ -23,11 +23,11 @@ public class StartLine {
         return new StartLine(httpMethod, requestUri, httpVersion);
     }
 
-    public String getRequestUri() {
-        return requestUri.getRequestUri();
+    public RequestUri getRequestUri() {
+        return requestUri;
     }
 
-    public String getHttpVersion() {
-        return httpVersion.toString();
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 }

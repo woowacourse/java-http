@@ -47,15 +47,15 @@ public class Http11RequestHeader {
                 .toList();
     }
 
-    public String getRequestUri() {
+    public RequestUri getRequestUri() {
         return startLine.getRequestUri();
     }
 
-    public String getHttpVersion() {
+    public HttpVersion getHttpVersion() {
         return startLine.getHttpVersion();
     }
 
-    public String getFirstValueAccept() {
-        return httpHeaders.firstValue("Accept").orElseGet(() -> "");
+    public List<String> getAcceptType() {
+        return httpHeaders.allValues("Accept");
     }
 }

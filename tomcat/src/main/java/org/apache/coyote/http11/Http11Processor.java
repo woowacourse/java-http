@@ -64,12 +64,10 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
             }
 
-            String fileContent = responseBody.replaceAll("\r\n", "\n");
-
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + fileContent.getBytes(StandardCharsets.UTF_8).length + " ",
+                    "Content-Length: " + calculateContentLength(responseBody) + " ",
                     "",
                     responseBody);
 
@@ -80,5 +78,10 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+
+    private int calculateContentLength (String content){
+        return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
     }
 }

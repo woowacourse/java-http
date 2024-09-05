@@ -56,7 +56,7 @@ public class RegisterServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        InMemoryUserRepository.save(new User(account, email, password));
+        InMemoryUserRepository.save(new User(account, password, email));
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);

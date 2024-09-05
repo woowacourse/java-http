@@ -76,6 +76,8 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (user.checkPassword(password)) {
                     log.info("user : {}", user);
+                    SessionManager sessionManager = new SessionManager();
+
                     URL url = getClass().getClassLoader().getResource("static/index.html");
                     if (url == null) {
                         return;
@@ -83,6 +85,10 @@ public class Http11Processor implements Runnable, Processor {
 
                     UUID jSessionId = UUID.randomUUID();
 
+                    Session session = new Session(jSessionId.toString());
+
+                    session.setAttribute("user", user);
+                    sessionManager.add(session);
                     Path path = Path.of(url.toURI());
                     responseBody = new String(Files.readAllBytes(path));
                     response = generate302ResponseWithCookie(responseBody, "text/html",
@@ -96,6 +102,43 @@ public class Http11Processor implements Runnable, Processor {
                     Path path = Path.of(url.toURI());
                     responseBody = new String(Files.readAllBytes(path));
                     response = generate302Response(responseBody, "text/html", "/401.html");
+                }
+            } else if (page.startsWith("/login") && httpMethod.equals("GET")) {
+                SessionManager sessionManager = new SessionManager();
+
+                if (httpRequestHeaders.containsKey("Cookie") &&
+                        httpRequestHeaders.get("Cookie").startsWith("JSESSIONID=")) {
+                    String jSessionId = httpRequestHeaders.get("Cookie").split("=")[1];
+                    Session session = sessionManager.findSession(jSessionId);
+
+                    if (session != null && session.getAttribute("user") != null) {
+                        URL url = getClass().getClassLoader().getResource("static/index.html");
+                        if (url == null) {
+                            return;
+                        }
+
+                        Path path = Path.of(url.toURI());
+                        responseBody = new String(Files.readAllBytes(path));
+                        response = generate200Response(responseBody, "text/html");
+                    } else {
+                        URL url = getClass().getClassLoader().getResource("static" + page + ".html");
+                        if (url == null) {
+                            return;
+                        }
+
+                        Path path = Path.of(url.toURI());
+                        responseBody = new String(Files.readAllBytes(path));
+                        response = generate200Response(responseBody, "text/html");
+                    }
+                } else {
+                    URL url = getClass().getClassLoader().getResource("static" + page + ".html");
+                    if (url == null) {
+                        return;
+                    }
+
+                    Path path = Path.of(url.toURI());
+                    responseBody = new String(Files.readAllBytes(path));
+                    response = generate200Response(responseBody, "text/html");
                 }
             } else if (page.equals("/register") && httpMethod.equals("POST")) {
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));

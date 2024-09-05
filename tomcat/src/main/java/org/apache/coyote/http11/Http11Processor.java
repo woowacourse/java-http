@@ -1,8 +1,8 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpRequestParser;
+import com.techcourse.http.MimeType;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -40,14 +40,12 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private String getResponse(HttpRequest request) throws NoSuchFieldException, IOException {
+    private String getResponse(HttpRequest request) throws IOException {
         if ("/".equals(request.getUri())) {
             final String responseBody = "Hello world!";
             return String.join(
@@ -61,14 +59,18 @@ public class Http11Processor implements Runnable, Processor {
 
         URL url = getClass().getClassLoader().getResource("static" + request.getUri());
         if (url == null) {
-            throw new NoSuchFieldException();
+            return "HTTP/1.1 404 Not Found ";
         }
+
         final Path path = Path.of(url.getPath());
         final byte[] responseBody = Files.readAllBytes(path);
+        String uri = request.getUri();
+        String endUri = uri.substring(uri.lastIndexOf("/") + 1);
+
         return String.join(
                 CRLF,
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + MimeType.getMimeType(endUri) + " ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 new String(responseBody)

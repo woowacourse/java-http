@@ -57,16 +57,15 @@ public class Http11Processor implements Runnable, Processor {
                 throw new IOException("not http1.1 request");
             }
 
-            var responseBody = "Hello world!";
+            var responseBody = "";
 
-            if (method.equals("GET") && !pattern.equals("/")) {
-                final URL resource = getClass().getClassLoader().getResource("static" + pattern);
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+            if (method.equals("GET")) {
+                responseBody = getResponseBody(pattern);
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + getContentType(pattern) + ";charset=utf-8 ",
                     "Content-Length: " + calculateContentLength(responseBody) + " ",
                     "",
                     responseBody);
@@ -80,8 +79,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-
     private int calculateContentLength (String content){
         return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
+    }
+
+    private String getResponseBody(String pattern) throws IOException {
+        if (pattern.equals("/")) {
+            return "Hello world!";
+        }
+
+        if (pattern.startsWith("/css")) {
+            URL resource = getClass().getClassLoader().getResource("static/css" + pattern.substring(4));
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+        }
+
+        URL resource = getClass().getClassLoader().getResource("static" + pattern);
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+    }
+
+    private String getContentType(String pattern) {
+        if (pattern.startsWith("/css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

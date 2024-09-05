@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -59,9 +60,28 @@ public class Http11Processor implements Runnable, Processor {
             log.info("{} 요청 = {}", method, requestMethodAndUrl);
             final Request request = new Request(path);
             log.info("request = {}", request);
+            //TODO localhost:8080 요청시 resource가 null 임
             final URL resource = request.getUrl();
             final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             final Response response = new Response();
+
+            if (method.equals("GET")) {
+                if (path.equals("/login")) {
+                    // TODO JSESSIONID가 유효한지도 확인해야하지 않나.
+                    log.info("httpRequestHeaders = {}", httpRequestHeaders);
+                    final var cookie = httpRequestHeaders.get("Cookie");
+
+                    final HttpCookie httpCookie = HttpCookie.parse(cookie);
+                    if (httpCookie.containsKey("JSESSIONID")) {
+                        log.info("이미 로그인 유저");
+                        redirectIndex(response, request, result);
+                    } else {
+                        generateOKResponse(response, request, result);
+                    }
+                } else {
+                    generateOKResponse(response, request, result);
+                }
+            }
 
             if (method.equals("POST")) {
                 final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length").strip());
@@ -73,15 +93,20 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (path.equals("/login")) {
                     // POST /login
+
+                    final UUID uuid = UUID.randomUUID();
+                    response.setCookie("JSESSIONID=" + uuid);
                     createResponse(body, request, response, result);
+                    log.info("set cookie = {}", uuid);
                 } else if (path.equals("/register")) {
                     // POST /register
                     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
-                    response.setSc("FOUND");
-                    response.setStatusCode(302);
-                    response.setLocation("index.html");
-                    response.setContentType("text/html");
+                    redirectIndex(response, request, result);
+//                    response.setSc("FOUND");
+//                    response.setStatusCode(302);
+//                    response.setLocation("index.html");
+//                    response.setContentType("text/html");
                 }
 
                 outputStream.write(response.toHttpResponse().getBytes());
@@ -89,7 +114,6 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            generateOKResponse(response, request, result);
             outputStream.write(response.toHttpResponse().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
@@ -112,6 +136,16 @@ public class Http11Processor implements Runnable, Processor {
         response.setContentType(request.getContentType());
         response.setContentLength(result.getBytes().length);
         response.setSourceCode(result);
+    }
+
+    private void redirectIndex(final Response response, final Request request, final String result) {
+        response.setStatusCode(302);
+        response.setSc("FOUND");
+        response.setContentType(request.getContentType());
+        response.setContentLength(result.getBytes().length);
+        response.setLocation("index.html");
+        response.setSourceCode(result);
+
     }
 
     private void createResponse(final Map<String, String> queryString, final Request request, final Response response,

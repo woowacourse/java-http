@@ -14,6 +14,9 @@ public class HttpCookie {
 
     public static HttpCookie parse(final String str) {
         final var httpCookie = new HttpCookie();
+        if (str == null || str.isBlank()) {
+            return httpCookie;
+        }
         final var cookies = str.split(";");
         for (final var cookie : cookies) {
             final var key = cookie.split("=")[0].strip();
@@ -22,6 +25,10 @@ public class HttpCookie {
         }
 
         return httpCookie;
+    }
+
+    public boolean containsKey(final String key) {
+        return header.containsKey(key);
     }
 
     public Map<String, String> getHeader() {

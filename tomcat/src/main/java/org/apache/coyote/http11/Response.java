@@ -8,6 +8,7 @@ public class Response {
     private int contentLength;
     private String location;
     private String sourceCode;
+    private String cookie;
 
     public int getStatusCode() {
         return statusCode;
@@ -57,15 +58,40 @@ public class Response {
         this.sourceCode = sourceCode;
     }
 
+    public String getCookie() {
+        return cookie;
+    }
+
+    public void setCookie(final String cookie) {
+        this.cookie = cookie;
+    }
+
     public String toHttpResponse() {
-        if (location == null) {
+        if (location == null && cookie == null) {
             return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + contentLength + " ",
                     "",
                     sourceCode);
         }
+        if (location != null && cookie == null) {
+            return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + contentLength + " ",
+                    "Location: " + location,
+                    "",
+                    sourceCode);
+        }
+        if (location == null) {
+            return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
+                    "Set-Cookie: " + cookie + " ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + contentLength + " ",
+                    "",
+                    sourceCode);
+        }
         return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
+                "Set-Cookie: " + cookie + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + contentLength + " ",
                 "Location: " + location,

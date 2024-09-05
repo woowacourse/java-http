@@ -30,9 +30,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             RequestProcessor requestProcessor = new RequestProcessor(inputStream);
             final var responseBody = requestProcessor.processRequestBody();
+            final var contentType = requestProcessor.getContentMediaType();
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpRequestParser {
@@ -28,10 +29,16 @@ public class HttpRequestParser {
         }
 
         String url = requestLineParts[1];
+        Map<String, String> queries = null;
+        if (url.contains("?")) {
+            queries = handleQueries(url);
+            url = url.substring(0, url.indexOf("?"));
+        }
         return new HttpRequest(requestLineParts[0],
                 parseUrl(url),
                 requestLineParts[2],
                 headers,
+                queries,
                 body);
     }
 
@@ -42,6 +49,22 @@ public class HttpRequestParser {
         if (rawUrl.equals("/")) {
             return "static/index.html";
         }
-        return rawUrl.substring(1) + ".html";
+        return "static/" + rawUrl.substring(1) + ".html";
+    }
+
+    private static Map<String, String> handleQueries(String url) { // TODO refactor, test
+        if (url.contains("?")) {
+            Map<String, String> queries = new LinkedHashMap<>();
+            String rawQueries = url.substring(url.indexOf("?") + 1);
+            for (String qu : rawQueries.split("&")) {
+                String[] split = qu.split("=");
+                if (split.length != 2) {
+                    throw new IllegalArgumentException("Bad Query Parameter Format = " + qu);
+                }
+                queries.put(split[0], split[1]);
+            }
+            return queries;
+        }
+        return null;
     }
 }

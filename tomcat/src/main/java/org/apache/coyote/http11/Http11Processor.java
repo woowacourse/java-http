@@ -35,7 +35,6 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = HttpRequestParser.parse(inputStream);
-
             final String response = getResponse(request);
 
             outputStream.write(response.getBytes());
@@ -47,33 +46,38 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponse(HttpRequest request) throws IOException {
         if ("/".equals(request.getUri())) {
-            final String responseBody = "Hello world!";
-            return String.join(
-                    CRLF,
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return rootPage();
         }
 
-        URL url = getClass().getClassLoader().getResource("static" + request.getUri());
-        if (url == null) {
+        return getStaticResource(request.getUri());
+    }
+
+    private String rootPage() {
+        return """
+                HTTP/1.1 200 OK \r
+                Content-Type: text/html;charset=utf-8 \r
+                Content-Length: 12 \r
+                \r
+                Hello world!""";
+    }
+
+    private String getStaticResource(String requestUri) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+        if (resource == null) {
             return "HTTP/1.1 404 Not Found ";
         }
 
-        final Path path = Path.of(url.getPath());
-        final byte[] responseBody = Files.readAllBytes(path);
-        String uri = request.getUri();
-        String endUri = uri.substring(uri.lastIndexOf("/") + 1);
+        final Path path = Path.of(resource.getPath());
+        final String responseBody = new String(Files.readAllBytes(path));
+        String endUri = requestUri.substring(requestUri.lastIndexOf("/") + 1);
 
         return String.join(
                 CRLF,
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + MimeType.getMimeType(endUri) + " ",
-                "Content-Length: " + responseBody.length + " ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
-                new String(responseBody)
+                responseBody
         );
     }
 }

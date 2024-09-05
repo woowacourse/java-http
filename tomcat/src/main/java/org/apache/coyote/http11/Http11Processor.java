@@ -8,11 +8,14 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +80,22 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
         }
-        if (method.equals("POST") && uri.contains("login")) {
+        if (method.equals("GET") && uri.equals("/login")) {
+            final var cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
+            if (cookie.hasJSESSIONID()) {
+                final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
+                final var user = (User) session.getAttribute("user");
+                if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: /index.html ",
+                            "Content-Length: 0 ",
+                            "Connection: close ",
+                            "");
+                }
+            }
+        }
+        if (method.equals("POST") && uri.equals("/login")) {
             final var responseBody = getResponseBody(reader, Integer.parseInt(requestHeader.get("Content-Length")));
             if (isAuthenticateUser(responseBody)) {
                 HttpCookie cookie = new HttpCookie(requestHeader.getOrDefault("Cookie", "Cookie"));
@@ -89,9 +107,13 @@ public class Http11Processor implements Runnable, Processor {
                             "Connection: close ",
                             "");
                 }
+
+                final var session = new Session(UUID.randomUUID().toString());
+                InMemoryUserRepository.findByAccount(responseBody.get("account"))
+                        .ifPresent(user -> session.setAttribute("user", user));
                 return String.join("\r\n",
                         "HTTP/1.1 302 Found ",
-                        "Set-Cookie: JSESSIONID=" + cookie.generateJSESSIONID() + " ",
+                        "Set-Cookie: JSESSIONID=" + session.getId() + " ",
                         "Location: /index.html ",
                         "Content-Length: 0 ",
                         "Connection: close ",

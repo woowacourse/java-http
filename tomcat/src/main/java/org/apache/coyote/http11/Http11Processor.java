@@ -15,9 +15,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,31 +47,34 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
+
+            // startline 읽기
+            String startLine = reader.readLine();
+            HttpRequestLine httpRequestLine = new HttpRequestLine(startLine);
+
+            // header 읽기
             StringBuilder builder = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                if (line.equals("\r\n")) {
-                    builder.append(line).append("\n");
-                    continue;
-                }
+            while (StringUtils.isNoneBlank(line = reader.readLine())) {
                 builder.append(line).append("\n");
             }
+            HttpHeaders httpHeaders = new HttpHeaders(builder.toString());
 
-            HttpRequest httpRequest = new HttpRequest(builder.toString());
+            // body 읽기
+            int contentLength = httpHeaders.getContentLength();
+            char[] bodyBuffer = new char[contentLength];
+            reader.read(bodyBuffer, 0, contentLength);
+            HttpBody httpBody = new HttpBody(new String(bodyBuffer));
+
+            HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders, httpBody);
+
+
             String response = "";
+            String body = httpBody.getBody();
 
-            String body = "";
             if (httpRequest.getStartLine().getMethod() == HttpMethod.POST) {
-                int contentLength = Integer.parseInt(httpRequest.getHeaders().get("Content-Length"));
-                StringBuilder bodyBuilder = new StringBuilder();
-                if (contentLength > 0) {
-                    char[] bodyBuffer = new char[contentLength];
-                    reader.read(bodyBuffer, 0, contentLength);
-                    bodyBuilder.append(new String(bodyBuffer));
-                }
-                body = bodyBuilder.toString();
                 String[] bodies = body.split("&");
                 Map<String, String> params = new HashMap<>();
                 for (String value : bodies) {

@@ -47,28 +47,25 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             Map<String, String> headerSentences = RequestHeaderReader.readHeaders(reader);
-            checkHttpMethodAndLoad(headerSentences, reader);
+            checkHttpMethodAndLoad(reader, headerSentences);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void checkHttpMethodAndLoad(Map<String, String> sentences, BufferedReader reader) {
+    private void checkHttpMethodAndLoad(BufferedReader reader, Map<String, String> sentences) {
         String httpMethod = sentences.get("HttpMethod");
-        String url = sentences.get("Url");
-        String fileType = sentences.get("Accept");
         if (httpMethod.equals("GET")) {
-            loadGetHttpMethod(url, fileType);
+            loadGetHttpMethod(sentences);
         }
         if (httpMethod.equals("POST")) {
-            loadPostHttpMethod(url, fileType, Integer.parseInt(sentences.get("Content-Length")), reader);
+            loadPostHttpMethod(reader, sentences);
         }
     }
 
-    private void loadGetHttpMethod(String url, String fileType) {
+    private void loadGetHttpMethod(Map<String, String> sentences) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = getResponseContentForUrl(url, fileType).responseToString();
-
+            String response = getResponseContentForUrl(sentences).responseToString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -76,7 +73,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseContent getResponseContentForUrl(String url, String accept) {
+    private ResponseContent getResponseContentForUrl(Map<String, String> sentences) {
+        String url = sentences.get("Url");
+        String accept = sentences.get("Accept");
         if (url.equals("/")) {
             return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE);
         }
@@ -138,8 +137,12 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private void loadPostHttpMethod(String url, String fileType, int contentLength, BufferedReader reader) {
-        Map<String, String> body = getRequestBody(contentLength, reader);
+    private void loadPostHttpMethod(BufferedReader reader, Map<String, String> sentences) {
+        String url = sentences.get("Url");
+        String fileType = sentences.get("Accept");
+        int contentLength = Integer.parseInt(sentences.get("Content-Length"));
+
+        Map<String, String> body = getRequestBody(reader, contentLength);
 
         try (final OutputStream outputStream = connection.getOutputStream()) {
             String response = "";
@@ -153,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getRequestBody(int contentLength, BufferedReader reader) {
+    private Map<String, String> getRequestBody(BufferedReader reader, int contentLength) {
         char[] buffer = new char[contentLength];
         try {
             reader.read(buffer, 0, contentLength);

@@ -101,7 +101,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (acceptHeader.startsWith("text/javascript")) {
-            contentType = "text/html;charset=utf-8";
+            contentType = "text/javascript;charset=utf-8";
         }
 
         final var requestResource = startLines[1];

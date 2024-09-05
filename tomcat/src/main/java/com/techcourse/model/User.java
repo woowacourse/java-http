@@ -1,13 +1,15 @@
 package com.techcourse.model;
 
+import java.util.UUID;
+
 public class User {
 
-    private final Long id;
+    private final UUID id;
     private final String account;
     private final String password;
     private final String email;
 
-    public User(Long id, String account, String password, String email) {
+    public User(UUID id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;
@@ -15,7 +17,7 @@ public class User {
     }
 
     public User(String account, String password, String email) {
-        this(null, account, password, email);
+        this(UUID.randomUUID(), account, password, email);
     }
 
     public boolean checkPassword(String password) {
@@ -34,5 +36,9 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public UUID getId() {
+        return id;
     }
 }

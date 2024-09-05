@@ -27,6 +27,7 @@ public class PageProcessor {
         String responseBody = ResourceFileLoader.loadFileToString("static/" + resourceName + ".html");
         final var response = String.join("\r\n",
                 "HTTP/1.1 " + httpStatus.getHeaderForm(),
+                "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46: ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

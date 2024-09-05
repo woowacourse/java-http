@@ -10,8 +10,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.ResourceFileLoader;
 
 public class ApiProcessor {
 
@@ -23,7 +25,8 @@ public class ApiProcessor {
         this.pageProcessor = new PageProcessor();
     }
 
-    public void process(Socket connection, String requestPath, MethodType methodType, Map<String, String> requestBody) throws IOException {
+    public void process(Socket connection, String requestPath, MethodType methodType, Map<String, String> requestBody)
+            throws IOException {
         OutputStream outputStream = connection.getOutputStream();
 
         String[] splitPath = requestPath.split("\\?");
@@ -84,7 +87,7 @@ public class ApiProcessor {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 User입니다."));
 
         if (user.checkPassword(password)) {
-            loginSuccess(outputStream);
+            loginSuccess(outputStream, user.getId().toString());
             return;
         }
         loginFail(outputStream);
@@ -95,8 +98,19 @@ public class ApiProcessor {
 
     }
 
-    private void loginSuccess(OutputStream outputStream) throws IOException {
-        pageProcessor.processWithHttpStatus(outputStream, "index", HttpStatus.FOUND);
+    private void loginSuccess(OutputStream outputStream, String userId) throws IOException {
+        String contentType = "text/html";
+        String responseBody = ResourceFileLoader.loadFileToString("static/" + "index" + ".html");
+        final var response = String.join("\r\n",
+                "HTTP/1.1 " + HttpStatus.FOUND.getHeaderForm(),
+                "Set-Cookie: JSESSIONID=" + userId,
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private void loginFail(OutputStream outputStream) throws IOException {

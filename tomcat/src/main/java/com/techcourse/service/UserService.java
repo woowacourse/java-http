@@ -12,8 +12,7 @@ public class UserService {
             throw new UnauthorizedException("Values for authorization is missing.");
         }
 
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new UnauthorizedException("Cannot find account"));
+        User user = getUserByAccount(account);
 
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException("Wrong password");
@@ -27,7 +26,11 @@ public class UserService {
             throw new InvalidRegisterException("Values for register is missing.");
         }
         User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        return user;
+        return InMemoryUserRepository.save(user);
+    }
+
+    private User getUserByAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UnauthorizedException("Cannot find account"));
     }
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.exception.UnexpectQueryParamException;
 import org.apache.coyote.exception.UnexpectedHeaderException;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
@@ -16,6 +17,7 @@ public class HttpRequest {
     private final String protocol;
     private final Map<String, String[]> headers = new HashMap<>();
     private final String body;
+    private final Cookies cookie;
 
     public HttpRequest(
             String method, String uri, String path, String[] paramStrings, String protocol, String headers, String body
@@ -26,6 +28,8 @@ public class HttpRequest {
         mapQueryParams(paramStrings);
         this.protocol = protocol;
         mapHeaders(headers);
+        this.cookie = new Cookies();
+        parseCookies();
         this.body = body;
     }
 
@@ -55,6 +59,16 @@ public class HttpRequest {
                     Arrays.stream(headerValues)
                             .map(String::trim).toArray(String[]::new)
             );
+        }
+    }
+
+    private void parseCookies() {
+        String[] cookies = headers.get("Cookie");
+        if (cookies == null) {
+            throw new UnexpectedHeaderException("Cookie");
+        }
+        for (String cookieLine : cookies) {
+            cookie.addCookie(cookieLine);
         }
     }
 

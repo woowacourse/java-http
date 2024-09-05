@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,14 +72,8 @@ public class Http11Processor implements Runnable, Processor {
             if (url.matches("/assets/.*\\.js")) {
                 buildScriptResponse(outputStream, url);
             }
-            if ("/login".equals(url) && "GET".equals(method)) {
+            if ("/login".equals(url) && "GET".equals(method) && !isLogin(br, outputStream)) {
                 buildHtmlResponse(outputStream, url + ".html");
-            }
-            if (url.matches("/login\\?account=.*&password=.*")) {
-                var index = url.indexOf('?');
-                var queryString = url.substring(index + 1);
-
-                login(outputStream, queryString);
             }
             if ("/login".equals(url) && "POST".equals(method)) {
                 final var httpRequestHeaders = parseHttpHeaders(br);
@@ -105,6 +101,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean isLogin(final BufferedReader br, final OutputStream outputStream) throws IOException {
+        final var httpRequestHeaders = parseHttpHeaders(br);
+        if (httpRequestHeaders.containsKey("Cookie")) {
+            final var cookies = parseCookie(httpRequestHeaders.get("Cookie"));
+            return cookies.containsKey("JSESSIONID") && hasSession(outputStream, cookies);
+        }
+        return false;
+    }
+
+    private boolean hasSession(final OutputStream outputStream, final Map<String, String> cookies) throws IOException {
+        final var sessionId = cookies.get("JSESSIONID");
+        if (SessionManager.findSession(sessionId) != null) {
+            build302Response(outputStream, "/index.html");
+            outputStream.flush();
+            return true;
+        }
+        return false;
+    }
+
     private void login(final OutputStream outputStream, final String queryString) throws IOException {
         Map<String, String> params = parseRequestString(queryString);
 
@@ -115,7 +130,12 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = InMemoryUserRepository.findByAccount(params.get("account")).get();
         if (user.checkPassword(params.get("password"))) {
-            HttpCookie cookie = new HttpCookie("JSESSIONID=" + UUID.randomUUID());
+            final UUID id = UUID.randomUUID();
+            final Session session = new Session(id.toString());
+            session.setAttribute("user", user);
+            SessionManager.add(session);
+
+            HttpCookie cookie = new HttpCookie("JSESSIONID=" + id);
             log.info("cookie: {}", cookie.getCookieValue("JSESSIONID"));
             build302Response(outputStream, "/index.html", cookie);
             log.info("user: {}", user);
@@ -145,6 +165,14 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return headers;
+    }
+
+    private Map<String, String> parseCookie(final String cookieString) {
+        final var params = cookieString.split("; ");
+
+        return Arrays.stream(params)
+                .map(param -> param.split("="))
+                .collect(Collectors.toMap(token -> token[0], token -> token[1]));
     }
 
     private Map<String, String> parseRequestString(final String requestString) {

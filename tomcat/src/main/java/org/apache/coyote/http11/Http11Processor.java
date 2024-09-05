@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,13 +130,31 @@ public class Http11Processor implements Runnable, Processor {
             return makeResponseMessageFromText("Hello world!", HttpStatusCode.OK);
         }
 
+        if (method.equals("GET") && endpoint.equals("/login")) {
+            if (cookie != null && cookie.hasCookieWithName(JSESSIONID)) {
+                SessionManager sessionManager = SessionManager.getInstance();
+                String sessionId = cookie.get(JSESSIONID);
+                if (sessionManager.findSession(sessionId).isPresent()) {
+                    return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie);
+                }
+            }
+
+            return makeResponseMessageFromFile("login.html", HttpStatusCode.OK, cookie);
+        }
+
         if (method.equals("POST") && endpoint.equals("/login")) {
             if (requestData.containsKey("account") && requestData.containsKey("password")) {
                 String account = requestData.get("account");
                 String password = requestData.get("password");
 
                 return InMemoryUserRepository.findByAccountAndPassword(account, password)
-                        .map(user -> makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie))
+                        .map(user -> {
+                            SessionManager sessionManager = SessionManager.getInstance();
+                            Session session = new Session();
+                            session.setAttribute("user", user);
+                            sessionManager.add(cookie.get(JSESSIONID), session);
+                            return makeResponseMessageFromFile("index.html", HttpStatusCode.FOUND, cookie);
+                        })
                         .orElseGet(() -> makeResponseMessageFromFile("401.html", HttpStatusCode.UNAUTHORIZED, cookie));
             }
         }

@@ -17,15 +17,19 @@ public class HttpCookie {
         this.cookies = parse(rawCookies);
     }
 
-    public void add(String name, String value) {
-        cookies.put(name, value);
-    }
-
     private Map<String, String> parse(String rawCookies) {
         return Arrays.stream(rawCookies.split("; "))
                 .map(cookie -> cookie.split("="))
                 .filter(data -> data.length == 2)
                 .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+    }
+
+    public void add(String name, String value) {
+        cookies.put(name, value);
+    }
+
+    public String get(String name) {
+        return cookies.get(name);
     }
 
     public String getCookiesAsString() {

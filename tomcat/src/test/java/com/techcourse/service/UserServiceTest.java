@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.DashboardException;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 
 class UserServiceTest {
@@ -50,7 +50,7 @@ class UserServiceTest {
 
         // when & then
         assertThatThrownBy(() -> userService.login(account, password))
-                .isInstanceOf(DashboardException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Wrong password");
     }
 
@@ -63,7 +63,7 @@ class UserServiceTest {
 
         // when & then
         assertThatThrownBy(() -> userService.login(account, password))
-                .isInstanceOf(DashboardException.class)
+                .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Cannot find account");
     }
 }

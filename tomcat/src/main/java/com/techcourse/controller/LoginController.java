@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.techcourse.exception.DashboardException;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 import com.techcourse.service.UserService;
 
@@ -24,7 +24,7 @@ public class LoginController {
         String password = queryParams.get("password");
 
         if (account == null || password == null) {
-            throw new DashboardException("Values for authorization is missing.");
+            throw new UnauthorizedException("Values for authorization is missing.");
         }
 
         User user = userService.login(account, password);

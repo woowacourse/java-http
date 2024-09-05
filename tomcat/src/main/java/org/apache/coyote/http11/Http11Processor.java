@@ -2,18 +2,15 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import com.techcourse.application.UserService;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -84,12 +81,16 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put(HttpHeaders.CONTENT_TYPE, contentType);
+            headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+
+            HttpHeaders httpHeaders = new HttpHeaders(headers);
+
+            HttpResponse httpResponse = new HttpResponse(statusLine, httpHeaders, responseBody);
+
+            String response = httpResponse.buildHttpResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -110,14 +111,6 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(requestLine, headers);
     }
 
-
-    private String readHeaders(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        return bufferedReader.readLine();
-    }
-
     private String createContentType(String fileExtension) {
         String contentType;
         if (fileExtension.endsWith("html")) {
@@ -128,14 +121,5 @@ public class Http11Processor implements Runnable, Processor {
             contentType = "text/plain;charset=utf-8";
         }
         return contentType;
-    }
-
-    private Map<String, String> parseQueryString(String queryString) {
-        if (queryString.isEmpty()) {
-            return new HashMap<>();
-        }
-        return Arrays.stream(queryString.split("&"))
-                .map(s -> s.split("="))
-                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 }

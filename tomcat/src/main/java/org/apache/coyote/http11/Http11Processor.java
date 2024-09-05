@@ -29,7 +29,7 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
+//        log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
         process(connection);
     }
 
@@ -45,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "";
             String statusCode = "";
             String location = "";
+            HttpCookie cookie = new HttpCookie();
 
             String rawLine;
             Map<String, String> header = new HashMap<>();
@@ -54,6 +55,10 @@ public class Http11Processor implements Runnable, Processor {
                     String[] line = rawLine.split(": ", 2);
                     header.put(line[0], line[1]);
                 }
+            }
+
+            if (header.containsKey("Cookie")) {
+                cookie = new HttpCookie(header.get("Cookie"));
             }
 
             if (header.get("requestLine").startsWith("GET")) {  // TODO: 404 추가하기
@@ -86,6 +91,8 @@ public class Http11Processor implements Runnable, Processor {
                             log.info(user.get().toString());
                             statusCode = "302 FOUND ";
                             location = "/index.html";
+
+                            cookie.setJSESSIONID();
                         }
                     }
                 }
@@ -132,6 +139,8 @@ public class Http11Processor implements Runnable, Processor {
                 location = "/index.html";
             }
 
+
+            String cookieResponse = cookie.getResponse();
             var response = "";
             if (statusCode.startsWith("200") || statusCode.startsWith("401")) {
                 Files.readAllLines(path)
@@ -140,6 +149,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 response = String.join("\r\n",
                         "HTTP/1.1 " + statusCode,
+                        "Set-Cookie: " + cookieResponse,
                         "Content-Type: " + contentType,
                         "Content-Length: " + responseBody.toString().getBytes().length + " ",
                         "",
@@ -148,6 +158,7 @@ public class Http11Processor implements Runnable, Processor {
             if (statusCode.startsWith("302")) {
                 response = String.join("\r\n",
                         "HTTP/1.1 " + statusCode,
+                        "Set-Cookie: " + cookieResponse,
                         "Location: " + location);
             }
 

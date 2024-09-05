@@ -3,10 +3,10 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Body {
+public class RequestBody {
     private final String body;
 
-    public Body(String body) {
+    public RequestBody(String body) {
         this.body = body;
     }
 

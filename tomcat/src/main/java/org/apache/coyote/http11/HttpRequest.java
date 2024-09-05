@@ -10,12 +10,13 @@ public class HttpRequest {
     private static final String URI = "URI";
     private static final String VERSION = "Version";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Cookie";
 
     private final String method;
     private final String uri;
     private final String version;
     private final Map<String, String> headers;
-    private final Body body;
+    private final RequestBody body;
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         Map<String, String> requestLine = extractRequestLine(bufferedReader);
@@ -55,7 +56,7 @@ public class HttpRequest {
         return headerMap;
     }
 
-    public Body extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
+    public RequestBody extractRequestBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
         StringBuilder body = new StringBuilder();
 
         int contentLength = 0;
@@ -66,7 +67,7 @@ public class HttpRequest {
             body.append(buffer);
         }
 
-        return new Body(body.toString());
+        return new RequestBody(body.toString());
     }
 
     public String getURI() {
@@ -77,7 +78,7 @@ public class HttpRequest {
         return method;
     }
 
-    public Body getBody() {
+    public RequestBody getBody() {
         return body;
     }
 }

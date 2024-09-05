@@ -25,7 +25,7 @@ public class QueryParams {
 
     public String getValue(String key) {
         if (!queryParams.containsKey(key)) {
-            throw new IllegalArgumentException("Query param not found");
+            throw new IllegalArgumentException("Query parameter가 존재하지 않습니다.");
         }
         return queryParams.get(key);
     }

@@ -100,15 +100,18 @@ public class Http11Processor implements Runnable, Processor {
                 .orElse(CONTENT_TYPE_HTML);
 
         String url = sentences.getFirst().split(" ")[1];
-        return getHtmlResponseContent(url, accept);
+        return getResponseContentForUrl(url, accept);
     }
 
-    private ResponseContent getHtmlResponseContent(String url, String accept) {
+    private ResponseContent getResponseContentForUrl(String url, String accept) {
         if (url.equals("/")) {
             return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE);
         }
         if (url.contains("?")) {
             return getResponseBodyUsedQuery(url, accept);
+        }
+        if (url.equals("/login")) {
+            return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName("/login.html"));
         }
         return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName(url));
     }
@@ -122,7 +125,6 @@ public class Http11Processor implements Runnable, Processor {
         if (validateQuery) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, getResponseBodyByFileName("/400.html"));
         }
-
         if (path.startsWith("/login")) {
             return login(queryString, accept);
         }
@@ -144,7 +146,6 @@ public class Http11Processor implements Runnable, Processor {
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, getResponseBodyByFileName("/401.html"));
     }
-
 
     private boolean checkAuth(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);

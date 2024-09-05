@@ -42,12 +42,10 @@ public class Http11Processor implements Runnable, Processor {
             if (httpRequest == null) {
                 return;
             }
-
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
             FrontController frontController = new FrontController();
             frontController.handleRequest(httpRequest, httpResponse);
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

@@ -75,10 +75,9 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
         }
-        if (method.equals("GET") && uri.contains("login") && hasQueryParam(uri)) {
-            final var queryString = uri.substring(uri.indexOf('?') + 1);
-            final var queryParams = parseQueryParam(queryString);
-            if (isAuthenticateUser(queryParams)) {
+        if (method.equals("POST") && uri.contains("login")) {
+            final var responseBody = getResponseBody(reader);
+            if (isAuthenticateUser(responseBody)) {
                 return String.join("\r\n",
                         "HTTP/1.1 302 Found ",
                         "Location: /index.html ",

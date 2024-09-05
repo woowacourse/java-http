@@ -3,6 +3,7 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -20,19 +21,18 @@ public class LoginRequestHandler implements RequestHandler {
     @Override
     public boolean canHandling(HttpRequest httpRequest) throws IOException {
         return httpRequest.getPath().equals("/login")
-                && httpRequest.existsQueryParam()
-                && "GET".equals(httpRequest.getMethod());
+                && httpRequest.existsBody()
+                && "POST".equals(httpRequest.getMethod());
     }
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
         Http11ResponseBuilder responseBuilder = Http11Response.builder()
                 .protocol(httpRequest.getVersionOfProtocol());
-        String account = httpRequest.getQueryParam().get("account");
-        String password = httpRequest.getQueryParam().get("password");
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        Map<String, String> param = httpRequest.getParsedBody();
+        Optional<User> user = InMemoryUserRepository.findByAccount(param.get("account"));
         String redirectPath = "/401.html";
-        if (user.isPresent() && user.get().checkPassword(password)) {
+        if (user.isPresent() && user.get().checkPassword(param.get("password"))) {
             redirectPath = "/index.html";
             log.info("로그인 성공 : " + user.get().getAccount());
         }

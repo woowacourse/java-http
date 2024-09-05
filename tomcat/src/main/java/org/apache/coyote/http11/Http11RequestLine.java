@@ -84,7 +84,7 @@ public class Http11RequestLine {
 
     public Map<String, String> getQueryParam() {
         if (!existsQueryString()) {
-            throw new UnsupportedOperationException();
+            throw new UncheckedServletException(new UnsupportedOperationException("QueryString 이 존재하지 않는 요청입니다."));
         }
         Map<String, String> queryParam = new HashMap<>();
         int index = getURI().indexOf(QUERY_STRING_DELIMITER);

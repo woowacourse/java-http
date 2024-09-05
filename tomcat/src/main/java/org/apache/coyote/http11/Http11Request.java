@@ -62,13 +62,15 @@ public class Http11Request implements HttpRequest {
         return requestLine.getQueryParam();
     }
 
+
     @Override
     public boolean existsBody() {
-        return !getBody().isEmpty();
+        return body.exists();
     }
 
     @Override
-    public String getBody() {
-        return body.getValue();
+    public Map<String, String> getParsedBody() {
+        return body.parseBody();
     }
+
 }

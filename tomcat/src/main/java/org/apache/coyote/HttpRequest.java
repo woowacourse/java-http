@@ -20,5 +20,5 @@ public interface HttpRequest {
 
     Map<String, String> getQueryParam();
 
-    String getBody();
+    Map<String, String> getParsedBody();
 }

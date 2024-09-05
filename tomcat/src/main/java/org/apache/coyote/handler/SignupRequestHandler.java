@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -22,9 +21,7 @@ public class SignupRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        System.out.println("RERERERER");
-        String body = httpRequest.getBody();
-        Map<String, String> param = parseBody(body);
+        Map<String, String> param = httpRequest.getParsedBody();
         User newUser = new User(param.get("account"), param.get("password"), param.get("email"));
         validateExists(newUser);
         InMemoryUserRepository.save(newUser);
@@ -34,16 +31,6 @@ public class SignupRequestHandler implements RequestHandler {
                 .statusMessage("Found")
                 .appendHeader("Location", "/index.html")
                 .build();
-    }
-
-    private Map<String, String> parseBody(String body) {
-        Map<String, String> param = new HashMap<>();
-        for (String query : body.split("&")) {
-            String key = query.split("=")[0];
-            String value = query.split("=")[1];
-            param.put(key, value);
-        }
-        return param;
     }
 
     private void validateExists(User user) {

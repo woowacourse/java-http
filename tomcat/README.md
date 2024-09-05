@@ -17,7 +17,7 @@
     - [x] 성공 : 응답 헤더에 http status code를 302로 반환하고 `/index.html`로 리다이렉트 한다.
     - [x] 실패 : `401.html`로 리다이렉트 한다.
 - [ ] POST 방식으로 회원가입
-    - [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)가 보여진다.(GET)
+    - [x] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)가 보여진다.(GET)
     - [ ] 회원가입 버튼을 눌러 회원가입할 수 있다.(POST)
         - 회원가입 완료 시, `index.html`로 리다이렉트한다.(GET)
     - [ ] 로그인 버튼을 눌러 로그인할 수 있다.(POST)

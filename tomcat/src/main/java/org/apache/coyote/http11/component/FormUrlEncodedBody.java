@@ -8,6 +8,10 @@ public class FormUrlEncodedBody extends Body {
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
+    public FormUrlEncodedBody(final String plaintext) {
+        super(plaintext);
+    }
+
     protected void consume(final String plaintext) {
         final var params = List.of(plaintext.split(PARAMETER_DELIMITER));
         params.forEach(this::convertParam);

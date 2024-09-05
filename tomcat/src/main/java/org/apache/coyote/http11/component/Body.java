@@ -7,6 +7,10 @@ public abstract class Body {
 
     private final Map<String, String> values = new ConcurrentHashMap<>();
 
+    protected Body(final String plaintext) {
+        consume(plaintext);
+    }
+
     protected abstract void consume(final String plaintext);
 
     public String get(final String key) {

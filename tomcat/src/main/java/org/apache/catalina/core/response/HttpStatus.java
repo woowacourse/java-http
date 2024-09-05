@@ -1,4 +1,4 @@
-package org.apache.catalina.core;
+package org.apache.catalina.core.response;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;

@@ -2,31 +2,26 @@ package org.apache.catalina.servlets;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.core.HttpResponse;
+import org.apache.catalina.core.request.HttpRequest;
+import org.apache.catalina.core.response.HttpResponse;
+import org.apache.catalina.core.response.HttpStatus;
 
 public class RegisterServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        super.doGet(request, response);
-
+    public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");
         String fileContent = getFileContent(resource);
 
         response.setContentType("text/html");
         response.setContentLength(fileContent.getBytes().length);
-        setResponseBody(response, fileContent);
+        response.setResponseBody(fileContent);
     }
 
     // TODO 뭔가 중복되는 코드 template 패턴으로 바꿔도 좋을 듯
@@ -43,23 +38,15 @@ public class RegisterServlet extends HttpServlet {
         return "";
     }
 
-    private void setResponseBody(ServletResponse response, String fileContent) {
-        HttpResponse httpResponse = (HttpResponse) response;
-        httpResponse.setResponseBody(fileContent);
-    }
-
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        super.doPost(request, response);
-
+    public void doPost(HttpRequest request, HttpResponse response) throws IOException {
         String account = request.getParameter("account");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-
         InMemoryUserRepository.save(new User(account, password, email));
 
         response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpStatus.OK.getStatusCode());
         response.sendRedirect("/index.html");
     }
 }

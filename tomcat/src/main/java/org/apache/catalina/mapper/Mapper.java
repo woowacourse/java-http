@@ -1,11 +1,11 @@
 package org.apache.catalina.mapper;
 
-import jakarta.servlet.Servlet;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.servlets.LoginServlet;
 import org.apache.catalina.servlets.RegisterServlet;
+import org.apache.catalina.servlets.Servlet;
 
 /**
  * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.(동적 파일만)

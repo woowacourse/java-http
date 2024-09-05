@@ -3,6 +3,8 @@ package com.techcourse.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.techcourse.exception.AuthenticationException;
+import com.techcourse.exception.DuplicatedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +26,7 @@ class UserServiceTest {
         UserService userService = new UserService();
 
         assertThatThrownBy(() -> userService.login("invalid", "password"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AuthenticationException.class)
                 .hasMessage("사용자를 찾을 수 없습니다.");
     }
 
@@ -34,7 +36,27 @@ class UserServiceTest {
         UserService userService = new UserService();
 
         assertThatThrownBy(() -> userService.login("gugu", "invalid"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AuthenticationException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("회원가입을 한다.")
+    void register() {
+        UserService userService = new UserService();
+
+        UserResponse userResponse = userService.register("loki", "loki@email.com", "password");
+
+        assertThat(userResponse.account()).isEqualTo("loki");
+    }
+
+    @Test
+    @DisplayName("이미 존재하는 계정으로 회원가입하려고 하면 예외를 던진다.")
+    void registerWithDuplicatedAccount() {
+        UserService userService = new UserService();
+
+        assertThatThrownBy(() -> userService.register("gugu", "gugu@email.com", "password"))
+                .isInstanceOf(DuplicatedException.class)
+                .hasMessage("이미 존재하는 계정입니다.");
     }
 }

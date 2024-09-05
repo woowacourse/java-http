@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.domain.request.HttpRequest;
+import org.apache.coyote.http11.domain.request.RequestBody;
+import org.apache.coyote.http11.domain.request.RequestHeaders;
+import org.apache.coyote.http11.domain.request.RequestLine;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -25,10 +28,10 @@ class RequestMappingTest {
                     }
                 }
         ));
-        String requestLine = "GET /test HTTP/1.1";
-        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        String requestMessage = "test body";
-        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
+        RequestLine requestLine = new RequestLine("GET /test HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
+        RequestBody requestBody = new RequestBody("test body");
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
 
         HttpResponse response = requestMapping.getController(request).service(request);
 
@@ -42,10 +45,10 @@ class RequestMappingTest {
     @DisplayName("요청을 처리할 수 있는 컨트롤러가 없으면 ResourceController 를 반환한다.")
     void getControllerNoMatchedController() throws IOException {
         RequestMapping requestMapping = new RequestMapping(Map.of());
-        String requestLine = "GET /not/matched HTTP/1.1";
-        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        String requestMessage = "test body";
-        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
+        RequestLine requestLine = new RequestLine("GET /not/matched HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
+        RequestBody requestBody = new RequestBody("test body");
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
 
         Controller controller = requestMapping.getController(request);
 

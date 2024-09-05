@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.IOException;
 import java.util.List;
 import org.apache.coyote.http11.domain.request.HttpRequest;
+import org.apache.coyote.http11.domain.request.RequestBody;
+import org.apache.coyote.http11.domain.request.RequestHeaders;
+import org.apache.coyote.http11.domain.request.RequestLine;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,10 +32,10 @@ public class AbstractControllerTest {
     @Test
     @DisplayName("구현한 HTTP 메서드를 처리한다.")
     void service() throws IOException {
-        String requestLine = "GET /index.html HTTP/1.1";
-        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        String requestMessage = "test body";
-        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
+        RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
+        RequestBody requestBody = new RequestBody("test body");
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
 
         HttpResponse response = controller.service(request);
 
@@ -45,10 +48,10 @@ public class AbstractControllerTest {
     @Test
     @DisplayName("구현하지 않은 HTTP 메서드를 처리한다.")
     void serviceMethodNotImplemented() throws IOException {
-        String requestLine = "POST /index.html HTTP/1.1";
-        List<String> headerLines = List.of("Host: localhost:8080", "Connection: keep-alive");
-        String requestMessage = "test body";
-        HttpRequest request = new HttpRequest(requestLine, headerLines, requestMessage);
+        RequestLine requestLine = new RequestLine("POST /index.html HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
+        RequestBody requestBody = new RequestBody("test body");
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
 
         HttpResponse response = controller.service(request);
 

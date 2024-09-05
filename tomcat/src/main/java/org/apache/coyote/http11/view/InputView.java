@@ -15,6 +15,16 @@ public class InputView {
         return bufferedReader.readLine();
     }
 
+    public String read(int length) throws IOException {
+        char[] buffer = new char[length];
+        int readCount = bufferedReader.read(buffer, 0, length);
+
+        if (readCount == -1) {
+            return null;
+        }
+        return new String(buffer);
+    }
+
     public boolean isReadable() throws IOException {
         return bufferedReader.ready();
     }

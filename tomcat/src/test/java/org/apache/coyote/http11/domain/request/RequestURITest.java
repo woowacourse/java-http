@@ -39,18 +39,4 @@ class RequestURITest {
 
         );
     }
-
-    @Test
-    @DisplayName("쿼리스트링의 형식이 맞지 않는 RequestURI 를 생성한다.")
-    void createRequestURIWithInvalidQueryString() {
-        String requestURIString = "/index.html?keyWithoutValue=&=valueWithoutKey&key==&keyValue";
-        String expectedPath = "/index.html";
-
-        RequestURI requestURI = new RequestURI(requestURIString);
-
-        assertAll(
-                () -> assertThat(requestURI.getPath()).isEqualTo(expectedPath),
-                () -> assertThat(requestURI.getQueryParameters()).isEmpty()
-        );
-    }
 }

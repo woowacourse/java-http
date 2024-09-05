@@ -2,6 +2,7 @@ package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.AuthenticationException;
+import com.techcourse.exception.DuplicatedException;
 import com.techcourse.model.User;
 
 public class UserService {
@@ -15,5 +16,16 @@ public class UserService {
         }
 
         return UserResponse.from(user);
+    }
+
+    public UserResponse register(String account, String email, String password) {
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent(user -> {
+                    throw new DuplicatedException("이미 존재하는 계정입니다.");
+                });
+
+        User saved = InMemoryUserRepository.save(new User(account, email, password));
+
+        return UserResponse.from(saved);
     }
 }

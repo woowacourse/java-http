@@ -13,15 +13,22 @@ public class RequestLine {
     String httpVersion;
 
     public RequestLine(String line) {
+        validateLineEmpty(line);
         List<String> tokens = Arrays.stream(line.split(StringUtils.SPACE)).toList();
-        validate(tokens);
+        validateTokenLength(tokens);
 
         this.method = HttpMethod.ofName(tokens.get(0));
         this.requestURI = new RequestURI(tokens.get(1));
         this.httpVersion = tokens.get(2);
     }
 
-    private void validate(List<String> tokens) {
+    private void validateLineEmpty(String line) {
+        if (StringUtils.isEmpty(line)) {
+            throw new IllegalArgumentException("Line is Empty");
+        }
+    }
+
+    private void validateTokenLength(List<String> tokens) {
         if (tokens.size() != 3) {
             throw new IllegalArgumentException("Invalid Request Line Length: " + tokens.size());
         }

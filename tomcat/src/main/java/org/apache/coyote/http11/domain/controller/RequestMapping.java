@@ -17,9 +17,11 @@ public class RequestMapping {
         this.controllers = new HashMap<>();
         this.resourceController = new ResourceController();
 
+        UserService userService = new UserService();
+
         controllers.put("/", new HomeController());
-        controllers.put("/login", new LoginController(new UserService()));
-        controllers.put("/register", new RegisterController());
+        controllers.put("/login", new LoginController(userService));
+        controllers.put("/register", new RegisterController(userService));
     }
 
     public RequestMapping(Map<String, Controller> controllers) {

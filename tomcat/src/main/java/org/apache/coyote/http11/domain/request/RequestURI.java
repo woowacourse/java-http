@@ -1,39 +1,25 @@
 package org.apache.coyote.http11.domain.request;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 public class RequestURI {
 
     private static final String QUESTION_MARK = "?";
-    private static final String PARAMETER_DELIMITER = "&";
-    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final String path;
-    private final Map<String, String> queryParameters;
+    private final QueryParameters queryParameters;
 
     public RequestURI(String requestURI) {
-        this.queryParameters = new HashMap<>();
-
-        int queryIndex = requestURI.indexOf(QUESTION_MARK);
-        if (isQueryEmpty(queryIndex)) {
+        int questionMarkIndex = requestURI.indexOf(QUESTION_MARK);
+        if (isQueryEmpty(questionMarkIndex)) {
             this.path = requestURI;
+            this.queryParameters = new QueryParameters(StringUtils.EMPTY);
             return;
         }
 
-        this.path = requestURI.substring(0, queryIndex);
-        String query = requestURI.substring(queryIndex + 1);
-        parseQuery(query);
-    }
-
-    private void parseQuery(String query) {
-        Arrays.stream(query.split(PARAMETER_DELIMITER))
-                .filter(param -> param.contains(KEY_VALUE_DELIMITER))
-                .map(param -> param.split(KEY_VALUE_DELIMITER))
-                .filter(param -> param.length == 2)
-                .filter(param -> !param[0].isEmpty())
-                .forEach(param -> queryParameters.put(param[0], param[1]));
+        this.path = requestURI.substring(0, questionMarkIndex);
+        this.queryParameters = new QueryParameters(requestURI.substring(questionMarkIndex + 1));
     }
 
     private boolean isQueryEmpty(int queryIndex) {
@@ -45,7 +31,7 @@ public class RequestURI {
     }
 
     public Map<String, String> getQueryParameters() {
-        return queryParameters;
+        return queryParameters.getParameters();
     }
 
     public String getQueryParameter(String key) {

@@ -13,6 +13,9 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.controller.Controller;
 import org.apache.coyote.http11.domain.controller.RequestMapping;
 import org.apache.coyote.http11.domain.request.HttpRequest;
+import org.apache.coyote.http11.domain.request.RequestBody;
+import org.apache.coyote.http11.domain.request.RequestHeaders;
+import org.apache.coyote.http11.domain.request.RequestLine;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.dto.HttpResponseDto;
 import org.apache.coyote.http11.view.InputView;
@@ -59,27 +62,29 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest readHttpRequest(InputView inputView) throws IOException {
-        String requestLine = inputView.readLine();
-        List<String> headerLines = readHttpHeaders(inputView);
-        String requestBody = readRequestMessage(inputView);
-
-        return new HttpRequest(requestLine, headerLines, requestBody);
+        RequestLine requestLine = new RequestLine(inputView.readLine());
+        RequestHeaders requestHeaders = new RequestHeaders(readHttpHeaders(inputView));
+        RequestBody requestBody = new RequestBody(readRequestBody(inputView, requestHeaders));
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
     private List<String> readHttpHeaders(InputView inputView) throws IOException {
         ArrayList<String> headerLines = new ArrayList<>();
-        while (inputView.isReadable()) {
-            headerLines.add(inputView.readLine());
+        String line;
+        while (!StringUtils.isEmpty(line = inputView.readLine())) {
+            headerLines.add(line);
         }
 
         return headerLines;
     }
 
-    private String readRequestMessage(InputView inputView) throws IOException {
-        if (!inputView.isReadable()) {
+    private String readRequestBody(InputView inputView, RequestHeaders requestHeaders) throws IOException {
+        String contentLengthHeader = requestHeaders.getHeader("Content-Length");
+        if (contentLengthHeader == null) {
             return StringUtils.EMPTY;
         }
 
-        return inputView.readLine();
+        int contentLength = Integer.parseInt(contentLengthHeader);
+        return inputView.read(contentLength);
     }
 }

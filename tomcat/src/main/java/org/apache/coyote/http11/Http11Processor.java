@@ -137,10 +137,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getLoginPage(HttpCookie cookie) {
-        if (cookie.contains(JSESSIONID)) {
-            if (sessionManager.hasId(cookie.get(JSESSIONID))) {
-                return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
-            }
+        if (cookie.contains(JSESSIONID) && sessionManager.hasId(cookie.get(JSESSIONID))) {
+            return buildMessage("index.html", HttpStatusCode.FOUND, cookie);
         }
 
         return buildMessage("login.html", HttpStatusCode.OK, cookie);

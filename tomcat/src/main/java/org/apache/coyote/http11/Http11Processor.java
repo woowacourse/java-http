@@ -46,13 +46,20 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()
         ) {
             List<String> request = getRequest(inputStream);
+            Map<String, String> body = getBody(request);
+
+            String method = request.getFirst()
+                    .split(" ")[0];
             String requestUrl = request.getFirst()
                     .split(" ")[1];
-            Map<String, String> queryParams = getQueryParams(requestUrl);
 
             String response = getResponse(requestUrl, "200 OK");
-            if (requestUrl.startsWith("/login") && !queryParams.isEmpty()) {
-                response = login(queryParams);
+            if (requestUrl.startsWith("/login") && method.equals("POST")) {
+                response = login(body);
+            }
+
+            if (requestUrl.startsWith("/register") && method.equals("POST")) {
+                response = register(body);
             }
 
             outputStream.write(response.getBytes());
@@ -82,40 +89,30 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private Map<String, String> getQueryParams(String requestUrl) {
-        Map<String, String> queryParams = new HashMap<>();
+    private Map<String, String> getBody(List<String> request) {
+        String rawBody = request.getLast();
 
-        if (requestUrl.contains("?")) {
-            String queryString = requestUrl.split("\\?")[1];
-            queryParams = Arrays.stream(queryString.split("&"))
-                    .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
+        if (rawBody.isEmpty()) {
+            return new HashMap<>();
         }
 
-        return queryParams;
-    }
-
-    private String login(Map<String, String> queryParams) throws IOException {
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
-        if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return getResponse("/401.html", "401 Unauthorized");
-        }
-
-        return getResponse("/index.html", "302 Redirected");
+        return Arrays.stream(rawBody.split("&"))
+                .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
     }
 
     private String getResponse(String requestUrl, String responseCode) throws IOException {
         String responseBody = getResponseBody(requestUrl);
 
-        return String.join("\r\n",
+        String responseHeader = String.join("\r\n",
                 "HTTP/1.1 " + responseCode + " ",
                 "Content-Type: " + ContentType.findContentType(requestUrl) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                "Content-Length: " + responseBody.getBytes().length + " ");
+
+        if (responseCode.equals("302 Redirected")) {
+            return String.join("\r\n", responseHeader, "Location: " + requestUrl + " ");
+        }
+
+        return String.join("\r\n", responseHeader, "", responseBody);
     }
 
     private String getResponseBody(String requestUrl) throws IOException {
@@ -144,5 +141,27 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return resourceUrl;
+    }
+
+    private String login(Map<String, String> body) throws IOException {
+        String account = body.get("account");
+        String password = body.get("password");
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            return getResponse("/401.html", "302 Redirected");
+        }
+
+        log.info("로그인 성공 :: account = {}", user.get().getAccount());
+        return getResponse("/index.html", "302 Redirected");
+    }
+
+    private String register(Map<String, String> body) throws IOException {
+        User user = new User(body.get("account"), body.get("password"), body.get("email"));
+        InMemoryUserRepository.save(user);
+
+        log.info("회원 가입 성공 :: account = {}", user.getAccount());
+        return getResponse("/index.html", "302 Redirected");
     }
 }

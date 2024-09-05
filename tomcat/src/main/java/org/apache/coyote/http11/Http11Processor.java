@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
@@ -50,6 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var requestLineTokens = requestLine.split(" ");
+            final var method = requestLineTokens[0];
             final var url = requestLineTokens[1];
 
             if ("/".equals(url)) {
@@ -67,14 +69,33 @@ public class Http11Processor implements Runnable, Processor {
             if (url.matches("/assets/.*\\.js")) {
                 buildScriptResponse(outputStream, url);
             }
-            if (url.equals("/login")) {
+            if ("/login".equals(url) && "GET".equals(method)) {
                 buildHtmlResponse(outputStream, url + ".html");
             }
             if (url.matches("/login\\?account=.*&password=.*")) {
                 var index = url.indexOf('?');
                 var queryString = url.substring(index + 1);
 
-                login(queryString, outputStream);
+                login(outputStream, queryString);
+            }
+            if ("/login".equals(url) && "POST".equals(method)) {
+                final var httpRequestHeaders = parseHttpHeaders(br);
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+
+                login(outputStream, new String(buffer));
+            }
+            if ("/register".equals(url) && "GET".equals(method)) {
+                buildHtmlResponse(outputStream, url + ".html");
+            }
+            if ("/register".equals(url) && "POST".equals(method)) {
+                final var httpRequestHeaders = parseHttpHeaders(br);
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+
+                register(outputStream, new String(buffer));
             }
 
             outputStream.flush();
@@ -83,8 +104,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(final String queryString, final OutputStream outputStream) throws IOException {
-        Map<String, String> params = parseQueryString(queryString);
+    private void login(final OutputStream outputStream, final String queryString) throws IOException {
+        Map<String, String> params = parseRequestString(queryString);
 
         if (InMemoryUserRepository.findByAccount(params.get("account")).isEmpty()) {
             buildHtmlResponse(outputStream, "/401.html");
@@ -95,18 +116,43 @@ public class Http11Processor implements Runnable, Processor {
         if (user.checkPassword(params.get("password"))) {
             build302Response(outputStream, "/index.html");
             log.info("user: {}", user);
+            return;
         }
+
+        buildHtmlResponse(outputStream, "/401.html");
     }
 
-    private Map<String, String> parseQueryString(final String queryString) {
-        final var params = queryString.split("&");
+    private void register(final OutputStream outputStream, final String requestBody) {
+        final Map<String, String> userInfos = parseRequestString(requestBody);
+
+        final User user = new User(userInfos.get("account"), userInfos.get("password"), userInfos.get("email"));
+        InMemoryUserRepository.save(user);
+
+        build302Response(outputStream, "/index.html");
+    }
+
+    private Map<String, String> parseHttpHeaders(final BufferedReader reader) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        var header = reader.readLine();
+
+        while (!"".equals(header)) {
+            final var tokens = header.split(": ");
+            headers.put(tokens[0], tokens[1]);
+            header = reader.readLine();
+        }
+
+        return headers;
+    }
+
+    private Map<String, String> parseRequestString(final String requestString) {
+        final var params = requestString.split("&");
 
         return Arrays.stream(params)
                 .map(param -> param.split("="))
                 .collect(Collectors.toMap(token -> token[0], token -> token[1]));
     }
 
-    private String buildResponseBodyFromStaticFile(String fileName) throws IOException {
+    private String buildResponseBodyFromStaticFile(final String fileName) throws IOException {
         final var resourceName = "static" + fileName;
         final var path = Path.of(this.getClass().getClassLoader().getResource(resourceName).getPath());
 

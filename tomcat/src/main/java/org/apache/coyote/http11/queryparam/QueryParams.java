@@ -15,7 +15,7 @@ public class QueryParams {
 
     public static QueryParams from(final String line) {
         return new QueryParams(Arrays.stream(line.split(DELIMITER))
-                .map(s -> StringUtil.split(s, QUERY_DELIMITER))
+                .map(s -> StringUtil.splitBiValue(s, QUERY_DELIMITER))
                 .filter(BiValue::secondNotNull)
                 .collect(Collectors.toMap(BiValue::first, BiValue::second)));
     }

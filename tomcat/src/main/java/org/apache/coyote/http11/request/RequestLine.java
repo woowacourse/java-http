@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.Path;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.queryparam.QueryParams;
 import util.BiValue;
@@ -28,7 +29,7 @@ public class RequestLine {
     }
 
     private static BiValue<Path, QueryParams> splitUriAndQueryParams(final String uri) {
-        final BiValue<String, String> biValue = StringUtil.split(uri, QUERY_PARAM_DELIMITER);
+        final BiValue<String, String> biValue = StringUtil.splitBiValue(uri, QUERY_PARAM_DELIMITER);
         return new BiValue<>(Path.from(biValue.first()), QueryParams.from(biValue.second()));
     }
 

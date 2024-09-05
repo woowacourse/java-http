@@ -8,7 +8,7 @@ public class StringUtil {
     }
 
 
-    public static BiValue<String, String> split(final String str, final String delimiter) {
+    public static BiValue<String, String> splitBiValue(final String str, final String delimiter) {
         final int index = str.indexOf(delimiter);
         if (index == -1) {
             return new BiValue<>(str, BLANK);

@@ -4,6 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.AbstractHandler;
 import org.apache.coyote.http11.handler.GetLoginHandler;
+import org.apache.coyote.http11.handler.GetRegisterHandler;
 import org.apache.coyote.http11.handler.HelloHandler;
 import org.apache.coyote.http11.handler.PostLoginHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
@@ -82,8 +83,15 @@ public class Http11Processor implements Runnable, Processor {
         AbstractHandler staticResourceHandler = new StaticResourceHandler();
         AbstractHandler postLoginHandler = new PostLoginHandler();
         AbstractHandler getLoginHandler = new GetLoginHandler();
+        AbstractHandler getRegisterHandler = new GetRegisterHandler();
 
-        List<AbstractHandler> handlers = List.of(helloHandler, staticResourceHandler, postLoginHandler, getLoginHandler);
+        List<AbstractHandler> handlers = List.of(
+                helloHandler,
+                staticResourceHandler,
+                postLoginHandler,
+                getLoginHandler,
+                getRegisterHandler
+        );
         AbstractHandler targetHandler = handlers.stream()
                 .filter(it -> it.canHandle(httpRequest))
                 .findFirst()

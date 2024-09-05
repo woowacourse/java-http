@@ -10,24 +10,24 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetLoginHandlerTest {
+class GetRegisterHandlerTest {
 
     @Test
-    @DisplayName("로그인 관련 GET 요청을 처리할 수 있다.")
+    @DisplayName("회원가입 관련 GET 요청을 처리할 수 있다.")
     void canHandle() {
-        GetLoginHandler getLoginHandler = new GetLoginHandler();
+        GetRegisterHandler getRegisterHandler = new GetRegisterHandler();
 
-        boolean result = getLoginHandler.canHandle(createHttpRequest("GET /login HTTP/1.1"));
+        boolean result = getRegisterHandler.canHandle(createHttpRequest("GET /register HTTP/1.1"));
 
         assertThat(result).isTrue();
     }
 
     @Test
-    @DisplayName("로그인 관련 GET 요청이 아니라면 처리할 수 없다.")
+    @DisplayName("회원가입 관련 GET 요청이 아니라면 처리할 수 없다.")
     void cantHandle() {
-        GetLoginHandler getLoginHandler = new GetLoginHandler();
+        GetRegisterHandler getRegisterHandler = new GetRegisterHandler();
 
-        boolean result = getLoginHandler.canHandle(createHttpRequest("POST /login HTTP/1.1"));
+        boolean result = getRegisterHandler.canHandle(createHttpRequest("POST /register HTTP/1.1"));
 
         assertThat(result).isFalse();
     }

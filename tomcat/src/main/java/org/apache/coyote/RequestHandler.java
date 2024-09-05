@@ -67,28 +67,35 @@ public class RequestHandler {
     }
 
     private String processLoginRequest(final HttpRequest httpRequest) throws IOException {
-        final String path = httpRequest.getPath();
-        if (!path.contains("?")) {
+        if (Objects.equals(httpRequest.getMethod(), "GET")) {
             return handleSimpleResource("login.html");
         }
 
-        final String[] params = path.split("\\?")[1].split("&");
+        if (Objects.equals(httpRequest.getMethod(), "POST")) {
+            return processLoginPostRequest(httpRequest);
+        }
+
+        return handleSimpleResource("404.html");
+    }
+
+    private String processLoginPostRequest(final HttpRequest httpRequest) throws IOException {
+        final String[] params = httpRequest.getBody().split("&");
         final String account = params[0].split("=")[1];
         final String password = params[1].split("=")[1];
 
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty()) {
-            return handleSimpleResource("login.html");
+            return handleSimpleResource("401.html");
         }
 
         final User user = userOptional.get();
         if (user.checkPassword(password)) {
-            return setCookie(
+            return addCookie(
                     HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
                     new HttpCookie("JSESSIONID", String.valueOf(UUID.randomUUID())));
         }
 
-        return handleSimpleResource("401.html");
+        return handleSimpleResource("404.html");
     }
 
     private String processRegisterRequest(final HttpRequest httpRequest) throws IOException {
@@ -124,9 +131,9 @@ public class RequestHandler {
         return STATIC_RESOURCE_ROOT_PATH.concat(resourcePath);
     }
 
-    private String setCookie(final String response, final HttpCookie cookie) {
-        response.concat("Set-Cookie: ").concat(cookie.toString()).concat("\r\n");
-        System.out.println("response " + response);
+    private String addCookie(final String response, final HttpCookie cookie) {
+        response.concat("Set-Cookie: ").concat(cookie.toString());
+        System.out.println("response!!!!!!!!!! " + response);
         return response;
     }
 }

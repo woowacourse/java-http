@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.request.Http11RequestHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +27,7 @@ class Http11RequestTest {
         Http11Request http11Request = Http11Request.from(inputStream);
         Http11RequestHeader headers = http11Request.getHeaders();
 
-        assertThat(headers.map())
+        assertThat(headers.getHeaders())
                 .containsExactlyInAnyOrderEntriesOf(Map.of(
                         "Host", List.of("localhost:8080"),
                         "Accept", List.of("text/css,*/*;q=0.1"),

@@ -1,20 +1,12 @@
 package org.apache.coyote.http11.response;
 
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
 public class Http11Response {
 
     private Http11ResponseStartLine startLine;
-    private final Map<String, List<String>> headers;
+    private Http11ResponseHeaders headers;
     private String body;
 
-    private Http11Response(Http11ResponseStartLine startLine, Map<String, List<String>> headers, String body) {
+    private Http11Response(Http11ResponseStartLine startLine, Http11ResponseHeaders headers, String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -22,24 +14,16 @@ public class Http11Response {
 
     public static Http11Response create() {
         Http11ResponseStartLine startLine = Http11ResponseStartLine.defaultLine();
-        Map<String, List<String>> headers = new TreeMap<>(CASE_INSENSITIVE_ORDER);
-        Http11Response response = new Http11Response(startLine, headers, null);
-        response.addContentType("text/html");
-        return response;
+        return new Http11Response(startLine, new Http11ResponseHeaders(), null);
     }
 
     public void sendRedirect(String url) {
         this.startLine = new Http11ResponseStartLine(HttpStatusCode.FOUND);
-        headers.put("Location", List.of(url));
-    }
-
-    public void addHeader(String key, String value) {
-        headers.put(key, List.of(value));
+        addHeader("Location", url);
     }
 
     public void addCookie(String key, String value) {
-        headers.computeIfAbsent("Set-Cookie", k -> new ArrayList<>())
-                .add(key + "=" + value);
+        addHeader("Set-Cookie", key + "=" + value);
     }
 
     public void addContentType(String accept) {
@@ -48,37 +32,29 @@ public class Http11Response {
 
     public void addBody(String body) {
         this.body = body;
+        addHeader("Content-Length", String.valueOf(body.getBytes().length));
+    }
+
+    private void addHeader(String key, String value) {
+        headers.add(key, value);
     }
 
     @Override
     public String toString() {
-        String headerString = headerToString();
-
         if (body == null) {
             return String.join(
                     "\r\n",
                     startLine.toString(),
-                    headerString,
+                    headers.toString(),
                     ""
             );
         }
-
         return String.join(
                 "\r\n",
                 startLine.toString(),
-                headerString,
+                headers.toString(),
                 "",
                 body
         );
-    }
-
-    private String headerToString() {
-        if (body != null) {
-            headers.put("Content-Length", List.of(String.valueOf(body.getBytes().length)));
-        }
-
-        return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + String.join(";", entry.getValue()) + " ")
-                .collect(Collectors.joining("\r\n"));
     }
 }

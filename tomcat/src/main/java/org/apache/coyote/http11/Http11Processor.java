@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -37,7 +38,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String urlPath = reader.readLine().split(" ")[1];
+            String line = reader.readLine();
+            String urlPath = line.split(" ")[1];
             if(urlPath.equals("/index.html")) {
                 printFileResource("static/index.html", outputStream);
                 return;
@@ -72,14 +74,16 @@ public class Http11Processor implements Runnable, Processor {
             String contentType = "text/html";
             if(fileName.endsWith("css")) {
                 contentType = "text/css";
+            } else if(fileName.endsWith("js")) {
+                contentType = "application/javascript";
             }
-            final var responseBody = String.join("\n", Files.readAllLines(path));
-            final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                "Content-Length: " + responseBody.length() + " ",
-                "",
-                responseBody);
+
+            final var responseBody = new String(Files.readAllBytes(path));
+            var response = "HTTP/1.1 200 OK \r\n" +
+                String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n"+
+                responseBody;
 
             outputStream.write(response.getBytes());
             outputStream.flush();

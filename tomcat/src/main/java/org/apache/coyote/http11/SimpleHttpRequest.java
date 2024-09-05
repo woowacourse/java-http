@@ -45,7 +45,11 @@ public class SimpleHttpRequest {
 
     public Map<String, String> getQueryParameters() {
         Map<String, String> queryParameters = new HashMap<>();
-        final String[] queryParams = getRequestUri().split("\\?")[1].split("&");
+        final String[] endPointAndQueryParams = getRequestUri().split("\\?");
+        if (endPointAndQueryParams.length < 2) {
+            return queryParameters;
+        }
+        final String[] queryParams = endPointAndQueryParams[1].split("&");
         Arrays.stream(queryParams)
                 .forEach(param -> {
                     final String[] keyAndValue = param.split("=");

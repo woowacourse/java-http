@@ -147,31 +147,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
+        // 로그인 요청
         if (endpoint.equals("/login")) {
             final Map<String, String> queryParameters = httpRequest.getQueryParameters();
             if (queryParameters.isEmpty()) {
-                final String responseBody = """
-                    {
-                        "message": "사용자 계정 정보와 비밀번호 정보는 필수입니다."
-                    }
-                    """;
-
-                final String response = String.join("\r\n",
-                        "HTTP/1.1 400 Bad Request ",
-                        "Content-Type: application/json ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "", responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            final String account = queryParameters.get("account");
-            final String password = queryParameters.get("password");
-            final User user = InMemoryUserRepository.findByAccount(account).orElse(null);
-            assert user != null;
-            if (user.checkPassword(password)) {
-                log.info("{}", user.toString());
                 final File file = getStaticFile("/login.html");
                 final String responseBody = readFileContent(file);
                 final String response = String.join("\r\n",
@@ -181,9 +160,40 @@ public class Http11Processor implements Runnable, Processor {
                         "", responseBody);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
+                return;
             }
+
+            final String account = queryParameters.get("account");
+            final String password = queryParameters.get("password");
+            if (!loginCheck(account, password)) {
+                final File file = getStaticFile("/401.html");
+                final String responseBody = String.join("", readFileContent(file));
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 401 Unauthorized",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "", responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            final String response = String.join("\r\n",
+                    "HTTP/1.1 302 Found",
+                    "Location: http://localhost:8080/index.html",
+                    "Content-Type: text/html; charset=utf-8",
+                    "Content-Length: 0",
+                    "", "");
+            outputStream.write(response.getBytes());
+            outputStream.flush();
         }
 
         sendNotFoundResponse(outputStream);
+    }
+
+    private boolean loginCheck(final String account, final String password) {
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElse(null);
+        return user != null && user.checkPassword(password);
     }
 }

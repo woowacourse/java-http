@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpRequestHeader;
 public class HandlerMapping {
 
     private static final Map<RequestMapping, Controller> HANDLER_MAPPER = Map.of(
-            new RequestMapping("GET", "/login"), new LogInController()
+            new RequestMapping("POST", "/login"), new LogInController()
     );
 
     public Controller getController(HttpRequestHeader request) {

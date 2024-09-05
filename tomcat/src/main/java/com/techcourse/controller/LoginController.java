@@ -25,7 +25,6 @@ public class LoginController {
         String fileContent = StaticResourceManager.read(STATIC_RESOURCE_PATH);
         return new HttpResponse(1.1, 200, "OK")
                 .addHeader("Content-Type", mediaType.getValue())
-                .addHeader("Content-Length", String.valueOf(fileContent.getBytes().length))
                 .setBody(fileContent);
     }
 

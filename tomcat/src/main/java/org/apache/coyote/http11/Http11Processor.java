@@ -75,7 +75,6 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = StaticResourceManager.read("static" + request.getPath());
         return new HttpResponse(1.1, 200, "OK")
                 .addHeader("Content-Type", mediaType.getValue())
-                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
                 .setBody(responseBody);
     }
 

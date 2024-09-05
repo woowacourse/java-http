@@ -26,6 +26,7 @@ public class HttpResponse {
 
     public HttpResponse setBody(String body) {
         this.body = body;
+        headers.put("Content-Length", String.valueOf(body.getBytes().length));
         return this;
     }
 

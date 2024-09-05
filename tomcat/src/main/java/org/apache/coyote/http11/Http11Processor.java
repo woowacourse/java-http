@@ -1,9 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Method;
@@ -33,12 +39,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (var inputStream = connection.getInputStream();
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             BufferedReader requestBufferedReader = new BufferedReader(inputStreamReader);
              var outputStream = connection.getOutputStream()) {
 
-            BufferedReader requestBufferedReader = new BufferedReader(inputStreamReader);
-            Request request = Request.parseFrom(requestBufferedReader.lines().toList());
-
+            Request request = Request.parseFrom(getPlainRequest(requestBufferedReader));
             String response = getResponseString(request);
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -46,7 +52,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseString(Request request) {
+    private List<String> getPlainRequest(BufferedReader requestBufferedReader) throws IOException {
+        List<String> plainRequest = new ArrayList<>();
+        while(requestBufferedReader.ready()) {
+            String line = requestBufferedReader.readLine();
+            plainRequest.add(line);
+        }
+        return Collections.unmodifiableList(plainRequest);
+    }
+
+    private String getResponseString(Request request) throws IOException {
         if (request.getMethod() == Method.GET) {
             String content = getContent(request);
 
@@ -60,10 +75,12 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String getContent(Request request) {
+    private String getContent(Request request) throws IOException {
         if (request.getTarget().equals("/")) {
             return "Hello world!";
         }
-        return null;
+        String name = "static" + request.getTarget();
+        URL resource = getClass().getClassLoader().getResource(name);
+        return new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
     }
 }

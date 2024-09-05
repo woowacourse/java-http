@@ -33,6 +33,8 @@ class RequestTest {
             //when
             InputStream requestStream = new ByteArrayInputStream(input.getBytes());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
+
+
             Request request = Request.parseFrom(bufferedReader.lines().toList());
 
             //then

@@ -37,3 +37,5 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
   * 그래도 변경이 반영됐는데 왜일까?
     * 추측 out은 src를 기반으로 만드는 소스코드이고, 결국 프로그램이 바라보는건 out 파일이니 src 변경 없이 out을 변경해도 제대로 동작하는건가
 ![img_3.png](img_3.png)
+
+* 카탈리나, 코요테 이녀석들은 뭐지

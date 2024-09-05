@@ -24,6 +24,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = new SessionManager(); //TODO refactor
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -93,20 +94,18 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (path.equals("/login")) {
                     // POST /login
-
                     final UUID uuid = UUID.randomUUID();
                     response.setCookie("JSESSIONID=" + uuid);
-                    createResponse(body, request, response, result);
+                    final var session = new Session(uuid.toString());
+                    final var user = createResponse(body, request, response, result);
+                    session.setAttribute("user", user);
+                    sessionManager.add(session);
                     log.info("set cookie = {}", uuid);
                 } else if (path.equals("/register")) {
                     // POST /register
                     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
                     redirectIndex(response, request, result);
-//                    response.setSc("FOUND");
-//                    response.setStatusCode(302);
-//                    response.setLocation("index.html");
-//                    response.setContentType("text/html");
                 }
 
                 outputStream.write(response.toHttpResponse().getBytes());
@@ -145,10 +144,9 @@ public class Http11Processor implements Runnable, Processor {
         response.setContentLength(result.getBytes().length);
         response.setLocation("index.html");
         response.setSourceCode(result);
-
     }
 
-    private void createResponse(final Map<String, String> queryString, final Request request, final Response response,
+    private User createResponse(final Map<String, String> queryString, final Request request, final Response response,
                                 final String result) {
         final String account = queryString.get("account");
         log.info("account = {}", account);
@@ -166,9 +164,11 @@ public class Http11Processor implements Runnable, Processor {
             }
             response.setLocation("index.html");
             log.info("user = {}", user);
+            return user;
         } catch (final IllegalArgumentException e) {
             log.warn(e.getMessage());
             response.setLocation("401.html");
+            return null;
         }
     }
 }

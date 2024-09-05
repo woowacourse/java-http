@@ -2,19 +2,16 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.request.Request;
+import org.apache.coyote.request.RequestParser;
+import org.apache.coyote.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
+import servlet.HttpServlet;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -22,8 +19,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private final RequestParser requestParser;
+
+    private final HttpServlet httpServlet;
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestParser = new RequestParser(); // todo singleton
+        this.httpServlet = new HttpServlet();
     }
 
     @Override
@@ -38,34 +41,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String request = bufferedReader.readLine();
-            Map<String, String> headers = new HashMap<>();
-            String line = bufferedReader.readLine();
-            while (line != null && !line.isEmpty()) {
-                String[] header = line.split(": ");
-                headers.put(header[0], header[1]);
-                line = bufferedReader.readLine();
-            }
-            String[] requestLines = request.split(" ");
-            String httpMethod = requestLines[0];
-            String uri = requestLines[1];
-            String httpVersion = requestLines[2];
-
-            String file = this.getClass().getClassLoader().getResource("static/index.html").getFile();
-            File html = new File(file);
-
-
-            var responseBody = Files.readString(html.toPath());
-            if (!uri.equals("/index.html")) {
-                responseBody = "Hello world!";
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Request request = requestParser.parse(bufferedReader);
+            Response response = httpServlet.service(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

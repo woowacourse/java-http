@@ -6,7 +6,7 @@ public class Response {
 
     private final ResponseHeaders headers;
 
-    private final ResponseBody body;
+    private final ResponseBody body; // todo
 
     public Response(ResponseLine responseLine, ResponseHeaders headers, ResponseBody body) {
         this.responseLine = responseLine;
@@ -14,7 +14,11 @@ public class Response {
         this.body = body;
     }
 
-    public String build() {
+    public byte[] getBytes() {
+        return build().getBytes();
+    }
+
+    private String build() {
         StringBuilder builder = new StringBuilder();
         responseLine.assemble(builder);
         headers.assemble(builder);

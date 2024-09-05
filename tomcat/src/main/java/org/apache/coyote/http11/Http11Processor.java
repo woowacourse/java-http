@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.Controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -9,21 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -31,8 +28,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
+    private final Controller controller;
+
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.controller = new Controller();
     }
 
     @Override
@@ -64,17 +64,17 @@ public class Http11Processor implements Runnable, Processor {
 
             StringTokenizer tokenizer = new StringTokenizer(headers.get(0));
             String method = tokenizer.nextToken();
-            String pattern = tokenizer.nextToken();
+            String uri = tokenizer.nextToken();
             String httpVersion = tokenizer.nextToken();
 
             if (!httpVersion.equals("HTTP/1.1")) {
                 throw new IOException("not http1.1 request");
             }
 
-            var responseBody = "";
+            var response = "";
 
             if (method.equals("GET")) {
-                responseBody = processGetRequest(pattern);
+                response = processGetRequest(uri);
             }
             if (method.equals("POST")) {
                 char[] body = new char[contentLength];
@@ -86,13 +86,8 @@ public class Http11Processor implements Runnable, Processor {
                 String decodedBody = URLDecoder.decode(requestBody, StandardCharsets.UTF_8);
 
                 log.info("Decoded Request Body: {}", decodedBody);
-                responseBody = processPostRequest(pattern, decodedBody);
+                response = processPostRequest(uri, decodedBody);
             }
-
-            var response = "HTTP/1.1 " + getStatusCode(pattern, method) + " OK \r\n";
-            response += String.join("\r\n", getHeaders(pattern, responseBody, method));
-            response += "\r\n" + "\r\n" + responseBody;
-
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -101,63 +96,48 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String processPostRequest(String pattern, String body) {
-        if (pattern.startsWith("/login")) {
-            Map<String, String> params = parseQueryString(body);
+    private String processGetRequest(String uri) throws IOException {
+        var responseBody = controller.processGetRequest(uri);
 
-            Optional<User> byAccount = InMemoryUserRepository.findByAccount(params.get("account"));
+        var response = "HTTP/1.1 " + getStatusCode("GET") + " OK \r\n";
+        response += String.join("\r\n", getResponseHeaders(uri, responseBody, "GET"));
+        response += "\r\n" + "\r\n" + responseBody;
+        return response;
+    }
 
-            if (byAccount.isPresent()) {
-                log.info(byAccount.get().getAccount());
-                return "/index.html";
-            }
-            return "/401.html";
-        }
+    private String processPostRequest(String uri, String body) {
+        Map<String, String> params = parseQueryString(body);
 
-        if (pattern.startsWith("/register")) {
-            Map<String, String> params = parseQueryString(body);
-            User user = new User(
-                (InMemoryUserRepository.getLastId() + 1),
-                params.get("account"),
-                params.get("password"),
-                params.get("email"));
-            InMemoryUserRepository.save(user);
+        var responseBody = controller.processPostRequest(uri, params);
 
-            log.info(user.toString());
-            return "/index.html";
-        }
-
-        return "";
+        var response = "HTTP/1.1 " + getStatusCode("POST") + " OK \r\n";
+        response += String.join("\r\n", getResponseHeaders(uri, responseBody, "POST"));
+        response += "\r\n" + "\r\n" + responseBody;
+        return response;
     }
 
     private Map<String, String> parseQueryString(String queryString) {
         Map<String, String> parameters = new HashMap<>();
-
-        // '&'로 각 키-값 쌍 분리
         String[] pairs = queryString.split("&");
 
         for (String pair : pairs) {
-            // '='로 키와 값을 분리
             String[] keyValue = pair.split("=", 2);
 
-            // 키와 값 저장
             String key = keyValue[0];
             String value = keyValue.length > 1 ? keyValue[1] : "";
 
-            // Map에 저장
             parameters.put(key, value);
         }
 
         return parameters;
     }
 
-
-    private List<String> getHeaders(String pattern, String responseBody, String method) {
+    private List<String> getResponseHeaders(String uri, String responseBody, String method) {
         List<String> headers = new ArrayList<>();
-        headers.add("Content-Type: " + getContentType(pattern) + ";charset=utf-8 ");
+        headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
         headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
 
-        if (getStatusCode(pattern, method).equals("302")) {
+        if (getStatusCode(method).equals("302")) {
             headers.add("Location: " + responseBody);
         }
 
@@ -168,32 +148,15 @@ public class Http11Processor implements Runnable, Processor {
         return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
     }
 
-    private String processGetRequest(String pattern) throws IOException {
-        if (pattern.equals("/")) {
-            return "Hello world!";
-        }
-
-        if (pattern.equals("/register")) {
-            URL resource = getClass().getClassLoader().getResource("static" + pattern+ ".html");
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + pattern);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
-    }
-
-    private String getContentType(String pattern) {
-        if (pattern.startsWith("/css")) {
+    private String getContentType(String uri) {
+        if (uri.startsWith("/css")) {
             return "text/css";
         }
         return "text/html";
     }
 
-    private String getStatusCode(String pattern, String method) {
-        if (pattern.startsWith("/login") && !pattern.endsWith(".html")) {
-            return "302";
-        }
-        if (pattern.startsWith("/register") && method.equals("POST")) {
+    private String getStatusCode(String method) {
+        if (method.equals("POST")) {
             return "302";
         }
         return "200";

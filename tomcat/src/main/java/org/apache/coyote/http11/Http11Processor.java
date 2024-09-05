@@ -1,16 +1,13 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.util.FileReader;
 import org.apache.coyote.util.HttpResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +17,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpHeaderParser parser = new HttpHeaderParser();
+    private final HttpRequestParser parser = new HttpRequestParser();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -37,27 +34,31 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()
         ) {
-            final String extractedStrings = parser.extractStrings(inputStream);
-            Path filePath = parser.parseFilePath(extractedStrings);
-            String fileName = filePath.getFileName().toString();
+            final HttpRequest request = parser.extractRequest(inputStream);
+            final String fileName = getFilePath(request.getPath());
+            final Path filePath = FileReader.parseFilePath(fileName);
 
-            List<String> contentLines = Files.readAllLines(filePath);
-            contentLines.add("");
-            final var response = HttpResponseBuilder.build(fileName, contentLines);
+            final List<String> contentLines = FileReader.readAllLines(filePath);
 
-            if (parser.containsQueryParameters(extractedStrings)) {
-                Map<String, String> query = parser.extractQueryParameters(extractedStrings);
-
-                User user = InMemoryUserRepository.findByAccount(query.get("account"))
-                        .orElseThrow();
-                if (user.checkPassword(query.get("password"))) {
-                    log.info(user.toString());
-                }
-            }
+            final HttpResponse response = HttpResponseBuilder.build(
+                    getFilePath(request.getPath()),
+                    contentLines,
+                    HttpStatus.OK
+            );
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public String getFilePath(String path) {
+        if (path.isEmpty()) {
+            return "index.html";
+        }
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+        return path;
     }
 }

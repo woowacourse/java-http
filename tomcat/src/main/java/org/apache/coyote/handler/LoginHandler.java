@@ -3,6 +3,7 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
 import org.apache.coyote.common.StatusCode;
@@ -24,7 +25,11 @@ public class LoginHandler implements Handler {
         } catch (IllegalArgumentException e) {
             return StaticResourceHandler.getInstance().handle(request, StatusCode.UNAUTHORIZED);
         }
-        return new Response(StatusCode.FOUND, Map.of("Location", "/index.html"), null);
+        return new Response(
+                StatusCode.FOUND,
+                Map.of("Location", "/index.html",
+                       "Set-Cookie", "JSESSIONID=" + UUID.randomUUID().toString()),
+                null);
     }
 
     private boolean isInvalidParameters(Request request) {

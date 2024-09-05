@@ -13,17 +13,19 @@ public class Response {
     private final String protocol;
     private final StatusCode status;
     private final Map<String, String> headers;
+    private final Cookie cookies;
     private final String body;
 
-    private Response(String protocol, StatusCode status, Map<String, String> headers, String body) {
+    private Response(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {
         this.protocol = protocol;
         this.status = status;
         this.headers = headers;
+        this.cookies = cookies;
         this.body = body;
     }
 
     public Response(StatusCode status, Map<String, String> headers, String body) {
-        this(DEFAULT_PROTOCOL, status, headers, body);
+        this(DEFAULT_PROTOCOL, status, headers, Cookie.empty(), body);
     }
 
     public byte[] getBytes() {
@@ -60,9 +62,9 @@ public class Response {
     public String toString() {
         return "Response{" +
                "protocol='" + protocol + '\'' +
-               ", status='" + status + '\'' +
-               ", headers=" + headers + '\'' +
-               ", body='" + body + '\'' +
+               ", status=" + status +
+               ", headers=" + headers +
+               ", cookies=" + cookies.toString() +
                '}';
     }
 }

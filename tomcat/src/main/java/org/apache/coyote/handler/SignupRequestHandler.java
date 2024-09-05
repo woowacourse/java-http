@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
+import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Response;
 
 public class SignupRequestHandler implements RequestHandler {
@@ -16,7 +17,7 @@ public class SignupRequestHandler implements RequestHandler {
     public boolean canHandling(HttpRequest httpRequest) throws IOException {
         return httpRequest.getPath().equals("/register")
                 && httpRequest.existsBody()
-                && "POST".equals(httpRequest.getMethod());
+                && Http11Method.POST.equals(httpRequest.getMethod());
     }
 
     @Override

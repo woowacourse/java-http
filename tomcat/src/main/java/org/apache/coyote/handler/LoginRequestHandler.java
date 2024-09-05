@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
+import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
@@ -22,7 +23,7 @@ public class LoginRequestHandler implements RequestHandler {
     public boolean canHandling(HttpRequest httpRequest) throws IOException {
         return httpRequest.getPath().equals("/login")
                 && httpRequest.existsBody()
-                && "POST".equals(httpRequest.getMethod());
+                && Http11Method.POST.equals(httpRequest.getMethod());
     }
 
     @Override

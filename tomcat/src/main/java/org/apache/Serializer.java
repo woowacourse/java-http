@@ -1,4 +1,6 @@
-package org.apache.coyote;
+package org.apache;
+
+import org.apache.coyote.HttpResponse;
 
 public class Serializer {
 

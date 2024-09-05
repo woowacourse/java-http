@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
+import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
 
@@ -14,7 +15,7 @@ public class ResourceRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
-        return canRead(httpRequest.getPath()) && "GET".equals(httpRequest.getMethod());
+        return canRead(httpRequest.getPath()) && Http11Method.GET.equals(httpRequest.getMethod());
     }
 
     @Override

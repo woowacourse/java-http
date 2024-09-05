@@ -3,14 +3,11 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 public class Http11RequestLine {
 
-    private static final List<String> METHODS =
-            List.of("POST", "GET", "HEAD", "PUT", "PATCH", "DELETE", "CONNECT", "TRACE", "OPTIONS");
     private static final String PROTOCOL = "HTTP";
     private static final String PROTOCOL_VERSION = "1.1";
     private static final int REQUEST_LINE_LENGTH = 3;
@@ -39,9 +36,7 @@ public class Http11RequestLine {
 
     private void validateMethod(String startLine) {
         String method = startLine.split(" ")[0];
-        if (!METHODS.contains(method)) {
-            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP Method가 아닙니다."));
-        }
+        Http11Method.validate(method);
     }
 
     private void validateProtocol(String startLine) {

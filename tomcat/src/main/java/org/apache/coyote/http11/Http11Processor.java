@@ -18,8 +18,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -52,19 +50,22 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if(urlPath.startsWith("/login")) {
-                if(urlPath.equals("/login")) {
+                if(urlPath.equals("/login") && httpMethod.equals("GET")) {
                     printFileResource("static" + urlPath +".html",  outputStream);
                     return;
                 }
-                String parameters = urlPath.substring(7);
-                String account = parameters.split("&")[0].split("=")[1];
-                String password = parameters.split("&")[1].split("=")[1];
+                String body = parseBody(reader);
+                if (body != null) {
+                    System.out.println("body = " + body);
+                    String account = body.split("&")[0].split("=")[1];
+                    String password = body.split("&")[1].split("=")[1];
 
-                User user = InMemoryUserRepository.findByAccount(account)
-                    .orElse(new User("guest", "guest", "guest"));
-                if(user.checkPassword(password)) {
-                    redirect("http://localhost:8080/index.html", outputStream);
-                    return;
+                    User user = InMemoryUserRepository.findByAccount(account)
+                        .orElse(new User("guest", "guest", "guest"));
+                    if (user.checkPassword(password)) {
+                        redirect("http://localhost:8080/index.html", outputStream);
+                        return;
+                    }
                 }
                 redirect("http://localhost:8080/401.html", outputStream);
                 return;

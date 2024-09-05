@@ -1,5 +1,7 @@
 package org.apache.coyote;
 
+import java.util.Arrays;
+
 public enum HttpVersion {
 
     HTTP_1_0("HTTP/1.0"),
@@ -12,13 +14,11 @@ public enum HttpVersion {
         this.versionString = versionString;
     }
 
-    public static HttpVersion fromString(String versionString) {
-        for (HttpVersion version : HttpVersion.values()) {
-            if (version.getVersionString().equals(versionString)) {
-                return version;
-            }
-        }
-        throw new IllegalArgumentException("Unknown HTTP version: " + versionString);
+    public static HttpVersion from(String versionString) {
+        return Arrays.stream(HttpVersion.values())
+                .filter(version -> version.getVersionString().equals(versionString))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown HTTP version: " + versionString));
     }
 
     public String getVersionString() {

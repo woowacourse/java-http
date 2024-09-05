@@ -1,5 +1,7 @@
 package org.apache.coyote.util;
 
+import java.util.Arrays;
+
 public enum FileExtension {
 
     HTML("html"),
@@ -31,11 +33,9 @@ public enum FileExtension {
     }
 
     public static FileExtension from(String path) {
-        for (FileExtension ext : values()) {
-            if (path.endsWith(ext.getExtension())) {
-                return ext;
-            }
-        }
-        throw new IllegalArgumentException();
+        return Arrays.stream(values())
+                .filter(ext -> path.endsWith(ext.getExtension()))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 }

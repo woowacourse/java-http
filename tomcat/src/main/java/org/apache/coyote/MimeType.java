@@ -1,5 +1,6 @@
 package org.apache.coyote;
 
+import java.util.Arrays;
 import org.apache.coyote.util.FileExtension;
 
 public enum MimeType {
@@ -23,12 +24,10 @@ public enum MimeType {
     }
 
     public static MimeType from(FileExtension fileExtension) {
-        for (MimeType mime : values()) {
-            if (mime.extension != null && fileExtension == mime.extension) {
-                return mime;
-            }
-        }
-        throw new IllegalArgumentException();
+        return Arrays.stream(MimeType.values())
+                .filter(mime -> mime.extension != null && mime.extension == fileExtension)
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 
     public String getContentType() {

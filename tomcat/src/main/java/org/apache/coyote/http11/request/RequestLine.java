@@ -31,7 +31,7 @@ public class RequestLine {
 
         HttpMethod method = HttpMethod.from(requestLineToken[0]);
         String url = requestLineToken[1];
-        HttpVersion version = HttpVersion.fromString(requestLineToken[2]);
+        HttpVersion version = HttpVersion.from(requestLineToken[2]);
         String path = parsePath(url);
         Map<String, String> queryParams = parseQueryParameter(url);
 

@@ -44,12 +44,7 @@ public class LoginController implements Controller {
             ResponseHeader header = new ResponseHeader();
             Manager manager = SessionManager.getInstance();
 
-            if (!isSessionExists(request)) {
-                Session session = Session.createRandomSession();
-                manager.add(session);
-                session.setAttribute("user", user.getAccount());
-                header.setCookie(HttpCookie.ofJSessionId(session.getId()));
-            }
+            addSession(request, manager, user, header);
             return redirectDefaultPage(header);
         }
         return redirectUnauthorizedPage();
@@ -75,9 +70,13 @@ public class LoginController implements Controller {
         return result;
     }
 
-    private boolean isSessionExists(HttpRequest request) {
-        RequestHeader requestHeaders = request.getHeaders();
-        return requestHeaders.existsSession();
+    private void addSession(HttpRequest request, Manager manager, User user, ResponseHeader header) {
+        if (!isSessionExists(request)) {
+            Session session = Session.createRandomSession();
+            manager.add(session);
+            session.setAttribute("user", user.getAccount());
+            header.setCookie(HttpCookie.ofJSessionId(session.getId()));
+        }
     }
 
     private HttpResponse redirectDefaultPage(ResponseHeader header) {
@@ -91,5 +90,10 @@ public class LoginController implements Controller {
         header.setLocation("/401.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);
+    }
+
+    private boolean isSessionExists(HttpRequest request) {
+        RequestHeader requestHeaders = request.getHeaders();
+        return requestHeaders.existsSession();
     }
 }

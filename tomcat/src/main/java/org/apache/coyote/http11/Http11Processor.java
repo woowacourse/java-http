@@ -118,15 +118,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBodyUsedQuery(String url) {
-        String path = url.split("\\?")[0];
-        String[] queryString = url.split("\\?")[1].split("&");
+        String[] separationUrl = url.split(QUERY_SEPARATOR);
+        String path = separationUrl[0];
+        String[] queryString = separationUrl[1].split(PARAM_SEPARATOR);
         if (path.startsWith("/login")) {
-            if (queryString[0].startsWith("account=") && queryString[1].startsWith("password=")) {
-                checkAuth(queryString[0].split("=")[1], queryString[1].split("=")[1]);
-            }
-            return getResponseBodyByFileName("/login.html");
+            return login(queryString);
         }
         throw new RuntimeException("정의되지 않은 URL 입니다.");
+    }
+
+    private String login(String[] queryString) {
+        if (queryString[0].startsWith("account=") && queryString[1].startsWith("password=")) {
+            checkAuth(queryString[0].split("=")[1], queryString[1].split("=")[1]);
+        }
+        return getResponseBodyByFileName("/login.html");
     }
 
     private void checkAuth(String account, String password) {

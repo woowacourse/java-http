@@ -26,11 +26,7 @@ public class HttpRequestConvertor {
             HttpRequestHeader httpRequestHeader = new HttpRequestHeader(method, path, version, headers);
 
             if (httpRequestHeader.containsKey("Content-Length")) {
-                int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String body = new String(buffer);
-                HttpRequestBody httpRequestBody = new HttpRequestBody(body);
+                HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
 
                 return new HttpRequest(httpRequestHeader, httpRequestBody);
             }
@@ -39,6 +35,18 @@ public class HttpRequestConvertor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static HttpRequestBody getHttpRequestBody(
+            BufferedReader bufferedReader,
+            HttpRequestHeader httpRequestHeader
+    ) throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String body = new String(buffer);
+        HttpRequestBody httpRequestBody = new HttpRequestBody(body);
+        return httpRequestBody;
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {

@@ -6,12 +6,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class LoginHandler extends AbstractRequestHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+public class RegisterHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
@@ -23,22 +19,28 @@ public class LoginHandler extends AbstractRequestHandler {
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> queryString = request.getQueryString();
-
-        if (queryString.containsKey("account") && queryString.containsKey("password")) {
-            String account = queryString.get("account");
-            String password = queryString.get("password");
+        if (
+                queryString.containsKey("account") &&
+                queryString.containsKey("password") &&
+                queryString.containsKey("email")
+        ) {
             try {
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .filter(it -> it.checkPassword(password))
-                        .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
-
-                log.debug("user: {}", user);
+                register(queryString.get("account"), queryString.get("password"), queryString.get("email"));
                 response.sendRedirect("/index.html");
             } catch (IllegalArgumentException e) {
-                response.sendRedirect("/401.html");
+                response.sendRedirect("/400.html");
             }
         } else {
             response.sendRedirect("/404.html");
         }
+    }
+
+    private void register(String account, String password, String email) {
+        InMemoryUserRepository.findByAccount(account).ifPresent(user -> {
+            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+        });
+
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
     }
 }

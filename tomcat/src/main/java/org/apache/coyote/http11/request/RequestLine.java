@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
 
@@ -19,6 +20,10 @@ public class RequestLine {
         return new RequestLine(HttpMethod.valueOf(tokens[0]), new RequestURI(tokens[1]), tokens[2]);
     }
 
+    public HttpMethod getMethod() {
+        return method;
+    }
+
     public Map<String, String> getQueryString() {
         return requestUri.getQueryString();
     }
@@ -29,5 +34,10 @@ public class RequestLine {
 
     public String getPath() {
         return requestUri.getPath();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", method, requestUri.getURI(), httpVersion);
     }
 }

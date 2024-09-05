@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
@@ -31,5 +32,13 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public boolean isSameMethod(HttpMethod method) {
+        return requestLine.getMethod().equals(method);
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 }

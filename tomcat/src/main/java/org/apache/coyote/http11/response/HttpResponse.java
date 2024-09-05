@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,6 +6,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 

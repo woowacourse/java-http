@@ -37,17 +37,6 @@ public class HttpResponse {
         this.httpResponseHeader.add(key, value);
     }
 
-    public String getResourceBody(String resourceName) throws IOException {
-        if (!resourceName.endsWith(".html") && resourceName.lastIndexOf(".") == -1) {
-            resourceName += ".html";
-        }
-
-        URL resource = getClass().getClassLoader().getResource("static" + resourceName);
-        Path path = new File(resource.getPath()).toPath();
-        byte[] bytes = Files.readAllBytes(path);
-        return new String(bytes);
-    }
-
     public void setContentType(HttpRequest httpRequest) {
         if (httpRequest.matchesFileExtension(".css")) {
             this.httpResponseHeader.add("Content-Type", "text/css");
@@ -60,7 +49,26 @@ public class HttpResponse {
         this.httpResponseHeader.add("Content-Type", "text/html;charset=utf-8");
     }
 
-    public String toHttpResponse(String responseBody) {
+    public void setHttpResponseBody(String resourceName) throws IOException {
+        if (resourceName.equals("Hello world!")) {
+            this.httpResponseBody = resourceName;
+            return;
+        }
+        this.httpResponseBody = getResponseBody(resourceName);
+    }
+
+    private String getResponseBody(String resourceName) throws IOException {
+        if (!resourceName.endsWith(".html") && resourceName.lastIndexOf(".") == -1) {
+            resourceName += ".html";
+        }
+
+        URL resource = getClass().getClassLoader().getResource("static" + resourceName);
+        Path path = new File(resource.getPath()).toPath();
+        byte[] bytes = Files.readAllBytes(path);
+        return new String(bytes);
+    }
+
+    public String toHttpResponse() {
         StringBuilder httpResponse = new StringBuilder();
 
         String responseStatusLine = String.format("%s %d %s ", this.httpVersion, this.httpStatusCode, this.httpStatusMessage);
@@ -68,11 +76,11 @@ public class HttpResponse {
 
         appendHeader(httpResponse, "Set-Cookie", this.httpResponseHeader.get("Set-Cookie"));
         appendHeader(httpResponse, "Content-Type", this.httpResponseHeader.get("Content-Type"));
-        appendHeader(httpResponse, "Content-Length", String.valueOf(responseBody.getBytes().length));
+        appendHeader(httpResponse, "Content-Length", String.valueOf(this.httpResponseBody.getBytes().length));
         appendHeader(httpResponse, "Location", this.httpResponseHeader.get("Location"));
 
         httpResponse.append(CRLF);
-        httpResponse.append(responseBody);
+        httpResponse.append(this.httpResponseBody);
         return httpResponse.toString();
     }
 

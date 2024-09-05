@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -35,20 +37,44 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String request = br.readLine();
-            StringTokenizer st = new StringTokenizer(request);
-
-            String requestMethodType = st.nextToken();
+            Map<String, String> httpRequestHeaders = new HashMap<>();
+            String requestTitle = br.readLine();
+            if (requestTitle == null) {
+                return;
+            }
+            log.info(requestTitle);
+            StringTokenizer st = new StringTokenizer(requestTitle);
+            MethodType requestMethodType = MethodType.toMethodType(st.nextToken());
             String requestPath = st.nextToken();
             if (requestPath.equals("/")) {
                 requestPath = "/index.html";
             }
+
+            // header
+            String header = br.readLine();
+            while (!"".equals(header)) {
+                String[] splitHeader = header.split(": ");
+                httpRequestHeaders.put(splitHeader[0], splitHeader[1]);
+                header = br.readLine();
+            }
+
+            // body
+            Map<String, String> requestBody = new HashMap<>();
+            if (requestMethodType == MethodType.POST) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+                String[] requestBodyParams = new String(buffer).split("&");
+                for (String requestBodyParam : requestBodyParams) {
+                    String[] paramEntry = requestBodyParam.split("=");
+                    requestBody.put(paramEntry[0], paramEntry[1]);
+                }
+            }
+
             RequestPathType requestPathType = RequestPathType.reqeustPathToRequestPathType(requestPath);
 
-            log.debug("request: " + request);
-            log.debug("requestPathType: " + requestPathType.toString());
             if (requestPathType.isAPI()) {
-                apiProcessor.process(connection, requestPath);
+                apiProcessor.process(connection, requestPath, requestMethodType, requestBody);
             }
             if (requestPathType.isResource()) {
                 resourceProcessor.process(connection, requestPath);

@@ -20,4 +20,19 @@ public class PageProcessor {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
+
+    public void processWithHttpStatus(OutputStream outputStream, String resourceName, HttpStatus httpStatus)
+            throws IOException {
+        String contentType = "text/html";
+        String responseBody = ResourceFileLoader.loadFileToString("static/" + resourceName + ".html");
+        final var response = String.join("\r\n",
+                "HTTP/1.1 " + httpStatus.getHeaderForm(),
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
 }

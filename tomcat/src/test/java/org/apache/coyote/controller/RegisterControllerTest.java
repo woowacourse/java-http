@@ -43,7 +43,7 @@ class RegisterControllerTest {
                 queryKey3 + "=" + queryValue3
         );
 
-        String requestLine = String.join(" ", "GET", path, "HTTP/1.1");
+        String requestLine = String.join(" ", "POST", path, "HTTP/1.1");
 
         String httpRequest = String.join("\r\n",
                 requestLine,

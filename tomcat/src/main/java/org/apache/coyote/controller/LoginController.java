@@ -4,6 +4,10 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Manager;
+import org.apache.coyote.Session;
+import org.apache.coyote.SessionManager;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -23,7 +27,6 @@ public class LoginController implements Controller {
 
     @Override
     public HttpResponse run(HttpRequest request) {
-
         if (request.getBody().isEmpty()) {
             return redirectLoginPage();
         }
@@ -33,13 +36,22 @@ public class LoginController implements Controller {
         String account = parsedBody.get(ACCOUNT_KEY);
         String password = parsedBody.get(PASSWORD_KEY);
 
-        try {
-            login(account, password);
-        } catch (IllegalArgumentException e) {
-            return redirectUnauthorizedPage();
-        }
+        User user = userRepository.findByAccount(account)
+                .orElseThrow();
 
-        return redirectDefaultPage();
+        if (user.checkPassword(password)) {
+            HttpHeader header = new HttpHeader();
+            Manager manager = SessionManager.getInstance();
+
+            if (!isSessionExists(request)) {
+                Session session = Session.createRandomSession();
+                manager.add(session);
+                session.setAttribute("user", user.getAccount());
+                header.setCookie(HttpCookie.ofJSessionId(session.getId()));
+            }
+            return redirectDefaultPage(header);
+        }
+        return redirectUnauthorizedPage();
     }
 
     private HttpResponse redirectLoginPage() {
@@ -59,29 +71,23 @@ public class LoginController implements Controller {
             String value = keyValue[1];
             result.put(key, value);
         }
-
         return result;
     }
 
-    private void login(String account, String password) {
-        User user = userRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    private boolean isSessionExists(HttpRequest request) {
+        HttpHeader requestHeaders = request.getHeaders();
+        return requestHeaders.existsSession();
+    }
 
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("비밀번호 오류가 발생했습니다.");
-        }
+    private HttpResponse redirectDefaultPage(HttpHeader header) {
+        header.setLocation("/index.html");
+        header.setContentType(MimeType.HTML);
+        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private HttpResponse redirectUnauthorizedPage() {
         HttpHeader header = new HttpHeader();
         header.setLocation("/401.html");
-        header.setContentType(MimeType.HTML);
-        return new HttpResponse(HttpStatusCode.FOUND, header);
-    }
-
-    private HttpResponse redirectDefaultPage() {
-        HttpHeader header = new HttpHeader();
-        header.setLocation("/index.html");
         header.setContentType(MimeType.HTML);
         return new HttpResponse(HttpStatusCode.FOUND, header);
     }

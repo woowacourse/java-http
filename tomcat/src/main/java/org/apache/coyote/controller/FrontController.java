@@ -48,16 +48,18 @@ public class FrontController {
         return controller.run(request);
     }
 
-    private static void log(HttpRequest request) {
+    private void log(HttpRequest request) {
         log.info("method = {}, path = {}, url = {}", request.getMethod(), request.getPath(), request.getUrl());
         for (String key : request.getQueryMap().keySet()) {
             log.info("key = {}, value = {}", key, request.getQueryMap().get(key));
+        }
+        for (String key : request.getHeaders().getCookies().getCookies().keySet()) {
+            log.info("COOKIE: key = {}, value = {}", key, request.getHeaders().getCookies().getCookies().get(key));
         }
         if (request.getBody().isPresent()) {
             log.info(request.getBody().get());
         }
     }
-
 
     public Controller getController(String path) {
         Controller controller = controllers.get(path);

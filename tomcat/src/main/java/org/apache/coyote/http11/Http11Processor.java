@@ -33,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             FrontController frontController = new FrontController();
             HttpResponse httpResponse = frontController.dispatch(httpRequest);
+
             outputStream.write(httpResponse.toByte());
             outputStream.flush();
 

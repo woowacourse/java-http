@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
@@ -29,89 +30,64 @@ class LoginControllerTest {
     @Test
     void login() throws IOException {
         // given
-        String path = "/login";
-        String queryKey1 = "account";
-        String queryValue1 = "gugu";
-        String queryKey2 = "password";
-        String queryValue2 = "password";
-
-        String queryString = String.join("&",
-                queryKey1 + "=" + queryValue1,
-                queryKey2 + "=" + queryValue2
-        );
-
-        String requestLine = String.join(" ",
-                "GET",
-                path + "?" + queryString,
-                "HTTP/1.1"
-        );
-
-        String httpRequest = String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "");
-
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
-        HttpRequest request = new HttpRequest(inputStream);
+        String body = buildRequestBody(Map.of("account", "gugu", "password", "password"));
+        HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
         HttpResponse httpResponse = loginController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
-        String expectedLocation = "Location: /index.html";
+        String expectedLocationHeader = "Location: " + "/index.html";
         String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
 
         assertAll(
                 () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedLocation.getBytes()),
+                () -> assertThat(httpResponse.toByte()).contains(expectedLocationHeader.getBytes()),
                 () -> assertThat(httpResponse.toByte()).contains(expectedContentType.getBytes())
         );
     }
 
-    @DisplayName("로그인에 실패할 경우, 401패이지로 리다이렉트한다.")
-    @Test
-    void failLogin() throws IOException {
-        // given
-        String path = "/login";
-        String queryKey1 = "account";
-        String queryValue1 = "gugu";
-        String queryKey2 = "password";
-        String queryValue2 = "invalidPassword";
+    private String buildRequestBody(Map<String, String> parameters) {
+        return parameters.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .reduce((param1, param2) -> param1 + "&" + param2)
+                .orElse("");
+    }
 
-        String queryString = String.join("&",
-                queryKey1 + "=" + queryValue1,
-                queryKey2 + "=" + queryValue2
-        );
-
-        String requestLine = String.join(" ",
-                "GET",
-                path + "?" + queryString,
-                "HTTP/1.1"
-        );
+    private HttpRequest buildHttpRequest(String method, String path, String body) throws IOException {
+        String requestLine = String.join(" ", method, path, "HTTP/1.1");
 
         String httpRequest = String.join("\r\n",
                 requestLine,
                 "Host: localhost:8080",
+                "Content-Length: " + body.length(),
                 "Connection: keep-alive",
                 "",
-                "");
+                body);
 
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
-        HttpRequest request = new HttpRequest(inputStream);
+        return new HttpRequest(inputStream);
+    }
+
+    @DisplayName("로그인에 실패할 경우, 401페이지로 리다이렉트한다.")
+    @Test
+    void failLogin() throws IOException {
+        // given
+        String body = buildRequestBody(Map.of("account", "gugu", "password", "invalidPassword"));
+        HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
         HttpResponse httpResponse = loginController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
-        String expectedLocation = "Location: /index.html";
+        String expectedLocationHeader = "Location: " + "/401.html";
         String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
 
         assertAll(
                 () -> assertThat(httpResponse.toByte()).contains(expectedRequestLine.getBytes()),
-                () -> assertThat(httpResponse.toByte()).contains(expectedLocation.getBytes()),
+                () -> assertThat(httpResponse.toByte()).contains(expectedLocationHeader.getBytes()),
                 () -> assertThat(httpResponse.toByte()).contains(expectedContentType.getBytes())
         );
     }

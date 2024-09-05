@@ -9,6 +9,8 @@ public class HttpHeader {
     private final String LOCATION = "Location";
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_LENGTH = "Content-Length";
+    private final String SET_COOKIE = "Set-Cookie";
+    private final String COOKIE = "Cookie";
 
     private final Map<String, String> header;
 
@@ -46,6 +48,26 @@ public class HttpHeader {
 
     public void setContentLength(String contentLength) {
         addHeader(CONTENT_LENGTH, contentLength);
+    }
+
+    public void setCookie(String cookie) {
+        addHeader(SET_COOKIE, cookie);
+    }
+
+    public boolean existsSession() {
+        if (!header.containsKey(COOKIE)) {
+            return false;
+        }
+
+        HttpCookie cookies = getCookies();
+        if (cookies.containsJSessionId()) {
+            return true;
+        }
+        return false;
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(header.get(COOKIE));
     }
 
     @Override

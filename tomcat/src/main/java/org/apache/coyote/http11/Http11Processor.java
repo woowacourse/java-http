@@ -125,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
         if (path.startsWith("/login")) {
             return login(queryString);
         }
-        throw new RuntimeException("정의되지 않은 URL 입니다.");
+        throw new RuntimeException("'" + url + "'은 정의되지 않은 URL 입니다.");
     }
 
     private String login(String[] queryString) {
@@ -145,14 +145,14 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponseBodyByFileName(String fileName) {
         URL resource = getClass().getClassLoader().getResource(RESOURCE_PATH_PREFIX + fileName);
         if (resource == null) {
-            throw new RuntimeException("페이지를 찾을 수 없습니다.");
+            throw new RuntimeException("'" + fileName + "'이란 페이지를 찾을 수 없습니다.");
         }
         Path path = new File(resource.getPath()).toPath();
 
         try {
             return Files.readString(path);
         } catch (IOException | UncheckedServletException e) {
-            throw new RuntimeException("파일을 String으로 변환하는데 오류가 발생했습니다.");
+            throw new RuntimeException("'" + fileName + "파일을 문자열로 변환하는데 오류가 발생했습니다.");
         }
     }
 }

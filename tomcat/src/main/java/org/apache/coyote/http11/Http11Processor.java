@@ -24,7 +24,7 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_PAGE = "Hello world!";
+    private static final String DEFAULT_PAGE_CONTENT = "Hello world!";
 
     private final Socket connection;
 
@@ -41,41 +41,42 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            Map<String, String> headerSentences = RequestReader.readHeaders(reader);
-            checkHttpMethodAndLoad(reader, headerSentences);
+            Map<String, String> headers = RequestReader.readHeaders(reader);
+            handleRequestMethod(reader, headers);
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
-    private void checkHttpMethodAndLoad(BufferedReader reader, Map<String, String> sentences) {
-        String httpMethod = sentences.get("HttpMethod");
-        if (httpMethod.equals("GET")) {
-            loadGetHttpMethod(sentences);
-        }
-        if (httpMethod.equals("POST")) {
-            loadPostHttpMethod(reader, sentences);
+    private void handleRequestMethod(BufferedReader reader, Map<String, String> headers) {
+        String httpMethod = headers.get("HttpMethod");
+        if ("GET".equalsIgnoreCase(httpMethod)) {
+            handleGetRequest(headers);
+        } else if ("POST".equalsIgnoreCase(httpMethod)) {
+            handlePostRequest(reader, headers);
+        } else {
+            log.warn("지원되지 않는 HTTP 메서드: {}", httpMethod);
         }
     }
 
-    private void loadGetHttpMethod(Map<String, String> sentences) {
+    private void handleGetRequest(Map<String, String> headers) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = getResponseContentForUrl(sentences).responseToString();
+            String response = generateResponseForUrl(headers).responseToString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            log.error("GET 요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
-    private ResponseContent getResponseContentForUrl(Map<String, String> sentences) {
-        String url = sentences.get("Url");
-        String accept = sentences.get("Accept");
-        if (url.equals("/")) {
-            return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE);
+    private ResponseContent generateResponseForUrl(Map<String, String> headers) {
+        String url = headers.get("Url");
+        String accept = headers.get("Accept");
+        if ("/".equals(url)) {
+            return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
-        if (sentences.get("IsQueryParam").equals("true")) {
-            return getResponseBodyUsedQuery(sentences);
+        if ("true".equals(headers.get("IsQueryParam"))) {
+            return generateResponseForQueryParam(headers);
         }
 
         Optional<ResponsePage> responsePage = ResponsePage.fromUrl(url);
@@ -87,69 +88,67 @@ public class Http11Processor implements Runnable, Processor {
         return new ResponseContent(HttpStatus.OK, accept, FileReader.loadFileContent(url));
     }
 
-    private ResponseContent getResponseBodyUsedQuery(Map<String, String> sentences) {
-        String url = sentences.get("Url");
-        if (url.equals("/login")) {
-            return login(sentences);
+    private ResponseContent generateResponseForQueryParam(Map<String, String> headers) {
+        String url = headers.get("Url");
+        if ("/login".equals(url)) {
+            return handleLoginRequest(headers);
         }
-        throw new RuntimeException("'" + url + "'은 정의되지 않은 URL 입니다.");
+        throw new RuntimeException("'" + url + "'는 정의되지 않은 URL입니다.");
     }
 
-
-    private ResponseContent login(Map<String, String> queryString) {
-        String accept = queryString.get("Accept");
-        if (Integer.parseInt(queryString.get("QueryParamSize")) < 2) {
+    private ResponseContent handleLoginRequest(Map<String, String> queryParams) {
+        String accept = queryParams.get("Accept");
+        if (Integer.parseInt(queryParams.get("QueryParamSize")) < 2) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
 
-        String accountParam = queryString.get("account");
-        String passwordParam = queryString.get("password");
-        if (accountParam == null || passwordParam == null) {
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        if (account == null || password == null) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
-        if (checkAuth(accountParam, passwordParam)) {
+        if (authenticateUser(account, password)) {
             return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent("/index.html"));
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent("/401.html"));
     }
 
-    private boolean checkAuth(String account, String password) {
+    private boolean authenticateUser(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
-            String userToString = "user : " + user.get();
-            log.info(userToString);
+            log.info("인증된 사용자: {}", user.get());
             return true;
         }
         return false;
     }
 
-    private void loadPostHttpMethod(BufferedReader reader, Map<String, String> sentences) {
-        int contentLength = Integer.parseInt(sentences.get("Content-Length"));
-        Map<String, String> body = RequestReader.readBody(reader, contentLength);
+    private void handlePostRequest(BufferedReader reader, Map<String, String> headers) {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        Map<String, String> bodyParams = RequestReader.readBody(reader, contentLength);
 
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = getResponseContentForUrl(sentences, body).responseToString();
+            String response = generateResponseForUrl(headers, bodyParams).responseToString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            log.error("POST 요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
-    private static ResponseContent getResponseContentForUrl(Map<String, String> sentences, Map<String, String> body) {
-        String url = sentences.get("Url");
-        String accept = sentences.get("Accept");
-        if (url.equals("/register")) {
-            return signUp(body, accept);
+    private static ResponseContent generateResponseForUrl(Map<String, String> headers, Map<String, String> bodyParams) {
+        String url = headers.get("Url");
+        String accept = headers.get("Accept");
+        if ("/register".equals(url)) {
+            return handleRegistration(bodyParams, accept);
         }
         return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/404.html"));
     }
 
-    private static ResponseContent signUp(Map<String, String> body, String accept) {
-        if (InMemoryUserRepository.findByAccount(body.get("account")).isPresent()) {
+    private static ResponseContent handleRegistration(Map<String, String> bodyParams, String accept) {
+        if (InMemoryUserRepository.findByAccount(bodyParams.get("account")).isPresent()) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent("/400.html"));
         }
-        InMemoryUserRepository.save(new User(body.get("account"), body.get("email"), body.get("password")));
+        InMemoryUserRepository.save(new User(bodyParams.get("account"), bodyParams.get("email"), bodyParams.get("password")));
         return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent("/index.html"));
     }
 }

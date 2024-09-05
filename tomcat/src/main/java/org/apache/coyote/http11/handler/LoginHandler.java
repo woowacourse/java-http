@@ -1,18 +1,12 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.QueryParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.Optional;
 
 public class LoginHandler extends AbstractHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
@@ -25,20 +19,27 @@ public class LoginHandler extends AbstractHandler {
     @Override
     protected String forward(HttpRequest httpRequest) {
         QueryParameter queryParameter = new QueryParameter(httpRequest.getUri().getQuery());
-        checkUser(queryParameter);
+        if (queryParameter.isEmpty()) {
+            return "login.html";
+        }
 
-        return "static/login.html";
+        return authenticate(queryParameter);
     }
 
-    private void checkUser(QueryParameter queryParameter) {
-        String password = queryParameter.get("password").orElse("");
-        Optional<User> user = queryParameter.get("account").flatMap(InMemoryUserRepository::findByAccount);
-
-        if (user.isPresent()) {
-            boolean isSame = user.get().checkPassword(password);
-            if (isSame) {
-                log.info("{}", user.get());
-            }
+    private String authenticate(QueryParameter queryParameter) {
+        if (isLoggedIn(queryParameter)) {
+            return "redirect:index.html";
         }
+
+        return "redirect:401.html";
+    }
+
+    private boolean isLoggedIn(QueryParameter queryParameter) {
+        String password = queryParameter.get("password").orElse("");
+
+        return queryParameter.get("account")
+                .flatMap(InMemoryUserRepository::findByAccount)
+                .map(it -> it.checkPassword(password))
+                .orElse(false);
     }
 }

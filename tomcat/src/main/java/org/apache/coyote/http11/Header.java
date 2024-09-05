@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,5 +42,9 @@ public class Header {
         Objects.requireNonNull(key);
 
         return Optional.ofNullable(header.get(key));
+    }
+
+    public Map<String, String> getHeader() {
+        return Collections.unmodifiableMap(header);
     }
 }

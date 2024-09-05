@@ -1,17 +1,36 @@
 package org.apache.coyote.http11;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
-public record HttpResponse(byte[] responseBody, String contentType) {
+public record HttpResponse(
+        HttpStatus httpStatus,
+        Header header,
+        byte[] responseBody
+) {
+
+    private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
 
     public byte[] serialize() {
-        String message = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                new String(responseBody, StandardCharsets.UTF_8));
-
+        String message = String.join("\r\n", startLine(), getHeaders(), getBody());
         return message.getBytes();
+    }
+
+    private String startLine() {
+        return "HTTP/1.1 " + httpStatus.getDescription() + " ";
+    }
+
+    private CharSequence getHeaders() {
+        StringBuilder stringBuilder = new StringBuilder();
+        Map<String, String> headerMap = header.getHeader();
+        headerMap.forEach((key, value) -> stringBuilder.append(String.format(RESPONSE_HEADER_FORMAT, key, value)));
+        String format = String.format(RESPONSE_HEADER_FORMAT, "Content-Length", responseBody.length);
+        stringBuilder.append(format);
+
+        return stringBuilder;
+    }
+
+    private String getBody() {
+        return new String(responseBody, StandardCharsets.UTF_8);
     }
 }

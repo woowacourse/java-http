@@ -1,11 +1,15 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractHandler {
 
@@ -20,10 +24,24 @@ public abstract class AbstractHandler {
 
         String result = forward(httpRequest);
 
-        String resourcePath = getClass().getClassLoader().getResource(result).getPath();
-        String contentType = determineContentType(resourcePath, acceptHeader);
+        List<String> headerTokens = new ArrayList<>();
+        boolean isRedirect = false;
+        if (result.startsWith("redirect:")) {
+            result = result.split(":")[1];
+            headerTokens.add("Location:" + result);
+            isRedirect = true;
+        }
 
-        return new HttpResponse(readStaticResource(resourcePath), contentType);
+        String resourcePath = getClass().getClassLoader().getResource("static/" + result).getPath();
+        String contentType = determineContentType(resourcePath, acceptHeader);
+        headerTokens.add("Content-Type: " + contentType);
+        Header header = new Header(headerTokens);
+
+        if (isRedirect) {
+            return new HttpResponse(HttpStatus.FOUND, header, new byte[]{});
+        }
+
+        return new HttpResponse(HttpStatus.OK, header, readStaticResource(resourcePath));
     }
 
     private String determineContentType(String resourcePath, String acceptHeader) {

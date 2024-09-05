@@ -17,8 +17,6 @@ public class StaticResourceHandler extends AbstractHandler {
     @Override
     public String forward(HttpRequest httpRequest) {
         URI uri = httpRequest.getUri();
-        String path = uri.getPath();
-
-        return "static/" + path;
+        return uri.getPath();
     }
 }

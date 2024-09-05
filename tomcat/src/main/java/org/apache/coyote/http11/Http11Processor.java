@@ -5,8 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Arrays;
 import org.apache.coyote.Processor;
+import org.apache.coyote.RequestGenerator;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
 import org.apache.coyote.handler.Handler;
@@ -37,10 +37,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var requestReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var request = parseRequest(requestReader);
-            log.info("request: {}", request);
+            final var request = RequestGenerator.accept(requestReader);
             final var response = getResponse(request);
-            log.info("response: {}", response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -56,26 +54,5 @@ public class Http11Processor implements Runnable, Processor {
         }
         // todo: GET 메서드가 아닌 경우 405 Method Not Allowed 응답을 반환
         return StaticResourceHandler.getInstance().handle(request);
-    }
-
-    private Request parseRequest(BufferedReader reader) throws IOException {
-        String startLine = reader.readLine();
-        String[] token = startLine.split(" ");
-        String[] headers = reader.lines().takeWhile(line -> !line.isEmpty()).toArray(String[]::new);
-        Request request = new Request(token[0], token[1], token[2], headers, null);
-        if ("POST".equals(token[0])) {
-            parseFormParameter(reader, request);
-        }
-        return request;
-    }
-
-    private void parseFormParameter(BufferedReader reader, Request request) throws IOException {
-        String s = request.getHeaders().getOrDefault("Content-Length", "0");
-        int contentLength = Integer.parseInt(s);
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        Arrays.stream(requestBody.split("&")).map(param -> param.split("="))
-                .forEach(entry -> request.addParameter(entry[0], entry[1]));
     }
 }

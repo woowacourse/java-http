@@ -15,6 +15,7 @@ public class Http11RequestLine {
     private static final int REQUEST_LINE_LENGTH = 3;
     private static final int VERSION_OF_PROTOCOL_LENGTH = 2;
     private static final String VERSION_OF_PROTOCOL_DELIMITER = "/";
+    private static final String QUERY_STRING_DELIMITER = "?";
 
     private final Map<String, String> line;
 
@@ -23,7 +24,7 @@ public class Http11RequestLine {
         validate(line);
         this.line = new HashMap<>();
         this.line.put("Method", line.split(" ")[0]);
-        this.line.put("Path", line.split(" ")[1]);
+        this.line.put("URI", line.split(" ")[1]);
         this.line.put("Protocol", line.split(" ")[2]);
     }
 
@@ -59,7 +60,35 @@ public class Http11RequestLine {
         return line.get("Method");
     }
 
+    public String getURI() {
+        return line.get("URI");
+    }
+
     public String getPath() {
-        return line.get("Path");
+        String uri = getURI();
+        if (existsQueryString()) {
+            int index = uri.indexOf("?");
+            return uri.substring(0, index);
+        }
+        return uri;
+    }
+
+    public boolean existsQueryString() {
+        return getURI().contains("?");
+    }
+
+    public Map<String, String> getQueryParam() {
+        if (!existsQueryString()) {
+            throw new UnsupportedOperationException();
+        }
+        Map<String, String> queryParam = new HashMap<>();
+        int index = getURI().indexOf("?");
+        String queryString = getURI().substring(index + 1);
+        for (String query : queryString.split("&")) {
+            String key = query.split("=")[0];
+            String value = query.split("=")[1];
+            queryParam.put(key, value);
+        }
+        return queryParam;
     }
 }

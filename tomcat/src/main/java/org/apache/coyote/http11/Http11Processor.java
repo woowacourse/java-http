@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.handler.ResourceRequestHandler;
@@ -28,8 +32,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private List<RequestHandler> findImplementations() {
         return List.of(
-                new ResourceRequestHandler(),
-                new RootRequestHandler()
+                new RootRequestHandler(),
+                new ResourceRequestHandler()
         );
     }
 
@@ -58,7 +62,11 @@ public class Http11Processor implements Runnable, Processor {
                     break;
                 }
             }
-
+            if (request.existsQueryParam()) {
+                Map<String, String> queryParam = request.getQueryParam();
+                Optional<User> user = InMemoryUserRepository.findByAccount(queryParam.get("account"));
+                log.info(user.get().toString());
+            }
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType,

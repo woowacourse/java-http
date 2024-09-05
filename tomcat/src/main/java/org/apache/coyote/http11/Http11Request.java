@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.HttpRequest;
 
 public class Http11Request implements HttpRequest {
@@ -36,11 +37,26 @@ public class Http11Request implements HttpRequest {
 
     @Override
     public String getRequestURI() {
+        return requestLine.getURI();
+    }
+
+    @Override
+    public String getPath() {
         return requestLine.getPath();
     }
 
     @Override
     public String getHeaderValue(String header) {
         return headers.getValue(header);
+    }
+
+    @Override
+    public boolean existsQueryParam() {
+        return requestLine.existsQueryString();
+    }
+
+    @Override
+    public Map<String, String> getQueryParam() {
+        return requestLine.getQueryParam();
     }
 }

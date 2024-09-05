@@ -6,7 +6,7 @@ public class Response {
 
     private final ResponseHeaders headers;
 
-    private final ResponseBody body; // todo
+    private final ResponseBody body;
 
     public Response(ResponseLine responseLine, ResponseHeaders headers, ResponseBody body) {
         this.responseLine = responseLine;

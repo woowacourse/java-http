@@ -33,11 +33,6 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String getVersionOfProtocol() {
-        return requestLine.getVersionOfProtocol();
-    }
-
-    @Override
     public String getRequestURI() {
         return requestLine.getURI();
     }
@@ -48,12 +43,17 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String getHeaderValue(String header) {
+    public boolean isNotExistsCookie(String key) {
+        return !headers.existsCookie(key);
+    }
+
+    @Override
+    public String getHeader(String header) {
         return headers.getValue(header);
     }
 
     @Override
-    public boolean existsQueryParam() {
+    public boolean isExistsQueryString() {
         return requestLine.existsQueryString();
     }
 
@@ -64,7 +64,7 @@ public class Http11Request implements HttpRequest {
 
 
     @Override
-    public boolean existsBody() {
+    public boolean isExistsBody() {
         return body.exists();
     }
 

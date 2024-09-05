@@ -17,7 +17,7 @@ public class SignupRequestHandler implements RequestHandler {
     @Override
     public boolean canHandling(HttpRequest httpRequest) throws IOException {
         return httpRequest.getPath().equals("/register")
-                && httpRequest.existsBody()
+                && httpRequest.isExistsBody()
                 && Http11Method.POST.equals(httpRequest.getMethod());
     }
 

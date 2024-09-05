@@ -4,19 +4,19 @@ import java.util.Map;
 
 public interface HttpRequest {
 
-    String getVersionOfProtocol();
-
     String getRequestURI();
 
     String getMethod();
 
     String getPath();
 
-    String getHeaderValue(String header);
+    boolean isNotExistsCookie(String key);
 
-    boolean existsQueryParam();
+    String getHeader(String header);
 
-    boolean existsBody();
+    boolean isExistsQueryString();
+
+    boolean isExistsBody();
 
     Map<String, String> getQueryParam();
 

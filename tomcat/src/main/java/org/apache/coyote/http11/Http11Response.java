@@ -59,7 +59,6 @@ public class Http11Response implements HttpResponse {
             return this;
         }
 
-
         public Http11ResponseBuilder appendHeader(String key, String value) {
             this.headers.put(key, value);
             return this;

@@ -11,14 +11,26 @@ public class Http11RequestHeaders {
     private static final int HEADER_LENGTH = 2;
 
     private final Map<String, String> headers;
+    private final HttpCookie cookie;
 
 
     public Http11RequestHeaders(List<String> headers) {
         this.headers = new LinkedHashMap<>();
+        this.cookie = new HttpCookie();
         for (String header : headers) {
             validateHeader(header);
-            this.headers.put(header.split(HEADER_DELIMITER)[0], header.split(": ")[1]);
+            String key = header.split(HEADER_DELIMITER)[0];
+            String value = header.split(HEADER_DELIMITER)[1];
+            append(key, value);
         }
+    }
+
+    private void append(String key, String value) {
+        if ("Cookie".equals(key)) {
+            cookie.append(key, value);
+            return;
+        }
+        this.headers.put(key, value);
     }
 
     private void validateHeader(String header) {
@@ -29,5 +41,9 @@ public class Http11RequestHeaders {
 
     public String getValue(String key) {
         return headers.get(key);
+    }
+
+    public boolean existsCookie(String key) {
+        return cookie.isEmpty() && cookie.isExists(key);
     }
 }

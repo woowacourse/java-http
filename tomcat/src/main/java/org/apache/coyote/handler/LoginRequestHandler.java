@@ -5,12 +5,14 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
 import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,7 @@ public class LoginRequestHandler implements RequestHandler {
     @Override
     public boolean canHandling(HttpRequest httpRequest) throws IOException {
         return httpRequest.getPath().equals("/login")
-                && httpRequest.existsBody()
+                && httpRequest.isExistsBody()
                 && Http11Method.POST.equals(httpRequest.getMethod());
     }
 
@@ -35,7 +37,11 @@ public class LoginRequestHandler implements RequestHandler {
             redirectPath = "/index.html";
             log.info("로그인 성공 : " + user.get().getAccount());
         }
-        return Http11Response.builder()
+        Http11ResponseBuilder responseBuilder = Http11Response.builder();
+        if (httpRequest.isNotExistsCookie("JSESSIONID")) {
+            responseBuilder.appendHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+        }
+        return responseBuilder
                 .status(HttpStatus.FOUND)
                 .appendHeader("Location", redirectPath)
                 .build();

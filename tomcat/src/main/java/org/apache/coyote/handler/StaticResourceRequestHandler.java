@@ -28,9 +28,9 @@ public class StaticResourceRequestHandler implements RequestHandler {
     }
 
     private String getContentType(HttpRequest httpRequest) {
-        if (httpRequest.getHeaderValue("Accept") == null) {
+        if (httpRequest.getHeader("Accept") == null) {
             return "";
         }
-        return httpRequest.getHeaderValue("Accept").split(",")[0];
+        return httpRequest.getHeader("Accept").split(",")[0];
     }
 }

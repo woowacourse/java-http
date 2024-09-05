@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,31 +38,18 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            FileReader fileReader = new FileReader();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            String requestUriSource = br.readLine().split(" ")[1];
-            URI requestUri = new URI(requestUriSource);
-            String responseBody = "Hello world!";
-            if (!requestUri.toString().equals("/")) {
-                URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-                final Path path = Path.of(resource.toURI());
-                List<String> actual = Files.readAllLines(path);
-                StringBuilder sb = new StringBuilder();
-                for (String s : actual) {
-                    sb.append(s);
-                    sb.append(System.lineSeparator());
-                }
-
-                responseBody = sb.toString();
-            }
-
+            String responseBody = fileReader.readFile(httpRequest.getHttpRequestPath());
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
-
 
             outputStream.write(response.getBytes());
             outputStream.flush();

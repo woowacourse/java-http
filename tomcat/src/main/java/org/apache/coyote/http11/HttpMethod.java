@@ -1,5 +1,10 @@
 package org.apache.coyote.http11;
 
-public record HttpMethod(String value) {
-
+public enum HttpMethod{
+    GET,
+    POST,
+    PUT,
+    PATCH,
+    DELETE
+    ;
 }

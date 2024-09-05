@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,41 +26,61 @@ public class Controller {
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
 
     public HttpResponse service(HttpRequest request) {
-        if (request.pathStartsWith("/login")) {
+        if(request.isTargetBlank()) {
+            return getResponse(HttpStatusCode.OK, "text/html", BASIC_RESPONSE_BODY);
+        }
+        if(request.isTargetStatic()) {
+            return createStaticResponse(HttpStatusCode.OK, request.getPath(), request.getTargetExtension());
+        }
+        return createDynamicResponse(request);
+    }
+
+    private HttpResponse createDynamicResponse(HttpRequest request) {
+        if(request.getHttpMethod() == HttpMethod.GET && request.containsQueryParameter()) {
             return createLoginResponse(request);
         }
-        return createStaticResponse(request.getPath(), request.getTargetExtension());
+        return null;
     }
 
     public HttpResponse createLoginResponse(HttpRequest request) {
         Map<String, String> parameters = request.parseQueryString();
         Optional<User> nullableUser = InMemoryUserRepository.findByAccount(parameters.get("account"));
-        nullableUser.ifPresent(user -> logUserInfo(user, parameters.get("password")));
+        return nullableUser
+                .filter(user -> user.checkPassword(parameters.get("password")))
+                .map(user -> redirectToIndex())
+                .orElseGet(this::redirectTo401);
+
+    }
+
+    private HttpResponse redirectToIndex() {
         try {
-            Path path = Path.of(getClass().getClassLoader().getResource("static/login.html").toURI());
-            return createStaticResponse(path, "html");
+            Path path = Path.of(getClass().getClassLoader().getResource("static/index.html").toURI());
+            return createStaticResponse(HttpStatusCode.FOUND, path, "html");
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
         }
     }
 
-    private static void logUserInfo(User user, String password) {
-        if (user.checkPassword(password)) {
-            log.info("user: {}", user);
+    private HttpResponse redirectTo401() {
+        try {
+            Path path = Path.of(getClass().getClassLoader().getResource("static/401.html").toURI());
+            return createStaticResponse(HttpStatusCode.UNAUTHORIZED, path, "html");
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
         }
     }
 
-    public HttpResponse createStaticResponse(Path path, String targetExtension) {
+    public HttpResponse createStaticResponse(HttpStatusCode httpStatusCode, Path path, String targetExtension) {
         try {
             if (Files.exists(path)) {
                 String contentType = getContentType(targetExtension);
                 String responseBody = readFile(path);
-                return getResponse(responseBody, contentType);
+                return getResponse(httpStatusCode, contentType, responseBody);
             }
             throw new FileNotFoundException(path.toString());
         } catch (NullPointerException | IOException e) {
             log.error(e.getMessage());
-            return getResponse(BASIC_RESPONSE_BODY, "text/html");
+            return getResponse(HttpStatusCode.OK, "text/html", BASIC_RESPONSE_BODY);
         }
     }
 
@@ -80,9 +102,9 @@ public class Controller {
         return joiner.toString();
     }
 
-    private HttpResponse getResponse(String responseBody, String contentType) {
+    private HttpResponse getResponse(HttpStatusCode httpStatusCode, String contentType, String responseBody) {
         return new HttpResponse(String.join(DELIMITER,
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + httpStatusCode.getValue() + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

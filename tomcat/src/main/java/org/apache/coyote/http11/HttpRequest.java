@@ -11,7 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public record HttpRequest (HttpStartLine httpStartLine, HttpHeaders httpHeaders){
+public class HttpRequest {
+
+    private final HttpStartLine httpStartLine;
+    private final HttpHeaders httpHeaders;
+
+    private HttpRequest(HttpStartLine httpStartLine, HttpHeaders httpHeaders){
+        this.httpStartLine = httpStartLine;
+        this.httpHeaders = httpHeaders;
+    }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -26,12 +34,24 @@ public record HttpRequest (HttpStartLine httpStartLine, HttpHeaders httpHeaders)
         return new HttpRequest(startLine, httpHeaders);
     }
 
-    public boolean pathStartsWith(String path) {
-        return httpStartLine.targetStartsWith(path);
-    }
-
     public Map<String, String> parseQueryString() {
         return httpStartLine.parseQueryString();
+    }
+
+    public boolean isTargetStatic() {
+        return httpStartLine.isTargetStatic();
+    }
+
+    public boolean isTargetBlank() {
+        return httpStartLine.isTargetBlank();
+    }
+
+    public boolean containsQueryParameter() {
+        return httpStartLine.containsQueryParameter();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpStartLine.getHttpMethod();
     }
 
     public String getTargetExtension() {

@@ -15,14 +15,14 @@ public class RequestTarget {
     }
 
     public Map<String, String> parseQueryString() {
-        if(isQueryString()) {
+        if(containsQueryParameter()) {
             String query = SubstringGenerator.splitByFirst("?", value).getLast();
             return parseQueryParameters(query);
         }
         throw new IllegalArgumentException("invalid query string: " + value);
     }
 
-    private boolean isQueryString() {
+    public boolean containsQueryParameter() {
         return value.contains("?");
     }
 
@@ -43,15 +43,15 @@ public class RequestTarget {
         return "html";
     }
 
-    public boolean startsWith(String path) {
-        return value.startsWith(path);
-    }
-
     public URL getUrl() {
         String path = value;
-        if(path.contains("?")) {
-            path = SubstringGenerator.splitByFirst("?", value).getFirst();
+        if(!path.contains(".")) {
+            path = path + ".html";
         }
         return getClass().getClassLoader().getResource("static" + path);
+    }
+
+    public boolean isBlank() {
+        return value.isBlank();
     }
 }

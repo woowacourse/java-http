@@ -14,7 +14,7 @@ public class HttpStartLine {
 
     public HttpStartLine(String startLine) {
         String[] separatedStartLine = validateAndSplit(startLine);
-        this.httpMethod = new HttpMethod(separatedStartLine[0]);
+        this.httpMethod = HttpMethod.valueOf(separatedStartLine[0]);
         this.requestTarget = new RequestTarget(separatedStartLine[1]);
     }
 
@@ -31,19 +31,31 @@ public class HttpStartLine {
         throw exception;
     }
 
+    public boolean isTargetStatic() {
+        return httpMethod.equals(HttpMethod.GET) && requestTarget.getUrl() != null;
+    }
+
+    public boolean isTargetBlank() {
+        return requestTarget.isBlank();
+    }
+
     public Map<String, String> parseQueryString() {
         return requestTarget.parseQueryString();
+    }
+
+    public boolean containsQueryParameter() {
+        return requestTarget.containsQueryParameter();
     }
 
     public String getTargetExtension() {
         return requestTarget.getTargetExtension();
     }
 
-    public boolean targetStartsWith(String path) {
-        return requestTarget.startsWith(path);
-    }
-
     public URL getTargetUrl() {
         return requestTarget.getUrl();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
     }
 }

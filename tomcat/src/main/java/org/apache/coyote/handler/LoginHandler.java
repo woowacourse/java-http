@@ -10,7 +10,6 @@ import org.apache.coyote.common.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class LoginHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
@@ -43,5 +42,6 @@ public class LoginHandler implements Handler {
                 .filter(user -> user.checkPassword(password))
                 .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
         log.info("user: {}", findUser);
+        request.getSession().setAttribute("user", findUser);
     }
 }

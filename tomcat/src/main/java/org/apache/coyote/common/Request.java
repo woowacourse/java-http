@@ -3,8 +3,14 @@ package org.apache.coyote.common;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
 public class Request {
+
+    private static final SessionManager sessionManager = new SessionManager();
+
     private final String method;
     private final String uri;
     private final String protocol;
@@ -12,8 +18,9 @@ public class Request {
     private final Map<String, String> parameters;
     private final Cookie cookie;
     private final String body;
+    private final Session session;
 
-    public Request(String method, String uri, String protocol, String[] headers, Cookie cookie, String body) {
+    public Request(String method, String uri, String protocol, String[] headers, String body) {
         this.method = method;
         this.uri = parseUri(uri);
         this.protocol = protocol;
@@ -21,10 +28,7 @@ public class Request {
         this.cookie = parseCookie();
         this.body = body;
         this.parameters = parseParameters(uri);
-    }
-
-    public Request(String method, String uri, String protocol, String[] headers, String body) {
-        this(method, uri, protocol, headers, Cookie.empty(), body);
+        this.session = parseSession();
     }
 
     private String parseUri(String uri) {
@@ -63,6 +67,22 @@ public class Request {
                 .collect(HashMap::new, (map, entry) -> map.put(entry[0], entry[1]), HashMap::putAll);
     }
 
+    private Session parseSession() {
+        return cookie.get("JSESSIONID").map(id -> {
+            Session findSession = sessionManager.findSession(id);
+            if (findSession != null) {
+                return findSession;
+            }
+            Session session = new Session(id);
+            sessionManager.add(session);
+            return session;
+        }).orElseGet(() -> {
+            Session session = new Session(UUID.randomUUID().toString());
+            sessionManager.add(session);
+            return session;
+        });
+    }
+
     public void addParameter(String key, String value) {
         parameters.put(key, value);
     }
@@ -89,6 +109,10 @@ public class Request {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.apache.coyote.common;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class Cookie {
 
@@ -12,6 +13,10 @@ public class Cookie {
 
     public static Cookie empty() {
         return new Cookie(Map.of());
+    }
+
+    public Optional<String> get(String key) {
+        return Optional.ofNullable(cookies.get(key));
     }
 
     @Override

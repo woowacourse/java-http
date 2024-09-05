@@ -3,7 +3,6 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.Map;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -15,14 +14,14 @@ import org.apache.coyote.http11.HttpStatus;
 public class SignupRequestHandler implements RequestHandler {
 
     @Override
-    public boolean canHandling(HttpRequest httpRequest) throws IOException {
+    public boolean canHandling(HttpRequest httpRequest) {
         return httpRequest.getPath().equals("/register")
                 && httpRequest.isExistsBody()
                 && Http11Method.POST.equals(httpRequest.getMethod());
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+    public HttpResponse handle(HttpRequest httpRequest) {
         Map<String, String> param = httpRequest.getParsedBody();
         User newUser = new User(param.get("account"), param.get("password"), param.get("email"));
         validateExists(newUser);

@@ -2,7 +2,6 @@ package org.apache.coyote.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,14 +21,14 @@ public class LoginRequestHandler implements RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @Override
-    public boolean canHandling(HttpRequest httpRequest) throws IOException {
+    public boolean canHandling(HttpRequest httpRequest) {
         return httpRequest.getPath().equals("/login")
                 && httpRequest.isExistsBody()
                 && Http11Method.POST.equals(httpRequest.getMethod());
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
+    public HttpResponse handle(HttpRequest httpRequest) {
         Map<String, String> param = httpRequest.getParsedBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(param.get("account"));
         String redirectPath = "/401.html";

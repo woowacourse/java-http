@@ -73,6 +73,13 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             requestPath = requestUri;
+            if (requestUri.equals("/login") && headerFirstLine[0].equals("GET")) {
+                if (httpRequestHeaders.containsKey("Cookie") && httpRequestHeaders.get("Cookie").contains("JSESSIONID")) {
+                    requestPath = "/index.html";
+                    statusCode = 302;
+                    statusMessage = "Found";
+                }
+            }
             if (requestUri.equals("/login") && headerFirstLine[0].equals("POST")) {
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];

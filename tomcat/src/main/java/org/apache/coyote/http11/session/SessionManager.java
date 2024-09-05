@@ -10,7 +10,6 @@ public class SessionManager {
 
     public void add(final Session session) {
         SESSIONS.put(session.getId(), session);
-
     }
 
     public Optional<Session> findSession(final String id) {

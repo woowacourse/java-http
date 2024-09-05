@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.cookie;
 
 import util.BiValue;
 import util.StringUtil;
@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class Cookies {
     private static final String DELIMITER = "; ";
     private static final String COOKIE_DELIMITER = "=";
+    public static final String SESSION_ID = "JSESSIONID";
 
     private final Map<String, String> values;
 

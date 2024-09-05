@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.Path;
+import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.queryparam.QueryParams;
 import util.BiValue;

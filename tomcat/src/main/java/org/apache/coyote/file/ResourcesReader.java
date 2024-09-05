@@ -1,6 +1,6 @@
 package org.apache.coyote.file;
 
-import org.apache.coyote.http11.Path;
+import org.apache.coyote.http11.path.Path;
 
 import java.io.IOException;
 import java.io.InputStream;

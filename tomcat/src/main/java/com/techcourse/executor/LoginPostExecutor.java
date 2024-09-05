@@ -2,11 +2,11 @@ package com.techcourse.executor;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.Executor;
-import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.Path;
-import org.apache.coyote.http11.ResourceToResponseConverter;
+import org.apache.coyote.http11.*;
+import org.apache.coyote.http11.cookie.Cookies;
+import org.apache.coyote.http11.executor.Executor;
 import org.apache.coyote.http11.method.HttpMethod;
+import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
@@ -37,7 +37,7 @@ public class LoginPostExecutor implements Executor {
         final Session session = request.getSession();
         session.setAttribute("user", user);
         final HttpResponse response = movePageResponse();
-        response.addCookie("JSESSIONID=" + session.getId());
+        response.addCookie(Cookies.SESSION_ID, session.getId());
         return response;
     }
 

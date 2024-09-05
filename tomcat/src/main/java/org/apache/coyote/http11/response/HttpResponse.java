@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.header.ResponseHeader;
 
 public class HttpResponse {
     private final HttpStatusCode statusCode;
@@ -28,7 +29,7 @@ public class HttpResponse {
         return body;
     }
 
-    public void addCookie(final String cookie) {
-        headers.put("Set-Cookie", cookie);
+    public void addCookie(final String cookie, final String value) {
+        headers.put(ResponseHeader.SET_COOKIE, cookie + "=" + value);
     }
 }

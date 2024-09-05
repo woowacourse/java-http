@@ -19,6 +19,10 @@ public class Headers {
         this.values = values;
     }
 
+    public String get(final RequestHeader header) {
+        return get(header.getValue());
+    }
+
     public String get(final String name) {
         return values.getOrDefault(name, StringUtil.BLANK);
     }
@@ -27,6 +31,11 @@ public class Headers {
         final String[] arys = line.split(DELIMITER);
         values.put(arys[0], arys[1]);
     }
+
+    public void put(final ResponseHeader header, final String value) {
+        put(header.getValue(), value);
+    }
+
     public void put(final String name, final String value) {
         values.put(name, value);
     }
@@ -34,14 +43,15 @@ public class Headers {
     public List<String> formats() {
         return values.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + DELIMITER + entry.getValue()+" ")
+                .map(entry -> entry.getKey() + DELIMITER + entry.getValue() + " ")
                 .toList();
     }
 
     @Override
     public String toString() {
         return "Headers{\n" +
-                values.entrySet().stream()
+                values.entrySet()
+                        .stream()
                         .map(entry -> "  " + entry.getKey() + ": " + entry.getValue())
                         .collect(Collectors.joining(",\n")) +
                 "\n}";

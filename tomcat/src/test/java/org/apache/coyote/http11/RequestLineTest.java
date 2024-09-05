@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.method.HttpMethod;
+import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.request.RequestLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

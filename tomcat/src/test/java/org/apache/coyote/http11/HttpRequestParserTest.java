@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

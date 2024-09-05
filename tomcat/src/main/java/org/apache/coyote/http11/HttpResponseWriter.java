@@ -1,6 +1,7 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.header.Headers;
+import org.apache.coyote.http11.response.HttpResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +14,7 @@ public class HttpResponseWriter {
         writeHeaders(out, response.getHeaders());
         writeCSRF(out);
         writeBody(out, response.getBody());
+        out.flush();
     }
 
     private static void writeStatusLine(final OutputStream out, final HttpResponse response) throws IOException {

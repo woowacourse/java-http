@@ -1,9 +1,9 @@
 package com.techcourse.executor;
 
 import org.apache.coyote.file.ResourcesReader;
-import org.apache.coyote.http11.Executor;
+import org.apache.coyote.http11.executor.Executor;
 import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.Path;
+import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.ResourceToResponseConverter;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;

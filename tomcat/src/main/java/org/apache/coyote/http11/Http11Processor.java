@@ -53,20 +53,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final Map<String, String> httpRequestHeader = readHttpRequestHeader(bufferedReader);
 
-            final String requestUrl = getRequestUrl(httpRequestHeader);
-            if (requestUrl.contains("?")) {
-                final int index = requestUrl.indexOf("?");
-                String path = requestUrl.substring(0, index);
-                String queryString = requestUrl.substring(index + 1);
-                if (!path.contains(".")) {
-                    String new_path = path + "." + DEFAULT_CONTENT_TYPE;
-                    String requestUri = httpRequestHeader.get(URI_HEADER_KEY);
-                    requestUri = requestUri.replace(requestUrl, new_path);
-                    httpRequestHeader.put(URI_HEADER_KEY, requestUri);
-                }
-                printUserIfExist(queryString);
+            if (isRequestUrlQueryString(httpRequestHeader)) {
+                processQueryString(httpRequestHeader);
             }
-
             final String responseBody = getResponseBody(httpRequestHeader);
             final String mimeType = getMimeType(httpRequestHeader);
 
@@ -82,6 +71,25 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isRequestUrlQueryString(Map<String, String> httpRequestHeader) {
+        final String requestUrl = getRequestUrl(httpRequestHeader);
+        return requestUrl.contains("?");
+    }
+
+    private void processQueryString(Map<String, String> httpRequestHeader) {
+        final String requestUrl = getRequestUrl(httpRequestHeader);
+        final int index = requestUrl.indexOf("?");
+        String path = requestUrl.substring(0, index);
+        String queryString = requestUrl.substring(index + 1);
+        if (!path.contains(".")) {
+            String new_path = path + "." + DEFAULT_CONTENT_TYPE;
+            String requestUri = httpRequestHeader.get(URI_HEADER_KEY);
+            requestUri = requestUri.replace(requestUrl, new_path);
+            httpRequestHeader.put(URI_HEADER_KEY, requestUri);
+        }
+        printUserIfExist(queryString);
     }
 
     private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {

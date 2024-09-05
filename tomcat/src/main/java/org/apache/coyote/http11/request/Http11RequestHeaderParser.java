@@ -22,7 +22,7 @@ class Http11RequestHeaderParser {
         return Arrays.stream(rawHeaders.split(CRLF))
                 .filter(rawHeader -> !rawHeader.startsWith("Cookie"))
                 .map(rawHeader -> {
-                    String[] split = rawHeader.split(":");
+                    String[] split = rawHeader.split(": ");
                     String key = split[0].trim();
                     String value = split[1].trim();
                     return new Http11Header(key, value);

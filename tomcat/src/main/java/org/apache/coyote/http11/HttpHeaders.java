@@ -10,6 +10,10 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
+    public HttpHeaders() {
+        this.headers = new LinkedHashMap<>();
+    }
+
     public HttpHeaders(Map<String, String> headers) {
         this.headers = new LinkedHashMap<>(headers);
     }
@@ -20,5 +24,9 @@ public class HttpHeaders {
                         .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
                         .toArray(String[]::new)
         );
+    }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 }

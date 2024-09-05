@@ -2,19 +2,21 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.techcourse.application.UserService;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.FrontController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +39,8 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream()
+                InputStream inputStream = connection.getInputStream();
+                OutputStream outputStream = connection.getOutputStream()
         ) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -48,52 +50,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String responseBody;
-            String contentType;
+            HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            if ("/".equals(httpRequest.getPath())) {
-                responseBody = "Hello world!";
-                contentType = "text/html;charset=utf-8";
-            } else {
-                Map<String, String> queryString = httpRequest.getQueryString();
-                String resourcePath = "static" + httpRequest.getPath() + "." + httpRequest.getExtension();
-                URL resource = getClass().getClassLoader().getResource(resourcePath);
-                if (resource == null) {
-                    // 리소스가 없을 경우 404 처리
-                    responseBody = "404 Not Found";
-                    contentType = "text/plain;charset=utf-8";
-                } else {
-                    Path path = Paths.get(resource.getPath());
-                    responseBody = new String(Files.readAllBytes(path));
-                    contentType = createContentType(httpRequest.getExtension());
-                }
+            FrontController frontController = new FrontController();
+            frontController.handleRequest(httpRequest, httpResponse);
 
-                if (
-                        httpRequest.getPath().startsWith("/login") &&
-                        queryString.containsKey("account") &&
-                        queryString.containsKey("password")
-                ) {
-                    String account = queryString.get("account");
-                    String password = queryString.get("password");
-                    log.debug("account: {}, password: {}", account, password);
-                    User user = new UserService().login(account, password);
-                    log.debug("user: {}", user);
-                }
-            }
-
-            StatusLine statusLine = new StatusLine(HttpStatus.OK);
-            Map<String, String> headers = new LinkedHashMap<>();
-            headers.put(HttpHeaders.CONTENT_TYPE, contentType);
-            headers.put(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
-
-            HttpHeaders httpHeaders = new HttpHeaders(headers);
-
-            HttpResponse httpResponse = new HttpResponse(statusLine, httpHeaders, responseBody);
-
-            String response = httpResponse.buildHttpResponse();
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -109,17 +70,5 @@ public class Http11Processor implements Runnable, Processor {
                 .toList();
 
         return new HttpRequest(requestLine, headers);
-    }
-
-    private String createContentType(String fileExtension) {
-        String contentType;
-        if (fileExtension.endsWith("html")) {
-            contentType = "text/html;charset=utf-8";
-        } else if (fileExtension.endsWith("css")) {
-            contentType = "text/css;charset=utf-8";
-        } else {
-            contentType = "text/plain;charset=utf-8";
-        }
-        return contentType;
     }
 }

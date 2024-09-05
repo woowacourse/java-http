@@ -1,7 +1,6 @@
 package com.techcourse.servlet.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
 import com.techcourse.servlet.Handler;
 import java.util.Optional;
 import org.apache.coyote.http11.request.HttpMethod;

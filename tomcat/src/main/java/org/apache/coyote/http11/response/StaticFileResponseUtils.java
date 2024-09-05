@@ -2,7 +2,6 @@ package org.apache.coyote.http11.response;
 
 import com.techcourse.exception.UncheckedServletException;
 import java.util.Map;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.util.StaticFileUtils;
 
 public class StaticFileResponseUtils {

@@ -1,6 +1,6 @@
 package servlet;
 
-import com.techcourse.presentation.LonginController;
+import com.techcourse.presentation.LoginController;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +14,7 @@ import org.apache.coyote.response.Response;
 import org.apache.coyote.response.ResponseBody;
 import org.apache.coyote.response.ResponseHeaders;
 import org.apache.coyote.response.ResponseLine;
+import org.apache.coyote.response.StatusCode;
 import servlet.handler.Handler;
 import servlet.resolver.ViewResolver;
 import servlet.handler.ResourceHandler;
@@ -27,7 +28,7 @@ public class HttpServlet {
 
     public HttpServlet() {
         this.requestMappingInfos = List.of(
-                new RequestMappingInfo("/login", HttpMethod.GET, new LonginController()::getLoginPage),
+                new RequestMappingInfo("/login", HttpMethod.GET, new LoginController()::getLoginPage),
                 new RequestMappingInfo("/", HttpMethod.GET, new WelcomePageHandler())
         );
         this.viewResolver = new ViewResolver();
@@ -43,6 +44,9 @@ public class HttpServlet {
         ResponseBody body = new ResponseBody(Files.readString(view.toPath(), StandardCharsets.UTF_8));
         headers.contentType(MimeType.from(view.getName()).getType());
         headers.contentLength(body.length());
+        if (responseAndView.getStatusCode().equals(StatusCode.FOUND)) {
+            headers.location(view.getName());
+        }
         return new Response(responseLine, headers, body);
     }
 

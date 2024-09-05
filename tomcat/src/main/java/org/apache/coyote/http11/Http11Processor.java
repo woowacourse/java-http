@@ -105,9 +105,12 @@ public class Http11Processor implements Runnable, Processor {
         String password = pairs.get("password");
         if (account != null & password != null) {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
-            if (foundUser.isPresent() && "password".equals(password)) {
-                writeRedirectResponse("/index.html", outputStream);
-                return;
+            if (foundUser.isPresent()) {
+                User user = foundUser.get();
+                if (user.checkPassword(password)) {
+                    writeRedirectResponse("/index.html", outputStream);
+                    return;
+                }
             }
         }
         writeRedirectResponse("/401.html", outputStream);

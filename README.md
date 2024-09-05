@@ -33,3 +33,27 @@
    - [x] 로그인 페이지 접속 (login.html)
    - [x] Query String을 파싱 후 아이디/비밀번호 일치 확인
    - [x] 일치할 경우, 콘솔창에 로그로 회원을 조회한 결과 출력
+
+### 2딘계
+
+- [ ] HTTP Status Code 302 : 로그인 페이지에서 로그인 시도에 따른 응답 처리
+   - 로그인 성공 시, 
+     - [ ] http status code 302
+     - [ ] /index.html 로 리다이렉트
+   - 로그인 실패 시,
+     - [ ] /401.html 로 리다이렉트
+
+- POST 방식으로 회원가입
+  - [ ] 회원가입 페이지 접근(http://localhost:8080/register)
+  - [ ] 페이지 로드 -> GET
+  - [ ] 회원가입 버튼 -> POST
+  - [ ] 회원가입 완료 -> /index.html 로 리다이렉트
+
+- Cookie에 JSESSIONID 값 저장하기 : 쿠키를 사용해 서버에 로그인 여부 저장
+  - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가
+  - [ ] Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie 반환 기능 구현
+
+- [ ] Session 구현하기 : 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부 체크
+  - 로그인 성공 시,
+  - [ ] Session 객체의 값으로 User 객체 저장
+  - [ ] /login 페이지에 HTTP GET method로 접근 시, index.html 페이지로 리다이렉트 처리

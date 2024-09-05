@@ -13,5 +13,13 @@ public class ResponseAndView {
         this.statusCode = statusCode;
     }
 
+    public String getViewName() {
+        return this.viewName;
+    }
+
+    public StatusCode getStatusCode() {
+        return this.statusCode;
+    }
+
     // todo buiider
 }

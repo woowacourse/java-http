@@ -142,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
         if (checkAuth(accountParam.split(PARAM_ASSIGNMENT)[1], passwordParam.split(PARAM_ASSIGNMENT)[1])) {
             return new ResponseContent(HttpStatus.FOUND, accept, getResponseBodyByFileName("/index.html"));
         }
-        return new ResponseContent(HttpStatus.OK, accept, getResponseBodyByFileName("/login.html"));
+        return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, getResponseBodyByFileName("/401.html"));
     }
 
 

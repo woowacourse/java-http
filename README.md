@@ -44,7 +44,8 @@
     - [x] http status code 302
     - [x] /index.html 로 리다이렉트
   - 로그인 실패 시,
-    - [ ] /401.html 로 리다이렉트
+    - [x] http status code 401
+    - [x] /401.html 로 리다이렉트
 
 - POST 방식으로 회원가입
   - [ ] 회원가입 페이지 접근(http://localhost:8080/register)

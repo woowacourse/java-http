@@ -27,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -38,10 +38,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+    public void process(Socket connection) {
+        try (var inputStream = connection.getInputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-             final var outputStream = connection.getOutputStream()) {
+             var outputStream = connection.getOutputStream()) {
 
             String httpMethod = null;
             String statusCode = "200 OK";
@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
                 if (uri.endsWith(".js")) {
                     contentType = "application/javascript";
                 }
-                final String fileName = "static" + uri;
+                String fileName = "static" + uri;
                 responseBody = getHtmlResponseBody(fileName);
             } else if (uri.startsWith("/login")) {
                 int parameterStartingIndex = uri.indexOf("?");
@@ -110,7 +110,7 @@ public class Http11Processor implements Runnable, Processor {
                     }
                     statusCode = "302 Found";
                 }
-                final String fileName = "static/login.html";
+                String fileName = "static/login.html";
                 responseBody = getHtmlResponseBody(fileName);
             } else if (uri.equals("/register")) {
                 if (httpMethod.equals("POST")) {
@@ -142,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
                 headers.add("Location: " + redirectUrl);
             }
 
-            final var response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;
+            var response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -152,12 +152,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getHtmlResponseBody(String fileName) throws IOException {
-        final URL url = getClass().getClassLoader().getResource(fileName);
+        URL url = getClass().getClassLoader().getResource(fileName);
         if (url != null) {
-            final File file = new File(url.getFile());
-            final Path path = file.toPath();
+            File file = new File(url.getFile());
+            Path path = file.toPath();
 
-            final StringBuilder htmlContent = new StringBuilder();
+            StringBuilder htmlContent = new StringBuilder();
             try (BufferedReader htmlBufferedReader = new BufferedReader(new FileReader(path.toString()))) {
                 String line;
                 while ((line = htmlBufferedReader.readLine()) != null) {

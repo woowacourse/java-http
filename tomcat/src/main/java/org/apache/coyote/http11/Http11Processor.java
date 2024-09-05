@@ -2,18 +2,13 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.ApiRouter;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.util.FileReader;
+import com.techcourse.util.StaticResourceManager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.MediaType;
@@ -63,26 +58,25 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(sb.toString());
     }
 
-    private HttpResponse createResponse(HttpRequest request) throws IOException {
-        // 정적 리소스 중 어떤 타입을 요청하는지 확장자를 통해 확인
-        String pathStr = request.getPath();
-        String requestedExtension = pathStr.substring(pathStr.lastIndexOf(".") + 1);
-        MediaType mediaType = MediaType.ofExtension(requestedExtension);
+    private HttpResponse createResponse(HttpRequest request) {
+        if (StaticResourceManager.isExist("static" + request.getPath())) {
+            return createStaticResourceResponse(request);
+        }
+        return ApiRouter.route(request.getMethod(), request.getPath(), request);
+    }
+
+    private HttpResponse createStaticResourceResponse(HttpRequest request) {
+        String path = request.getPath();
+        int extensionSeparatorIndex = path.lastIndexOf(".");
+        String requestedExtension = extensionSeparatorIndex == -1 ? "" : path.substring(extensionSeparatorIndex + 1);
+        MediaType mediaType = MediaType.fromExtension(requestedExtension);
         log.info("Requested MediaType: {}", mediaType);
 
-        // 정적 리소스부터 읽어옴
-        HttpResponse response;
-        try {
-            String responseBody = FileReader.read("static" + request.getPath());
-            response = new HttpResponse(1.1, 200, "OK")
-                    .addHeader("Content-Type", mediaType.getValue())
-                    .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
-                    .setBody(responseBody);
-        } catch (RuntimeException e) {
-            response = ApiRouter.route(request.getMethod(), request.getPath(), request);
-        }
-
-        return response;
+        String responseBody = StaticResourceManager.read("static" + request.getPath());
+        return new HttpResponse(1.1, 200, "OK")
+                .addHeader("Content-Type", mediaType.getValue())
+                .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                .setBody(responseBody);
     }
 
     private void writeResponse(OutputStream outputStream, HttpResponse response) throws IOException {

@@ -7,14 +7,19 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-public class FileReader {
+public class StaticResourceManager {
     private static final String CRLF = "\r\n";
 
-    private FileReader() {
+    private StaticResourceManager() {
+    }
+
+    public static boolean isExist(String filePath) {
+        URL resource = ClassLoader.getSystemClassLoader().getResource(filePath);
+        return resource != null;
     }
 
     public static String read(String filePath) {
-        URL resource = FileReader.class.getClassLoader().getResource(filePath);
+        URL resource = ClassLoader.getSystemClassLoader().getResource(filePath);
         Path path = Optional.ofNullable(resource)
                 .map(URL::getPath)
                 .map(Path::of)

@@ -46,7 +46,7 @@ public class HttpRequest {
     }
 
     public String getQueryParameter(String key) {
-        return queryParameters.get(key);
+        return queryParameters.getOrDefault(key, "");
     }
 
     public Map<String, String> getQueryParameters() {

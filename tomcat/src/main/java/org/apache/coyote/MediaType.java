@@ -25,6 +25,25 @@ public enum MediaType {
         return type.getValue() + "/" + subType.getValue();
     }
 
+    public static MediaType fromAcceptHeader(String header) {
+        if (header == null) {
+            return ALL;
+        }
+
+        String[] values = header.split(",");
+        for (String value : values) {
+            String[] mediaType = value.split(";");
+            if (mediaType.length == 1) {
+                return of(mediaType[0]);
+            }
+            if (mediaType.length == 2 && mediaType[1].trim().equals("q=0")) {
+                continue;
+            }
+            return of(mediaType[0]);
+        }
+        return ALL;
+    }
+
     public static MediaType of(String value) {
         for (MediaType mediaType : values()) {
             if (mediaType.getValue().equals(value)) {
@@ -34,7 +53,7 @@ public enum MediaType {
         return ALL;
     }
 
-    public static MediaType ofExtension(String extension) {
+    public static MediaType fromExtension(String extension) {
         return Arrays.stream(values())
                 .filter(mediaType -> mediaType.extensions.contains(extension))
                 .findFirst()

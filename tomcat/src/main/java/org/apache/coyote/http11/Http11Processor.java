@@ -56,25 +56,22 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // 엔드포인트 변경
+            String statusCode = "200 OK";
             final String requestUri = header.getFirst();
             String endpoint = requestUri.split(" ")[1];
 
-            int queryIndex = endpoint.indexOf("?");
-            if (queryIndex != -1) {
+            // todo: 나중에 바꾸기
+            int temp = -1;
+            if (endpoint.startsWith("/login?")) {
+                int queryIndex = endpoint.indexOf("?");
                 String queryString = endpoint.substring(queryIndex + 1);
                 endpoint = endpoint.substring(0, queryIndex);
-                checkLoginQuery(queryString);
-            }
-            List<String> fileExtensions = List.of(".css", ".ico", ".html", ".js");
-            boolean existExtension = false;
-            for (String extension : fileExtensions) {
-                if (endpoint.endsWith(extension)) {
-                    existExtension = true;
-                    break;
+                statusCode = "302 Found";
+                if (checkLoginQueryValid(queryString)) {
+                    temp = 0;
+                } else {
+                    temp = 1;
                 }
-            }
-            if (!existExtension && !endpoint.equals("/")) {
-                endpoint += ".html";
             }
 
             String responseBody = makeResponseBody(endpoint);
@@ -83,10 +80,24 @@ public class Http11Processor implements Runnable, Processor {
             }
             String contentType = makeContentType(endpoint);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+            String additionalHeader = "Location: ";
+            if (temp == 0) {
+                additionalHeader += "/index.html";
+            }
+            if (temp == 1) {
+                additionalHeader += "/401.html";
+            }
+
+            var headers = String.join("\r\n",
+                    "HTTP/1.1 " + statusCode + " ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.getBytes().length + " ");
+            if (temp != -1) {
+                headers += "\r\n" + additionalHeader + " ";
+            }
+
+            final var response = String.join("\r\n",
+                    headers,
                     "",
                     responseBody);
 
@@ -100,25 +111,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void checkLoginQuery(final String queryString) {
+    private boolean checkLoginQueryValid(final String queryString) {
         Map<String, String> queryStorage = new HashMap<>();
         for (String query : queryString.split("&")) {
             String[] keyValue = query.split("=");
             queryStorage.put(keyValue[0], keyValue[1]);
         }
-
         User user = InMemoryUserRepository.findByAccount(queryStorage.get("account"))
                 .orElseThrow(() -> new IllegalArgumentException("해당 account가 존재하지 않습니다."));
         if (user.checkPassword(queryStorage.get("password"))) {
             log.info("user : {}", user);
+            return true;
         }
+        return false;
     }
 
     private String makeContentType(final String endpoint) {
         if (endpoint.length() > 3 && endpoint.endsWith("css")) {
                 return "text/css";
             }
-
         return "text/html";
     }
 
@@ -126,11 +137,19 @@ public class Http11Processor implements Runnable, Processor {
         if (endpoint.equals("/")) {
             return "Hello world!";
         }
-        final URL resource = Http11Processor.class.getResource("/static" + endpoint);
+        String fileExtension = makefileExtension(endpoint);
+        final URL resource = Http11Processor.class.getResource("/static" + fileExtension);
         if (resource == null) {
             return null;
         }
         final Path path = Paths.get(resource.toURI()).toFile().toPath();
         return Files.readString(path);
+    }
+
+    private String makefileExtension(final String endpoint) {
+        if (endpoint.equals("/login")) {
+            return "/login.html";
+        }
+        return endpoint;
     }
 }

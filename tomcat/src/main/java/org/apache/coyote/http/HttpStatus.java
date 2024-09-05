@@ -1,14 +1,17 @@
-package com.techcourse.model;
+package org.apache.coyote.http;
 
 public enum HttpStatus {
     OK("OK", 200),
     CREATED("Created", 201),
     ACCEPTED("Accepted", 202),
+
     FOUND("Found", 302),
+
     BAD_REQUEST("Bad Request", 400),
     UNAUTHORIZED("Unauthorized", 401),
     FORBIDDEN("Forbidden", 403),
     NOT_FOUND("Not Found", 404),
+
     INTERNAL_SERVER_ERROR("Internal Server Error", 500),
     NOT_IMPLEMENTED("Not Implemented", 501),
     BAD_GATEWAY("Bad Gateway", 502),

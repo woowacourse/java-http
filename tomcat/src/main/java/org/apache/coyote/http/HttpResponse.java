@@ -1,8 +1,8 @@
-package com.techcourse.model;
+package org.apache.coyote.http;
+
+import static org.apache.coyote.http.Constants.CRLF;
 
 public class HttpResponse {
-
-    private static final String CRLF = "\r\n";
 
     private final StatusLine statusLine;
     private final Header headers;

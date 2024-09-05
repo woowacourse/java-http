@@ -1,6 +1,8 @@
-package com.techcourse.model;
+package org.apache.coyote.http;
 
 import java.util.List;
+
+import static org.apache.coyote.http.Constants.CRLF;
 
 public class HttpRequest {
 
@@ -8,7 +10,7 @@ public class HttpRequest {
     private final Header headers;
 
     public static HttpRequest of(String request) {
-        List<String> requests = List.of(request.split("\r\n"));
+        List<String> requests = List.of(request.split(CRLF));
         return new HttpRequest(RequestLine.of(requests.getFirst()), Header.of(requests.subList(1, requests.size())));
     }
 

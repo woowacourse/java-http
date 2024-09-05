@@ -4,6 +4,7 @@ import org.apache.coyote.http.request.Path;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PathTest {
@@ -28,4 +29,15 @@ class PathTest {
                 .hasMessageContaining("Path must start with '/'");
     }
 
+    @Test
+    @DisplayName("")
+    void parameter() {
+        String test = "/login?account=gugu&password=password";
+
+        Path path = new Path(test);
+
+        assertThat(path.getParameters()).hasSize(2);
+        assertThat(path.getPath()).isEqualTo("/login");
+        assertThat(path.getParameters().get("account")).isEqualTo("gugu");
+    }
 }

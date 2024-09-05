@@ -16,13 +16,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
+import java.util.Map;
 
 public class RequestToResponse {
 
     private static final Logger log = LoggerFactory.getLogger(RequestToResponse.class);
 
     private static final String STATIC = "static";
+    private static final String REDIRECT = "/index.html";
 
     public String build(HttpRequest request) throws IOException {
         Path path = request.getRequestLine().getPath();
@@ -52,55 +53,35 @@ public class RequestToResponse {
     }
 
     private String login(RequestLine requestLine) throws IOException {
-        String uris = requestLine.getPath().getPath();
-        if (!uris.contains("?")) {
-            Path path = requestLine.getPath();
-            final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(".html"));
-            try {
-                final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-                StatusLine statusLine = new StatusLine(HttpStatus.OK);
-                ResponseHeader header = new ResponseHeader();
-                header.setContentType(MimeType.getContentTypeFromExtension(".html"));
-                header.setContentLength(responseBody.getBytes().length);
-
-                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-                return response.toResponse();
-            } catch (NullPointerException e) {
-                return HttpResponse.notFoundResponses().toResponse();
-            }
-        }
-        if (uris.contains("?")) {
-            int index = uris.indexOf("?");
-            String uri = uris.substring(0, index);
-            String queryString = uris.substring(index + 1);
-            final URL resource = getClass().getClassLoader().getResource("static" + uri + ".html");
+        Path path = requestLine.getPath();
+        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(MimeType.HTML.getExtension()));
+        try {
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            List<String> infos = List.of(queryString.split("&"));
-            List<String> ids = List.of(infos.get(0).split("="));
-            List<String> passwords = List.of(infos.get(1).split("="));
-            User user = InMemoryUserRepository.findByAccount(ids.get(1)).get();
             ResponseHeader header = new ResponseHeader();
             header.setContentType(MimeType.HTML.getContentType());
             header.setContentLength(responseBody.getBytes().length);
-            if (user.checkPassword(passwords.get(1))) {
-                log.info(user.toString());
-                header.setLocation("/index.html");
-                HttpResponse response = new HttpResponse(
-                        new StatusLine(HttpVersion.HTTP11, HttpStatus.FOUND),
-                        header,
-                        null
-                );
+
+            if (path.hasQueryParameter()) {
+                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+                Map<String, String> parameters = path.getParameters();
+                User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
+                        .orElseThrow();
+                if (user.checkPassword(parameters.get("password"))) {
+                    log.info(user.toString());
+                    header.setLocation(REDIRECT);
+                    HttpResponse response = new HttpResponse(statusLine, header, null);
+                    return response.toResponse();
+                }
+                header.setLocation("/401.html");
+                HttpResponse response = new HttpResponse(statusLine, header, null);
                 return response.toResponse();
+
             }
-            header.setLocation("/401.html");
-            HttpResponse response = new HttpResponse(
-                    new StatusLine(HttpVersion.HTTP11, HttpStatus.FOUND),
-                    header,
-                    null
-            );
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
             return response.toResponse();
+        } catch (NullPointerException e) {
+            return HttpResponse.notFoundResponses().toResponse();
         }
-        return "";
     }
 }

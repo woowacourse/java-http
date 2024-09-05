@@ -40,7 +40,6 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             RequestLine requestLine = new RequestLine(bufferedReader.readLine());
 
-            Map<String, String> requestHeaders = makeRequestHeaders(bufferedReader);
             String body = makeResponseBody(requestLine);
 
             String response = String.join("\r\n",
@@ -55,27 +54,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Map<String, String> makeRequestHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> requestHeaders = new HashMap<>();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            if (line.isBlank()) {
-                break;
-            }
-
-            String[] split = line.split(":");
-
-            if(split.length != 2) {
-                continue;
-            }
-
-            String key = split[0].trim();
-            String value = split[1].trim();
-            requestHeaders.put(key, value);
-        }
-        return requestHeaders;
     }
 
     private String makeResponseBody(RequestLine requestLine) throws IOException {

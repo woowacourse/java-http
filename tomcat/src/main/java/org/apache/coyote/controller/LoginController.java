@@ -9,10 +9,10 @@ import org.apache.coyote.Session;
 import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController implements Controller {
 

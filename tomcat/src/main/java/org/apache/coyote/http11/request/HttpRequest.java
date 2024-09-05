@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 

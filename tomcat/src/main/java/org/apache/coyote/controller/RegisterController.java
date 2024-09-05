@@ -5,10 +5,10 @@ import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController implements Controller {
 

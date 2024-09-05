@@ -1,6 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.StringJoiner;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpStatusCode;
 
 public class HttpResponse {
 

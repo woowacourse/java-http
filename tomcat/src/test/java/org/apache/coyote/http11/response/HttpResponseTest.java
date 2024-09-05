@@ -1,9 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.nio.charset.StandardCharsets;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.MimeType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

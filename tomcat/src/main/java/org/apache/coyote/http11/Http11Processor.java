@@ -40,9 +40,12 @@ public class Http11Processor implements Runnable, Processor {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final String requestFirstLine = bufferedReader.readLine();
+            final String[] requestFirstLine = bufferedReader.readLine().split(" ");
+            final String httpMethod = requestFirstLine[0];
+            final String path = requestFirstLine[1].split("[?]")[0];
 
-            if (GET_METHOD.equals(requestFirstLine.split(" ")[0])) {
-                final var response = bindResponse(requestFirstLine);
+            if (GET_METHOD.equals(httpMethod)) {
+                final var response = bindResponse(path);
                 outputStream.write(response.getBytes());
             }
             outputStream.flush();
@@ -51,13 +54,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String bindResponse(String requestFirstLine) throws IOException {
-        String route = requestFirstLine.split(" ")[1];
-        if (DEFAULT_ROUTE.equals(route)) {
+    private String bindResponse(String path) throws IOException {
+        if (DEFAULT_ROUTE.equals(path)) {
             return responseBinder.buildSuccessfulResponse(DEFAULT_RESPONSE_BODY);
         }
 
-        URL resource = getClass().getClassLoader().getResource("static" + route);
+        URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
             URL badRequestURL = getClass().getClassLoader().getResource("static/404.html");
             return responseBinder.buildFailedResponse(404, "NotFound",
@@ -65,10 +67,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String staticResource = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        if (route.split("[.]").length == 0) {
+        if (path.split("[.]").length == 0) {
             return responseBinder.buildSuccessfulResponse(staticResource);
         }
-        String fileExtension = route.split("[.]")[1];
+        String fileExtension = path.split("[.]")[1];
         String contentType = contentTypeConverter.mapToContentType(fileExtension);
         return responseBinder.buildSuccessfulResponse(contentType, staticResource);
     }

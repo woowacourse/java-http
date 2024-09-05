@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +34,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String request = new String(inputStream.readAllBytes());
-            final String response = getResponse(request);
-
+            final String response = getResponse(inputStream);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -42,20 +42,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(String request) throws IOException {
-        final StringTokenizer tokenizer = new StringTokenizer(request, "\r\n");
+    private String getResponse(InputStream requestStream) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
 
-        while (tokenizer.hasMoreTokens()) {
-            final String line = tokenizer.nextToken();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
             if (line.startsWith("GET")) {
-                final String path = line.split(" ")[1];
+                final String requestUri = line.split(" ")[1];
 
-                if (path.equals("/")) {
+                if (requestUri.equals("/")) {
                     return getRootPage();
                 }
 
-                final URL resource = getClass().getClassLoader().getResource("static" + path);
-
+                final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
                 final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
                 return String.join("\r\n",
                         "HTTP/1.1 200 OK ",
@@ -65,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
                         responseBody);
             }
         }
-        return getRootPage();
+        return null;
     }
 
     private String getRootPage() {

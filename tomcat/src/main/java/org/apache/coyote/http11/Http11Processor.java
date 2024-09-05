@@ -39,14 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = parseStartLine(resourceName);
             String resourceExtension = getExtension(resourceName);
 
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + resourceExtension + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody
-            );
-
+            HttpResponse response = new HttpResponse(responseBody, resourceExtension);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

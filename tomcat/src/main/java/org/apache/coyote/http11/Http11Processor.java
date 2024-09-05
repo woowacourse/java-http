@@ -6,6 +6,7 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +19,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -61,6 +64,20 @@ public class Http11Processor implements Runnable, Processor {
             }
             if(urlPath.startsWith("/login")) {
                 if(urlPath.equals("/login") && httpMethod.equals("GET")) {
+                    if(httpRequestHeader.get("Cookie") != null) {
+                        Optional<String> sessionCookie = Arrays.asList(httpRequestHeader.get("Cookie").split("; "))
+                            .stream()
+                            .filter(cookie -> cookie.startsWith("JSESSIONID"))
+                            .findAny();
+                        if(!sessionCookie.isEmpty()) {
+                            String sessionId = sessionCookie.get().split("=")[1];
+                            Optional<User> userBySession = SessionManager.findUserBySession(sessionId);
+                            if(userBySession.isPresent()) {
+                                redirect("http://localhost:8080/index.html", outputStream);
+                                return;
+                            }
+                        }
+                    }
                     printFileResource("static" + urlPath +".html",  outputStream);
                     return;
                 }
@@ -73,6 +90,7 @@ public class Http11Processor implements Runnable, Processor {
                     User user = InMemoryUserRepository.findByAccount(account)
                         .orElse(new User("guest", "guest", "guest"));
                     if (user.checkPassword(password)) {
+                        SessionManager.createSession(user);
                         redirectWithSetCookie("http://localhost:8080/index.html", outputStream);
                         return;
                     }
@@ -142,7 +160,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final var responseBody = new String(Files.readAllBytes(path));
-            if(httpRequestHeader.get("Cookie").contains("JSESSIONID")) {
+            String cookie = httpRequestHeader.get("Cookie");
+            if(cookie != null && cookie.contains("JSESSIONID")) {
                 var response = "HTTP/1.1 200 OK \r\n" +
                     String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
                     "Content-Length: " + responseBody.getBytes().length + " \r\n" +

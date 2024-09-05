@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public record HttpResponse(
@@ -31,6 +30,6 @@ public record HttpResponse(
     }
 
     private String getBody() {
-        return new String(responseBody, StandardCharsets.UTF_8);
+        return new String(responseBody);
     }
 }

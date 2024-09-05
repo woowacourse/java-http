@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 /**
@@ -205,9 +206,18 @@ class IOStreamTest {
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
-            final StringBuilder actual = new StringBuilder();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 
-            assertThat(actual).hasToString(emoji);
+            try (BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                String s = bufferedReader.readLine();
+
+                System.out.println(s);
+
+                final StringBuilder actual = new StringBuilder();
+                assertThat(actual).hasToString(emoji);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

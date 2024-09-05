@@ -6,27 +6,19 @@ import org.apache.coyote.http11.QueryParameter;
 
 import java.net.URI;
 
-public class LoginHandler extends AbstractHandler {
+public class PostLoginHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
         URI uri = httpRequest.getUri();
         String path = uri.getPath();
 
-        return "/login".equals(path);
+        return "/login".equals(path) && httpRequest.getMethod().isPost();
     }
 
     @Override
     protected String forward(HttpRequest httpRequest) {
-        QueryParameter queryParameter = new QueryParameter(httpRequest.getUri().getQuery());
-        if (queryParameter.isEmpty()) {
-            return "login.html";
-        }
-
-        return authenticate(queryParameter);
-    }
-
-    private String authenticate(QueryParameter queryParameter) {
+        QueryParameter queryParameter = httpRequest.body();
         if (isLoggedIn(queryParameter)) {
             return "redirect:index.html";
         }

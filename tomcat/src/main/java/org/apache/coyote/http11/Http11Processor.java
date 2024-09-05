@@ -3,8 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.AbstractHandler;
+import org.apache.coyote.http11.handler.GetLoginHandler;
 import org.apache.coyote.http11.handler.HelloHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
+import org.apache.coyote.http11.handler.PostLoginHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,23 +51,39 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest createHttpRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestLine = bufferedReader.readLine();
-        List<String> headerTokens = new ArrayList<>();
+        Header header = createHeader(bufferedReader);
+        QueryParameter queryParameter = createQueryParameter(bufferedReader, header);
 
-        String nowLine = bufferedReader.readLine();
-        while (!nowLine.isBlank()) {
-            headerTokens.add(nowLine);
-            nowLine = bufferedReader.readLine();
+        return new HttpRequest(requestLine, header, queryParameter);
+    }
+
+    private Header createHeader(BufferedReader bufferedReader) throws IOException {
+        List<String> headerTokens = new ArrayList<>();
+        String line = bufferedReader.readLine();
+        while (!line.isBlank()) {
+            line = bufferedReader.readLine();
+            headerTokens.add(line);
         }
 
-        return new HttpRequest(requestLine, new Header(headerTokens));
+        return new Header(headerTokens);
+    }
+
+    private QueryParameter createQueryParameter(BufferedReader bufferedReader, Header header) throws IOException {
+        int length = Integer.parseInt(header.get("Content-Length").orElse("0"));
+        char[] body = new char[length];
+        bufferedReader.read(body);
+        String bodyString = new String(body);
+
+        return new QueryParameter(bodyString);
     }
 
     private HttpResponse respondResource(HttpRequest httpRequest) throws IOException {
         AbstractHandler helloHandler = new HelloHandler();
         AbstractHandler staticResourceHandler = new StaticResourceHandler();
-        AbstractHandler loginHandler = new LoginHandler();
+        AbstractHandler postLoginHandler = new PostLoginHandler();
+        AbstractHandler getLoginHandler = new GetLoginHandler();
 
-        List<AbstractHandler> handlers = List.of(helloHandler, staticResourceHandler, loginHandler);
+        List<AbstractHandler> handlers = List.of(helloHandler, staticResourceHandler, postLoginHandler, getLoginHandler);
         AbstractHandler targetHandler = handlers.stream()
                 .filter(it -> it.canHandle(httpRequest))
                 .findFirst()

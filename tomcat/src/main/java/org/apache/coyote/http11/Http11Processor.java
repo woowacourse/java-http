@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.FileResponseReader;
 import org.apache.catalina.response.ResponseContent;
+import org.apache.catalina.response.ResponsePage;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,9 +107,13 @@ public class Http11Processor implements Runnable, Processor {
         if (url.contains("?")) {
             return getResponseBodyUsedQuery(url, accept);
         }
-        if (url.equals("/login")) {
-            return new ResponseContent(HttpStatus.OK, accept, FileResponseReader.loadFileContent("/login.html"));
+
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(url);
+        if(responsePage.isPresent()) {
+            ResponsePage page = responsePage.get();
+            return new ResponseContent(page.getStatus(), accept, FileResponseReader.loadFileContent(page.getFileName()));
         }
+
         return new ResponseContent(HttpStatus.OK, accept, FileResponseReader.loadFileContent(url));
     }
 

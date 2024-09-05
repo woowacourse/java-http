@@ -17,14 +17,14 @@ public enum ErrorHandlerMapper {
         this.errorHandler = errorHandler;
     }
 
-    public boolean hasErrorHandler(Class<? extends Exception> exception) {
+    public static boolean hasErrorHandler(Class<? extends Exception> exception) {
         return Stream.of(values())
                 .anyMatch(handler -> handler.exceptionClass.isInstance(exception));
     }
 
-    public String handleError() {
+    public static String handleError(Class<? extends Exception> exception) {
         return Stream.of(values())
-                .filter(handler -> handler.exceptionClass.isInstance(exceptionClass))
+                .filter(handler -> handler.exceptionClass.isInstance(exception))
                 .findAny()
                 .orElseThrow(()-> new NoSuchElementException("에러 핸들러가 존재하지 않습니다."))
                 .errorHandler

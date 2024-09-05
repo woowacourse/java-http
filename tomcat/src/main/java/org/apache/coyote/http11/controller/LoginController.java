@@ -2,12 +2,8 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +35,10 @@ public class LoginController implements Controller {
                 .orElseThrow(NoSuchElementException::new);
 
         if (!user.checkPassword(password)) {
-            return "/401.html";
+            throw new SecurityException("잘못된 유저 정보 입니다.");
         }
 
         log.info("user : {}", user);
         return "/index.html";
     }
-
-
 }

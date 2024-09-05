@@ -9,11 +9,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
+import org.apache.coyote.http11.error.ErrorHandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,13 +56,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String makeResponseBody(RequestLine requestLine) throws IOException {
-        if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
-            Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
-            String viewUri = controller.handle(requestLine);
-            Path path = new ViewResolver().findViewPath(viewUri);
-            return Files.readString(path);
+        try {
+            if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
+                Controller controller = HandlerMapper.mapTo(requestLine.getRequestURI());
+                return findResponseFile(controller.handle(requestLine));
+            }
+            return findResponseFile(requestLine.getRequestURI());
+        } catch (Exception e) {
+            if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
+                return findResponseFile(ErrorHandlerMapper.handleError(e.getClass()));
+            }
+            throw new UncheckedServletException(e);
         }
-        Path path = new ViewResolver().findViewPath(requestLine.getRequestURI());
+    }
+
+    private static String findResponseFile(String viewUri) throws IOException {
+        Path path = new ViewResolver().findViewPath(viewUri);
         return Files.readString(path);
     }
 

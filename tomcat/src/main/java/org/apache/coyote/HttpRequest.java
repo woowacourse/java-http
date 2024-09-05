@@ -15,6 +15,7 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final Map<String, String> queryParameters;
     private final String body;
+    private final Map<String, String> cookies;
 
     public HttpRequest(String request) {
         String[] lines = request.split(CRLF);
@@ -26,6 +27,21 @@ public class HttpRequest {
         this.headers = parseHeaders(lines);
         this.body = lines.length > 1 ? URLDecoder.decode(lines[lines.length - 1], StandardCharsets.UTF_8) : null;
         this.queryParameters = parseQueryParameters(pathWithQuery);
+        this.cookies = parseCookies(headers.getOrDefault("Cookie", null));
+    }
+
+    private Map<String, String> parseCookies(String cookie) {
+        if (cookie == null) {
+            return new HashMap<>();
+        }
+
+        Map<String, String> result = new HashMap<>();
+        String[] cookies = cookie.split("; ");
+        for (String c : cookies) {
+            String[] keyValue = c.split("=");
+            result.put(keyValue[0], keyValue[1]);
+        }
+        return result;
     }
 
     private Map<String, String> parseHeaders(String[] lines) {
@@ -95,5 +111,12 @@ public class HttpRequest {
             return Optional.empty();
         }
         return Optional.of(formBody.get(key));
+    }
+
+    public Optional<String> getCookie(String key) {
+        if (cookies == null || !cookies.containsKey(key)) {
+            return Optional.empty();
+        }
+        return Optional.of(cookies.get(key));
     }
 }

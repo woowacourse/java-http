@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.UUID;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.MediaType;
@@ -38,7 +39,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = readRequest(inputStream);
+
+            boolean isIdExist = httpRequest.getCookie("JSESSIONID").isPresent();
+            log.info("isIdExist: {}", isIdExist);
+
             HttpResponse response = createResponse(httpRequest);
+            if (!isIdExist) {
+                String sessionId = UUID.randomUUID().toString();
+                response.addCookie("JSESSIONID", sessionId);
+            }
             writeResponse(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

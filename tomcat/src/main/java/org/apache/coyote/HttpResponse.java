@@ -35,6 +35,15 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse addCookie(String key, String value) {
+        if (headers.containsKey("Set-Cookie")) {
+            headers.put("Set-Cookie", headers.get("Set-Cookie") + "; " + key + "=" + value);
+            return this;
+        }
+        headers.put("Set-Cookie", key + "=" + value);
+        return this;
+    }
+
     public String toHttpMessage() {
         final var response = new StringBuilder();
         response.append("HTTP/").append(VERSION).append(" ").append(statusCode).append(" ").append(statusMessage).append("\r\n");

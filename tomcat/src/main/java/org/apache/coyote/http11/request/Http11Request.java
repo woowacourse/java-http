@@ -5,10 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import org.apache.coyote.http11.Http11Cookie;
-import org.apache.coyote.http11.Http11CookieParser;
 import org.apache.coyote.http11.Http11Header;
-import org.apache.coyote.http11.Http11HeaderParser;
-import org.apache.coyote.http11.Http11StartLineParser;
 
 public record Http11Request(Http11Method method, String requestUri, List<Http11Query> queries,
                             List<Http11Header> headers, List<Http11Cookie> cookies,
@@ -22,9 +19,9 @@ public record Http11Request(Http11Method method, String requestUri, List<Http11Q
 
     private static final Http11RequestUriParser REQUEST_URI_PARSER = new Http11RequestUriParser(START_LINE_PARSER);
 
-    private static final Http11HeaderParser HEADER_PARSER = new Http11HeaderParser(START_LINE_PARSER);
+    private static final Http11RequestHeaderParser HEADER_PARSER = new Http11RequestHeaderParser(START_LINE_PARSER);
 
-    private static final Http11CookieParser COOKIE_PARSER = new Http11CookieParser(START_LINE_PARSER);
+    private static final Http11RequestCookieParser COOKIE_PARSER = new Http11RequestCookieParser(START_LINE_PARSER);
 
     public static Http11Request from(InputStream inputStream) {
         String rawRequest = REQUEST_PARSER.readAsString(inputStream);

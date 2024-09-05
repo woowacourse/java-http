@@ -1,19 +1,20 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.List;
+import org.apache.coyote.http11.Http11Cookie;
 
-public class Http11CookieParser {
+class Http11RequestCookieParser {
 
     private static final String CRLF = "\r\n";
 
     private final Http11StartLineParser startLineParser;
 
-    public Http11CookieParser(Http11StartLineParser startLineParser) {
+    Http11RequestCookieParser(Http11StartLineParser startLineParser) {
         this.startLineParser = startLineParser;
     }
 
-    public List<Http11Cookie> parseCookies(String requestMessage) {
+    List<Http11Cookie> parseCookies(String requestMessage) {
         String rawHeaders = requestMessage.replace(startLineParser.parseStartLine(requestMessage), "")
                 .replaceFirst(CRLF, "");
 

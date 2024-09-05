@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
-public class Http11StartLineParser {
+class Http11StartLineParser {
 
     private static final String CRLF = "\r\n";
 
-    public String parseStartLine(String requestMessage) {
+    String parseStartLine(String requestMessage) {
         String startLine = requestMessage.split(CRLF)[0];
         validateStartLine(startLine);
         return startLine;

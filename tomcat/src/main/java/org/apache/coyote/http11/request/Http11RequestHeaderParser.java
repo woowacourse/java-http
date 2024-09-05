@@ -1,19 +1,20 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.List;
+import org.apache.coyote.http11.Http11Header;
 
-public class Http11HeaderParser {
+class Http11RequestHeaderParser {
 
     private static final String CRLF = "\r\n";
 
     private final Http11StartLineParser startLineParser;
 
-    public Http11HeaderParser(Http11StartLineParser startLineParser) {
+    Http11RequestHeaderParser(Http11StartLineParser startLineParser) {
         this.startLineParser = startLineParser;
     }
 
-    public List<Http11Header> parseHeaders(String requestMessage) {
+    List<Http11Header> parseHeaders(String requestMessage) {
         String rawHeaders = requestMessage.split(CRLF + CRLF)[0]
                 .replace(startLineParser.parseStartLine(requestMessage), "")
                 .replaceFirst(CRLF, "");

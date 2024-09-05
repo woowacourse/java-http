@@ -49,20 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpMethod method = request.getMethod();
             String requestUrl = request.getRequestUrl();
 
-            HttpHeader responseHeader = new HttpHeader();
-            String response = getResponse(requestUrl, HttpStatus.OK, responseHeader);
-            if (requestUrl.startsWith("/login") && method.isPost()) {
-                response = login(request.getBody(), request.getCookie(), responseHeader);
-            }
-
-            if (requestUrl.startsWith("/login") && method.isGet()) {
-                response = getLoginPage(request.getCookie(), responseHeader);
-            }
-
-            if (requestUrl.startsWith("/register") && method.isPost()) {
-                response = register(request.getBody(), responseHeader);
-            }
-
+            String response = dispatch(requestUrl, method, request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -90,22 +77,35 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.from(request);
     }
 
-    private String getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
-        String responseBody = getResponseBody(requestUrl);
+    private String dispatch(String requestUrl, HttpMethod method, HttpRequest request) throws IOException {
+        HttpHeader responseHeader = new HttpHeader();
 
+        if (requestUrl.startsWith("/login") && method.isPost()) {
+            return login(request.getBody(), request.getCookie(), responseHeader);
+        }
+
+        if (requestUrl.startsWith("/login") && method.isGet()) {
+            return getLoginPage(request.getCookie(), responseHeader);
+        }
+
+        if (requestUrl.startsWith("/register") && method.isPost()) {
+            return register(request.getBody(), responseHeader);
+        }
+
+        return getResponse(requestUrl, HttpStatus.OK, responseHeader);
+    }
+
+    private String getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
+        String responseBody = getResource(requestUrl);
         String responseLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
 
         responseHeader.addHeader("Content-Type", ContentType.findContentType(requestUrl) + ";charset=utf-8");
         responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        if (httpStatus.isFound()) {
-            responseHeader.addHeader("Location", requestUrl);
-        }
-
         return String.join("\r\n", responseLine, responseHeader.toHttpHeader(), "", responseBody);
     }
 
-    private String getResponseBody(String requestUrl) throws IOException {
+    private String getResource(String requestUrl) throws IOException {
         if (requestUrl.equals("/")) {
             return "Hello world!";
         }
@@ -135,6 +135,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
         if (httpCookie.isContains(JSESSIONID)) {
+            responseHeader.addHeader("Location", "/index.html");
             return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
         }
 
@@ -148,6 +149,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty() || !user.get().checkPassword(password)) {
+            responseHeader.addHeader("Location", "/401.html");
             return getResponse("/401.html", HttpStatus.FOUND, responseHeader);
         }
 
@@ -162,6 +164,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info("로그인 성공 :: account = {}", user.get().getAccount());
+        responseHeader.addHeader("Location", "/index.html");
         return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
     }
 
@@ -170,6 +173,7 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
 
         log.info("회원 가입 성공 :: account = {}", user.getAccount());
+        responseHeader.addHeader("Location", "/index.html");
         return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
     }
 }

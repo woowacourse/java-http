@@ -62,24 +62,8 @@ public class Http11Processor implements Runnable, Processor {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             RequestLine requestLine = new RequestLine(reader.readLine());
-
-            List<String> rawHeaders = new ArrayList<>();
-            while (reader.ready()) {
-                String line = reader.readLine();
-                if (line.isBlank()) {
-                    break;
-                }
-                rawHeaders.add(line);
-            }
-            HttpHeader httpHeader = new HttpHeader(rawHeaders);
-
-            RequestBody requestBody = null;
-            if (httpHeader.contains(CONTENT_LENGTH)) {
-                int contentLength = Integer.parseInt(httpHeader.get(CONTENT_LENGTH));
-                char[] buffer = new char[contentLength];
-                reader.read(buffer, 0, contentLength);
-                requestBody = new RequestBody(new String(buffer));
-            }
+            HttpHeader httpHeader = new HttpHeader(readRequestHeaders(reader));
+            RequestBody requestBody = readRequestBody(reader, httpHeader);
 
             HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, requestBody);
 
@@ -95,6 +79,38 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private List<String> readRequestHeaders(BufferedReader reader) {
+        try {
+            List<String> rawHeaders = new ArrayList<>();
+
+            while (reader.ready()) {
+                String line = reader.readLine();
+                if (line.isBlank()) {
+                    break;
+                }
+                rawHeaders.add(line);
+            }
+
+            return rawHeaders;
+        } catch (IOException e) {
+            throw new UncheckedServletException("헤더를 읽는 데 실패하였습니다.");
+        }
+    }
+
+    private RequestBody readRequestBody(BufferedReader reader, HttpHeader httpHeader) {
+        try {
+            if (httpHeader.contains(CONTENT_LENGTH)) {
+                int contentLength = Integer.parseInt(httpHeader.get(CONTENT_LENGTH));
+                char[] buffer = new char[contentLength];
+                reader.read(buffer, 0, contentLength);
+                return new RequestBody(new String(buffer));
+            }
+            return null;
+        } catch (IOException e) {
+            throw new UncheckedServletException("Request Body를 읽는 데 실패하였습니다.");
         }
     }
 

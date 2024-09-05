@@ -8,7 +8,7 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeader header;
-    private final byte[] body;
+    private final ResponseBody body;
 
     public HttpResponse(HttpStatusCode statusCode, ResponseHeader header) {
         this(statusCode, header, null);
@@ -17,10 +17,8 @@ public class HttpResponse {
     public HttpResponse(HttpStatusCode statusCode, ResponseHeader header, byte[] body) {
         this.statusLine = new StatusLine(HttpVersion.HTTP_1_1, statusCode);
         this.header = header;
-        this.body = body;
-        if (body != null) {
-            header.setContentLength(String.valueOf(body.length));
-        }
+        this.body = new ResponseBody(body);
+        header.setContentLength(String.valueOf(this.body.getBodyLength()));
     }
 
     public byte[] toByte() {
@@ -31,11 +29,11 @@ public class HttpResponse {
         stringJoiner.add("\r\n");
 
         byte[] headerBytes = stringJoiner.toString().getBytes();
-        if (body != null) {
-            byte[] response = new byte[headerBytes.length + body.length];
+        if (!body.isEmpty()) {
+            byte[] response = new byte[headerBytes.length + body.getBodyLength()];
 
             System.arraycopy(headerBytes, 0, response, 0, headerBytes.length);
-            System.arraycopy(body, 0, response, headerBytes.length, body.length);
+            System.arraycopy(body.getBody(), 0, response, headerBytes.length, body.getBodyLength());
 
             return response;
         }

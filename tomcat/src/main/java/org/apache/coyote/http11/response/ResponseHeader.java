@@ -3,7 +3,6 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.MimeType;
 
 public class ResponseHeader {

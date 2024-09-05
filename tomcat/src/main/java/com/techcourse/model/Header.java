@@ -31,4 +31,14 @@ public class Header {
         }
         return headers.get(header);
     }
+
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    public String toResponse() {
+        return headers.entrySet().stream()
+                .map(entry -> entry.getKey().concat(": ").concat(entry.getValue()).concat(" "))
+                .collect(Collectors.joining("\r\n"));
+    }
 }

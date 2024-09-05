@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionGenerator;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
@@ -38,9 +39,11 @@ public class Http11Processor implements Runnable, Processor {
     private final static SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
+    private final SessionGenerator sessionGenerator;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, SessionGenerator sessionGenerator) {
         this.connection = connection;
+        this.sessionGenerator = sessionGenerator;
     }
 
     @Override
@@ -87,7 +90,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoginUser(HttpRequest request) {
-        Session session = request.getSession();
+        return request.getSessionId()
+                .map(this::isLoginUser)
+                .orElse(false);
+    }
+
+    private boolean isLoginUser(String sessionId) {
+        Session session = SESSION_MANAGER.findSession(sessionId);
+        if (session == null) {
+            return false;
+        }
         return session.contains("user");
     }
 
@@ -129,11 +141,10 @@ public class Http11Processor implements Runnable, Processor {
         String account = queries.get("account");
         String password = queries.get("password");
         validateLoginRequest(account, password);
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (user.checkPassword(password)) {
-            Session session = request.getSession();
+        try {
+            User user = getLoginUser(account, password);
+            Session session = sessionGenerator.create();
             session.setAttribute("user", user);
             SESSION_MANAGER.add(session);
             ResponseCookie sessionCookie = ResponseCookie.of(session);
@@ -141,8 +152,20 @@ public class Http11Processor implements Runnable, Processor {
             headers.put("Location", "/index.html");
             headers.put("Set-Cookie", sessionCookie.toResponse());
             return new HttpResponse(HttpStatus.FOUND, headers);
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+            return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
         }
-        return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
+    }
+
+    private User getLoginUser(String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        }
+        return user;
     }
 
     private void validateLoginRequest(String account, String password) {

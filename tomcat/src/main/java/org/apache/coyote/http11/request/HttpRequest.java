@@ -4,12 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
+import java.util.Optional;
 
 public class HttpRequest {
-
-    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
@@ -87,13 +84,12 @@ public class HttpRequest {
         return body;
     }
 
-    public Session getSession() {
+    public Optional<String> getSessionId() {
         RequestCookies requestCookies = RequestCookies.of(headers.get("Cookie"));
         String sessionId = requestCookies.get("JSESSIONID");
-        Session session = SESSION_MANAGER.findSession(sessionId);
-        if (session == null) {
-            return Session.create();
+        if (sessionId == null) {
+            return Optional.empty();
         }
-        return session;
+        return Optional.of(sessionId);
     }
 }

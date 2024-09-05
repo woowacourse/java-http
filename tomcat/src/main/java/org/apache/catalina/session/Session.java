@@ -2,7 +2,6 @@ package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class Session {
 
@@ -11,11 +10,6 @@ public class Session {
 
     public Session(String id) {
         this.id = id;
-    }
-
-    public static Session create() {
-        String sessionId = UUID.randomUUID().toString();
-        return new Session(sessionId);
     }
 
     public boolean contains(String name) {

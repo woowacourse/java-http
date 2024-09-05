@@ -72,6 +72,10 @@ public abstract class AbstractHandler {
             return String.format(encodedContentType, "text/javascript");
         }
 
+        if(resourcePath.endsWith(".svg")) {
+            return "image/svg+xml";
+        }
+
         throw new IllegalStateException();
     }
 

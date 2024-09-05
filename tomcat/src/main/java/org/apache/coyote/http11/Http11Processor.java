@@ -6,6 +6,7 @@ import org.apache.coyote.http11.handler.AbstractHandler;
 import org.apache.coyote.http11.handler.GetLoginHandler;
 import org.apache.coyote.http11.handler.GetRegisterHandler;
 import org.apache.coyote.http11.handler.HelloHandler;
+import org.apache.coyote.http11.handler.NotFoundHandler;
 import org.apache.coyote.http11.handler.PostLoginHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
@@ -84,6 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         AbstractHandler postLoginHandler = new PostLoginHandler();
         AbstractHandler getLoginHandler = new GetLoginHandler();
         AbstractHandler getRegisterHandler = new GetRegisterHandler();
+        AbstractHandler notFoundHandler = new NotFoundHandler();
 
         List<AbstractHandler> handlers = List.of(
                 helloHandler,
@@ -95,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
         AbstractHandler targetHandler = handlers.stream()
                 .filter(it -> it.canHandle(httpRequest))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElse(notFoundHandler);
 
         return targetHandler.handle(httpRequest);
     }

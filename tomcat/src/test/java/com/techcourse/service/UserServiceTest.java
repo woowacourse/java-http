@@ -66,4 +66,17 @@ class UserServiceTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Cannot find account");
     }
+
+    @DisplayName("누락된 정보가 있어서 로그인에 실패한다.")
+    @Test
+    void cannotLoginWithoutInformation() {
+        // given
+        String account = "";
+        String password = user.getPassword();
+
+        // when & then
+        assertThatThrownBy(() -> userService.login(account, password))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("Values for authorization is missing.");
+    }
 }

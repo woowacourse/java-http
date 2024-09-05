@@ -7,12 +7,17 @@ import com.techcourse.model.User;
 public class UserService {
 
     public User login(String account, String password) {
+        if (account.isEmpty() || password.isEmpty()) {
+            throw new UnauthorizedException("Values for authorization is missing.");
+        }
+
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException("Cannot find account"));
 
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException("Wrong password");
         }
+
         return user;
     }
 }

@@ -37,10 +37,6 @@ public class LoginController extends Controller {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
 
-        if (account == null || password == null) {
-            throw new UnauthorizedException("Values for authorization is missing.");
-        }
-
         User user = userService.login(account, password);
         log.info("User found: {}", user);
 

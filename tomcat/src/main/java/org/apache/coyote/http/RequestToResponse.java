@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.request.RequestLine;
@@ -16,7 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RequestToResponse {
 
@@ -33,7 +36,11 @@ public class RequestToResponse {
         }
 
         if (path.getPath().startsWith("/login")) {
-            return login(request.getRequestLine());
+            return login(request);
+        }
+
+        if (path.getPath().startsWith("/register")) {
+            return register(request);
         }
 
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()));
@@ -52,8 +59,8 @@ public class RequestToResponse {
         }
     }
 
-    private String login(RequestLine requestLine) throws IOException {
-        Path path = requestLine.getPath();
+    private String login(HttpRequest request) throws IOException {
+        Path path = request.getRequestLine().getPath();
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(MimeType.HTML.getExtension()));
         try {
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -83,5 +90,39 @@ public class RequestToResponse {
         } catch (NullPointerException e) {
             return HttpResponse.notFoundResponses().toResponse();
         }
+    }
+
+    private String register(HttpRequest request) throws IOException {
+        RequestLine requestLine = request.getRequestLine();
+        Path path = requestLine.getPath();
+        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(MimeType.HTML.getExtension()));
+        try {
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            ResponseHeader header = new ResponseHeader();
+            header.setContentType(MimeType.HTML.getContentType());
+            header.setContentLength(responseBody.getBytes().length);
+
+            if (requestLine.getMethod().equals(HttpMethod.GET)) {
+                StatusLine statusLine = new StatusLine(HttpStatus.OK);
+                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+                return response.toResponse();
+            }
+
+            if (requestLine.getMethod().equals(HttpMethod.POST)) {
+                String body = request.getBody();
+                List<String> bodies = List.of(body.split("&"));
+                Map<String, String> parsedBody = bodies.stream()
+                        .map(b -> b.split("="))
+                        .collect(Collectors.toMap(b -> b[0], b -> b[1]));
+                InMemoryUserRepository.save(new User(parsedBody.get("account"), parsedBody.get("password"), parsedBody.get("email")));
+                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+                header.setLocation(REDIRECT);
+                HttpResponse response = new HttpResponse(statusLine, header, null);
+                return response.toResponse();
+            }
+        } catch (NullPointerException e) {
+            return HttpResponse.notFoundResponses().toResponse();
+        }
+        return HttpResponse.notFoundResponses().toResponse();
     }
 }

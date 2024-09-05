@@ -102,6 +102,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String processPostRequest(String pattern, String body) {
+        if (pattern.startsWith("/login")) {
+            Map<String, String> params = parseQueryString(body);
+
+            Optional<User> byAccount = InMemoryUserRepository.findByAccount(params.get("account"));
+
+            if (byAccount.isPresent()) {
+                log.info(byAccount.get().getAccount());
+                return "/index.html";
+            }
+            return "/401.html";
+        }
 
         if (pattern.startsWith("/register")) {
             Map<String, String> params = parseQueryString(body);
@@ -166,25 +177,6 @@ public class Http11Processor implements Runnable, Processor {
             URL resource = getClass().getClassLoader().getResource("static" + pattern+ ".html");
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
         }
-
-        if (pattern.startsWith("/login") && !pattern.endsWith(".html")) {
-            String uri = pattern;
-            int index = uri.indexOf("?");
-            // String path = uri.substring(0, index);
-            String queryString = uri.substring(index + 1);
-            int separatorIndex = queryString.indexOf("&");
-            String accountQuery = queryString.substring(0, separatorIndex);
-            String passwordQuery = queryString.substring(separatorIndex + 1);
-            String account = accountQuery.substring(8);
-
-            Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
-
-            if (byAccount.isPresent()) {
-                log.info(byAccount.get().getAccount());
-                return "/index.html";
-            }
-            return "/401.html";
-		}
 
         URL resource = getClass().getClassLoader().getResource("static" + pattern);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);

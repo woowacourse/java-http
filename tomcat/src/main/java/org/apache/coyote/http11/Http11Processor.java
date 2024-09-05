@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +42,11 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
+            String statusCode = "200 OK";
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
             String uri = "/";
+            String redirectUrl = null;
             String requestLine = bufferedReader.readLine();
             if (requestLine != null) {
                 String[] requestParts = requestLine.split(" ");
@@ -75,23 +78,35 @@ public class Http11Processor implements Runnable, Processor {
                             ));
                     String account = queryParameters.get("account");
                     String password = queryParameters.get("password");
-                    User user = InMemoryUserRepository.findByAccount(account)
-                            .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
-                    if (!user.checkPassword(password)) {
-                        throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                    redirectUrl = "/index.html";
+                    try {
+                        User user = InMemoryUserRepository.findByAccount(account)
+                                .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
+                        if (!user.checkPassword(password)) {
+                            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                        }
+                        log.info("user: " + user);
+                    } catch (IllegalArgumentException e) {
+                        redirectUrl = "/401.html";
                     }
-                    log.info("user: " + user);
+                    statusCode = "302 Found";
                 }
                 final String fileName = "static/login.html";
                 responseBody = getResponseBody(fileName);
+            } else if (uri.endsWith("401.html")) {
+                final String fileName = "static" + uri;
+                responseBody = getResponseBody(fileName);
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + " ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            List<String> headers = new ArrayList<>();
+            headers.add("HTTP/1.1 " + statusCode + " ");
+            headers.add("Content-Type: " + contentType + " ");
+            headers.add("Content-Length: " + responseBody.getBytes().length + " ");
+            if (redirectUrl != null) {
+                headers.add("Location: " + redirectUrl);
+            }
+
+            final var response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,8 +12,6 @@ import java.util.Objects;
 import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Helper {
-    private static final int METHOD_POSITION = 0;
-    private static final int ENDPOINT_POSITION = 1;
     private static final String DEFAULT_EXTENSION = MimeType.HTML.getExtension();
     private static final Http11Helper instance = new Http11Helper();
 
@@ -25,24 +22,7 @@ public class Http11Helper {
         return instance;
     }
 
-    public String getRequest(BufferedReader bufferedReader) throws IOException {
-        StringBuilder request = new StringBuilder();
-        String line;
-        while (Objects.nonNull(line = bufferedReader.readLine())) {
-            request.append(line).append(System.lineSeparator());
-        }
-        return request.toString().trim();
-    }
-
-    public String extractHttpMethod(String request){
-        return request.split(" ")[METHOD_POSITION];
-    }
-
-    public String extractEndpoint(String request) {
-        return request.split(" ")[ENDPOINT_POSITION];
-    }
-
-    public Map<String, String> extractRequestBody(String request) {
+    public Map<String, String> parseRequestBody(String body) {
         Map<String, String> bodyParams = new HashMap<>();
         String[] pairs = body.split("&");
         for (String pair : pairs) {

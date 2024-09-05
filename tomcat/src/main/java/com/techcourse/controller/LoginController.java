@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.coyote.http11.Http11Helper;
+import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,15 +18,15 @@ public class LoginController extends Controller {
     private final UserService userService = new UserService();
     private final Http11Helper http11Helper = Http11Helper.getInstance();
 
-    public String login(String request) throws IOException {
+    public String login(HttpRequest request) throws IOException {
         String response = operate(request);
 
         return response;
     }
 
     @Override
-    protected String doPost(String request) throws IOException {
-        Map<String, String> requestBody = http11Helper.extractRequestBody(request);
+    protected String doPost(HttpRequest request) throws IOException {
+        Map<String, String> requestBody = http11Helper.parseRequestBody(request.getBody());
         String account = requestBody.get("account");
         String password = requestBody.get("password");
 
@@ -42,8 +43,8 @@ public class LoginController extends Controller {
     }
 
     @Override
-    protected String doGet(String request) throws IOException {
-        String endpoint = http11Helper.extractEndpoint(request);
+    protected String doGet(HttpRequest request) throws IOException {
+        String endpoint = request.getURI();
         String fileName = http11Helper.getFileName(endpoint);
         String response = http11Helper.createResponse(HttpStatus.OK, fileName);
 

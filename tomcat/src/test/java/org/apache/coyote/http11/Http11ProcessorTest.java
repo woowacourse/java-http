@@ -171,12 +171,14 @@ class Http11ProcessorTest {
     @Test
     void loginSuccess() throws IOException {
         // given
+        String requestBody = "account=validUser&password=correctPassword";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + requestBody.length(),
                 "",
-                "account=validUser&password=correctPassword");
+                requestBody);
         final var socket = new StubSocket(httpRequest);
         final var processor = new Http11Processor(socket);
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");
@@ -202,12 +204,14 @@ class Http11ProcessorTest {
     @Test
     void loginFailedInvalidPassword() throws IOException {
         // given
+        String requestBody = "account=validUser&password=wrongPassword";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + requestBody.length(),
                 "",
-                "account=validUser&password=wrongPassword");
+                requestBody);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         User mockUser = new User(1L, "validUser", "correctPassword", "correctEmail");

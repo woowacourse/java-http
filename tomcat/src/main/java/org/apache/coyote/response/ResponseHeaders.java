@@ -20,6 +20,10 @@ public class ResponseHeaders implements Assemblable {
         headers.put("Content-Length", String.valueOf(contentLength));
     }
 
+    public void location(String location) {
+        headers.put("Location", location);
+    }
+
     @Override
     public void assemble(StringBuilder builder) {
         for (Entry<String, String> entry : headers.entrySet()) {

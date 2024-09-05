@@ -83,6 +83,11 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void sendRedirect(String path) {
+        setHttpStatus(HttpStatus.FOUND);
+        addHeader(HttpHeaders.LOCATION, path);
+    }
+
     public void write() {
         String contentLength = String.valueOf(body.getBytes().length);
         headers.addHeader(HttpHeaders.CONTENT_LENGTH, contentLength);

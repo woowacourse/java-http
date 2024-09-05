@@ -20,10 +20,16 @@ public class LoginHandler implements RequestHandler {
         if (queryString.containsKey("account") && queryString.containsKey("password")) {
             String account = queryString.get("account");
             String password = queryString.get("password");
-            User user = new UserService().login(account, password);
-            log.debug("user: {}", user);
+            try {
+                User user = new UserService().login(account, password);
+                log.debug("user: {}", user);
+                httpResponse.sendRedirect("/index.html");
+            } catch (IllegalArgumentException e) {
+                httpResponse.sendRedirect("/401.html");
+            }
         }
 
+        // /login 요청인 경우
         httpResponse.setResponseBodyFile(httpRequest);
         httpResponse.write();
     }

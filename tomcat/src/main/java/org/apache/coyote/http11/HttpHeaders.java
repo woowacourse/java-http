@@ -23,6 +23,20 @@ public class HttpHeaders {
         return 0;
     }
 
+    public boolean findInCookie(String key) {
+        if (fields.containsKey("Cookie")) {
+            String value = fields.get("Cookie");
+
+            String[] valueParts = value.split("; ");
+            for (String valuePart : valueParts) {
+                if (valuePart.startsWith(key + "=")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "HttpHeaders{" +

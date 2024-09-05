@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.SplittableRandom;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -263,6 +265,13 @@ public class Http11Processor implements Runnable, Processor {
                     isValidPassword = savedUser.get().checkPassword(password);
                 }
 
+                boolean jsessionid = request.getHeaders().findInCookie("JSESSIONID");
+                String setCookie = null;
+                if (!jsessionid) {
+                    UUID idValue = UUID.randomUUID();
+                    setCookie = "Set-Cookie: JSESSIONID=" + idValue;
+                }
+
                 URL fakeResource = getClass().getResource("/static/index.html");
                 Path path = Path.of(fakeResource.toURI());
                 String contentType = Files.probeContentType(path);
@@ -275,12 +284,14 @@ public class Http11Processor implements Runnable, Processor {
 
                     final var response = String.join("\r\n",
                             "HTTP/1.1 302 Found ",
+                            setCookie,
                             "Location: http://localhost:8080/" + (isValidPassword ? "index.html" : "401.html"),
                             "Content-Type: " + contentType + ";charset=utf-8 ",
                             "Content-Length: " + newBody.getBytes().length + " ",
                             "",
                             newBody);
 
+                    System.out.println("response = " + response);
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                 } catch (Exception e) {

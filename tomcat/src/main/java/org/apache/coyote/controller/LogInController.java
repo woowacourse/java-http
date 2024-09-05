@@ -18,6 +18,6 @@ public class LogInController extends Controller {
                 .orElseThrow(IllegalArgumentException::new);
         log.info("user : {}", user);
 
-        return new ModelAndView("login", null);
+        return new ModelAndView("/login", null);
     }
 }

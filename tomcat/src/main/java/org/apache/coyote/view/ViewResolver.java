@@ -34,7 +34,7 @@ public class ViewResolver {
 
         URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
-            if (path.split("[.]").length == 0) {
+            if (path.split("[.]").length == 1) {
                 return handleNoFileExtensionRequest(path);
             }
             return responseBuilder.buildNotFoundResponse();

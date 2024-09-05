@@ -30,7 +30,7 @@ public class HttpRequest {
         Map<String, String> map = new HashMap<>();
         if (url.contains("?")) {
             String[] queryStringArgs = url.split("[?]")[1].split("[&=]");
-            for (int i = 0; i < queryStringArgs.length; i++) {
+            for (int i = 0; i < queryStringArgs.length / 2; i++) {
                 map.put(queryStringArgs[i * 2], queryStringArgs[i * 2 + 1]);
             }
         }

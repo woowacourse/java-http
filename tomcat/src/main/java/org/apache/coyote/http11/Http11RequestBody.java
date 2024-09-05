@@ -12,10 +12,6 @@ public class Http11RequestBody {
         this.value = requestBody;
     }
 
-    public boolean exists() {
-        return value.length() > 0;
-    }
-
     public Map<String, String> parseBody() {
         if (!exists()) {
             throw new UncheckedServletException(new UnsupportedOperationException("Body 가 존재하지 않는 요청입니다."));
@@ -27,5 +23,9 @@ public class Http11RequestBody {
             param.put(key, value);
         }
         return param;
+    }
+
+    private boolean exists() {
+        return value.length() > 0;
     }
 }

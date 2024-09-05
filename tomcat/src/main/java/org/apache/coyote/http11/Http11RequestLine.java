@@ -52,10 +52,6 @@ public class Http11RequestLine {
         }
     }
 
-    public String getVersionOfProtocol() {
-        return line.get("Protocol");
-    }
-
     public String getMethod() {
         return line.get("Method");
     }
@@ -73,10 +69,6 @@ public class Http11RequestLine {
         return uri;
     }
 
-    public boolean existsQueryString() {
-        return getURI().contains(QUERY_STRING_DELIMITER);
-    }
-
     public Map<String, String> getQueryParam() {
         if (!existsQueryString()) {
             throw new UncheckedServletException(new UnsupportedOperationException("QueryString 이 존재하지 않는 요청입니다."));
@@ -90,5 +82,9 @@ public class Http11RequestLine {
             queryParam.put(key, value);
         }
         return queryParam;
+    }
+
+    private boolean existsQueryString() {
+        return getURI().contains(QUERY_STRING_DELIMITER);
     }
 }

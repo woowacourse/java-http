@@ -13,7 +13,6 @@ public class Http11RequestHeaders {
     private final Map<String, String> headers;
     private final HttpCookie cookie;
 
-
     public Http11RequestHeaders(List<String> headers) {
         this.headers = new LinkedHashMap<>();
         this.cookie = new HttpCookie();

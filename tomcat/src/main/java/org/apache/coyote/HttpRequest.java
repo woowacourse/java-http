@@ -14,11 +14,5 @@ public interface HttpRequest {
 
     String getHeader(String header);
 
-    boolean isExistsQueryString();
-
-    boolean isExistsBody();
-
-    Map<String, String> getQueryParam();
-
     Map<String, String> getParsedBody();
 }

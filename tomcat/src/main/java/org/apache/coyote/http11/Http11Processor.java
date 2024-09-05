@@ -1,17 +1,13 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.net.http.HttpRequest;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Set;
 
-import jakarta.activation.MimeTypeEntry;
-
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpRequestParser;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
@@ -39,9 +35,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = HttpRequestParser.parseRequest(inputStream);
+            final HttpRequest httpRequest = HttpRequestParser.parseRequest(bufferedReader);
             final RequestHandler requestHandler = new RequestHandler();
             final String response = requestHandler.handle(httpRequest);
 

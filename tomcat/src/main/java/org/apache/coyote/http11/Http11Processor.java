@@ -43,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
         String requestUri = http11RequestHeader.getRequestUri();
         String firstValueAccept = http11RequestHeader.getFirstValueAccept();
         StatusLine statusLine = StatusLine.ok(http11RequestHeader.getHttpVersion());
+
         return Http11Response.of(statusLine, firstValueAccept, requestUri);
     }
 }

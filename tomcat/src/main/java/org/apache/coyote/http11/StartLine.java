@@ -16,15 +16,11 @@ public class StartLine {
 
     public static StartLine from(String startLine) {
         String[] splitStartLine = startLine.split(START_LINE_DELIMITER);
-        String httpMethod = splitStartLine[0];
-        String requestUri = splitStartLine[1];
-        String httpVersion = splitStartLine[2];
+        HttpMethod httpMethod = HttpMethod.from(splitStartLine[0]);
+        RequestUri requestUri = RequestUri.from(splitStartLine[1]);
+        HttpVersion httpVersion = HttpVersion.from(splitStartLine[2]);
 
-        return new StartLine(HttpMethod.from(httpMethod), RequestUri.from(requestUri), HttpVersion.from(httpVersion));
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
+        return new StartLine(httpMethod, requestUri, httpVersion);
     }
 
     public String getRequestUri() {

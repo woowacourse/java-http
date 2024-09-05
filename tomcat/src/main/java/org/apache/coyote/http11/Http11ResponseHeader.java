@@ -7,7 +7,6 @@ public class Http11ResponseHeader {
             "Content-Type: %s;charset=utf-8 ",
             "Content-Length: %d ") + "\r\n";
 
-
     private final StatusLine statusLine;
     private final ContentType contentType;
     private final int contentLength;

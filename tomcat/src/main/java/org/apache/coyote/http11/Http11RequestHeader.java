@@ -58,8 +58,4 @@ public class Http11RequestHeader {
     public String getFirstValueAccept() {
         return httpHeaders.firstValue("Accept").orElseGet(() -> "");
     }
-
-    public String getHeader(String key) {
-        return httpHeaders.firstValue(key).orElseGet(() -> "");
-    }
 }

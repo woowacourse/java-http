@@ -24,14 +24,6 @@ public class RequestUri {
         return new RequestUri(path, queryString);
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public String getQueryString() {
-        return queryString;
-    }
-
     public String getRequestUri() {
         return String.join(EMPTY_STRING, path, queryString);
     }

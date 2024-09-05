@@ -6,6 +6,9 @@ import java.nio.charset.StandardCharsets;
 
 public class Http11ResponseBody {
 
+    private static final String ROOT_PATH = "/";
+    private static final String STATIC_RESOURCE_PATH = "static";
+
     private final String body;
 
     public Http11ResponseBody(String body) {
@@ -17,11 +20,12 @@ public class Http11ResponseBody {
     }
 
     private static String getResponseBody(String resourcePath) throws IOException {
-        if (resourcePath.equals("/")) {
+        if (resourcePath.equals(ROOT_PATH)) {
             return "Hello world!";
         }
 
-        try (InputStream inputStream = Http11Response.class.getClassLoader().getResourceAsStream("static" + resourcePath)) {
+        try (InputStream inputStream = Http11Response.class.getClassLoader()
+                .getResourceAsStream(STATIC_RESOURCE_PATH + resourcePath)) {
             if (inputStream == null) {
                 throw new IOException("Resource not found: " + resourcePath);
             }

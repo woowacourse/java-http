@@ -20,7 +20,8 @@ public class Http11Response {
             throws IOException {
         Http11ResponseBody body = Http11ResponseBody.from(requestUri);
         int contentLength = body.getContentLength();
-        Http11ResponseHeader header = new Http11ResponseHeader(statusLine, ContentType.from(firstValueAccept),
+        Http11ResponseHeader header = new Http11ResponseHeader(statusLine,
+                ContentType.from(firstValueAccept),
                 contentLength);
 
         return new Http11Response(header, body);
@@ -28,6 +29,7 @@ public class Http11Response {
 
     public String getResponse() {
         String header = this.header.getHeader();
+
         return String.format(RESPONSE_FORMAT, header, body.getBody());
     }
 }

@@ -120,8 +120,6 @@ public class Http11Processor implements Runnable, Processor {
                         if (optionalUser.isPresent()) {
                             User user = optionalUser.get();
                             if (user.checkPassword(params.get("password"))) {
-                                log.info("user : {}", user);
-
                                 String response = String.join("\r\n",
                                         "HTTP/1.1 302 FOUND ",
                                         "Location: /index.html ",
@@ -130,6 +128,8 @@ public class Http11Processor implements Runnable, Processor {
 
                                 bufferedWriter.write(response);
                                 bufferedWriter.flush();
+
+                                log.info("로그인 성공! 아이디 : {}", user.getAccount());
                                 return;
                             }
                         }

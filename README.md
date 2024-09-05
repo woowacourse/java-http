@@ -39,9 +39,9 @@
 ## 🚀 2단계 - 로그인 구현하기
 
 ### 1. HTTP Status Code 302
-- [ ] 로그인 여부에 따라 다른 페이지로 이동
-  - [ ] 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
-  - [ ] 실패하면 401.html로 리다이렉트한다.
+- [x] 로그인 여부에 따라 다른 페이지로 이동
+  - [x] 성공하면 응답 헤더에 http status code를 302로 반환하고 /index.html로 리다이렉트 한다.
+  - [x] 실패하면 401.html로 리다이렉트한다.
 
 ### 2. POST 방식으로 회원가입
 - [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.

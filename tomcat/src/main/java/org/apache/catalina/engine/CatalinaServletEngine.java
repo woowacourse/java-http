@@ -4,12 +4,19 @@ import static org.apache.coyote.http11.RequestLine.REQUEST_URI;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,36 +28,40 @@ public class CatalinaServletEngine {
 
     private static final Logger log = LoggerFactory.getLogger(CatalinaServletEngine.class);
 
-    public static void processRequest(Map<RequestLine, String> requestLine, Map<String, String> requestHeaders, StringBuilder response) {
-        String contentType = convertContentTypeByAccept(requestHeaders.get("Accept"));
+    public static void processRequest(Map<RequestLine, String> requestLine, HttpResponse response) {
         if (requestLine.get(REQUEST_URI).equals("/")) {
+            String contentType = probeContentType("/index.html");
             String content = findStaticFile("/index.html");
-            response(response, content, contentType);
+            response.addHttpStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", contentType);
+            response.setBody(content);
             return;
         }
         if (requestLine.get(REQUEST_URI).startsWith("/login")) {
-            parseLogin(requestLine.get(RequestLine.REQUEST_URI));
-            String content = findStaticFile("/login.html");
-            response(response, content, contentType);
+            responseLogin(requestLine.get(REQUEST_URI), response);
             return;
         }
         String content = findStaticFile(requestLine.get(REQUEST_URI));
         if (!StringUtils.isEmpty(content)) {
-            response(response, content, contentType);
+            String contentType = probeContentType(requestLine.get(REQUEST_URI));
+            response.addHttpStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", contentType);
+            response.setBody(content);
         }
     }
 
-    private static void response(StringBuilder response, String content, String contentType) {
-        response.append("HTTP/1.1 200 OK ")
-                .append("\r\n" + "Content-Type: " + contentType + ";charset=utf-8 ")
-                .append("\r\n" + "Content-Length: " + content.getBytes().length + " " + "\r\n")
-                .append("\r\n" + content);
+    private static String probeContentType(String url) {
+        try {
+            return Files.probeContentType(Paths.get(Objects.requireNonNull(CatalinaServletEngine.class.getClassLoader()
+                    .getResource("static" + url)).toURI()));
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private static String findStaticFile(String filename) {
+    private static String findStaticFile(String url) {
         try {
-            URL resource = CatalinaServletEngine.class.getClassLoader()
-                    .getResource("static" + filename);
+            URL resource = CatalinaServletEngine.class.getClassLoader().getResource("static" + url);
             if (Objects.isNull(resource)) {
                 return StringUtils.EMPTY;
             }
@@ -60,32 +71,58 @@ public class CatalinaServletEngine {
         }
     }
 
-    private static String convertContentTypeByAccept(String accept) {
-        if (!Objects.isNull(accept) && accept.contains("text/css")) {
-            return "text/css";
-        }
-        return "text/html";
-    }
-
-    private static void parseLogin(String uri) {
-        if (!(uri.contains("?account=") && uri.contains("&password="))) {
+    private static void responseLogin(String uri, HttpResponse response) {
+        if (uri.equals("/login")) {
+            String content = findStaticFile("/login.html");
+            String contentType = probeContentType("/login.html");
+            response.addHttpStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", contentType);
+            response.setBody(content);
             return;
         }
-        String queryString = uri.substring("/login?".length());
-        int index = queryString.indexOf("&");
-        String account = queryString.substring("account=".length(), index);
-        String password = queryString.substring(index + 1 + "password=".length());
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> {
-                            log.error("account: {} 는 존재하지 않는 사용자입니다.", account);
-                            return new RuntimeException();
-                        }
-                );
+        try {
+            Map<String, String> queryString = parseQueryString(uri.substring("/login?".length()));
+            login(queryString, response);
+        } catch (RuntimeException e) {
+            response.addHttpStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/404.html");
+            response.addHeader("Content-Type", probeContentType("/404.html"));
+            response.setBody(findStaticFile("/404.html"));
+        }
+    }
+
+    private static void login(Map<String, String> queryString, HttpResponse response) {
+        String account = queryString.get("account");
+        String password = queryString.get("password");
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isEmpty()) {
+            log.error("inputAccount={}, 해당하는 사용자를 찾을 수 없습니다.", account);
+            response.addHttpStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/404.html");
+            response.addHeader("Content-Type", probeContentType("/404.html"));
+            response.setBody(findStaticFile("/404.html"));
+            return;
+        }
+        User user = optionalUser.get();
         if (user.checkPassword(password)) {
             log.info("user: {}", user);
+            response.addHttpStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/index.html");
+            response.addHeader("Content-Type", probeContentType("/index.html"));
+            response.setBody(findStaticFile("/index.html"));
             return;
         }
         log.error("user: {}, inputPassword={}, 비밀번호가 올바르지 않습니다.", user, password);
-        throw new RuntimeException();
+        response.addHttpStatus(HttpStatus.FOUND);
+        response.addHeader("Location", "/401.html");
+        response.addHeader("Content-Type", probeContentType("/401.html"));
+        response.setBody(findStaticFile("/401.html"));
+    }
+
+    private static Map<String, String> parseQueryString(String queryString) {
+        return Arrays.stream(queryString.split("&"))
+                .map(pair -> pair.split("="))
+                .filter(keyValue -> keyValue.length == 2)
+                .collect(Collectors.toMap(keyValue -> keyValue[0], keyValue -> keyValue[1]));
     }
 }

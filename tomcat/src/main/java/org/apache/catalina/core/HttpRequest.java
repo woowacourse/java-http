@@ -77,7 +77,8 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public String getMethod() {
-        return "";
+        String startLine = getStartLine();
+        return startLine.split(" ")[0];
     }
 
     @Override

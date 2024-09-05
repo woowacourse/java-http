@@ -115,7 +115,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (httpRequest.is(GET, "/login")) {
-            if (cookie.hasCookieWithName(JSESSIONID)) {
+            if (cookie.contains(JSESSIONID)) {
                 SessionManager sessionManager = SessionManager.getInstance();
                 String sessionId = cookie.get(JSESSIONID);
                 if (sessionManager.findSession(sessionId).isPresent()) {
@@ -176,28 +176,28 @@ public class Http11Processor implements Runnable, Processor {
             fileName += ".html";
         }
 
-        String responseBody = readBody(fileName);
+        String responseBody = readFile(fileName);
         ContentType contentType = ContentType.fromFileExtension(
                 fileName.substring(fileName.lastIndexOf(".")));
 
         HttpResponse httpResponse = new HttpResponse(statusCode, responseBody, contentType);
 
-        if (cookie == null || !cookie.hasCookieWithName(JSESSIONID)) {
+        if (cookie == null || !cookie.contains(JSESSIONID)) {
             HttpCookie httpCookie = new HttpCookie();
             httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
-            httpResponse.addHeader(SET_COOKIE, httpCookie.getCookiesAsString());
+            httpResponse.addHeader(SET_COOKIE, httpCookie.buildMessage());
         }
 
         return httpResponse.buildMessage();
     }
 
-    private String readBody(String fileName) {
+    private String readFile(String fileName) {
         try {
             URI uri = getClass().getClassLoader().getResource(STATIC_DIRNAME + "/" + fileName).toURI();
             Path path = Paths.get(uri);
             return Files.readString(path);
         } catch (NullPointerException e) {
-            return readBody(NOT_FOUND_FILENAME);
+            return readFile(NOT_FOUND_FILENAME);
         } catch (Exception e) {
             throw new UncheckedServletException(e);
         }

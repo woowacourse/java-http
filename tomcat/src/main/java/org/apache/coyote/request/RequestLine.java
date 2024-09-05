@@ -14,15 +14,15 @@ public class RequestLine {
     private final String path;
     private final Map<String, String> queryParameters;
 
-    public RequestLine(String requestLine) {
-        validateParameterCount(requestLine);
-        String[] parameters = requestLine.split(" ");
+    public RequestLine(String rawRequestLine) {
+        validateParameterCount(rawRequestLine);
+        String[] parameters = rawRequestLine.split(" ");
 
         validateUri(parameters[1]);
         validateHttpVersion(parameters[2]);
 
         this.method = HttpMethod.from(parameters[0]);
-        this.path = parseEndpoint(parameters[1]);
+        this.path = parsePath(parameters[1]);
         this.queryParameters = parseQueryParams(parameters[1]);
     }
 
@@ -44,7 +44,7 @@ public class RequestLine {
         }
     }
 
-    private String parseEndpoint(String uri) {
+    private String parsePath(String uri) {
         return uri.split("\\?")[0];
     }
 

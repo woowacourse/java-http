@@ -11,7 +11,7 @@ class HttpCookieTest {
     @Test
     void construct_Success() {
         HttpCookie httpCookie = new HttpCookie("name1=value1; name2=value2");
-        assertThat(httpCookie.getCookiesAsString())
+        assertThat(httpCookie.buildMessage())
                 .isIn("name1=value1; name2=value2", "name2=value2; name1=value1");
     }
 
@@ -21,7 +21,7 @@ class HttpCookieTest {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.add("name1", "value1");
         httpCookie.add("name2", "value2");
-        assertThat(httpCookie.getCookiesAsString())
+        assertThat(httpCookie.buildMessage())
                 .isIn("name1=value1; name2=value2", "name2=value2; name1=value1");
     }
 }

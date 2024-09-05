@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -14,40 +13,18 @@ import java.util.StringJoiner;
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ":";
-    private static final String QUERY_DELIMITER = "&";
-    private static final String PARAM_DELIMITER = "=";
-    private static final String QUERY_START = "\\?";
 
     private final RequestLine requestLine;
-    private final Map<String, String> queryParams = new HashMap<>();
     private final HttpHeader header;
     private final Optional<String> body;
-    private String path;
 
     public HttpRequest(InputStream in) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         String requestLine = bufferedReader.readLine();
 
         this.requestLine = RequestLine.from(requestLine);
-        parseQueryParameter();
         this.header = parseHeader(bufferedReader);
         this.body = parseBody(bufferedReader);
-    }
-
-    private void parseQueryParameter() {
-        String url = requestLine.getUrl();
-        if (!url.contains("?")) {
-            path = url;
-            return;
-        }
-        String[] urlParts = url.split(QUERY_START);
-        path = urlParts[0];
-        String queryLine = urlParts[1];
-        String[] queryList = queryLine.split(QUERY_DELIMITER);
-        for (String query : queryList) {
-            String[] queryParam = query.split(PARAM_DELIMITER);
-            queryParams.put(queryParam[0], queryParam[1]);
-        }
     }
 
     private HttpHeader parseHeader(BufferedReader bufferedReader) throws IOException {
@@ -89,7 +66,7 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public String getUrl() {
@@ -105,7 +82,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryParams() {
-        return queryParams;
+        return requestLine.getQueryParams();
     }
 
     public Optional<String> getBody() {
@@ -115,11 +92,9 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "queryMap=" + queryParams +
-                ", requestLine=" + requestLine +
+                "requestLine=" + requestLine +
                 ", header=" + header +
                 ", body=" + body +
-                ", path='" + path + '\'' +
                 '}';
     }
 }

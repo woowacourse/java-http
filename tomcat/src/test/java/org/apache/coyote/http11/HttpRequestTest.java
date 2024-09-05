@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,45 +59,5 @@ class HttpRequestTest {
 
         // then
         assertThat(request.getHeaders().getContentLength()).isEqualTo(Integer.parseInt(contentLengthValue));
-    }
-
-    @DisplayName("쿼리 파라미터 파싱에 성공한다.")
-    @Test
-    void parseQueryParameter() throws Exception {
-        // given
-        String path = "/search";
-        String queryKey1 = "name";
-        String queryValue1 = "Chocochip";
-        String queryKey2 = "age";
-        String queryValue2 = "27";
-
-        String queryString = String.join("&",
-                queryKey1 + "=" + queryValue1,
-                queryKey2 + "=" + queryValue2
-        );
-
-        String requestLine = String.join(" ",
-                "GET",
-                path + "?" + queryString,
-                "HTTP/1.1"
-        );
-
-        String httpRequest = String.join("\r\n",
-                requestLine,
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
-
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
-
-        // when
-        HttpRequest request = new HttpRequest(inputStream);
-
-        // then
-        Map<String, String> queryMap = request.getQueryParams();
-        assertThat(request.getPath()).isEqualTo(path);
-        assertThat(queryMap).containsEntry(queryKey1, queryValue1);
-        assertThat(queryMap).containsEntry(queryKey2, queryValue2);
     }
 }

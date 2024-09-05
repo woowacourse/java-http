@@ -3,13 +3,14 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("RequestLine 테스트")
+@DisplayName("요청라인 테스트")
 class RequestLineTest {
 
-    @DisplayName("Request Line 파싱에 성공한다.")
+    @DisplayName("요청 라인 파싱에 성공한다.")
     @Test
     void parseRequestLine() {
         // given
@@ -24,5 +25,36 @@ class RequestLineTest {
                 () -> assertThat(line.getUrl()).isEqualTo("/index.html"),
                 () -> assertThat(line.getVersion()).isEqualTo("HTTP/1.1")
         );
+    }
+
+    @DisplayName("쿼리 파라미터 파싱에 성공한다.")
+    @Test
+    void parseQueryParameter() {
+        // given
+        String path = "/search";
+        String queryKey1 = "name";
+        String queryValue1 = "Chocochip";
+        String queryKey2 = "age";
+        String queryValue2 = "27";
+
+        String queryString = String.join("&",
+                queryKey1 + "=" + queryValue1,
+                queryKey2 + "=" + queryValue2
+        );
+
+        String requestLine = String.join(" ",
+                "GET",
+                path + "?" + queryString,
+                "HTTP/1.1"
+        );
+
+        // when
+        RequestLine line = RequestLine.from(requestLine);
+
+        // then
+        Map<String, String> queryMap = line.getQueryParams();
+        assertThat(line.getPath()).isEqualTo(path);
+        assertThat(queryMap).containsEntry(queryKey1, queryValue1);
+        assertThat(queryMap).containsEntry(queryKey2, queryValue2);
     }
 }

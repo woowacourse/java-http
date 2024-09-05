@@ -48,24 +48,17 @@ public class Http11Response implements HttpResponse {
         private String body;
 
         private Http11ResponseBuilder() {
+            this.protocol = "HTTP/1.1";
             this.headers = new LinkedHashMap<>();
             this.body = "";
         }
 
-        public Http11ResponseBuilder protocol(String protocol) {
-            this.protocol = protocol;
+        public Http11ResponseBuilder status(HttpStatus status) {
+            this.statusCode = status.statusCode();
+            this.statusMessage = status.statusMessage();
             return this;
         }
 
-        public Http11ResponseBuilder statusCode(int statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public Http11ResponseBuilder statusMessage(String statusMessage) {
-            this.statusMessage = statusMessage;
-            return this;
-        }
 
         public Http11ResponseBuilder appendHeader(String key, String value) {
             this.headers.put(key, value);

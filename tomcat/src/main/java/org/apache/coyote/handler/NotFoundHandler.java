@@ -7,7 +7,7 @@ import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
+import org.apache.coyote.http11.HttpStatus;
 
 public class NotFoundHandler implements RequestHandler {
 
@@ -18,11 +18,8 @@ public class NotFoundHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        Http11ResponseBuilder responseBuilder = Http11Response.builder()
-                .protocol("HTTP/1.1");
-        return responseBuilder
-                .statusCode(404)
-                .statusMessage("Not Found")
+        return Http11Response.builder()
+                .status(HttpStatus.NOT_FOUND)
                 .appendHeader("Content-Type", "text/html;charset=utf-8 ")
                 .body(readFile("/404.html"))
                 .build();

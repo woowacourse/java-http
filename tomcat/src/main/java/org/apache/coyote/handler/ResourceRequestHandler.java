@@ -9,7 +9,7 @@ import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
+import org.apache.coyote.http11.HttpStatus;
 
 public class ResourceRequestHandler implements RequestHandler {
 
@@ -20,11 +20,8 @@ public class ResourceRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        Http11ResponseBuilder responseBuilder = Http11Response.builder()
-                .protocol(httpRequest.getVersionOfProtocol());
-        return responseBuilder
-                .statusCode(200)
-                .statusMessage("OK")
+        return Http11Response.builder()
+                .status(HttpStatus.OK)
                 .appendHeader("Content-Type", getContentType(httpRequest))
                 .body(readFile(httpRequest.getPath()))
                 .build();

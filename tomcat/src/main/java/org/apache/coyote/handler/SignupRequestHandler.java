@@ -10,6 +10,7 @@ import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.HttpStatus;
 
 public class SignupRequestHandler implements RequestHandler {
 
@@ -27,9 +28,7 @@ public class SignupRequestHandler implements RequestHandler {
         validateExists(newUser);
         InMemoryUserRepository.save(newUser);
         return Http11Response.builder()
-                .protocol(httpRequest.getVersionOfProtocol())
-                .statusCode(302)
-                .statusMessage("Found")
+                .status(HttpStatus.FOUND)
                 .appendHeader("Location", "/index.html")
                 .build();
     }

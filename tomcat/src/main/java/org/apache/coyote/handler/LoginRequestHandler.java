@@ -11,7 +11,7 @@ import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.Http11Method;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Http11Response.Http11ResponseBuilder;
+import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +28,6 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        Http11ResponseBuilder responseBuilder = Http11Response.builder()
-                .protocol(httpRequest.getVersionOfProtocol());
         Map<String, String> param = httpRequest.getParsedBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(param.get("account"));
         String redirectPath = "/401.html";
@@ -37,9 +35,8 @@ public class LoginRequestHandler implements RequestHandler {
             redirectPath = "/index.html";
             log.info("로그인 성공 : " + user.get().getAccount());
         }
-        return responseBuilder
-                .statusCode(302)
-                .statusMessage("Found")
+        return Http11Response.builder()
+                .status(HttpStatus.FOUND)
                 .appendHeader("Location", redirectPath)
                 .build();
     }

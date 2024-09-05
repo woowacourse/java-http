@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             String requestUrl = request.getFirst()
                     .split(" ")[1];
 
-            String response = getResponse(requestUrl, "200 OK");
+            String response = getResponse(requestUrl, HttpStatus.OK);
             if (requestUrl.startsWith("/login") && method.equals("POST")) {
                 response = login(body);
             }
@@ -100,15 +100,15 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
     }
 
-    private String getResponse(String requestUrl, String responseCode) throws IOException {
+    private String getResponse(String requestUrl, HttpStatus httpStatus) throws IOException {
         String responseBody = getResponseBody(requestUrl);
 
         String responseHeader = String.join("\r\n",
-                "HTTP/1.1 " + responseCode + " ",
+                "HTTP/1.1 " + httpStatus.toHttpHeader() + " ",
                 "Content-Type: " + ContentType.findContentType(requestUrl) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ");
 
-        if (responseCode.equals("302 Redirected")) {
+        if (httpStatus.isFound()) {
             return String.join("\r\n", responseHeader, "Location: " + requestUrl + " ");
         }
 
@@ -150,11 +150,11 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return getResponse("/401.html", "302 Redirected");
+            return getResponse("/401.html", HttpStatus.FOUND);
         }
 
         log.info("로그인 성공 :: account = {}", user.get().getAccount());
-        return getResponse("/index.html", "302 Redirected");
+        return getResponse("/index.html", HttpStatus.FOUND);
     }
 
     private String register(Map<String, String> body) throws IOException {
@@ -162,6 +162,6 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
 
         log.info("회원 가입 성공 :: account = {}", user.getAccount());
-        return getResponse("/index.html", "302 Redirected");
+        return getResponse("/index.html", HttpStatus.FOUND);
     }
 }

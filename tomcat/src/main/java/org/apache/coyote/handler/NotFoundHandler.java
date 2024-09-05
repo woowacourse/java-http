@@ -14,7 +14,7 @@ public class NotFoundHandler implements RequestHandler {
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
-        return false;
+        return true;
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.handler.LoginHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

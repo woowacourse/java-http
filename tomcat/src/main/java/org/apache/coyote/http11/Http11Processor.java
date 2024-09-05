@@ -229,8 +229,8 @@ public class Http11Processor implements Runnable, Processor {
         return String.join(
                 "\r\n",
                 "HTTP/1.1 " + statusCode.getValue() + " ",
-                CONTENT_TYPE + ": text/html;charset=utf-8 ",
-                "Content-Length: " + content.getBytes().length + " ",
+                CONTENT_TYPE + ": " + "text/html;charset=utf-8 ",
+                CONTENT_LENGTH + ": " + content.getBytes().length + " ",
                 "",
                 content
         );

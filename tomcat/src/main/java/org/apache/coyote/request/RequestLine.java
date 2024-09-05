@@ -25,7 +25,7 @@ public class RequestLine {
 
     private void validLength(String[] requestLines) {
         if (requestLines.length != VALID_REQUEST_LENGTH) {
-            throw new IllegalArgumentException("Request line is invalid");
+            throw new IllegalArgumentException("잘못된 Request line입니다.");
         }
     }
 

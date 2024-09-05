@@ -17,7 +17,7 @@ public class RequestParser {
     private RequestLine getRequestLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
         if (requestLine == null) {
-            throw new IllegalArgumentException("Request line is null");
+            throw new IllegalArgumentException("Request line은 필수입니다.");
         }
         return new RequestLine(requestLine);
     }
@@ -32,7 +32,7 @@ public class RequestParser {
             }
             String[] parts = header.split(": ");
             if (parts.length != 2) {
-                throw new IllegalArgumentException("Invalid header: " + header);
+                throw new IllegalArgumentException("올바르지 않은 Request header 포맷입니다. header: %s".formatted(header));
             }
             headers.put(parts[0], parts[1]);
         }

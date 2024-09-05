@@ -25,7 +25,7 @@ public class RequestBody {
 
     public String getValue(String key) {
         if (!body.containsKey(key)) {
-            throw new IllegalArgumentException("Body not found");
+            throw new IllegalArgumentException("Request body가 존재하지 않습니다.");
         }
         return body.get(key);
     }

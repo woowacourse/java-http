@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +46,17 @@ public class Http11Processor implements Runnable, Processor {
             if(urlPath.equals("/index.html")) {
                 printFileResource("static/index.html", outputStream);
                 return;
+            }
+            if(urlPath.startsWith("/login")) {
+                String parameters = urlPath.substring(7);
+                String account = parameters.split("&")[0].split("=")[1];
+                String password = parameters.split("&")[1].split("=")[1];
+                User user = InMemoryUserRepository.findByAccount(account)
+                    .orElse(new User("guest", "guest", "guest"));
+                if(user.checkPassword(password)) {
+                    System.out.println("user : " + user);
+                }
+                printFileResource("static/login.html", outputStream);
             }
             if(urlPath.startsWith("/css") || urlPath.startsWith("/js") || urlPath.startsWith("/assets")) {
                 printFileResource("static" + urlPath, outputStream);

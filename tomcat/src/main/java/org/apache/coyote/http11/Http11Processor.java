@@ -36,12 +36,23 @@ public class Http11Processor implements Runnable, Processor {
             FileReader fileReader = new FileReader(resourceHandler);
             String responseBody = fileReader.read();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String response = "";
+            if (request.isCss()) {
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
+            else {
+                response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

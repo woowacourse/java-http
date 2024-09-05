@@ -11,7 +11,7 @@ Connection: keep-alive
 Accept: */*
 ```
 
-- [ ] CSS 지원 기능 구현
+- [x] CSS 지원 기능 구현
 
 ```text
 GET /css/styles.css HTTP/1.1

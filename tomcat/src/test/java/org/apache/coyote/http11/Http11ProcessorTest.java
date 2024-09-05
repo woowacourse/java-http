@@ -118,4 +118,29 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
     }
+
+    @Test
+    @DisplayName("로그인 실패하면 sessionId를 만들지 않는다.")
+    void doNotGenerateSESSIONID() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 3863",
+                "Content-Type: application/x-www.form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=redddy&password=486 ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).doesNotContain("JSESSIONID");
+    }
 }

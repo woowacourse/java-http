@@ -74,7 +74,10 @@ public class Http11Processor implements Runnable, Processor {
 
                     final HttpCookie httpCookie = HttpCookie.parse(cookie);
                     if (httpCookie.containsKey("JSESSIONID")) {
-                        log.info("이미 로그인 유저");
+                        final String jSessionId = httpCookie.get("JSESSIONID");
+                        final Session session = sessionManager.findSession(jSessionId);
+                        final User sessionUser = (User) session.getAttribute("user");
+                        log.info("이미 로그인 유저 = {}", sessionUser);
                         redirectIndex(response, request, result);
                     } else {
                         generateOKResponse(response, request, result);
@@ -94,13 +97,9 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (path.equals("/login")) {
                     // POST /login
-                    final UUID uuid = UUID.randomUUID();
-                    response.setCookie("JSESSIONID=" + uuid);
-                    final var session = new Session(uuid.toString());
                     final var user = createResponse(body, request, response, result);
-                    session.setAttribute("user", user);
-                    sessionManager.add(session);
-                    log.info("set cookie = {}", uuid);
+
+                    log.info("user login = {}", user);
                 } else if (path.equals("/register")) {
                     // POST /register
                     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
@@ -151,22 +150,22 @@ public class Http11Processor implements Runnable, Processor {
         final String account = queryString.get("account");
         log.info("account = {}", account);
         try {
-            response.setStatusCode(302);
-            response.setSc("FOUND");
-            response.setContentType(request.getContentType());
-            response.setContentLength(result.getBytes().length);
-            response.setSourceCode(result);
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
             final String password = queryString.get("password");
             if (!user.checkPassword(password)) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
             }
-            response.setLocation("index.html");
-            log.info("user = {}", user);
+            redirectIndex(response, request, result);
+            final UUID uuid = UUID.randomUUID();
+            response.setCookie("JSESSIONID=" + uuid);
+            final var session = new Session(uuid.toString());
+            session.setAttribute("user", user);
+            sessionManager.add(session);
             return user;
         } catch (final IllegalArgumentException e) {
             log.warn(e.getMessage());
+            redirectIndex(response, request, result);
             response.setLocation("401.html");
             return null;
         }

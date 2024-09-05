@@ -31,6 +31,10 @@ public class HttpCookie {
         return header.containsKey(key);
     }
 
+    public String get(final String key) {
+        return header.get(key);
+    }
+
     public Map<String, String> getHeader() {
         return Collections.unmodifiableMap(header);
     }

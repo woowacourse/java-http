@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,27 +76,23 @@ public class Http11Processor implements Runnable, Processor {
                 Hello world!""";
     }
 
-    private String login(HttpRequest request) throws IOException {
+    private String login(HttpRequest request) {
         String account = request.getParameter("account");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-        if (!user.checkPassword(request.getParameter("password"))) {
-            throw new IllegalArgumentException("Password or email is not correct");
+        if (user.isEmpty() || !user.get().checkPassword(request.getParameter("password"))) {
+            return """
+                HTTP/1.1 302 Found \r
+                Location: /401.html \r
+                """;
         }
 
-        log.info("user : {}", user);
+        log.info("user : {}", user.get());
 
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final String responseBody = new String(Files.readAllBytes(Path.of(resource.getPath())));
-        return String.join(
-                CRLF,
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
+        return """
+                HTTP/1.1 302 Found \r
+                Location: /index.html \r
+                """;
     }
 
     private String getStaticResource(HttpRequest request) throws IOException {

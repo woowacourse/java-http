@@ -22,6 +22,10 @@ public class Request {
         return requestLine.target();
     }
 
+    public String getHttpVersion() {
+        return requestLine.httpVersion();
+    }
+
     @Override
     public String toString() {
         return "Request{" +

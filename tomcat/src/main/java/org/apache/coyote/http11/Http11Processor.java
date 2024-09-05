@@ -65,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
             Content content = getContent(request);
 
             return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    String.format("%s 200 OK ", request.getHttpVersion()),
                     String.format("Content-Type: %s;charset=utf-8 ", content.getContentType()),
                     "Content-Length: " + content.getContent().getBytes().length + " ",
                     "",

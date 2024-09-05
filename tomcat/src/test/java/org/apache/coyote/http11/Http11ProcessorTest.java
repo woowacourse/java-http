@@ -78,12 +78,17 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        assert resource != null;
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: 211991 \r\n" +
+                "Content-Length: " + getFileSize(resource) + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private long getFileSize(URL resource) {
+        return new File(resource.getFile()).length();
     }
 }

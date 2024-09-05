@@ -1,7 +1,4 @@
-package org.apache.coyote.common;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Header {
+class Header {
 
     private static final String PAIR_DELIMITER = "=";
 

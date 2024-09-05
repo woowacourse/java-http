@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http11;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

@@ -1,11 +1,11 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class QueryParameter {
+class QueryParameter {
 
     private static final String PAIR_DELIMITER = "=";
     private static final String PARAMETER_DELIMITER = "&";

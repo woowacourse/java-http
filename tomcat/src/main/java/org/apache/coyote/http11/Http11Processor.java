@@ -4,8 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.common.Header;
-import org.apache.coyote.common.QueryParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

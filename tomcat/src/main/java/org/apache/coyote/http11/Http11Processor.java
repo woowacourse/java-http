@@ -2,17 +2,12 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.Controller;
 import com.techcourse.controller.FrontController;
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest request = HttpRequest.from(input);
 
-            if(request.getPath().contains(".")) {
+            if(request.hasFilePath()) {
                 File requestFile = getRequestFile(request);
                 String mimeType = Files.probeContentType(requestFile.toPath());
                 final var response = String.join("\r\n",

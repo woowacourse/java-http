@@ -1,13 +1,10 @@
 package org.apache.coyote.http11;
 
-import com.sun.jdi.Value;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 
 //TODO: getAccept에서 text/html 등 리턴하도록 만들
@@ -82,12 +79,14 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public boolean containsHeader(String header) {
-        for (Entry<String, String> entry : headers.entrySet()) {
-            if(entry.getKey().equals(header)) {
+    public boolean hasFilePath() {
+        if(path.contains(".")) {
+            int extensionIndex = path.indexOf(".");
+            if(path.substring(extensionIndex).length() > 1) {
                 return true;
             }
         }
+
         return false;
     }
 

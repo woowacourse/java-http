@@ -46,20 +46,20 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()
         ) {
             HttpRequest request = getRequest(inputStream);
-            String method = request.getMethod();
+            HttpMethod method = request.getMethod();
             String requestUrl = request.getRequestUrl();
 
             HttpHeader responseHeader = new HttpHeader();
             String response = getResponse(requestUrl, HttpStatus.OK, responseHeader);
-            if (requestUrl.startsWith("/login") && method.equals("POST")) {
+            if (requestUrl.startsWith("/login") && method.isPost()) {
                 response = login(request.getBody(), request.getCookie(), responseHeader);
             }
 
-            if (requestUrl.startsWith("/login") && method.equals("GET")) {
+            if (requestUrl.startsWith("/login") && method.isGet()) {
                 response = getLoginPage(request.getCookie(), responseHeader);
             }
 
-            if (requestUrl.startsWith("/register") && method.equals("POST")) {
+            if (requestUrl.startsWith("/register") && method.isPost()) {
                 response = register(request.getBody(), responseHeader);
             }
 

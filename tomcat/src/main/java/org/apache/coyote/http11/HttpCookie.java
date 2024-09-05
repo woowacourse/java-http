@@ -20,7 +20,6 @@ public class HttpCookie {
 
         Map<String, String> cookies = Arrays.stream(rawCookies.replaceAll(" ", "").split(";"))
                 .collect(Collectors.toMap(cookie -> cookie.split("=")[0], cookie -> cookie.split("=")[1]));
-
         return new HttpCookie(cookies);
     }
 

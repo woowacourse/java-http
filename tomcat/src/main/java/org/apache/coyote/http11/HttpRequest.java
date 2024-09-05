@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private final String method;
+    private final HttpMethod method;
     private final String requestUrl;
     private final HttpHeader header;
     private final HttpCookie httpCookie;
     private final Map<String, String> body;
 
-    public HttpRequest(HttpHeader header, String method, String requestUrl, HttpCookie httpCookie, Map<String, String> body) {
+    public HttpRequest(HttpHeader header, HttpMethod method, String requestUrl, HttpCookie httpCookie, Map<String, String> body) {
         this.header = header;
         this.method = method;
         this.requestUrl = requestUrl;
@@ -23,9 +23,9 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(List<String> request) {
-        String requestLine = request.getFirst();
-        String method = requestLine.split(" ")[0];
-        String requestUrl = requestLine.split(" ")[1];
+        String[] requestLine = request.getFirst().split(" ");
+        HttpMethod method = HttpMethod.valueOf(requestLine[0]);
+        String requestUrl = requestLine[1];
 
         Map<String, String> body = getBody(request);
         HttpHeader httpHeader = HttpHeader.from(request);
@@ -45,7 +45,7 @@ public class HttpRequest {
                 .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

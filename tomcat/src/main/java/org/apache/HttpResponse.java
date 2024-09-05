@@ -6,9 +6,9 @@ import java.util.List;
 
 public class HttpResponse {
     List<String> headers;
-    String responseBody;
+    byte[] responseBody;
 
-    private HttpResponse(List<String> headers, String responseBody) {
+    private HttpResponse(List<String> headers, byte[] responseBody) {
         this.headers = headers;
         this.responseBody = responseBody;
     }
@@ -18,6 +18,15 @@ public class HttpResponse {
         headers.add("HTTP/1.1 200 OK ");
         headers.add("Content-Type: " + getContentType(uri) + ";charset=utf-8 ");
         headers.add("Content-Length: " + calculateContentLength(responseBody) + " ");
+
+        return new HttpResponse(headers, responseBody.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static HttpResponse okWithContentType(String uri, byte[] responseBody, String contentType) {
+        List<String> headers = new ArrayList<>();
+        headers.add("HTTP/1.1 200 OK ");
+        headers.add("Content-Type: " + contentType + " ");
+        headers.add("Content-Length: " + responseBody.length + " ");
 
         return new HttpResponse(headers, responseBody);
     }
@@ -29,7 +38,17 @@ public class HttpResponse {
         headers.add("Content-Length: " + calculateContentLength(redirectUri) + " ");
         headers.add("Location: " + redirectUri);
 
-        return new HttpResponse(headers, redirectUri);
+        return new HttpResponse(headers, redirectUri.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static HttpResponse notFound() {
+        List<String> headers = new ArrayList<>();
+        headers.add("HTTP/1.1 404 Not Found");
+        headers.add("Content-Type: text/html; charset=UTF-8");
+        String body = "<h1>404 - Not Found</h1>";
+        headers.add("Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length);
+
+        return new HttpResponse(headers, body.getBytes(StandardCharsets.UTF_8));
     }
 
     private static int calculateContentLength(String content) {
@@ -56,7 +75,13 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        String responseString = String.join("\r\n", headers) + "\r\n" + "\r\n" + responseBody;
-        return responseString.getBytes();
+        String headerString = String.join("\r\n", headers) + "\r\n" + "\r\n";
+        byte[] headerBytes = headerString.getBytes(StandardCharsets.UTF_8);
+
+        byte[] fullResponse = new byte[headerBytes.length + responseBody.length];
+        System.arraycopy(headerBytes, 0, fullResponse, 0, headerBytes.length);
+        System.arraycopy(responseBody, 0, fullResponse, headerBytes.length, responseBody.length);
+
+        return fullResponse;
     }
 }

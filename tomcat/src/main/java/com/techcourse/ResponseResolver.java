@@ -5,7 +5,10 @@ import org.apache.HttpResponse;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,9 +51,17 @@ public class ResponseResolver {
             }
             return HttpResponse.redirect(uri, "/index.html");
         }
+        if (uri.startsWith("/favicon.ico")) {
+            var favicon = controller.serveFavicon();
+            if (favicon == null) {
+                return HttpResponse.notFound();
+            }
+            return HttpResponse.okWithContentType("favicon.ico", favicon, "image/x-icon");
+        }
         var responseBody = controller.getUriPage(uri);
         return HttpResponse.ok(uri, responseBody);
     }
+
 
     private HttpResponse processPostRequest(String uri, Map<String, String> params) {
         if (uri.startsWith("/login")) {

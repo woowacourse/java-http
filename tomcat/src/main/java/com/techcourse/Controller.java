@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,14 @@ public class Controller {
 	public String getUriPage(String uri) throws IOException {
 		URL resource = getClass().getClassLoader().getResource("static" + uri);
 		return new String(Files.readAllBytes(new File(resource.getFile()).toPath()), StandardCharsets.UTF_8);
+	}
+
+	public byte[] serveFavicon() throws IOException {
+		URL resource = getClass().getClassLoader().getResource("static/favicon.ico");
+		if (resource != null) {
+			return Files.readAllBytes(new File(resource.getFile()).toPath());
+		}
+		return null;
 	}
 
 	public User login(String account, String password) {

@@ -10,13 +10,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -51,28 +55,33 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
+            // 엔드포인트 변경
             final String requestUri = header.getFirst();
-            final String[] elements = requestUri.split(" ");
-            final String endpoint = elements[1];
+            String endpoint = requestUri.split(" ")[1];
 
-            String responseBody = "";
-            String contentType = "text/html";
-            if (endpoint.equals("/")) {
-                responseBody = "Hello world!";
-            } else {
-                if (endpoint.length() > 3) {
-                    if (endpoint.substring(endpoint.length()-3, endpoint.length()).equals("css")) {
-                        contentType = "text/css";
-                    }
-                }
-                final URL resource = Http11Processor.class.getResource("/static" + endpoint);
-                if (resource == null) {
-                    return;
-                }
-                final Path path = Paths.get(resource.toURI()).toFile().toPath();
-
-                responseBody = Files.readString(path);
+            int queryIndex = endpoint.indexOf("?");
+            if (queryIndex != -1) {
+                String queryString = endpoint.substring(queryIndex + 1);
+                endpoint = endpoint.substring(0, queryIndex);
+                checkLoginQuery(queryString);
             }
+            List<String> fileExtensions = List.of(".css", ".ico", ".html", ".js");
+            boolean existExtension = false;
+            for (String extension : fileExtensions) {
+                if (endpoint.endsWith(extension)) {
+                    existExtension = true;
+                    break;
+                }
+            }
+            if (!existExtension && !endpoint.equals("/")) {
+                endpoint += ".html";
+            }
+
+            String responseBody = makeResponseBody(endpoint);
+            if (responseBody == null) {
+                return;
+            }
+            String contentType = makeContentType(endpoint);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -89,5 +98,39 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void checkLoginQuery(final String queryString) {
+        Map<String, String> queryStorage = new HashMap<>();
+        for (String query : queryString.split("&")) {
+            String[] keyValue = query.split("=");
+            queryStorage.put(keyValue[0], keyValue[1]);
+        }
+
+        User user = InMemoryUserRepository.findByAccount(queryStorage.get("account"))
+                .orElseThrow(() -> new IllegalArgumentException("해당 account가 존재하지 않습니다."));
+        if (user.checkPassword(queryStorage.get("password"))) {
+            log.info("user : {}", user);
+        }
+    }
+
+    private String makeContentType(final String endpoint) {
+        if (endpoint.length() > 3 && endpoint.endsWith("css")) {
+                return "text/css";
+            }
+
+        return "text/html";
+    }
+
+    private String makeResponseBody(final String endpoint) throws URISyntaxException, IOException {
+        if (endpoint.equals("/")) {
+            return "Hello world!";
+        }
+        final URL resource = Http11Processor.class.getResource("/static" + endpoint);
+        if (resource == null) {
+            return null;
+        }
+        final Path path = Paths.get(resource.toURI()).toFile().toPath();
+        return Files.readString(path);
     }
 }

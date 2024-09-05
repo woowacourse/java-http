@@ -276,6 +276,10 @@ public class HttpRequest implements HttpServletRequest {
 
     @Override
     public String getParameter(String s) {
+        String[] parameterValues = getParameterValues(s);
+        if (parameterValues.length == 0) {
+            return null;
+        }
         return getParameterValues(s)[0];
     }
 
@@ -288,7 +292,10 @@ public class HttpRequest implements HttpServletRequest {
     @Override
     public String[] getParameterValues(String s) {
         Map<String, String[]> map = getParameterMap();
-        return map.get(s);
+        if (map.containsKey(s)) {
+            return map.get(s);
+        }
+        return new String[0];
     }
 
     @Override

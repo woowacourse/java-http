@@ -34,6 +34,8 @@ public class LoginServlet extends HttpServlet {
         setResponseBody(resp, fileContent);
 
         loggingUser(req);
+
+
     }
 
     // TODO: 리팩토링 필요 중복 발생
@@ -56,9 +58,12 @@ public class LoginServlet extends HttpServlet {
     }
 
     private void loggingUser(HttpServletRequest req) {
-        User user = InMemoryUserRepository.findByAccount(req.getParameter("account"))
-                .orElseThrow(NoSuchElementException::new);
+        String account = req.getParameter("account");
+        if (account == null) {
+            return;
+        }
 
+        User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchElementException::new);
         if (user.checkPassword(req.getParameter("password"))) {
             log.info("user : {}", user);
         }

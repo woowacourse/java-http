@@ -4,13 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Http11Response {
+public class HttpResponse {
 
     private final Map<String, String> headers = new LinkedHashMap<>();
     private int statusCode = 200;
     private String body;
 
-    public Http11Response() {
+    public HttpResponse() {
     }
 
     private String parseResponseLine() {

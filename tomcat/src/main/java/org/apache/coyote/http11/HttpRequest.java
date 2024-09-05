@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Collections;
 import java.util.Map;
 
-public class Http11Request {
+public class HttpRequest {
 
     private final String httpMethod;
     private final String uri;
@@ -11,8 +11,8 @@ public class Http11Request {
     private final Map<String, String> headers;
     private final String body;
 
-    public Http11Request(String httpMethod, String uri, Map<String, String> queryParams, Map<String, String> headers,
-                         String body) {
+    public HttpRequest(String httpMethod, String uri, Map<String, String> queryParams, Map<String, String> headers,
+                       String body) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.queryParams = queryParams;
@@ -20,9 +20,9 @@ public class Http11Request {
         this.body = body;
     }
 
-    public Http11Cookie getCookies() {
+    public HttpCookie getCookies() {
         String cookies = headers.getOrDefault("Cookie", "");
-        return new Http11Cookie(cookies);
+        return new HttpCookie(cookies);
     }
 
     public String getHttpMethod() {

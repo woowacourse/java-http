@@ -36,8 +36,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            Http11Request request = RequestExtractor.extract(inputStream);
-            Http11Response response = new Http11Response();
+            HttpRequest request = HttpRequestExtractor.extract(inputStream);
+            HttpResponse response = new HttpResponse();
             execute(request, response);
 
             outputStream.write(response.getResponse().getBytes());
@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void execute(Http11Request request, Http11Response response) throws IOException, URISyntaxException {
+    private void execute(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         String httpMethod = request.getHttpMethod();
         String path = request.getPath();
         log.info("request path = {}", path);
@@ -71,8 +71,8 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Content-Length", decideContentLengthHeader(response));
     }
 
-    private void checkLogin(Http11Request request, Http11Response response) {
-        Http11Cookie cookies = request.getCookies();
+    private void checkLogin(HttpRequest request, HttpResponse response) {
+        HttpCookie cookies = request.getCookies();
         if (!cookies.containsCookieKey("JSESSIONID")) {
             return;
         }
@@ -84,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void doLogin(Http11Request request, Http11Response response) throws IOException, URISyntaxException {
+    private void doLogin(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         String requestBody = request.getBody();
         Map<String, String> fields = new HashMap<>();
         String[] rawFields = requestBody.split("&");
@@ -120,7 +120,7 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
     }
 
-    private void doRegister(Http11Request request, Http11Response response) {
+    private void doRegister(HttpRequest request, HttpResponse response) {
         String requestBody = request.getBody();
 
         Map<String, String> fields = new HashMap<>();
@@ -142,10 +142,10 @@ public class Http11Processor implements Runnable, Processor {
         response.addHeader("Location", "/index.html");
     }
 
-    private void refresh(Http11Request request, Http11Response response) {
+    private void refresh(HttpRequest request, HttpResponse response) {
         Map<String, String> headers = request.getHeaders();
         String rawCookies = headers.getOrDefault("Cookie", "");
-        Http11Cookie cookie = new Http11Cookie(rawCookies);
+        HttpCookie cookie = new HttpCookie(rawCookies);
 
         if (!cookie.containsCookieKey("JSESSIONID")) {
             response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
@@ -154,7 +154,7 @@ public class Http11Processor implements Runnable, Processor {
 
     // 아래는 응답 생성 관련
 
-    private String decideResponseBody(Http11Request request) throws IOException, URISyntaxException {
+    private String decideResponseBody(HttpRequest request) throws IOException, URISyntaxException {
         String requestPath = request.getPath();
         if (requestPath.equals("/")) {
             return FileReader.readResourceFile();
@@ -170,7 +170,7 @@ public class Http11Processor implements Runnable, Processor {
         return requestPath + ".html";
     }
 
-    private String decideContentTypeHeader(Http11Request request) {
+    private String decideContentTypeHeader(HttpRequest request) {
         Map<String, String> headers = request.getHeaders();
         String accepts = headers.getOrDefault("Accept", "");
         String mediaType = Arrays.stream(accepts.split(","))
@@ -181,7 +181,7 @@ public class Http11Processor implements Runnable, Processor {
         return String.format("text/%s;charset=utf-8", mediaType);
     }
 
-    private String decideContentLengthHeader(Http11Response response) {
+    private String decideContentLengthHeader(HttpResponse response) {
         String responseBody = response.getBody();
         return String.valueOf(responseBody.getBytes().length);
     }

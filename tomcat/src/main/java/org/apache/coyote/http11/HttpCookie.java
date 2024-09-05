@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Http11Cookie {
+public class HttpCookie {
 
     private final Map<String, String> cookies = new HashMap<>();
 
-    public Http11Cookie(String rawCookies) {
+    public HttpCookie(String rawCookies) {
         if (rawCookies.isEmpty()) {
             return;
         }

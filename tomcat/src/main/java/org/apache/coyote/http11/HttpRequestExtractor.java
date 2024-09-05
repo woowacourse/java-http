@@ -7,9 +7,9 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestExtractor {
+public class HttpRequestExtractor {
 
-    public static Http11Request extract(InputStream inputStream) throws IOException {
+    public static HttpRequest extract(InputStream inputStream) throws IOException {
         InputStreamReader reader = new InputStreamReader(inputStream);
         BufferedReader br = new BufferedReader(reader);
 
@@ -21,7 +21,7 @@ public class RequestExtractor {
         String body = extractBody(br);
         // TODO: 메서드 호출 순서에 의존
 
-        return new Http11Request(httpMethod, uri, queryParams, headers, body);
+        return new HttpRequest(httpMethod, uri, queryParams, headers, body);
     }
 
     private static String extractHttpMethod(String requestLine) {

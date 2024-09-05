@@ -67,13 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = new HttpRequest(requestLine, httpHeader, requestBody);
 
-            HttpCookie cookie = null;
-
-            if (httpHeader.contains(COOKIE)) {
-                cookie = new HttpCookie(httpHeader.get(COOKIE));
-            }
-
-            final String response = makeResponse(httpRequest, cookie);
+            final String response = makeResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -114,13 +108,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(HttpRequest httpRequest, HttpCookie cookie) {
+    private String makeResponse(HttpRequest httpRequest) {
+        HttpCookie cookie = new HttpCookie(httpRequest.getHeader(COOKIE));
+
         if (httpRequest.is(GET, "/")) {
             return makeResponseMessageFromText("Hello world!", HttpStatusCode.OK);
         }
 
         if (httpRequest.is(GET, "/login")) {
-            if (cookie != null && cookie.hasCookieWithName(JSESSIONID)) {
+            if (cookie.hasCookieWithName(JSESSIONID)) {
                 SessionManager sessionManager = SessionManager.getInstance();
                 String sessionId = cookie.get(JSESSIONID);
                 if (sessionManager.findSession(sessionId).isPresent()) {

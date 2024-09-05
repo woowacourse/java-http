@@ -24,4 +24,8 @@ public class HttpRequest {
     public String getPath() {
         return requestLine.getPath();
     }
+
+    public String getHeader(String name) {
+        return httpHeader.get(name);
+    }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,6 +19,10 @@ public class HttpCookie {
     }
 
     private Map<String, String> parse(String rawCookies) {
+        if (rawCookies == null) {
+            return Collections.emptyMap();
+        }
+
         return Arrays.stream(rawCookies.split("; "))
                 .map(cookie -> cookie.split("="))
                 .filter(data -> data.length == 2)

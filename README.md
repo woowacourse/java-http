@@ -44,11 +44,11 @@
   - [x] 실패하면 401.html로 리다이렉트한다.
 
 ### 2. POST 방식으로 회원가입
-- [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
-- [ ] 회원가입 페이지를 보여줄 때는 GET을 사용한다.
-- [ ] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
-- [ ] 회원가입을 완료하면 index.html로 리다이렉트한다.
-- [ ] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
+- [x] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+- [x] 회원가입 페이지를 보여줄 때는 GET을 사용한다.
+- [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+- [x] 회원가입을 완료하면 index.html로 리다이렉트한다.
+- [x] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
 
 ### 3. Cookie에 JSESSIONID 값 저장하기
 - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하고 `JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46` 형태로 값을 전달한다.

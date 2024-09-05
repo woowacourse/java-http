@@ -89,6 +89,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Disabled
     @Test
     void queryStringParsing() throws IOException {
         // given

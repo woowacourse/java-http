@@ -1,11 +1,14 @@
 package org.apache.catalina.engine;
 
+import static org.apache.coyote.http11.RequestLine.HTTP_METHOD;
 import static org.apache.coyote.http11.RequestLine.REQUEST_URI;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -28,7 +31,7 @@ public class CatalinaServletEngine {
 
     private static final Logger log = LoggerFactory.getLogger(CatalinaServletEngine.class);
 
-    public static void processRequest(Map<RequestLine, String> requestLine, HttpResponse response) {
+    public static void processRequest(Map<RequestLine, String> requestLine, String body, HttpResponse response) {
         if (requestLine.get(REQUEST_URI).equals("/")) {
             String contentType = probeContentType("/index.html");
             String content = findStaticFile("/index.html");
@@ -37,8 +40,28 @@ public class CatalinaServletEngine {
             response.setBody(content);
             return;
         }
-        if (requestLine.get(REQUEST_URI).startsWith("/login")) {
-            responseLogin(requestLine.get(REQUEST_URI), response);
+        if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("GET")) {
+            String contentType = probeContentType("/login.html");
+            String content = findStaticFile("/login.html");
+            response.addHttpStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", contentType);
+            response.setBody(content);
+            return;
+        }
+        if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("POST")) {
+            responseLogin(body, response);
+            return;
+        }
+        if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("GET")) {
+            String contentType = probeContentType("/register.html");
+            String content = findStaticFile("/register.html");
+            response.addHttpStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", contentType);
+            response.setBody(content);
+            return;
+        }
+        if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("POST")) {
+            responseRegister(body, response);
             return;
         }
         String content = findStaticFile(requestLine.get(REQUEST_URI));
@@ -71,17 +94,9 @@ public class CatalinaServletEngine {
         }
     }
 
-    private static void responseLogin(String uri, HttpResponse response) {
-        if (uri.equals("/login")) {
-            String content = findStaticFile("/login.html");
-            String contentType = probeContentType("/login.html");
-            response.addHttpStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(content);
-            return;
-        }
+    private static void responseLogin(String body, HttpResponse response) {
         try {
-            Map<String, String> queryString = parseQueryString(uri.substring("/login?".length()));
+            Map<String, String> queryString = parseQueryStringType(body);
             login(queryString, response);
         } catch (RuntimeException e) {
             response.addHttpStatus(HttpStatus.FOUND);
@@ -119,10 +134,47 @@ public class CatalinaServletEngine {
         response.setBody(findStaticFile("/401.html"));
     }
 
-    private static Map<String, String> parseQueryString(String queryString) {
+    private static Map<String, String> parseQueryStringType(String queryString) {
         return Arrays.stream(queryString.split("&"))
                 .map(pair -> pair.split("="))
                 .filter(keyValue -> keyValue.length == 2)
-                .collect(Collectors.toMap(keyValue -> keyValue[0], keyValue -> keyValue[1]));
+                .collect(Collectors.toMap(keyValue -> decode(keyValue[0]), keyValue -> decode(keyValue[1])));
+    }
+
+    private static String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
+    }
+
+    private static void responseRegister(String body, HttpResponse response) {
+        try {
+            Map<String, String> queryString = parseQueryStringType(body);
+            register(queryString, response);
+        } catch (RuntimeException e) {
+            response.addHttpStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/404.html");
+            response.addHeader("Content-Type", probeContentType("/404.html"));
+            response.setBody(findStaticFile("/404.html"));
+        }
+    }
+
+    private static void register(Map<String, String> queryString, HttpResponse response) {
+        String account = queryString.get("account");
+        String password = queryString.get("password");
+        String email = queryString.get("email");
+        if (Objects.isNull(account) || Objects.isNull(password) || Objects.isNull(email)) {
+            log.error("account={}, password={}, email={}, 회원가입에 실패하였습니다.", account, password, email);
+            response.addHttpStatus(HttpStatus.FOUND);
+            response.addHeader("Location", "/404.html");
+            response.addHeader("Content-Type", probeContentType("/404.html"));
+            response.setBody(findStaticFile("/404.html"));
+            return;
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("save user: {}", user);
+        response.addHttpStatus(HttpStatus.FOUND);
+        response.addHeader("Location", "/index.html");
+        response.addHeader("Content-Type", probeContentType("/index.html"));
+        response.setBody(findStaticFile("/index.html"));
     }
 }

@@ -107,8 +107,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 404 NotFound\r\n" +
-                "Content-Type: text/html;charset=utf-8";
+        var expected = "HTTP/1.1 404 NOT_FOUND \r\n"
+                + "Content-Type: text/html;charset=utf-8";
 
         assertThat(socket.output()).startsWith(expected);
     }

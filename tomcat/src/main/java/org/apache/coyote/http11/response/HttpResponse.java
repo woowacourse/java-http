@@ -27,4 +27,8 @@ public class HttpResponse {
     public byte[] getBody() {
         return body;
     }
+
+    public void addCookie(final String cookie) {
+        headers.put("Set-Cookie", cookie);
+    }
 }

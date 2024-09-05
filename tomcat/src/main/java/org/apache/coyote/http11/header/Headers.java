@@ -5,6 +5,7 @@ import util.StringUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Headers {
     private final Map<String, String> values;
@@ -26,11 +27,23 @@ public class Headers {
         final String[] arys = line.split(DELIMITER);
         values.put(arys[0], arys[1]);
     }
+    public void put(final String name, final String value) {
+        values.put(name, value);
+    }
 
     public List<String> formats() {
         return values.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + DELIMITER + entry.getValue()+" ")
                 .toList();
+    }
+
+    @Override
+    public String toString() {
+        return "Headers{\n" +
+                values.entrySet().stream()
+                        .map(entry -> "  " + entry.getKey() + ": " + entry.getValue())
+                        .collect(Collectors.joining(",\n")) +
+                "\n}";
     }
 }

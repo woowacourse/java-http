@@ -5,7 +5,7 @@ import java.util.Arrays;
 public enum Method {
     GET, POST, PUT, PATCH, DELETE;
 
-    public Method findByName(String name) {
+    public static Method findByName(String name) {
         return Arrays.stream(values())
                 .filter(method -> method.name().equals(name))
                 .findFirst()

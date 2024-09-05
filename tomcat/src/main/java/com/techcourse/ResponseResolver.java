@@ -1,5 +1,9 @@
 package com.techcourse;
 
+import com.techcourse.exception.UncheckedServletException;
+import org.apache.HttpRequest;
+import org.apache.catalina.session.SessionManager;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -7,15 +11,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class FrontController {
+public class ResponseResolver {
 
 	private final Controller controller;
+	private final SessionManager sessionManager;
 
-	public FrontController() {
+
+	public ResponseResolver() {
 		this.controller = new Controller();
+		this.sessionManager = SessionManager.getInstance();
 	}
 
-	public String processGetRequest(String uri) throws IOException {
+	public String processRequest(HttpRequest httpRequest) throws IOException {
+		if (httpRequest.getMethod().equals("GET")) {
+			return processGetRequest(httpRequest.getUri());
+		}
+		if (httpRequest.getMethod().equals("POST")) {
+			return processPostRequest(httpRequest.getUri(), httpRequest.getPayload());
+		}
+		throw new IllegalArgumentException("unexpected http method");
+	}
+
+	private String processGetRequest(String uri) throws IOException {
 		if (uri.equals("/")) {
 			var responseBody = controller.getHomePage();
 			var response = "HTTP/1.1 200 OK \r\n";
@@ -37,7 +54,7 @@ public class FrontController {
 		return response;
 	}
 
-	public String processPostRequest(String uri, Map<String, String> params) {
+	private String processPostRequest(String uri, Map<String, String> params) {
 		if (uri.startsWith("/login")) {
 			var redirectUri = "/401.html";
 			UUID uuid;

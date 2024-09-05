@@ -5,16 +5,19 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final String httpMethod;
-    private final String uri;
+    private final String method;
+    private final String path;
     private final Map<String, String> queryParams;
     private final Map<String, String> headers;
     private final String body;
 
-    public HttpRequest(String httpMethod, String uri, Map<String, String> queryParams, Map<String, String> headers,
+    public HttpRequest(String method,
+                       String path,
+                       Map<String, String> queryParams,
+                       Map<String, String> headers,
                        String body) {
-        this.httpMethod = httpMethod;
-        this.uri = uri;
+        this.method = method;
+        this.path = path;
         this.queryParams = queryParams;
         this.headers = headers;
         this.body = body;
@@ -25,12 +28,12 @@ public class HttpRequest {
         return new HttpCookie(cookies);
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
+    public String getMethod() {
+        return method;
     }
 
     public String getPath() {
-        return uri.split("\\?")[0];
+        return path;
     }
 
     public Map<String, String> getQueryParams() {
@@ -48,8 +51,8 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "Request{" +
-                "httpMethod='" + httpMethod + '\'' +
-                ", uri='" + uri + '\'' +
+                "httpMethod='" + method + '\'' +
+                ", uri='" + path + '\'' +
                 ", headers=" + headers +
                 ", body='" + body + '\'' +
                 '}';

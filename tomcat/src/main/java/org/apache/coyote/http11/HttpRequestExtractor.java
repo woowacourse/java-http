@@ -14,7 +14,7 @@ public class HttpRequestExtractor {
         BufferedReader br = new BufferedReader(reader);
 
         String requestLine = br.readLine();
-        String httpMethod = extractHttpMethod(requestLine);
+        String httpMethod = extractMethod(requestLine);
         String uri = extractUri(requestLine);
         Map<String, String> queryParams = extractQueryParams(uri);
         Map<String, String> headers = extractHeaders(br);
@@ -24,7 +24,7 @@ public class HttpRequestExtractor {
         return new HttpRequest(httpMethod, uri, queryParams, headers, body);
     }
 
-    private static String extractHttpMethod(String requestLine) {
+    private static String extractMethod(String requestLine) {
         return requestLine.split(" ")[0];
     }
 

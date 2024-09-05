@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void execute(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
-        String httpMethod = request.getHttpMethod();
+        String httpMethod = request.getMethod();
         String path = request.getPath();
         log.info("request = {} {}", httpMethod, path);
 

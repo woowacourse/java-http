@@ -73,6 +73,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> httpRequestHeader = new HashMap<>();
+
+        final String requestUri = bufferedReader.readLine();
+        httpRequestHeader.put(URI_HEADER_KEY, requestUri);
+
+        String line;
+        while (!"".equals(line = bufferedReader.readLine())) {
+            if (line == null) {
+                break;
+            }
+            final List<String> splitLine = Arrays.asList(line.split(": "));
+            httpRequestHeader.put(splitLine.get(0), splitLine.get(1));
+        }
+
+        return httpRequestHeader;
+    }
+
     private boolean isRequestUrlQueryString(Map<String, String> httpRequestHeader) {
         final String requestUrl = getRequestUrl(httpRequestHeader);
         return requestUrl.contains("?");
@@ -92,22 +110,27 @@ public class Http11Processor implements Runnable, Processor {
         printUserIfExist(queryString);
     }
 
-    private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> httpRequestHeader = new HashMap<>();
+    private void printUserIfExist(String queryString) {
+        Map<String, String> userInformation = Arrays.stream(queryString.split("&"))
+                .map(line -> line.split("="))
+                .collect(Collectors.toMap(
+                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[1]
+                ));
 
-        final String requestUri = bufferedReader.readLine();
-        httpRequestHeader.put(URI_HEADER_KEY, requestUri);
-
-        String line;
-        while (!"".equals(line = bufferedReader.readLine())) {
-            if (line == null) {
-                break;
-            }
-            final List<String> splitLine = Arrays.asList(line.split(": "));
-            httpRequestHeader.put(splitLine.get(0), splitLine.get(1));
+        if (!userInformation.containsKey("account") || !userInformation.containsKey("password")) {
+            return;
         }
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(userInformation.get("account"));
 
-        return httpRequestHeader;
+        optionalUser.ifPresent(
+                user -> {
+                    String password = userInformation.get("password");
+                    if (user.checkPassword(password)) {
+                        System.out.println(user);
+                    }
+                }
+        );
     }
 
     private String getResponseBody(final Map<String, String> httpRequestHeader) throws IOException {
@@ -149,29 +172,5 @@ public class Http11Processor implements Runnable, Processor {
             return DEFAULT_CONTENT_TYPE;
         }
         return Arrays.asList(requestUrl.split("\\.")).getLast();
-    }
-
-    private void printUserIfExist(String queryString) {
-        Map<String, String> userInformation = Arrays.stream(queryString.split("&"))
-                .map(line -> line.split("="))
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
-                        keyValue -> keyValue[1]
-                ));
-
-        if (!userInformation.containsKey("account") || !userInformation.containsKey("password")) {
-            return;
-        }
-
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(userInformation.get("account"));
-
-        optionalUser.ifPresent(
-                user -> {
-                    String password = userInformation.get("password");
-                    if (user.checkPassword(password)) {
-                        System.out.println(user);
-                    }
-                }
-        );
     }
 }

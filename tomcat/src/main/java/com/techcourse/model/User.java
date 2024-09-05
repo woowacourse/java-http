@@ -1,5 +1,10 @@
 package com.techcourse.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public class User {
 
     private final Long id;
@@ -7,23 +12,12 @@ public class User {
     private final String password;
     private final String email;
 
-    public User(Long id, String account, String password, String email) {
-        this.id = id;
-        this.account = account;
-        this.password = password;
-        this.email = email;
-    }
-
     public User(String account, String password, String email) {
         this(null, account, password, email);
     }
 
     public boolean checkPassword(String password) {
         return this.password.equals(password);
-    }
-
-    public String getAccount() {
-        return account;
     }
 
     @Override

@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpRequestParser;
 import com.techcourse.http.MimeType;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -46,11 +48,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private String generateResponse(HttpRequest request) {
         try {
-            String uri = request.getUri();
-            if ("/".equals(uri)) {
+            String path = request.getPath();
+            String method = request.getMethod();
+            if ("/".equals(path) && method.equals("GET")) {
                 return rootPage();
             }
-            return getStaticResource(uri);
+            if (path.equals("/login") && method.equals("GET")) {
+                return login(request);
+            }
+            return getStaticResource(request);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             return "HTTP/1.1 404 Not Found ";
@@ -69,20 +75,44 @@ public class Http11Processor implements Runnable, Processor {
                 Hello world!""";
     }
 
-    private String getStaticResource(String requestUri) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+    private String login(HttpRequest request) throws IOException {
+        String account = request.getParameter("account");
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!user.checkPassword(request.getParameter("password"))) {
+            throw new IllegalArgumentException("Password or email is not correct");
+        }
+
+        log.info("user : {}", user);
+
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String responseBody = new String(Files.readAllBytes(Path.of(resource.getPath())));
+        return String.join(
+                CRLF,
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+    }
+
+    private String getStaticResource(HttpRequest request) throws IOException {
+        String requestPath = request.getPath();
+        URL resource = getClass().getClassLoader().getResource("static" + requestPath);
         if (resource == null) {
             throw new IllegalArgumentException("Resource not found");
         }
 
-        final Path path = Path.of(resource.getPath());
-        final String responseBody = new String(Files.readAllBytes(path));
-        String endUri = requestUri.substring(requestUri.lastIndexOf("/") + 1);
+        final String responseBody = new String(Files.readAllBytes(Path.of(resource.getPath())));
+        String endPath = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+        String mimeType = MimeType.getMimeType(endPath);
 
         return String.join(
                 CRLF,
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + MimeType.getMimeType(endUri) + " ",
+                "Content-Type: " + mimeType + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody

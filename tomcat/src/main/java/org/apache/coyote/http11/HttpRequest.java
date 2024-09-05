@@ -13,16 +13,37 @@ class HttpRequest {
     public HttpRequest(String request) {
         String[] firstLineArgs = request.split(System.lineSeparator())[0].split(" ");
         this.httpMethod = firstLineArgs[0];
-        this.path = firstLineArgs[1].split("[?]")[0];
+        this.path = initializePath(firstLineArgs[1]);
+        this.queryString = initializeQueryString(firstLineArgs[1]);
+        this.body = initializeBody(request);
+    }
 
-        Map<String, String> map = new HashMap<>();
-        String[] queryStringArgs = firstLineArgs[1].split("[?]")[1].split("[&=]");
-        for (int i = 0; i < queryStringArgs.length; i++) {
-            map.put(queryStringArgs[i * 2], queryStringArgs[i * 2 + 1]);
+    private String initializePath(String url) {
+        if (url.contains("?")) {
+            return url.split("[?]")[0];
         }
-        this.queryString = map;
+        return url;
+    }
 
-        this.body = request.split(System.lineSeparator() + System.lineSeparator())[1];
+    private Map<String, String> initializeQueryString(String url) {
+        Map<String, String> map = new HashMap<>();
+        if (url.contains("?")) {
+            String[] queryStringArgs = url.split("[?]")[1].split("[&=]");
+            for (int i = 0; i < queryStringArgs.length; i++) {
+                map.put(queryStringArgs[i * 2], queryStringArgs[i * 2 + 1]);
+            }
+        }
+
+        return map;
+    }
+
+    private String initializeBody(String request) {
+        String[] requests = request.split(System.lineSeparator() + System.lineSeparator());
+        if (requests.length == 2) {
+            return requests[1];
+        }
+
+        return null;
     }
 
     public String getHttpMethod() {

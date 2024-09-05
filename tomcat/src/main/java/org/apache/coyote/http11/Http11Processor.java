@@ -14,9 +14,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
@@ -49,11 +47,21 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            List<String> header = new ArrayList<>();
+            Map<String, String> headers = new HashMap<>();
             String headerLine = bufferedReader.readLine();
             while (!headerLine.isBlank()) {
-                header.add(headerLine);
+                String[] header = headerLine.split(": ");
+                headers.put(header[0], header[1]);
                 headerLine = bufferedReader.readLine();
+            }
+
+            StringBuilder body = new StringBuilder();
+            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+
+            if (contentLength > 0) {
+                char[] bodyChars = new char[contentLength];
+                bufferedReader.read(bodyChars, 0, contentLength);
+                body.append(bodyChars);
             }
 
             if (!requestLine.isBlank()) {
@@ -64,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 String responseBody = "Hello world!";
 
-                if ("GET".equals(method) && !"/".equals(uri)) {
+                if (!"/".equals(uri)) {
                     String path = uri;
 
                     if (path.contains("?")) {
@@ -72,52 +80,51 @@ public class Http11Processor implements Runnable, Processor {
                         path = uri.substring(0, index);
                     }
 
-                    String resourcePath = "static" + path;
-                    if (!resourcePath.contains(".") || resourcePath.lastIndexOf("/") > resourcePath.lastIndexOf(".")) {
-                        resourcePath = resourcePath + ".html";
+                    if ("GET".equals(method) && "/login".equals(path)) {
+                        String resourcePath = "static" + path + ".html";
+
+                        Optional<URL> resource = Optional.ofNullable(
+                                getClass().getClassLoader().getResource(resourcePath));
+
+                        if (resource.isPresent()) {
+                            responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
+
+                            final String response = String.join("\r\n",
+                                    "HTTP/1.1 200 OK ",
+                                    "Content-Type: " + ContentType.findWithCharset(uri) + " ",
+                                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                                    "",
+                                    responseBody);
+
+                            bufferedWriter.write(response);
+                            bufferedWriter.flush();
+                            return;
+                        }
                     }
 
-                    Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
+                    if ("POST".equals(method) && "/login".equals(path)) {
+                        Map<String, String> params = new HashMap<>();
 
-                    if (resource.isPresent()) {
-                        responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
+                        String[] paramPairs = body.toString().split("&");
+                        for (String pair : paramPairs) {
+                            String[] keyValue = pair.split("=");
+                            if (keyValue.length == 2) {
+                                params.put(URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
+                                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                            }
+                        }
 
-                        if ("/login".equals(path)) {
-                            if (uri.contains("?")) {
-                                Map<String, String> params = new HashMap<>();
-                                String queryString = uri.substring(uri.indexOf("?") + 1);
+                        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(
+                                params.get("account"));
 
-                                for (String param : queryString.split("&")) {
-                                    String[] keyValue = param.split("=");
-
-                                    String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
-                                    String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                                    params.put(key, value);
-                                }
-
-                                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(
-                                        params.get("account"));
-
-                                if (optionalUser.isPresent()) {
-                                    User user = optionalUser.get();
-                                    if (user.checkPassword(params.get("password"))) {
-                                        log.info("user : {}", user);
-
-                                        String response = String.join("\r\n",
-                                                "HTTP/1.1 302 FOUND ",
-                                                "Location: /index.html ",
-                                                "Content-Length: 0 ",
-                                                "");
-
-                                        bufferedWriter.write(response);
-                                        bufferedWriter.flush();
-                                        return;
-                                    }
-                                }
+                        if (optionalUser.isPresent()) {
+                            User user = optionalUser.get();
+                            if (user.checkPassword(params.get("password"))) {
+                                log.info("user : {}", user);
 
                                 String response = String.join("\r\n",
                                         "HTTP/1.1 302 FOUND ",
-                                        "Location: /401.html ",
+                                        "Location: /index.html ",
                                         "Content-Length: 0 ",
                                         "");
 
@@ -126,7 +133,24 @@ public class Http11Processor implements Runnable, Processor {
                                 return;
                             }
                         }
+
+                        String response = String.join("\r\n",
+                                "HTTP/1.1 302 FOUND ",
+                                "Location: /401.html ",
+                                "Content-Length: 0 ",
+                                "");
+
+                        bufferedWriter.write(response);
+                        bufferedWriter.flush();
+                        return;
                     }
+                }
+
+                String resourcePath = "static" + uri;
+                Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
+
+                if (resource.isPresent()) {
+                    responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
                 }
 
                 final String response = String.join("\r\n",

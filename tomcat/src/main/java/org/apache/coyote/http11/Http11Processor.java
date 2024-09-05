@@ -10,12 +10,13 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.session.Session;
 import org.apache.util.QueryStringParser;
@@ -47,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("http request : {}", request);
             Http11Response response = Http11Response.create();
 
-            controll(request, response);
+            handle(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
@@ -56,42 +57,52 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void controll(Http11Request request, Http11Response response) throws IOException {
-        if (request.isStaticResourceRequest()) {
-            getStaticResource(request, response);
-            return;
-        }
-        String endpoint = request.getEndpoint();
-        HttpMethod method = request.getMethod();
-        if (method == HttpMethod.GET && "/login".equals(endpoint)) {
-            if (request.hasSession()) {
-                response.sendRedirect("/index.html");
+    private void handle(Http11Request request, Http11Response response) throws IOException {
+        try {
+            if (request.isStaticResourceRequest()) {
+                getView(request.getEndpoint(), response);
                 return;
             }
-            viewLogin(response);
-            return;
+            String endpoint = request.getEndpoint();
+            Http11Method method = request.getMethod();
+            if (method == Http11Method.GET && "/".equals(endpoint)) {
+                response.addBody("Hello world!");
+                return;
+            }
+            if (method == Http11Method.GET && "/login".equals(endpoint)) {
+                if (hasUser(request)) {
+                    response.sendRedirect("/index.html");
+                    return;
+                }
+                getView("/login.html", response);
+                return;
+            }
+            if (method == Http11Method.GET && "/register".equals(endpoint)) {
+                getView("/register.html", response);
+                return;
+            }
+            if (method == Http11Method.POST && "/login".equals(endpoint)) {
+                login(request, response);
+                return;
+            }
+            if (method == Http11Method.POST && "/register".equals(endpoint)) {
+                register(request, response);
+                return;
+            }
+            response.sendRedirect("/404.html");
+        } catch (Exception e) {
+            response.sendRedirect("/500.html");
         }
-        if (method == HttpMethod.POST && "/login".equals(endpoint)) {
-            login(request, response);
-            return;
-        }
-        if (method == HttpMethod.GET && "/register".equals(endpoint)) {
-            viewRegist(response);
-            return;
-        }
-        if (method == HttpMethod.POST && "/register".equals(endpoint)) {
-            regist(request, response);
-            return;
-        }
-        response.addBody("Hello world!");
     }
 
-    private void getStaticResource(Http11Request request, Http11Response response) throws IOException {
-        getView(request.getEndpoint(), response);
-
-        String accept = request.getAccept();
-
-        response.addContentType(accept);
+    private boolean hasUser(Http11Request request) {
+        try {
+            Session session = request.getSession();
+            session.getAttribute("user");
+            return true;
+        } catch (IllegalArgumentException e) {
+        }
+        return false;
     }
 
     private void getView(String view, Http11Response response) throws IOException {
@@ -99,12 +110,10 @@ public class Http11Processor implements Runnable, Processor {
         if (resource == null) {
             throw new IllegalArgumentException("존재하지 않는 자원입니다.");
         }
-        response.addBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-        response.addContentType("text/html");
-    }
-
-    private void viewLogin(Http11Response response) throws IOException {
-        getView("/login.html", response);
+        Path path = new File(resource.getFile()).toPath();
+        String contentType = Files.probeContentType(path);
+        response.addBody(new String(Files.readAllBytes(path)));
+        response.addContentType(contentType);
     }
 
     private void login(Http11Request request, Http11Response response) {
@@ -117,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.checkPassword(password)) {
-                Session session = request.getSession(true);
+                Session session = request.getSession();
                 session.setAttribute("user", user);
                 response.addCookie("JSESSIONID", session.getId());
                 response.sendRedirect("/index.html");
@@ -127,11 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         response.sendRedirect("/401.html");
     }
 
-    private void viewRegist(Http11Response response) throws IOException {
-        getView("/register.html", response);
-    }
-
-    private void regist(Http11Request request, Http11Response response) {
+    private void register(Http11Request request, Http11Response response) {
         String body = request.getBody();
         Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
         String account = queryStrings.get("account").getFirst();

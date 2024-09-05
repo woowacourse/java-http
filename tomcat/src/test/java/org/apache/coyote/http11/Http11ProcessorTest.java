@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class Http11RequestProcessorTest {
+class Http11ProcessorTest {
 
     @Test
     void process() {

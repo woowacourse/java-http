@@ -30,11 +30,13 @@ public class Http11Request {
     private final Http11RequestStartLine startLine;
     private final Http11RequestHeader headers;
     private final String body;
+    private final Session session;
 
-    public Http11Request(Http11RequestStartLine startLine, Http11RequestHeader headers, String body) {
+    private Http11Request(Http11RequestStartLine startLine, Http11RequestHeader headers, String body, Session session) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+        this.session = session;
     }
 
     public static Http11Request from(InputStream inputStream) throws IOException {
@@ -42,10 +44,26 @@ public class Http11Request {
 
         Http11RequestStartLine startLine = Http11RequestStartLine.from(bufferedReader.readLine());
         Http11RequestHeader httpHeaders = Http11RequestHeader.from(createHttpHeaderMap(bufferedReader));
+        Session session = getSession(httpHeaders);
+
         if (startLine.getMethod().hasBody()) {
-            return new Http11Request(startLine, httpHeaders, createBody(bufferedReader, httpHeaders.getContentLength()));
+            return new Http11Request(startLine, httpHeaders, createBody(bufferedReader, httpHeaders.getContentLength()), session);
         }
-        return new Http11Request(startLine, httpHeaders, null);
+        return new Http11Request(startLine, httpHeaders, null, session);
+    }
+
+    private static Session getSession(Http11RequestHeader httpHeaders) {
+        Optional<String> optionalSessionId = httpHeaders.getCookieValue(JSESSIONID);
+        if (optionalSessionId.isPresent()) {
+            String sessionId = optionalSessionId.get();
+            try {
+                return sessionManager.findSession(sessionId);
+            } catch (IllegalArgumentException e) {
+            }
+        }
+        Session session = new Session(UUID.randomUUID().toString());
+        sessionManager.add(session);
+        return session;
     }
 
     private static Map<String, List<String>> createHttpHeaderMap(BufferedReader bufferedReader) {
@@ -64,42 +82,11 @@ public class Http11Request {
         return new String(buffer);
     }
 
-    public boolean hasSession() {
-        Optional<String> optionalSessionId = headers.getCookieValue(JSESSIONID);
-
-        if (optionalSessionId.isPresent()) {
-            String sessionId = optionalSessionId.get();
-            try {
-                sessionManager.findSession(sessionId);
-                return true;
-            } catch (IllegalArgumentException e) {
-                log.info("Invalid Session ID = {}", sessionId);
-                return false;
-            }
-        }
-        return false;
-    }
-
     public boolean isStaticResourceRequest() {
-        return startLine.getMethod() == HttpMethod.GET && startLine.getEndPoint().contains(".");
+        return startLine.getMethod() == Http11Method.GET && startLine.getEndPoint().contains(".");
     }
 
-    public Session getSession(boolean hasNotSession) {
-        if (hasNotSession) {
-            Session session = new Session(UUID.randomUUID().toString());
-            sessionManager.add(session);
-            return session;
-        }
-        String sessionId = headers.getCookieValue(JSESSIONID)
-                .orElseThrow(() -> new IllegalArgumentException("세션 ID가 존재하지 않습니다."));
-        return sessionManager.findSession(sessionId);
-    }
-
-    public String getAccept() {
-        return headers.getAccept();
-    }
-
-    public HttpMethod getMethod() {
+    public Http11Method getMethod() {
         return startLine.getMethod();
     }
 
@@ -113,6 +100,10 @@ public class Http11Request {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        return session;
     }
 
     @Override

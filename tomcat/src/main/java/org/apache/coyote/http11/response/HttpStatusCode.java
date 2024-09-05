@@ -4,16 +4,16 @@ public enum HttpStatusCode {
     OK("OK", 200),
     FOUND("Found", 302);
 
-    private final String name;
+    private final String message;
     private final int code;
 
-    HttpStatusCode(String name, int code) {
-        this.name = name;
+    HttpStatusCode(String message, int code) {
+        this.message = message;
         this.code = code;
     }
 
     @Override
     public String toString() {
-        return code + " " + name;
+        return code + " " + message;
     }
 }

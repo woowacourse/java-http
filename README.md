@@ -6,8 +6,8 @@
 
 1. GET /index.html 응답하기
 
-- [ ] 인덱스 페이지 보여주도록 만들기 (GET `/index.html`)
-- [ ] Http11ProcessorTest 테스트 클래스의 모든 테스트 통과하기
+- [x] 인덱스 페이지 보여주도록 만들기 (GET `/index.html`)
+- [x] Http11ProcessorTest 테스트 클래스의 모든 테스트 통과하기
 
 2. CSS 지원하기
 

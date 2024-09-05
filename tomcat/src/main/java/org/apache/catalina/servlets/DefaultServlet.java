@@ -26,7 +26,6 @@ public class DefaultServlet implements Servlet {
             "js", "application/javascript"
     );
 
-
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
 
@@ -37,7 +36,6 @@ public class DefaultServlet implements Servlet {
         return null;
     }
 
-    // 정적 파일에 대한 처리를 해주는 거임 그니까 그것만 생각하고 규격 맞추기
     @Override
     public void service(ServletRequest servletRequest, ServletResponse servletResponse)
             throws ServletException, IOException {
@@ -53,7 +51,6 @@ public class DefaultServlet implements Servlet {
         servletResponse.setContentType(contentType);
         servletResponse.setContentLength(fileContent.getBytes().length);
         setResponseBody(servletResponse, fileContent);
-
     }
 
     private String getFileContent(URL resourceURL) throws IOException {
@@ -87,6 +84,4 @@ public class DefaultServlet implements Servlet {
     public void destroy() {
 
     }
-
-
 }

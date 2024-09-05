@@ -13,9 +13,10 @@ import java.util.Map;
 
 public class HttpResponse implements HttpServletResponse {
 
-    private static final String START_LINE = "HTTP/1.1 200 OK ";
+    private static final String START_LiNE_FORMAT = "%s %s %s ";
     private static final String HEADER_FORMAT_TEMPLATE = "%s: %s \r\n";
 
+    private HttpStatus httpStatus = HttpStatus.OK;
     private final Map<String, String> headers = new LinkedHashMap<>();
     private String responseBody = "";
 
@@ -99,17 +100,17 @@ public class HttpResponse implements HttpServletResponse {
 
     @Override
     public void setStatus(int i) {
-
+        this.httpStatus = HttpStatus.from(i);
     }
 
     @Override
     public void setStatus(int i, String s) {
-
+        this.httpStatus = HttpStatus.valueOf(s);
     }
 
     @Override
     public int getStatus() {
-        return 0;
+        return httpStatus.getStatusCode();
     }
 
     @Override
@@ -209,7 +210,8 @@ public class HttpResponse implements HttpServletResponse {
 
 
     public String getResponse() {
-        StringBuilder sb = new StringBuilder(START_LINE).append("\r\n");
+        String startLine = START_LiNE_FORMAT.formatted("HTTP/1.1", httpStatus.getStatusCode(), httpStatus.name());
+        StringBuilder sb = new StringBuilder(startLine).append("\r\n");
         headers.forEach((name, value) -> sb.append(HEADER_FORMAT_TEMPLATE.formatted(name, value)));
         sb.append("\r\n").append(responseBody);
         return sb.toString();
@@ -218,5 +220,4 @@ public class HttpResponse implements HttpServletResponse {
     public void setResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
-
 }

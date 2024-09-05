@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public enum HandlerMapper {
     LOGIN("GET", "/login", new LoginHandler()),
+    REGISTER("POST", "/register", new RegisterHandler()),
     ;
 
     private final String method;

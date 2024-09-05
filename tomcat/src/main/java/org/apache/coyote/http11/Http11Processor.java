@@ -1,12 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +11,7 @@ import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              var outputStream = connection.getOutputStream()) {
 
             Request request = Request.parseFrom(getPlainRequest(requestBufferedReader));
+            log.info("request : {}", request);
             String response = getResponseString(request);
 
             outputStream.write(response.getBytes());
@@ -54,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private List<String> getPlainRequest(BufferedReader requestBufferedReader) throws IOException {
         List<String> plainRequest = new ArrayList<>();
-        while(requestBufferedReader.ready()) {
+        while (requestBufferedReader.ready()) {
             String line = requestBufferedReader.readLine();
             plainRequest.add(line);
         }
@@ -63,24 +62,22 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseString(Request request) throws IOException {
         if (request.getMethod() == Method.GET) {
-            String content = getContent(request);
+            Content content = getContent(request);
 
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + content.getBytes().length + " ",
+                    String.format("Content-Type: %s;charset=utf-8 ", content.getContentType()),
+                    "Content-Length: " + content.getContent().getBytes().length + " ",
                     "",
-                    content);
+                    content.getContent());
         }
         return null;
     }
 
-    private String getContent(Request request) throws IOException {
+    private Content getContent(Request request) throws IOException {
         if (request.getTarget().equals("/")) {
-            return "Hello world!";
+            return new Content("index.html");
         }
-        String name = "static" + request.getTarget();
-        URL resource = getClass().getClassLoader().getResource(name);
-        return new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
+        return new Content(request.getTarget());
     }
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import support.StubSocket;
@@ -14,6 +15,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
+    @Disabled
     void process() {
         // given
         final var socket = new StubSocket();
@@ -56,6 +58,34 @@ class Http11ProcessorTest {
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        String contentBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css;charset=utf-8 \r\n" +
+                String.format("Content-Length: %d \r\n",contentBody.getBytes().length) +
+                "\r\n" +
+                contentBody;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

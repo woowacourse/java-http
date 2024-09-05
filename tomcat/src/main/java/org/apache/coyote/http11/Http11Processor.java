@@ -62,15 +62,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public List<String> getRequest(InputStream inputStream) throws IOException {
+    private List<String> getRequest(InputStream inputStream) throws IOException {
         List<String> request = new ArrayList<>();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        int contentLength = 0;
 
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            if (line.toLowerCase().startsWith("content-length")) {
+                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
             request.add(line);
         }
 
+        char[] body = new char[contentLength];
+        bufferedReader.read(body, 0, contentLength);
+
+        request.add(new String(body));
         return request;
     }
 

@@ -47,10 +47,18 @@ public class Http11Processor implements Runnable, Processor {
             String requestStartLine = bufferedReader.readLine();
 
             /**
-             * Request URI 및 filename 추출
+             * Request URI 및 filename, 확장자 추출
              */
             String requestUri = requestStartLine.split(" ")[1];
             String filePath = "static" + requestUri;
+            String fileExtension = "html";
+
+            int fileExtensionIndex = filePath.indexOf(".");
+            if (fileExtensionIndex >= 0) {
+                 fileExtension = filePath.substring(fileExtensionIndex)
+                    .replaceFirst(".", "");
+            }
+            String responseContentType = "text/" + fileExtension;
 
             /**
              * Request URI에 해당하는 파일 찾기
@@ -69,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + responseContentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

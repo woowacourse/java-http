@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequestData httpRequestData = createHttpRequestData(inputStream);
+            HttpRequest httpRequestData = createHttpRequestData(inputStream);
             String httpResponse = createHttpResponseMessage(responseResource(httpRequestData));
 
             outputStream.write(httpResponse.getBytes());
@@ -51,64 +51,53 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestData createHttpRequestData(InputStream inputStream) throws IOException {
+    private HttpRequest createHttpRequestData(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestLine = bufferedReader.readLine();
         List<String> headerTokens = new ArrayList<>();
 
         String nowLine = bufferedReader.readLine();
         while (!nowLine.isBlank()) {
+            if (nowLine.startsWith("Accept")) {
+                log.info(nowLine);
+            }
+
             headerTokens.add(nowLine);
             nowLine = bufferedReader.readLine();
         }
 
-        return new HttpRequestData(requestLine, new Header(headerTokens));
+        return new HttpRequest(requestLine, new Header(headerTokens));
     }
 
-    private HttpResponseData responseResource(HttpRequestData httpRequestData) throws IOException {
-        final var uri = URI.create(httpRequestData.startLine.split(" ")[1]);
+    private HttpResponse responseResource(HttpRequest httpRequestData) throws IOException {
+        final var uri = httpRequestData.getUri();
 
         if ("/".equals(uri.getPath())) {
-            return new HttpResponseData("Hello world!".getBytes(), "text/html;charset=utf-8");
+            return new HttpResponse("Hello world!".getBytes(), "text/html;charset=utf-8");
         }
 
-        var contentType = "";
-        String path = uri.getPath();
-        // TODO: acceptHeader를 읽어 적절한 contentType을 생성하는 부분
-        if (path.endsWith(".html")) {
-            contentType = "text/html;charset=utf-8";
-        }
-
-        if (path.endsWith(".css")) {
-            contentType = "text/css;charset=utf-8";
-        }
-
-        if (path.endsWith(".js")) {
-            contentType = "text/javascript;charset=utf-8";
-        }
-
-        var resourceUrl = getClass().getClassLoader().getResource("static/" + path);
-        var resourcePath = "";
+        StaticResourceHandler staticResourceHandler = new StaticResourceHandler();
 
         // TODO: 존재하지 않는 정적 리소스 요청이라면 동적으로 생성하는 부분
-        if (resourceUrl == null) {
-            if (path.contains("login")) {
+        if (!staticResourceHandler.canHandle(httpRequestData)) {
+            if (uri.getPath().contains("login")) {
                 processLogin(httpRequestData);
-                resourcePath = getClass().getClassLoader().getResource("static/login.html").getPath();
+                String resourcePath = getClass().getClassLoader().getResource("static/login.html").getPath();
+                final var bufferedInputStream = new BufferedInputStream(new FileInputStream(resourcePath));
+                final var responseBody = bufferedInputStream.readAllBytes();
+                bufferedInputStream.close();
+
+                return new HttpResponse(responseBody, "text/html;charset=utf8");
             }
         } else {
-            resourcePath = resourceUrl.getPath();
+            return staticResourceHandler.handle(httpRequestData);
         }
 
-        final var bufferedInputStream = new BufferedInputStream(new FileInputStream(resourcePath));
-        final var responseBody = bufferedInputStream.readAllBytes();
-        bufferedInputStream.close();
-
-        return new HttpResponseData(responseBody, contentType);
+        return null;
     }
 
-    private void processLogin(HttpRequestData httpRequestData) {
-        final var startLine = httpRequestData.startLine;
+    private void processLogin(HttpRequest httpRequestData) {
+        final var startLine = httpRequestData.startLine();
         final var split = startLine.split(" ");
         final var resourcePath = split[1];
 
@@ -130,18 +119,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createHttpResponseMessage(HttpResponseData httpResponseData) {
+    private String createHttpResponseMessage(HttpResponse httpResponseData) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpResponseData.contentType + " ",
-                "Content-Length: " + httpResponseData.responseBody.length + " ",
+                "Content-Type: " + httpResponseData.contentType() + " ",
+                "Content-Length: " + httpResponseData.responseBody().length + " ",
                 "",
-                new String(httpResponseData.responseBody, StandardCharsets.UTF_8));
-    }
-
-    private record HttpRequestData(String startLine, Header header) {
-    }
-
-    private record HttpResponseData(byte[] responseBody, String contentType) {
+                new String(httpResponseData.responseBody(), StandardCharsets.UTF_8));
     }
 }

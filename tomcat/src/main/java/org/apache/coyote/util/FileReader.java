@@ -21,7 +21,6 @@ public class FileReader {
 
     public String read(String fileName) {
         try {
-            System.out.println("STATIC_DIRNAME + \"/\" + fileName = " + STATIC_DIRNAME + "/" + fileName);
             URI uri = getClass().getClassLoader().getResource(STATIC_DIRNAME + "/" + fileName).toURI();
             Path path = Paths.get(uri);
             return Files.readString(path);

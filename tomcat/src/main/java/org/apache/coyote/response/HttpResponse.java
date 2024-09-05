@@ -36,6 +36,12 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse ofRedirection(String path) {
+        HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, "", ContentType.TEXT_HTML);
+        response.addHeader("Location", path);
+        return response;
+    }
+
     public HttpResponse cookie(HttpCookie cookie) {
         if (!cookie.contains(JSESSIONID)) {
             HttpCookie httpCookie = new HttpCookie();

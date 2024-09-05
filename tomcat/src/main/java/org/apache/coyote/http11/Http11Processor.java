@@ -131,7 +131,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getLoginPage(HttpCookie cookie) {
         if (cookie.contains(JSESSIONID) && sessionManager.hasId(cookie.get(JSESSIONID))) {
-            return HttpResponse.ofRedirection("/index.html")
+            return HttpResponse.redirectTo("/index.html")
                     .cookie(cookie)
                     .buildMessage();
         }
@@ -149,7 +149,7 @@ public class Http11Processor implements Runnable, Processor {
             if (InMemoryUserRepository.exists(account, password)) {
                 User user = InMemoryUserRepository.getByAccount(account);
                 saveSession(cookie, user);
-                return HttpResponse.ofRedirection("/index.html")
+                return HttpResponse.redirectTo("/index.html")
                         .cookie(cookie)
                         .buildMessage();
             }
@@ -172,7 +172,7 @@ public class Http11Processor implements Runnable, Processor {
                 User user = new User(account, password, email);
                 InMemoryUserRepository.save(user);
                 saveSession(cookie, user);
-                return HttpResponse.ofRedirection("/index.html")
+                return HttpResponse.redirectTo("/index.html")
                         .cookie(cookie)
                         .buildMessage();
             }

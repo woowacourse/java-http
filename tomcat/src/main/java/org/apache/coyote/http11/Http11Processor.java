@@ -49,8 +49,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpMethod method = request.getMethod();
             String requestUrl = request.getRequestUrl();
 
-            String response = dispatch(requestUrl, method, request);
-            outputStream.write(response.getBytes());
+            HttpResponse response = dispatch(requestUrl, method, request);
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -77,7 +77,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.from(request);
     }
 
-    private String dispatch(String requestUrl, HttpMethod method, HttpRequest request) throws IOException {
+    private HttpResponse dispatch(String requestUrl, HttpMethod method, HttpRequest request) throws IOException {
         HttpHeader responseHeader = new HttpHeader();
 
         if (requestUrl.startsWith("/login") && method.isPost()) {
@@ -95,17 +95,12 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse(requestUrl, HttpStatus.OK, responseHeader);
     }
 
-    private String getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
-        String responseBody = getResource(requestUrl);
-        String responseLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
-
-        responseHeader.addHeader("Content-Type", ContentType.findContentType(requestUrl) + ";charset=utf-8");
-        responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
-
-        return String.join("\r\n", responseLine, responseHeader.toHttpHeader(), "", responseBody);
+    private HttpResponse getResponse(String requestUrl, HttpStatus httpStatus, HttpHeader responseHeader) throws IOException {
+        String responseBody = getResponseBody(requestUrl, responseHeader);
+        return new HttpResponse(responseHeader, httpStatus, responseBody);
     }
 
-    private String getResource(String requestUrl) throws IOException {
+    private String getResponseBody(String requestUrl, HttpHeader responseHeader) throws IOException {
         if (requestUrl.equals("/")) {
             return "Hello world!";
         }
@@ -116,9 +111,15 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         URL resourceUrl = getResourceUrl(path);
-
         Path resourcePath = Path.of(resourceUrl.getPath());
-        return Files.readString(resourcePath);
+
+        String body = Files.readString(resourcePath);
+        String contentType = Files.probeContentType(resourcePath);
+
+        responseHeader.addHeader("Content-Type", contentType + ";charset=utf-8");
+        responseHeader.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+
+        return body;
     }
 
     private URL getResourceUrl(String path) {
@@ -133,7 +134,7 @@ public class Http11Processor implements Runnable, Processor {
         return resourceUrl;
     }
 
-    private String getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
+    private HttpResponse getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
         if (httpCookie.isContains(JSESSIONID)) {
             responseHeader.addHeader("Location", "/index.html");
             return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
@@ -142,7 +143,7 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse("/login.html", HttpStatus.OK, responseHeader);
     }
 
-    private String login(Map<String, String> body, HttpCookie cookie, HttpHeader responseHeader) throws IOException {
+    private HttpResponse login(Map<String, String> body, HttpCookie cookie, HttpHeader responseHeader) throws IOException {
         String account = body.get("account");
         String password = body.get("password");
 
@@ -168,7 +169,7 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse("/index.html", HttpStatus.FOUND, responseHeader);
     }
 
-    private String register(Map<String, String> body, HttpHeader responseHeader) throws IOException {
+    private HttpResponse register(Map<String, String> body, HttpHeader responseHeader) throws IOException {
         User user = new User(body.get("account"), body.get("password"), body.get("email"));
         InMemoryUserRepository.save(user);
 

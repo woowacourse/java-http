@@ -30,13 +30,12 @@ public class User {
         return password;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+        return "User{" + "id=" + id + ", account='" + account + '\'' + ", email='" + email + '\'' + ", password='" + password + '\'' + '}';
     }
 }

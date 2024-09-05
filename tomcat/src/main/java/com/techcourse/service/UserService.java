@@ -1,6 +1,7 @@
 package com.techcourse.service;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.InvalidRegisterException;
 import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
 
@@ -18,6 +19,15 @@ public class UserService {
             throw new UnauthorizedException("Wrong password");
         }
 
+        return user;
+    }
+
+    public User register(String account, String password, String email) {
+        if (account.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            throw new InvalidRegisterException("Values for register is missing.");
+        }
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
         return user;
     }
 }

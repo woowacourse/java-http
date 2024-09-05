@@ -8,6 +8,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -20,6 +23,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_PATH = "static";
     private static final String DEFAULT_MESSAGE = "Hello world!";
     private static final String DEFAULT_CONTENT_TYPE = "html";
+    private static final String URI_HEADER_KEY = "Uri";
+    private static final String ACCEPT_HEADER_KEY = "Accept";
+    private static final String ALL_MIME_TYPE = "*/*";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -38,16 +44,13 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final String firstLine = bufferedReader.readLine();
-            final String requestUrl = Arrays.asList(firstLine.split(" ")).get(1);
-            final String extension = getExtension(requestUrl);
+            final Map<String, String> httpRequestHeader = readHttpRequestHeader(bufferedReader);
 
-            final String responseBody = getResponseBody(requestUrl);
-            final String mimeType = getMimeType(bufferedReader, extension);
+            final String responseBody = getResponseBody(httpRequestHeader);
+            final String mimeType = getMimeType(httpRequestHeader);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -63,39 +66,56 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getExtension(String requestUrl) {
-        if (requestUrl.equals("/")) {
-            return DEFAULT_CONTENT_TYPE;
-        }
-        return Arrays.asList(requestUrl.split("\\.")).getLast();
-    }
+    private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> httpRequestHeader = new HashMap<>();
 
-    private String getResponseBody(String requestUrl) throws IOException {
-        if (requestUrl.equals("/")) {
-            return DEFAULT_MESSAGE;
-        }
-        final URL resourceUrl = getClass().getClassLoader().getResource(STATIC_PATH + requestUrl);
-        return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
-    }
+        final String requestUri = bufferedReader.readLine();
+        httpRequestHeader.put(URI_HEADER_KEY, requestUri);
 
-    private String getMimeType(BufferedReader bufferedReader, String extension) throws IOException {
-        String mimeType = null;
         String line;
         while (!"".equals(line = bufferedReader.readLine())) {
             if (line == null) {
                 break;
             }
-            if (line.startsWith("Accept")) {
-                String acceptLine = Arrays.asList(line.split(" ")).get(1);
-                mimeType = Arrays.asList(acceptLine.split(",")).getFirst();
-                break;
-            }
+            final List<String> splitLine = Arrays.asList(line.split(": "));
+            httpRequestHeader.put(splitLine.get(0), splitLine.get(1));
         }
 
-        if (mimeType == null || mimeType.equals("*/*")) {
-            mimeType = MimeTypeMaker.getMimeTypeFromExtension(extension);
+        return httpRequestHeader;
+    }
+
+    private String getResponseBody(final Map<String, String> httpRequestHeader) throws IOException {
+        final String requestUrl = getRequestUrl(httpRequestHeader);
+        if (requestUrl.equals("/")) {
+            return DEFAULT_MESSAGE;
+        }
+
+        final URL resourceUrl = getClass().getClassLoader().getResource(STATIC_PATH + requestUrl);
+        return new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
+    }
+
+    private String getMimeType(final Map<String, String> httpRequestHeader) throws IOException {
+        final String requestUrl = getRequestUrl(httpRequestHeader);
+        final String acceptLine = httpRequestHeader.getOrDefault(ACCEPT_HEADER_KEY, "");
+        final String mimeType = Arrays.asList(acceptLine.split(",")).getFirst();
+
+        if (mimeType.isEmpty() || mimeType.equals(ALL_MIME_TYPE)) {
+            final String extension = getExtension(requestUrl);
+            return MimeTypeMaker.getMimeTypeFromExtension(extension);
         }
 
         return mimeType;
+    }
+
+    private String getRequestUrl(final Map<String, String> httpRequestHeader) {
+        final String uriLine = httpRequestHeader.get(URI_HEADER_KEY);
+        return Arrays.asList(uriLine.split(" ")).get(1);
+    }
+
+    private String getExtension(final String requestUrl) {
+        if (requestUrl.equals("/")) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+        return Arrays.asList(requestUrl.split("\\.")).getLast();
     }
 }

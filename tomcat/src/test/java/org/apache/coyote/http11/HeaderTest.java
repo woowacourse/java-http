@@ -20,7 +20,7 @@ class HeaderTest {
     }
 
     @Test
-    @DisplayName("헤더는 a=b 형식만 인식한다.")
+    @DisplayName("헤더는 a:b 형식만 인식한다.")
     void singleFormat() {
         Header header = new Header(List.of("a-2"));
 
@@ -32,7 +32,7 @@ class HeaderTest {
     @Test
     @DisplayName("단일 헤더를 조회한다.")
     void single() {
-        Header header = new Header(List.of("a=2"));
+        Header header = new Header(List.of("a:2"));
 
         Optional<String> result = header.get("a");
 
@@ -42,7 +42,7 @@ class HeaderTest {
     @Test
     @DisplayName("여러 헤더를 읽는다.")
     void multi() {
-        List<String> headers = List.of("a=1", "b=2", "c=3");
+        List<String> headers = List.of("a:1", "b:2", "c:3");
         Header header = new Header(headers);
 
         Assertions.assertAll(
@@ -55,7 +55,7 @@ class HeaderTest {
     @Test
     @DisplayName("조회 키는 null이 될 수 없다.")
     void keyNonNull() {
-        Header header = new Header(List.of("a=2"));
+        Header header = new Header(List.of("a:2"));
 
         assertThatThrownBy(() -> header.get(null))
                 .isInstanceOf(NullPointerException.class);

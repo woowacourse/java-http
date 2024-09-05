@@ -8,7 +8,7 @@ import java.util.Optional;
 
 class Header {
 
-    private static final String PAIR_DELIMITER = "=";
+    private static final String PAIR_DELIMITER = ":";
 
     private final Map<String, String> header = new HashMap<>();
 

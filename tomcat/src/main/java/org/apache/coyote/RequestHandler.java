@@ -1,7 +1,6 @@
 package org.apache.coyote;
 
 import java.io.IOException;
-import java.net.HttpCookie;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.apache.coyote.http11.HttpCookie;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -92,7 +93,7 @@ public class RequestHandler {
         if (user.checkPassword(password)) {
             return addCookie(
                     HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
-                    new HttpCookie("JSESSIONID", String.valueOf(UUID.randomUUID())));
+                    new HttpCookie("JSESSIONID=" + UUID.randomUUID()));
         }
 
         return handleSimpleResource("404.html");
@@ -132,8 +133,6 @@ public class RequestHandler {
     }
 
     private String addCookie(final String response, final HttpCookie cookie) {
-        response.concat("Set-Cookie: ").concat(cookie.toString());
-        System.out.println("response!!!!!!!!!! " + response);
-        return response;
+        return response.concat("\n").concat("Set-Cookie: " + cookie.toString());
     }
 }

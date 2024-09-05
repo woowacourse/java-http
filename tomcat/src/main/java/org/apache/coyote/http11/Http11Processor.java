@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +36,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final var reader = new BufferedReader(new InputStreamReader(inputStream));
-            final var requestHeader = reader.readLine();
-            final var parts = requestHeader.split(" ");
-            final var method = parts[0];
-            final var uri = parts[1];
 
-            final var response = generateResponse(method, uri);
+            final var response = generateResponse(reader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,7 +46,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String generateResponse(String method, String uri) throws IOException {
+    private String generateResponse(final BufferedReader reader) throws IOException {
+        final var requestLine = reader.readLine();
+        final var parts = requestLine.split(" ");
+        final var method = parts[0];
+        final var uri = parts[1];
+
         if (method.equals("GET") && uri.equals("/")) {
             final var responseBody = "Hello world!";
 
@@ -74,10 +76,6 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody);
         }
         if (method.equals("GET") && uri.contains("login") && hasQueryParam(uri)) {
-            final var resource = getClass().getClassLoader().getResource("static/index.html");
-            final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
-            final var responseBody = new String(fileContent);
-
             final var queryString = uri.substring(uri.indexOf('?') + 1);
             final var queryParams = parseQueryParam(queryString);
             if (isAuthenticateUser(queryParams)) {
@@ -86,17 +84,26 @@ public class Http11Processor implements Runnable, Processor {
                         "Location: /index.html ",
                         "Content-Length: 0 ",
                         "Connection: close ",
-                        "",
-                        responseBody);
+                        "");
             } else {
                 return String.join("\r\n",
                         "HTTP/1.1 302 Found ",
                         "Location: /401.html ",
                         "Content-Length: 0 ",
                         "Connection: close ",
-                        "",
-                        responseBody);
+                        "");
             }
+        }
+        if (method.equals("POST") && uri.contains("register")) {
+            final var responseBody = getResponseBody(reader);
+            final var newUser = new User(responseBody.get("account"), responseBody.get("password"), responseBody.get("email"));
+            InMemoryUserRepository.save(newUser);
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: /index.html ",
+                    "Content-Length: 0 ",
+                    "Connection: close ",
+                    "");
         }
         final var resource = getClass().getClassLoader().getResource("static" + uri + ".html");
         final var fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
@@ -107,6 +114,25 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private Map<String, String> getResponseBody(BufferedReader reader) throws IOException {
+        final var requestHeader = parseRequestHeader(reader);
+        int contentLength = Integer.parseInt(requestHeader.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        final var requestBody = new String(buffer);
+        return parseQueryParam(requestBody);
+    }
+
+    private Map<String, String> parseRequestHeader(final BufferedReader reader) throws IOException {
+        final Map<String, String> result = new HashMap<>();
+        String line;
+        while (!(line = reader.readLine()).isBlank()) {
+            String[] parts = line.split(": ", 2);
+            result.put(parts[0], parts[1]);
+        }
+        return result;
     }
 
     private boolean hasQueryParam(final String uri) {

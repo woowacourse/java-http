@@ -6,14 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.net.http.HttpHeaders;
 import java.nio.file.Files;
 import java.util.HashMap;
-
-import jakarta.servlet.HttpMethodConstraintElement;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -50,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             final String[] texts = requestMethodAndUrl.split(" ");
             var line = " ";
 
-            var httpRequestHeaders = new HashMap<String, String>();
+            final var httpRequestHeaders = new HashMap<String, String>();
             while (!line.isEmpty()) {
                 line = bufferedReader.readLine();
                 if (line == null || line.isBlank()) {
@@ -63,13 +57,13 @@ public class Http11Processor implements Runnable, Processor {
             final var path = texts[1];
             log.info("{} 요청 = {}", method, requestMethodAndUrl);
             if (method.equals("POST")) {
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length").strip());
-                char[] buffer = new char[contentLength];
+                final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length").strip());
+                final char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
+                final String requestBody = new String(buffer);
                 log.info("requestBody = {}", requestBody);
 
-                var body = new HashMap<String, String>();
+                final var body = new HashMap<String, String>();
                 final String[] params = requestBody.split("&");
                 for (final String param : params) {
                     body.put(param.split("=")[0], param.split("=")[1]);

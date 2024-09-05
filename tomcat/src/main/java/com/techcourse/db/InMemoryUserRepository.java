@@ -23,5 +23,10 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
+    public static Optional<User> findByAccountAndPassword(String account, String password) {
+        return findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+    }
+
     private InMemoryUserRepository() {}
 }

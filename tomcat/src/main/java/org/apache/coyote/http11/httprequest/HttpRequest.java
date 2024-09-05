@@ -1,25 +1,29 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.httprequest;
+
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
+    private final HttpRequestLine httpRequestLine;
     private final HttpRequestHeader httpRequestHeader;
-    private HttpRequestBody httpRequestBody;
+    private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader, HttpRequestBody httpRequestBody) {
+        this.httpRequestLine = httpRequestLine;
         this.httpRequestHeader = httpRequestHeader;
         this.httpRequestBody = httpRequestBody;
     }
 
-    public HttpRequest(HttpRequestHeader httpRequestHeader) {
-        this(httpRequestHeader, null);
+    public HttpRequest(HttpRequestLine httpRequestLine, HttpRequestHeader httpRequestHeader) {
+        this(httpRequestLine, httpRequestHeader, null);
     }
 
     public boolean isMethod(String name) {
-        return httpRequestHeader.isMethod(name);
+        return httpRequestLine.isMethod(name);
     }
 
     public boolean isPath(String path) {
-        return httpRequestHeader.isPath(path);
+        return httpRequestLine.isPath(path);
     }
 
     public boolean containsKey(String key) {
@@ -31,15 +35,15 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return httpRequestHeader.getMethod();
+        return httpRequestLine.getMethod();
     }
 
     public String getPath() {
-        return httpRequestHeader.getPath();
+        return httpRequestLine.getPath();
     }
 
     public String getVersion() {
-        return httpRequestHeader.getVersion();
+        return httpRequestLine.getVersion();
     }
 
     public String getBody() {

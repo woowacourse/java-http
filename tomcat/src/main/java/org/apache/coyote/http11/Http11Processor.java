@@ -54,6 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             String header = br.readLine();
             while (!"".equals(header)) {
                 String[] splitHeader = header.split(": ");
+//                log.info(splitHeader[0]+": "+splitHeader[1]);
                 httpRequestHeaders.put(splitHeader[0], splitHeader[1]);
                 header = br.readLine();
             }
@@ -74,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             RequestPathType requestPathType = RequestPathType.reqeustPathToRequestPathType(requestPath);
 
             if (requestPathType.isAPI()) {
-                apiProcessor.process(connection, requestPath, requestMethodType, requestBody);
+                apiProcessor.process(connection, requestPath, requestMethodType, httpRequestHeaders, requestBody);
             }
             if (requestPathType.isResource()) {
                 resourceProcessor.process(connection, requestPath);

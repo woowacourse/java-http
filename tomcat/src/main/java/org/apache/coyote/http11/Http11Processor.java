@@ -17,7 +17,9 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -40,29 +42,35 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            Map<RequestLineElement, String> requestLineElements = extractRequestLine(bufferedReader);
-            final URL resource = getClass().getClassLoader().getResource(
-                    "static" + requestLineElements.get(RequestLineElement.REQUEST_URI));
+            while (bufferedReader.ready()) {
+                Map<RequestLineElement, String> requestLineElements = extractRequestLine(bufferedReader);
+                URL resource = getClass().getClassLoader()
+                        .getResource("static" + requestLineElements.get(RequestLineElement.REQUEST_URI));
+                if (requestLineElements.get(RequestLineElement.REQUEST_URI).startsWith("/login")) {
+                    parseLogin(requestLineElements.get(RequestLineElement.REQUEST_URI));
+                    resource = getClass().getClassLoader().getResource("static/login.html");
+                }
 
-            Map<String, String> headers = parseHeaders(bufferedReader);
-            String contentType = convertContentTypeByAccept(headers.get("Accept"));
+                Map<String, String> headers = parseHeaders(bufferedReader);
+                String contentType = convertContentTypeByAccept(headers.get("Accept"));
 
-            if (isResourceNotExists(resource)) {
-                write(requestLineElements.get(RequestLineElement.REQUEST_URI), contentType, outputStream);
-                return;
+                if (isResourceExists(resource)) {
+                    final String content = new String(Files.readAllBytes(new File((resource).getFile()).toPath()));
+                    rendering(content, contentType, outputStream);
+                    return;
+                }
+                rendering(requestLineElements.get(RequestLineElement.REQUEST_URI), contentType, outputStream);
             }
-            final String content = new String(Files.readAllBytes(new File((resource).getFile()).toPath()));
-            write(content, contentType, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private static boolean isResourceNotExists(URL resource) {
-        return Objects.isNull(resource);
+    private static boolean isResourceExists(URL resource) {
+        return !Objects.isNull(resource);
     }
 
-    private static void write(String content, String contentType, OutputStream outputStream) throws IOException {
+    private static void rendering(String content, String contentType, OutputStream outputStream) throws IOException {
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -107,5 +115,27 @@ public class Http11Processor implements Runnable, Processor {
             return "text/css";
         }
         return "text/html";
+    }
+
+    private static void parseLogin(String uri) {
+        if (!(uri.contains("?account=") && uri.contains("&password="))) {
+            return;
+        }
+        String queryString = uri.substring("/login?".length());
+        int index = queryString.indexOf("&");
+        String account = queryString.substring("account=".length(), index);
+        String password = queryString.substring(index + 1 + "password=".length());
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> {
+                            log.error("account: {} 는 존재하지 않는 사용자입니다.", account);
+                            return new RuntimeException();
+                        }
+                );
+        if (user.checkPassword(password)) {
+            log.info("user: {}", user);
+            return;
+        }
+        log.error("user: {}, inputPassword={}, 비밀번호가 올바르지 않습니다.", user, password);
+        throw new RuntimeException();
     }
 }

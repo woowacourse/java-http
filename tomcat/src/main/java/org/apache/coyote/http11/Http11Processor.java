@@ -35,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()
         ) {
             final HttpRequest request = HttpRequestParser.parse(inputStream);
-            final String response = getResponse(request);
+            final String response = generateResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -44,12 +44,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(HttpRequest request) throws IOException {
-        if ("/".equals(request.getUri())) {
-            return rootPage();
+    private String generateResponse(HttpRequest request) {
+        try {
+            String uri = request.getUri();
+            if ("/".equals(uri)) {
+                return rootPage();
+            }
+            return getStaticResource(uri);
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage(), e);
+            return "HTTP/1.1 404 Not Found ";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "HTTP/1.1 500 Internal Server Error ";
         }
-
-        return getStaticResource(request.getUri());
     }
 
     private String rootPage() {
@@ -64,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getStaticResource(String requestUri) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         if (resource == null) {
-            return "HTTP/1.1 404 Not Found ";
+            throw new IllegalArgumentException("Resource not found");
         }
 
         final Path path = Path.of(resource.getPath());

@@ -44,7 +44,7 @@ public class HttpResponse {
         );
     }
 
-    public void setResponseBodyFile(HttpRequest httpRequest) throws IOException {
+    public void setStaticResourceResponse(HttpRequest httpRequest) throws IOException {
         Path path = buildPath(httpRequest);
         String responseBody = new String(Files.readAllBytes(path));
         String contentType = createContentType(httpRequest.getExtension());

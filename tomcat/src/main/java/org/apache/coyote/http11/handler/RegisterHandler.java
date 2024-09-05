@@ -11,7 +11,7 @@ public class RegisterHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.setResponseBodyFile(request);
+        response.setStaticResourceResponse(request);
 
         response.write();
     }
@@ -29,7 +29,6 @@ public class RegisterHandler extends AbstractRequestHandler {
         } catch (IllegalArgumentException e) {
             response.sendRedirect("/400.html");
         }
-
         response.write();
     }
 

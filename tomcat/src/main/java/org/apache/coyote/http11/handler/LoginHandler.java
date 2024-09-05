@@ -18,8 +18,8 @@ public class LoginHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.setResponseBodyFile(request);
-
+        response.setStaticResourceResponse(request);
+        response.addHeader(HttpHeaders.CONTENT_TYPE, "text/html;charset=utf-8");
         response.write();
     }
 

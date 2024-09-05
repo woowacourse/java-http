@@ -8,8 +8,7 @@ public class StaticResourceHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        httpResponse.setResponseBodyFile(httpRequest);
-
+        httpResponse.setStaticResourceResponse(httpRequest);
         httpResponse.write();
     }
 }

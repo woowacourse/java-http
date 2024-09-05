@@ -56,7 +56,7 @@ public class RequestURI {
     private String extractExtension(String path) {
         int index = path.lastIndexOf('.');
         if (index == -1) {
-            return "html"; // default extension = html
+            return "";
         }
         return path.substring(index + 1);
     }

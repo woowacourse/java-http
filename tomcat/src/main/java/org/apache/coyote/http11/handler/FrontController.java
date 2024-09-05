@@ -16,8 +16,7 @@ public class FrontController {
     private final Map<String, RequestHandler> handlers = new HashMap<>();
 
     public FrontController() {
-        handlers.put("/", new HomeHandler());
-        handlers.put("/index", new IndexHandler());
+        handlers.put("/", new IndexHandler());
         handlers.put("/login", new LoginHandler());
         handlers.put("/register", new RegisterHandler());
         handlers.put("/user", new UserHandler());
@@ -33,8 +32,8 @@ public class FrontController {
             return;
         }
 
-        List<String> staticResources = List.of("css", "js", "png", "jpg", "ico", "html", "svg");
-        if (staticResources.contains(request.getExtension())) {
+        List<String> allowedStaticResources = List.of("html", "css", "js", "png", "jpg", "ico", "svg");
+        if (allowedStaticResources.contains(request.getExtension())) {
             new StaticResourceHandler().handle(request, response);
             return;
         }

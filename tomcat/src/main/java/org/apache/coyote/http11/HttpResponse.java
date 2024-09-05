@@ -13,6 +13,22 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
+    public void addHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public void sendRedirect(String location) {
+        this.statusCode = 302;
+        this.headers.put("Location", location);
+    }
+
+    public String getResponse() {
+        return String.join("\r\n",
+                parseResponseLine(),
+                parseHeaders(),
+                body);
+    }
+
     private String parseResponseLine() {
         return String.format("HTTP/1.1 %d OK ", statusCode);
     }
@@ -29,26 +45,15 @@ public class HttpResponse {
         return sb.toString();
     }
 
-    public void addHeader(String key, String value) {
-        this.headers.put(key, value);
-    }
-
-    public String getResponse() {
-        return String.join("\r\n",
-                parseResponseLine(),
-                parseHeaders(),
-                body);
-    }
-
     public String getBody() {
         return body;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 }

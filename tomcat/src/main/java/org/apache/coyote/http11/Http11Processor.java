@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
     private void execute(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
         String httpMethod = request.getHttpMethod();
         String path = request.getPath();
-        log.info("request path = {}", path);
+        log.info("request = {} {}", httpMethod, path);
 
         if (path.equals("/login") && httpMethod.equals("GET")) {
             checkLogin(request, response);
@@ -79,8 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         String jSessionId = cookies.getCookieValue("JSESSIONID");
         boolean isLogin = SessionManager.containsSession(jSessionId);
         if (isLogin) {
-            response.setStatusCode(302);
-            response.addHeader("Location", "/index.html");
+            response.sendRedirect("/index.html");
         }
     }
 
@@ -110,8 +109,7 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         log.info("user: {}", user);
-        response.setStatusCode(302);
-        response.addHeader("Location", "/index.html");
+        response.sendRedirect("/index.html");
 
         UUID jSessionId = UUID.randomUUID();
         Session session = new Session(jSessionId.toString());
@@ -138,8 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        response.setStatusCode(302);
-        response.addHeader("Location", "/index.html");
+        response.sendRedirect("/index.html");
     }
 
     private void refresh(HttpRequest request, HttpResponse response) {

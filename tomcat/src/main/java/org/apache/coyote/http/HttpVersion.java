@@ -1,5 +1,7 @@
 package org.apache.coyote.http;
 
+import java.util.Arrays;
+
 public enum HttpVersion {
     HTTP11("HTTP/1.1"),
     ;
@@ -12,5 +14,10 @@ public enum HttpVersion {
 
     public String getVersion() {
         return version;
+    }
+
+    public static HttpVersion findByVersion(String version) {
+        return Arrays.stream(HttpVersion.values()).filter(httpVersion -> httpVersion.getVersion().equals(version)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown http version: " + version));
     }
 }

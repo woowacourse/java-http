@@ -18,17 +18,17 @@ public class RequestToResponse {
     private static final String STATIC = "static";
 
     public String build(HttpRequest request) throws IOException {
-        String path = request.getRequestLine().getPath();
+        Path path = request.getRequestLine().getPath();
 
-        if (path.equals("/")) {
+        if (path.getPath().equals("/")) {
             return HttpResponse.basicResponse().toResponse();
         }
 
-        if (request.getRequestLine().getPath().startsWith("/login")) {
+        if (path.getPath().startsWith("/login")) {
             return login(request.getRequestLine());
         }
 
-        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path));
+        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()));
 
         if (resource == null) {
             return HttpResponse.notFoundResponses().toResponse();
@@ -37,7 +37,7 @@ public class RequestToResponse {
 
         StatusLine statusLine = new StatusLine(HttpStatus.OK);
         ResponseHeader header = new ResponseHeader();
-        header.setContentType(MimeType.getContentTypeFromExtension(path));
+        header.setContentType(MimeType.getContentTypeFromExtension(path.getPath()));
         header.setContentLength(responseBody.getBytes().length);
 
         HttpResponse response = new HttpResponse(statusLine, header, responseBody);
@@ -45,7 +45,7 @@ public class RequestToResponse {
     }
 
     private String login(RequestLine requestLine) throws IOException {
-        String uris = requestLine.getPath();
+        String uris = requestLine.getPath().getPath();
         int index = uris.indexOf("?");
         String uri = uris.substring(0, index);
         String queryString = uris.substring(index + 1);

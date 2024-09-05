@@ -5,58 +5,35 @@ import java.util.List;
 public class RequestLine {
 
     private final HttpMethod method;
-    private final String path;
-    private final String version;
+    private final Path path;
+    private final HttpVersion version;
 
     public static RequestLine of(String requestLine) {
-        return new RequestLine(List.of(requestLine.split(" ")));
-    }
-
-    private RequestLine(List<String> requestLines) {
-        validateSize(requestLines);
-        String originMethod = requestLines.get(0);
-        String originPath = requestLines.get(1);
-        String originVersion = requestLines.get(2);
-        validateMethod(originMethod);
-        validatePath(originPath);
-        this.method = HttpMethod.findByMethod(originMethod);
-        this.path = originPath;
-        this.version = originVersion;
-    }
-
-    private void validateSize(List<String> requestLines) {
+        List<String> requestLines = List.of(requestLine.split(" "));
         if (requestLines.size() != 3) {
             throw new IllegalArgumentException("Invalid request line: " + requestLines);
         }
+        String originMethod = requestLines.get(0);
+        String originPath = requestLines.get(1);
+        String originVersion = requestLines.get(2);
+        return new RequestLine(HttpMethod.findByMethod(originMethod), new Path(originPath), HttpVersion.findByVersion(originVersion));
     }
 
-    private void validateMethod(String method) {
-        if (method == null || method.isEmpty()) {
-            throw new IllegalArgumentException("Method cannot be null or empty");
-        }
-        if (!HttpMethod.isHttpMethod(method)) {
-            throw new IllegalArgumentException("Method " + method + " is not supported");
-        }
-    }
-
-    private void validatePath(String path) {
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("Path cannot be null or empty");
-        }
-        if (!path.startsWith("/")) {
-            throw new IllegalArgumentException("Path must start with '/'");
-        }
+    private RequestLine(HttpMethod method, Path path, HttpVersion version) {
+        this.method = method;
+        this.path = path;
+        this.version = version;
     }
 
     public HttpMethod getMethod() {
         return method;
     }
 
-    public String getPath() {
+    public Path getPath() {
         return path;
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 }

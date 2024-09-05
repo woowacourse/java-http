@@ -30,4 +30,12 @@ public class HttpHeaders {
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
+
+    public String get(String key) {
+        return headers.get(key);
+    }
+
+    public boolean containsKey(String key) {
+        return headers.containsKey(key);
+    }
 }

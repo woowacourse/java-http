@@ -22,23 +22,21 @@ public class LoginHandler extends AbstractRequestHandler {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        Map<String, String> queryString = request.getQueryString();
+        Map<String, String> params = request.getParams();
+        String account = params.get("account");
+        String password = params.get("password");
 
-        if (queryString.containsKey("account") && queryString.containsKey("password")) {
-            String account = queryString.get("account");
-            String password = queryString.get("password");
-            try {
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .filter(it -> it.checkPassword(password))
-                        .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
+        try {
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .filter(it -> it.checkPassword(password))
+                    .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));
 
-                log.debug("user: {}", user);
-                response.sendRedirect("/index.html");
-            } catch (IllegalArgumentException e) {
-                response.sendRedirect("/401.html");
-            }
-        } else {
-            response.sendRedirect("/404.html");
+            log.debug("user: {}", user);
+            response.sendRedirect("/index.html");
+        } catch (IllegalArgumentException e) {
+            response.sendRedirect("/401.html");
         }
+
+        response.write();
     }
 }

@@ -18,21 +18,19 @@ public class RegisterHandler extends AbstractRequestHandler {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        Map<String, String> queryString = request.getQueryString();
-        if (
-                queryString.containsKey("account") &&
-                queryString.containsKey("password") &&
-                queryString.containsKey("email")
-        ) {
-            try {
-                register(queryString.get("account"), queryString.get("password"), queryString.get("email"));
-                response.sendRedirect("/index.html");
-            } catch (IllegalArgumentException e) {
-                response.sendRedirect("/400.html");
-            }
-        } else {
-            response.sendRedirect("/404.html");
+        Map<String, String> params = request.getParams();
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+
+        try {
+            register(account, password, email);
+            response.sendRedirect("/index.html");
+        } catch (IllegalArgumentException e) {
+            response.sendRedirect("/400.html");
         }
+
+        response.write();
     }
 
     private void register(String account, String password, String email) {

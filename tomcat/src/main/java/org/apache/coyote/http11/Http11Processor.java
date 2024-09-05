@@ -53,15 +53,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest readHttpRequest(BufferedReader bufferedReader) throws IOException {
-        String requestLine = bufferedReader.readLine();
+    private HttpRequest readHttpRequest(BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
         if (requestLine == null) {
             return null;
         }
-        List<String> headers = bufferedReader.lines()
+        List<String> headers = reader.lines()
                 .takeWhile(s -> !s.isBlank())
                 .toList();
 
-        return new HttpRequest(requestLine, headers);
+        HttpRequest httpRequest = new HttpRequest(requestLine, headers);
+        setRequestBodyIfPresent(reader, httpRequest);
+        return httpRequest;
+    }
+
+    private void setRequestBodyIfPresent(BufferedReader reader, HttpRequest httpRequest) throws IOException {
+        int contentLength = httpRequest.getContentLength();
+        if (contentLength == 0) {
+            return;
+        }
+
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+
+        httpRequest.setRequestBody(requestBody);
     }
 }

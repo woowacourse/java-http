@@ -24,6 +24,7 @@ public class FrontController {
     public void handleRequest(HttpRequest request, HttpResponse response) throws IOException {
         RequestHandler handler = handlers.get(request.getPath());
         log.debug("Request Line: {}", request.getRequestLine());
+        log.debug("Body: {}", request.getParams());
         if (handler != null) {
             handler.handle(request, response);
             return;

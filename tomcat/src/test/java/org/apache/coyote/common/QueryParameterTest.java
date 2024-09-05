@@ -1,10 +1,12 @@
 package org.apache.coyote.common;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +38,20 @@ class QueryParameterTest {
         Optional<String> result = queryParameter.get("a");
 
         assertThat(result).hasValue("2");
+    }
+
+    @Test
+    @DisplayName("여러 키값 페어를 읽는다.")
+    void multi() {
+        List<String> strings = List.of("a=1", "b=2", "c=3");
+        String input = String.join("&", strings);
+        QueryParameter queryParameter = new QueryParameter(input);
+
+        Assertions.assertAll(
+                () -> assertThat(queryParameter.get("a")).hasValue("1"),
+                () -> assertThat(queryParameter.get("b")).hasValue("2"),
+                () -> assertThat(queryParameter.get("c")).hasValue("3")
+        );
     }
 
     @Test

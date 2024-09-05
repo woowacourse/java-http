@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.httprequest.HttpRequest;
+import org.apache.coyote.http11.httprequest.HttpRequestBody;
+import org.apache.coyote.http11.httprequest.HttpRequestHeader;
+import org.apache.coyote.http11.httprequest.HttpRequestLine;
 
 public class HttpRequestConvertor {
 
@@ -21,17 +25,20 @@ public class HttpRequestConvertor {
                 path += ".html";
             }
             String version = headerFirstLine[2];
+
+            HttpRequestLine httpRequestLine = new HttpRequestLine(method, path, version);
+
             Map<String, String> headers = getHeaders(bufferedReader);
 
-            HttpRequestHeader httpRequestHeader = new HttpRequestHeader(method, path, version, headers);
+            HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
             if (httpRequestHeader.containsKey("Content-Length")) {
                 HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
 
-                return new HttpRequest(httpRequestHeader, httpRequestBody);
+                return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
             }
 
-            return new HttpRequest(httpRequestHeader);
+            return new HttpRequest(httpRequestLine, httpRequestHeader);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -45,8 +52,7 @@ public class HttpRequestConvertor {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String body = new String(buffer);
-        HttpRequestBody httpRequestBody = new HttpRequestBody(body);
-        return httpRequestBody;
+        return new HttpRequestBody(body);
     }
 
     private static Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {

@@ -40,19 +40,40 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            List<String> additionalHeaders = new ArrayList<>();
+            Map<String, String> requestHeaders = new HashMap<>();
+            List<String> additionalResponseHeaders = new ArrayList<>();
             String statusCode = "200 OK";
 
             /**
-             * HTTP Request start-line 읽기
+             * HTTP Request Header 읽기
              */
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String requestStartLine = bufferedReader.readLine();
+            String currentLine = bufferedReader.readLine();
+            while (currentLine != null && !currentLine.isBlank()) {
+                String[] requestHeaderEntry = currentLine.split(":");
+                requestHeaders.put(requestHeaderEntry[0], requestHeaderEntry[1].trim());
+                currentLine = bufferedReader.readLine();
+            }
 
             /**
-             * Request URI 추출
+             * HTTP Request Body 읽기
              */
-            String requestUri = requestStartLine.split(" ")[1];
+            String requestBody = "";
+            String rawContentLength = requestHeaders.get("Content-Length");
+            if (rawContentLength != null) {
+                int contentLength = Integer.parseInt(rawContentLength);
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+            }
+
+            /**
+             * Request HTTP Method, URI 추출
+             */
+            String[] splitRequestStartLine = requestStartLine.split(" ");
+            String requestMethod = splitRequestStartLine[0];
+            String requestUri = splitRequestStartLine[1];
             String filePath = requestUri;
 
             /**
@@ -81,20 +102,55 @@ public class Http11Processor implements Runnable, Processor {
             /**
              * queryString을 통해 회원 조회
              */
-            String inputAccount = queryParameters.get("account");
-            String inputPassword = queryParameters.get("password");
+            String queryStringInputAccount = queryParameters.get("account");
+            String queryStringInputPassword = queryParameters.get("password");
 
-            if (inputAccount != null && inputPassword != null) {
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(inputAccount);
+            if (queryStringInputAccount != null && queryStringInputPassword != null) {
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringInputAccount);
                 if (optionalUser.isEmpty()) {
                     statusCode = "401 Unauthorized";
                     filePath = "/401.html";
                 }
                 if (optionalUser.isPresent()) {
                     User user = optionalUser.get();
-                    if (user.checkPassword(inputPassword)) {
+                    if (user.checkPassword(queryStringInputPassword)) {
                         log.info(user.toString());
-                        additionalHeaders.add("Location: /index.html");
+                        additionalResponseHeaders.add("Location: /index.html");
+                        statusCode = "302 Found";
+                    }
+                }
+            }
+
+            /**
+             * application/x-www-form-urlencoded 타입의 Request Body 파싱
+             */
+            Map<String, String> requestBodyFields = new HashMap<>();
+            Arrays.stream(requestBody.split("&"))
+                    .forEach(requestBodyField -> {
+                        String[] split = requestBodyField.split("=");
+                        if (split.length == 2 && !split[0].isBlank() && !split[1].isBlank()) {
+                            requestBodyFields.put(split[0], split[1]);
+                            System.out.println("fieldKey: " + split[0] + ", fieldValue: " + split[1]);
+                        }
+                    });
+
+            /**
+             * application/x-www-form-urlencoded 타입의 Request Body를 통해 회원 조회
+             */
+            String requestBodyInputAccount = requestBodyFields.get("account");
+            String requestBodyInputPassword = requestBodyFields.get("password");
+
+            if (requestBodyInputAccount != null && requestBodyInputPassword != null) {
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(requestBodyInputAccount);
+                if (optionalUser.isEmpty()) {
+                    statusCode = "401 Unauthorized";
+                    filePath = "/401.html";
+                }
+                if (optionalUser.isPresent()) {
+                    User user = optionalUser.get();
+                    if (user.checkPassword(requestBodyInputPassword)) {
+                        log.info(user.toString());
+                        additionalResponseHeaders.add("Location: /index.html");
                         statusCode = "302 Found";
                     }
                 }
@@ -137,7 +193,7 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Type: " + responseContentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " "
             );
-            for (String additionalHeader : additionalHeaders) {
+            for (String additionalHeader : additionalResponseHeaders) {
                 responseHeader = String.join("\r\n", responseHeader, additionalHeader + " ");
             }
 

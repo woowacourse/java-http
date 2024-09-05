@@ -81,7 +81,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void loadGetHttpMethod(List<String> sentences) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = checkFileType(sentences).responseToString();
+            String fileType = getFileType(sentences);
+            String url = sentences.getFirst().split(" ")[1];
+            String response = getResponseContentForUrl(url, fileType).responseToString();
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -89,15 +92,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseContent checkFileType(List<String> sentences) {
-        String accept = sentences.stream()
+    private String getFileType(List<String> sentences) {
+        return sentences.stream()
                 .filter(sentence -> sentence.startsWith(ACCEPT_PREFIX))
                 .map(sentence -> sentence.substring(ACCEPT_PREFIX.length(), sentence.length() - 1).split(",")[0])
                 .findAny()
                 .orElse(CONTENT_TYPE_HTML);
-
-        String url = sentences.getFirst().split(" ")[1];
-        return getResponseContentForUrl(url, accept);
     }
 
     private ResponseContent getResponseContentForUrl(String url, String accept) {

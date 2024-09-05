@@ -36,17 +36,22 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = new HttpRequest(inputStream);
             log.info("request: {}", request);
 
-            String indexFileName = classLoader.getResource("static/index.html").getFile();
-            String responseBody = new String(Files.readAllBytes(Paths.get(indexFileName)));
-
-            String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            if (request.getMethod() == HttpMethod.GET) {
+                String indexFileName = classLoader.getResource("static/" + request.getUri()).getFile();
+                String responseBody = new String(Files.readAllBytes(Paths.get(indexFileName)));
+                HttpResponse response = HttpResponse.builder()
+                        .ok()
+                        .contentType(ContentType.TEXT_HTML)
+                        .body(responseBody)
+                        .build();
+                outputStream.write(HttpResponseWriter.write(response).getBytes());
+                outputStream.flush();
+                return;
+            }
+            HttpResponse response = HttpResponse.builder()
+                    .statusCode(StatusCode.METHOD_NOT_ALLOWED)
+                    .build();
+            outputStream.write(HttpResponseWriter.write(response).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

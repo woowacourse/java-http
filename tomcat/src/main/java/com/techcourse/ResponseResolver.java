@@ -5,10 +5,7 @@ import org.apache.HttpResponse;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 

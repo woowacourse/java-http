@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class RequestCookies {
 
+    private static final RequestCookies EMPTY_COOKIES = new RequestCookies(Map.of());
     private static final String COOKIES_SEPARATOR = "; ";
     private static final String COOKIE_SEPARATOR = "=";
 
@@ -15,6 +16,9 @@ public class RequestCookies {
     }
 
     public static RequestCookies of(String httpCookies) {
+        if (httpCookies == null || httpCookies.isBlank()) {
+            return EMPTY_COOKIES;
+        }
         String[] splitHttpCookies = httpCookies.split(COOKIES_SEPARATOR);
         Map<String, String> cookies = new HashMap<>();
         for (String cookie : splitHttpCookies) {

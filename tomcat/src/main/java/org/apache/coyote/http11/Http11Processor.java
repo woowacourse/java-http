@@ -44,33 +44,22 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final String requestMethodAndUrl = bufferedReader.readLine();
 
-            final String[] texts = requestMethodAndUrl.split(" ");
-            var line = " ";
+            final HttpHeaders httpHeaders = HttpHeaders.parse(bufferedReader);
 
-            final var httpRequestHeaders = new HashMap<String, String>();
-            while (!line.isEmpty()) {
-                line = bufferedReader.readLine();
-                if (line == null || line.isBlank()) {
-                    break;
-                }
-                final String[] split = line.split(":");
-                httpRequestHeaders.put(split[0], split[1]);
-            }
-            final var method = texts[0];
-            final var path = texts[1];
-            log.info("{} 요청 = {}", method, requestMethodAndUrl);
-            final Request request = new Request(path);
-            log.info("request = {}", request);
+            final String[] texts = requestMethodAndUrl.split(" ");
+            final var method = HttpMethod.fromName(texts[0]);
+            final var path = new Path(texts[1]);
+            log.info("{} 요청 = {}", method, path);
+
             //TODO localhost:8080 요청시 resource가 null 임
-            final URL resource = request.getUrl();
+            final URL resource = path.getUrl();
             final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             final Response response = new Response();
 
-            if (method.equals("GET")) {
-                if (path.equals("/login")) {
+            if (HttpMethod.GET.equals(method)) {
+                if (path.getValue().equals("/login")) { //TODO 디미터 법칙 지키기
                     // TODO JSESSIONID가 유효한지도 확인해야하지 않나.
-                    log.info("httpRequestHeaders = {}", httpRequestHeaders);
-                    final var cookie = httpRequestHeaders.get("Cookie");
+                    final var cookie = httpHeaders.get("Cookie");
 
                     final HttpCookie httpCookie = HttpCookie.parse(cookie);
                     if (httpCookie.containsKey("JSESSIONID")) {
@@ -78,33 +67,34 @@ public class Http11Processor implements Runnable, Processor {
                         final Session session = sessionManager.findSession(jSessionId);
                         final User sessionUser = (User) session.getAttribute("user");
                         log.info("이미 로그인 유저 = {}", sessionUser);
-                        redirectIndex(response, request, result);
+                        redirectIndex(response, path, result);
                     } else {
-                        generateOKResponse(response, request, result);
+                        generateOKResponse(response, path, result);
                     }
                 } else {
-                    generateOKResponse(response, request, result);
+                    generateOKResponse(response, path, result);
                 }
             }
 
-            if (method.equals("POST")) {
-                final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length").strip());
+            if (HttpMethod.POST.equals(method)) {
+                //TODO requestBody 객체 만들기
+                final int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
                 final char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
                 final String requestBody = new String(buffer);
                 log.info("requestBody = {}", requestBody);
                 final var body = parsingBody(requestBody);
 
-                if (path.equals("/login")) {
+                if (path.getValue().equals("/login")) {
                     // POST /login
-                    final var user = createResponse(body, request, response, result);
+                    final var user = createResponse(body, path, response, result);
 
                     log.info("user login = {}", user);
-                } else if (path.equals("/register")) {
+                } else if (path.getValue().equals("/register")) {
                     // POST /register
                     final User user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
-                    redirectIndex(response, request, result);
+                    redirectIndex(response, path, result);
                 }
 
                 outputStream.write(response.toHttpResponse().getBytes());
@@ -128,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
         return body;
     }
 
-    private void generateOKResponse(final Response response, final Request request, final String result) {
+    private void generateOKResponse(final Response response, final Path request, final String result) {
         response.setSc("OK");
         response.setStatusCode(200);
         response.setContentType(request.getContentType());
@@ -136,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
         response.setSourceCode(result);
     }
 
-    private void redirectIndex(final Response response, final Request request, final String result) {
+    private void redirectIndex(final Response response, final Path request, final String result) {
         response.setStatusCode(302);
         response.setSc("FOUND");
         response.setContentType(request.getContentType());
@@ -145,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
         response.setSourceCode(result);
     }
 
-    private User createResponse(final Map<String, String> queryString, final Request request, final Response response,
+    private User createResponse(final Map<String, String> queryString, final Path request, final Response response,
                                 final String result) {
         final String account = queryString.get("account");
         log.info("account = {}", account);

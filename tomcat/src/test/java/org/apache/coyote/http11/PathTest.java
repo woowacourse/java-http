@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class RequestTest {
+class PathTest {
 
     @ParameterizedTest
     @DisplayName("확장자 있는 상태로 요청이 오면 경로를 반환한다.")
     @CsvSource(value = {"/css/styles.css|css", "/index.html|html"}, delimiter = '|')
     void requestUrlWithExtension(final String path, final String expected) {
         //given
-        final Request request = new Request(path);
+        final var request = new Path(path);
 
         //when && then
         assertAll(
@@ -32,7 +32,7 @@ class RequestTest {
     void requestQueryParam() {
         //given
         final var query = "login?account=redddy&password=password";
-        final Request request = new Request(query);
+        final var request = new Path(query);
 
         //when
         final var expected = Map.of("account", "redddy", "password", "password");

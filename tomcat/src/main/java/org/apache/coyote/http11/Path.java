@@ -5,23 +5,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Request {
+public class Path {
 
+    private final String value;
     private final URL url;
     private final String extension;
-    private final Map<String, String> queryString;
+    private final Map<String, String> queryString; //TODO request Param?
 
-    public Request(final URL url, final String extension, final Map<String, String> queryString) {
-        this.url = url;
-        this.extension = extension;
-        this.queryString = queryString;
-    }
-
-    public Request(final String path) {
-        if (path.contains("?")) {
+    public Path(final String target) {
+        this.value = target;
+        if (target.contains("?")) {
             this.url = getClass().getClassLoader()
-                    .getResource("static" + path.substring(0, path.indexOf("?")) + ".html");
-            final var query = path.substring(path.indexOf('?') + 1);
+                    .getResource("static" + target.substring(0, target.indexOf("?")) + ".html");
+            final var query = target.substring(target.indexOf('?') + 1);
             this.queryString = new HashMap<>();
             final String[] queryParams = query.split("&");
             for (final String param : queryParams) {
@@ -31,13 +27,13 @@ public class Request {
             this.extension = "html";
             return;
         }
-        if (path.contains(".")) {
-            this.url = getClass().getClassLoader().getResource("static" + path);
-            this.extension = path.substring(path.lastIndexOf(".") + 1);
+        if (target.contains(".")) {
+            this.url = getClass().getClassLoader().getResource("static" + target);
+            this.extension = target.substring(target.lastIndexOf(".") + 1);
             this.queryString = new HashMap<>();
             return;
         }
-        this.url = getClass().getClassLoader().getResource("static" + path + ".html");
+        this.url = getClass().getClassLoader().getResource("static" + target + ".html");
         this.extension = "html";
         this.queryString = new HashMap<>();
     }
@@ -47,6 +43,10 @@ public class Request {
             return "text/" + extension;
         }
         return "text/html";
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public URL getUrl() {
@@ -63,8 +63,8 @@ public class Request {
 
     @Override
     public String toString() {
-        return "Request{" +
-               "url=" + url +
+        return "Path{" +
+               "value=" + value +
                ", extension='" + extension + '\'' +
                ", queryString=" + queryString +
                '}';

@@ -144,6 +144,71 @@ public class Http11Processor implements Runnable, Processor {
                         bufferedWriter.flush();
                         return;
                     }
+
+                    if ("GET".equals(method) && "/register".equals(path)) {
+                        String resourcePath = "static" + path + ".html";
+
+                        Optional<URL> resource = Optional.ofNullable(
+                                getClass().getClassLoader().getResource(resourcePath));
+
+                        if (resource.isPresent()) {
+                            responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
+
+                            final String response = String.join("\r\n",
+                                    "HTTP/1.1 200 OK ",
+                                    "Content-Type: " + ContentType.findWithCharset(uri) + " ",
+                                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                                    "",
+                                    responseBody);
+
+                            bufferedWriter.write(response);
+                            bufferedWriter.flush();
+                            return;
+                        }
+                    }
+
+                    if ("POST".equals(method) && "/login".equals(path)) {
+                        Map<String, String> params = new HashMap<>();
+
+                        String[] paramPairs = body.toString().split("&");
+                        for (String pair : paramPairs) {
+                            String[] keyValue = pair.split("=");
+                            if (keyValue.length == 2) {
+                                params.put(URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
+                                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                            }
+                        }
+
+                        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(
+                                params.get("account"));
+
+                        if (optionalUser.isPresent()) {
+                            User user = optionalUser.get();
+                            if (user.checkPassword(params.get("password"))) {
+                                log.info("user : {}", user);
+
+                                String response = String.join("\r\n",
+                                        "HTTP/1.1 302 FOUND ",
+                                        "Location: /index.html ",
+                                        "Content-Length: 0 ",
+                                        "");
+
+                                bufferedWriter.write(response);
+                                bufferedWriter.flush();
+                                return;
+                            }
+                        }
+
+                        String response = String.join("\r\n",
+                                "HTTP/1.1 302 FOUND ",
+                                "Location: /401.html ",
+                                "Content-Length: 0 ",
+                                "");
+
+                        bufferedWriter.write(response);
+                        bufferedWriter.flush();
+                        return;
+                    }
                 }
 
                 String resourcePath = "static" + uri;

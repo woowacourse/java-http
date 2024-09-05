@@ -54,11 +54,14 @@ public class Http11Processor implements Runnable, Processor {
             if ("POST".equals(httpMethod)) {
                 Map<String, String> headers = getHeaders(bufferedReader);
                 String requestBody = getRequestBody(headers, bufferedReader);
-                if (uri.startsWith("/login")) {
+                if ("/login".equals(uri)) {
                     handleLogin(requestBody, outputStream);
                     return;
                 }
-                // TODO: POST /register 구현
+                if ("/register".equals(uri)) {
+                    handleRegister(requestBody, outputStream);
+                    return;
+                }
             }
 
             writeStaticFileResponse(uri, outputStream);
@@ -96,10 +99,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLogin(String requestBody, OutputStream outputStream) throws IOException {
-        Map<String, String> Pairs = getPairs(requestBody);
+        Map<String, String> pairs = getPairs(requestBody);
 
-        String account = Pairs.get("account");
-        String password = Pairs.get("password");
+        String account = pairs.get("account");
+        String password = pairs.get("password");
         if (account != null & password != null) {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
             if (foundUser.isPresent() && "password".equals(password)) {
@@ -110,11 +113,11 @@ public class Http11Processor implements Runnable, Processor {
         writeRedirectResponse("/401.html", outputStream);
     }
 
-    private void writeRedirectResponse(String location, OutputStream outputStream) throws IOException {
-        final var response = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080" + location + " \r\n" +
-                "\r\n";
-        writeResponse(outputStream, response);
+    private void handleRegister(String requestBody, OutputStream outputStream) throws IOException {
+        Map<String, String> pairs = getPairs(requestBody);
+
+        InMemoryUserRepository.save(new User(pairs.get("account"), pairs.get("password"), pairs.get("email")));
+        writeRedirectResponse("/index.html", outputStream);
     }
 
     private Map<String, String> getPairs(String requestBody) {
@@ -127,6 +130,13 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return queryStringPairs;
+    }
+
+    private void writeRedirectResponse(String location, OutputStream outputStream) throws IOException {
+        final var response = "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080" + location + " \r\n" +
+                "\r\n";
+        writeResponse(outputStream, response);
     }
 
     private void writeStaticFileResponse(String uri, OutputStream outputStream) throws IOException {

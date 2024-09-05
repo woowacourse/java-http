@@ -26,21 +26,44 @@ public final class MemberController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse httpResponse) {
+        if (request.getUri().equals("/login")) {
+            login(request, httpResponse);
+            return;
+        }
+        if (request.getUri().equals("/register")) {
+            register(request, httpResponse);
+        }
+    }
+
+    private void login(HttpRequest request, HttpResponse httpResponse) {
         String account = request.getParams("account");
         String password = request.getParams("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UnauthorizedException::new);
         if (user.checkPassword(password)) {
-            httpResponse.setStatusCode(HttpStatus.FOUND.statusCode());
-            httpResponse.setStatusMessage(HttpStatus.FOUND.statusMessage());
-            httpResponse.addHeaders("Location", "/index.html");
-            HttpResponseBuilder.buildDefault(httpResponse);
+            setStatusCodeFound(httpResponse, "/index.html");
             return;
         }
+        setStatusCodeFound(httpResponse, "/401.html");
+
+    }
+
+    private void register(HttpRequest request, HttpResponse httpResponse) {
+        String account = request.getParams("account");
+        String password = request.getParams("password");
+        String email = request.getParams("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        setStatusCodeFound(httpResponse, "/index.html");
+
+    }
+
+    private void setStatusCodeFound(HttpResponse httpResponse, String headerValue) {
         httpResponse.setStatusCode(HttpStatus.FOUND.statusCode());
         httpResponse.setStatusMessage(HttpStatus.FOUND.statusMessage());
-        httpResponse.addHeaders("Location", "/401.html");
+        httpResponse.addHeaders("Location", headerValue);
         HttpResponseBuilder.buildDefault(httpResponse);
     }
 }

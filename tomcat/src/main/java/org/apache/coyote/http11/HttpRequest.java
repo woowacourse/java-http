@@ -46,6 +46,10 @@ public class HttpRequest {
         return method;
     }
 
+    public String getUri() {
+        return uri;
+    }
+
     public String getPath() {
         return path;
     }

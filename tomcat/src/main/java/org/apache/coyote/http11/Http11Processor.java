@@ -119,7 +119,8 @@ public class Http11Processor implements Runnable, Processor {
             return saveUser(cookie, requestBody);
         }
 
-        return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK, cookie)
+        return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK)
+                .cookie(cookie)
                 .buildMessage();
     }
 
@@ -130,11 +131,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getLoginPage(HttpCookie cookie) {
         if (cookie.contains(JSESSIONID) && sessionManager.hasId(cookie.get(JSESSIONID))) {
-            return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND, cookie)
+            return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND)
+                    .cookie(cookie)
                     .buildMessage();
         }
 
-        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK, cookie)
+        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK)
+                .cookie(cookie)
                 .buildMessage();
     }
 
@@ -146,11 +149,13 @@ public class Http11Processor implements Runnable, Processor {
             if (InMemoryUserRepository.exists(account, password)) {
                 User user = InMemoryUserRepository.getByAccount(account);
                 saveSession(cookie, user);
-                return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND, cookie)
+                return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND)
+                        .cookie(cookie)
                         .buildMessage();
             }
 
-            return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED, cookie)
+            return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED)
+                    .cookie(cookie)
                     .buildMessage();
         }
 
@@ -167,7 +172,8 @@ public class Http11Processor implements Runnable, Processor {
                 User user = new User(account, password, email);
                 InMemoryUserRepository.save(user);
                 saveSession(cookie, user);
-                return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND, cookie)
+                return HttpResponse.ofStaticFile("index.html", HttpStatusCode.FOUND)
+                        .cookie(cookie)
                         .buildMessage();
             }
 

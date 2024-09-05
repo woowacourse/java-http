@@ -24,24 +24,25 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse ofStaticFile(String fileName, HttpStatusCode httpStatusCode, HttpCookie cookie) {
+    public static HttpResponse ofStaticFile(String fileName, HttpStatusCode httpStatusCode) {
         if (!fileName.contains(".")) {
             fileName += ".html";
         }
 
-        HttpResponse response = new HttpResponse(
+        return new HttpResponse(
                 httpStatusCode,
                 FILE_READER.read(fileName),
                 ContentType.fromFileName(fileName)
         );
+    }
 
+    public HttpResponse cookie(HttpCookie cookie) {
         if (!cookie.contains(JSESSIONID)) {
             HttpCookie httpCookie = new HttpCookie();
             httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
-            response.addHeader(SET_COOKIE, httpCookie.buildMessage());
+            this.addHeader(SET_COOKIE, httpCookie.buildMessage());
         }
-
-        return response;
+        return this;
     }
 
     private HttpHeader buildInitialHeaders(String responseBody, ContentType contentType) {

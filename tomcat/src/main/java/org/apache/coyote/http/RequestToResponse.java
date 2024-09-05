@@ -29,6 +29,10 @@ public class RequestToResponse {
         }
 
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path));
+
+        if (resource == null) {
+            return HttpResponse.notFoundResponses().toResponse();
+        }
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         StatusLine statusLine = new StatusLine(HttpStatus.OK);

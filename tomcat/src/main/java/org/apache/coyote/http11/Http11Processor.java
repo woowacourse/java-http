@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String response;
             try {
-                if (endpoint.startsWith("/login")) {
+                if (endpoint.startsWith("/login") && endpoint.contains("?")) {
                     response = loginController.login(request.toString());
                 } else {
                     String fileName = http11Helper.getFileName(endpoint);

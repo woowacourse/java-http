@@ -116,7 +116,7 @@ class Http11ProcessorTest {
     void indexWithoutExtension() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -129,10 +129,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: 3796 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

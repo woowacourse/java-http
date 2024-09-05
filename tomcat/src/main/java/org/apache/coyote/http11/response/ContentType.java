@@ -10,10 +10,25 @@ enum ContentType {
     private final String rawContentType;
 
     static ContentType[] fromResourceName(String resourceName) {
-        String fileExtension = resourceName.split("\\.")[1];
-        return Arrays.stream(values())
+        String[] split = resourceName.split("\\.");
+        if (split.length == 1) {
+            return new ContentType[]{HTML};
+        }
+
+        String fileExtension = split[1];
+        ContentType[] result = findContentTypes(fileExtension);
+
+        if (result.length == 0) {
+            return new ContentType[]{HTML};
+        }
+        return result;
+    }
+
+    private static ContentType[] findContentTypes(String fileExtension) {
+        ContentType[] result = Arrays.stream(values())
                 .filter(contentType -> contentType.rawContentType.contains(fileExtension))
                 .toArray(ContentType[]::new);
+        return result;
     }
 
     ContentType(String rawContentType) {

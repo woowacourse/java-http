@@ -12,7 +12,7 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public boolean is(HttpMethod httpMethod, String path) {
+    public boolean pointsTo(HttpMethod httpMethod, String path) {
         return httpMethod == requestLine.getMethod()
                && path.equals(requestLine.getPath());
     }

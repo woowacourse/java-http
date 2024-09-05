@@ -112,19 +112,19 @@ public class Http11Processor implements Runnable, Processor {
         HttpCookie cookie = new HttpCookie(request.getHeader(COOKIE));
         RequestBody requestBody = request.getRequestBody();
 
-        if (request.is(GET, "/")) {
+        if (request.pointsTo(GET, "/")) {
             return buildTextMessage("Hello world!", HttpStatusCode.OK);
         }
 
-        if (request.is(GET, "/login")) {
+        if (request.pointsTo(GET, "/login")) {
             return getLoginPage(cookie);
         }
 
-        if (request.is(POST, "/login")) {
+        if (request.pointsTo(POST, "/login")) {
             return login(cookie, requestBody);
         }
 
-        if (request.is(POST, "/register")) {
+        if (request.pointsTo(POST, "/register")) {
             return saveUser(cookie, requestBody);
         }
 

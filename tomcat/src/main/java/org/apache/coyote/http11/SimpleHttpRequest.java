@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,21 @@ public class SimpleHttpRequest {
     public String getRequestUri() {
         final int requestUriIndexNumber = 1;
         return parseRequestLine().split(" ")[requestUriIndexNumber];
+    }
+
+    public String getEndpoint() {
+        return getRequestUri().split("\\?")[0];
+    }
+
+    public Map<String, String> getQueryParameters() {
+        Map<String, String> queryParameters = new HashMap<>();
+        final String[] queryParams = getRequestUri().split("\\?")[1].split("&");
+        Arrays.stream(queryParams)
+                .forEach(param -> {
+                    final String[] keyAndValue = param.split("=");
+                    queryParameters.put(keyAndValue[0], keyAndValue[1]);
+                });
+        return queryParameters;
     }
 
     private String parseRequestLine() {

@@ -6,7 +6,8 @@ public enum FileExtensionType {
     HTML("html"),
     CSS("css"),
     JAVASCRIPT("js"),
-    SVG("svg");
+    SVG("svg"),
+    ICO("ico");
 
     private final String value;
 

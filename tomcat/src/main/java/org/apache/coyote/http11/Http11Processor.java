@@ -11,12 +11,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,7 +45,11 @@ public class Http11Processor implements Runnable, Processor {
         ) {
             final String requestMessage = parseRequestMessage(bufferedReader);
             final SimpleHttpRequest httpRequest = new SimpleHttpRequest(requestMessage);
-            sendResponse(outputStream, httpRequest);
+            if (httpRequest.parseStaticFileExtensionType() != null) {
+                handleStaticResourceRequest(outputStream, httpRequest);
+                return;
+            }
+            handleDynamicResourceRequest(outputStream, httpRequest);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
@@ -63,18 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private void sendResponse(final OutputStream outputStream, final SimpleHttpRequest httpRequest) throws URISyntaxException, IOException {
-        if (httpRequest.getRequestUri().equals("/")) {
-            final String responseBody = "Hello world!";
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "", responseBody);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        }
-
+    private void handleStaticResourceRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest) throws URISyntaxException, IOException {
         final File file = getStaticFile(httpRequest.getRequestUri());
         if (file == null) {
             sendNotFoundResponse(outputStream);
@@ -129,6 +125,65 @@ public class Http11Processor implements Runnable, Processor {
             return prefix + HttpAcceptHeaderType.SVG.getValue();
         }
 
+        if (fileExtensionType == FileExtensionType.ICO) {
+            return prefix + HttpAcceptHeaderType.ICO.getValue();
+        }
+
         return prefix + HttpAcceptHeaderType.HTML.getValue() + ";charset=utf-8 ";
+    }
+
+    private void handleDynamicResourceRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest)
+            throws IOException, URISyntaxException {
+        final String endpoint = httpRequest.getEndpoint();
+        if (endpoint.equals("/")) {
+            final String responseBody = "Hello world!";
+            final String response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "", responseBody);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            return;
+        }
+
+        if (endpoint.equals("/login")) {
+            final Map<String, String> queryParameters = httpRequest.getQueryParameters();
+            if (queryParameters.isEmpty()) {
+                final String responseBody = """
+                    {
+                        "message": "사용자 계정 정보와 비밀번호 정보는 필수입니다."
+                    }
+                    """;
+
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 400 Bad Request ",
+                        "Content-Type: application/json ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "", responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            final String account = queryParameters.get("account");
+            final String password = queryParameters.get("password");
+            final User user = InMemoryUserRepository.findByAccount(account).orElse(null);
+            assert user != null;
+            if (user.checkPassword(password)) {
+                log.info("{}", user.toString());
+                final File file = getStaticFile("/login.html");
+                final String responseBody = readFileContent(file);
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        buildResponseContentTypeHeaderLine(httpRequest.parseStaticFileExtensionType()),
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "", responseBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+            }
+        }
+
+        sendNotFoundResponse(outputStream);
     }
 }

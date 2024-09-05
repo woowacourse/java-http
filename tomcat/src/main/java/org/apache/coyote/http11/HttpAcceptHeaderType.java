@@ -8,6 +8,7 @@ public enum HttpAcceptHeaderType {
     CSS("text/css"),
     JAVASCRIPT("application/javascript"),
     SVG("image/svg+xml"),
+    ICO("image/x-icon"),
     ALL_ACCEPT("*/*");
 
     private final String value;

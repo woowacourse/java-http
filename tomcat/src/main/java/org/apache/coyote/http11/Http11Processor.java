@@ -18,6 +18,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,7 +43,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
             String line = reader.readLine();
+            String httpMethod = line.split(" ")[0];
             String urlPath = line.split(" ")[1];
             if(urlPath.endsWith("html")) {
                 printFileResource("static" + urlPath,  outputStream);
@@ -65,6 +69,22 @@ public class Http11Processor implements Runnable, Processor {
                 redirect("http://localhost:8080/401.html", outputStream);
                 return;
             }
+            if(urlPath.startsWith("/register")) {
+                if(httpMethod.equals("GET")) {
+                    printFileResource("static" + urlPath + ".html", outputStream);
+                    return;
+                }
+                String body = parseBody(reader);
+                if (body != null) {
+                    String account = body.split("&")[0].split("=")[1];
+                    String mail = body.split("&")[1].split("=")[1];
+                    String password = body.split("&")[2].split("=")[1];
+                    User user = new User(account, mail, password);
+                    InMemoryUserRepository.save(user);
+                    redirect("http://localhost:8080/index.html", outputStream);
+                    return;
+                }
+            }
 
             if(urlPath.startsWith("/css") || urlPath.startsWith("/js") || urlPath.startsWith("/assets")) {
                 printFileResource("static" + urlPath, outputStream);
@@ -85,6 +105,23 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseBody(BufferedReader reader) throws IOException {
+        String line;
+        int contentLength = 0;
+        while((line = reader.readLine()) != null && !line.isEmpty()) {
+            if(line.startsWith("Content-Length")) {
+                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
+        }
+
+        if(contentLength > 0) {
+            char[] body = new char[contentLength];
+            reader.read(body, 0, contentLength);
+            return new String(body);
+        }
+        return null;
     }
 
     private void printFileResource(String fileName, OutputStream outputStream) {

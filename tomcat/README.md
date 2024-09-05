@@ -17,6 +17,6 @@
 - [ ] Cookie에 JSESSIONID 값 저장하기
   - [ ] Cookie 클래스 추가
   - [x] HTTP Request Header의 Cookie에 JSESSIONID가 없으면 Set-Cookie 반환
-- [ ] Session 구현하기
-  - [ ] 로그인 성공 시 Session 객체의 값으로 User 객체 저장 
-  - [ ] 로그인된 상태에서 `/login` 접속하면 `index.html`로 리다이렉트
+- [x] Session 구현하기
+  - [x] 로그인 성공 시 Session 객체의 값으로 User 객체 저장 
+  - [x] 로그인된 상태에서 `/login` 접속하면 `index.html`로 리다이렉트

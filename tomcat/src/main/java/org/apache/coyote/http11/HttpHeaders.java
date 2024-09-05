@@ -43,4 +43,18 @@ public class HttpHeaders {
                 "fields=" + fields +
                 '}';
     }
+
+    public String findJsessionId() {
+        if (fields.containsKey("Cookie")) {
+            String value = fields.get("Cookie");
+
+            String[] valueParts = value.split("; ");
+            for (String valuePart : valueParts) {
+                if (valuePart.startsWith("JSESSION=")) {
+                    return valuePart;
+                }
+            }
+        }
+        return null;
+    }
 }

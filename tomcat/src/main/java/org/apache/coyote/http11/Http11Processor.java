@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
 
@@ -210,6 +211,37 @@ public class Http11Processor implements Runnable, Processor {
 //
 //            // query string parse
             if (request.isGetMethod() && request.getPath().equals("/login")) {
+                boolean isLogined = request.getHeaders().findInCookie("JSESSIONID");
+                if (isLogined) {
+                    String jsessionId = request.getHeaders().findJsessionId();
+                    Session session = sessionManager.findSession(jsessionId);
+
+                    URL fakeResource = getClass().getResource("/static/index.html");
+                    Path path = Path.of(fakeResource.toURI());
+                    String contentType = Files.probeContentType(path);
+
+                    try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+                        List<String> rawBody = bufferedReader.lines().toList();
+
+                        String newBody = rawBody.stream()
+                                .collect(Collectors.joining("\n")) + "\n";
+
+                        final var response = String.join("\r\n",
+                                "HTTP/1.1 302 Found ",
+                                "Location: http://localhost:8080/index.html",
+                                "Content-Type: " + contentType + ";charset=utf-8 ",
+                                "Content-Length: " + newBody.getBytes().length + " ",
+                                "",
+                                newBody);
+
+                        System.out.println("response = " + response);
+                        outputStream.write(response.getBytes());
+                        outputStream.flush();
+                    } catch (Exception e) {
+                    }
+                }
+
+
                 URL fakeResource = getClass().getResource("/static/login.html");
                 Path path = Path.of(fakeResource.toURI());
                 String contentType = Files.probeContentType(path);
@@ -269,6 +301,15 @@ public class Http11Processor implements Runnable, Processor {
                 String setCookie = null;
                 if (!jsessionid) {
                     UUID idValue = UUID.randomUUID();
+
+                    Session session = new Session(idValue.toString());
+                    session.setAttribute("user", savedUser.get());
+                    sessionManager.add(session);
+
+                    Session session1 = sessionManager.findSession(idValue.toString());
+                    Object user = session1.getAttribute("user");
+                    System.out.println("user = " + user);;
+
                     setCookie = "Set-Cookie: JSESSIONID=" + idValue;
                 }
 
@@ -284,7 +325,7 @@ public class Http11Processor implements Runnable, Processor {
 
                     final var response = String.join("\r\n",
                             "HTTP/1.1 302 Found ",
-                            setCookie,
+                            setCookie, // TODO: null이 그대로 응답에 찍힘
                             "Location: http://localhost:8080/" + (isValidPassword ? "index.html" : "401.html"),
                             "Content-Type: " + contentType + ";charset=utf-8 ",
                             "Content-Length: " + newBody.getBytes().length + " ",

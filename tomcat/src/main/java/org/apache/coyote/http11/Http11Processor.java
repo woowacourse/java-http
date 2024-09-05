@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.catalina.io.FileReader;
+import org.apache.catalina.request.RequestHeaderReader;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponseContent;
 import org.apache.catalina.response.ResponsePage;
@@ -28,8 +27,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_PAGE = "Hello world!";
-    private static final String CONTENT_TYPE_HTML = "text/html";
-    public static final String ACCEPT_PREFIX = "Accept: ";
     public static final String QUERY_SEPARATOR = "\\?";
     public static final String PARAM_SEPARATOR = "&";
     public static final String PARAM_ASSIGNMENT = "=";
@@ -49,44 +46,22 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            List<String> headerSentences = readRequestHeader(reader);
+            Map<String, String> headerSentences = RequestHeaderReader.readHeaders(reader);
             checkHttpMethodAndLoad(headerSentences, reader);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private List<String> readRequestHeader(BufferedReader reader) {
-        List<String> headerSentences = new ArrayList<>();
-        try {
-            String sentence = reader.readLine();
-            while (sentence != null && !sentence.isBlank()) {
-                headerSentences.add(sentence);
-                sentence = reader.readLine();
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        if (headerSentences.isEmpty()) {
-            throw new IllegalArgumentException("요청 header가 존재하지 않습니다.");
-        }
-
-        return headerSentences;
-    }
-
-    private void checkHttpMethodAndLoad(List<String> sentences, BufferedReader reader) {
-        String[] firstHeaderSentence = sentences.getFirst().split(" ");
-        if (firstHeaderSentence.length < 2) {
-            throw new IllegalArgumentException("요청 header가 적절하지 않습니다.");
-        }
-        String url = firstHeaderSentence[1];
-        String fileType = getFileType(sentences);
-
-        if (firstHeaderSentence[0].startsWith("GET")) {
+    private void checkHttpMethodAndLoad(Map<String, String> sentences, BufferedReader reader) {
+        String httpMethod = sentences.get("HttpMethod");
+        String url = sentences.get("Url");
+        String fileType = sentences.get("Accept");
+        if (httpMethod.equals("GET")) {
             loadGetHttpMethod(url, fileType);
         }
-        if (firstHeaderSentence[0].startsWith("POST")) {
-            loadPostHttpMethod(url, fileType, sentences, reader);
+        if (httpMethod.equals("POST")) {
+            loadPostHttpMethod(url, fileType, Integer.parseInt(sentences.get("Content-Length")), reader);
         }
     }
 
@@ -99,14 +74,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getFileType(List<String> sentences) {
-        return sentences.stream()
-                .filter(sentence -> sentence.startsWith(ACCEPT_PREFIX))
-                .map(sentence -> sentence.substring(ACCEPT_PREFIX.length(), sentence.length() - 1).split(",")[0])
-                .findAny()
-                .orElse(CONTENT_TYPE_HTML);
     }
 
     private ResponseContent getResponseContentForUrl(String url, String accept) {
@@ -171,8 +138,8 @@ public class Http11Processor implements Runnable, Processor {
         return false;
     }
 
-    private void loadPostHttpMethod(String url, String fileType, List<String> sentences, BufferedReader reader) {
-        Map<String, String> body = getRequestBody(sentences, reader);
+    private void loadPostHttpMethod(String url, String fileType, int contentLength, BufferedReader reader) {
+        Map<String, String> body = getRequestBody(contentLength, reader);
 
         try (final OutputStream outputStream = connection.getOutputStream()) {
             String response = "";
@@ -186,13 +153,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getRequestBody(List<String> sentences, BufferedReader reader) {
-        int contentLength = Integer.parseInt(sentences.stream()
-                .filter(sentence -> sentence.startsWith("Content-Length: "))
-                .map(sentence -> sentence.substring("Content-Length: ".length(), sentence.length()).split(",")[0])
-                .findAny()
-                .orElse("0"));
-
+    private Map<String, String> getRequestBody(int contentLength, BufferedReader reader) {
         char[] buffer = new char[contentLength];
         try {
             reader.read(buffer, 0, contentLength);

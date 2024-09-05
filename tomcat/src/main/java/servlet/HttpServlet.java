@@ -29,7 +29,8 @@ public class HttpServlet {
 
     public HttpServlet() {
         this.requestMappingInfos = List.of(
-                new RequestMappingInfo("/login", HttpMethod.GET, new LoginController()::getLoginPage),
+                new RequestMappingInfo("/login", HttpMethod.GET, LoginController.getInstance()::getLogin),
+                new RequestMappingInfo("/login", HttpMethod.POST, LoginController.getInstance()::postLogin),
                 new RequestMappingInfo("/register", HttpMethod.POST, RegisterController.getInstance()::register),
                 new RequestMappingInfo("/", HttpMethod.GET, new WelcomePageHandler())
         );

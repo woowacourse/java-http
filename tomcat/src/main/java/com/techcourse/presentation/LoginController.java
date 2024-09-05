@@ -12,21 +12,39 @@ public class LoginController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    public ResponseAndView getLoginPage(Request request) {
+    private static LoginController INSTANCE;
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new LoginController();
+        }
+        return INSTANCE;
+    }
+
+    public ResponseAndView getLogin(Request request) {
         if (request.existQueryParams()) {
             String account = request.getQueryParamValue("account");
             String password = request.getQueryParamValue("password");
-            return login(account, password);
+            return postLogin(account, password);
         }
         return new ResponseAndView("/login", StatusCode.OK);
     }
 
-    private ResponseAndView login(String account, String password) {
+    public ResponseAndView postLogin(Request request) {
+        String account = request.getBodyValue("account");
+        String password = request.getBodyValue("password");
+        return postLogin(account, password);
+    }
+
+    private ResponseAndView postLogin(String account, String password) {
         try {
             User user = getUser(account, password);
-            log.info("user : {}", user);
+            log.info("로그인 성공! 아이디 : {}", user.getAccount());
             return new ResponseAndView("/index", StatusCode.FOUND);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return new ResponseAndView("/401", StatusCode.UNAUTHORIZED);
         }
     }

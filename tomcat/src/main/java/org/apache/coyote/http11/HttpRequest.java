@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.exception.UnexpectQueryParamException;
+import org.apache.coyote.exception.UnexpectedHeaderException;
 import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
@@ -12,19 +14,18 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> params = new HashMap<>();
     private final String protocol;
-    private final String headers;
+    private final Map<String, String[]> headers = new HashMap<>();
     private final String body;
 
     public HttpRequest(
-            String method, String uri, String path, String[] paramStrings, String protocol, String headers,
-            String body
+            String method, String uri, String path, String[] paramStrings, String protocol, String headers, String body
     ) {
         this.method = HttpMethod.valueOf(method);
         this.uri = uri;
         this.path = path;
         mapQueryParams(paramStrings);
         this.protocol = protocol;
-        this.headers = headers;
+        mapHeaders(headers);
         this.body = body;
     }
 
@@ -39,6 +40,21 @@ public class HttpRequest {
                 value = keyValue[1];
             }
             params.put(key, value);
+        }
+    }
+
+    private void mapHeaders(String headerString) {
+        String[] headerLines = headerString.split("\r\n");
+
+        for (String headerLine : headerLines) {
+            String[] pair = headerLine.split(": ");
+            String[] headerValues = pair[1].split(";");
+
+            headers.put(
+                    pair[0],
+                    Arrays.stream(headerValues)
+                            .map(String::trim).toArray(String[]::new)
+            );
         }
     }
 
@@ -62,16 +78,18 @@ public class HttpRequest {
         return paramValue;
     }
 
+    public String[] getHeaders(String headerKey) {
+        String[] headerValues = headers.get(headerKey);
+        if (headerValues == null) {
+            throw new UnexpectedHeaderException(headerKey);
+        }
+        return headerValues;
+    }
+
     @Override
     public String toString() {
-        return "HttpRequest{" +
-                "body='" + body + '\'' +
-                ", method=" + method +
-                ", uri='" + uri + '\'' +
-                ", path='" + path + '\'' +
-                ", params=" + params +
-                ", protocol='" + protocol + '\'' +
-                ", headers='" + headers + '\'' +
-                '}';
+        return "HttpRequest{" + "body='" + body + '\'' + ", method=" + method + ", uri='" + uri + '\'' + ", path='"
+                + path + '\'' + ", params=" + params + ", protocol='" + protocol + '\'' + ", headers='" + headers + '\''
+                + '}';
     }
 }

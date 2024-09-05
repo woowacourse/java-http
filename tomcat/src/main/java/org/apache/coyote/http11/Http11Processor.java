@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 import org.apache.coyote.Processor;
@@ -47,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             );
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }

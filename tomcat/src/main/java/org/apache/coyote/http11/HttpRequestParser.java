@@ -19,7 +19,7 @@ public class HttpRequestParser {
         String protocol = requestLine[2];
         String headers = parseHeaders(requestStrings.split("\r\n"));
         String[] pairs = new String[0];
-        int resourceIndex = uri.lastIndexOf("/");
+        int resourceIndex = uri.indexOf("/");
         path = uri.substring(resourceIndex + 1);
         if (uri.contains("?")) {
             int queryIndex = uri.indexOf("?");

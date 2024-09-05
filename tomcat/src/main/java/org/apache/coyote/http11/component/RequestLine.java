@@ -31,4 +31,16 @@ public class RequestLine {
         }
         throw new IllegalArgumentException("올바른지 않은 요청 시작");
     }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public URI getUri() {
+        return uri;
+    }
+
+    public Version getVersion() {
+        return version;
+    }
 }

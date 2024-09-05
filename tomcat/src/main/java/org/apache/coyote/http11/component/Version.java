@@ -3,6 +3,7 @@ package org.apache.coyote.http11.component;
 import java.util.List;
 
 public class Version {
+    private static final String PROTOCOL_NAME = "HTTP";
     private static final String DELIMITER = "[/.]";
 
     private final int major;
@@ -16,8 +17,13 @@ public class Version {
         this.minor = Integer.parseInt(elements.get(2));
     }
 
+    public Version(final int major, final int minor) {
+        this.major = major;
+        this.minor = minor;
+    }
+
     private void validateProtocol(final List<String> elements) {
-        if (elements.getFirst().equals("HTTP") && elements.size() == 3) {
+        if (elements.getFirst().equals(PROTOCOL_NAME) && elements.size() == 3) {
             return;
         }
         throw new IllegalArgumentException("올바르지 않은 버전 정보");
@@ -34,11 +40,7 @@ public class Version {
         throw new IllegalArgumentException("존재하지 않는 Http version");
     }
 
-    public int getMajor() {
-        return major;
-    }
-
-    public int getMinor() {
-        return minor;
+    public String getResponseText() {
+        return PROTOCOL_NAME + "/" + major + "." + minor;
     }
 }

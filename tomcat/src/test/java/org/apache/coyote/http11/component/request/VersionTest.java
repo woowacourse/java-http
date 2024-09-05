@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.component.request;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import org.apache.coyote.http11.component.Version;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,8 @@ class VersionTest {
         final var text = "HTTP/1.1";
 
         // when & then
-        assertThatCode(() -> new Version(text))
+        assertThatCode(() -> new
+                Version(text))
                 .doesNotThrowAnyException();
     }
 
@@ -39,5 +42,18 @@ class VersionTest {
         // when & then
         assertThatThrownBy(() -> new Version(text))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("응답을 위한 버전 문자 생성한다.")
+    void generate_version_info_for_response() {
+        // given
+        final var version = new Version(1, 1);
+
+        // when
+        final var responseText = version.getResponseText();
+
+        // then
+        assertThat(responseText).isEqualTo("HTTP/1.1");
     }
 }

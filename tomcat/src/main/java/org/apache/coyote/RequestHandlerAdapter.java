@@ -5,7 +5,7 @@ import org.apache.coyote.mapping.UrlHandlerMapping;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponseGenerator;
 
-public class RequestHandler {
+public class RequestHandlerAdapter {
     private static final String PATH_DELIMITER = "/";
 
     // TODO: mapping handler method

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import servlet.http.HttpHeader;
 
 public class ResponseCookie implements Assemblable {
 
@@ -15,11 +16,11 @@ public class ResponseCookie implements Assemblable {
         this.cookies = cookies;
     }
 
-    public static ResponseCookie create() {
+    protected static ResponseCookie create() {
         return new ResponseCookie(new HashMap<>());
     }
 
-    public void setJsessionid(String jsessionid) {
+    protected void setJsessionid(String jsessionid) {
         cookies.put(JSESSIONID, jsessionid);
     }
 
@@ -28,7 +29,7 @@ public class ResponseCookie implements Assemblable {
         if (cookies.isEmpty()) {
             return;
         }
-        builder.append("Set-Cookie: ")
+        builder.append("%s: ".formatted(HttpHeader.SET_COOKIE.value()))
                 .append(cookies.entrySet()
                         .stream()
                         .map(this::convert)

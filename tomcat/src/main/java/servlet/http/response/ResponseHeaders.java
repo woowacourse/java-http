@@ -3,6 +3,7 @@ package servlet.http.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import servlet.http.HttpHeader;
 
 public class ResponseHeaders implements Assemblable {
 
@@ -20,15 +21,15 @@ public class ResponseHeaders implements Assemblable {
     }
 
     protected void contentType(String contentType) {
-        headers.put("Content-Type", "%s;charset=utf-8".formatted(contentType));
+        headers.put(HttpHeader.CONTENT_TYPE.value(), "%s;charset=utf-8".formatted(contentType));
     }
 
     protected void contentLength(int contentLength) {
-        headers.put("Content-Length", String.valueOf(contentLength));
+        headers.put(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(contentLength));
     }
 
     protected void location(String location) {
-        headers.put("Location", location);
+        headers.put(HttpHeader.LOCATION.value(), location);
     }
 
     protected void setJsessionid(String jsessionid) {

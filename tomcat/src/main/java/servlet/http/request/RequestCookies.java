@@ -17,7 +17,7 @@ public class RequestCookies {
         this.cookies = cookies;
     }
 
-    public static RequestCookies from(String cookies) {
+    protected static RequestCookies from(String cookies) {
         if (cookies == null) {
             return EMPTY;
         }
@@ -26,7 +26,7 @@ public class RequestCookies {
                 .collect(collectingAndThen(toMap(c -> c[0], c -> c[1]), RequestCookies::new));
     }
 
-    public String get(String key) {
+    protected String get(String key) {
         return cookies.get(key);
     }
 }

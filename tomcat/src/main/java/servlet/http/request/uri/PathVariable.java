@@ -4,11 +4,11 @@ public class PathVariable {
 
     private final String path;
 
-    public PathVariable(String path) {
+    protected PathVariable(String path) {
         this.path = path;
     }
 
-    public String getPath() {
+    protected String getPath() {
         return this.path;
     }
 }

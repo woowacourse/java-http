@@ -250,7 +250,7 @@ public class Http11Processor implements Runnable, Processor {
 
             /**
              * Request URI에 해당하는 파일 찾기
-             * 파일(정적 리소스) 요청이고, 요청받은 파일이 존재하는 경우에만 파일을 읽어 응답.
+             * 요청받은 파일이 존재하는 경우에만 파일을 읽어 응답.
              * 만약 파일이 존재하지 않거나, 디렉토리인 경우 기본 메시지 응답
              */
             URL resource = getClass().getClassLoader().getResource("static" + path);

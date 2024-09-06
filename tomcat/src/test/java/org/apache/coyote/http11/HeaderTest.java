@@ -57,7 +57,39 @@ class HeaderTest {
     void keyNonNull() {
         Header header = new Header(List.of("a:2"));
 
-        assertThatThrownBy(() -> header.get(null))
+        assertThatThrownBy(() -> header.get((String) null))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("header 상수를 조회 키로 사용할 수 있다.")
+    void enumKey() {
+        Header header = new Header(List.of("Location:/admin"));
+
+        Optional<String> result = header.get(HttpHeaderKey.LOCATION);
+
+        assertThat(result).hasValue("/admin");
+    }
+
+    @Test
+    @DisplayName("정의된 헤더를 추가할 수 있다.")
+    void append() {
+        Header header = new Header(List.of());
+
+        header.append(HttpHeaderKey.LOCATION, "/admin");
+
+        Optional<String> result = header.get(HttpHeaderKey.LOCATION);
+        assertThat(result).hasValue("/admin");
+    }
+
+    @Test
+    @DisplayName("사용자 정의 헤더를 추가할 수 있다.")
+    void appendCustom() {
+        Header header = new Header(List.of());
+
+        header.append("a", "b");
+
+        Optional<String> result = header.get("a");
+        assertThat(result).hasValue("b");
     }
 }

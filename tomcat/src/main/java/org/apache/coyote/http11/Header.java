@@ -35,7 +35,19 @@ public class Header {
         String key = keyValuePair[0].trim();
         String value = keyValuePair[1].trim();
 
+        append(key, value);
+    }
+
+    public void append(HttpHeaderKey key, String value) {
+        append(key.getName(), value);
+    }
+
+    public void append(String key, String value) {
         header.put(key, value);
+    }
+
+    public Optional<String> get(HttpHeaderKey key) {
+        return get(key.getName());
     }
 
     public Optional<String> get(String key) {

@@ -52,54 +52,101 @@ public class Http11Processor implements Runnable, Processor {
 
     private String generateResponse(final BufferedReader reader) throws IOException {
         final var request = HttpRequest.of(reader.readLine(), reader);
-
         if (request.isGet() && request.isSameUri("/")) {
-            final var response = new HttpResponse(HttpStatus.OK);
-            response.setBody(new ResponseBody("text/html", "Hello world!"));
-
-            return response.getResponse();
+            return renderDefaultPage();
         }
         if (request.isGet() && ContentMimeType.isEndsWithExtension(request.getUri())) {
-            final var responseBody = ResourceLoader.loadStaticResource(request.getUri());
-            final var response = new HttpResponse(HttpStatus.OK);
-            response.setBody(responseBody);
+            return renderStaticResource(request);
+        }
+        if (request.isSameUri("/login")) {
+            return login(request);
+        }
+        if (request.isSameUri("/register")) {
+            return register(request);
+        }
+        return renderHtmlPage(request);
+    }
+
+    private String renderDefaultPage() {
+        final var response = new HttpResponse(HttpStatus.OK);
+        response.setBody(new ResponseBody("text/html", "Hello world!"));
+        return response.getResponse();
+    }
+
+    private String renderStaticResource(HttpRequest request) throws IOException {
+        final var responseBody = ResourceLoader.loadStaticResource(request.getUri());
+        final var response = new HttpResponse(HttpStatus.OK);
+        response.setBody(responseBody);
+        return response.getResponse();
+    }
+
+    private String renderHtmlPage(HttpRequest request) throws IOException {
+        final var response = new HttpResponse(HttpStatus.OK);
+        response.setBody(ResourceLoader.loadHtmlResource(request.getUri()));
+        return response.getResponse();
+    }
+
+    private String login(final HttpRequest request) throws IOException {
+        if (request.isGet()) {
+            final var cookie = new HttpCookie(request.getCookie());
+            return createResponseBasedOnCookie(request, cookie);
+        }
+        if (request.isPost()) {
+            return postLogin(request);
+        }
+        return renderHtmlPage(request);
+    }
+
+    private String createResponseBasedOnCookie(HttpRequest request, HttpCookie cookie) throws IOException {
+        if (!cookie.hasJSESSIONID()) {
+            return renderHtmlPage(request);
+        }
+        return createResponseBasedOnSession(request, cookie);
+    }
+
+    private String createResponseBasedOnSession(HttpRequest request, HttpCookie cookie) throws IOException {
+        final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
+        final var user = (User) session.getAttribute("user");
+        if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
+            return renderHtmlPage(request);
+        }
+        final var response = new HttpResponse(HttpStatus.FOUND);
+        response.setRedirect("/index.html");
+        return response.getResponse();
+    }
+
+    private String postLogin(HttpRequest request) {
+        if (isAuthenticateUser(request)) {
+            HttpCookie cookie = new HttpCookie(request.getCookie());
+            return getLoginResponse(request, cookie);
+        }
+        final var response = new HttpResponse(HttpStatus.FOUND);
+        response.setRedirect("/401.html");
+        return response.getResponse();
+    }
+
+    private String getLoginResponse(HttpRequest request, HttpCookie cookie) {
+        if (cookie.hasJSESSIONID()) {
+            final var response = new HttpResponse(HttpStatus.FOUND);
+            response.setRedirect("/index.html");
             return response.getResponse();
         }
-        if (request.isGet() && request.isSameUri("/login")) {
-            final var cookie = new HttpCookie(request.getCookie());
-            if (cookie.hasJSESSIONID()) {
-                final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
-                final var user = (User) session.getAttribute("user");
-                if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
-                    final var response = new HttpResponse(HttpStatus.FOUND);
-                    response.setRedirect("/index.html");
-                    return response.getResponse();
-                }
-            }
-        }
-        if (request.isPost() && request.isSameUri("/login")) {
-            if (isAuthenticateUser(request)) {
-                HttpCookie cookie = new HttpCookie(request.getCookie());
-                if (cookie.hasJSESSIONID()) {
-                    final var response = new HttpResponse(HttpStatus.FOUND);
-                    response.setRedirect("/index.html");
-                    return response.getResponse();
-                }
+        final var session = getSession(request);
+        final var response = new HttpResponse(HttpStatus.FOUND);
+        response.setRedirect("/index.html");
+        response.setCookie("JSESSIONID", session.getId());
+        return response.getResponse();
+    }
 
-                final var session = new Session(UUID.randomUUID().toString());
-                InMemoryUserRepository.findByAccount(request.findBodyValueByKey("account"))
-                        .ifPresent(user -> session.setAttribute("user", user));
-                final var response = new HttpResponse(HttpStatus.FOUND);
-                response.setRedirect("/index.html");
-                response.setCookie("JSESSIONID", session.getId());
-                return response.getResponse();
-            } else {
-                final var response = new HttpResponse(HttpStatus.FOUND);
-                response.setRedirect("/401.html");
-                return response.getResponse();
-            }
-        }
-        if (request.isPost() && request.isSameUri("/register")) {
+    private Session getSession(HttpRequest request) {
+        final var session = new Session(UUID.randomUUID().toString());
+        InMemoryUserRepository.findByAccount(request.findBodyValueByKey("account"))
+                .ifPresent(user -> session.setAttribute("user", user));
+        return session;
+    }
+
+    private String register(final HttpRequest request) throws IOException {
+        if (request.isPost()) {
             final var newUser =
                     new User(request.findBodyValueByKey("account"), request.findBodyValueByKey("password"), request.findBodyValueByKey("email"));
             InMemoryUserRepository.save(newUser);
@@ -107,9 +154,7 @@ public class Http11Processor implements Runnable, Processor {
             response.setRedirect("/index.html");
             return response.getResponse();
         }
-        final var response = new HttpResponse(HttpStatus.OK);
-        response.setBody(ResourceLoader.loadHtmlResource(request.getUri()));
-        return response.getResponse();
+        return renderHtmlPage(request);
     }
 
     private boolean isAuthenticateUser(final HttpRequest request) {

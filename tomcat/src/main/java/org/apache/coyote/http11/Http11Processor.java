@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
@@ -49,36 +51,39 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(InputStream requestStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
 
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            if (line.startsWith("GET")) {
-                return doGet(line);
-            }
-            if (line.startsWith("POST")) {
-                return doPost(line, bufferedReader);
-            }
+        String line = bufferedReader.readLine();
+        String method = "";
+        String path = "";
+        if (line != null) {
+            StringTokenizer tokenizer = new StringTokenizer(line);
+            method = tokenizer.nextToken();
+            path = tokenizer.nextToken();
+        }
+
+        Map<String, String> requestHeader = new HashMap<>();
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            StringTokenizer tokenizer = new StringTokenizer(line, ": ");
+            requestHeader.put(tokenizer.nextToken(), tokenizer.nextToken());
+        }
+
+        String contentLength = requestHeader.getOrDefault("Content-Length", "0");
+        int length = Integer.parseInt(contentLength);
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+        String requestBody = new String(buffer);
+
+        if (method.equals("GET")) {
+            return doGet(path);
+        }
+        if (method.equals("POST")) {
+            return doPost(path, requestHeader, requestBody);
         }
         return null;
     }
 
-    private String doPost(String line, BufferedReader bufferedReader) throws IOException {
-        final String path = line.split(" ")[1];
-
+    private String doPost(String path, Map<String, String> requestHeader, String requestBody) throws IOException {
         if (path.equals("/register")) {
-            String contentLength = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.isEmpty()) {
-                    break;
-                }
-                if (line.startsWith("Content-Length:")) {
-                    contentLength = line.split(" ")[1];
-                }
-            }
-            int length = Integer.parseInt(contentLength);
-            char[] buffer = new char[length];
-            bufferedReader.read(buffer, 0, length);
-            String requestBody = new String(buffer);
-            StringTokenizer tokenizer = new StringTokenizer(requestBody);
+            StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
             String account = "";
             String password = "";
             String email = "";
@@ -103,15 +108,13 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String doGet(String line) throws IOException {
-        final String requestUri = line.split(" ")[1];
-        final int index = requestUri.indexOf("?");
-
-        String path = requestUri;
+    private String doGet(String uri) throws IOException {
+        final int index = uri.indexOf("?");
+        String path = uri;
         String queryString = "";
         if (index != -1) {
-            path = requestUri.substring(0, index);
-            queryString = requestUri.substring(index + 1);
+            path = uri.substring(0, index);
+            queryString = uri.substring(index + 1);
         }
 
         if (path.equals("/")) {

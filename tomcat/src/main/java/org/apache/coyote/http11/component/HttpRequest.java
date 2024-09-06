@@ -15,8 +15,7 @@ public class HttpRequest implements HttpInteract {
         final var lines = List.of(plaintext.split(LINE_DELIMITER));
         this.requestLine = new RequestLine(lines.getFirst());
         this.requestHeaders = new RequestHeaders(extractHeader(lines));
-        // TODO: Body 파싱 구현
-        this.body = null;
+        this.body = new FormUrlEncodedBody(requestLine.getUri().getQuery());
     }
 
     public URI getUri() {

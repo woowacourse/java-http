@@ -54,8 +54,10 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpRequest.getUri().toString().equals("/")) {
                 renderWelcome(outputStream);
+            } else if (httpRequest.getUri().getPath().equals("/login")) {
+                renderLogin(httpRequest.getUri().toString(), outputStream);
             } else {
-                extracted(httpRequest.getUri().toString(), outputStream);
+                renderOther(httpRequest.getUri().toString(), outputStream);
             }
 
         } catch (final IOException | UncheckedServletException e) {
@@ -75,7 +77,18 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void extracted(final String path, final OutputStream outputStream) throws IOException {
+    private void renderLogin(final String path, final OutputStream outputStream) throws IOException {
+        final var split = path.split("\\?")[0];
+        final var resource = getClass().getClassLoader().getResource("static/" + split + ".html");
+        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
+        final var responseHeader = new ResponseHeader();
+        final var response = new HttpResponse(ok, responseHeader,
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        outputStream.write(response.getResponseText().getBytes());
+        outputStream.flush();
+    }
+
+    private void renderOther(final String path, final OutputStream outputStream) throws IOException {
         final var resource = getClass().getClassLoader().getResource("static/" + path);
         final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
         final var responseHeader = new ResponseHeader();
@@ -84,4 +97,5 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.write(response.getResponseText().getBytes());
         outputStream.flush();
     }
+
 }

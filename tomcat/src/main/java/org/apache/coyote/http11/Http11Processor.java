@@ -50,7 +50,6 @@ public class Http11Processor implements Runnable, Processor {
             final var path = new Path(texts[1]);
             log.info("{} 요청 = {}", method, path);
 
-            //TODO localhost:8080 요청시 resource가 null 임
             final var result = getFile(path);
             final var response = new Response();
 
@@ -75,7 +74,6 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (HttpMethod.POST.equals(method)) {
-                //TODO requestBody 객체 만들기
                 final var body = parseRequestBody(httpHeaders, bufferedReader);
 
                 if (path.isEqualPath("/login")) {

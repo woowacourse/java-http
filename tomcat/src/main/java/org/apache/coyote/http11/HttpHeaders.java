@@ -15,7 +15,6 @@ public class HttpHeaders {
 
     public static HttpHeaders parse(final BufferedReader bufferedReader) {
         var line = " ";
-        //TODO 리팩터링
         final var httpRequestHeaders = new HashMap<String, String>();
         while (!line.isEmpty()) {
             try {

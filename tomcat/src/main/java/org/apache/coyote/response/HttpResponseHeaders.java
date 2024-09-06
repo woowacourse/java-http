@@ -19,7 +19,7 @@ public class HttpResponseHeaders {
     @Override
     public String toString() {
         return headers.stream()
-                .map(header -> header.getName() + ": " + String.join(";", header.getValue()) + " ")
+                .map(header -> header.name() + ": " + String.join(";", header.value()) + " ")
                 .collect(Collectors.joining("\r\n"));
     }
 }

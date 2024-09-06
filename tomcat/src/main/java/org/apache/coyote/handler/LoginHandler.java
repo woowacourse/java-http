@@ -4,14 +4,18 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.common.Request;
+import org.apache.coyote.common.RequestBody;
 import org.apache.coyote.common.Response;
 import org.apache.coyote.common.StatusCode;
 
 public class LoginHandler implements Handler {
 
+    public static final String ACCOUNT_FIELD = "account";
+    public static final String PASSWORD_FIELD = "password";
+
     @Override
     public Response handle(Request request) {
-        if (isInvalidParameters(request)) {
+        if (isInvalidRequestBody(request)) {
             return StaticResourceHandler.getInstance().handle(request);
         }
         try {
@@ -26,13 +30,15 @@ public class LoginHandler implements Handler {
                 null);
     }
 
-    private boolean isInvalidParameters(Request request) {
-        return !request.getParameters().containsKey("account") || !request.getParameters().containsKey("password");
+    private boolean isInvalidRequestBody(Request request) {
+        RequestBody requestBody = request.getBody();
+        return requestBody.missing(ACCOUNT_FIELD) || requestBody.missing(PASSWORD_FIELD);
     }
 
     private void login(Request request) {
-        String account = request.getParameters().get("account");
-        String password = request.getParameters().get("password");
+        RequestBody requestBody = request.getBody();
+        String account = requestBody.getValue(ACCOUNT_FIELD);
+        String password = requestBody.getValue(PASSWORD_FIELD);
         User findUser = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))
                 .orElseThrow(() -> new IllegalArgumentException("로그인 실패"));

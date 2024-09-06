@@ -1,6 +1,7 @@
 package org.apache.coyote.common;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,60 +12,29 @@ public class Request {
 
     private static final SessionManager sessionManager = new SessionManager();
 
-    private final String method;
-    private final String uri;
-    private final String protocol;
-    private final Map<String, String> headers;
-    private final Map<String, String> parameters;
+    private final RequestLine requestLine;
+    private final RequestHeaders headers;
+    private final RequestParameters parameters;
     private final Cookie cookie;
-    private final String body;
+    private final RequestBody body;
     private final Session session;
 
-    public Request(String method, String uri, String protocol, String[] headers, String body) {
-        this.method = method;
-        this.uri = parseUri(uri);
-        this.protocol = protocol;
-        this.headers = parseHeaders(headers);
+    public Request(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters, RequestBody body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
         this.cookie = parseCookie();
         this.body = body;
-        this.parameters = parseParameters(uri);
+        this.parameters = parameters;
         this.session = parseSession();
     }
 
-    private String parseUri(String uri) {
-        if (!uri.contains("?")) {
-            return uri;
-        }
-        return uri.substring(0, uri.indexOf("?"));
-    }
-
-    private Map<String, String> parseHeaders(String[] headers) {
-        Map<String, String> result = new HashMap<>();
-        for (String header : headers) {
-            String[] token = header.split(": ");
-            result.put(token[0], token[1]);
-        }
-        return result;
-    }
-
     private Cookie parseCookie() {
-        if (headers.containsKey("Cookie")) {
-            String cookies = headers.get("Cookie");
-            HashMap<String, String> collect = Arrays.stream(cookies.split("; "))
-                    .map(cookie -> cookie.split("="))
-                    .collect(HashMap::new, (map, entry) -> map.put(entry[0], entry[1]), HashMap::putAll);
-            return new Cookie(collect);
-        }
-        return Cookie.empty();
-    }
-
-    private Map<String, String> parseParameters(String uri) {
-        if (!uri.contains("?")) {
-            return new HashMap<>();
-        }
-        return Arrays.stream(uri.substring(uri.indexOf("?") + 1).split("&"))
-                .map(param -> param.split("="))
+        String cookies = headers.getCookies();
+        HashMap<String, String> collect = Arrays.stream(cookies.split("; "))
+                .map(cookie -> cookie.split("=", 2))
+                .filter(cookie -> cookie.length == 2)
                 .collect(HashMap::new, (map, entry) -> map.put(entry[0], entry[1]), HashMap::putAll);
+        return new Cookie(collect);
     }
 
     private Session parseSession() {
@@ -83,32 +53,28 @@ public class Request {
         });
     }
 
-    public void addParameter(String key, String value) {
-        parameters.put(key, value);
-    }
-
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getUri() {
-        return uri;
+        return requestLine.getUri();
     }
 
     public String getProtocol() {
-        return protocol;
+        return requestLine.getProtocol();
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return headers.getValues();
+    }
+
+    public RequestBody getBody() {
+        return body;
     }
 
     public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    public String getBody() {
-        return body;
+        return parameters.getValues();
     }
 
     public Session getSession() {
@@ -118,14 +84,12 @@ public class Request {
     @Override
     public String toString() {
         return "Request{" +
-               "method='" + method + '\'' +
-               ", uri='" + uri + '\'' +
-               ", protocol='" + protocol + '\'' +
+               "requestLine=" + requestLine +
                ", headers=" + headers +
                ", parameters=" + parameters +
                ", cookie=" + cookie +
                ", body='" + body + '\'' +
-               ", session=" + session.toString() +
+               ", session=" + session +
                '}';
     }
 }

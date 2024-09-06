@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.response;
 
 public class HttpResponseGenerator {
     public static String getOkResponse(String mimeType, String responseBody) {

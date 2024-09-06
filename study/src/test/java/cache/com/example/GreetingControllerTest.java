@@ -1,5 +1,7 @@
 package cache.com.example;
 
+import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+
 import cache.com.example.version.ResourceVersion;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -12,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Duration;
 
-import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+//import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GreetingControllerTest {

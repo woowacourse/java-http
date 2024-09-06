@@ -1,5 +1,6 @@
 package org.apache;
 
+import com.techcourse.exception.UncheckedServletException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -16,10 +17,14 @@ public class ResourceReader {
         return toURL(path) != null;
     }
 
-    public static String readFile(String path) throws IOException {
-        File file = new File(toURL(path).getFile());
-        Path filePath = file.toPath();
-        return Files.readString(filePath, StandardCharsets.UTF_8);
+    public static String readFile(String path) {
+        try {
+            File file = new File(toURL(path).getFile());
+            Path filePath = file.toPath();
+            return Files.readString(filePath, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedServletException(new NoSuchFieldException("파일을 찾을 수 없습니다."));
+        }
     }
 
     private static URL toURL(String path) {

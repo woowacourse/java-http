@@ -7,7 +7,6 @@ import static org.apache.coyote.http11.Http11Method.POST;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.apache.catalina.Session;
@@ -63,14 +62,10 @@ public class SignupRequestHandler implements RequestHandler {
     }
 
     private Http11Response get(HttpRequest httpRequest) {
-        try {
-            return Http11Response.builder()
-                    .status(HttpStatus.OK)
-                    .appendHeader("Content-Type", "text/html;charset=utf-8")
-                    .body(readFile(httpRequest.getRequestURI()))
-                    .build();
-        } catch (IOException e) {
-            throw new UncheckedServletException(new NoSuchFieldException("파일을 찾을 수 없습니다."));
-        }
+        return Http11Response.builder()
+                .status(HttpStatus.OK)
+                .appendHeader("Content-Type", "text/html;charset=utf-8")
+                .body(readFile(httpRequest.getRequestURI()))
+                .build();
     }
 }

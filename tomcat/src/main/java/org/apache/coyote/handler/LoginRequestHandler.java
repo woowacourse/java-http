@@ -7,7 +7,6 @@ import static org.apache.coyote.http11.Http11Method.POST;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,21 +65,17 @@ public class LoginRequestHandler implements RequestHandler {
     }
 
     private Http11Response get(HttpRequest httpRequest) {
-        try {
-            if (httpRequest.isExistsSession()) {
-                Session session = httpRequest.getSession();
-                User user = (User) session.getAttribute("user");
-                log.info("세션 로그인 : " + user.getAccount());
-                return redirect(SUCCESS_LOGIN_REDIRECT_PATH);
-            }
-            return Http11Response.builder()
-                    .status(HttpStatus.OK)
-                    .appendHeader("Content-Type", "text/html;charset=utf-8")
-                    .body(readFile(httpRequest.getRequestURI()))
-                    .build();
-        } catch (IOException e) {
-            throw new UncheckedServletException(new NoSuchFieldException("파일을 찾을 수 없습니다."));
+        if (httpRequest.isExistsSession()) {
+            Session session = httpRequest.getSession();
+            User user = (User) session.getAttribute("user");
+            log.info("세션 로그인 : " + user.getAccount());
+            return redirect(SUCCESS_LOGIN_REDIRECT_PATH);
         }
+        return Http11Response.builder()
+                .status(HttpStatus.OK)
+                .appendHeader("Content-Type", "text/html;charset=utf-8")
+                .body(readFile(httpRequest.getRequestURI()))
+                .build();
     }
 
     private Http11Response redirect(String path) {

@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import com.techcourse.request.RegisterRequest;
+
 public class User {
 
     private final Long id;
@@ -16,6 +18,10 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    public User(RegisterRequest request) {
+        this(null, request.account(), request.password(), request.email());
     }
 
     public boolean checkPassword(String password) {

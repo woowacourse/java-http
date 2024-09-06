@@ -1,7 +1,7 @@
 package com.techcourse.presentation;
 
 import com.techcourse.infrastructure.Presentation;
-import com.techcourse.presentation.requestparam.UserRequestParam;
+import com.techcourse.presentation.requestparam.LoginRequestParam;
 import com.techcourse.request.UserRequest;
 import com.techcourse.service.LoginService;
 import http.HttpHeader;
@@ -27,7 +27,7 @@ public class LoginPresentation implements Presentation {
 
     @Override
     public HttpResponse view(HttpRequest request) {
-        UserRequestParam requestParam = new UserRequestParam(request.getQueryParam());
+        LoginRequestParam requestParam = new LoginRequestParam(request.getQueryParam());
         UserRequest userRequest = requestParam.toObject();
         String redirectionPage = processRedirectionPage(userRequest);
         List<HttpHeader> headers = List.of(new HttpHeader("Location", redirectionPage));

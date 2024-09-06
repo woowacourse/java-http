@@ -2,9 +2,9 @@ package com.techcourse.presentation.requestparam;
 
 import com.techcourse.request.UserRequest;
 
-public class UserRequestParam extends RequestParam<UserRequest> {
+public class LoginRequestParam extends RequestParam<UserRequest> {
 
-    public UserRequestParam(String queryParam) {
+    public LoginRequestParam(String queryParam) {
         super(queryParam);
     }
 

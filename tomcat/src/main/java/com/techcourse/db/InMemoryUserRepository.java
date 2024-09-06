@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
-
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {

@@ -2,6 +2,7 @@ package com.techcourse.infrastructure;
 
 import com.techcourse.presentation.DefaultPresentation;
 import com.techcourse.presentation.LoginPresentation;
+import com.techcourse.presentation.RegisterPresentation;
 import com.techcourse.presentation.RootPresentation;
 import java.util.List;
 import org.apache.coyote.ioprocessor.parser.HttpRequest;
@@ -20,8 +21,8 @@ public class PresentationResolver {
     public PresentationResolver() {
         this(List.of(
                 new LoginPresentation(),
-                new RootPresentation())
-        );
+                new RootPresentation(),
+                new RegisterPresentation()));
     }
 
     public HttpResponse resolve(HttpRequest request) {

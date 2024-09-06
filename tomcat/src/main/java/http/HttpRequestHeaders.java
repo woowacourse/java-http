@@ -17,7 +17,7 @@ public class HttpRequestHeaders {
             String[] headerParts = headerValue.split(HEADER_FIELD_DELIMITER, -1);
             String fieldName = headerParts[0];
             String fieldValue = headerParts[1];
-            headers.put(fieldName, fieldValue);
+            headers.put(fieldName, fieldValue.strip());
         }
     }
 

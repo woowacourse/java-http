@@ -41,14 +41,14 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequest.from(inputStream);
             log.info("http request : {}", request);
-            HttpResponse response = HttpResponse.create();
+            HttpResponse response = HttpResponse.from(request);
 
             handle(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+        } catch (IOException | UncheckedServletException exception) {
+            log.error("요청 처리 과정 중 에러 발생 : {}", exception.getMessage());
         }
     }
 
@@ -83,6 +83,9 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource("static/" + fileName);
         if (resource == null) {
             throw new IllegalArgumentException(fileName + "  파일이 존재하지 않습니다.");
+        }
+        if (response.has5xxCode()) {
+            throw new RuntimeException("서버 내부에 오류 발생가 발생했습니다.");
         }
         Path path = Path.of(resource.getPath());
         String contentType = Files.probeContentType(path);

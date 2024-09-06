@@ -77,13 +77,14 @@ public class Dispatcher {
             header.setContentType(MimeType.HTML.getContentType());
             header.setContentLength(responseBody.getBytes().length);
 
+            if (request.getHeaders().hasHeader("Cookie") && request.getHeaders().getCookie().hasCookieName("JSESSIONID")) {
+                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+                header.setLocation(REDIRECT);
+                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+                return response.toResponse();
+            }
+
             if (method.equals(HttpMethod.GET)) {
-                if (request.getHeaders().hasHeader("Cookie") && request.getHeaders().getCookie().hasCookieName("JSESSIONID")) {
-                    StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
-                    header.setLocation(REDIRECT);
-                    HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-                    return response.toResponse();
-                }
                 StatusLine statusLine = new StatusLine(HttpStatus.OK);
                 HttpResponse response = new HttpResponse(statusLine, header, responseBody);
                 return response.toResponse();

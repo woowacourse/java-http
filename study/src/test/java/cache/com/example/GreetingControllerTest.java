@@ -32,10 +32,12 @@ class GreetingControllerTest {
                 .uri("/")
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())
+                .expectHeader().cacheControl(CacheControl.noCache().cachePrivate()) // chaining
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
+        // interceptor postHandle()에서 관련 헤더 삽입
+        // TODO: 상태코드 304 관련하여 더 실험해보기
     }
 
     @Test

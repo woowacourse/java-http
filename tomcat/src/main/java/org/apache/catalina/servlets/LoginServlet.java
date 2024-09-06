@@ -7,10 +7,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.catalina.servlets.http.request.HttpRequest;
 import org.apache.catalina.servlets.http.Cookie;
+import org.apache.catalina.servlets.http.Cookies;
+import org.apache.catalina.servlets.http.Session;
+import org.apache.catalina.servlets.http.SessionManager;
+import org.apache.catalina.servlets.http.request.HttpRequest;
 import org.apache.catalina.servlets.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,19 @@ public class LoginServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
+
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");
         String fileContent = getFileContent(resource);
+
+        if (request.hasCookie()) {
+            Cookie cookie = request.getCookie();
+            SessionManager sessionManager = SessionManager.getInstance();
+            if (sessionManager.hasSession(cookie.getValue())) {
+                response.sendRedirect("/index.html");
+            }
+        }
 
         response.setContentType("text/html");
         response.setContentLength(fileContent.getBytes().length);
@@ -52,18 +63,13 @@ public class LoginServlet extends HttpServlet {
 
     private void login(HttpRequest request, HttpResponse response, User user) {
         if (user.checkPassword(request.getParameter("password"))) {
-            addCookie(request, response);
             log.info("user : {}", user);
+            Session session = request.getSession(true);
+            session.setAttribute("user", user);
+            response.addCookie(Cookies.ofJSessionId(session.getId()));
             response.sendRedirect("/index.html");
             return;
         }
         response.sendRedirect("/401.html");
-    }
-
-    private void addCookie(HttpRequest request, HttpResponse response) {
-        if (!request.hasCookie()) {
-            Cookie cookie = new Cookie("JSESSIONID", UUID.randomUUID().toString());
-            response.addCookie(cookie);
-        }
     }
 }

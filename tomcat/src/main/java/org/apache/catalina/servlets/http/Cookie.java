@@ -13,6 +13,13 @@ public class Cookie {
         this.value = value;
     }
 
+    public Cookie(String values) {
+        values = values.trim();
+        String[] parts = values.split(";");
+        this.name = parts[0].split("=")[0];
+        this.value = parts[0].split("=")[1];
+    }
+
     public String getName() {
         return name;
     }

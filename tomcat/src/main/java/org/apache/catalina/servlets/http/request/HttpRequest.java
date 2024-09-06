@@ -9,6 +9,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.apache.catalina.servlets.http.Cookie;
+import org.apache.catalina.servlets.http.Session;
+import org.apache.catalina.servlets.http.SessionManager;
 
 public class HttpRequest {
 
@@ -155,6 +159,11 @@ public class HttpRequest {
         return !cookie.isEmpty();
     }
 
+    public Cookie getCookie() {
+        String values = getHeader("Cookie");
+        return new Cookie(values);
+    }
+
     public String getHeader(String name) {
         Map<String, String> headers = getHeaders();
         if (!headers.containsKey(name)) {
@@ -169,5 +178,12 @@ public class HttpRequest {
         return Arrays.stream(headers)
                 .map(header -> header.split(": ", 2))
                 .collect(toMap(header -> header[0], header -> header[1]));
+    }
+
+    public Session getSession(boolean create) {
+        Session session = new Session(UUID.randomUUID().toString());
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        return session;
     }
 }

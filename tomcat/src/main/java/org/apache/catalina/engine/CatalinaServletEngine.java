@@ -15,9 +15,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestLine;
@@ -31,7 +33,7 @@ public class CatalinaServletEngine {
 
     private static final Logger log = LoggerFactory.getLogger(CatalinaServletEngine.class);
 
-    public static void processRequest(Map<RequestLine, String> requestLine, String body, HttpResponse response) {
+    public static void processRequest(Map<RequestLine, String> requestLine, Map<String, String> headers, String body, HttpResponse response) {
         if (requestLine.get(REQUEST_URI).equals("/")) {
             String contentType = probeContentType("/index.html");
             String content = findStaticFile("/index.html");
@@ -49,7 +51,7 @@ public class CatalinaServletEngine {
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("POST")) {
-            responseLogin(body, response);
+            responseLogin(headers, body, response);
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("GET")) {
@@ -94,10 +96,11 @@ public class CatalinaServletEngine {
         }
     }
 
-    private static void responseLogin(String body, HttpResponse response) {
+    private static void responseLogin(Map<String, String> headers, String body, HttpResponse response) {
         try {
             Map<String, String> queryString = parseQueryStringType(body);
-            login(queryString, response);
+            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+            login(httpCookie, queryString, response);
         } catch (RuntimeException e) {
             response.addHttpStatus(HttpStatus.FOUND);
             response.addHeader("Location", "/404.html");
@@ -106,7 +109,7 @@ public class CatalinaServletEngine {
         }
     }
 
-    private static void login(Map<String, String> queryString, HttpResponse response) {
+    private static void login(HttpCookie httpCookie, Map<String, String> queryString, HttpResponse response) {
         String account = queryString.get("account");
         String password = queryString.get("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
@@ -121,6 +124,7 @@ public class CatalinaServletEngine {
         User user = optionalUser.get();
         if (user.checkPassword(password)) {
             log.info("user: {}", user);
+            checkCookie(httpCookie, response);
             response.addHttpStatus(HttpStatus.FOUND);
             response.addHeader("Location", "/index.html");
             response.addHeader("Content-Type", probeContentType("/index.html"));
@@ -132,6 +136,14 @@ public class CatalinaServletEngine {
         response.addHeader("Location", "/401.html");
         response.addHeader("Content-Type", probeContentType("/401.html"));
         response.setBody(findStaticFile("/401.html"));
+    }
+
+    private static void checkCookie(HttpCookie httpCookie, HttpResponse response) {
+        String sessionId = httpCookie.get("JSESSIONID");
+        if (Objects.isNull(sessionId)) {
+            sessionId = UUID.randomUUID().toString();
+            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+        }
     }
 
     private static Map<String, String> parseQueryStringType(String queryString) {

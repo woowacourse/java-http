@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
                 String body = parseBody(bufferedReader, headers);
                 HttpResponse httpResponse = HttpResponse.from("HTTP/1.1");
 
-                CatalinaServletEngine.processRequest(requestLineElements, body, httpResponse);
+                CatalinaServletEngine.processRequest(requestLineElements, headers, body, httpResponse);
 
                 outputStream.write(httpResponse.buildResponse().getBytes());
                 outputStream.flush();

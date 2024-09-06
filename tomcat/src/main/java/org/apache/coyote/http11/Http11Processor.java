@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/login") && method.equals("GET")) {
                 return login(request).build();
             }
-            return getStaticResource(request).build();
+            return getStaticResourceResponse(request.getPath()).build();
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             return HttpResponse.notFound().build();
@@ -82,9 +82,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpResponse.found("/index.html");
     }
 
-    private HttpResponse getStaticResource(HttpRequest request) throws IOException {
-        String requestPath = request.getPath();
-
+    private HttpResponse getStaticResourceResponse(String requestPath) throws IOException {
         final String responseBody = readResource("static" + requestPath);
         String endPath = requestPath.substring(requestPath.lastIndexOf("/") + 1);
         String mimeType = MimeType.from(endPath);

@@ -15,8 +15,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse(responseHeader, HttpStatus.FOUND);
         }
 
-        String responseBody = getResponseBody("/login.html",responseHeader);
+        String responseBody = getResponseBody("/login.html", responseHeader);
         return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
     }
 
@@ -143,28 +143,31 @@ public class Http11Processor implements Runnable, Processor {
         String account = body.get("account");
         String password = body.get("password");
 
-        Optional<User> result = InMemoryUserRepository.findByAccount(account);
-        if (result.isEmpty()) {
-            responseHeader.addHeader("Location", "/401.html");
-            return new HttpResponse(responseHeader, HttpStatus.FOUND);
-        }
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresentOrElse(
+                        login(cookie, responseHeader, password),
+                        () -> responseHeader.addHeader("Location", "/401.html")
+                );
 
-        User user = result.get();
-        if (!user.checkPassword(password)) {
-            responseHeader.addHeader("Location", "/401.html");
-            return new HttpResponse(responseHeader, HttpStatus.FOUND);
-        }
-
-        if (!cookie.isContains(JSESSIONID)) {
-            setSession(cookie, responseHeader, user);
-        }
-
-        log.info("로그인 성공 :: account = {}", user.getAccount());
-        responseHeader.addHeader("Location", "/index.html");
         return new HttpResponse(responseHeader, HttpStatus.FOUND);
     }
 
-    private void setSession(HttpCookie cookie, HttpHeader responseHeader, User user) {
+    private Consumer<User> login(HttpCookie cookie, HttpHeader responseHeader, String password) {
+        return user -> {
+            if (!user.checkPassword(password)) {
+                responseHeader.addHeader("Location", "/401.html");
+            }
+
+            if (!cookie.isContains(JSESSIONID)) {
+                saveSession(cookie, responseHeader, user);
+            }
+
+            log.info("로그인 성공 :: account = {}", user.getAccount());
+            responseHeader.addHeader("Location", "/index.html");
+        };
+    }
+
+    private void saveSession(HttpCookie cookie, HttpHeader responseHeader, User user) {
         String sessionId = String.valueOf(UUID.randomUUID());
         cookie.addCookie(JSESSIONID, sessionId);
         responseHeader.addHeader("Set-Cookie", JSESSIONID + "=" + sessionId);
@@ -175,7 +178,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse register(Map<String, String> body, HttpHeader responseHeader) {
-        User user = new User(body.get("account"), body.get("password"), body.get("email"));
+        String account = body.get("account");
+        String password = body.get("password");
+        String email = body.get("email");
+
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         log.info("회원 가입 성공 :: account = {}", user.getAccount());

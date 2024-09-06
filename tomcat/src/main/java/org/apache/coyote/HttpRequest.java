@@ -1,6 +1,9 @@
 package org.apache.coyote;
 
 import java.util.Arrays;
+import java.util.Optional;
+
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
     private final String method;
@@ -9,6 +12,7 @@ public class HttpRequest {
     private final String version;
     private final HttpHeader[] headers;
     private final String body;
+    private final HttpCookie httpCookie;
 
     public HttpRequest(String method, String path, String version, HttpHeader[] headers, String body) {
         this.method = method;
@@ -17,15 +21,7 @@ public class HttpRequest {
         this.headers = headers;
         this.url = parseUrl(path);
         this.body = body;
-    }
-
-    public HttpRequest(String method, String path, String version, HttpHeader[] headers) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
-        this.headers = headers;
-        this.url = parseUrl(path);
-        this.body = null;
+        this.httpCookie = parseCookie(headers);
     }
 
     public String getMethod() {
@@ -49,6 +45,13 @@ public class HttpRequest {
         return hostHeader.getValue() + path;
     }
 
+    private HttpCookie parseCookie(HttpHeader[] headers) {
+        return Arrays.stream(headers)
+                .filter(header -> header.getKey().equalsIgnoreCase("Cookie"))
+                .findFirst()
+                .map(header -> new HttpCookie(header.getValue())).orElse(null);
+    }
+
     public String getVersion() {
         return version;
     }
@@ -70,7 +73,7 @@ public class HttpRequest {
         return body;
     }
 
-    public Session getSession() {
-        return new Session("session-id");
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 }

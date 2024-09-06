@@ -16,6 +16,10 @@ public class HttpCookie {
         this.cookie = parseCookie(cookie);
     }
 
+    public String getValue(String key) {
+        return cookie.get(key);
+    }
+
     public static Map<String, String> parseCookie(String cookie) {
         String[] cookiePairs = cookie.split("; ");
 

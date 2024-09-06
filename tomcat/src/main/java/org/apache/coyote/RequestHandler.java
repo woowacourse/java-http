@@ -82,8 +82,13 @@ public class RequestHandler {
     }
 
     private String processLoginGetRequest(final HttpRequest httpRequest) throws IOException {
-        Session session = httpRequest.getSession();
-        if (sessionManager.findSession(session.getId()) == null) {
+        HttpCookie httpCookie = httpRequest.getHttpCookie();
+        if (httpCookie == null) {
+            return handleSimpleResource("login.html");
+        }
+
+        String sessionId = httpCookie.getValue("JSESSIONID=");
+        if (sessionManager.findSession(sessionId) == null) {
             return handleSimpleResource("login.html");
         }
         return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
@@ -101,12 +106,12 @@ public class RequestHandler {
 
         final User user = userOptional.get();
         if (user.checkPassword(password)) {
-            final Session session = httpRequest.getSession();
+            final Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
             return addCookie(
                     HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
-                    new HttpCookie("JSESSIONID=" + UUID.randomUUID()));
+                    new HttpCookie("JSESSIONID=" + session.getId()));
         }
 
         return handleSimpleResource("404.html");

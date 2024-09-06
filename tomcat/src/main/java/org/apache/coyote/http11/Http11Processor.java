@@ -1,14 +1,16 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.apache.coyote.http.Dispatcher;
 import org.apache.coyote.http.request.HttpMethod;
 import org.apache.coyote.http.request.HttpRequest;
-import org.apache.coyote.http.RequestToResponse;
-import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,18 +38,18 @@ public class Http11Processor implements Runnable, Processor {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            RequestToResponse requestToResponse = new RequestToResponse();
+            Dispatcher dispatcher = new Dispatcher();
 
             HttpRequest request = getRequestHeader(bufferedReader);
             if (request.getRequestLine().getMethod().equals(HttpMethod.POST)) {
                 getRequestBody(bufferedReader, request);
             }
 
-            final var response = requestToResponse.build(request);
+            final var response = dispatcher.dispatch(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }

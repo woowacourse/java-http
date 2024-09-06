@@ -1,19 +1,19 @@
 package org.apache.coyote.http.request;
 
+import org.apache.coyote.util.StringUtils;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Path {
 
-    private final String path;
+    private final String uri;
     private final Map<String, String> parameters;
 
-    public Path(String path) {
-        validatePath(path);
-        this.path = findPath(path);
-        this.parameters = findParameters(path);
+    public Path(String uri) {
+        validatePath(uri);
+        this.uri = findPath(uri);
+        this.parameters = findParameters(uri);
     }
 
     private void validatePath(String path) {
@@ -34,10 +34,7 @@ public class Path {
 
     private Map<String, String> findParameters(String path) {
         if (path.contains("?")) {
-            List<String> queryParameters = List.of(path.substring(path.indexOf("?")+1).split("&"));
-            return queryParameters.stream()
-                    .map(q -> q.split("="))
-                    .collect(Collectors.toMap(q -> q[0], q -> q[1]));
+            return StringUtils.separate(path.substring(path.indexOf("?") + 1));
         }
         return new HashMap<>();
     }
@@ -46,8 +43,8 @@ public class Path {
         return parameters != null && !parameters.isEmpty();
     }
 
-    public String getPath() {
-        return path;
+    public String getUri() {
+        return uri;
     }
 
     public Map<String, String> getParameters() {

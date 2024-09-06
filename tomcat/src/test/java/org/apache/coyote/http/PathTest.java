@@ -37,7 +37,7 @@ class PathTest {
         Path path = new Path(test);
 
         assertThat(path.getParameters()).hasSize(2);
-        assertThat(path.getPath()).isEqualTo("/login");
+        assertThat(path.getUri()).isEqualTo("/login");
         assertThat(path.getParameters().get("account")).isEqualTo("gugu");
     }
 }

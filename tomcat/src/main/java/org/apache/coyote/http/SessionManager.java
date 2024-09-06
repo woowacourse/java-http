@@ -33,6 +33,7 @@ public class SessionManager implements Manager {
         return instance;
     }
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 }
 

@@ -10,8 +10,8 @@ import java.util.Map;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> header;
-    private final String body;
+    private final Map<HeaderName, String> header;
+    private final String body;  // TODO: 왜 안쓰이는지 보기
 
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -22,14 +22,16 @@ public class HttpRequest {
         this.body = mapBody(bufferedReader);
     }
 
-    private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
+    private Map<HeaderName, String> mapHeader(BufferedReader bufferedReader) throws IOException {
+        Map<HeaderName, String> header = new HashMap<>();
         String rawLine;
 
         while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
             String[] headerEntry = rawLine.split(": ", 2);
-            header.put(headerEntry[0], headerEntry[1]);
+            header.put(HeaderName.findByName(headerEntry[0]), headerEntry[1]);
         }
+
+        header.put(HeaderName.CONTENT_TYPE, requestLine.getContentType().getResponse());
         return header;
     }
 
@@ -52,19 +54,23 @@ public class HttpRequest {
         return header.get(headerName);
     }
 
-    public String getBody() {
-        return body;
-    }
-
     public boolean hasCookie() {
         return header.containsKey(HeaderName.COOKIE);
     }
 
-    public boolean hasQueryParam() {
-        return requestLine.hasQueryParam();
-    }
-
     public String getQueryParam(String paramName) {
         return requestLine.getQueryParam(paramName);
+    }
+
+    public boolean isStaticRequest() {
+        return requestLine.isStaticRequest();
+    }
+
+    public boolean isPath(String path) {
+        return requestLine.isPath(path);
+    }
+
+    public boolean isPathWithQuery(String path) {
+        return requestLine.isPathWithQuery(path);
     }
 }

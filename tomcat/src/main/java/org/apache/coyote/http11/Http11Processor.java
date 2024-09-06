@@ -105,18 +105,44 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length: 0 ",
                     "");
         }
+
+        if (path.equals("/login")) {
+            StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
+            String account = "";
+            String password = "";
+            while (tokenizer.hasMoreTokens()) {
+                String key = tokenizer.nextToken();
+                if (key.equals("account") && tokenizer.hasMoreTokens()) {
+                    account = tokenizer.nextToken();
+                } else if (key.equals("password") && tokenizer.hasMoreTokens()) {
+                    password = tokenizer.nextToken();
+                }
+            }
+
+            Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
+            if (loginUser.isPresent()) {
+                final User user = loginUser.get();
+                if (user.checkPassword(password)) {
+                    log.info("로그인 성공! 아이디: {}", user.getAccount());
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: http://localhost:8080/index.html ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: 0 ",
+                            "");
+                }
+            }
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/404.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
+        }
         return null;
     }
 
-    private String doGet(String uri) throws IOException {
-        final int index = uri.indexOf("?");
-        String path = uri;
-        String queryString = "";
-        if (index != -1) {
-            path = uri.substring(0, index);
-            queryString = uri.substring(index + 1);
-        }
-
+    private String doGet(String path) throws IOException {
         if (path.equals("/")) {
             return getRootPage();
         }
@@ -150,41 +176,6 @@ public class Http11Processor implements Runnable, Processor {
         }
         final URL resource = getClass().getClassLoader().getResource("static" + path);
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        if (path.startsWith("/login") && !queryString.isEmpty()) {
-            StringTokenizer tokenizer = new StringTokenizer(queryString, "&|=");
-            String account = "";
-            String password = "";
-            while (tokenizer.hasMoreTokens()) {
-                if (tokenizer.nextToken().equals("account") && tokenizer.hasMoreTokens()) {
-                    account = tokenizer.nextToken();
-                }
-                if (tokenizer.nextToken().equals("password") && tokenizer.hasMoreTokens()) {
-                    password = tokenizer.nextToken();
-                }
-            }
-
-            Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
-            if (loginUser.isPresent()) {
-                final User user = loginUser.get();
-                if (user.checkPassword(password)) {
-                    log.info("user : {}", user);
-                    return String.join("\r\n",
-                            "HTTP/1.1 302 Found ",
-                            "Location: http://localhost:8080/index.html ",
-                            "Content-Type: text/html;charset=utf-8 ",
-                            "Content-Length: 0 ",
-                            "");
-                }
-            }
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/404.html ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: 0 ",
-                    "");
-        }
-
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",

@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpMethod;
 public enum ControllerMapping {
 
     SEARCH_USER(HttpMethod.GET, "/login", params -> new UserController().searchUserData(params)),
+    LOGIN_USER(HttpMethod.POST, "/login", params -> new UserController().login(params)),
     REGISTER_USER(HttpMethod.POST, "/register", params -> new UserController().registerUser(params));
 
     private final HttpMethod httpMethod;

@@ -27,6 +27,23 @@ public class UserController {
         return httpResponse;
     }
 
+    public HttpResponseEntity<User> login(Map<String, String> params) {
+        String account = params.getOrDefault("account", "");
+        String password = params.getOrDefault("password", "");
+
+        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
+            HttpResponseEntity<User> httpResponse = new HttpResponseEntity<>(HttpStatus.FOUND, null);
+            httpResponse.addHeader(HttpHeaders.LOCATION, "/401.html");
+            return httpResponse;
+        }
+
+        HttpResponseEntity<User> httpResponse = new HttpResponseEntity<>(HttpStatus.FOUND, user.get());
+        httpResponse.addHeader(HttpHeaders.LOCATION, "/index.html");
+        return httpResponse;
+    }
+
     public HttpResponseEntity<Void> registerUser(Map<String, String> data) {
         String account = data.getOrDefault("account", "");
         String email = data.getOrDefault("email", "");

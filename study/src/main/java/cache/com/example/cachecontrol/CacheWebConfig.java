@@ -21,14 +21,14 @@ public class CacheWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        WebContentInterceptor webContentInterceptor = new WebContentInterceptor();
-        webContentInterceptor.addCacheMapping(CacheControl.noCache().cachePrivate(), "/**");
-        webContentInterceptor.addCacheMapping(CacheControl.maxAge(Duration.ofDays(365L)), "/etag");
-//        webContentInterceptor.addCacheMapping(CacheControl.maxAge(Duration.ofDays(365L)).cachePublic(),
-//                "/resource-versioning");
-        webContentInterceptor.addCacheMapping(CacheControl.maxAge(Duration.ofDays(365L)).cachePublic(),
-                "/resources/" + version.getVersion() + "/**");
+        WebContentInterceptor noCacheInterceptor = new WebContentInterceptor();
+        noCacheInterceptor.addCacheMapping(CacheControl.noCache().cachePrivate(), "/**");
+        registry.addInterceptor(noCacheInterceptor);
 
-        registry.addInterceptor(webContentInterceptor);
+        WebContentInterceptor cacheInterceptor = new WebContentInterceptor();
+        cacheInterceptor.addCacheMapping(CacheControl.maxAge(Duration.ofDays(365L)), "/etag");
+        cacheInterceptor.addCacheMapping(CacheControl.maxAge(Duration.ofDays(365L)).cachePublic(),
+                "/resources/" + version.getVersion() + "/**");
+        registry.addInterceptor(cacheInterceptor);
     }
 }

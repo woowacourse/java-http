@@ -10,7 +10,6 @@ public class SessionManager implements Manager {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
-
     @Override
     public void add(HttpSession session) {
         SESSIONS.put(session.getId(), session);
@@ -24,5 +23,9 @@ public class SessionManager implements Manager {
     @Override
     public void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public boolean isExistSession(String id) {
+        return SESSIONS.containsKey(id);
     }
 }

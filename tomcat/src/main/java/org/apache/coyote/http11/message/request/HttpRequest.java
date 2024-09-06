@@ -2,8 +2,9 @@ package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 
@@ -46,10 +47,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers.getHeaders();
-    }
-
     public String getBody() {
         return body.getBody();
     }
@@ -58,8 +55,12 @@ public class HttpRequest {
         return startLine.getUri();
     }
 
-    public HttpRequestLine getStartLine() {
-        return startLine;
+    public HttpCookie getCookie() {
+        return headers.getCookie();
+    }
+
+    public ContentType getContentType() {
+        return headers.getContentType();
     }
 
     public HttpMethod getMethod() {

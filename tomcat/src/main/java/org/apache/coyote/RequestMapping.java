@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.coyote.controller.FrontController;
 import org.apache.coyote.controller.HomeController;
+import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.RegisterController;
 import org.apache.coyote.controller.StaticResourceController;
-import org.apache.coyote.http11.LoginController;
 
 public class RequestMapping {
 

@@ -2,6 +2,7 @@ package org.apache.coyote.http11.message.common;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpHeaders {
 
@@ -35,16 +36,20 @@ public class HttpHeaders {
         return map;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public int getContentLength() {
         return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
     }
 
     public void setHeaders(String key, String value) {
         this.headers.put(key, value);
+    }
+
+    public HttpCookie getCookie() {
+        return new HttpCookie(headers.getOrDefault("Cookie", ""));
+    }
+
+    public ContentType getContentType() {
+        return ContentType.from(headers.getOrDefault("Content-Type", ""));
     }
 
     @Override

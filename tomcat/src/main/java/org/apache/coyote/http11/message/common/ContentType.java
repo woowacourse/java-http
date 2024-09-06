@@ -4,23 +4,25 @@ import java.util.Arrays;
 
 public enum ContentType {
 
-    HTML("html", "text/html;charset=utf-8 "),
-    JS("js", "text/javascript;charset=utf-8"),
-    CSS("css", "text/css;charset=utf-8");
+    TEXT_HTML("text/html;charset=utf-8 "),
+    TEXT_JS("text/javascript;charset=utf-8"),
+    TEXT_CSS("text/css;charset=utf-8"),
+    FORM_DATA("application/x-www-form-urlencoded");
 
-    private final String extension;
     private final String type;
 
-    ContentType(String extension, String type) {
-        this.extension = extension;
+    ContentType(String type) {
         this.type = type;
     }
 
-    public static String getContentType(String extension) {
+    public static ContentType from(String type) {
         return Arrays.stream(values())
-                .filter(contentType -> contentType.extension.equalsIgnoreCase(extension))
+                .filter(contentType -> contentType.type.equalsIgnoreCase(type))
                 .findFirst()
-                .map(contentType -> contentType.type)
-                .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 확장자입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 ContentType."));
+    }
+
+    public String getType() {
+        return type;
     }
 }

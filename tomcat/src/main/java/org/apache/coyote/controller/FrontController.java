@@ -1,5 +1,6 @@
 package org.apache.coyote.controller;
 
+import org.apache.coyote.http11.message.request.HttpMethod;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -8,12 +9,12 @@ public abstract class FrontController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        String method = request.getMethod().name();
+        HttpMethod method = request.getMethod();
         switch (method) {
-            case "GET":
+            case HttpMethod.GET:
                 doGet(request, response);
                 break;
-            case "POST":
+            case HttpMethod.POST:
                 doPost(request, response);
                 break;
             default:

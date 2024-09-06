@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.message.response;
 
+import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpBody;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 
@@ -25,6 +26,10 @@ public class HttpResponse {
 
     public void setHeader(String key, String value) {
         this.headers.setHeaders(key, value);
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.headers.setHeaders("Content-Type", contentType.getType());
     }
 
     public void setBody(String body) {

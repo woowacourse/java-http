@@ -38,7 +38,6 @@ public class Session implements HttpSession {
 
     @Override
     public void setMaxInactiveInterval(int interval) {
-
     }
 
     @Override

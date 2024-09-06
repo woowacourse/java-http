@@ -1,35 +1,32 @@
 package org.apache.coyote.controller;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import org.apache.coyote.http11.message.common.ContentType;
+import org.apache.coyote.http11.message.common.FileExtension;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.util.ResourceReader;
 
 public class StaticResourceController extends FrontController {
 
-    @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        super.doPost(request, response);
-    }
+    private static final String STATIC_PREFIX = "static";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String uri = request.getPath();
-        System.out.println(uri);
-        URL resource = getUrl(uri);
-        String path = resource.getPath();
-        String[] strings = path.split("\\.");
-        String extension = strings[strings.length - 1];
-        String file = new String(Files.readAllBytes(Path.of(resource.toURI())));
-        response.setHeader("Content-Type", ContentType.getContentType(extension));
-        response.setHeader("Content-Length", file.getBytes().length + " ");
-        response.setBody(file);
+        String path = STATIC_PREFIX + request.getPath();
+        String resource = ResourceReader.readResource(path);
+
+        String extension = extractFileExtension(path);
+
+        response.setContentType(FileExtension.getFileExtension(extension).getContentType());
+        response.setHeader(CONTENT_LENGTH_HEADER, String.valueOf(resource.getBytes().length));
+        response.setBody(resource);
     }
 
-    private URL getUrl(String path) {
-        path = "static" + path;
-        return getClass().getClassLoader().getResource(path);
+    private String extractFileExtension(String path) {
+        int lastDotIndex = path.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return "";
+        }
+        return path.substring(lastDotIndex + 1);
     }
 }

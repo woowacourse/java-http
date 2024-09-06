@@ -1,50 +1,45 @@
 package org.apache.coyote.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
+import com.techcourse.service.UserService;
 import java.util.Map;
+import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
+import org.apache.util.ResourceReader;
+import org.apache.util.parser.BodyParserFactory;
+import org.apache.util.parser.Parser;
 
 public class RegisterController extends FrontController {
 
+    private final UserService userService = new UserService();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        String body = request.getBody();
-        String[] bodies = body.split("&");
-        Map<String, String> params = new HashMap<>();
-        for (String value : bodies) {
-            String[] keyValue = value.split("=");
-            params.put(keyValue[0], keyValue[1]);
-        }
-        User user = new User(params.get("account"), params.get("password"), params.get("email"));
-        InMemoryUserRepository.save(user);
-        System.out.println("회원가입 성공: " + user.getAccount());
+        Parser parser = BodyParserFactory.getParser(request.getContentType());
+        Map<String, String> params = parser.parse(request.getBody());
+
+        String account = params.get("account");
+        String password = params.get("password");
+        String email = params.get("email");
+
+        userService.registerUser(account, password, email);
 
         String path = "static/index.html";
-        URL url = getClass().getClassLoader().getResource(path);
-        String file = new String(Files.readAllBytes(Path.of(url.toURI())));
-
+        String resource = ResourceReader.readResource(path);
 
         response.setStatusLine(HttpStatus.OK);
-        response.setHeader("Content-Type", "text/html;charset=utf-8 ");
-        response.setBody(file);
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setBody(resource);
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String path = "static/register.html";
-        URL url = getClass().getClassLoader().getResource(path);
-        String file = new String(Files.readAllBytes(Path.of(url.toURI())));
+        String resource = ResourceReader.readResource(path);
 
         response.setStatusLine(HttpStatus.OK);
-        response.setHeader("Content-Type", "text/html;charset=utf-8 ");
-        response.setBody(file);
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setBody(resource);
     }
 }

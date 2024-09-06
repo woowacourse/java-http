@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_PATH = "/login";
-    private static Logger logger = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     private final UserService userService;
 

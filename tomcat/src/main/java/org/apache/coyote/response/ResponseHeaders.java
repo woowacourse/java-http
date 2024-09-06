@@ -8,12 +8,15 @@ public class ResponseHeaders implements Assemblable {
 
     private final Map<String, String> headers;
 
-    private ResponseHeaders(Map<String, String> headers) {
+    private final HttpCookie httpCookie;
+
+    private ResponseHeaders(Map<String, String> headers, HttpCookie httpCookie) {
         this.headers = headers;
+        this.httpCookie = httpCookie;
     }
 
     protected static ResponseHeaders create() {
-        return new ResponseHeaders(new LinkedHashMap<>());
+        return new ResponseHeaders(new LinkedHashMap<>(), HttpCookie.create());
     }
 
     protected void contentType(String contentType) {
@@ -28,8 +31,13 @@ public class ResponseHeaders implements Assemblable {
         headers.put("Location", location);
     }
 
+    protected void setJsessionid(String jsessionid) {
+        httpCookie.setJsessionid(jsessionid);
+    }
+
     @Override
     public void assemble(StringBuilder builder) {
+        httpCookie.assemble(builder);
         for (Entry<String, String> entry : headers.entrySet()) {
             builder.append(convert(entry));
         }

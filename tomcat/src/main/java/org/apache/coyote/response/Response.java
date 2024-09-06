@@ -35,6 +35,10 @@ public class Response {
         responseHeaders.contentType(mimeType.getType());
     }
 
+    public void setJsessionid(String jsessionid) {
+        responseHeaders.setJsessionid(jsessionid);
+    }
+
     public void setBody(String body) {
         responseBody.setBody(body);
         responseHeaders.contentLength(responseBody.length());

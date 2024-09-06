@@ -2,6 +2,7 @@ package com.techcourse.presentation;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.util.UUID;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.Response;
 import org.apache.coyote.response.StatusCode;
@@ -43,6 +44,7 @@ public class LoginController {
         try {
             User user = getUser(account, password);
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
+            response.setJsessionid(UUID.randomUUID().toString());
             response.configureViewAndStatus("/index", StatusCode.FOUND);
         } catch (IllegalArgumentException e) {
             response.configureViewAndStatus("/401", StatusCode.UNAUTHORIZED);

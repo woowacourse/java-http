@@ -25,4 +25,26 @@ class ResponseHeadersTest {
                 """;
         assertThat(builder.toString()).isEqualTo(expected);
     }
+
+    @Test
+    void 쿠키가_있다면_Set_Cookie_헤더도_함께_조립한다() {
+        // given
+        ResponseHeaders responseHeaders = ResponseHeaders.create();
+        responseHeaders.contentType("text/html");
+        responseHeaders.contentLength(1024);
+        responseHeaders.setJsessionid("656cef62-e3c4-40bc-a8df-94732920ed46");
+
+        // when
+        StringBuilder builder = new StringBuilder();
+        responseHeaders.assemble(builder);
+
+        // then
+        String expected = """
+                Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 \r
+                Content-Type: text/html;charset=utf-8 \r
+                Content-Length: 1024 \r
+                \r
+                """;
+        assertThat(builder.toString()).isEqualTo(expected);
+    }
 }

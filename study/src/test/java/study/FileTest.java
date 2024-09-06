@@ -1,5 +1,10 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,8 +32,8 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        URL resource = getClass().getClassLoader().getResource(fileName);
+        String actual = resource.getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -40,14 +45,12 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
-
-        // todo
-        final List<String> actual = Collections.emptyList();
+        InputStream inputStream = getClass().getClassLoader().getResource(fileName).openStream();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final List<String> actual = bufferedReader.lines().toList();
 
         assertThat(actual).containsOnly("nextstep");
     }

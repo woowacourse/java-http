@@ -10,10 +10,10 @@ public class RequestLine {
     private final String httpVersion;
 
     public RequestLine(String requestLine) {
-        String[] input = requestLine.split(REQUEST_LINE_DELIMITER);
-        this.httpMethod = input[0];
-        this.uri = input[1];
-        this.httpVersion = input[2];
+        String[] parts = requestLine.split(REQUEST_LINE_DELIMITER);
+        this.httpMethod = parts[0];
+        this.uri = parts[1];
+        this.httpVersion = parts[2];
     }
 
     public boolean isCSS() {

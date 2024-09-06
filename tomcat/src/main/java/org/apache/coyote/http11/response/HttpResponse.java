@@ -26,7 +26,7 @@ public class HttpResponse {
     public static HttpResponse of(String version, int statusCode,
                                     String contentType, String body) {
         Map<String, Object> headers = new HashMap<>();
-        headers.put("Content-Type", contentType);
+        headers.put("Content-Type", contentType + ";charset=utf-8");
         headers.put("Content-Length", body.getBytes().length);
 
         return new HttpResponse(version, statusCode, "OK", headers, body);

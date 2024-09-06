@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpCookie;
 
 public class HttpResponse {
 
@@ -9,6 +10,7 @@ public class HttpResponse {
     private static final String LOCATION = "Location";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String COOKIE = "Set-Cookie";
 
     private StatusLine statusLine;
     private Map<String, String> headers;
@@ -51,6 +53,10 @@ public class HttpResponse {
         headers.put(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
     }
 
+    public void setCookie(HttpCookie cookie) {
+        headers.put(COOKIE, "JSESSIONID=" + cookie.getJsessionId());
+    }
+
     public String getResponse() {
         StringBuilder header = new StringBuilder();
         if (headers.containsKey(LOCATION)) {
@@ -61,6 +67,9 @@ public class HttpResponse {
         }
         if (headers.containsKey(CONTENT_LENGTH)) {
             header.append(CONTENT_LENGTH + ": ").append(headers.get(CONTENT_LENGTH) + " ").append(LINE_SEPARATOR);
+        }
+        if (headers.containsKey(COOKIE)) {
+            header.append(COOKIE + ": ").append(headers.get(COOKIE) + " ").append(LINE_SEPARATOR);
         }
 
         return String.join(LINE_SEPARATOR,

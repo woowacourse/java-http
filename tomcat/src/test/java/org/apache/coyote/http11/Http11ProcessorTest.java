@@ -1,14 +1,17 @@
 package org.apache.coyote.http11;
 
-import org.junit.jupiter.api.Test;
-import support.StubSocket;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
@@ -131,13 +134,16 @@ class Http11ProcessorTest {
 
         // when
         processor.process(socket);
+        String output = socket.output();
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n";
+        assertThat(output).contains("HTTP/1.1 302 Found");
+        assertThat(output).contains("Location: /index.html");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String sessionIdPattern = "Set-Cookie: JSESSIONID=[a-fA-F0-9\\-]{36}";
+        Pattern pattern = Pattern.compile(sessionIdPattern);
+        Matcher matcher = pattern.matcher(output);
+        assertThat(matcher.find()).isTrue();
     }
 
     @Test
@@ -220,6 +226,7 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
 
     private long getFileSize(URL resource) {
         return new File(resource.getFile()).length();

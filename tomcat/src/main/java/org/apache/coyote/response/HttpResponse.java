@@ -52,7 +52,7 @@ public class HttpResponse {
 
     public static HttpResponse redirectTo(String path) {
         HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, "", ContentType.TEXT_HTML);
-        response.addHeader("Location", path);
+        response.addHeader(HttpHeaders.LOCATION.getName(), path);
         return response;
     }
 

@@ -6,6 +6,7 @@ public enum HttpHeaders {
     COOKIE("Cookie"),
     CONTENT_TYPE("Content-Type"),
     SET_COOKIE("Set-Cookie"),
+    LOCATION("Location"),
     ;
 
     private final String name;

@@ -21,6 +21,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.startLine.HttpMethod;
+import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.startLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

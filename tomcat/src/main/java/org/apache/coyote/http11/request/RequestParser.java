@@ -11,7 +11,7 @@ public class RequestParser {
         final Map<String, String> header = new HashMap<>();
         String line;
 
-        while(!(line = reader.readLine()).isBlank()) {
+        while (!(line = reader.readLine()).isBlank()) {
             final var parts = line.split(": ", 2);
             header.put(parts[0], parts[1]);
         }

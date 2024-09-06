@@ -29,5 +29,6 @@ public class SessionManager implements Manager {
         SESSIONS.remove(session.getId());
     }
 
-    private SessionManager() {}
+    private SessionManager() {
+    }
 }

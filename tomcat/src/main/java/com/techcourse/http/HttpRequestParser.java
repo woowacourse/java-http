@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class HttpRequestParser {
 
@@ -72,6 +74,6 @@ public class HttpRequestParser {
             throw new IOException("Failed to read the entire request body");
         }
 
-        request.setBody(new String(bodyChars));
+        request.setBody(URLDecoder.decode(new String(bodyChars), StandardCharsets.UTF_8));
     }
 }

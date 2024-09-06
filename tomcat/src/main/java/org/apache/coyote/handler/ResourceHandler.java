@@ -26,13 +26,17 @@ public class ResourceHandler {
         return INSTANCE;
     }
 
-    public String handleSimpleResource(final String resourceName) throws IOException {
+    public String handleSimpleResource(final String resourceName) {
         final URL resourceURL = getClass().getClassLoader().getResource(findResourcePath(resourceName));
         final Path resourcePath = Path.of(resourceURL.getPath());
-        final String responseBody = Files.readString(resourcePath);
-        final String mimeType = Files.probeContentType(resourcePath);
-
-        return HttpResponseGenerator.getOkResponse(mimeType, responseBody);
+        try {
+            final String responseBody = Files.readString(resourcePath);
+            final String mimeType = Files.probeContentType(resourcePath);
+            return HttpResponseGenerator.getOkResponse(mimeType, responseBody);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return HttpResponseGenerator.getFoundResponse("404.html");
+        }
     }
 
     private String findResourcePath(final String resourcePath) {

@@ -34,14 +34,14 @@ public class RequestHandler {
     }
 
     // TOOD: change naming
-    private String handleURL(final HttpRequest httpRequest) throws IOException {
+    private String handleURL(final HttpRequest httpRequest) {
         final String uri = httpRequest.getUrl();
         if (uri.contains("login")) {
-            return LoginHandler.getInstance().processLoginRequest(httpRequest);
+            return LoginHandler.getInstance().handle(httpRequest);
         }
 
         if (uri.contains("register")) {
-            return RegisterHandler.getInstance().processRegisterRequest(httpRequest);
+            return RegisterHandler.getInstance().handle(httpRequest);
         }
 
         throw new IllegalCallerException("유효하지 않은 기능입니다.");

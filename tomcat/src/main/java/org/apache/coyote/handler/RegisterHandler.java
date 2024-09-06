@@ -1,7 +1,5 @@
 package org.apache.coyote.handler;
 
-import java.io.IOException;
-
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponseGenerator;
@@ -9,7 +7,7 @@ import org.apache.coyote.response.HttpResponseGenerator;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class RegisterHandler {
+public class RegisterHandler extends Handler {
 
     private static final RegisterHandler INSTANCE = new RegisterHandler();
 
@@ -20,7 +18,7 @@ public class RegisterHandler {
         return INSTANCE;
     }
 
-    public String processRegisterRequest(final HttpRequest httpRequest) throws IOException {
+    public String handle(final HttpRequest httpRequest) {
         if (httpRequest.isSameMethod(HttpMethod.GET)) {
             return ResourceHandler.getInstance().handleSimpleResource("register.html");
         }
@@ -40,5 +38,4 @@ public class RegisterHandler {
         InMemoryUserRepository.save(new User(account, password, email));
         return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
     }
-
 }

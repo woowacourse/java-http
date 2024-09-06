@@ -1,6 +1,5 @@
 package org.apache.coyote.handler;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ import org.apache.coyote.response.HttpResponseGenerator;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class LoginHandler {
+public class LoginHandler extends Handler {
     private static final LoginHandler INSTANCE = new LoginHandler();
     private final SessionManager sessionManager = SessionManager.getInstance();
 
@@ -25,7 +24,8 @@ public class LoginHandler {
         return INSTANCE;
     }
 
-    public String processLoginRequest(final HttpRequest httpRequest) throws IOException {
+    @Override
+    public String handle(final HttpRequest httpRequest) {
         if (httpRequest.isSameMethod(HttpMethod.GET)) {
             return processLoginGetRequest(httpRequest);
         }
@@ -38,7 +38,7 @@ public class LoginHandler {
 
     }
 
-    private String processLoginGetRequest(final HttpRequest httpRequest) throws IOException {
+    private String processLoginGetRequest(final HttpRequest httpRequest) {
         HttpCookie httpCookie = httpRequest.getHttpCookie();
         if (httpCookie == null) {
             return ResourceHandler.getInstance().handleSimpleResource("login.html");
@@ -51,7 +51,7 @@ public class LoginHandler {
         return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
     }
 
-    private String processLoginPostRequest(final HttpRequest httpRequest) throws IOException {
+    private String processLoginPostRequest(final HttpRequest httpRequest) {
         final String[] params = httpRequest.getBody().split("&");
         final String account = params[0].split("=")[1];
         final String password = params[1].split("=")[1];

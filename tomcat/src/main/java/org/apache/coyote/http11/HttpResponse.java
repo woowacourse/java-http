@@ -15,7 +15,7 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
         this.mimeType = Files.probeContentType(file.toPath());
         this.body = Files.readString(file.toPath());
-        this.contentLength = body.getBytes().length;
+        this.contentLength = Files.readString(file.toPath()).getBytes().length;
     }
 
     public String toMessage() {

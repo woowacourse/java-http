@@ -69,4 +69,8 @@ public class HttpRequest {
     public String getBody() {
         return body;
     }
+
+    public Session getSession() {
+        return new Session("session-id");
+    }
 }

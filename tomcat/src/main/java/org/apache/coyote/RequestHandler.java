@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 
 import com.techcourse.db.InMemoryUserRepository;
@@ -21,8 +22,9 @@ public class RequestHandler {
     );
     private static final String STATIC_RESOURCE_ROOT_PATH = "static/";
     private static final String PATH_DELIMITER = "/";
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
-    // mapping handler method
+    // TODO: mapping handler method
     public String handle(final HttpRequest httpRequest) throws IOException {
         final String path = httpRequest.getPath();
         final String[] paths = path.split(PATH_DELIMITER);
@@ -69,7 +71,7 @@ public class RequestHandler {
 
     private String processLoginRequest(final HttpRequest httpRequest) throws IOException {
         if (Objects.equals(httpRequest.getMethod(), "GET")) {
-            return handleSimpleResource("login.html");
+            return processLoginGetRequest(httpRequest);
         }
 
         if (Objects.equals(httpRequest.getMethod(), "POST")) {
@@ -77,6 +79,14 @@ public class RequestHandler {
         }
 
         return handleSimpleResource("404.html");
+    }
+
+    private String processLoginGetRequest(final HttpRequest httpRequest) throws IOException {
+        Session session = httpRequest.getSession();
+        if (sessionManager.findSession(session.getId()) == null) {
+            return handleSimpleResource("login.html");
+        }
+        return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
     }
 
     private String processLoginPostRequest(final HttpRequest httpRequest) throws IOException {
@@ -91,6 +101,9 @@ public class RequestHandler {
 
         final User user = userOptional.get();
         if (user.checkPassword(password)) {
+            final Session session = httpRequest.getSession();
+            session.setAttribute("user", user);
+            sessionManager.add(session);
             return addCookie(
                     HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
                     new HttpCookie("JSESSIONID=" + UUID.randomUUID()));

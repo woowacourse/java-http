@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.LoginService;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,13 +40,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = createRequest(inputStream);
             log.info("[REQUEST] = {}", request);
 
-            ContentType contentType = ContentType.findByUrl(request.getUrl());
-            String resourceUrl = getResourceUrl(contentType, request.getUrl());
-            String responseBody = createResponseBody(resourceUrl);
+            HttpResponse httpResponse = createResponse(request);
 
-            Map<String, String> header = createHeader(contentType, responseBody.getBytes().length);
-
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header, responseBody);
             final var response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());
@@ -64,6 +61,25 @@ public class Http11Processor implements Runnable, Processor {
             log.error("IO Exception occur during make request object");
         }
         return null;
+    }
+
+    private HttpResponse createResponse(HttpRequest request) throws IOException {
+        String url = request.getUrl();
+
+        if (url.equals("/login")) {
+            Map<String, String> queries = request.getQueries();
+            User user = LoginService.login(queries.get("account"), queries.get("password"));
+            log.info("Login Success = {}", user);
+        }
+
+        ContentType contentType = ContentType.findByUrl(url);
+        String resourceUrl = getResourceUrl(contentType, url);
+        String responseBody = createResponseBody(resourceUrl);
+
+        Map<String, String> header = createHeader(contentType, responseBody.getBytes().length);
+
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header, responseBody);
+        return httpResponse;
     }
 
     private String getResourceUrl(ContentType contentType, String rawUrl) {

@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpVersion;
 
 public class HttpRequest {
 
@@ -60,6 +61,10 @@ public class HttpRequest {
 
     public String getTargetPath() {
         return startLine.getTargetPath();
+    }
+
+    public HttpVersion getVersion() {
+        return startLine.getVersion();
     }
 
     public QueryParameters getTargetQueryParameters() {

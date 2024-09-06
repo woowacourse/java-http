@@ -1,34 +1,44 @@
 package org.apache.coyote.response;
 
-public class HttpResponse {
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.util.FileTypeChecker;
 
+public class HttpResponse {
 
     private final HttpResponseStartLine startLine;
     private final HttpResponseHeaders headers;
-    private String body;
+    private final HttpResponseBody body;
 
-    private HttpResponse(HttpResponseStartLine startLine, HttpResponseHeaders headers, String body) {
+    public HttpResponse(HttpResponseStartLine startLine, HttpResponseHeaders headers, HttpResponseBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpResponse create() {
-        HttpResponseStartLine startLine = HttpResponseStartLine.defaultLine();
-        return new HttpResponse(startLine, new HttpResponseHeaders(), null);
+    public static HttpResponse from(HttpRequest httpRequest) {
+        HttpResponseStartLine startLine = HttpResponseStartLine.defaultStartLineFrom(httpRequest);
+        return new HttpResponse(startLine, new HttpResponseHeaders(), new HttpResponseBody(null));
     }
 
-    public void addContentType(String accept) {
-        addHeader("Content-Type", accept + ";charset=utf-8");
+    public void addContentType(String contentType) {
+        if (FileTypeChecker.isHtml(contentType)) {
+            headers.add("Content-Type", contentType + ";charset=utf-8");
+            return;
+        }
+        headers.add("Content-Type", contentType);
     }
 
-    public void addBody(String body) {
-        this.body = body;
-        addHeader("Content-Length", String.valueOf(body.getBytes().length));
+    public void addBody(String newBody) {
+        this.body.update(newBody);
+        if (this.body.hasBody()) {
+            headers.add("Content-Length", String.valueOf(newBody.getBytes().length));
+            return;
+        }
+        headers.add("Content-Length", "0");
     }
 
-    private void addHeader(String key, String value) {
-        headers.add(key, value);
+    public boolean has5xxCode() {
+        return startLine.has5xxCode();
     }
 
     @Override
@@ -46,7 +56,7 @@ public class HttpResponse {
                 startLine.toString(),
                 headers.toString(),
                 "",
-                body
+                body.toString()
         );
     }
 }

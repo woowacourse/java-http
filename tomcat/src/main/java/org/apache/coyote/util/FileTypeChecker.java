@@ -17,4 +17,8 @@ public class FileTypeChecker {
         }
         return true;
     }
+
+    public static boolean isHtml(String contentType) {
+        return contentType.equals("text/html");
+    }
 }

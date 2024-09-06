@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.handler;
 
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;

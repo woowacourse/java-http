@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.handler;
 
 import java.io.IOException;
 import java.util.HashMap;

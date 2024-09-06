@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.FrontController;
+import com.techcourse.handler.FrontController;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.response.HttpResponse;

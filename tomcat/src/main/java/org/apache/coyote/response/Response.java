@@ -4,14 +4,44 @@ public class Response {
 
     private final ResponseLine responseLine;
 
-    private final ResponseHeaders headers;
+    private final ResponseHeaders responseHeaders;
 
-    private final ResponseBody body;
+    private final ResponseBody responseBody;
 
-    public Response(ResponseLine responseLine, ResponseHeaders headers, ResponseBody body) {
+    private String viewName;
+
+    private Response(ResponseLine responseLine, ResponseHeaders responseHeaders, ResponseBody responseBody) {
         this.responseLine = responseLine;
-        this.headers = headers;
-        this.body = body;
+        this.responseHeaders = responseHeaders;
+        this.responseBody = responseBody;
+    }
+
+    public static Response create() {
+        ResponseLine responseLine = ResponseLine.create();
+        ResponseHeaders responseHeaders = ResponseHeaders.create();
+        ResponseBody responseBody = ResponseBody.create();
+        return new Response(responseLine, responseHeaders, responseBody);
+    }
+
+    public void configureViewAndStatus(String viewName, StatusCode statusCode) {
+        if (StatusCode.FOUND.equals(statusCode)) {
+            responseHeaders.location(viewName);
+        }
+        this.viewName = viewName;
+        responseLine.setStatusCode(statusCode);
+    }
+
+    public void contentType(MimeType mimeType) {
+        responseHeaders.contentType(mimeType.getType());
+    }
+
+    public void setBody(String body) {
+        responseBody.setBody(body);
+        responseHeaders.contentLength(responseBody.length());
+    }
+
+    public String getViewName() {
+        return viewName;
     }
 
     public byte[] getBytes() {
@@ -21,8 +51,8 @@ public class Response {
     private String build() {
         StringBuilder builder = new StringBuilder();
         responseLine.assemble(builder);
-        headers.assemble(builder);
-        body.assemble(builder);
+        responseHeaders.assemble(builder);
+        responseBody.assemble(builder);
         return builder.toString();
     }
 }

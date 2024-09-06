@@ -3,10 +3,10 @@ package com.techcourse.presentation;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.request.Request;
+import org.apache.coyote.response.Response;
 import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import servlet.ResponseAndView;
 
 public class LoginController {
 
@@ -24,28 +24,28 @@ public class LoginController {
         return INSTANCE;
     }
 
-    public ResponseAndView getLogin(Request request) {
+    public void getLogin(Request request, Response response) {
         if (request.existQueryParams()) {
             String account = request.getQueryParamValue("account");
             String password = request.getQueryParamValue("password");
-            return postLogin(account, password);
+            postLogin(account, password, response);
         }
-        return new ResponseAndView("/login", StatusCode.OK);
+        response.configureViewAndStatus("/login", StatusCode.OK);
     }
 
-    public ResponseAndView postLogin(Request request) {
+    public void postLogin(Request request, Response response) {
         String account = request.getBodyValue("account");
         String password = request.getBodyValue("password");
-        return postLogin(account, password);
+        postLogin(account, password, response);
     }
 
-    private ResponseAndView postLogin(String account, String password) {
+    private void postLogin(String account, String password, Response response) {
         try {
             User user = getUser(account, password);
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
-            return new ResponseAndView("/index", StatusCode.FOUND);
+            response.configureViewAndStatus("/index", StatusCode.FOUND);
         } catch (IllegalArgumentException e) {
-            return new ResponseAndView("/401", StatusCode.UNAUTHORIZED);
+            response.configureViewAndStatus("/401", StatusCode.UNAUTHORIZED);
         }
     }
 

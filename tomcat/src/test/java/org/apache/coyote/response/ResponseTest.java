@@ -9,12 +9,11 @@ class ResponseTest {
     @Test
     void Response의_bytes를_반환한다() {
         // given
-        ResponseLine responseLine = new ResponseLine(StatusCode.OK);
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        responseHeaders.contentType("text/html");
-        responseHeaders.contentLength(1024);
-        ResponseBody responseBody = new ResponseBody("Hello, World!");
-        Response response = new Response(responseLine, responseHeaders, responseBody);
+        Response response = Response.create();
+        response.configureViewAndStatus("index.html", StatusCode.OK);
+        response.contentType(MimeType.HTML);
+        response.setBody("Hello, World!");
+
 
         // when
         byte[] bytes = response.getBytes();
@@ -23,7 +22,7 @@ class ResponseTest {
         String expected = """
                 HTTP/1.1 200 OK \r
                 Content-Type: text/html;charset=utf-8 \r
-                Content-Length: 1024 \r
+                Content-Length: 13 \r
                 \r
                 Hello, World!""";
         assertThat(bytes).isEqualTo(expected.getBytes());

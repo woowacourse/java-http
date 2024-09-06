@@ -1,10 +1,10 @@
 package servlet.handler;
 
 import org.apache.coyote.request.Request;
-import servlet.ResponseAndView;
+import org.apache.coyote.response.Response;
 
 @FunctionalInterface
 public interface Handler {
 
-    ResponseAndView handlerRequest(Request request);
+    void handleRequest(Request request, Response response);
 }

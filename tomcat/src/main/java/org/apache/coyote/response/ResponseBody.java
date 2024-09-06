@@ -2,13 +2,23 @@ package org.apache.coyote.response;
 
 public class ResponseBody implements Assemblable {
 
-    private final String body;
+    private static final String EMPTY_BODY = "";
 
-    public ResponseBody(String body) {
+    private String body;
+
+    private ResponseBody(String body) {
         this.body = body;
     }
 
-    public int length() {
+    protected static ResponseBody create() {
+        return new ResponseBody(EMPTY_BODY);
+    }
+
+    protected void setBody(String body) {
+        this.body = body;
+    }
+
+    protected int length() {
         return body.getBytes().length;
     }
 

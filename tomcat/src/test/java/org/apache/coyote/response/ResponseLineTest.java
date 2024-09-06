@@ -9,7 +9,8 @@ class ResponseLineTest {
     @Test
     void ResponseLine을_조립한다() {
         // given
-        ResponseLine responseLine = new ResponseLine(StatusCode.OK);
+        ResponseLine responseLine = ResponseLine.create();
+        responseLine.setStatusCode(StatusCode.OK);
 
         // when
         StringBuilder builder = new StringBuilder();

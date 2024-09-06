@@ -8,19 +8,23 @@ public class ResponseHeaders implements Assemblable {
 
     private final Map<String, String> headers;
 
-    public ResponseHeaders() {
-        this.headers = new LinkedHashMap<>();
+    private ResponseHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
-    public void contentType(String contentType) {
+    protected static ResponseHeaders create() {
+        return new ResponseHeaders(new LinkedHashMap<>());
+    }
+
+    protected void contentType(String contentType) {
         headers.put("Content-Type", "%s;charset=utf-8".formatted(contentType));
     }
 
-    public void contentLength(int contentLength) {
+    protected void contentLength(int contentLength) {
         headers.put("Content-Length", String.valueOf(contentLength));
     }
 
-    public void location(String location) {
+    protected void location(String location) {
         headers.put("Location", location);
     }
 

@@ -12,9 +12,6 @@ import org.apache.coyote.request.HttpMethod;
 import org.apache.coyote.request.Request;
 import org.apache.coyote.response.MimeType;
 import org.apache.coyote.response.Response;
-import org.apache.coyote.response.ResponseBody;
-import org.apache.coyote.response.ResponseHeaders;
-import org.apache.coyote.response.ResponseLine;
 import org.apache.coyote.response.StatusCode;
 import servlet.handler.Handler;
 import servlet.resolver.ViewResolver;
@@ -37,20 +34,17 @@ public class HttpServlet {
         this.viewResolver = new ViewResolver();
     }
 
-    public Response service(Request request) throws IOException { // todo httpRequest, httpResponse
+    public void service(Request request, Response response) throws IOException {
         Handler handler = getHandler(request);
-        ResponseAndView responseAndView = handler.handlerRequest(request);
-
-        File view = viewResolver.resolveViewName(responseAndView.getViewName());
-        ResponseLine responseLine = new ResponseLine(responseAndView.getStatusCode()); // todo render
-        ResponseHeaders headers = new ResponseHeaders();
-        ResponseBody body = new ResponseBody(Files.readString(view.toPath(), StandardCharsets.UTF_8));
-        headers.contentType(MimeType.from(view.getName()).getType());
-        headers.contentLength(body.length());
-        if (responseAndView.getStatusCode().equals(StatusCode.FOUND)) {
-            headers.location(view.getName());
+        handler.handleRequest(request, response);
+        File view = viewResolver.resolveViewName(response.getViewName());
+        if (view == null) {
+            response.configureViewAndStatus("/404", StatusCode.NOT_FOUND);
+            view = viewResolver.resolveViewName(response.getViewName());
         }
-        return new Response(responseLine, headers, body);
+        MimeType mimeType = MimeType.from(view.getName());
+        response.contentType(mimeType);
+        response.setBody(Files.readString(view.toPath(), StandardCharsets.UTF_8));
     }
 
     private Handler getHandler(Request request) {

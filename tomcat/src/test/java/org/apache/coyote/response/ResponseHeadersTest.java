@@ -9,7 +9,7 @@ class ResponseHeadersTest {
     @Test
     void ResponseHeaders를_조립한다() {
         // given
-        ResponseHeaders responseHeaders = new ResponseHeaders();
+        ResponseHeaders responseHeaders = ResponseHeaders.create();
         responseHeaders.contentType("text/html");
         responseHeaders.contentLength(1024);
 

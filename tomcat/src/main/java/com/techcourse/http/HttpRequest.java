@@ -25,7 +25,15 @@ public class HttpRequest {
         return parameters.get(key);
     }
 
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+
     public void setParameter(String key, String value) {
         parameters.put(key, value);
+    }
+
+    public void setHeader(String key, String value) {
+        headers.put(key, value);
     }
 }

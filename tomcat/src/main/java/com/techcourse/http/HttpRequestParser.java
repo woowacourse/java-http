@@ -54,20 +54,24 @@ public class HttpRequestParser {
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
             String[] headerParts = line.split(": ");
-            request.getHeaders().put(headerParts[0], headerParts[1]);
+            request.setHeader(headerParts[0], headerParts[1]);
         }
     }
 
     private static void parseBody(BufferedReader reader, HttpRequest request) throws IOException {
-        StringBuilder body = new StringBuilder();
-        String line;
-        while (reader.ready()) {
-            line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-            body.append(line).append("\n");
+        String contentLengthHeader = request.getHeader("Content-Length");
+        if (contentLengthHeader == null) {
+            return;
         }
-        request.setBody(body.toString().trim());
+
+        int contentLength = Integer.parseInt(contentLengthHeader);
+        char[] bodyChars = new char[contentLength];
+        int readChars = reader.read(bodyChars, 0, contentLength);
+
+        if (readChars != contentLength) {
+            throw new IOException("Failed to read the entire request body");
+        }
+
+        request.setBody(new String(bodyChars));
     }
 }

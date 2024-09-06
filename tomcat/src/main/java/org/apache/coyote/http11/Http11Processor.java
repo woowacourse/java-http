@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.apache.coyote.Processor;
@@ -59,6 +61,12 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/login") && method.equals("GET")) {
                 return login(request).build();
             }
+            if (path.equals("/register") && method.equals("GET")) {
+                return getStaticResourceResponse("/register.html").build();
+            }
+            if (path.equals("/register") && method.equals("POST")) {
+                return register(request).build();
+            }
             return getStaticResourceResponse(request.getPath()).build();
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
@@ -78,6 +86,23 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         log.info("user : {}", user.get());
+
+        return HttpResponse.found("/index.html");
+    }
+
+    private HttpResponse register(HttpRequest request) {
+        Map<String, String> parameters = new HashMap<>();
+        String body = request.getBody();
+        for (String data : body.split("&")) {
+            String[] keyValue = data.split("=");
+            parameters.put(keyValue[0], keyValue[1]);
+        }
+
+        InMemoryUserRepository.save(new User(
+                parameters.get("account"),
+                parameters.get("password"),
+                parameters.get("email")
+        ));
 
         return HttpResponse.found("/index.html");
     }

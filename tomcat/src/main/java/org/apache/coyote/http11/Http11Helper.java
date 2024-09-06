@@ -44,7 +44,7 @@ public class Http11Helper {
         String responseBody = getResponseBody(fileName);
         MimeType mimeType = MimeType.getMimeType(fileName);
         return String.join("\r\n",
-                "HTTP/1.1 " + status.getValue() + " ",
+                "HTTP/1.1 " + status.getMessage() + " ",
                 "Content-Type: " + mimeType.getType() + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

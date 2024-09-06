@@ -6,7 +6,7 @@ public class Version {
 
     private static final Pattern VERSION_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]+)*$");
 
-    private String version;
+    private final String version;
 
     public Version(String version) {
         validateVersion(version);

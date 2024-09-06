@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
@@ -77,7 +78,9 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponseHeader.put("Status", "302 Found");
                 httpResponseHeader.put("Location", "/index.html");
                 if (requestUrl.equals("/login")) {
-                    if (!isCorrectUser(httpRequestBody)) {
+                    if (isCorrectUser(httpRequestBody)) {
+                        processCookie(httpRequestHeader, httpResponseHeader);
+                    } else if (!isCorrectUser(httpRequestBody)) {
                         httpResponseHeader.put("Location", "/401.html");
                     }
                 } else if (requestUrl.equals("/register")) {
@@ -92,6 +95,21 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void processCookie(Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        if (httpRequestHeader.containsKey("Cookie")) {
+            HttpCookie httpCookie = new HttpCookie(httpRequestHeader.get("Cookie"));
+            if (httpCookie.isSessionIdNotExist()) {
+                addNewSessionId(httpResponseHeader);
+            }
+        } else if (!httpRequestHeader.containsKey("Cookie")) {
+            addNewSessionId(httpResponseHeader);
+        }
+    }
+
+    private void addNewSessionId(Map<String, String> httpResponseHeader) {
+        httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
     }
 
     private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {

@@ -33,14 +33,11 @@ public class HttpRequestLine {
         }
     }
 
-    public void processRequestParams() {
-        requestUri.processQueryParams(httpMethod);
-    }
-
-    public HttpResponse getHttpResponse() throws IOException {
-        if (httpMethod.isGet()) {
-            return requestUri.getHttpResponse();
+    public HttpResponse<String> getHttpResponse() throws IOException {
+        if (!httpMethod.isGet()) {
+            throw new UncheckedHttpException(new UnsupportedOperationException("지원하지 않는 기능입니다."));
         }
-        throw new UncheckedHttpException(new UnsupportedOperationException("지원하지 않는 기능입니다."));
+        HttpResponse<?> httpResponse = requestUri.processQueryParams(httpMethod);
+        return requestUri.getHttpResponse(httpResponse);
     }
 }

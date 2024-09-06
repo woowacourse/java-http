@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -137,33 +136,5 @@ class Http11ProcessorTest {
                 "\r\n" +
                 responseBody;
         assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("로그인 처리시 쿼리 파리미터를 이용하여 유저 정보를 실패하면 실패 로그가 기록된다.")
-    @Test
-    void processWithoutExtensionInvalidQueryString() {
-        //given
-        String expectedLog = "java.lang.IllegalArgumentException";
-        String path = "/login";
-        String queryParams = "?account=gugu&password=passwor";
-        String httpRequest = String.join("\r\n",
-                "GET " + path + queryParams + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        StubSocket socket = new StubSocket(httpRequest);
-        Http11Processor processor = new Http11Processor(socket);
-
-        //when
-        processor.process(socket);
-
-        //then
-        List<ILoggingEvent> testLogs = listAppender.list;
-        List<String> messages = testLogs.stream()
-                .map(ILoggingEvent::getFormattedMessage)
-                .toList();
-        assertThat(messages).isNotEmpty().anyMatch(message -> message.contains(expectedLog));
     }
 }

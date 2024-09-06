@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import org.apache.coyote.exception.UncheckedHttpException;
 
 public enum MediaType {
 
@@ -22,7 +23,9 @@ public enum MediaType {
         return Arrays.stream(values())
                 .filter(value -> value.extension.equals(extension))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(
+                        () -> new UncheckedHttpException(new IllegalArgumentException("처리할 확장자가 없습니다. 값: " + extension))
+                );
     }
 
     public String getExtension() {

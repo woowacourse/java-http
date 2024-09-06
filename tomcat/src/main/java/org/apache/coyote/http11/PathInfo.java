@@ -24,13 +24,17 @@ public class PathInfo {
         return ControllerMapping.of(method, filePath);
     }
 
-    public HttpResponse getHttpResponse() throws IOException {
+    public HttpResponse<String> getHttpResponse(HttpResponse<?> response) throws IOException {
         URL resource = CLASS_LOADER.getResource(STATIC_FOLDER_NAME + filePath + mediaType.getExtension());
         if (resource == null) {
             throw new UncheckedHttpException(new IllegalArgumentException("잘못된 경로입니다."));
         }
         File file = new File(resource.getFile());
         String responseBody = new String(Files.readAllBytes(file.toPath()));
-        return new HttpResponse(responseBody, mediaType);
+        HttpResponse<String> httpResponse = response.getFileResponse(responseBody);
+        int contentLength = httpResponse.getBody().getBytes().length;
+        httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, mediaType.getValue());
+        httpResponse.addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
+        return httpResponse;
     }
 }

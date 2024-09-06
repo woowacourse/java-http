@@ -2,21 +2,31 @@ package org.apache.coyote.http11;
 
 public class StatusLine {
 
+    private static final String STATUS_LINE_DELIMITER = " ";
+
     private final String httpVersion;
-    private final int statusCode;
-    private final String statusMessage;
+    private final HttpStatus httpStatus;
 
     public StatusLine() {
-        this("HTTP/1.1", 200, "OK");
+        this("HTTP/1.1", HttpStatus.OK);
     }
 
-    private StatusLine(String httpVersion, int statusCode, String statusMessage) {
+    public StatusLine(HttpStatus httpStatus) {
+        this("HTTP/1.1", httpStatus);
+    }
+
+    private StatusLine(String httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+        this.httpStatus = httpStatus;
     }
 
     public String getStatusLineMessage() {
-        return String.join(" ", httpVersion, String.valueOf(statusCode), statusMessage, "");
+        return String.join(
+                STATUS_LINE_DELIMITER,
+                httpVersion,
+                String.valueOf(httpStatus.getCode()),
+                httpStatus.getValue(),
+                ""
+        );
     }
 }

@@ -4,7 +4,8 @@ public enum HttpHeaders {
 
     HOST("Host"),
     CONTENT_TYPE("Content-Type"),
-    CONTENT_LENGTH("Content-Length");
+    CONTENT_LENGTH("Content-Length"),
+    LOCATION("Location");
 
     private final String header;
 

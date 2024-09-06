@@ -30,13 +30,14 @@ class PathInfoTest {
     void getHttpResponse() throws IOException {
         //given
         PathInfo pathInfo = new PathInfo("/index", MediaType.HTML);
+        HttpResponse<Object> response = new HttpResponse<>(new StatusLine(), null);
 
         //when
-        HttpResponse httpResponse = pathInfo.getHttpResponse();
+        HttpResponse<String> httpResponse = pathInfo.getHttpResponse(response);
 
         //then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        assertThat(httpResponse.getResponseBody().getBytes()).isNotEmpty().isEqualTo(bytes);
+        assertThat(httpResponse.getBody().getBytes()).isNotEmpty().isEqualTo(bytes);
     }
 }

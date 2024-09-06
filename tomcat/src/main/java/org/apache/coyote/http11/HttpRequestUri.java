@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.controller.ControllerMapping;
-import com.techcourse.controller.dto.Response;
+import com.techcourse.controller.dto.HttpResponseEntity;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -24,16 +24,17 @@ public class HttpRequestUri {
         this.queryParams = queryParams;
     }
 
-    public void processQueryParams(HttpMethod method) {
+    public HttpResponse<?> processQueryParams(HttpMethod method) {
         if (queryParams.isEmpty()) {
-            return;
+            return new HttpResponseEntity<>().convertResponse();
         }
         ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
-        Response<?> response = controllerMapping.apply(queryParams);
-        log.info("user : {}", response.response());
+        HttpResponseEntity<?> response = controllerMapping.apply(queryParams);
+        log.info("user : {}", response.body());
+        return response.convertResponse();
     }
 
-    public HttpResponse getHttpResponse() throws IOException {
-        return pathInfo.getHttpResponse();
+    public HttpResponse<String> getHttpResponse(HttpResponse<?> response) throws IOException {
+        return pathInfo.getHttpResponse(response);
     }
 }

@@ -4,54 +4,55 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class HttpResponse {
+public class HttpResponse<T> {
 
-    private static final Map<HttpHeaders, String> DEFAULT_HTTP_HEADERS = new EnumMap<>(HttpHeaders.class);
     private static final String CRLF = "\r\n";
     private static final String HEADER_DELIMITER = ": ";
     private static final String SPACE = " ";
 
     private final StatusLine statusLine;
-    private final String responseBody;
-    private final Map<HttpHeaders, String> headers;
+    private final T body;
+    private final Map<HttpHeaders, String> headers = new EnumMap<>(HttpHeaders.class);
 
-    public HttpResponse(String responseBody, MediaType mediaType) {
-        this(new StatusLine(), responseBody, DEFAULT_HTTP_HEADERS);
-        addHeader(HttpHeaders.CONTENT_TYPE, mediaType.getValue());
-        addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+    public HttpResponse(HttpStatus httpStatus, T body, Map<HttpHeaders, String> headers) {
+        this(new StatusLine(httpStatus), body);
+        headers.forEach(this::addHeader);
     }
 
-    public HttpResponse(StatusLine statusLine, String responseBody, Map<HttpHeaders, String> headers) {
+    public HttpResponse(StatusLine statusLine, T body, Map<HttpHeaders, String> headers) {
+        this(statusLine, body);
+        headers.forEach(this::addHeader);
+    }
+
+    public HttpResponse(StatusLine statusLine, T body) {
         this.statusLine = statusLine;
-        this.responseBody = responseBody;
-        this.headers = headers;
+        this.body = body;
     }
 
     public void addHeader(HttpHeaders header, String value) {
         headers.put(header, value);
     }
 
-    public byte[] convertToBytes() {
+    public HttpResponse<String> getFileResponse(String body) {
+        return new HttpResponse<>(statusLine, body, headers);
+    }
+
+    public String convertToMessage() {
         StringBuilder stringBuilder = new StringBuilder();
-        String headerMessages = headers.entrySet().stream()
-                .map(this::formatHeaderEntry)
+        String headerMessages = headers.entrySet().stream().map(this::formatHeaderEntry)
                 .collect(Collectors.joining(CRLF));
 
-        stringBuilder.append(statusLine.getStatusLineMessage())
-                .append(CRLF)
-                .append(headerMessages)
-                .append(CRLF)
-                .append(CRLF)
-                .append(responseBody);
+        stringBuilder.append(statusLine.getStatusLineMessage()).append(CRLF).append(headerMessages).append(CRLF)
+                .append(CRLF).append(body);
 
-        return stringBuilder.toString().getBytes();
+        return stringBuilder.toString();
     }
 
     private String formatHeaderEntry(Map.Entry<HttpHeaders, String> entry) {
         return entry.getKey().getHeader() + HEADER_DELIMITER + entry.getValue() + SPACE;
     }
 
-    public String getResponseBody() {
-        return responseBody;
+    public T getBody() {
+        return body;
     }
 }

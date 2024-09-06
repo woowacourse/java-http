@@ -1,12 +1,14 @@
 package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.controller.dto.Response;
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.controller.dto.HttpResponseEntity;
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,31 +18,41 @@ class UserControllerTest {
     @Test
     void searchUserData() {
         //given
-        String target = "account";
-        Map<String, String> params = Map.of(target, "gugu", "password", "password");
+        String target = "gugu";
+        Map<String, String> params = Map.of("account", target, "password", "password");
+        User user = InMemoryUserRepository.findByAccount(target)
+                .orElseThrow();
         UserController userController = new UserController();
 
         //when
-        Response<User> result = userController.searchUserData(params);
+        HttpResponseEntity<User> result = userController.searchUserData(params);
 
         //then
-        assertThat(result.response().getAccount()).isEqualTo(params.get(target));
+        assertAll(
+                () -> assertThat(result.body()).isEqualTo(user),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/index.html")
+        );
     }
 
-    @DisplayName("유효하지 않는 account로 조회하면 예외가 발생한다.")
+    @DisplayName("유효하지 않는 account로 조회하면 401.html로 리다이렉트 한다.")
     @Test
     void searchUserDataInvalidAccount() {
         //given
         Map<String, String> params = Map.of("account", "daon", "password", "password");
         UserController userController = new UserController();
 
-        //when //then
-        assertThatThrownBy(() -> userController.searchUserData(params))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessageContaining("일치하는 계정이 존재하지 않습니다.");
+        //when
+        HttpResponseEntity<User> result = userController.searchUserData(params);
+
+        //then
+        assertAll(
+                () -> assertThat(result.body()).isNull(),
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
+        );
     }
 
-    @DisplayName("유효하지 않는 비밀번호로 조회하면 예외가 발생한다.")
+    @DisplayName("유효하지 않는 비밀번호로 조회하면 401.html로 리다이렉트 한다.")
     @Test
     void searchUserDataInvalidPassword() {
         //given
@@ -48,9 +60,14 @@ class UserControllerTest {
         Map<String, String> params = Map.of("account", "gugu", "password", target);
         UserController userController = new UserController();
 
-        //when //then
-        assertThatThrownBy(() -> userController.searchUserData(params))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessageContaining("비밀번호가 일치하지 않습니다.");
+        //when
+        HttpResponseEntity<User> result = userController.searchUserData(params);
+
+        //then
+        assertAll(
+                () -> assertThat(result.body()).isNull(),
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
+        );
     }
 }

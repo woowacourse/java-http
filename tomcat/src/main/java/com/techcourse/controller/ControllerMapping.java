@@ -1,6 +1,6 @@
 package com.techcourse.controller;
 
-import com.techcourse.controller.dto.Response;
+import com.techcourse.controller.dto.HttpResponseEntity;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.Map;
@@ -13,9 +13,10 @@ public enum ControllerMapping {
 
     private final HttpMethod httpMethod;
     private final String path;
-    private final Function<Map<String, String>, Response<?>> handler;
+    private final Function<Map<String, String>, HttpResponseEntity<?>> handler;
 
-    ControllerMapping(HttpMethod httpMethod, String path, Function<Map<String, String>, Response<?>> handler) {
+    ControllerMapping(HttpMethod httpMethod, String path,
+                      Function<Map<String, String>, HttpResponseEntity<?>> handler) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.handler = handler;
@@ -30,7 +31,7 @@ public enum ControllerMapping {
                 );
     }
 
-    public Response<?> apply(Map<String, String> params) {
+    public HttpResponseEntity<?> apply(Map<String, String> params) {
         return handler.apply(params);
     }
 }

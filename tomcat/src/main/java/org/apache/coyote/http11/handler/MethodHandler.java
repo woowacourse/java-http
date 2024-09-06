@@ -16,23 +16,43 @@ import com.techcourse.model.User;
 public class MethodHandler implements RequestHandler {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Override
-    public String handle(Request request) throws IOException {
-        String[] targetToken = request.getTarget().split("\\?");
-        Map<String, String> queryParams = new HashMap<>();
-        String[] queryParamTokens = targetToken[1].split("&");
-        for (String queryParam : queryParamTokens) {
-            String[] split = queryParam.split("=");
-            queryParams.put(split[0], split[1]);
+    private static class MethodRequest {
+        private final String endPoint;
+        private final Map<String, String> queryParams;
+
+        private MethodRequest(String url) {
+            String[] targetToken = url.split("\\?");
+            this.endPoint = targetToken[0];
+
+            Map<String,String> queryParams = new HashMap<>();
+            String[] queryParamTokens = targetToken[1].split("&");
+            for (String queryParam : queryParamTokens) {
+                String[] split = queryParam.split("=");
+                queryParams.put(split[0], split[1]);
+            }
+            this.queryParams = Map.copyOf(queryParams);
         }
-        return Response.writeResponse(request, "application/json", handleMethod(targetToken[0], queryParams));
+
+        public String getParam(String key) {
+            return queryParams.get(key);
+        }
+
+        public String getEndPoint() {
+            return this.endPoint;
+        }
     }
 
-    private String handleMethod(String endPoint, Map<String, String> queryParams) throws JsonProcessingException {
-        if (!endPoint.equals("/login")) {
+    @Override
+    public String handle(Request request) throws IOException {
+        MethodRequest methodRequest = new MethodRequest(request.getTarget());
+        return Response.writeResponse(request, "application/json", handleMethod(methodRequest));
+    }
+
+    private String handleMethod(MethodRequest methodRequest) throws JsonProcessingException {
+        if (!methodRequest.getEndPoint().equals("/login")) {
             return null;
         }
-        String account = queryParams.get("account");
+        String account = methodRequest.getParam("account");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException(account + " 이름의 유저가 없습니다."));
         return objectMapper.writeValueAsString(user);

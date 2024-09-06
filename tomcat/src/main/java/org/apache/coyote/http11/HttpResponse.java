@@ -17,11 +17,11 @@ public class HttpResponse {
     }
 
     public String toHttpResponse() {
-        String responseLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
+        String statusLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
 
         if (body == null) {
-            return String.join("\r\n", responseLine, httpHeader.toHttpHeader(), "");
+            return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "");
         }
-        return String.join("\r\n", responseLine, httpHeader.toHttpHeader(), "", body);
+        return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "", body);
     }
 }

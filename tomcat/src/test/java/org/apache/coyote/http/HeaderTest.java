@@ -16,7 +16,7 @@ class HeaderTest {
             "");
 
     @Test
-    @DisplayName("")
+    @DisplayName("하나의 String 으로 들어온 헤더를 파싱하여 저장한다.")
     void ofString() {
         Header header = Header.of(bulkHeaders);
 
@@ -24,7 +24,7 @@ class HeaderTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("List<String> 형식으로 들어온 헤더를 파싱하여 저장한다.")
     void ofList() {
         List<String> headers = List.of(bulkHeaders.split("\r\n"));
 

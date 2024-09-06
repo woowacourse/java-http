@@ -33,33 +33,17 @@ public class Dispatcher {
     public String dispatch(HttpRequest request) {
         Path path = request.getRequestLine().getPath();
 
-        if (path.getUri().equals("/")) {
-            return HttpResponse.basicResponse().toResponse();
-        }
-
-        if (path.getUri().equals("/login")) {
-            return getLoginResponse(request);
-        }
-
-        if (path.getUri().equals("/register")) {
-            return getRegisterResponse(request);
-        }
-
-        return gerResourceResponse(path);
-    }
-
-    private String gerResourceResponse(Path path) {
-        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()));
         try {
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            StatusLine statusLine = new StatusLine(HttpStatus.OK);
-            ResponseHeader header = new ResponseHeader();
-            header.setContentType(MimeType.getContentTypeFromExtension(path.getUri()));
-            header.setContentLength(responseBody.getBytes().length);
-
-            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-            return response.toResponse();
+            if (path.getUri().equals("/")) {
+                return HttpResponse.basicResponse().toResponse();
+            }
+            if (path.getUri().equals("/login")) {
+                return getLoginResponse(request);
+            }
+            if (path.getUri().equals("/register")) {
+                return getRegisterResponse(request);
+            }
+            return gerResourceResponse(path);
         } catch (NullPointerException | IllegalArgumentException e) {
             return HttpResponse.notFoundResponses().toResponse();
         } catch (IOException e) {
@@ -67,40 +51,47 @@ public class Dispatcher {
         }
     }
 
-    private String getLoginResponse(HttpRequest request) {
+    private String gerResourceResponse(Path path) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()));
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        StatusLine statusLine = new StatusLine(HttpStatus.OK);
+        ResponseHeader header = new ResponseHeader();
+        header.setContentType(MimeType.getContentTypeFromExtension(path.getUri()));
+        header.setContentLength(responseBody.getBytes().length);
+
+        HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+        return response.toResponse();
+    }
+
+    private String getLoginResponse(HttpRequest request) throws IOException {
         HttpMethod method = request.getRequestLine().getMethod();
         Path path = request.getRequestLine().getPath();
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()).concat(MimeType.HTML.getExtension()));
-        try {
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            ResponseHeader header = new ResponseHeader();
-            header.setContentType(MimeType.HTML.getContentType());
-            header.setContentLength(responseBody.getBytes().length);
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        ResponseHeader header = new ResponseHeader();
+        header.setContentType(MimeType.HTML.getContentType());
+        header.setContentLength(responseBody.getBytes().length);
 
-            if (request.getHeaders().hasHeader("Cookie") && request.getHeaders().getCookie().hasCookieName("JSESSIONID")) {
-                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
-                header.setLocation(REDIRECT);
-                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-                return response.toResponse();
-            }
+        if (request.getHeaders().getCookie().hasCookieName("JSESSIONID")) {
+            StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+            header.setLocation(REDIRECT);
+            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+            return response.toResponse();
+        }
 
-            if (method.equals(HttpMethod.GET)) {
-                StatusLine statusLine = new StatusLine(HttpStatus.OK);
-                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-                return response.toResponse();
-            }
+        if (method.equals(HttpMethod.GET)) {
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+            return response.toResponse();
+        }
 
-            if (method.equals(HttpMethod.POST)) {
-                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
-                Map<String, String> parsedBody = StringUtils.separate(request.getBody());
-                return InMemoryUserRepository.findByAccount(parsedBody.get("account"))
-                        .map(user -> getLoginResult(user, parsedBody, header, statusLine))
-                        .orElse(new HttpResponse(new StatusLine(HttpStatus.OK), header, responseBody).toResponse());
-            }
-        } catch (NullPointerException | IllegalArgumentException e) {
-            return HttpResponse.notFoundResponses().toResponse();
-        } catch (IOException e) {
-            return HttpResponse.serverErrorResponses().toResponse();
+        if (method.equals(HttpMethod.POST)) {
+            StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+            Map<String, String> parsedBody = StringUtils.separate(request.getBody());
+            return InMemoryUserRepository.findByAccount(parsedBody.get("account"))
+                    .map(user -> getLoginResult(user, parsedBody, header, statusLine))
+                    .orElse(new HttpResponse(new StatusLine(HttpStatus.OK), header, responseBody).toResponse());
         }
         return HttpResponse.notFoundResponses().toResponse();
     }
@@ -124,34 +115,28 @@ public class Dispatcher {
         return response.toResponse();
     }
 
-    private String getRegisterResponse(HttpRequest request) {
+    private String getRegisterResponse(HttpRequest request) throws IOException {
         HttpMethod method = request.getRequestLine().getMethod();
         Path path = request.getRequestLine().getPath();
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()).concat(MimeType.HTML.getExtension()));
-        try {
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            ResponseHeader header = new ResponseHeader();
-            header.setContentType(MimeType.HTML.getContentType());
-            header.setContentLength(responseBody.getBytes().length);
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        ResponseHeader header = new ResponseHeader();
+        header.setContentType(MimeType.HTML.getContentType());
+        header.setContentLength(responseBody.getBytes().length);
 
-            if (method.equals(HttpMethod.GET)) {
-                StatusLine statusLine = new StatusLine(HttpStatus.OK);
-                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-                return response.toResponse();
-            }
+        if (method.equals(HttpMethod.GET)) {
+            StatusLine statusLine = new StatusLine(HttpStatus.OK);
+            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+            return response.toResponse();
+        }
 
-            if (method.equals(HttpMethod.POST)) {
-                Map<String, String> parsedBody = StringUtils.separate(request.getBody());
-                InMemoryUserRepository.save(new User(parsedBody.get("account"), parsedBody.get("password"), parsedBody.get("email")));
-                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
-                header.setLocation(REDIRECT);
-                HttpResponse response = new HttpResponse(statusLine, header, null);
-                return response.toResponse();
-            }
-        } catch (NullPointerException | IllegalArgumentException e) {
-            return HttpResponse.notFoundResponses().toResponse();
-        } catch (IOException e) {
-            return HttpResponse.serverErrorResponses().toResponse();
+        if (method.equals(HttpMethod.POST)) {
+            Map<String, String> parsedBody = StringUtils.separate(request.getBody());
+            InMemoryUserRepository.save(new User(parsedBody.get("account"), parsedBody.get("password"), parsedBody.get("email")));
+            StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+            header.setLocation(REDIRECT);
+            HttpResponse response = new HttpResponse(statusLine, header, null);
+            return response.toResponse();
         }
         return HttpResponse.notFoundResponses().toResponse();
     }

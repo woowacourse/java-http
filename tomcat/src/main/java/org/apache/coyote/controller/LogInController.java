@@ -25,10 +25,11 @@ public class LogInController extends Controller {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             log.info("optionalUser : {}", user);
-            SessionManager.add(new Session(user));
+            String sessionId = SessionManager.add(new Session(user));
             return new HttpResponse(
                     new HttpResponseStatusLine(302, "Found"),
-                    Map.of("Location", "/index.html"),
+                    Map.of("Location", "/index.html",
+                            "Set-Cookie", "JSESSIONID=" + sessionId),
                     null
             );
         }

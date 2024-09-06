@@ -23,11 +23,12 @@ public class RegisterController extends Controller {
 
         User user = InMemoryUserRepository.save(new User(account, password, email));
         log.info("Register success: { account: {}, email: {}, password:{}}", account, email, password);
-        SessionManager.add(new Session(user));
+        String sessionId = SessionManager.add(new Session(user));
 
         return new HttpResponse(
                 new HttpResponseStatusLine(302, "Found"),
-                Map.of("Location", "/index.html"),
+                Map.of("Location", "/index.html",
+                        "Set-Cookie", "JSESSIONID=" + sessionId),
                 null
         );
     }

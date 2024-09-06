@@ -6,8 +6,10 @@ import org.apache.coyote.AbstractController;
 import org.apache.coyote.exception.UnauthorizedException;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
-import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.util.HttpResponseBuilder;
 
 public final class MemberController extends AbstractController {
@@ -42,11 +44,23 @@ public final class MemberController extends AbstractController {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UnauthorizedException::new);
         if (user.checkPassword(password)) {
-            setStatusCodeFound(httpResponse, "/index.html");
+            HttpResponseBuilder.setRedirection(httpResponse, "/");
+            registerLoginSession(request, httpResponse, user);
             return;
         }
-        setStatusCodeFound(httpResponse, "/401.html");
+        HttpResponseBuilder.setRedirection(httpResponse, "/401.html");
+    }
 
+    private void registerLoginSession(HttpRequest request, HttpResponse httpResponse, User user) {
+        Cookies requestCookies = request.getCookies();
+        if (!requestCookies.hasJSESSIONID() || SessionManager.isRegisitered(requestCookies.getJSESSIONID())) {
+            Session loginSession = new Session();
+            loginSession.setAttribute("user", user);
+            SessionManager.add(loginSession);
+            Cookies cookies = new Cookies();
+            cookies.setCookie("JSESSIONID", loginSession.getId());
+            httpResponse.setCookies(cookies);
+        }
     }
 
     private void register(HttpRequest request, HttpResponse httpResponse) {
@@ -56,14 +70,6 @@ public final class MemberController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        setStatusCodeFound(httpResponse, "/index.html");
-
-    }
-
-    private void setStatusCodeFound(HttpResponse httpResponse, String headerValue) {
-        httpResponse.setStatusCode(HttpStatus.FOUND.statusCode());
-        httpResponse.setStatusMessage(HttpStatus.FOUND.statusMessage());
-        httpResponse.addHeaders("Location", headerValue);
-        HttpResponseBuilder.buildDefault(httpResponse);
+        HttpResponseBuilder.setRedirection(httpResponse, "/");
     }
 }

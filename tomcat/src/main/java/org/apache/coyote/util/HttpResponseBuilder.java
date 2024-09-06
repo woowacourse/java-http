@@ -26,12 +26,6 @@ public class HttpResponseBuilder {
         throw new IllegalStateException("Utility class");
     }
 
-    public static void buildDefault(final HttpResponse httpResponse) {
-        httpResponse.setProtocol(HTTP_VERSION_PROTOCOL);
-        httpResponse.addHeaders(CONTENT_TYPE, HttpContentType.HTML.mediaType() + ";" + CHARSET_UTF_8);
-        httpResponse.setBody("");
-    }
-
     public static void buildStaticContent(
             final HttpResponse httpResponse,
             final String fileName,
@@ -51,6 +45,15 @@ public class HttpResponseBuilder {
 
     private static String httpContentType(String fileName) {
         return contentMapper.get(fileName.substring(fileName.lastIndexOf(".") + 1)).mediaType();
+    }
+
+    public static void setRedirection(HttpResponse httpResponse, String redirectUrl) {
+        httpResponse.setStatusCode(HttpStatus.FOUND.statusCode());
+        httpResponse.setStatusMessage(HttpStatus.FOUND.statusMessage());
+        httpResponse.setProtocol(HTTP_VERSION_PROTOCOL);
+        httpResponse.addHeaders("Location", redirectUrl);
+        httpResponse.addHeaders(CONTENT_TYPE, HttpContentType.HTML.mediaType() + ";" + CHARSET_UTF_8);
+        httpResponse.setBody("");
     }
 
     public static void buildNotFound(final HttpResponse httpResponse, final List<String> contentLines) {

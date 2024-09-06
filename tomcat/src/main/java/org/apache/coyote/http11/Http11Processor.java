@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.catalina.HandlerAdapter;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.request.RequestCreator;
 import org.apache.coyote.Processor;
@@ -22,10 +23,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final RequestCreator requestCreator;
+    private final HandlerAdapter handlerAdapter;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.requestCreator = new RequestCreator();
+        this.handlerAdapter = new HandlerAdapter();
     }
 
     @Override
@@ -43,6 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             String payload = readPayload(in);
 
             HttpRequest httpRequest = requestCreator.create(header, payload);
+            String response = handlerAdapter.handle(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

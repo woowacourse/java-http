@@ -22,6 +22,9 @@ public class HandlerAdapter {
             if (path.equals("/")) {
                 return controller.getHelloWorldPage(httpRequest);
             }
+            if (path.equals("/index.html")) {
+                return controller.getDefaultPage(httpRequest);
+            }
         }
         return responseCreator.create(200, path);
     }

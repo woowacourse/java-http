@@ -15,4 +15,9 @@ public class Controller {
     public String getHelloWorldPage(HttpRequest httpRequest) throws IOException {
         return responseCreator.create(200, httpRequest.getPath());
     }
+
+    public String getDefaultPage(HttpRequest httpRequest) throws IOException {
+        return responseCreator.create(200, httpRequest.getPath());
+    }
+
 }

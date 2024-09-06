@@ -10,12 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class GreetingController {
 
     @GetMapping("/")
-    public String index(final HttpServletResponse response) {
-        final String cacheControl = CacheControl
-                .noCache()
-                .cachePrivate()
-                .getHeaderValue();
-        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
+    public String index() {
         return "index";
     }
 

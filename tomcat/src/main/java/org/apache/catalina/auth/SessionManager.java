@@ -2,21 +2,24 @@ package org.apache.catalina.auth;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 public class SessionManager implements Manager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final SessionManager instance = new SessionManager();
 
     @Override
     public void add(Session session) {
-        String id = UUID.randomUUID().toString();
-        SESSIONS.put(id, session);
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public Session findSession(String id) {
-        return SESSIONS.get(id);
+    public Optional<Session> findSession(String id) {
+        if (SESSIONS.containsKey(id)) {
+            return Optional.of(SESSIONS.get(id));
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -25,6 +28,10 @@ public class SessionManager implements Manager {
                 .filter(key -> SESSIONS.get(key).equals(session))
                 .findAny()
                 .ifPresent(SESSIONS::remove);
+    }
+
+    public static SessionManager getInstance() {
+        return instance;
     }
 
     private SessionManager() {}

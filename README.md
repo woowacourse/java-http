@@ -55,7 +55,7 @@
   - [x] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가
   - [x] Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie 반환 기능 구현
 
-- [ ] Session 구현하기 : 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부 체크
+- Session 구현하기 : 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부 체크
   - 로그인 성공 시,
-  - [ ] Session 객체의 값으로 User 객체 저장
-  - [ ] /login 페이지에 HTTP GET method로 접근 시, index.html 페이지로 리다이렉트 처리
+  - [x] Session 객체의 값으로 User 객체 저장
+  - [x] /login 페이지에 HTTP GET method로 접근 시, index.html 페이지로 리다이렉트 처리

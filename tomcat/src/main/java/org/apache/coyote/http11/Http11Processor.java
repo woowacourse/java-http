@@ -7,7 +7,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.apache.catalina.auth.HttpCookie;
+import org.apache.catalina.auth.Session;
+import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
 import org.apache.catalina.request.RequestReader;
 import org.apache.catalina.response.HttpStatus;
@@ -17,7 +21,6 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.catalina.auth.HttpCookie;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -25,7 +28,6 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String COOKIE_KEY = "JSESSIONID";
     private static final String DEFAULT_PAGE_CONTENT = "Hello world!";
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
@@ -41,6 +43,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String IS_QUERY_PARAM = "IsQueryParam";
     private static final String QUERY_PARAM_SIZE = "QueryParamSize";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -62,6 +65,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             Map<String, String> headers = RequestReader.readHeaders(reader);
+            HttpCookie.setCookies(headers.get(SET_COOKIE));
             handleRequestMethod(reader, headers);
         } catch (IOException e) {
             log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
@@ -129,8 +133,11 @@ public class Http11Processor implements Runnable, Processor {
         }
         Optional<User> user = authenticateUser(account, password);
         if (user.isPresent()) {
-            HttpCookie.saveAuthCookie();
-            String cookie = HttpCookie.getCookie();
+            Session session = new Session(UUID.randomUUID().toString());
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
+            String cookie = HttpCookie.ofJSessionId(session.getId());
+
             return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE), cookie);
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));

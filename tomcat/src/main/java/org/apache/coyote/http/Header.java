@@ -32,6 +32,10 @@ public class Header {
         this.headers = headers;
     }
 
+    public boolean hasHeader(String header) {
+        return headers.containsKey(header);
+    }
+
     public String getKey(String header) {
         if (!headers.containsKey(header)) {
             throw new IllegalArgumentException("Header " + header + " not found");

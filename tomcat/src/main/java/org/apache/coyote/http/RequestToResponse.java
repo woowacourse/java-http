@@ -19,6 +19,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RequestToResponse {
@@ -97,6 +98,10 @@ public class RequestToResponse {
         if (user.checkPassword(parsedBody.get("password"))) {
             log.info(user.toString());
             header.setLocation(REDIRECT);
+            UUID uuid = UUID.randomUUID();
+            HttpCookie cookie = new HttpCookie();
+            cookie.setSessionId(uuid.toString());
+            header.setCookie(cookie.toCookieResponse());
             HttpResponse response = new HttpResponse(statusLine, header, null);
             return response.toResponse();
         }

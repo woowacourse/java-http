@@ -8,6 +8,7 @@ public class ResponseHeader {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Header header;
 
@@ -29,6 +30,10 @@ public class ResponseHeader {
 
     public void setLocation(String location) {
         header.addHeader(LOCATION, location);
+    }
+
+    public void setCookie(String cookie) {
+        header.addHeader(SET_COOKIE, cookie);
     }
 
     public String toResponse() {

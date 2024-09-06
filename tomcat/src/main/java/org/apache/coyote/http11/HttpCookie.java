@@ -25,4 +25,11 @@ public class HttpCookie {
     public boolean isSessionIdNotExist() {
         return !cookie.containsKey(JSESSIONID_KEY);
     }
+
+    public String getJSessionId() {
+        if (isSessionIdNotExist()) {
+            return "";
+        }
+        return cookie.get(JSESSIONID_KEY);
+    }
 }

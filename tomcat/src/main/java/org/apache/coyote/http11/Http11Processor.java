@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +69,14 @@ public class Http11Processor implements Runnable, Processor {
 
             String responseBody = "";
             if (isHttpMethod(httpRequestHeader, "GET")) {
-                responseBody = getResponseBody(httpRequestHeader);
-                httpResponseHeader.put("Content-Type", getMimeType(httpRequestHeader) + ";charset=utf-8");
-                httpResponseHeader.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+                if (requestUrl.equals("/login") && isAlreadlyLogined(httpRequestHeader, httpResponseHeader)) {
+                    httpResponseHeader.put("Status", "302 Found");
+                    httpResponseHeader.put("Location", "/index.html");
+                } else {
+                    responseBody = getResponseBody(httpRequestHeader);
+                    httpResponseHeader.put("Content-Type", getMimeType(httpRequestHeader) + ";charset=utf-8");
+                    httpResponseHeader.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+                }
             }
 
             if (isHttpMethod(httpRequestHeader, "POST")) {
@@ -78,9 +85,11 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponseHeader.put("Status", "302 Found");
                 httpResponseHeader.put("Location", "/index.html");
                 if (requestUrl.equals("/login")) {
-                    if (isCorrectUser(httpRequestBody)) {
-                        processCookie(httpRequestHeader, httpResponseHeader);
-                    } else if (!isCorrectUser(httpRequestBody)) {
+                    User user = getUser(httpRequestBody);
+                    String password = getUserInformation(httpRequestBody).get("password");
+                    if (user.checkPassword(password)) {
+                        processCookie(user, httpRequestHeader, httpResponseHeader);
+                    } else if (!user.checkPassword(password)) {
                         httpResponseHeader.put("Location", "/401.html");
                     }
                 } else if (requestUrl.equals("/register")) {
@@ -97,19 +106,53 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processCookie(Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
-        if (httpRequestHeader.containsKey("Cookie")) {
-            HttpCookie httpCookie = new HttpCookie(httpRequestHeader.get("Cookie"));
-            if (httpCookie.isSessionIdNotExist()) {
-                addNewSessionId(httpResponseHeader);
+    private boolean isAlreadlyLogined(Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        String sessionId = getSession(httpRequestHeader);
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(sessionId);
+
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                return true;
             }
-        } else if (!httpRequestHeader.containsKey("Cookie")) {
-            addNewSessionId(httpResponseHeader);
+        }
+        return false;
+    }
+
+    private void processCookie(User user, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        final String sessionId = getSession(httpRequestHeader);
+        SessionManager sessionManager = SessionManager.getInstance();
+
+        if (sessionId.isEmpty()) {
+            String newSessionId = UUID.randomUUID().toString();
+            Session session = new Session(newSessionId);
+            session.setAttribute("user", user);
+            sessionManager.add(session);
+            httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSessionId);
+        } else if (!sessionId.isEmpty()) {
+            Session session = sessionManager.findSession(sessionId);
+            if (session != null) {
+                User loggedInUser = (User) session.getAttribute("user");
+                if (loggedInUser == null) {
+                    session.setAttribute("user", user);
+                }
+            } else if (session == null) {
+                String newSessionId = UUID.randomUUID().toString();
+                Session newSession = new Session(newSessionId);
+                newSession.setAttribute("user", user);
+                sessionManager.add(newSession);
+                httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSession.getId());
+            }
         }
     }
 
-    private void addNewSessionId(Map<String, String> httpResponseHeader) {
-        httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+    private String getSession(Map<String, String> httpRequestHeader) {
+        if (httpRequestHeader.containsKey("Cookie")) {
+            HttpCookie httpCookie = new HttpCookie(httpRequestHeader.get("Cookie"));
+            return httpCookie.getJSessionId();
+        }
+        return "";
     }
 
     private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
@@ -161,19 +204,14 @@ public class Http11Processor implements Runnable, Processor {
         return Arrays.asList(uriLine.split(" ")).getFirst();
     }
 
-    private boolean isCorrectUser(String queryString) {
-        Map<String, String> userInformation = getUserInformation(queryString);
+    private User getUser(String httpRequestBody) {
+        Map<String, String> userInformation = getUserInformation(httpRequestBody);
 
-        if (!userInformation.containsKey("account") || !userInformation.containsKey("password")) {
-            return false;
+        if (!userInformation.containsKey("account")) {
+            return null;
         }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(userInformation.get("account"));
-        if (optionalUser.isEmpty()) {
-            return false;
-        }
-        User user = optionalUser.get();
-
-        return user.checkPassword(userInformation.get("password"));
+        return optionalUser.orElse(null);
     }
 
     private void saveUser(String queryString) {

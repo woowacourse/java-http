@@ -16,7 +16,8 @@ public class HttpRequestReceiver {
         HttpRequestBody body = null;
         if ("POST".equals(header.getHttpMethod()) || "PUT".equals(header.getHttpMethod())) {
             int contentLength = header.getContentLength();
-            body = new HttpRequestBody(receiveRequestBody(bufferedReader, contentLength));
+            String payload = receiveRequestBody(bufferedReader, contentLength);
+            body = new HttpRequestBody(payload, header.getContentType());
         }
 
         return new HttpRequest(header, body);

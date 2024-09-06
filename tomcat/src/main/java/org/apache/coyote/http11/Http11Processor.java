@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         String jSessionId = cookies.getCookieValue("JSESSIONID");
         boolean isLogin = SessionManager.containsSession(jSessionId);
         if (isLogin) {
-            response.sendRedirect("/index.html");
+            response.redirect("/index.html");
         }
     }
 
@@ -98,18 +98,18 @@ public class Http11Processor implements Runnable, Processor {
 
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
         if (rawUser.isEmpty()) {
-            response.setStatusCode(401);
+            response.statusUnauthorized();
             response.setBody(FileReader.readResourceFile("401.html"));
             return;
         }
         User user = rawUser.get();
         if (!user.checkPassword(password)) {
-            response.setStatusCode(401);
+            response.statusUnauthorized();
             response.setBody(FileReader.readResourceFile("401.html"));
             return;
         }
         log.info("user: {}", user);
-        response.sendRedirect("/index.html");
+        response.redirect("/index.html");
 
         UUID jSessionId = UUID.randomUUID();
         Session session = new Session(jSessionId.toString());
@@ -136,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        response.sendRedirect("/index.html");
+        response.redirect("/index.html");
     }
 
     private void refresh(HttpRequest request, HttpResponse response) {

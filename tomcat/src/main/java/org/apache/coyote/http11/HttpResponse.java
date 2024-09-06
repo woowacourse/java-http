@@ -2,24 +2,22 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class HttpResponse {
 
-    private final Map<String, String> headers = new LinkedHashMap<>();
-    private int statusCode = 200;
+    private final float version;
+    private int statusCode;
+    private String statusMessage;
+    private final Map<String, String> headers;
     private String body;
 
     public HttpResponse() {
-    }
-
-    public void addHeader(String key, String value) {
-        this.headers.put(key, value);
-    }
-
-    public void sendRedirect(String location) {
-        this.statusCode = 302;
-        this.headers.put("Location", location);
+        this.version = 1.1F;
+        this.statusCode = 200;
+        this.statusMessage = "OK";
+        this.headers = new LinkedHashMap<>();
+        this.body = "";
     }
 
     public String getResponse() {
@@ -30,30 +28,35 @@ public class HttpResponse {
     }
 
     private String parseResponseLine() {
-        return String.format("HTTP/1.1 %d OK ", statusCode);
+        return String.format("HTTP/%.1f %d %s ", version, statusCode, statusMessage);
     }
 
     private String parseHeaders() {
-        // TODO: refactoring - join 으로 진행하고 싶음
-        StringBuilder sb = new StringBuilder();
-        for (Entry<String, String> header : headers.entrySet()) {
-            String key = header.getKey();
-            String value = header.getValue();
-            sb.append(String.format("%s: %s ", key, value));
-            sb.append("\r\n");
-        }
-        return sb.toString();
+        return headers.entrySet().stream()
+                .map(header -> String.format("%s: %s ", header.getKey(), header.getValue()))
+                .collect(Collectors.joining("\r\n"));
     }
 
-    public String getBody() {
-        return body;
+    public void redirect(String location) {
+        this.statusCode = 302;
+        this.statusMessage = "FOUND";
+        this.headers.put("Location", location);
+    }
+
+    public void statusUnauthorized() {
+        this.statusCode = 401;
+        this.statusMessage = "UNAUTHORIZED";
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.put(key, value);
     }
 
     public void setBody(String body) {
         this.body = body;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+    public String getBody() {
+        return body;
     }
 }

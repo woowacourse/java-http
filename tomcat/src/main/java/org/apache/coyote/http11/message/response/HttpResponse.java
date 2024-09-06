@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpResponse {
+
     private final HttpStatus status;
     private final HttpHeaders headers;
     private final String body;

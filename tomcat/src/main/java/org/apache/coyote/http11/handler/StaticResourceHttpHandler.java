@@ -8,8 +8,6 @@ import org.apache.coyote.http11.message.response.HttpResponse;
 
 public class StaticResourceHttpHandler implements HttpHandler {
 
-    private static final String LINE_FEED = "\n";
-
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
         String fileName = "static" + request.getUrlPath();

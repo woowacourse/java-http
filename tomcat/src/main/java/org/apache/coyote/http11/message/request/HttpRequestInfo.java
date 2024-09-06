@@ -3,6 +3,7 @@ package org.apache.coyote.http11.message.request;
 import java.util.Objects;
 
 public class HttpRequestInfo {
+
     private final HttpMethod method;
     private final String urlPath;
 

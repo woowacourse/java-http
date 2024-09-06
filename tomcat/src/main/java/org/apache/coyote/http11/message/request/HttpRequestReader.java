@@ -9,8 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.http11.message.HttpHeaders;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // TODO: BufferedReader와 BufferedInputStream 같이 사용했을 때 문제가 발생하지 않는지 확인하기
 public class HttpRequestReader {
@@ -20,8 +18,6 @@ public class HttpRequestReader {
     public HttpRequestReader(InputStream inputStream) {
         this.inputStream = inputStream;
     }
-
-    private static final Logger log = LoggerFactory.getLogger(HttpRequestReader.class);
 
     public HttpRequest read() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));

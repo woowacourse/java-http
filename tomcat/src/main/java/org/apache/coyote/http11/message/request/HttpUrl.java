@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
 public class HttpUrl {
+
     private final String path;
     private final QueryParameters queryParameters;
 

@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpRequest {
+
     private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int HTTP_URL_INDEX = 1;

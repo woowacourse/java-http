@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class QueryParameters {
+
     private final Map<String, List<String>> parameters;
 
     public QueryParameters(Map<String, List<String>> parameters) {

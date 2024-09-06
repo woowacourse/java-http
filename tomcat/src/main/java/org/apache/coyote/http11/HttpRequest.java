@@ -10,22 +10,28 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.apache.coyote.http11.body.HttpRequestBody;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeaders;
+import org.apache.coyote.http11.startline.HttpMethod;
+import org.apache.coyote.http11.startline.HttpRequestLine;
 
 public class HttpRequest {
 
-    private final HttpStartLine httpStartLine;
+    private final HttpRequestLine httpRequestLine;
     private final HttpHeaders httpHeaders;
-    private final HttpBody httpBody;
+    private final HttpRequestBody httpRequestBody;
 
-    private HttpRequest(HttpStartLine httpStartLine, HttpHeaders httpHeaders, HttpBody httpBody) {
-        this.httpStartLine = httpStartLine;
+    private HttpRequest(HttpRequestLine httpRequestLine, HttpHeaders httpHeaders, HttpRequestBody httpRequestBody) {
+        this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
-        this.httpBody = httpBody;
+        this.httpRequestBody = httpRequestBody;
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
-        HttpStartLine startLine = new HttpStartLine(httpRequestReader.readLine());
+        HttpRequestLine startLine = new HttpRequestLine(httpRequestReader.readLine());
 
         List<String> headers = new ArrayList<>();
         while (httpRequestReader.ready()) {
@@ -38,53 +44,57 @@ public class HttpRequest {
         HttpHeaders httpHeaders = new HttpHeaders(headers);
 
         if (!httpRequestReader.ready()) {
-            return new HttpRequest(startLine, httpHeaders, HttpBody.empty());
+            return new HttpRequest(startLine, httpHeaders, HttpRequestBody.empty());
         }
         int contentLength = Integer.parseInt(httpHeaders.get(HttpHeader.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         httpRequestReader.read(buffer, 0, contentLength);
-        HttpBody requestBody = HttpBody.parseUrlEncoded(new String(buffer));
+        HttpRequestBody requestBody = HttpRequestBody.parseUrlEncoded(new String(buffer));
         return new HttpRequest(startLine, httpHeaders, requestBody);
     }
 
     public Map<String, String> parseQueryString() {
-        return httpStartLine.parseQueryString();
+        return httpRequestLine.parseQueryString();
     }
 
     public boolean isTargetStatic() {
-        return httpStartLine.isTargetStatic();
+        return httpRequestLine.isTargetStatic();
     }
 
     public boolean isTargetBlank() {
-        return httpStartLine.isTargetBlank();
+        return httpRequestLine.isTargetBlank();
     }
 
     public boolean containsQueryParameter() {
-        return httpStartLine.containsQueryParameter();
+        return httpRequestLine.containsQueryParameter();
     }
 
     public boolean targetStartsWith(String startsWith) {
-        return httpStartLine.targetStartsWith(startsWith);
+        return httpRequestLine.targetStartsWith(startsWith);
+    }
+
+    public boolean targetEqualTo(String target) {
+        return httpRequestLine.targetEqualTo(target);
     }
 
     public boolean containsBody() {
-        return httpBody.isNotEmpty();
+        return httpRequestBody.isNotEmpty();
     }
 
-    public boolean containsSession() {
-        return httpHeaders.containsSession();
+    public Optional<String> getSessionFromCookie() {
+        return httpHeaders.getSessionFromCookie();
     }
 
     public HttpMethod getHttpMethod() {
-        return httpStartLine.getHttpMethod();
+        return httpRequestLine.getHttpMethod();
     }
 
     public String getTargetExtension() {
-        return httpStartLine.getTargetExtension();
+        return httpRequestLine.getTargetExtension();
     }
 
     public Path getPath() {
-        URL resource = httpStartLine.getTargetUrl();
+        URL resource = httpRequestLine.getTargetUrl();
         try {
             return Path.of(resource.toURI());
         } catch (URISyntaxException e) {
@@ -93,6 +103,10 @@ public class HttpRequest {
     }
 
     public String getFromBody(String key) {
-        return httpBody.get(key);
+        return httpRequestBody.get(key);
+    }
+
+    public String getHttpVersion() {
+        return httpRequestLine.getHttpVersion();
     }
 }

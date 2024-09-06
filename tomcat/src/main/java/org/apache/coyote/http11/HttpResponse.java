@@ -1,31 +1,58 @@
 package org.apache.coyote.http11;
 
 import java.util.StringJoiner;
+import org.apache.coyote.http11.body.HttpResponseBody;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpHeaders;
+import org.apache.coyote.http11.startline.HttpResponseLine;
+import org.apache.coyote.http11.startline.HttpStatus;
 
-public record HttpResponse(String value) {
+public class HttpResponse {
 
     private static final String DELIMITER = "\r\n";
 
-    public static HttpResponse generate(HttpRequest request, HttpStatus httpStatus,
-                                        String contentType, String responseBody) {
-        StringJoiner joiner = new StringJoiner(DELIMITER);
-        joiner.add("HTTP/1.1 " + httpStatus.getValue() + " ");
-        addSession(request, joiner);
-        joiner.add(HttpHeader.CONTENT_TYPE.getValue() + ": " + contentType + ";charset=utf-8 ");
-        joiner.add(HttpHeader.CONTENT_LENGTH.getValue() + ": " + responseBody.getBytes().length + " ");
-        joiner.add("");
-        joiner.add(responseBody);
+    private final HttpResponseLine httpResponseLine;
+    private final HttpHeaders httpHeaders;
+    private final HttpResponseBody httpResponseBody;
 
-        return new HttpResponse(joiner.toString());
-    }
-
-    private static void addSession(HttpRequest request, StringJoiner joiner) {
-        if (!request.containsSession()) {
-            joiner.add(HttpHeader.SET_COOKIE.getValue() + ": " + SessionGenerator.generate());
-        }
+    public HttpResponse(String httpVersion) {
+        this.httpResponseLine = new HttpResponseLine(httpVersion);
+        this.httpHeaders = new HttpHeaders();
+        this.httpResponseBody = new HttpResponseBody();
     }
 
     public byte[] getBytes() {
-        return value.getBytes();
+        return stringify().getBytes();
+    }
+
+    private String stringify() {
+        StringJoiner joiner = new StringJoiner(DELIMITER);
+        joiner.add(httpResponseLine.stringify());
+        joiner.add(httpHeaders.stringify(DELIMITER));
+        joiner.add("");
+        joiner.add(httpResponseBody.getValue());
+
+        return joiner.toString();
+    }
+
+    public void addHeader(HttpHeader header, String value) {
+        httpHeaders.add(header, value);
+    }
+
+    public void setStatus(HttpStatus httpStatus) {
+        httpResponseLine.setStatus(httpStatus);
+    }
+
+    public void setBody(String body) {
+        httpResponseBody.setValue(body);
+        httpHeaders.add(HttpHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+    }
+
+    public void addSessionToCookies(String session) {
+        httpHeaders.addSessionToCookies(session);
+    }
+
+    public boolean isValid() {
+        return httpResponseLine.isValid() && httpHeaders.contains(HttpHeader.CONTENT_LENGTH);
     }
 }

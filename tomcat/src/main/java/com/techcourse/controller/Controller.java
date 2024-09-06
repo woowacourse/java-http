@@ -2,6 +2,8 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,10 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.startline.HttpMethod;
+import org.apache.coyote.http11.startline.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,30 +28,40 @@ public class Controller {
     private static final String DELIMITER = "\r\n";
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
 
-    private static boolean isRegisterRequest(HttpRequest request) {
-        return request.getHttpMethod() == HttpMethod.POST
-                && request.containsBody()
-                && request.targetStartsWith("/register");
-    }
-
-    public HttpResponse service(HttpRequest request) {
+    public boolean service(HttpRequest request, HttpResponse response) {
         if (request.isTargetBlank()) {
-            return HttpResponse.generate(request, HttpStatus.OK, "text/html", BASIC_RESPONSE_BODY);
+            response.addHeader(HttpHeader.CONTENT_TYPE, "text/html");
+            response.setBody(BASIC_RESPONSE_BODY);
+            return true;
+        }
+        if (isLoginPageRequest(request)) {
+            return showLoginPage(request, response);
         }
         if (request.isTargetStatic()) {
-            return createStaticResponse(request, HttpStatus.OK, request.getPath(), request.getTargetExtension());
+            return readStaticFile(response, request.getPath(), request.getTargetExtension());
         }
-        return createDynamicResponse(request);
+        return createDynamicResponse(request, response);
     }
 
-    private HttpResponse createDynamicResponse(HttpRequest request) {
+    private boolean isLoginPageRequest(HttpRequest request) {
+        return request.targetEqualTo("/login") && request.isTargetStatic();
+    }
+
+    private boolean showLoginPage(HttpRequest request, HttpResponse response) {
+        Optional<String> nullableSession = request.getSessionFromCookie();
+        return nullableSession.map(SessionManager::findSession)
+                .map(session -> redirectToIndex(response))
+                .orElseGet(() -> readStaticFile(response, request.getPath(), request.getTargetExtension()));
+    }
+
+    private boolean createDynamicResponse(HttpRequest request, HttpResponse response) {
         if (isLoginRequest(request)) {
-            return createLoginResponse(request);
+            return login(request, response);
         }
         if (isRegisterRequest(request)) {
-            return createRegisterResponse(request);
+            return register(request, response);
         }
-        return null;
+        return false;
     }
 
     private boolean isLoginRequest(HttpRequest request) {
@@ -57,62 +70,76 @@ public class Controller {
                 && request.targetStartsWith("/login");
     }
 
-    public HttpResponse createLoginResponse(HttpRequest request) {
+    public boolean login(HttpRequest request, HttpResponse response) {
         Map<String, String> parameters = request.parseQueryString();
         Optional<User> nullableUser = InMemoryUserRepository.findByAccount(parameters.get("account"));
         return nullableUser
                 .filter(user -> user.checkPassword(parameters.get("password")))
-                .map(user -> redirectToIndex(request))
-                .orElseGet(() -> redirectTo401(request));
+                .map(user -> loginAndRedirectToIndex(response, user))
+                .orElseGet(() -> redirectTo401(response));
     }
 
-    private HttpResponse createRegisterResponse(HttpRequest request) {
+    private boolean isRegisterRequest(HttpRequest request) {
+        return request.getHttpMethod() == HttpMethod.POST
+                && request.containsBody()
+                && request.targetStartsWith("/register");
+    }
+
+    private boolean register(HttpRequest request, HttpResponse response) {
         User user = new User(
                 request.getFromBody("account"),
                 request.getFromBody("password"),
-                request.getFromBody("email"));
+                request.getFromBody("email")
+        );
         InMemoryUserRepository.save(user);
-        return redirectToIndex(request);
+        return loginAndRedirectToIndex(response, user);
     }
 
-    private HttpResponse redirectToIndex(HttpRequest request) {
+    private boolean loginAndRedirectToIndex(HttpResponse response, User user) {
+        response.addSessionToCookies(addSession(user));
+        return redirectToIndex(response);
+    }
+
+    private String addSession(User user) {
+        Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        return session.getId();
+    }
+
+    private boolean redirectToIndex(HttpResponse response) {
         try {
             Path path = Path.of(getClass().getClassLoader().getResource("static/index.html").toURI());
-            return createStaticResponse(request, HttpStatus.FOUND, path, "html");
+            response.setStatus(HttpStatus.FOUND);
+            return readStaticFile(response, path, "html");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
         }
     }
 
-    private HttpResponse redirectTo401(HttpRequest request) {
+    private boolean redirectTo401(HttpResponse response) {
         try {
             Path path = Path.of(getClass().getClassLoader().getResource("static/401.html").toURI());
-            return createStaticResponse(request, HttpStatus.UNAUTHORIZED, path, "html");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            return readStaticFile(response, path, "html");
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
         }
     }
 
-    public HttpResponse createStaticResponse(HttpRequest request, HttpStatus httpStatus,
-                                             Path path, String targetExtension) {
+    public boolean readStaticFile(HttpResponse response, Path path, String targetExtension) {
         try {
             if (Files.exists(path)) {
-                String contentType = getContentType(targetExtension);
                 String responseBody = readFile(path);
-                return HttpResponse.generate(request, httpStatus, contentType, responseBody);
+                response.addHeader(HttpHeader.CONTENT_TYPE, getContentType(targetExtension) + ";charset=utf-8");
+                response.setBody(responseBody);
+                return response.isValid();
             }
             throw new FileNotFoundException(path.toString());
         } catch (NullPointerException | IOException e) {
             log.error(e.getMessage());
             throw new IllegalArgumentException("invalid path: " + path.toString());
         }
-    }
-
-    private String getContentType(String targetExtension) {
-        if (targetExtension.equals("ico") || targetExtension.equals("png") || targetExtension.equals("jpg")) {
-            return "image/" + targetExtension;
-        }
-        return "text/" + targetExtension;
     }
 
     public String readFile(Path path) throws IOException {
@@ -126,5 +153,10 @@ public class Controller {
         return joiner.toString();
     }
 
-
+    private String getContentType(String targetExtension) {
+        if (targetExtension.equals("ico") || targetExtension.equals("png") || targetExtension.equals("jpg")) {
+            return "image/" + targetExtension;
+        }
+        return "text/" + targetExtension;
+    }
 }

@@ -1,21 +1,24 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.startline;
 
 import java.net.URL;
 import java.util.Map;
+import org.apache.coyote.http11.header.RequestTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpStartLine {
+public class HttpRequestLine {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpStartLine.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpRequestLine.class);
 
     private final HttpMethod httpMethod;
     private final RequestTarget requestTarget;
+    private final String httpVersion;
 
-    public HttpStartLine(String startLine) {
+    public HttpRequestLine(String startLine) {
         String[] separatedStartLine = validateAndSplit(startLine);
         this.httpMethod = HttpMethod.valueOf(separatedStartLine[0]);
         this.requestTarget = new RequestTarget(separatedStartLine[1]);
+        this.httpVersion = separatedStartLine[2];
     }
 
     private String[] validateAndSplit(String startLine) {
@@ -51,6 +54,10 @@ public class HttpStartLine {
         return requestTarget.startsWith(startsWith);
     }
 
+    public boolean targetEqualTo(String target) {
+        return requestTarget.isEqualTo(target);
+    }
+
     public String getTargetExtension() {
         return requestTarget.getTargetExtension();
     }
@@ -61,5 +68,9 @@ public class HttpStartLine {
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
     }
 }

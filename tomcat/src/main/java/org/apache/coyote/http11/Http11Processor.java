@@ -31,7 +31,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequest.parse(inputStream);
-            HttpResponse response = controller.service(request);
+            HttpResponse response = new HttpResponse(request.getHttpVersion());
+            boolean isResponseValid = controller.service(request, response);
+            if (!isResponseValid) {
+                throw new IllegalArgumentException("response not valid: \r\n" + response);
+            }
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

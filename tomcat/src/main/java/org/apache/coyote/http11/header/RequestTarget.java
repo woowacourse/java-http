@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.header;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -38,6 +38,10 @@ public class RequestTarget {
 
     public boolean startsWith(String startsWith) {
         return value.startsWith(startsWith);
+    }
+
+    public boolean isEqualTo(String target) {
+        return value.equals(target);
     }
 
     public String getTargetExtension() {

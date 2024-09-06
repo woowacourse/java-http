@@ -9,8 +9,8 @@ public class FrontController {
     private final RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
 
     public FrontController() {
-        requestHandlerMapper.register(new StaticResourceRequestHandler());
         requestHandlerMapper.register(new LoginRequestHandler());
+        requestHandlerMapper.register(new StaticResourceRequestHandler());
     }
 
     public HttpResponse service(HttpRequest request) {

@@ -68,7 +68,7 @@ public class LoginRequestHandler implements RequestHandler {
         if (httpRequest.isExistsSession()) {
             Session session = httpRequest.getSession();
             User user = (User) session.getAttribute("user");
-            log.info("세션 로그인 : " + user.getAccount());
+            log.info("세션 로그인 : " + user);
             return redirect(SUCCESS_LOGIN_REDIRECT_PATH);
         }
         return Http11Response.builder()

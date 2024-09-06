@@ -101,28 +101,6 @@ public class Http11Processor implements Runnable, Processor {
                         }
                     });
 
-//            /**
-//             * queryString을 통해 회원 조회
-//             */
-//            String queryStringInputAccount = queryParameters.get("account");
-//            String queryStringInputPassword = queryParameters.get("password");
-//
-//            if (queryStringInputAccount != null && queryStringInputPassword != null) {
-//                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(queryStringInputAccount);
-//                if (optionalUser.isEmpty()) {
-//                    statusCode = "401 Unauthorized";
-//                    filePath = "/401.html";
-//                }
-//                if (optionalUser.isPresent()) {
-//                    User user = optionalUser.get();
-//                    if (user.checkPassword(queryStringInputPassword)) {
-//                        log.info(user.toString());
-//                        additionalResponseHeaders.add("Location: /index.html");
-//                        statusCode = "302 Found";
-//                    }
-//                }
-//            }
-
             /**
              * application/x-www-form-urlencoded 타입의 Request Body 파싱
              */

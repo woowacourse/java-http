@@ -1,9 +1,11 @@
 package org.apache.coyote.ioprocessor.parser;
 
+import com.techcourse.infrastructure.PresentationResolver;
 import http.HttpRequestBody;
 import http.HttpRequestHeaders;
 import http.HttpRequestLine;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -20,6 +22,7 @@ public class RequestParser {
     private final HttpRequestLine requestLine;
     private final HttpRequestHeaders requestHeaders;
     private final HttpRequestBody requestBody;
+    private final PresentationResolver resolver;
 
     public RequestParser(String httpRequest) {
         String[] requestParts = httpRequest.split(REQUEST_PART_DELIMITER, -1);
@@ -28,6 +31,7 @@ public class RequestParser {
         this.requestLine = new HttpRequestLine(requestHeaders[0]);
         this.requestHeaders = new HttpRequestHeaders(buildRequestHeader(requestHeaders));
         this.requestBody = new HttpRequestBody(requestParts[1]);
+        this.resolver = new PresentationResolver();
     }
 
     private List<String> buildRequestHeader(String[] requestHeaders) {
@@ -43,9 +47,22 @@ public class RequestParser {
     }
 
     public String readResource() throws IOException, URISyntaxException {
-        URL staticResourceURL = getClass().getResource(STATIC_RESOURCE_ROOT + requestLine.getUri().getPath());
+        URI requestUri = requestLine.getUri();
+        String webPath = requestUri.getPath();
+        String queryParam = requestUri.getQuery();
+        resolver.view(requestLine.getHttpMethod(), webPath, queryParam);
+        URL staticResourceURL = processResourceUri(requestUri);
         Path path = Paths.get(staticResourceURL.toURI());
         return Files.readString(path);
+    }
+
+    private URL processResourceUri(URI requestUri) {
+        String path = requestUri.getPath();
+        URL resource = getClass().getResource(STATIC_RESOURCE_ROOT + path);
+        if (resource == null) {
+            return getClass().getResource(STATIC_RESOURCE_ROOT + path + ".html");
+        }
+        return resource;
     }
 
     public boolean isRootUri() {

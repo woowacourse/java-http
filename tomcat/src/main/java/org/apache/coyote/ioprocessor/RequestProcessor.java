@@ -16,7 +16,6 @@ public class RequestProcessor {
 
     public RequestProcessor(InputStream inputStream) throws IOException {
         String httpRequest = readRequestFromInputStream(inputStream);
-        System.out.println(httpRequest);
         this.parser = new RequestParser(httpRequest);
     }
 

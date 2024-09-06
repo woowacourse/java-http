@@ -21,6 +21,10 @@ public class HttpSession {
         values.remove(name);
     }
 
+    public Object getAttribute(String name) {
+        return values.get(name);
+    }
+
     public String getId() {
         return id;
     }

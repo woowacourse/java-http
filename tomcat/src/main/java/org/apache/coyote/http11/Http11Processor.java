@@ -134,8 +134,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getLoginPage(HttpCookie httpCookie, HttpHeader responseHeader) throws IOException {
         if (httpCookie.isContains(JSESSIONID)) {
-            responseHeader.addHeader("Location", "/index.html");
-            return new HttpResponse(responseHeader, HttpStatus.FOUND);
+            String sessionId = httpCookie.findCookie(JSESSIONID);
+            HttpSession session = HTTP_SESSION_MANGER.findSession(sessionId);
+            if (session.getAttribute("user") != null) {
+                responseHeader.addHeader("Location", "/index.html");
+                return new HttpResponse(responseHeader, HttpStatus.FOUND);
+            }
         }
 
         String responseBody = readResource("/login.html", responseHeader);

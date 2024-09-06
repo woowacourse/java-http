@@ -30,4 +30,8 @@ public class HttpCookie {
     public void addCookie(String key, String value) {
         cookies.put(key, value);
     }
+
+    public String findCookie(String key) {
+        return cookies.get(key);
+    }
 }

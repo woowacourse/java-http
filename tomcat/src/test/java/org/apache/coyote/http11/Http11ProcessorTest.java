@@ -10,6 +10,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.catalina.session.HttpSession;
+import org.apache.catalina.session.HttpSessionManger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -110,6 +112,11 @@ class Http11ProcessorTest {
                 "",
                 ""
         );
+
+        HttpSessionManger httpSessionManger = new HttpSessionManger();
+        HttpSession httpSession = new HttpSession("randomUUID");
+        httpSession.setAttribute("user", new User("tester", "password", "test@gmail.com"));
+        httpSessionManger.add(httpSession);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);

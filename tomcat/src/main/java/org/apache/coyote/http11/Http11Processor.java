@@ -26,7 +26,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestParser = new RequestParser(); // todo singleton
+        this.requestParser = new RequestParser();
         this.httpServlet = new HttpServlet();
     }
 
@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }

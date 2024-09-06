@@ -41,7 +41,7 @@ public class ViewController extends AbstractController {
         response.setStatus200();
         response.setResponseBody(view.getContent());
 
-        String accept = request.getHeaders().get("Accept");
+        String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("text/css")) {
             response.setContentTypeCss();
         } else {

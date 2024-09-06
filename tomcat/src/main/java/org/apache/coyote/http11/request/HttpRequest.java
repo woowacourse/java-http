@@ -75,12 +75,12 @@ public class HttpRequest {
         }
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public String getHeader(String key) {
+        return headers.get(key);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public String getRequestBody() {

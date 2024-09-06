@@ -132,7 +132,7 @@ class Http11ProcessorTest {
 
         @DisplayName("로그인 성공 시, 302을 반환하고 `/index.html`로 리다이렉트 한다.")
         @Test
-        void loginSuccess() throws IOException {
+        void loginSuccess() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -161,7 +161,7 @@ class Http11ProcessorTest {
 
         @DisplayName("로그인 실패 시, 302을 반환하고 `/401.html`로 리다이렉트 한다.")
         @Test
-        void loginFailure() throws IOException {
+        void loginFailure() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -219,7 +219,7 @@ class Http11ProcessorTest {
 
         @DisplayName("회원가입 성공 시, index 페이지로 리다이렉트 한다.")
         @Test
-        void registerSuccess() throws IOException {
+        void registerSuccess() {
             // given
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",

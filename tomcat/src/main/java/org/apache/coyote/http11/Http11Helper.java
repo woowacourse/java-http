@@ -45,7 +45,7 @@ public class Http11Helper {
         MimeType mimeType = MimeType.getMimeType(fileName);
         return String.join("\r\n",
                 "HTTP/1.1 " + status.getValue() + " ",
-                "Content-Type: " + mimeType.getType() + ";charset=utf-8 ",
+                "Content-Type: " + mimeType.getType() + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

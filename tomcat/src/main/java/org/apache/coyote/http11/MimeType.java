@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 public enum MimeType {
-    HTML("html", "text/html"),
+    HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
     SVG("svg", "image/svg+xml"),
     NONE("", "application/octet-stream");

@@ -10,7 +10,7 @@ class MimeTypeTest {
 
     @DisplayName("확장자를 기준으로 MIME 타입을 판단하여 반환한다.")
     @ParameterizedTest
-    @CsvSource({"index.html, text/html", "styles.css, text/css", "error.svg, image/svg+xml"})
+    @CsvSource({"index.html, text/html;charset=utf-8", "styles.css, text/css", "error.svg, image/svg+xml"})
     void getMimeTypeByExtension(String extension, String expectedMimeType) {
         // when
         MimeType result = MimeType.getMimeType(extension);

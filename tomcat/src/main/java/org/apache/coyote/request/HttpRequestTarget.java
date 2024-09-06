@@ -33,14 +33,11 @@ public class HttpRequestTarget {
     }
 
     public QueryParameters getQueryParameters() {
-        if (queryParameters.hasParameters()) {
-            return queryParameters;
-        }
-        throw new IllegalStateException("쿼리 파라미터가 존재하지 않습니다.");
+        return queryParameters;
     }
 
     @Override
     public String toString() {
-        return "path=" + path + " queryParameters=" + queryParameters.getValues();
+        return String.format("path : %s, queryParameters : %s", path, queryParameters);
     }
 }

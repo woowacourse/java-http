@@ -4,83 +4,92 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
-import org.apache.coyote.http11.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
-    private static final int HEADER_INDEX_SIZE = 2;
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private final HttpRequestStartLine startLine;
     private final HttpRequestHeader headers;
-    private final String body;
+    private final HttpRequestBody body;
 
-    private HttpRequest(HttpRequestStartLine startLine, HttpRequestHeader headers, String body) {
+    private HttpRequest(HttpRequestStartLine startLine, HttpRequestHeader headers, HttpRequestBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequestStartLine startLine = HttpRequestStartLine.from(bufferedReader.readLine());
-        HttpRequestHeader httpHeaders = HttpRequestHeader.from(createHttpHeaderMap(bufferedReader));
-
-        if (!startLine.getMethod().name().equals("GET")) {
-            return new HttpRequest(startLine, httpHeaders, null);
+        HttpRequestHeader httpHeaders = new HttpRequestHeader(readHeader(bufferedReader));
+        HttpRequestBody httpRequestBody = new HttpRequestBody(readBody(bufferedReader, httpHeaders.getContentLength()));
+        if (!startLine.getMethod().isGet()) {
+            return new HttpRequest(startLine, httpHeaders, httpRequestBody);
         }
-        return new HttpRequest(startLine, httpHeaders, createBody(bufferedReader, httpHeaders.getContentLength()));
+        return new HttpRequest(startLine, httpHeaders, null);
     }
 
-    private static Map<String, List<String>> createHttpHeaderMap(BufferedReader bufferedReader) {
+    private static Map<String, List<String>> readHeader(BufferedReader bufferedReader) {
         return bufferedReader.lines()
                 .takeWhile(line -> !line.isBlank())
                 .map(line -> line.split(HEADER_DELIMITER))
-                .filter(parts -> parts.length == HEADER_INDEX_SIZE)
-                .collect(groupingBy(parts -> parts[HEADER_KEY_INDEX].trim(),
-                        mapping(parts -> parts[HEADER_VALUE_INDEX].trim(), toList())));
+                .collect(groupingBy(header -> header[HEADER_KEY_INDEX].trim(),
+                        mapping(header -> header[HEADER_VALUE_INDEX].trim(), toList())
+                ));
     }
 
-    private static String createBody(BufferedReader bufferedReader, int contentLength) throws IOException {
+    private static String readBody(BufferedReader bufferedReader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-
-        return new String(buffer);
+        int bytesRead = bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer, 0, bytesRead);
     }
 
     public HttpMethod getMethod() {
         return startLine.getMethod();
     }
 
-    public String getEndpoint() {
-        return startLine.getEndPoint();
+    public String getTargetPath() {
+        return startLine.getTargetPath();
+    }
+
+    public QueryParameters getTargetQueryParameters() {
+        return startLine.getQueryParameters();
     }
 
     public HttpRequestHeader getHeaders() {
         return headers;
     }
 
-    public String getBody() {
+    public HttpRequestBody getBody() {
         return body;
     }
 
     @Override
     public String toString() {
-        return "HttpRequest{" +
-                "startLine=" + startLine +
-                ", headers=" + headers +
-                ", body='" + body + '\'' +
-                '}';
+        if (body == null) {
+            return String.join(
+                    "\r\n",
+                    startLine.toString(),
+                    headers.toString(),
+                    ""
+            );
+        }
+        return String.join(
+                "\r\n",
+                startLine.toString(),
+                headers.toString(),
+                "",
+                body.toString()
+        );
     }
 }

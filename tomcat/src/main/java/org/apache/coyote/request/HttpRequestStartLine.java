@@ -57,6 +57,6 @@ public class HttpRequestStartLine {
 
     @Override
     public String toString() {
-        return "method=" + method + " target=" + target + " httpVersion=" + httpVersion;
+        return String.join(" ", method.toString(), target.toString(), httpVersion.getValue());
     }
 }

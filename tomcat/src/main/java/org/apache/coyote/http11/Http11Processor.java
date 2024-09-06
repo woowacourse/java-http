@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -41,9 +39,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         ) {
-            final String requestMessage = parseRequestMessage(bufferedReader);
+            final String requestMessage = parseRequestMessage(inputStream);
             final SimpleHttpRequest httpRequest = new SimpleHttpRequest(requestMessage);
             if (httpRequest.parseStaticFileExtensionType() != null) {
                 handleStaticResourceRequest(outputStream, httpRequest);
@@ -55,22 +52,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestMessage(final BufferedReader reader) throws IOException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        String line = reader.readLine();
-        if (line == null) {
-            return null;
-        }
+    private String parseRequestMessage(final InputStream inputStream) throws IOException {
+        final byte[] data = new byte[10000];
+        final int readDataSize = inputStream.read(data);
 
-        do {
-            stringBuilder.append(line).append("\r\n");
-            line = reader.readLine();
-        } while (line != null && line.isEmpty());
-
-        return stringBuilder.toString();
+        return new String(data, 0, readDataSize);
     }
 
-    private void handleStaticResourceRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest) throws URISyntaxException, IOException {
+    private void handleStaticResourceRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest)
+            throws URISyntaxException, IOException {
         final File file = getStaticFile(httpRequest.getRequestUri());
         if (file == null) {
             sendNotFoundResponse(outputStream);
@@ -136,9 +126,59 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException, URISyntaxException {
         final String endpoint = httpRequest.getEndpoint();
         if (endpoint.equals("/")) {
-            final String responseBody = "Hello world!";
+            handleRootRequest(outputStream);
+            return;
+        }
+
+        // 로그인 요청
+        if (endpoint.equals("/login")) {
+            handleLoginRequest(outputStream, httpRequest);
+            return;
+        }
+
+        if (endpoint.equals("/register")) {
+            handleRegisterRequest(outputStream, httpRequest);
+            return;
+        }
+
+        sendNotFoundResponse(outputStream);
+    }
+
+    private void handleRootRequest(final OutputStream outputStream) throws IOException {
+        final String responseBody = "Hello world!";
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "", responseBody);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void handleLoginRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest)
+            throws URISyntaxException, IOException
+    {
+        if (httpRequest.getHttpMethod() == HttpMethod.GET) {
+            final File file = getStaticFile("/login.html");
+            final String responseBody = readFileContent(file);
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
+                    buildResponseContentTypeHeaderLine(httpRequest.parseStaticFileExtensionType()),
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "", responseBody);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            return;
+        }
+
+        final Map<String, String> bodyData = httpRequest.getBodyData();
+        final String account = bodyData.get("account");
+        final String password = bodyData.get("password");
+        if (!loginCheck(account, password)) {
+            final File file = getStaticFile("/401.html");
+            final String responseBody = String.join("", readFileContent(file));
+            final String response = String.join("\r\n",
+                    "HTTP/1.1 401 Unauthorized",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "", responseBody);
@@ -147,53 +187,77 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        // 로그인 요청
-        if (endpoint.equals("/login")) {
-            final Map<String, String> queryParameters = httpRequest.getQueryParameters();
-            if (queryParameters.isEmpty()) {
-                final File file = getStaticFile("/login.html");
-                final String responseBody = readFileContent(file);
-                final String response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        buildResponseContentTypeHeaderLine(httpRequest.parseStaticFileExtensionType()),
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "", responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            final String account = queryParameters.get("account");
-            final String password = queryParameters.get("password");
-            if (!loginCheck(account, password)) {
-                final File file = getStaticFile("/401.html");
-                final String responseBody = String.join("", readFileContent(file));
-                final String response = String.join("\r\n",
-                        "HTTP/1.1 401 Unauthorized",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "", responseBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 302 Found",
-                    "Location: http://localhost:8080/index.html",
-                    "Content-Type: text/html; charset=utf-8",
-                    "Content-Length: 0",
-                    "", "");
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        }
-
-        sendNotFoundResponse(outputStream);
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: http://localhost:8080/index.html",
+                "Content-Type: text/html; charset=utf-8",
+                "Content-Length: 0",
+                "", "");
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private boolean loginCheck(final String account, final String password) {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
         return user != null && user.checkPassword(password);
+    }
+
+    private void handleRegisterRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest)
+            throws IOException, URISyntaxException {
+        if (httpRequest.getHttpMethod() == HttpMethod.GET) {
+            final File file = getStaticFile("/register.html");
+            final String responseBody = readFileContent(file);
+            final String response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    buildResponseContentTypeHeaderLine(httpRequest.parseStaticFileExtensionType()),
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "", responseBody);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            return;
+        }
+
+        final Map<String, String> bodyData = httpRequest.getBodyData();
+        final String account = bodyData.get("account");
+        final String password = bodyData.get("password");
+        final String email = bodyData.get("email");
+
+        final User registeredUser = register(account, password, email);
+
+        if (registeredUser == null) {
+            final String responseBody = "{\"message\": \"이미 존재하는 사용자 계정입니다.\"}";
+            final String response = String.join("\r\n",
+                    "HTTP/1.1 400 Bad Request",
+                    "Content-Type: application/json ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "", responseBody);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            return;
+        }
+
+        final String response = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: http://localhost:8080/index.html",
+                "Content-Type: text/html; charset=utf-8",
+                "Content-Length: 0",
+                "", "");
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private User register(final String account, final String password, final String email) {
+        if (!checkDuplicateAccount(account)) {
+            return null;
+        }
+
+        final User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        return user;
+    }
+
+    private boolean checkDuplicateAccount(final String account) {
+        return InMemoryUserRepository.findByAccount(account).isEmpty();
     }
 }

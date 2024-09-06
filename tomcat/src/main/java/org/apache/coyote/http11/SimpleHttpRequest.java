@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,5 +75,22 @@ public class SimpleHttpRequest {
         }
 
         return FileExtensionType.fromValue(split[1]);
+    }
+
+    public Map<String, String> getBodyData() {
+        final HashMap<String, String> result = new HashMap<>();
+        final String[] headerAndBodyData = requestMessage.split("\r\n\r\n", 2);
+        if (headerAndBodyData.length < 2) {
+            return Collections.emptyMap();
+        }
+
+        final String[] bodyData = headerAndBodyData[1].split("&");
+        Arrays.stream(bodyData)
+                .forEach(data -> {
+                    final String[] keyAndValue = data.trim().split("=");
+                    result.put(keyAndValue[0], keyAndValue[1]);
+                });
+
+        return result;
     }
 }

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHeader {
+public class HttpHeaders {
 
     private final Map<String, Object> fields = new HashMap<>();
 

@@ -24,7 +24,7 @@ public class HttpRequest {
     private final URI uri;
     private final QueryParameter queryParameter;
     private final String version;
-    private final HttpHeader header = new HttpHeader();
+    private final HttpHeaders headers = new HttpHeaders();
     private final String body;
 
     public HttpRequest(InputStream inputStream) {
@@ -50,14 +50,14 @@ public class HttpRequest {
             String headerLine;
             while (!(headerLine = bufferedReader.readLine()).isEmpty()) {
                 String[] headerToken = headerLine.split(HEADER_DELIMITER, 2);
-                header.put(headerToken[0].trim(), headerToken[1].trim());
+                headers.put(headerToken[0].trim(), headerToken[1].trim());
             }
 
             // Parse Body, it should consider all character including escape characters
             StringBuilder bodyBuilder = new StringBuilder();
             char[] buffer = new char[BUFFER_SIZE];
             int readBytes = 0;
-            while (readBytes < header.getContentLength()) {
+            while (readBytes < headers.getContentLength()) {
                 readBytes += bufferedReader.read(buffer);
                 bodyBuilder.append(buffer, 0, readBytes);
             }
@@ -83,8 +83,8 @@ public class HttpRequest {
         return version;
     }
 
-    public HttpHeader getHeader() {
-        return header;
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     public String getParameter(String name) {
@@ -101,7 +101,7 @@ public class HttpRequest {
                ", uri=" + uri +
                ", queryParameter=" + queryParameter +
                ", version='" + version + '\'' +
-               ", header=" + header +
+               ", header=" + headers +
                ", body='" + body + '\'' +
                '}';
     }

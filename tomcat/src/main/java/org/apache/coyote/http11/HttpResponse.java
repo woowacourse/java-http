@@ -2,12 +2,12 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
-    private final HttpHeader header;
+    private final HttpHeaders headers;
     private final StatusCode statusCode;
     private final String body;
 
-    public HttpResponse(HttpHeader header, StatusCode statusCode, String body) {
-        this.header = header;
+    public HttpResponse(HttpHeaders headers, StatusCode statusCode, String body) {
+        this.headers = headers;
         this.statusCode = statusCode;
         this.body = body;
     }
@@ -16,8 +16,8 @@ public class HttpResponse {
         return new HttpResponseBuilder();
     }
 
-    public HttpHeader getHeader() {
-        return header;
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     public StatusCode getStatusCode() {

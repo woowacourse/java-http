@@ -12,13 +12,13 @@ public class HttpResponseWriter {
 
     public static String write(HttpResponse response) {
         StatusCode statusCode = response.getStatusCode();
-        HttpHeader header = response.getHeader();
+        HttpHeaders headers = response.getHeaders();
         String body = response.getBody();
 
         StringBuilder builder = new StringBuilder();
         builder.append("%s %s %s".formatted(HTTP_VERSION, statusCode.getCode(), statusCode.getMessage()));
         builder.append(CRLF);
-        for (Entry<String, Object> entry : header.getFields().entrySet()) {
+        for (Entry<String, Object> entry : headers.getFields().entrySet()) {
             builder.append("%s: %s".formatted(entry.getKey(), entry.getValue()));
             builder.append(CRLF);
         }

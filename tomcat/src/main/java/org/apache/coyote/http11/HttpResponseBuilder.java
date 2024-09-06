@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public class HttpResponseBuilder {
 
-    private HttpHeader header = new HttpHeader();
+    private HttpHeaders headers = new HttpHeaders();
     private StatusCode statusCode;
     private String body;
 
@@ -10,12 +10,12 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder addHeader(String name, String value) {
-        header.put(name, value);
+        headers.put(name, value);
         return this;
     }
 
     public HttpResponseBuilder contentType(ContentType contentType) {
-        header.setContentType(contentType);
+        headers.setContentType(contentType);
         return this;
     }
 
@@ -42,7 +42,7 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
-        header.put("Content-Length", String.valueOf(body.getBytes().length));
-        return new HttpResponse(header, statusCode, body);
+        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        return new HttpResponse(headers, statusCode, body);
     }
 }

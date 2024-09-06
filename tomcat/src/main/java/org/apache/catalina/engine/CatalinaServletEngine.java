@@ -23,6 +23,8 @@ import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.RequestLine;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +45,17 @@ public class CatalinaServletEngine {
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("GET")) {
+            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+            SessionManager sessionManager = new SessionManager();
+            String sessionId = httpCookie.get("JSESSIONID");
+            Session session = sessionManager.findSession(sessionId);
+            if (Objects.nonNull(session)) {
+                response.addHttpStatus(HttpStatus.FOUND);
+                response.addHeader("Location", "/index.html");
+                response.addHeader("Content-Type", probeContentType("/index.html"));
+                response.setBody(findStaticFile("/index.html"));
+                return;
+            }
             String contentType = probeContentType("/login.html");
             String content = findStaticFile("/login.html");
             response.addHttpStatus(HttpStatus.OK);
@@ -123,12 +136,7 @@ public class CatalinaServletEngine {
         }
         User user = optionalUser.get();
         if (user.checkPassword(password)) {
-            log.info("user: {}", user);
-            checkCookie(httpCookie, response);
-            response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader("Location", "/index.html");
-            response.addHeader("Content-Type", probeContentType("/index.html"));
-            response.setBody(findStaticFile("/index.html"));
+            normalLogin(httpCookie, response, user);
             return;
         }
         log.error("user: {}, inputPassword={}, 비밀번호가 올바르지 않습니다.", user, password);
@@ -138,12 +146,19 @@ public class CatalinaServletEngine {
         response.setBody(findStaticFile("/401.html"));
     }
 
-    private static void checkCookie(HttpCookie httpCookie, HttpResponse response) {
+    private static void normalLogin(HttpCookie httpCookie, HttpResponse response, User user) {
+        log.info("user: {}", user);
+        SessionManager sessionManager = new SessionManager();
         String sessionId = httpCookie.get("JSESSIONID");
         if (Objects.isNull(sessionId)) {
-            sessionId = UUID.randomUUID().toString();
-            response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+            Session session = new Session(user);
+            sessionManager.add(session);
+            response.addHeader("Set-Cookie", "JSESSIONID=" + session.getSessionId());
         }
+        response.addHttpStatus(HttpStatus.FOUND);
+        response.addHeader("Location", "/index.html");
+        response.addHeader("Content-Type", probeContentType("/index.html"));
+        response.setBody(findStaticFile("/index.html"));
     }
 
     private static Map<String, String> parseQueryStringType(String queryString) {

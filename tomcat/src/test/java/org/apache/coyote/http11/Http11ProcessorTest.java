@@ -10,6 +10,10 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -83,7 +87,36 @@ class Http11ProcessorTest {
         String contentBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css;charset=utf-8 \r\n" +
-                String.format("Content-Length: %d \r\n",contentBody.getBytes().length) +
+                String.format("Content-Length: %d \r\n", contentBody.getBytes().length) +
+                "\r\n" +
+                contentBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+        final ObjectMapper objectMapper = new ObjectMapper();
+
+        // when
+        processor.process(socket);
+
+        // then
+        User user = InMemoryUserRepository.findByAccount("gugu").get();
+        String contentBody = objectMapper.writeValueAsString(user);
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: application/json;charset=utf-8 \r\n" +
+                String.format("Content-Length: %d \r\n", contentBody.getBytes().length) +
                 "\r\n" +
                 contentBody;
 

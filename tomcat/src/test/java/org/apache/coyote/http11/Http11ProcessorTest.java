@@ -135,7 +135,7 @@ class Http11ProcessorTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-length: " + body.getBytes().length + " ",
+                "Content-Length: " + body.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 body
@@ -166,7 +166,7 @@ class Http11ProcessorTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-length: " + body.getBytes().length + " ",
+                "Content-Length: " + body.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 body
@@ -228,7 +228,7 @@ class Http11ProcessorTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-length: " + body.getBytes().length + " ",
+                "Content-Length: " + body.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
                 body

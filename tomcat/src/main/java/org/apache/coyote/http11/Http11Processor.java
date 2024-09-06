@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.apache.coyote.Processor;
+import org.apache.coyote.session.HttpSession;
+import org.apache.coyote.session.HttpSessionManger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()
         ) {
-            HttpRequest request = getRequest(inputStream);
+            HttpRequest request = convertRequest(inputStream);
             HttpResponse response = dispatch(request);
 
             outputStream.write(response.toHttpResponse().getBytes());
@@ -55,14 +57,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest getRequest(InputStream inputStream) throws IOException {
+    private HttpRequest convertRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        int contentLength = 0;
 
         List<String> header = new ArrayList<>();
+        int contentLength = 0;
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            if (line.toLowerCase().startsWith("content-length")) {
+            if (line.startsWith("Content-Length")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
             }
             header.add(line);

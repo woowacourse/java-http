@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class HttpRequestReceiver {
 
     HttpRequest receiveRequest(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         HttpRequestHeader header = new HttpRequestHeader(receiveRequestHeader(bufferedReader));
@@ -17,7 +19,8 @@ public class HttpRequestReceiver {
         if ("POST".equals(header.getHttpMethod()) || "PUT".equals(header.getHttpMethod())) {
             int contentLength = header.getContentLength();
             String payload = receiveRequestBody(bufferedReader, contentLength);
-            body = new HttpRequestBody(payload, header.getContentType());
+            String decodedPayload = URLDecoder.decode(payload, StandardCharsets.UTF_8);
+            body = new HttpRequestBody(decodedPayload, header.getContentType());
         }
 
         return new HttpRequest(header, body);

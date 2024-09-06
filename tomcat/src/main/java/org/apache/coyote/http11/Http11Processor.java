@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.apache.coyote.Processor;
@@ -64,7 +65,8 @@ public class Http11Processor implements Runnable, Processor {
 
         String path = parsePath(tokens[1]);
         Map<String, String> queryString = parseQueryString(tokens[1]);
-        return new HttpRequest(tokens[0], path, queryString, tokens[2]);
+        Map<String, String> headers = parseHeaders(bufferedReader);
+        return new HttpRequest(tokens[0], path, queryString, tokens[2], headers);
     }
 
     private String parsePath(String token) {
@@ -111,5 +113,22 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             return "Hello world!";
         }
+    }
+
+    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+        String line = bufferedReader.readLine();
+        Map<String, String> headers = new LinkedHashMap<>();
+
+        while (!"".equals(line)) {
+            if (line == null) {
+                return headers;
+            }
+            int index = line.indexOf(':');
+            String key = line.substring(0, index);
+            String value = line.substring(index + 2);
+            headers.put(key, value);
+            line = bufferedReader.readLine();
+        }
+        return headers;
     }
 }

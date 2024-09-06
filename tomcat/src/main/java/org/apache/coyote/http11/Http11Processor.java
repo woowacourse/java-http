@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.ResourceLoader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -11,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,10 +44,10 @@ public class Http11Processor implements Runnable, Processor {
             String page = httpRequest.getPath();
             HttpResponse httpResponse;
 
-            String responseBody = "";
+            String responseBody;
             if (page.equals("/")) {
                 responseBody = "Hello world!";
-                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
             } else if (page.startsWith("/login") && httpMethod.equals("POST")) {
                 String requestBody = httpRequest.getBody();
                 String account = requestBody.split("&")[0].split("=")[1];
@@ -60,32 +58,18 @@ public class Http11Processor implements Runnable, Processor {
                 if (user.checkPassword(password)) {
                     log.info("user : {}", user);
                     SessionManager sessionManager = new SessionManager();
-
-                    URL url = getClass().getClassLoader().getResource("static/index.html");
-                    if (url == null) {
-                        return;
-                    }
-
                     UUID jSessionId = UUID.randomUUID();
-
                     Session session = new Session(jSessionId.toString());
-
                     session.setAttribute("user", user);
                     sessionManager.add(session);
-                    Path path = Path.of(url.toURI());
-                    responseBody = new String(Files.readAllBytes(path));
-                    httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+
+                    responseBody = new String(ResourceLoader.loadResource("static/index.html"));
+                    httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
                     httpResponse.addHeader("Location", "/index.html");
                     httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
                 } else {
-                    URL url = getClass().getClassLoader().getResource("static/401.html");
-                    if (url == null) {
-                        return;
-                    }
-
-                    Path path = Path.of(url.toURI());
-                    responseBody = new String(Files.readAllBytes(path));
-                    httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                    responseBody = new String(ResourceLoader.loadResource("static/401.html"));
+                    httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
                     httpResponse.addHeader("Location", "/401.html");
                 }
             } else if (page.startsWith("/login") && httpMethod.equals("GET")) {
@@ -97,33 +81,15 @@ public class Http11Processor implements Runnable, Processor {
                     Session session = sessionManager.findSession(jSessionId);
 
                     if (session != null && session.getAttribute("user") != null) {
-                        URL url = getClass().getClassLoader().getResource("static/index.html");
-                        if (url == null) {
-                            return;
-                        }
-
-                        Path path = Path.of(url.toURI());
-                        responseBody = new String(Files.readAllBytes(path));
-                        httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                        responseBody = new String(ResourceLoader.loadResource("static/index.html"));
+                        httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
                     } else {
-                        URL url = getClass().getClassLoader().getResource("static" + page + ".html");
-                        if (url == null) {
-                            return;
-                        }
-
-                        Path path = Path.of(url.toURI());
-                        responseBody = new String(Files.readAllBytes(path));
-                        httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                        responseBody = new String(ResourceLoader.loadResource("static" + page + ".html"));
+                        httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
                     }
                 } else {
-                    URL url = getClass().getClassLoader().getResource("static" + page + ".html");
-                    if (url == null) {
-                        return;
-                    }
-
-                    Path path = Path.of(url.toURI());
-                    responseBody = new String(Files.readAllBytes(path));
-                    httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                    responseBody = new String(ResourceLoader.loadResource("static" + page + ".html"));
+                    httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
                 }
             } else if (page.equals("/register") && httpMethod.equals("POST")) {
                 String requestBody = httpRequest.getBody();
@@ -131,51 +97,21 @@ public class Http11Processor implements Runnable, Processor {
                 String email = requestBody.split("&")[1].split("=")[1];
                 String password = requestBody.split("&")[2].split("=")[1];
                 InMemoryUserRepository.save(new User(account, email, password));
-
-                URL url = getClass().getClassLoader().getResource("static/index.html");
-                if (url == null) {
-                    return;
-                }
-
-                Path path = Path.of(url.toURI());
-                responseBody = new String(Files.readAllBytes(path));
-                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                responseBody = new String(ResourceLoader.loadResource("static/index.html"));
+                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
                 httpResponse.addHeader("Location", "/index.html");
             } else if (page.startsWith("/css/")) {
-                URL url = getClass().getClassLoader().getResource("static" + page);
-                if (url == null) {
-                    return;
-                }
-
-                Path path = Path.of(url.toURI());
-                responseBody = new String(Files.readAllBytes(path));
-                httpResponse = HttpResponse.of(version,200, "text/css", responseBody);
+                responseBody = new String(ResourceLoader.loadResource("static" + page));
+                httpResponse = HttpResponse.of(version, 200, "text/css", responseBody);
             } else if (page.contains(".js")) {
-                URL url = getClass().getClassLoader().getResource("static" + page);
-                if (url == null) {
-                    return;
-                }
-                Path path = Path.of(url.toURI());
-                responseBody = new String(Files.readAllBytes(path));
-                httpResponse = HttpResponse.of(version,200, "text/javascript", responseBody);
+                responseBody = new String(ResourceLoader.loadResource("static" + page));
+                httpResponse = HttpResponse.of(version, 200, "text/javascript", responseBody);
             } else if (page.endsWith(".html")) {
-                URL url = getClass().getClassLoader().getResource("static" + page);
-                if (url == null) {
-                    return;
-                }
-
-                Path path = Path.of(url.toURI());
-                responseBody = new String(Files.readAllBytes(path));
-                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                responseBody = new String(ResourceLoader.loadResource("static" + page));
+                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
             } else {
-                URL url = getClass().getClassLoader().getResource("static" + page + ".html");
-                if (url == null) {
-                    return;
-                }
-
-                Path path = Path.of(url.toURI());
-                responseBody = new String(Files.readAllBytes(path));
-                httpResponse = HttpResponse.of(version,200, "text/html", responseBody);
+                responseBody = new String(ResourceLoader.loadResource("static" + page + ".html"));
+                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
             }
             httpResponse.send(outputStream);
         } catch (IOException | UncheckedServletException e) {

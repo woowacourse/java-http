@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -9,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -24,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -42,8 +45,11 @@ public class Http11Processor implements Runnable, Processor {
             FileReader fileReader = new FileReader();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
-
             String responseBody = fileReader.readFile(httpRequest.getHttpRequestPath());
+            if (httpRequest.getHttpRequestPath().equals("/login")){
+                login(httpRequest);
+            }
+
             String contentType = httpRequest.getContentType();
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -56,6 +62,15 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void login(HttpRequest httpRequest) {
+        String account = httpRequest.getQueryParameter("account");
+        String password = httpRequest.getQueryParameter("password");
+        User foundUser = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+        if (foundUser.checkPassword(password)) {
+            log.info("user : " + foundUser);
         }
     }
 }

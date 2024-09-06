@@ -27,4 +27,8 @@ public class HttpRequest {
     public String getContentType() {
         return httpHeaders.getContentType();
     }
+
+    public String getQueryParameter(String key) {
+        return queryString.getValue(key);
+    }
 }

@@ -94,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         if (ROOT_PATH.equals(url)) {
             return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
-        if ("true".equals(headers.get(IS_QUERY_PARAM))) {
+        if (Boolean.parseBoolean(headers.get(IS_QUERY_PARAM))) {
             return generateResponseForQueryParam(headers);
         }
 

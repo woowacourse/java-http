@@ -1,7 +1,5 @@
 package org.apache.coyote;
 
-import java.io.IOException;
-
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.RegisterHandler;
 import org.apache.coyote.handler.ResourceHandler;
@@ -12,7 +10,7 @@ public class RequestHandler {
     private static final String PATH_DELIMITER = "/";
 
     // TODO: mapping handler method
-    public String handle(final HttpRequest httpRequest) throws IOException {
+    public String handle(final HttpRequest httpRequest) {
         final String path = httpRequest.getPath();
         final String[] paths = path.split(PATH_DELIMITER);
 

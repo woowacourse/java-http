@@ -10,6 +10,7 @@ server:
     accept-count: 1 # 스레드별 작업 대기열 큐 대기 갯수
     max-connections: 4 # 최대 동시 요청 수 : 3개의 요청이 오면 connections만큼 요청이 수락되고 count인 1만큼 요청이 수락되고, 나머지 2개 요청은 거절된다
     threads:
+      min-spare: 2
       max: 2  #스레드 풀에 대기 상태로 존재하는 최대 스레드 개수
 
 #debug: true

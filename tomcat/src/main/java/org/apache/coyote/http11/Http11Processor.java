@@ -11,16 +11,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.manager.Session;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.header.RequestHeaders;
+import org.apache.coyote.http11.response.startLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,211 +48,193 @@ public class Http11Processor implements Runnable, Processor {
 
             SessionManager sessionManager = new SessionManager();
 
-            String requestLine = bufferedReader.readLine();
-            if (requestLine == null || requestLine.isBlank()) {
-                return;
-            }
+            HttpRequest httpRequest = HttpRequest.create(bufferedReader);
+            HttpMethod httpMethod = httpRequest.getHttpMethod();
+            String uri = httpRequest.getUri();
 
-            Map<String, String> headers = new HashMap<>();
-            String headerLine = bufferedReader.readLine();
-            while (!headerLine.isBlank()) {
-                String[] header = headerLine.split(": ");
-                headers.put(header[0], header[1]);
-                headerLine = bufferedReader.readLine();
-            }
-
-            StringBuilder body = new StringBuilder();
-            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-
-            if (contentLength > 0) {
-                char[] bodyChars = new char[contentLength];
-                bufferedReader.read(bodyChars, 0, contentLength);
-                body.append(bodyChars);
-            }
-
-            if (!requestLine.isBlank()) {
-                String[] requestParts = requestLine.split(" ");
-                HttpMethod httpMethod = HttpMethod.find(requestParts[0]);
-                String uri = requestParts[1];
-                String version = requestParts[2];
-
+            if ("/".equals(uri)) {
                 String responseBody = "Hello world!";
-
-                if (!"/".equals(uri)) {
-                    String path = uri;
-
-                    if (path.contains("?")) {
-                        int index = uri.indexOf("?");
-                        path = uri.substring(0, index);
-                    }
-
-                    if (httpMethod == HttpMethod.GET && "/login".equals(path)) {
-                        String resourcePath = "static" + path + ".html";
-
-                        Optional<URL> resource = Optional.ofNullable(
-                                getClass().getClassLoader().getResource(resourcePath));
-
-                        if (resource.isPresent()) {
-                            Cookie cookie = new Cookie(headers.getOrDefault("Cookie", ""));
-                            Optional<String> optionalSessionId = cookie.getJSessionId();
-
-                            if (optionalSessionId.isPresent()) {
-                                String sessionId = optionalSessionId.get();
-                                Session session = sessionManager.findSession(sessionId);
-                                if (session != null) {
-                                    String response = String.join("\r\n",
-                                            "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                                            "Location: /index.html ",
-                                            "Content-Length: 0 ",
-                                            "");
-
-                                    bufferedWriter.write(response);
-                                    bufferedWriter.flush();
-                                    return;
-                                }
-                            }
-
-                            responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
-
-                            final String response = String.join("\r\n",
-                                    "HTTP/1.1 " + HttpStatus.OK.compose(),
-                                    "Content-Type: " + ContentType.findWithCharset(uri) + " ",
-                                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                                    "",
-                                    responseBody);
-
-                            bufferedWriter.write(response);
-                            bufferedWriter.flush();
-                            return;
-                        }
-                    }
-
-                    if (httpMethod == HttpMethod.POST && "/login".equals(path)) {
-                        Map<String, String> params = new HashMap<>();
-
-                        String[] paramPairs = body.toString().split("&");
-                        for (String pair : paramPairs) {
-                            String[] keyValue = pair.split("=");
-                            if (keyValue.length == 2) {
-                                params.put(URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
-                                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
-                            }
-                        }
-
-                        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
-
-                        if (optionalUser.isPresent()) {
-                            User user = optionalUser.get();
-                            if (user.checkPassword(params.get("password"))) {
-                                Cookie cookie = new Cookie(headers.getOrDefault("Cookie", ""));
-                                Optional<String> sessionId = cookie.getJSessionId();
-
-                                if (sessionId.isEmpty()) {
-                                    UUID uuid = UUID.randomUUID();
-                                    Session session = new Session(uuid.toString());
-                                    session.setAttribute("user", user);
-                                    sessionManager.add(session);
-                                    cookie.addCookie(Cookie.JSESSIONID, uuid.toString());
-                                }
-
-                                String response = String.join("\r\n",
-                                        "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                                        "Set-Cookie: " + cookie.toCookieHeader(),
-                                        "Location: /index.html",
-                                        "Content-Length: 0",
-                                        "");
-
-                                bufferedWriter.write(response);
-                                bufferedWriter.flush();
-
-                                log.info("로그인 성공! 아이디 : {}", user.getAccount());
-                                return;
-                            }
-                        }
-
-                        String response = String.join("\r\n",
-                                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                                "Location: /401.html ",
-                                "Content-Length: 0 ",
-                                "");
-
-                        bufferedWriter.write(response);
-                        bufferedWriter.flush();
-                        return;
-                    }
-
-                    if (httpMethod == HttpMethod.GET && "/register".equals(path)) {
-                        String resourcePath = "static" + path + ".html";
-
-                        Optional<URL> resource = Optional.ofNullable(
-                                getClass().getClassLoader().getResource(resourcePath));
-
-                        if (resource.isPresent()) {
-                            responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
-
-                            final String response = String.join("\r\n",
-                                    "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                                    "Content-Type: " + ContentType.findWithCharset(uri) + " ",
-                                    "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
-                                    "",
-                                    responseBody);
-
-                            bufferedWriter.write(response);
-                            bufferedWriter.flush();
-                            return;
-                        }
-                    }
-
-                    if (httpMethod == HttpMethod.POST && "/register".equals(path)) {
-                        Map<String, String> params = new HashMap<>();
-
-                        String[] paramPairs = body.toString().split("&");
-                        for (String pair : paramPairs) {
-                            String[] keyValue = pair.split("=");
-                            if (keyValue.length == 2) {
-                                params.put(
-                                        URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
-                                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
-                                );
-                            }
-                        }
-
-                        String account = params.get("account");
-                        String password = params.get("password");
-                        String email = params.get("email");
-                        User newUser = new User(account, password, email);
-
-                        InMemoryUserRepository.save(newUser);
-
-                        String response = String.join("\r\n",
-                                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                                "Location: /index.html ",
-                                "Content-Length: 0 ",
-                                "");
-
-                        bufferedWriter.write(response);
-                        bufferedWriter.flush();
-                        return;
-                    }
-                }
-
-                String resourcePath = "static" + uri;
-                Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
-
-                if (resource.isPresent()) {
-                    responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
-                }
-
                 final String response = String.join("\r\n",
                         "HTTP/1.1 " + HttpStatus.OK.compose(),
                         "Content-Type: " + ContentType.findWithCharset(uri) + " ",
                         "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
                         "",
-                        responseBody);
+                        responseBody
+                );
 
                 bufferedWriter.write(response);
                 bufferedWriter.flush();
+                return;
             }
+
+            String path = uri;
+            if (path.contains("?")) {
+                int index = uri.indexOf("?");
+                path = uri.substring(0, index);
+            }
+
+            if (httpMethod == HttpMethod.GET && "/login".equals(path)) {
+                String resourcePath = "static" + path + ".html";
+                Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
+
+                RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
+
+                if (resource.isPresent()) {
+                    Cookie cookie = new Cookie(requestHeaders.getOrDefault("Cookie", ""));
+                    Optional<String> optionalSessionId = cookie.getJSessionId();
+
+                    if (optionalSessionId.isPresent()) {
+                        String sessionId = optionalSessionId.get();
+                        Session session = sessionManager.findSession(sessionId);
+                        if (session != null) {
+                            String response = String.join("\r\n",
+                                    "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                                    "Location: /index.html ",
+                                    "Content-Length: 0 ",
+                                    ""
+                            );
+
+                            bufferedWriter.write(response);
+                            bufferedWriter.flush();
+                            return;
+                        }
+                    }
+
+                    String responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
+
+                    String response = String.join("\r\n",
+                            "HTTP/1.1 " + HttpStatus.OK.compose(),
+                            "Content-Type: " + ContentType.findWithCharset(uri) + " ",
+                            "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                            "",
+                            responseBody
+                    );
+
+                    bufferedWriter.write(response);
+                    bufferedWriter.flush();
+                    return;
+                }
+            }
+
+            if (httpMethod == HttpMethod.POST && "/login".equals(path)) {
+                RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
+                RequestBody requestBody = httpRequest.getRequestBody();
+
+                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+
+                if (optionalUser.isPresent()) {
+                    User user = optionalUser.get();
+                    if (user.checkPassword(requestBody.get("password"))) {
+                        Cookie cookie = new Cookie(requestHeaders.getOrDefault("Cookie", ""));
+                        Optional<String> sessionId = cookie.getJSessionId();
+
+                        if (sessionId.isEmpty()) {
+                            UUID uuid = UUID.randomUUID();
+                            Session session = new Session(uuid.toString());
+                            session.setAttribute("user", user);
+                            sessionManager.add(session);
+                            cookie.addCookie(Cookie.JSESSIONID, uuid.toString());
+                        }
+
+                        String response = String.join("\r\n",
+                                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                                "Set-Cookie: " + cookie.toCookieHeader(),
+                                "Location: /index.html",
+                                "Content-Length: 0",
+                                ""
+                        );
+
+                        bufferedWriter.write(response);
+                        bufferedWriter.flush();
+
+                        log.info("로그인 성공! 아이디 : {}", user.getAccount());
+                        return;
+                    }
+                }
+
+                String response = String.join("\r\n",
+                        "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                        "Location: /401.html ",
+                        "Content-Length: 0 ",
+                        ""
+                );
+
+                bufferedWriter.write(response);
+                bufferedWriter.flush();
+                return;
+            }
+
+            if (httpMethod == HttpMethod.GET && "/register".equals(path)) {
+                String resourcePath = "static" + path + ".html";
+
+                Optional<URL> resource = Optional.ofNullable(
+                        getClass().getClassLoader().getResource(resourcePath));
+
+                if (resource.isPresent()) {
+                    String responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
+
+                    String response = String.join("\r\n",
+                            "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                            "Content-Type: " + ContentType.findWithCharset(uri) + " ",
+                            "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                            "",
+                            responseBody
+                    );
+
+                    bufferedWriter.write(response);
+                    bufferedWriter.flush();
+                    return;
+                }
+            }
+
+            if (httpMethod == HttpMethod.POST && "/register".equals(path)) {
+                RequestBody requestBody = httpRequest.getRequestBody();
+
+                String account = requestBody.get("account");
+                String password = requestBody.get("password");
+                String email = requestBody.get("email");
+                User newUser = new User(account, password, email);
+
+                InMemoryUserRepository.save(newUser);
+
+                String response = String.join("\r\n",
+                        "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                        "Location: /index.html ",
+                        "Content-Length: 0 ",
+                        ""
+                );
+
+                bufferedWriter.write(response);
+                bufferedWriter.flush();
+                return;
+            }
+
+            String resourcePath = "static" + uri;
+            Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
+            if (resource.isPresent()) {
+                String responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
+                String response = String.join("\r\n",
+                        "HTTP/1.1 " + HttpStatus.OK.compose(),
+                        "Content-Type: " + ContentType.findWithCharset(uri) + " ",
+                        "Content-Length: " + responseBody.getBytes(StandardCharsets.UTF_8).length + " ",
+                        "",
+                        responseBody
+                );
+
+                bufferedWriter.write(response);
+                bufferedWriter.flush();
+                return;
+            }
+
+            String response = String.join("\r\n",
+                    "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                    "Location: /404.html ",
+                    "Content-Length: 0 ",
+                    ""
+            );
+
+            bufferedWriter.write(response);
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String responseBody = "";
             if (isHttpMethod(httpRequestHeader, "GET")) {
-                if (requestUrl.equals("/login") && isAlreadlyLogined(httpRequestHeader, httpResponseHeader)) {
+                if (requestUrl.equals("/login") && isAlreadyLogin(httpRequestHeader)) {
                     httpResponseHeader.put("Status", "302 Found");
                     httpResponseHeader.put("Location", "/index.html");
                 } else {
@@ -85,13 +83,7 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponseHeader.put("Status", "302 Found");
                 httpResponseHeader.put("Location", "/index.html");
                 if (requestUrl.equals("/login")) {
-                    User user = getUser(httpRequestBody);
-                    String password = getUserInformation(httpRequestBody).get("password");
-                    if (user.checkPassword(password)) {
-                        processCookie(user, httpRequestHeader, httpResponseHeader);
-                    } else if (!user.checkPassword(password)) {
-                        httpResponseHeader.put("Location", "/401.html");
-                    }
+                    loginUser(httpRequestBody, httpRequestHeader, httpResponseHeader);
                 } else if (requestUrl.equals("/register")) {
                     saveUser(httpRequestBody);
                 }
@@ -106,9 +98,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean isAlreadlyLogined(Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
-        String sessionId = getSession(httpRequestHeader);
+    private void loginUser(String httpRequestBody, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        User user = getUser(httpRequestBody);
+        if (user == null) {
+            httpResponseHeader.put("Location", "/401.html");
+            return;
+        }
+        String password = getUserInformation(httpRequestBody).get("password");
+        if (user.checkPassword(password)) {
+            processCookie(user, httpRequestHeader, httpResponseHeader);
+        } else if (!user.checkPassword(password)) {
+            httpResponseHeader.put("Location", "/401.html");
+        }
+    }
+
+    private boolean isAlreadyLogin(Map<String, String> httpRequestHeader) {
         SessionManager sessionManager = SessionManager.getInstance();
+        String sessionId = getSession(httpRequestHeader);
+        if (sessionId.isEmpty()) {
+            return false;
+        }
         Session session = sessionManager.findSession(sessionId);
 
         if (session != null) {
@@ -121,30 +130,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void processCookie(User user, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        final SessionManager sessionManager = SessionManager.getInstance();
         final String sessionId = getSession(httpRequestHeader);
-        SessionManager sessionManager = SessionManager.getInstance();
 
-        if (sessionId.isEmpty()) {
-            String newSessionId = UUID.randomUUID().toString();
-            Session session = new Session(newSessionId);
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSessionId);
-        } else if (!sessionId.isEmpty()) {
-            Session session = sessionManager.findSession(sessionId);
-            if (session != null) {
-                User loggedInUser = (User) session.getAttribute("user");
-                if (loggedInUser == null) {
-                    session.setAttribute("user", user);
-                }
-            } else if (session == null) {
-                String newSessionId = UUID.randomUUID().toString();
-                Session newSession = new Session(newSessionId);
-                newSession.setAttribute("user", user);
-                sessionManager.add(newSession);
-                httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSession.getId());
-            }
+        if (!sessionId.isEmpty()) {
+            return;
         }
+        String newSessionId = UUID.randomUUID().toString();
+        Session session = new Session(newSessionId);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSessionId);
     }
 
     private String getSession(Map<String, String> httpRequestHeader) {

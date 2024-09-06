@@ -13,20 +13,11 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-        // ...
-        return null;
+        return values.getOrDefault(name, null);
     }
 
     public void setAttribute(final String name, final Object value) {
-        // ...
-    }
-
-    public void removeAttribute(final String name) {
-        // ...
-    }
-
-    public void invalidate() {
-        // ...
+        values.put(name, value);
     }
 
     public String getId() {

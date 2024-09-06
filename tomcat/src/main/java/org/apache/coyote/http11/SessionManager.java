@@ -1,12 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpSession;
-
-import org.apache.catalina.Manager;
 
 public class SessionManager {
 
@@ -29,9 +24,6 @@ public class SessionManager {
         return SESSIONS.getOrDefault(id, null);
     }
 
-    public void remove(Session session) {
-        SESSIONS.remove(session.getId());
+    private SessionManager() {
     }
-
-    private SessionManager() {}
 }

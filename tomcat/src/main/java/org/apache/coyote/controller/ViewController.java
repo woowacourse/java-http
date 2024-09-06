@@ -8,6 +8,8 @@ import org.apache.coyote.AbstractController;
 import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.util.FileReader;
 import org.apache.coyote.util.HttpResponseBuilder;
@@ -27,10 +29,17 @@ public final class ViewController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse httpResponse) {
-        String fileName = getFilePath(request.getPath());
-        Path filePath;
+        Cookies cookies = request.getCookies();
+        if (request.getUri().equals("/login")
+                && cookies.hasJSESSIONID()
+                && SessionManager.isRegisitered(cookies.getJSESSIONID())) {
+            HttpResponseBuilder.setRedirection(httpResponse, "/");
+            return;
+        }
+
         try {
-            filePath = FileReader.parseFilePath(fileName);
+            String fileName = getFilePath(request.getPath());
+            Path filePath = FileReader.parseFilePath(fileName);
             List<String> contentLines = FileReader.readAllLines(filePath);
             HttpResponseBuilder.buildStaticContent(httpResponse, fileName, contentLines);
         } catch (ResourceNotFoundException | URISyntaxException | IOException e) {

@@ -3,15 +3,18 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.HeaderName;
+import org.apache.catalina.HttpCookie;
+import org.apache.catalina.HttpMethod;
+import org.apache.catalina.HttpRequest;
+import org.apache.catalina.Session;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -40,32 +43,18 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            HttpRequest httpRequest = new HttpRequest(inputStream);
 
             Path path = Path.of("");
             StringBuilder responseBody = new StringBuilder();
             String contentType = "";
             String statusCode = "";
             String location = "";
-            HttpCookie cookie = new HttpCookie();
+            HttpCookie cookie = new HttpCookie(httpRequest.get(HeaderName.COOKIE));
 
-            String rawLine;
-            Map<String, String> header = new HashMap<>();
-            header.put("requestLine", bufferedReader.readLine());
-            while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
-                if (!rawLine.isEmpty()) {
-                    String[] line = rawLine.split(": ", 2);
-                    header.put(line[0], line[1]);
-                }
-            }
-
-            if (header.containsKey("Cookie")) {
-                cookie = new HttpCookie(header.get("Cookie"));
-            }
-
-            if (header.get("requestLine").startsWith("GET")) {  // TODO: 404 추가하기
-                String uri = header.get("requestLine").split(" ")[1];
+            if (httpRequest.isMethod(HttpMethod.GET)) {  // TODO: 404 추가하기
+                String uri = httpRequest.getPath();
                 if (uri.equals("/")) {
                     contentType = "text/html; charset=utf-8 ";
                     statusCode = "200 OK";
@@ -74,21 +63,18 @@ public class Http11Processor implements Runnable, Processor {
                 if (uri.startsWith("/login")) {
                     contentType = "text/html; charset=utf-8 ";
                     // session이 있는 경우 다른 설정은 하지 않고, 쿠키에 그 세션 아이디를 넣어주고 리다이렉션한다.
-                    if (header.containsKey("Cookie") && cookie.hasESSIONID() && sessionManager.isSessionExist(cookie.getJESSIONID())) {
+                    if (httpRequest.hasCookie()&& cookie.hasESSIONID() && sessionManager.isSessionExist(cookie.getJESSIONID())) { // TODO: 객체에게 옮기기
                         statusCode = "302 FOUND ";
                         location = "/index.html";
                     }
-                    if (!header.containsKey("Cookie") || !cookie.hasESSIONID() || !sessionManager.isSessionExist(cookie.getJESSIONID())) {
-                        int index = uri.indexOf("?");
-                        if (index == -1) { // 쿼리 파라미터가 없는 경우
+                    if (!httpRequest.hasCookie() || !cookie.hasESSIONID() || !sessionManager.isSessionExist(cookie.getJESSIONID())) {
+                        if (httpRequest.hasQueryParam()) { // 쿼리 파라미터가 없는 경우
                             statusCode = "200 OK";
                             path = Path.of(getClass().getResource(STATIC_PATH + "/login.html").getPath());
                         }
-                        if (index != -1) { // 쿼리 파라미터가 있는 경우
-                            String queryString = uri.substring(index + 1);
-                            String[] userInfo = queryString.split("&");
-                            String account = userInfo[0].split("=")[1];
-                            String password = userInfo[1].split("=")[1];
+                        if (!httpRequest.hasQueryParam()) { // 쿼리 파라미터가 있는 경우
+                            String account = httpRequest.getQueryParam("account");
+                            String password = httpRequest.getQueryParam("password");
                             Optional<User> user = InMemoryUserRepository.findByAccount(account);
                             if (!user.isPresent()
                                 || (user.isPresent() && !user.get().checkPassword(password))) {
@@ -96,7 +82,6 @@ public class Http11Processor implements Runnable, Processor {
                                 path = Path.of(getClass().getResource(STATIC_PATH + "/401.html").getPath());
                             }
                             if (user.isPresent() && user.get().checkPassword(password)) {
-                                log.info(user.get().toString());
                                 statusCode = "302 FOUND ";
                                 location = "/index.html";
 
@@ -127,15 +112,11 @@ public class Http11Processor implements Runnable, Processor {
                     contentType = "application/javascript ";
                     statusCode = "200 OK";
                     path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-
                 }
             }
 
-            if (header.get("requestLine").startsWith("POST")) {
-                int contentLength = Integer.parseInt(header.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
-                String requestBody = new String(buffer);
+            if (httpRequest.isMethod(HttpMethod.POST)) {
+                String requestBody = httpRequest.getBody();
 
                 Map<String, String> userInfo = new HashMap<>();
                 String[] body = requestBody.split("&");

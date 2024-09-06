@@ -5,20 +5,53 @@ import java.util.Map;
 
 public class RequestLine {
 
-    private final Map<String, String> requestLine;
+    public static final String QUERY_INDICATOR = "?";
+    public static final String QUERY_COMPONENT_DELIMITER = "&";
+    public static final String QUERY_COMPONENT_VALUE_DELIMITER = "=";
+
+    private final HttpMethod httpMethod;
+    private final String path;
+    private final String VersionOfProtocol;
+    private final Map<String, String> queryParams;
 
     public RequestLine(String requestLine) {
-        this.requestLine = mapRequestLine(requestLine);
+        String[] requestLineEntries = requestLine.split(" ");
+
+        this.httpMethod = HttpMethod.valueOf(requestLineEntries[0]);
+        this.path = requestLineEntries[1];
+        this.VersionOfProtocol = requestLineEntries[2];
+        this.queryParams = mapQueryParam();
     }
 
-    private Map<String, String> mapRequestLine(String rawRequestLine) {
-        Map<String, String> mappedRequestLine = new HashMap<>();
+    public boolean isMethod(HttpMethod httpMethod) { // TODO: 상수화
+        return this.httpMethod == httpMethod;
+    }
 
-        String[] requestLineEntries = rawRequestLine.split(" ");
-        requestLine.put("Version of the protocol", requestLineEntries[0]);
-        requestLine.put("Status code", requestLineEntries[1]);
-        requestLine.put("Status message", requestLineEntries[2]);
+    public String getPath() {
+        return path;
+    }
 
-        return mappedRequestLine;
+    public boolean hasQueryParam() {
+        return path.contains("?");
+    }
+
+    public String getQueryParam(String paramName) {
+        return queryParams.get(paramName);
+    }
+
+    private Map<String, String> mapQueryParam() {
+        Map<String, String> mappedQueryParams = new HashMap<>();
+
+        int queryParamIndex = path.indexOf(QUERY_INDICATOR);
+        String queryString = path.substring(queryParamIndex + 1);
+        String[] splittedQueryString = queryString.split(QUERY_COMPONENT_DELIMITER);
+
+        for (String queryParamEntry : splittedQueryString) {
+            mappedQueryParams.put(
+                    queryParamEntry.split(QUERY_COMPONENT_VALUE_DELIMITER)[0],
+                    queryParamEntry.split(QUERY_COMPONENT_VALUE_DELIMITER)[1]
+            );
+        }
+        return mappedQueryParams;
     }
 }

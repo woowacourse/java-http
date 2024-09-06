@@ -11,6 +11,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> header;
+    private final String body;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -18,6 +19,7 @@ public class HttpRequest {
 
         this.requestLine = new RequestLine(bufferedReader.readLine());
         this.header = mapHeader(bufferedReader);
+        this.body = mapBody(bufferedReader);
     }
 
     private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
@@ -29,5 +31,40 @@ public class HttpRequest {
             header.put(headerEntry[0], headerEntry[1]);
         }
         return header;
+    }
+
+    private String mapBody(BufferedReader bufferedReader) throws IOException {
+        int contentLength = Integer.parseInt(get(HeaderName.CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
+        return new String(buffer);
+    }
+
+    public boolean isMethod(HttpMethod httpMethod) {
+        return requestLine.isMethod(httpMethod);
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String get(HeaderName headerName) {
+        return header.get(headerName);
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public boolean hasCookie() {
+        return header.containsKey(HeaderName.COOKIE);
+    }
+
+    public boolean hasQueryParam() {
+        return requestLine.hasQueryParam();
+    }
+
+    public String getQueryParam(String paramName) {
+        return requestLine.getQueryParam(paramName);
     }
 }

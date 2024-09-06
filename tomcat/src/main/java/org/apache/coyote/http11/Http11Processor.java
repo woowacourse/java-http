@@ -1,8 +1,7 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.LoginService;
+import com.techcourse.FrontController;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,14 +63,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(HttpRequest request) throws IOException {
+
+        FrontController.service(request);
+
+        // 정적 파일을 응답
         String url = request.getUrl();
-
-        if (url.equals("/login")) {
-            Map<String, String> queries = request.getQueries();
-            User user = LoginService.login(queries.get("account"), queries.get("password"));
-            log.info("Login Success = {}", user);
-        }
-
         ContentType contentType = ContentType.findByUrl(url);
         String resourceUrl = getResourceUrl(contentType, url);
         String responseBody = createResponseBody(resourceUrl);
@@ -105,5 +101,4 @@ public class Http11Processor implements Runnable, Processor {
         header.put("Content-Length", length + " ");
         return header;
     }
-
 }

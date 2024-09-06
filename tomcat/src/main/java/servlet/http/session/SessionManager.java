@@ -7,16 +7,16 @@ public class SessionManager implements Manager {
 
     private static final Map<String, Session> sessions = new HashMap<>();
 
-    private static SessionManager instance;
+    private static SessionManager INSTANCE;
 
     private SessionManager() {
     }
 
     public static SessionManager getInstance() {
-        if (instance == null) {
-            instance = new SessionManager();
+        if (INSTANCE == null) {
+            INSTANCE = new SessionManager();
         }
-        return instance;
+        return INSTANCE;
     }
 
     @Override

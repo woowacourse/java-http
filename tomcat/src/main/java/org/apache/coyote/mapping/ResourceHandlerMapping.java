@@ -1,4 +1,4 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.mapping;
 
 import java.io.IOException;
 import java.net.URL;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.apache.coyote.response.HttpResponseGenerator;
 
-public class ResourceHandler {
+public class ResourceHandlerMapping {
 
     private static final Map<String, String> STATIC_RESOURCE_EXTENSIONS = Map.of(
             "css", "css",
@@ -17,12 +17,12 @@ public class ResourceHandler {
     private static final String STATIC_RESOURCE_ROOT_PATH = "static/";
     private static final String PATH_DELIMITER = "/";
 
-    private static final ResourceHandler INSTANCE = new ResourceHandler();
+    private static final ResourceHandlerMapping INSTANCE = new ResourceHandlerMapping();
 
-    private ResourceHandler() {
+    private ResourceHandlerMapping() {
     }
 
-    public static ResourceHandler getInstance() {
+    public static ResourceHandlerMapping getInstance() {
         return INSTANCE;
     }
 

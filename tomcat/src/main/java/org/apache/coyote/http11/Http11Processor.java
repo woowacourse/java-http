@@ -1,27 +1,32 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.HttpCookie;
+import com.techcourse.HttpProtocol;
+import com.techcourse.MyHttpRequest;
+import com.techcourse.Session;
+import com.techcourse.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -39,35 +44,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             // parse request
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder sb = new StringBuilder();
-
-            int contentLength = -1;
-            String s;
-            while ((s = bufferedReader.readLine()) != null && !s.isEmpty()) {
-                sb.append(s).append("\r\n");
-                if (s.contains("Content-Length")) {
-                    contentLength = Integer.parseInt(s.split(":")[1].strip());
-                }
-            }
-
-            String requestBody = null;
-            if (contentLength != -1) {
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
-            }
-
-            if (sb.isEmpty()) {
-                return;
-            }
-
-            // handle request
-            String request = sb.toString().split("\r\n")[0];
+            MyHttpRequest request = new MyHttpRequest(inputStream);
 
             // handle post
-            if (request.contains("POST")) {
-                outputStream.write(handleStaticPostRequest(request, requestBody));
+            if ("POST".equals(request.getMethod())) {
+                outputStream.write(handleStaticPostRequest(request));
                 outputStream.flush();
                 return;
             }
@@ -77,55 +58,58 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(handleStaticRequest(request));
             outputStream.flush();
 
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private byte[] handleStaticPostRequest(String request, String requestBody) {
-
-        String[] requestBodySplit = requestBody.split("&");
-        Map<String, String> requestBodyMap = new HashMap<>();
-        for (int i = 0; i < requestBodySplit.length; i++) {
-            String[] split = requestBodySplit[i].split("=");
-            requestBodyMap.put(split[0], split[1]);
-        }
-        if(request.contains("login")){
-            if (InMemoryUserRepository.findByAccount(requestBodyMap.get("account")).isEmpty()) {
+    private byte[] handleStaticPostRequest(MyHttpRequest request) {
+        Map<String, String> payload = request.getPayload();
+        Session newId = new Session(UUID.randomUUID().toString());
+        if (payload.containsKey("login")) {
+            if (InMemoryUserRepository.findByAccount(payload.get("account")).isEmpty()) {
                 throw new IllegalArgumentException("account already exists");
             }
+            Session session = sessionManager.findSession(payload.get("account"));
+
             return String.join("\r\n",
                             "HTTP/1.1 " + "302 Found" + " ",
                             "Content-Type: " + "text/html" + " ",
-                            "Location: /index.html" + " ")
+                            "Location: /index.html" + " ",
+                            "Set-Cookie: JSESSIONID=" + sessionManager.findSession(payload.get("account")) + " "
+                    )
                     .getBytes();
         }
 
-        if (InMemoryUserRepository.findByAccount(requestBodyMap.get("account")).isPresent()) {
+        if (InMemoryUserRepository.findByAccount(payload.get("account")).isPresent()) {
             throw new IllegalArgumentException("account already exists");
         }
 
+        Session session = sessionManager.findSession(payload.get("account"));
+        session.setAttribute("JESSIONID", UUID.randomUUID().toString());
+
         InMemoryUserRepository.save(
                 new User(
-                        requestBodyMap.get("account"),
-                        requestBodyMap.get("password"),
-                        requestBodyMap.get("email")
+                        payload.get("account"),
+                        payload.get("password"),
+                        payload.get("email")
                 )
         );
 
+        sessionManager.add(newId);
         return String.join("\r\n",
                         "HTTP/1.1 " + "302 Found" + " ",
                         "Content-Type: " + "text/html" + " ",
-                        "Location: /index.html" + " ")
+                        "Location: /index.html" + " ",
+                        "Set-Cookie: JSESSIONID=" + newId + " "
+                )
                 .getBytes();
     }
 
-    private byte[] handleStaticRequest(String request) throws URISyntaxException, IOException {
-        String file = request.split(" ")[1];
-        validateFileName(file);
-        String[] split = file.split("\\.");
+    private byte[] handleStaticRequest(MyHttpRequest request) throws URISyntaxException, IOException {
+        String location = request.getLocation();
+        validateFileName(location);
+        String[] split = location.split("\\.");
         String fileName = split[0];
         if (fileName.contains("?")) {
             return getQueryParameterResponseBody(fileName);
@@ -206,7 +190,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         return String.join("\r\n",
                         "HTTP/1.1 200 OK ",
-                        "Content-Type: " + "text/" + extension + " ",
+                        "Content-Type: " + "text/" + extension + ";charset=utf-8 ",
                         "Content-Length: " + responseBody.getBytes().length + " ",
                         "", responseBody)
                 .getBytes();

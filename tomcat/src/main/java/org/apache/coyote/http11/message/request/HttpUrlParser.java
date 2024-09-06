@@ -18,6 +18,9 @@ public class HttpUrlParser {
     private static final int QUERY_PARAMETER_KEY_INDEX = 0;
     private static final int QUERY_PARAMETER_VALUE_INDEX = 1;
 
+    private HttpUrlParser() {
+    }
+
     public static HttpUrl parseUrl(String url) {
         String[] urlElements = url.split(URL_DELIMITER);
         String path = urlElements[PATH_INDEX];

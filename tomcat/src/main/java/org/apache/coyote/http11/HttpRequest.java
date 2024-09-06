@@ -29,7 +29,7 @@ public class HttpRequest {
             return new HttpRequest(method, httpProtocol, path, queries, headers);
 
         } catch (IOException e) {
-            throw new IllegalArgumentException("HTTP 요청 정보를 파싱하는 중에 에러가 발생했습니다." ,e);
+            throw new IllegalArgumentException("HTTP 요청 정보를 파싱하는 중에 에러가 발생했습니다.", e);
         }
     }
 
@@ -80,9 +80,9 @@ public class HttpRequest {
     }
 
     public boolean hasFilePath() {
-        if(path.contains(".")) {
+        if (path.contains(".")) {
             int extensionIndex = path.indexOf(".");
-            if(path.substring(extensionIndex).length() > 1) {
+            if (path.substring(extensionIndex).length() > 1) {
                 return true;
             }
         }

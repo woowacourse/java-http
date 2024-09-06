@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.file.Files;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +39,8 @@ public class Http11Processor implements Runnable, Processor {
 
             if(request.hasFilePath()) {
                 File requestFile = getRequestFile(request);
-                String mimeType = Files.probeContentType(requestFile.toPath());
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: %s;charset=utf-8 ".formatted(mimeType),
-                        "Content-Length: " + requestFile.toString().getBytes().length + " ",
-                        "",
-                        requestFile.toString());
-                outputStream.write(response.getBytes());
+                HttpResponse response = new HttpResponse("200 OK", requestFile);
+                outputStream.write(response.toMessage().getBytes());
             } else {
                 FrontController frontController = FrontController.getInstance();
                 Controller controller = frontController.mapController(request.getMethod(), request.getPath());
@@ -65,6 +58,9 @@ public class Http11Processor implements Runnable, Processor {
         String resourcePath = "static" + httpRequest.getPath();
         URL resource = getClass().getClassLoader().getResource(resourcePath);
 
+        if(httpRequest.getPath().equals("favicon.ico")) {
+            log.warn("favicon.ico 를 찾을 수 없습니다.");
+        }
         return new File(resource.getPath());
     }
 }

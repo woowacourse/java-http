@@ -2,6 +2,7 @@ package org.apache.catalina.manager;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager implements Manager {
@@ -14,8 +15,8 @@ public class SessionManager implements Manager {
     }
 
     @Override
-    public Session findSession(String id) throws IOException {
-        return STORE.get(id);
+    public Optional<Session> findSession(String id) throws IOException {
+        return Optional.ofNullable(STORE.get(id));
     }
 
     @Override

@@ -13,8 +13,4 @@ public class RequestBody {
     public String get(String key) {
         return params.get(key);
     }
-
-    public Map<String, String> getParams() {
-        return params;
-    }
 }

@@ -20,7 +20,6 @@ import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
-import org.apache.coyote.http11.request.header.RequestHeaders;
 import org.apache.coyote.http11.response.startLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,16 +76,15 @@ public class Http11Processor implements Runnable, Processor {
                 String resourcePath = "static" + path + ".html";
                 Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
 
-                RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
-
                 if (resource.isPresent()) {
-                    Cookie cookie = new Cookie(requestHeaders.getOrDefault("Cookie", ""));
-                    Optional<String> optionalSessionId = cookie.getJSessionId();
+                    Optional<String> cookieHeader = httpRequest.getHeader("Cookie");
+                    Cookie cookie = new Cookie(cookieHeader.orElse(""));
 
-                    if (optionalSessionId.isPresent()) {
-                        String sessionId = optionalSessionId.get();
-                        Session session = sessionManager.findSession(sessionId);
-                        if (session != null) {
+                    Optional<String> sessionId = cookie.getJSessionId();
+                    if (sessionId.isPresent()) {
+                        Optional<Session> session = sessionManager.findSession(sessionId.get());
+
+                        if (session.isPresent()) {
                             String response = String.join("\r\n",
                                     "HTTP/1.1 " + HttpStatus.FOUND.compose(),
                                     "Location: /index.html ",
@@ -117,39 +115,36 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpMethod == HttpMethod.POST && "/login".equals(path)) {
-                RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
                 RequestBody requestBody = httpRequest.getRequestBody();
-
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
 
-                if (optionalUser.isPresent()) {
+                if (optionalUser.isPresent() && optionalUser.get().checkPassword(requestBody.get("password"))) {
                     User user = optionalUser.get();
-                    if (user.checkPassword(requestBody.get("password"))) {
-                        Cookie cookie = new Cookie(requestHeaders.getOrDefault("Cookie", ""));
-                        Optional<String> sessionId = cookie.getJSessionId();
+                    Optional<String> cookieHeader = httpRequest.getHeader("Cookie");
+                    Cookie cookie = new Cookie(cookieHeader.orElse(""));
 
-                        if (sessionId.isEmpty()) {
-                            UUID uuid = UUID.randomUUID();
-                            Session session = new Session(uuid.toString());
-                            session.setAttribute("user", user);
-                            sessionManager.add(session);
-                            cookie.addCookie(Cookie.JSESSIONID, uuid.toString());
-                        }
-
-                        String response = String.join("\r\n",
-                                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                                "Set-Cookie: " + cookie.toCookieHeader(),
-                                "Location: /index.html",
-                                "Content-Length: 0",
-                                ""
-                        );
-
-                        bufferedWriter.write(response);
-                        bufferedWriter.flush();
-
-                        log.info("로그인 성공! 아이디 : {}", user.getAccount());
-                        return;
+                    Optional<String> sessionId = cookie.getJSessionId();
+                    if (sessionId.isEmpty()) {
+                        UUID uuid = UUID.randomUUID();
+                        Session session = new Session(uuid.toString());
+                        session.setAttribute("user", user);
+                        sessionManager.add(session);
+                        cookie.addCookie(Cookie.JSESSIONID, uuid.toString());
                     }
+
+                    String response = String.join("\r\n",
+                            "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                            "Set-Cookie: " + cookie.toCookieHeader(),
+                            "Location: /index.html",
+                            "Content-Length: 0",
+                            ""
+                    );
+
+                    bufferedWriter.write(response);
+                    bufferedWriter.flush();
+
+                    log.info("로그인 성공! 아이디 : {}", user.getAccount());
+                    return;
                 }
 
                 String response = String.join("\r\n",
@@ -167,8 +162,7 @@ public class Http11Processor implements Runnable, Processor {
             if (httpMethod == HttpMethod.GET && "/register".equals(path)) {
                 String resourcePath = "static" + path + ".html";
 
-                Optional<URL> resource = Optional.ofNullable(
-                        getClass().getClassLoader().getResource(resourcePath));
+                Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
 
                 if (resource.isPresent()) {
                     String responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));

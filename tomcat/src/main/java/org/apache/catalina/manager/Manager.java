@@ -1,6 +1,7 @@
 package org.apache.catalina.manager;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -43,7 +44,7 @@ public interface Manager {
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    Session findSession(String id) throws IOException;
+    Optional<Session> findSession(String id) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.

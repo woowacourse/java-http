@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
@@ -47,7 +48,9 @@ public class HttpRequest {
     private static RequestBody createRequestBody(BufferedReader bufferedReader, RequestHeaders requestHeaders)
             throws IOException {
         StringBuilder body = new StringBuilder();
-        int contentLength = Integer.parseInt(requestHeaders.getOrDefault("Content-Length", "0"));
+        int contentLength = requestHeaders.get("Content-Length")
+                .map(Integer::parseInt)
+                .orElse(0);
 
         if (contentLength > 0) {
             char[] bodyChars = new char[contentLength];
@@ -69,6 +72,10 @@ public class HttpRequest {
         }
 
         return new RequestBody(params);
+    }
+
+    public Optional<String> getHeader(String header) {
+        return requestHeaders.get(header);
     }
 
     public RequestLine getRequestLine() {

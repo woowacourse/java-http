@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,13 +44,14 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequestFirstLine firstLine = new HttpRequestFirstLine(bufferedReader.readLine());
             String requestURL = firstLine.getUrl();
+            HttpMethod requestMethod = firstLine.getMethod();
 
-            if (Objects.equals(firstLine.getMethod(), "GET")) {
+            if (requestMethod == HttpMethod.GET) {
                 processGetRequest(requestURL, outputStream);
                 return;
             }
 
-            if (Objects.equals(firstLine.getMethod(), "POST")) {
+            if (requestMethod == HttpMethod.POST) {
                 processPostRequest(requestURL, bufferedReader, outputStream);
             }
         } catch (IOException | UncheckedServletException e) {

@@ -12,9 +12,8 @@ public class HttpResponse {
     private String responseBody;
     private String redirectUrl;
 
-    public HttpResponse addHttpVersion(HttpVersion httpVersion) {
+    public HttpResponse(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
-        return this;
     }
 
     public HttpResponse addHttpStatusCode(HttpStatusCode httpStatusCode) {

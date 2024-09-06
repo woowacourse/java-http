@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             String path = httpRequest.getPath();
             HttpMethod httpRequestMethod = httpRequest.getHttpMethod();
 
-            HttpResponse httpResponse = new HttpResponse().addHttpVersion(HttpVersion.HTTP_1_1);
+            HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
 
             if (path.equals("/")) {
                 httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))

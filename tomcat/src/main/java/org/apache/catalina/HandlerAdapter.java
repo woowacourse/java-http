@@ -33,6 +33,9 @@ public class HandlerAdapter {
             if (path.equals("/login")) {
                 return controller.login(httpRequest);
             }
+            if (path.equals("/register")) {
+                return controller.register(httpRequest);
+            }
         }
         return responseCreator.create(200, path);
     }

@@ -41,4 +41,12 @@ public class Controller {
         }
         return responseCreator.create(401, "/401.html"); //todo 리다이렉트
     }
+
+    public String register(HttpRequest httpRequest) throws IOException {
+        Map<String, String> payload = httpRequest.getPayload();
+        User user = new User(payload.get("account"), payload.get("password"), payload.get("email"));
+        InMemoryUserRepository.save(user);
+
+        return responseCreator.create(200, "/index.html");
+    }
 }

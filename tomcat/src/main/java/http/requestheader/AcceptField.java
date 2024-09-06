@@ -1,6 +1,5 @@
 package http.requestheader;
 
-import java.net.URI;
 import java.util.Arrays;
 
 public class AcceptField {
@@ -81,30 +80,29 @@ public class AcceptField {
         return typeValue.compareTo(otherTypeValue);
     }
 
-    public String buildMediaType(URI uri) {
+    public String buildMediaType(String path) {
         if (!type.equals(WILD_TYPE) && !subType.equals(WILD_TYPE)) {
             return combineType(this.subType);
         }
         if (type.equals(WILD_TYPE)) {
             return "text/html";
         }
-        return buildMediaTypeFromUri(uri);
+        return buildMediaTypeFromUri(path);
     }
 
     private String combineType(String subType) {
         return type + "/" + subType;
     }
 
-    private String buildMediaTypeFromUri(URI uri) {
-        String extension = parseFileExtension(uri);
+    private String buildMediaTypeFromUri(String path) {
+        String extension = parseFileExtension(path);
         if (extension.isEmpty()) {
             return "text/plain";
         }
         return combineType(subType);
     }
 
-    private String parseFileExtension(URI uri) {
-        String path = uri.getPath();
+    private String parseFileExtension(String path) {
         if (path == null || path.isEmpty()) {
             return "";
         }

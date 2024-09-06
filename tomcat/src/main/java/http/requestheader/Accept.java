@@ -1,6 +1,5 @@
 package http.requestheader;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,10 +20,10 @@ public class Accept {
                 .toList();
     }
 
-    public String processContentType(URI uri) {
+    public String processContentType(String path) {
         return fields.stream()
                 .max(AcceptField::compare)
-                .map(field -> field.buildMediaType(uri))
+                .map(field -> field.buildMediaType(path))
                 .orElse("text/html");
     }
 }

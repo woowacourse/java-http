@@ -2,7 +2,6 @@ package http.requestheader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,7 @@ class AcceptTest {
         String expected = "text/html";
 
         // when
-        String actual = accept.processContentType(new URI("/test/path"));
+        String actual = accept.processContentType("/test/path");
 
         // then
         assertThat(actual).isEqualTo(expected);

@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpCookie;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

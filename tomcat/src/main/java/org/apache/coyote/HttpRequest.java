@@ -1,9 +1,6 @@
 package org.apache.coyote;
 
 import java.util.Arrays;
-import java.util.Optional;
-
-import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
     private final String method;

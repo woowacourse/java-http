@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -91,7 +93,11 @@ public class Http11Processor implements Runnable, Processor {
 
         log.info("user : {}", user.get());
 
-        return HttpResponse.found("/index.html");
+        HttpResponse redirect = HttpResponse.found("/index.html");
+        if (request.getCookie(JSESSIONID) == null) {
+            redirect.setCookie(JSESSIONID, UUID.randomUUID().toString());
+        }
+        return redirect;
     }
 
     private HttpResponse register(HttpRequest request) {

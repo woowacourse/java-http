@@ -13,12 +13,14 @@ public class HttpRequest {
     private String uri;
     private String path;
     private Map<String, String> headers;
+    private HttpCookie cookie;
     private Map<String, String> parameters;
     private String body;
 
     public HttpRequest() {
         this.headers = new HashMap<>();
         this.parameters = new HashMap<>();
+        this.cookie = new HttpCookie();
     }
 
     public String getParameter(String key) {
@@ -27,6 +29,10 @@ public class HttpRequest {
 
     public String getHeader(String key) {
         return headers.get(key);
+    }
+
+    public String getCookie(String key) {
+        return cookie.getCookie(key);
     }
 
     public void setParameter(String key, String value) {

@@ -17,30 +17,42 @@ public class HttpResponse {
     private int statusCode;
     private String statusMessage;
     private Map<String, String> headers;
+    private HttpCookie cookie;
     private String body;
 
+    private HttpResponse(int statusCode, String statusMessage, String body) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.headers = new HashMap<>();
+        this.cookie = new HttpCookie();
+        this.body = body;
+    }
+
     public static HttpResponse ok(String body) {
-        return new HttpResponse(200, "OK", new HashMap<>(), body);
+        return new HttpResponse(200, "OK", body);
     }
 
     public static HttpResponse found(String location) {
-        return new HttpResponse(302, "Found", Map.of(
-                "Location", location
-        ), "");
+        return new HttpResponse(
+                302, "Found", new HashMap<>(Map.of("Location", location)), new HttpCookie(), ""
+        );
     }
 
     public static HttpResponse notFound() {
-        return new HttpResponse(404, "Not Found", new HashMap<>(), "");
+        return new HttpResponse(404, "Not Found", "");
     }
 
     public static HttpResponse internalServerError() {
-        return new HttpResponse(500, "Internal Server Error", new HashMap<>(), "");
+        return new HttpResponse(500, "Internal Server Error", "");
     }
 
     public String build() {
         if (body.isBlank()) {
             return "%s %d %s \r\n%s\r\n"
                     .formatted(HTTP_VERSION, statusCode, statusMessage, getHeadersString());
+        }
+        if (cookie.isExist()) {
+            headers.put("Set-Cookie", cookie.serialize());
         }
 
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
@@ -77,6 +89,11 @@ public class HttpResponse {
 
     public HttpResponse setContentType(String contentType) {
         headers.put("Content-Type", contentType);
+        return this;
+    }
+
+    public HttpResponse setCookie(String key, String value) {
+        headers.put("Set-Cookie", "%s=%s".formatted(key, value));
         return this;
     }
 

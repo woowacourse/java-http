@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequestParser {
 
@@ -58,6 +60,22 @@ public class HttpRequestParser {
             String[] headerParts = line.split(": ");
             request.setHeader(headerParts[0], headerParts[1]);
         }
+
+        if (request.getHeader("Cookie") != null) {
+            HttpCookie cookie = parseCookie(request.getHeader("Cookie"));
+            request.setCookie(cookie);
+        }
+    }
+
+    private static HttpCookie parseCookie(String cookieString) {
+        Map<String, String> cookies = new HashMap<>();
+
+        String[] cookieArray = cookieString.split("; ");
+        for (String cookiePair : cookieArray) {
+            String[] pair = cookiePair.split("=");
+            cookies.put(pair[0], pair[1]);
+        }
+        return new HttpCookie(cookies);
     }
 
     private static void parseBody(BufferedReader reader, HttpRequest request) throws IOException {

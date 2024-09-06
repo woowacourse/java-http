@@ -70,7 +70,7 @@ public class ApiProcessor {
         String email = requestBody.get("email");
         String password = requestBody.get("password");
 
-        User user = new User(account, email, password);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         pageProcessor.processWithHttpStatus(outputStream, "index", HttpStatus.CREATED);

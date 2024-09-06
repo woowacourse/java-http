@@ -1,14 +1,20 @@
 package cache.com.example;
 
+import cache.com.example.version.ResourceVersion;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 @Controller
 public class GreetingController {
+
+    private final ResourceVersion version;
+
+    public GreetingController(ResourceVersion version) {
+        this.version = version;
+    }
 
     @GetMapping("/")
     public String index() {

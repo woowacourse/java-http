@@ -93,4 +93,28 @@ public class SimpleHttpRequest {
 
         return result;
     }
+
+    public Map<String, String> getCookies() {
+        final String cookieLinePrefix = "Cookie: ";
+        final String cookieLine = Arrays.stream(requestMessage.split("\r\n"))
+                .filter(line -> line.startsWith(cookieLinePrefix))
+                .findAny()
+                .orElse(null);
+
+        if (cookieLine == null) {
+            return Collections.emptyMap();
+        }
+        final String[] cookies = cookieLine.replace(cookieLinePrefix, "")
+                .trim()
+                .split("; ");
+
+        final HashMap<String, String> result = new HashMap<>();
+        Arrays.stream(cookies)
+                .forEach(cookie -> {
+                    final String[] keyAndValue = cookie.split("=");
+                    result.put(keyAndValue[0], keyAndValue[1]);
+                });
+
+        return result;
+    }
 }

@@ -157,9 +157,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleLoginRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest)
-            throws URISyntaxException, IOException
-    {
+            throws URISyntaxException, IOException {
         if (httpRequest.getHttpMethod() == HttpMethod.GET) {
+            final Map<String, String> cookies = httpRequest.getCookies();
+            if (isLogin(cookies)) {
+                final String response = String.join("\r\n",
+                        "HTTP/1.1 302 Found",
+                        "Location: http://localhost:8080/index.html",
+                        "Content-Type: text/html; charset=utf-8",
+                        "Content-Length: 0",
+                        "", "");
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
             final File file = getStaticFile("/login.html");
             final String responseBody = readFileContent(file);
             final String response = String.join("\r\n",
@@ -175,7 +186,9 @@ public class Http11Processor implements Runnable, Processor {
         final Map<String, String> bodyData = httpRequest.getBodyData();
         final String account = bodyData.get("account");
         final String password = bodyData.get("password");
-        if (!loginCheck(account, password)) {
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseGet(null);
+        if (!validateLoginCredential(user, password)) {
             final File file = getStaticFile("/401.html");
             final String responseBody = String.join("", readFileContent(file));
             final String response = String.join("\r\n",
@@ -189,6 +202,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final String sessionId = generateSessionId();
+        final Session session = new Session(sessionId, user);
+        final SessionStorage sessionStorage = new SessionStorage();
+        sessionStorage.add(session);
+
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found",
                 "Set-Cookie: JSESSIONID=" + sessionId,
@@ -200,9 +217,17 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private boolean loginCheck(final String account, final String password) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElse(null);
+    private boolean isLogin(final Map<String, String> cookies) {
+        if (cookies.isEmpty() || !cookies.containsKey("JSESSIONID")) {
+            return false;
+        }
+
+        final String sessionId = cookies.get("JSESSIONID");
+        final SessionStorage sessionStorage = new SessionStorage();
+        return sessionStorage.exist(sessionId);
+    }
+
+    private boolean validateLoginCredential(final User user, final String password) {
         return user != null && user.checkPassword(password);
     }
 
@@ -261,6 +286,11 @@ public class Http11Processor implements Runnable, Processor {
 
         final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+
+        final SessionStorage sessionStorage = new SessionStorage();
+        final String sessionId = generateSessionId();
+        final Session session = new Session(sessionId, user);
+        sessionStorage.add(session);
         return user;
     }
 

@@ -32,6 +32,7 @@ class GreetingControllerTest {
         final var response = webTestClient
                 .get()
                 .uri("/")
+                .header("Cache-Control", "no-cache, private")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())
@@ -47,7 +48,6 @@ class GreetingControllerTest {
                 .uri("/")
                 .exchange()
                 .expectStatus().isOk()
-
                 // gzip으로 요청 보내도 어떤 방식으로 압축할지 서버에서 결정한다.
                 // 웹브라우저에서 localhost:8080으로 접근하면 응답 헤더에 "Content-Encoding: gzip"이 있다.
                 .expectHeader().valueEquals(HttpHeaders.TRANSFER_ENCODING, "chunked")

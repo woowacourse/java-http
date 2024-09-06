@@ -5,9 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
+import org.apache.catalina.controller.Controller;
+import org.apache.catalina.handler.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -36,57 +35,16 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = new HttpRequest(reader);
-            HttpResponse httpResponse = new HttpResponse();
+            HttpRequest request = new HttpRequest(reader);
+            HttpResponse response = new HttpResponse();
 
-            String path = httpRequest.getRequestLine().getPath();
-            String accept = httpRequest.getHeaders().get("Accept");
-            log.info("request accept: {}", accept);
+            RequestMapping requestMapping = new RequestMapping();
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
 
-            if (path.equals("/")) {
-                httpResponse.setResponseBodyByText("Hello world!");
-                httpResponse.setStatus200();
-                httpResponse.setContentTypeHtml();
-
-            } else if (path.contains("/login")) {
-                URL resource = getClass().getClassLoader().getResource("static/login.html");
-                httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
-                httpResponse.setStatus200();
-                httpResponse.setContentTypeHtml();
-                log.info("response resource : {}", resource.toURI());
-
-            } else {
-
-                URL resource = getClass().getClassLoader().getResource("static" + path);
-                log.info("response resource : {}", resource);
-
-                if (resource == null) {
-                    URL notFoundResource = getClass().getClassLoader().getResource("static/404.html");
-                    httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
-                    httpResponse.setStatus404();
-                    httpResponse.setContentTypeHtml();
-                    log.info("response resource : {}", notFoundResource.toURI());
-
-                } else if (accept != null && accept.contains("text/css")) {
-                    httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
-                    httpResponse.setStatus200();
-                    httpResponse.setContentTypeCss();
-                    log.info("response resource : {}", resource.toURI());
-
-                } else {
-                    httpResponse.setResponseBodyByPath(Path.of(resource.toURI()));
-                    httpResponse.setStatus200();
-                    httpResponse.setContentTypeHtml();
-                    log.info("response resource : {}", resource.toURI());
-
-                }
-            }
-
-            final String response = httpResponse.getResponse();
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

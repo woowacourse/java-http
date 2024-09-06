@@ -63,7 +63,8 @@ public class Http11Processor implements Runnable, Processor {
                 4. true가 나온다면 로그인이 잘 됐다고 판단하고, index.html로 리다이렉트
                  */
                 if ("/login".equals(uri)) {
-                    String jsessionId = getJsessionId(headers.get("Cookie"));
+                    HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+                    String jsessionId = httpCookie.get("JSESSIONID");
                     if (jsessionId != null) {
                         // TODO: 올바르지 않은 jsessionId가 왔을 때, 대처하기 위한 분기처리
                         Session session = sessionManager.findSession(jsessionId);

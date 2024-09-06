@@ -2,19 +2,22 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpCookie {
 
-    private static final Map<String, String> cookies = new ConcurrentHashMap<>();
+    private final Map<String, String> cookiePairs = new HashMap<>();
 
-    public static String getJsessionId(String account) {
-        String uuid = UUID.randomUUID().toString();
-        cookies.put(uuid, account);
-
-        return uuid;
+    public HttpCookie(String cookie) {
+        if (cookie == null) {
+            return;
+        }
+        for (String rawCookiePair : cookie.split(";")) {
+            String[] cookiePair = rawCookiePair.split("=");
+            cookiePairs.put(cookiePair[0].trim(), cookiePair[1].trim());
+        }
     }
 
-    private HttpCookie() {}
+    public String get(String key) {
+        return cookiePairs.get(key);
+    }
 }

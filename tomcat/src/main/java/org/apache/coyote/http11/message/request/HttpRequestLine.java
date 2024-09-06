@@ -11,18 +11,18 @@ public class HttpRequestLine {
     private final String uri;
     private final String httpVersion;
 
-    public HttpRequestLine(HttpMethod method, String uri, String httpVersion) {
-        this.method = method;
-        this.uri = uri;
-        this.httpVersion = httpVersion;
-    }
-
     public HttpRequestLine(String startLine) {
         this(
                 parseMethod(startLine),
                 parsePath(startLine),
                 parseHttpVersion(startLine)
         );
+    }
+
+    public HttpRequestLine(HttpMethod method, String uri, String httpVersion) {
+        this.method = method;
+        this.uri = uri;
+        this.httpVersion = httpVersion;
     }
 
     private static HttpMethod parseMethod(String startLine) {

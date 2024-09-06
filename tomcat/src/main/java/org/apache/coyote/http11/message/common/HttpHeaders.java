@@ -13,16 +13,12 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
-    public HttpHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
     public HttpHeaders(String headers) {
         this(parseHeaders(headers));
     }
 
-    public HttpHeaders() {
-        this(new LinkedHashMap<>());
+    public HttpHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     private static Map<String, String> parseHeaders(String header) {
@@ -34,6 +30,10 @@ public class HttpHeaders {
             map.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
         return map;
+    }
+
+    public HttpHeaders() {
+        this(new LinkedHashMap<>());
     }
 
     public int getContentLength() {

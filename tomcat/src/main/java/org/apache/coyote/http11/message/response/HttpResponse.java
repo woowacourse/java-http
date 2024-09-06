@@ -10,14 +10,14 @@ public class HttpResponse {
     private final HttpHeaders headers;
     private final HttpBody body;
 
+    public HttpResponse() {
+        this(new HttpStatusLine(HttpStatus.OK), new HttpHeaders(), new HttpBody(""));
+    }
+
     public HttpResponse(HttpStatusLine statusLine, HttpHeaders headers, HttpBody body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
-    }
-
-    public HttpResponse() {
-        this(new HttpStatusLine(HttpStatus.OK), new HttpHeaders(), new HttpBody(""));
     }
 
     public void setStatusLine(HttpStatus httpStatus) {

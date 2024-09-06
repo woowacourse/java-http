@@ -12,7 +12,8 @@ import org.apache.coyote.controller.StaticResourceController;
 public class RequestMapping {
 
     private static final Pattern LOGIN_REGEX = Pattern.compile("^(/login)(\\?([^#\\s]*))?");
-    private static final Pattern STATIC_RESOURCE_PATTERN = Pattern.compile("\\.(html|css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern STATIC_RESOURCE_PATTERN = Pattern.compile(
+            "\\.(html|css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$", Pattern.CASE_INSENSITIVE);
 
     private static final Map<String, FrontController> controllers = new HashMap<>();
 

@@ -37,12 +37,12 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public void setMaxInactiveInterval(int interval) {
+    public int getMaxInactiveInterval() {
+        return 0;
     }
 
     @Override
-    public int getMaxInactiveInterval() {
-        return 0;
+    public void setMaxInactiveInterval(int interval) {
     }
 
     @Override
@@ -72,12 +72,12 @@ public class Session implements HttpSession {
 
     @Override
     public void setAttribute(String name, Object value) {
-         values.put(name, value);
+        values.put(name, value);
     }
 
     @Override
     public void putValue(String name, Object value) {
-         values.put(name, value);
+        values.put(name, value);
     }
 
     @Override

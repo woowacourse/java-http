@@ -14,6 +14,10 @@ public class SessionManager implements Manager {
     private SessionManager() {
     }
 
+    public static SessionManager getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public void add(HttpSession session) {
         SESSIONS.put(session.getId(), session);
@@ -31,9 +35,5 @@ public class SessionManager implements Manager {
 
     public boolean isExistSession(String id) {
         return SESSIONS.containsKey(id);
-    }
-
-    public static SessionManager getInstance() {
-        return INSTANCE;
     }
 }

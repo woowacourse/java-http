@@ -10,6 +10,10 @@ public class UserService {
     private UserService() {
     }
 
+    public static UserService getInstance() {
+        return INSTANCE;
+    }
+
     public boolean isPasswordCorrect(User user, String password) {
         return user.checkPassword(password);
     }
@@ -27,9 +31,5 @@ public class UserService {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         System.out.println("회원가입 성공: " + user.getAccount());
-    }
-
-    public static UserService getInstance() {
-        return INSTANCE;
     }
 }

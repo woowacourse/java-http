@@ -8,13 +8,13 @@ public class HttpStatusLine {
     private HttpStatus httpStatus;
 
 
+    public HttpStatusLine(HttpStatus httpStatus) {
+        this(DEFAULT_VERSION, httpStatus);
+    }
+
     public HttpStatusLine(String httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
-    }
-
-    public HttpStatusLine(HttpStatus httpStatus) {
-        this(DEFAULT_VERSION, httpStatus);
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {

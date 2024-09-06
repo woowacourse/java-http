@@ -43,6 +43,15 @@ public class LoginController extends FrontController {
         handleSuccessfulLogin(response, user);
     }
 
+    private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
+        String path = "static/401.html";
+        String file = ResourceReader.readResource(path);
+
+        response.setStatusLine(HttpStatus.UNAUTHORIZED);
+        response.setContentType(ContentType.TEXT_HTML);
+        response.setBody(file);
+    }
+
     private void handleSuccessfulLogin(HttpResponse response, User user) {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.addSessionId();
@@ -53,15 +62,6 @@ public class LoginController extends FrontController {
 
         sessionService.registerSession(httpCookie.getSessionId(), user);
         System.out.println(user);
-    }
-
-    private void handleFailedLogin(HttpResponse response) throws IOException, URISyntaxException {
-        String path = "static/401.html";
-        String file = ResourceReader.readResource(path);
-
-        response.setStatusLine(HttpStatus.UNAUTHORIZED);
-        response.setContentType(ContentType.TEXT_HTML);
-        response.setBody(file);
     }
 
     @Override

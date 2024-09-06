@@ -11,6 +11,10 @@ public class SessionService {
     private SessionService() {
     }
 
+    public static SessionService getInstance() {
+        return INSTANCE;
+    }
+
     public void registerSession(String sessionId, User user) {
         Session session = new Session(sessionId);
         session.setAttribute("user", user);
@@ -19,9 +23,5 @@ public class SessionService {
 
     public boolean isSessionExist(String sessionId) {
         return sessionManager.isExistSession(sessionId);
-    }
-
-    public static SessionService getInstance() {
-        return INSTANCE;
     }
 }

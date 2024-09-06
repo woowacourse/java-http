@@ -15,10 +15,7 @@ class FileReaderTest {
     @Test
     @DisplayName("요청 파일을 읽을 수 있다.")
     void read() throws IOException {
-        ResourceHandler resourceHandler = new StaticResourceHandler("/index.html");
-        FileReader fileReader = new FileReader(resourceHandler);
-
-        String actual = fileReader.read();
+        String actual = FileReader.read("static/index.html");
 
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

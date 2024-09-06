@@ -7,15 +7,11 @@ import java.nio.file.Files;
 
 public class FileReader {
 
-    private final ResourceHandler resourceHandler;
-
-    public FileReader(ResourceHandler resourceHandler) {
-        this.resourceHandler = resourceHandler;
+    private FileReader() {
     }
 
-    public String read() throws IOException {
-        String fileName = resourceHandler.handle();
-        URL resource = getClass().getClassLoader().getResource(fileName);
+    public static String read(String fileName) throws IOException {
+        URL resource = FileReader.class.getClassLoader().getResource(fileName);
 
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }

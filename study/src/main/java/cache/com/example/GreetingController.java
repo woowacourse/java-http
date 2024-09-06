@@ -32,6 +32,11 @@ public class GreetingController {
         return "index";
     }
 
+    @GetMapping("/no-etag")
+    public String noEtag() {
+        return "index";
+    }
+
     @GetMapping("/resource-versioning")
     public String resourceVersioning() {
         return "resource-versioning";

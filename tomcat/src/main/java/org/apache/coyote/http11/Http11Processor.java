@@ -79,7 +79,15 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse dispatch(HttpRequest request) throws IOException {
         HttpMethod method = request.getMethod();
         String requestUrl = request.getRequestUrl();
+
         HttpHeader responseHeader = new HttpHeader();
+
+        if (requestUrl.equals("/") && method.isGet()) {
+            String responseBody = "Hello world!";
+            responseHeader.addHeader("Content-Type", "text/html;charset=utf-8");
+            responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+            return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
+        }
 
         if (requestUrl.startsWith("/login") && method.isPost()) {
             return login(request.getBody(), request.getCookie(), responseHeader);
@@ -93,18 +101,11 @@ public class Http11Processor implements Runnable, Processor {
             return register(request.getBody(), responseHeader);
         }
 
-        String responseBody = getResponseBody(requestUrl, responseHeader);
+        String responseBody = readResource(requestUrl, responseHeader);
         return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
     }
 
-    private String getResponseBody(String requestUrl, HttpHeader responseHeader) throws IOException {
-        if (requestUrl.equals("/")) {
-            String body = "Hello world!";
-            responseHeader.addHeader("Content-Type", "text/html;charset=utf-8");
-            responseHeader.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-            return body;
-        }
-
+    private String readResource(String requestUrl, HttpHeader responseHeader) throws IOException {
         String path = requestUrl.split("\\?")[0];
         if (!path.contains(".")) {
             path += ".html";
@@ -137,7 +138,7 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse(responseHeader, HttpStatus.FOUND);
         }
 
-        String responseBody = getResponseBody("/login.html", responseHeader);
+        String responseBody = readResource("/login.html", responseHeader);
         return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
     }
 

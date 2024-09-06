@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -97,6 +99,36 @@ class Http11ProcessorTest {
                 new String(fileContent);
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("이미 로그인이 되어있는데 GET /login 요청을 보내면 index.html로 리다이렉트한다.")
+    @Test
+    void alreadyLogin() throws IOException {
+        // given
+        Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
+        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertAll(
+                () -> assertThat(socket.output()).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(socket.output()).contains("Location: http://localhost:8080/index.html")
+        );
     }
 
     @DisplayName("올바른 회원 정보와 함께 로그인 요청이 오면 쿠키를 설정해주고 /index.html로 리다이렉트한다.")

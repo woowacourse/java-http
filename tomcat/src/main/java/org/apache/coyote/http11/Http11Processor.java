@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -60,6 +62,17 @@ public class Http11Processor implements Runnable, Processor {
                 3. session.isExistAttribute("user")로 세션에 저장된 유저객체가 있는지 질문
                 4. true가 나온다면 로그인이 잘 됐다고 판단하고, index.html로 리다이렉트
                  */
+                if ("/login".equals(uri)) {
+                    String jsessionId = getJsessionId(headers.get("Cookie"));
+                    if (jsessionId != null) {
+                        // TODO: 올바르지 않은 jsessionId가 왔을 때, 대처하기 위한 분기처리
+                        Session session = sessionManager.findSession(jsessionId);
+                        if (session.isExistAttribute("user")) {
+                            writeRedirectResponse("/index.html", outputStream);
+                            return;
+                        }
+                    }
+                }
             }
             if ("POST".equals(httpMethod)) {
                 String requestBody = getRequestBody(headers, bufferedReader);
@@ -79,13 +92,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void handleFaviconRequest(OutputStream outputStream) throws IOException {
-        final var response = "HTTP/1.1 204 No Content \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-        writeResponse(outputStream, response);
-    }
-
     private Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         while (true) {
@@ -97,6 +103,25 @@ public class Http11Processor implements Runnable, Processor {
             headers.put(splitHeader[0].trim(), splitHeader[1].trim());
         }
         return headers;
+    }
+
+    private void handleFaviconRequest(OutputStream outputStream) throws IOException {
+        final var response = "HTTP/1.1 204 No Content \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
+        writeResponse(outputStream, response);
+    }
+
+    private String getJsessionId(String cookie) {
+        if (cookie == null) {
+            return null;
+        }
+        Map<String, String> cookiePairs = new HashMap<>();
+        for (String rawCookiePair : cookie.split(";")) {
+            String[] cookiePair = rawCookiePair.split("=");
+            cookiePairs.put(cookiePair[0].trim(), cookiePair[1].trim());
+        }
+        return cookiePairs.get("JSESSIONID");
     }
 
     private String getRequestBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
@@ -128,6 +153,7 @@ public class Http11Processor implements Runnable, Processor {
                     log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
                     Session session = new Session(UUID.randomUUID().toString());
                     session.setAttribute("user", user);
+                    sessionManager.add(session);
                     writeRedirectResponseWithCookie(session.getId(), "/index.html", outputStream);
                     return;
                 }

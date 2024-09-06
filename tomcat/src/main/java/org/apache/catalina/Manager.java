@@ -1,8 +1,7 @@
 package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -36,14 +35,12 @@ public interface Manager {
      * specified session id (if any); otherwise return <code>null</code>.
      *
      * @param id The session id for the session to be returned
-     *
-     * @exception IllegalStateException if a new session cannot be
-     *  instantiated for any reason
-     * @exception IOException if an input/output error occurs while
-     *  processing this request
-     *
      * @return the request session or {@code null} if a session with the
-     *         requested ID could not be found
+     * requested ID could not be found
+     * @throws IllegalStateException if a new session cannot be
+     *                               instantiated for any reason
+     * @throws IOException           if an input/output error occurs while
+     *                               processing this request
      */
     HttpSession findSession(String id) throws IOException;
 

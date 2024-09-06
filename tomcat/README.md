@@ -10,11 +10,11 @@
 - [x] 로그인 기능 구현
   - [x] 성공 시 302 응답과 함께 `/index.html` 로 리다이랙트
   - [x] 실패 시 `401.html` 로 리다이랙트
-- [ ] 회원가입 기능 구현
+- [x] 회원가입 기능 구현
   - [x] `localhost:8080/register` 로 GET 요청 시 `register.html` 응답
   - [x] 회원가입 버튼은 POST 요청 사용
   - [x] POST 요청 시 Request Body 받음
-  - [ ] 로그인 요청 또한 POST 로 변경
+  - [x] 로그인 요청 또한 POST 로 변경
 - [ ] 쿠키에 JSESSIONID 저장
   - [ ] 응답 헤더에 `Set-Cookie` 키에 `JSESSIONID=...` 값을 저장
 - [ ] Session 구현하기

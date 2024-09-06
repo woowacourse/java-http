@@ -27,6 +27,7 @@ public class RequestToResponse {
 
     private static final String STATIC = "static";
     private static final String REDIRECT = "/index.html";
+    private static final String UNAUTHORIZED = "/401.html";
 
     public String build(HttpRequest request) throws IOException {
         Path path = request.getRequestLine().getPath();
@@ -60,7 +61,8 @@ public class RequestToResponse {
     }
 
     private String login(HttpRequest request) throws IOException {
-        Path path = request.getRequestLine().getPath();
+        RequestLine requestLine = request.getRequestLine();
+        Path path = requestLine.getPath();
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(MimeType.HTML.getExtension()));
         try {
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -68,28 +70,39 @@ public class RequestToResponse {
             header.setContentType(MimeType.HTML.getContentType());
             header.setContentLength(responseBody.getBytes().length);
 
-            if (path.hasQueryParameter()) {
-                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
-                Map<String, String> parameters = path.getParameters();
-                User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
-                        .orElseThrow();
-                if (user.checkPassword(parameters.get("password"))) {
-                    log.info(user.toString());
-                    header.setLocation(REDIRECT);
-                    HttpResponse response = new HttpResponse(statusLine, header, null);
-                    return response.toResponse();
-                }
-                header.setLocation("/401.html");
-                HttpResponse response = new HttpResponse(statusLine, header, null);
+            if (requestLine.getMethod().equals(HttpMethod.GET)) {
+                StatusLine statusLine = new StatusLine(HttpStatus.OK);
+                HttpResponse response = new HttpResponse(statusLine, header, responseBody);
                 return response.toResponse();
-
             }
-            StatusLine statusLine = new StatusLine(HttpStatus.OK);
-            HttpResponse response = new HttpResponse(statusLine, header, responseBody);
-            return response.toResponse();
+
+            if (requestLine.getMethod().equals(HttpMethod.POST)) {
+                StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+                String body = request.getBody();
+                List<String> bodies = List.of(body.split("&"));
+                Map<String, String> parsedBody = bodies.stream()
+                        .map(b -> b.split("="))
+                        .collect(Collectors.toMap(b -> b[0], b -> b[1]));
+                return InMemoryUserRepository.findByAccount(parsedBody.get("account"))
+                        .map(user -> getLoginResult(user, parsedBody, header, statusLine))
+                        .orElse(new HttpResponse(new StatusLine(HttpStatus.OK), header, responseBody).toResponse());
+            }
         } catch (NullPointerException e) {
             return HttpResponse.notFoundResponses().toResponse();
         }
+        return HttpResponse.notFoundResponses().toResponse();
+    }
+
+    private static String getLoginResult(User user, Map<String, String> parsedBody, ResponseHeader header, StatusLine statusLine) {
+        if (user.checkPassword(parsedBody.get("password"))) {
+            log.info(user.toString());
+            header.setLocation(REDIRECT);
+            HttpResponse response = new HttpResponse(statusLine, header, null);
+            return response.toResponse();
+        }
+        header.setLocation(UNAUTHORIZED);
+        HttpResponse response = new HttpResponse(statusLine, header, null);
+        return response.toResponse();
     }
 
     private String register(HttpRequest request) throws IOException {

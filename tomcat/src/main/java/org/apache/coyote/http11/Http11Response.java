@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.List;
-
 public class Http11Response {
 
     private static final String RESPONSE_FORMAT = String.join("\r\n",
@@ -16,11 +14,7 @@ public class Http11Response {
         this.responseBody = responseBody;
     }
 
-    public static Http11Response of(StatusLine statusLine, List<String> acceptTypes, Http11ResponseBody responseBody) {
-        int contentLength = responseBody.getContentLength();
-        ContentType from = ContentType.from(acceptTypes);
-        Http11ResponseHeader header = Http11ResponseHeader.of(statusLine, from, contentLength);
-
+    public static Http11Response of(Http11ResponseHeader header, Http11ResponseBody responseBody) {
         return new Http11Response(header, responseBody);
     }
 

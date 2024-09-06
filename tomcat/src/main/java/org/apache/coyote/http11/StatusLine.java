@@ -13,6 +13,22 @@ public class StatusLine {
         return new StatusLine(httpVersion, StatusCode.OK);
     }
 
+    public static StatusLine found(HttpVersion httpVersion) {
+        return new StatusLine(httpVersion, StatusCode.FOUND);
+    }
+
+    public static StatusLine unAuthorized(HttpVersion httpVersion) {
+        return new StatusLine(httpVersion, StatusCode.UNAUTHORIZED);
+    }
+
+    public static StatusLine notFound(HttpVersion httpVersion) {
+        return new StatusLine(httpVersion, StatusCode.NOT_FOUND);
+    }
+
+    public static StatusLine internalServerError(HttpVersion httpVersion) {
+        return new StatusLine(httpVersion, StatusCode.INTERNAL_SERVER_ERROR);
+    }
+
     @Override
     public String toString() {
         return httpVersion + " " + statusCode;

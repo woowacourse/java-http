@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.List;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,20 +30,12 @@ public class Http11Processor implements Runnable, Processor {
         try (OutputStream outputStream = connection.getOutputStream();
              InputStream inputStream = connection.getInputStream()) {
             Http11RequestHeader http11RequestHeader = Http11RequestHeader.from(inputStream);
-            Http11Response http11Response = getHttp11Response(http11RequestHeader);
+            Http11Response http11Response = Http11RequestHandler.handle(http11RequestHeader);
             final var response = http11Response.getResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Http11Response getHttp11Response(Http11RequestHeader http11RequestHeader) throws IOException {
-        RequestUri requestUri = http11RequestHeader.getRequestUri();
-        List<String> acceptTypes = http11RequestHeader.getAcceptType();
-        StatusLine statusLine = StatusLine.ok(http11RequestHeader.getHttpVersion());
-
-        return Http11Response.of(statusLine, acceptTypes, Http11RequestHandler.handle(requestUri));
     }
 }

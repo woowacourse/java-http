@@ -5,8 +5,8 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class Http11RequestHandler {
@@ -14,19 +14,31 @@ public class Http11RequestHandler {
     private static final String ROOT_PATH = "/";
     private static final String STATIC_RESOURCE_PATH = "static";
 
-    public static Http11ResponseBody handle(RequestUri requestUri) throws IOException {
+    public static Http11Response handle(Http11RequestHeader http11RequestHeader) throws IOException {
+        RequestUri requestUri = http11RequestHeader.getRequestUri();
+        HttpVersion httpVersion = http11RequestHeader.getHttpVersion();
+        List<String> acceptTypes = http11RequestHeader.getAcceptType();
+
         if (requestUri.hasQueryParameters()) {
-            return handleWithQueryParameters(requestUri);
+            return handleWithQueryParameters(requestUri, httpVersion, acceptTypes);
         }
 
-        String staticResource = getStaticResource(requestUri.getRequestUri());
-        return Http11ResponseBody.of(staticResource);
+        return getStaticResource(requestUri.getRequestUri())
+                .map(staticResource -> getHttp11Response(staticResource, StatusLine.ok(httpVersion), acceptTypes))
+                .orElseGet(() -> {
+                    String notFoundResource = getStaticResource("/404.html").orElse("404 Not Found");
+                    return getHttp11Response(notFoundResource, StatusLine.notFound(httpVersion), acceptTypes);
+                });
     }
 
-    private static Http11ResponseBody handleWithQueryParameters(RequestUri requestUri) throws IOException {
+    private static Http11Response handleWithQueryParameters(RequestUri requestUri,
+                                                            HttpVersion httpVersion,
+                                                            List<String> acceptTypes) {
         Map<String, String> queryParameters = requestUri.getQueryParameters();
+
         if (!queryParameters.containsKey("account")) {
-            return Http11ResponseBody.of(getStaticResource("/401.html"));
+            return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"),
+                    StatusLine.unAuthorized(httpVersion), acceptTypes);
         }
 
         String account = queryParameters.get("account");
@@ -34,30 +46,42 @@ public class Http11RequestHandler {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty() || !user.get().checkPassword(password)) {
-            return Http11ResponseBody.of(getStaticResource("/401.html"));
+            return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"),
+                    StatusLine.unAuthorized(httpVersion), acceptTypes);
         }
 
-        return Http11ResponseBody.of(getStaticResource("/index.html"));
+        return getHttp11Response(getStaticResource("/index.html").orElse("Index"), StatusLine.found(httpVersion),
+                acceptTypes);
     }
 
-    private static String getStaticResource(String resourcePath) throws IOException {
+    private static Http11Response getHttp11Response(String staticResource,
+                                                    StatusLine httpVersion,
+                                                    List<String> acceptTypes) {
+        Http11ResponseBody responseBody = Http11ResponseBody.of(staticResource);
+        Http11ResponseHeader header = Http11ResponseHeader.of(httpVersion,
+                ContentType.from(acceptTypes),
+                responseBody.getContentLength());
+
+        return Http11Response.of(header, responseBody);
+    }
+
+    private static Optional<String> getStaticResource(String resourcePath) {
         if (ROOT_PATH.equals(resourcePath)) {
-            return "Hello world!";
+            return Optional.of("Hello world!");
         }
 
         if ("/login".equals(resourcePath)) {
             resourcePath = "/login.html";
         }
 
-        try (InputStream inputStream = Http11Response.class.getClassLoader()
+        try (InputStream inputStream = Http11RequestHandler.class.getClassLoader()
                 .getResourceAsStream(STATIC_RESOURCE_PATH + resourcePath)) {
             if (inputStream == null) {
-                return new String(Objects.requireNonNull(Http11Response.class.getClassLoader()
-                        .getResourceAsStream(STATIC_RESOURCE_PATH + "/404.html")).readAllBytes(),
-                        StandardCharsets.UTF_8);
+                return Optional.empty();
             }
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            return Optional.of(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            return Optional.empty();
         }
     }
 }
-

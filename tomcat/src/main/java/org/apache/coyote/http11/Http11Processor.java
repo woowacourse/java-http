@@ -50,8 +50,7 @@ public class Http11Processor implements Runnable, Processor {
     private boolean processFileRequest(HttpRequest request, OutputStream outputStream) {
         try {
             if (request.getPath().equals("/")) {
-                File welcomePage = getFile("/welcome.html");
-                processFile(welcomePage, "200 OK", outputStream);
+                processString("Hello world!", "200 OK", outputStream);
             } else {
                 File requestFile = getRequestFile(request);
                 processFile(requestFile, "200 OK", outputStream);
@@ -64,6 +63,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private void processFile(File file, String httpStatus, OutputStream outputStream) throws IOException {
         HttpResponse response = new HttpResponse(httpStatus, file);
+        outputStream.write(response.toMessage().getBytes());
+        outputStream.flush();
+    }
+
+    private void processString(String body, String httpStatus, OutputStream outputStream) throws IOException {
+        HttpResponse response = new HttpResponse(httpStatus, body);
         outputStream.write(response.toMessage().getBytes());
         outputStream.flush();
     }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public class HttpResponse {
@@ -16,6 +17,13 @@ public class HttpResponse {
         this.mimeType = Files.probeContentType(file.toPath());
         this.body = new String(Files.readAllBytes(file.toPath()));
         this.contentLength = Files.readAllBytes(file.toPath()).length;
+    }
+
+    public HttpResponse(String httpStatus, String body) {
+        this.httpStatus = httpStatus;
+        this.mimeType = "text/html";
+        this.body = body;
+        this.contentLength = body.getBytes().length;
     }
 
     public String toMessage() {

@@ -13,8 +13,12 @@ public class Http11RequestHandler {
 
     private static final String ROOT_PATH = "/";
     private static final String STATIC_RESOURCE_PATH = "static";
+    private static final Map<String, String> ACCESS_URI = Map.of(
+            "/login", "/login.html",
+            "/register", "/register.html"
+    );
 
-    public static Http11Response handle(Http11RequestHeader http11RequestHeader) throws IOException {
+    public static Http11Response handle(Http11RequestHeader http11RequestHeader) {
         RequestUri requestUri = http11RequestHeader.getRequestUri();
         HttpVersion httpVersion = http11RequestHeader.getHttpVersion();
         List<String> acceptTypes = http11RequestHeader.getAcceptType();
@@ -70,9 +74,7 @@ public class Http11RequestHandler {
             return Optional.of("Hello world!");
         }
 
-        if ("/login".equals(resourcePath)) {
-            resourcePath = "/login.html";
-        }
+        resourcePath = getAccessUri(resourcePath);
 
         try (InputStream inputStream = Http11RequestHandler.class.getClassLoader()
                 .getResourceAsStream(STATIC_RESOURCE_PATH + resourcePath)) {
@@ -83,5 +85,9 @@ public class Http11RequestHandler {
         } catch (IOException e) {
             return Optional.empty();
         }
+    }
+
+    private static String getAccessUri(String resourcePath) {
+        return ACCESS_URI.getOrDefault(resourcePath, resourcePath);
     }
 }

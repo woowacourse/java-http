@@ -16,8 +16,8 @@ public class Header {
         parseHeader(header);
     }
 
-    private void parseHeader(List<String> headers) {
-        for (String pair : headers) {
+    private void parseHeader(List<String> header) {
+        for (String pair : header) {
             if (pair.contains(PAIR_DELIMITER)) {
                 String[] split = pair.split(PAIR_DELIMITER);
                 putIfValidPair(split);

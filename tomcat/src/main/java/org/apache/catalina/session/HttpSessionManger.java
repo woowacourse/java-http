@@ -1,10 +1,10 @@
-package org.apache.coyote.session;
+package org.apache.catalina.session;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpSessionManger {
+public class HttpSessionManger implements Manager {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 

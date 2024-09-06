@@ -81,10 +81,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
         if ("/login".equals(uri) && doesLoggedIn(httpCookie)) {
-            writeRedirectResponse("/index.html", outputStream);
+            redirectTo("/index.html", outputStream);
             return;
         }
-        writeStaticFileResponse(uri, outputStream);
+        serveStaticFile(addHtmlExtension(uri), outputStream);
     }
 
     private void handleFaviconRequest(OutputStream outputStream) throws IOException {
@@ -131,19 +131,19 @@ public class Http11Processor implements Runnable, Processor {
                     Session session = new Session(UUID.randomUUID().toString());
                     session.setAttribute("user", user);
                     sessionManager.add(session);
-                    writeRedirectResponseWithCookie(session.getId(), "/index.html", outputStream);
+                    redirectToHomeSettingCookie(session.getId(), outputStream);
                     return;
                 }
             }
         }
-        writeRedirectResponse("/401.html", outputStream);
+        redirectTo("/401.html", outputStream);
     }
 
     private void handleRegister(String requestBody, OutputStream outputStream) throws IOException {
         Map<String, String> pairs = getPairs(requestBody);
 
         InMemoryUserRepository.save(new User(pairs.get("account"), pairs.get("password"), pairs.get("email")));
-        writeRedirectResponse("/index.html", outputStream);
+        redirectTo("/index.html", outputStream);
     }
 
     private Map<String, String> getPairs(String requestBody) {
@@ -158,30 +158,18 @@ public class Http11Processor implements Runnable, Processor {
         return queryStringPairs;
     }
 
-    private void writeRedirectResponseWithCookie(String jSessionId, String location, OutputStream outputStream) throws IOException {
+    private void redirectToHomeSettingCookie(String jSessionId, OutputStream outputStream) throws IOException {
         final var response = "HTTP/1.1 302 Found \r\n" +
                 "Set-Cookie: JSESSIONID=" + jSessionId + " \r\n" +
-                "Location: http://localhost:8080" + location + " \r\n" +
+                "Location: http://localhost:8080/index.html \r\n" +
                 "\r\n";
         writeResponse(outputStream, response);
     }
 
-    private void writeRedirectResponse(String location, OutputStream outputStream) throws IOException {
+    private void redirectTo(String location, OutputStream outputStream) throws IOException {
         final var response = "HTTP/1.1 302 Found \r\n" +
                 "Location: http://localhost:8080" + location + " \r\n" +
                 "\r\n";
-        writeResponse(outputStream, response);
-    }
-
-    private void writeStaticFileResponse(String uri, OutputStream outputStream) throws IOException {
-        uri = addHtmlExtension(uri);
-        var responseBody = getStaticFileContent(uri);
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/" + getFileExtension(uri) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
         writeResponse(outputStream, response);
     }
 
@@ -190,6 +178,17 @@ public class Http11Processor implements Runnable, Processor {
             return uri + ".html";
         }
         return uri;
+    }
+
+    private void serveStaticFile(String uri, OutputStream outputStream) throws IOException {
+        var responseBody = getStaticFileContent(uri);
+        final var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/" + getFileExtension(uri) + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        writeResponse(outputStream, response);
     }
 
     private String getStaticFileContent(String uri) throws IOException {

@@ -33,10 +33,7 @@ public class RegisterController extends Controller {
         } catch (InvalidRegisterException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
-            HttpResponse response = new HttpResponse();
-            response.setStatus(HttpStatus.FOUND);
-            response.setLocation("400.html");
-            return response;
+            return redirect("400.html");
         }
     }
 
@@ -50,17 +47,18 @@ public class RegisterController extends Controller {
         User user = userService.register(account, password, email);
         log.info("User registered: {}", user);
 
-        HttpResponse response = new HttpResponse();
-        response.setStatus(HttpStatus.FOUND);
-        response.setLocation("index.html");
-        return response;
+        return redirect("index.html");
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
+        return redirect("register.html");
+    }
+
+    private static HttpResponse redirect(String location) {
         HttpResponse response = new HttpResponse();
         response.setStatus(HttpStatus.FOUND);
-        response.setLocation("register.html");
+        response.setLocation(location);
 
         return response;
     }

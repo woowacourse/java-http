@@ -34,10 +34,7 @@ public class LoginController extends Controller {
         } catch (UnauthorizedException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
-            HttpResponse response = new HttpResponse();
-            response.setStatus(HttpStatus.FOUND);
-            response.setLocation("401.html");
-            return response;
+            return redirect("401.html");
         }
     }
 
@@ -50,18 +47,18 @@ public class LoginController extends Controller {
         User user = userService.login(account, password);
         log.info("User found: {}", user);
 
-        HttpResponse response = new HttpResponse();
-        response.setStatus(HttpStatus.FOUND);
-        response.setLocation("index.html");
-        return response;
+        return redirect("index.html");
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
+        return redirect("login.html");
+    }
+
+    private static HttpResponse redirect(String location) {
         HttpResponse response = new HttpResponse();
         response.setStatus(HttpStatus.FOUND);
-        response.setLocation("login.html");
-
+        response.setLocation(location);
         return response;
     }
 }

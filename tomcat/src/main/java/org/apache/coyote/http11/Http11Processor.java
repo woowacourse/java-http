@@ -55,33 +55,34 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> httpResponseHeader = new HashMap<>();
 
             final String requestUrl = getRequestUrl(httpRequestHeader);
-            String path = requestUrl;
-            boolean isQueryString = isRequestUrlQueryString(httpRequestHeader);
 
             httpResponseHeader.put("Status", "200 OK");
-            if (isQueryString) {
-                final int index = requestUrl.indexOf("?");
-                path = requestUrl.substring(0, index);
-                String queryString = requestUrl.substring(index + 1);
-
-                httpResponseHeader.put("Status", "302 Found");
-                httpResponseHeader.put("Location", "/401.html");
-                if (isCorrectUser(queryString)) {
-                    httpResponseHeader.put("Location", "/index.html");
-                }
-            }
-            if (!path.equals("/") && !path.contains(".")) {
-                String new_path = path + "." + DEFAULT_CONTENT_TYPE;
+            if (!requestUrl.equals("/") && !requestUrl.contains(".")) {
+                String newRequestUrl = requestUrl + "." + DEFAULT_CONTENT_TYPE;
                 String requestUri = httpRequestHeader.get(URI_HEADER_KEY);
-                requestUri = requestUri.replace(requestUrl, new_path);
+                requestUri = requestUri.replace(requestUrl, newRequestUrl);
                 httpRequestHeader.put(URI_HEADER_KEY, requestUri);
             }
 
             String responseBody = "";
-            if (!isQueryString) {
+            if (isHttpMethod(httpRequestHeader, "GET")) {
                 responseBody = getResponseBody(httpRequestHeader);
                 httpResponseHeader.put("Content-Type", getMimeType(httpRequestHeader) + ";charset=utf-8");
                 httpResponseHeader.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+            }
+
+            if (isHttpMethod(httpRequestHeader, "POST")) {
+                final String httpRequestBody = readHttpRequestBody(bufferedReader, httpRequestHeader);
+
+                httpResponseHeader.put("Status", "302 Found");
+                httpResponseHeader.put("Location", "/index.html");
+                if (requestUrl.equals("/login")) {
+                    if (!isCorrectUser(httpRequestBody)) {
+                        httpResponseHeader.put("Location", "/401.html");
+                    }
+                } else if (requestUrl.equals("/register")) {
+                    saveUser(httpRequestBody);
+                }
             }
 
             final var response = makeHttpResponseHeader(httpResponseHeader, responseBody);
@@ -100,15 +101,22 @@ public class Http11Processor implements Runnable, Processor {
         httpRequestHeader.put(URI_HEADER_KEY, requestUri);
 
         String line;
-        while (!"".equals(line = bufferedReader.readLine())) {
-            if (line == null) {
-                break;
-            }
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             final List<String> splitLine = Arrays.asList(line.split(": "));
-            httpRequestHeader.put(splitLine.get(0), splitLine.get(1));
+            httpRequestHeader.put(splitLine.get(0).trim(), splitLine.get(1).trim());
         }
 
         return httpRequestHeader;
+    }
+
+    private String readHttpRequestBody(BufferedReader bufferedReader, Map<String, String> httpRequestHeader) throws IOException {
+        if (!httpRequestHeader.containsKey("Content-Length")) {
+            return "";
+        }
+        int contentLength = Integer.parseInt(httpRequestHeader.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     private String makeHttpResponseHeader(Map<String, String> httpResponseHeader, String responseBody) {
@@ -126,18 +134,17 @@ public class Http11Processor implements Runnable, Processor {
         return response.toString();
     }
 
-    private boolean isRequestUrlQueryString(Map<String, String> httpRequestHeader) {
-        final String requestUrl = getRequestUrl(httpRequestHeader);
-        return requestUrl.contains("?");
+    private boolean isHttpMethod(Map<String, String> httpRequestHeader, final String httpMethod) {
+        return getHttpMethod(httpRequestHeader).equals(httpMethod);
+    }
+
+    private String getHttpMethod(Map<String, String> httpRequestHeader) {
+        final String uriLine = httpRequestHeader.get(URI_HEADER_KEY);
+        return Arrays.asList(uriLine.split(" ")).getFirst();
     }
 
     private boolean isCorrectUser(String queryString) {
-        Map<String, String> userInformation = Arrays.stream(queryString.split("&"))
-                .map(line -> line.split("="))
-                .collect(Collectors.toMap(
-                        keyValue -> keyValue[0],
-                        keyValue -> keyValue[1]
-                ));
+        Map<String, String> userInformation = getUserInformation(queryString);
 
         if (!userInformation.containsKey("account") || !userInformation.containsKey("password")) {
             return false;
@@ -149,6 +156,31 @@ public class Http11Processor implements Runnable, Processor {
         User user = optionalUser.get();
 
         return user.checkPassword(userInformation.get("password"));
+    }
+
+    private void saveUser(String queryString) {
+        Map<String, String> userInformation = getUserInformation(queryString);
+
+        if (!userInformation.containsKey("account") || !userInformation.containsKey("password") || !userInformation.containsKey("email")) {
+            return;
+        }
+
+        String account = userInformation.get("account");
+        String password = userInformation.get("password");
+        String email = userInformation.get("email");
+
+        User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+    }
+
+    private Map<String, String> getUserInformation(String queryString) {
+        return Arrays.stream(queryString.split("&"))
+                .map(line -> line.split("="))
+                .collect(Collectors.toMap(
+                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[1]
+                ));
     }
 
     private String getResponseBody(final Map<String, String> httpRequestHeader) throws IOException {

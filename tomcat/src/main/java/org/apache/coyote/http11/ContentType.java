@@ -7,7 +7,6 @@ public enum ContentType {
     CSS("text/css", ".css"),
     SVG("image/svg+xml", ".svg"),
     PLAIN("text/plain", ""),
-
     ;
 
     private final String name;

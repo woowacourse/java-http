@@ -7,7 +7,6 @@ public enum HttpMethod {
 
     GET,
     POST,
-
     ;
 
     public static HttpMethod from(String value) {

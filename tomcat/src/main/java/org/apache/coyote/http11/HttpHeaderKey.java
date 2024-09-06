@@ -7,7 +7,6 @@ public enum HttpHeaderKey {
     LOCATION("Location"),
     COOKIE("Cookie"),
     SET_COOKIE("Set-Cookie"),
-
     ;
 
     private final String name;

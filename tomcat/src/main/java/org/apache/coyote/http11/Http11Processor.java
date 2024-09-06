@@ -26,7 +26,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REQUEST_HEADER_SUFFIX = "";
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String SUCCESS_STATUS_CODE = "200 OK";
-    private static final String HTML_CONTENT_TYPE = "text/html";
+    private static final String STATIC_PATH_PREFIX = "static";
+    private static final String TEXT_CONTENT_TYPE_PREFIX = "text/";
+    private static final String HTML_TYPE = "html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -45,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            // requestHeader 읽기
+            // TODO: requestHeader 읽기 객체 분리
             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             List<String> lines = new ArrayList<>();
             String line = br.readLine();
@@ -57,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
                 line = br.readLine();
             }
 
-            // requestHeader의 startLine 파싱
+            // TODO: requestHeader의 startLine 파싱 함수 분리
             final String[] startLine = lines.get(0).split(" ");
             if (startLine.length != 3) {
                 return;
@@ -69,30 +71,55 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            // startLine의 httpMethod, requestURI 값에 따라 처리
+            // TODO: startLine의 httpMethod, requestURI 값에 따라 처리 함수 분리
             HttpMethod httpMethod = HttpMethod.findByName(httpMethodName);
             if (HttpMethod.GET.equals(httpMethod)) {
                 Map<String, String> queryString = parseQueryString(requestURI);
                 if (requestURI.contains("/login")) {
                     login(queryString.get("account"), queryString.get("password"));
-                    createResponse(outputStream, SUCCESS_STATUS_CODE, HTML_CONTENT_TYPE, "static/login.html");
-                    return;
-                }
-                if (requestURI.contains(".")) {
-                    String type = "text/" + requestURI.split("\\.")[1];
-                    String path = "static" + requestURI;
+                    String type = parseTextContentType(HTML_TYPE);
+                    String path = parseStaticPath("/login.html");
                     createResponse(outputStream, SUCCESS_STATUS_CODE, type, path);
                     return;
                 }
-                createResponse(outputStream, SUCCESS_STATUS_CODE, HTML_CONTENT_TYPE, requestURI);
+                if (requestURI.contains(".")) {
+                    String type = parseTextContentType(requestURI);
+                    String path = parseStaticPath(requestURI);
+                    createResponse(outputStream, SUCCESS_STATUS_CODE, type, path);
+                    return;
+                }
+                String type = parseTextContentType(HTML_TYPE);
+                createResponse(outputStream, SUCCESS_STATUS_CODE, type, requestURI);
                 return;
             }
             if (HttpMethod.POST.equals(httpMethod)) {
-                createResponse(outputStream, SUCCESS_STATUS_CODE, HTML_CONTENT_TYPE, requestURI);
+                String type = parseTextContentType(HTML_TYPE);
+                createResponse(outputStream, SUCCESS_STATUS_CODE, type, requestURI);
             }
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> parseQueryString(String requestURI) {
+        Map<String, String> queries = new HashMap<>();
+        if (requestURI.contains("?")) {
+            int index = requestURI.indexOf("?");
+            String queryString = requestURI.substring(index + 1);
+            for (String eachQueryString : queryString.split("&")) {
+                String[] parsedEachQueryString = eachQueryString.split("=");
+                queries.put(parsedEachQueryString[0], parsedEachQueryString[1]);
+            }
+        }
+        return queries;
+    }
+
+    private String parseTextContentType(String filePath) {
+        return TEXT_CONTENT_TYPE_PREFIX + filePath.split("\\.")[1];
+    }
+
+    private String parseStaticPath(String filePath) {
+        return STATIC_PATH_PREFIX + filePath;
     }
 
     private void createResponse(OutputStream outputStream, String statusCode, String contentType, String path)
@@ -115,19 +142,6 @@ public class Http11Processor implements Runnable, Processor {
             return Files.readString(path);
         }
         return "Hello world!";
-    }
-
-    private Map<String, String> parseQueryString(String requestURI) {
-        Map<String, String> queries = new HashMap<>();
-        if (requestURI.contains("?")) {
-            int index = requestURI.indexOf("?");
-            String queryString = requestURI.substring(index + 1);
-            for (String eachQueryString : queryString.split("&")) {
-                String[] parsedEachQueryString = eachQueryString.split("=");
-                queries.put(parsedEachQueryString[0], parsedEachQueryString[1]);
-            }
-        }
-        return queries;
     }
 
     private void login(String account, String password) {

@@ -1,25 +1,19 @@
-package org.apache.coyote.http11.finder;
+package org.apache.coyote.http11.domain;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.request.domain.RequestPath;
 
 public final class ResourceFinder {
-
-    public static final String DEFAULT_BODY = "Hello world!";
-    private static final String DEFAULT_RESOURCE_PATH = "static";
 
     private ResourceFinder() {
     }
 
-    public static String find(String resourcePath) {
-        if ("/".equals(resourcePath)) {
-            return DEFAULT_BODY;
-        }
-
-        URL resourceUrl = ResourceFinder.class.getClassLoader().getResource(DEFAULT_RESOURCE_PATH + resourcePath);
+    public static String find(RequestPath requestPath) {
+        URL resourceUrl = ResourceFinder.class.getClassLoader().getResource(requestPath.toResourcePath());
 
         try {
             Path filePath = Path.of(resourceUrl.toURI());

@@ -16,4 +16,24 @@ public enum HttpMethod {
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP 메서드 요청입니다."));
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
+
+    public boolean isDelete() {
+        return this == DELETE;
+    }
+
+    public boolean isPatch() {
+        return this == PATCH;
+    }
+
+    public boolean isPut() {
+        return this == PUT;
+    }
 }

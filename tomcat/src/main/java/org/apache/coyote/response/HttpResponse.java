@@ -13,7 +13,6 @@ public class HttpResponse {
     private static final FileReader FILE_READER = FileReader.getInstance();
 
     private static final String JSESSIONID = "JSESSIONID";
-    private static final String SET_COOKIE = "Set-Cookie";
     private static final String NOT_FOUND_FILENAME = "404.html";
 
     private final HttpStatusCode httpStatusCode;
@@ -60,7 +59,7 @@ public class HttpResponse {
         if (!cookie.contains(JSESSIONID)) {
             HttpCookie httpCookie = new HttpCookie();
             httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
-            this.addHeader(SET_COOKIE, httpCookie.buildMessage());
+            this.addHeader(HttpHeaders.SET_COOKIE.getName(), httpCookie.buildMessage());
         }
         return this;
     }

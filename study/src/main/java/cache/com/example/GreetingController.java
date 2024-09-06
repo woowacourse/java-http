@@ -35,6 +35,6 @@ public class GreetingController {
 
     @GetMapping("/resource-versioning")
     public String resourceVersioning() {
-        return "resource-versioning";
+        return "resource-versioning.html";
     }
 }

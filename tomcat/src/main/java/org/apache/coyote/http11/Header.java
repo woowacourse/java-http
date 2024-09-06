@@ -14,8 +14,6 @@ public class Header {
     private final Map<String, String> header = new HashMap<>();
 
     public Header(List<String> header) {
-        Objects.requireNonNull(header);
-
         parseHeader(header);
     }
 
@@ -51,8 +49,6 @@ public class Header {
     }
 
     public Optional<String> get(String key) {
-        Objects.requireNonNull(key);
-
         return Optional.ofNullable(header.get(key));
     }
 

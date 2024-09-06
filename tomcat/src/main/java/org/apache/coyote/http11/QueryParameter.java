@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class QueryParameter {
@@ -42,8 +41,6 @@ public class QueryParameter {
     }
 
     public Optional<String> get(String key) {
-        Objects.requireNonNull(key);
-
         return Optional.ofNullable(queryParameter.get(key));
     }
 

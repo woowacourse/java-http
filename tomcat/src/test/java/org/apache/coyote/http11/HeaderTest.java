@@ -8,16 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HeaderTest {
-
-    @Test
-    @DisplayName("헤더 문자열 리스트는 null이 될 수 없다.")
-    void createWithNull() {
-        assertThatThrownBy(() -> new Header(null))
-                .isInstanceOf(NullPointerException.class);
-    }
 
     @Test
     @DisplayName("헤더는 a:b 형식만 인식한다.")
@@ -50,15 +42,6 @@ class HeaderTest {
                 () -> assertThat(header.get("b")).hasValue("2"),
                 () -> assertThat(header.get("c")).hasValue("3")
         );
-    }
-
-    @Test
-    @DisplayName("조회 키는 null이 될 수 없다.")
-    void keyNonNull() {
-        Header header = new Header(List.of("a:2"));
-
-        assertThatThrownBy(() -> header.get((String) null))
-                .isInstanceOf(NullPointerException.class);
     }
 
     @Test

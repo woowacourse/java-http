@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class QueryParameterTest {
 
@@ -52,15 +51,6 @@ class QueryParameterTest {
                 () -> assertThat(queryParameter.get("b")).hasValue("2"),
                 () -> assertThat(queryParameter.get("c")).hasValue("3")
         );
-    }
-
-    @Test
-    @DisplayName("조회 키는 null이 될 수 없다.")
-    void keyNonNull() {
-        QueryParameter queryParameter = new QueryParameter("a=2");
-
-        assertThatThrownBy(() -> queryParameter.get(null))
-                .isInstanceOf(NullPointerException.class);
     }
 
     @ParameterizedTest

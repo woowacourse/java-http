@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package com.techcourse.handler;
 
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpRequest;
@@ -10,24 +10,24 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HelloHandlerTest {
+class PostLoginHandlerTest {
 
     @Test
-    @DisplayName("루트 경로 요청을 처리할 수 있다.")
+    @DisplayName("로그인 관련 POST 요청을 처리할 수 있다.")
     void canHandle() {
-        HelloHandler helloHandler = new HelloHandler();
+        PostLoginHandler postLoginHandler = new PostLoginHandler();
 
-        boolean result = helloHandler.canHandle(createHttpRequest("GET / HTTP/1.1"));
+        boolean result = postLoginHandler.canHandle(createHttpRequest("POST /login HTTP/1.1"));
 
         assertThat(result).isTrue();
     }
 
     @Test
-    @DisplayName("루트 경로가 아닌 요청은 처리할 수 없다.")
+    @DisplayName("로그인 관련 POST 요청이 아니라면 처리할 수 없다.")
     void cantHandle() {
-        HelloHandler helloHandler = new HelloHandler();
+        PostLoginHandler postLoginHandler = new PostLoginHandler();
 
-        boolean result = helloHandler.canHandle(createHttpRequest("GET /login HTTP/1.1"));
+        boolean result = postLoginHandler.canHandle(createHttpRequest("GET /login HTTP/1.1"));
 
         assertThat(result).isFalse();
     }

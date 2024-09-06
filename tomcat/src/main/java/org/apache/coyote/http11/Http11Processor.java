@@ -1,15 +1,13 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.handler.GetLoginHandler;
+import com.techcourse.handler.GetRegisterHandler;
+import com.techcourse.handler.HelloHandler;
+import com.techcourse.handler.NotFoundHandler;
+import com.techcourse.handler.PostLoginHandler;
+import com.techcourse.handler.PostRegisterHandler;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.AbstractHandler;
-import org.apache.coyote.http11.handler.GetLoginHandler;
-import org.apache.coyote.http11.handler.GetRegisterHandler;
-import org.apache.coyote.http11.handler.HelloHandler;
-import org.apache.coyote.http11.handler.NotFoundHandler;
-import org.apache.coyote.http11.handler.PostLoginHandler;
-import org.apache.coyote.http11.handler.PostRegisterHandler;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

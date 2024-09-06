@@ -1,8 +1,5 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.Header;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.QueryParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

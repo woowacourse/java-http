@@ -1,7 +1,4 @@
-package org.apache.coyote.http11.handler;
-
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpStatus;
+package org.apache.coyote.http11;
 
 import java.net.URI;
 import java.net.URL;

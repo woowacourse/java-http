@@ -1,10 +1,4 @@
-package org.apache.coyote.http11.handler;
-
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Header;
-import org.apache.coyote.http11.HttpHeaderKey;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+package org.apache.coyote.http11;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;

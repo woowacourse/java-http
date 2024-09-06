@@ -10,11 +10,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseBody;
+import org.apache.coyote.http11.response.HttpResponseHeaders;
+import org.apache.coyote.http11.response.HttpResponseParser;
+import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,27 +49,32 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpResponseParser httpResponseParser = new HttpResponseParser();
             FileReader fileReader = new FileReader();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
-            String responseBody = fileReader.readFile(httpRequest.getHttpRequestPath());
+            HttpResponseBody httpResponseBody = new HttpResponseBody(
+                    fileReader.readFile(httpRequest.getHttpRequestPath()));
             if (httpRequest.getHttpRequestPath().equals("/login")){
                 login(httpRequest);
             }
 
-            String contentType = httpRequest.getContentType();
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponse httpResponse = mapToHttpResponse(HttpStatusCode.OK, httpRequest, httpResponseBody);
+            String response = httpResponseParser.parseResponse(httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse mapToHttpResponse(HttpStatusCode code, HttpRequest request, HttpResponseBody responseBody) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", request.getContentType());
+        headers.put("Content-Length", String.valueOf(responseBody.body().getBytes().length));
+        HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(headers);
+        return new HttpResponse(code, httpResponseHeaders, responseBody);
     }
 
     private void login(HttpRequest httpRequest) {

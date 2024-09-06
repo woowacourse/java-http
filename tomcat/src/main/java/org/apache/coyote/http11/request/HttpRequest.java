@@ -8,16 +8,16 @@ public class HttpRequest {
 
     private final QueryString queryString;
 
-    private final HttpHeaders httpHeaders;
+    private final HttpRequestHeaders httpRequestHeaders;
 
     public HttpRequest(HttpMethod httpMethod,
                        HttpRequestPath httpRequestPath,
                        QueryString queryString,
-                       HttpHeaders httpHeaders) {
+                       HttpRequestHeaders httpRequestHeaders) {
         this.httpMethod = httpMethod;
         this.httpRequestPath = httpRequestPath;
         this.queryString = queryString;
-        this.httpHeaders = httpHeaders;
+        this.httpRequestHeaders = httpRequestHeaders;
     }
 
     public String getHttpRequestPath() {
@@ -25,7 +25,7 @@ public class HttpRequest {
     }
 
     public String getContentType() {
-        return httpHeaders.getContentType();
+        return httpRequestHeaders.getContentType();
     }
 
     public String getQueryParameter(String key) {

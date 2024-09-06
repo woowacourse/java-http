@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class HttpHeaders {
+public class HttpRequestHeaders {
 
     private static final String contentTypeKey = "Accept";
 
@@ -11,7 +10,7 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
-    public HttpHeaders(Map<String, String> headers) {
+    public HttpRequestHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 

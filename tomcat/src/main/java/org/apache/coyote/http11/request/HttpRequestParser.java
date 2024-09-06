@@ -26,9 +26,9 @@ public class HttpRequestParser {
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
-        HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
+        HttpRequestHeaders httpRequestHeaders = parseHttpHeaders(bufferedReader);
 
-        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpHeaders);
+        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpRequestHeaders);
     }
 
     private HttpMethod parseHttpMethod(String[] requestLine) {
@@ -66,7 +66,7 @@ public class HttpRequestParser {
         return requestLine.indexOf(DELIMITER_QUERY_STRING);
     }
 
-    private HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
+    private HttpRequestHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
 
         String headerLine = bufferedReader.readLine();
@@ -77,6 +77,6 @@ public class HttpRequestParser {
             headers.put(key, value);
             headerLine = bufferedReader.readLine();
         }
-        return new HttpHeaders(headers);
+        return new HttpRequestHeaders(headers);
     }
 }

@@ -18,4 +18,8 @@ public class HttpRequest {
     public HttpResponse<String> getHttpResponse() throws IOException {
         return httpRequestLine.getHttpResponse(bodies);
     }
+
+    public Map<HttpHeaders, String> getHeaders() {
+        return headers;
+    }
 }

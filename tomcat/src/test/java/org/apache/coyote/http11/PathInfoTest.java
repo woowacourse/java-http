@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ class PathInfoTest {
 
         //then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
-        byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+        byte[] bytes = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
         assertThat(httpResponse.getBody().getBytes()).isNotEmpty().isEqualTo(bytes);
     }
 }

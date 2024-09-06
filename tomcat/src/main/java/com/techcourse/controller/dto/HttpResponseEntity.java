@@ -12,10 +12,6 @@ public record HttpResponseEntity<T>(HttpStatus httpStatus, T body, Map<HttpHeade
         this(HttpStatus.OK, null, new EnumMap<>(HttpHeaders.class));
     }
 
-    public HttpResponseEntity(T body) {
-        this(HttpStatus.OK, body, new EnumMap<>(HttpHeaders.class));
-    }
-
     public HttpResponseEntity(HttpStatus httpStatus, T body) {
         this(httpStatus, body, new EnumMap<>(HttpHeaders.class));
     }

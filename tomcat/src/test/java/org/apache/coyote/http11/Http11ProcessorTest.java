@@ -2,30 +2,16 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
-
-    private ListAppender<ILoggingEvent> listAppender;
-
-    @BeforeEach
-    void setup() {
-        listAppender = new ListAppender<>();
-        Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
-        logger.addAppender(listAppender);
-        listAppender.start();
-    }
 
     @DisplayName("루트 경로로 HTTP 요청을 보내면 index.html이 출력된다.")
     @Test
@@ -43,7 +29,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -71,7 +57,7 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -98,7 +84,8 @@ class Http11ProcessorTest {
 
         // then
         URL resource = getClass().getClassLoader().getResource("static" + path);
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String responseBody = new String(
+                Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: " + expectedMediaType.getValue() + " \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
@@ -129,7 +116,8 @@ class Http11ProcessorTest {
 
         //then
         URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String responseBody = new String(
+                Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: " + expectedMediaType.getValue() + " \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +

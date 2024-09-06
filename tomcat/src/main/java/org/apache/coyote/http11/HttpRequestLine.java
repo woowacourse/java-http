@@ -44,4 +44,8 @@ public class HttpRequestLine {
         }
         throw new UncheckedHttpException(new UnsupportedOperationException("지원하지 않는 기능입니다."));
     }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
 }

@@ -159,7 +159,7 @@ class Http11ProcessorTest {
             assertThat(socket.output()).isEqualTo(expected);
         }
 
-        @DisplayName("로그인 실패 시, 302을 반환하고 `/404.html`로 리다이렉트 한다.")
+        @DisplayName("로그인 실패 시, 302을 반환하고 `/401.html`로 리다이렉트 한다.")
         @Test
         void loginFailure() throws IOException {
             // given
@@ -180,7 +180,7 @@ class Http11ProcessorTest {
             // then
             var expected = String.join("\r\n",
                     "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/404.html ",
+                    "Location: http://localhost:8080/401.html ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: 0 ",
                     "");

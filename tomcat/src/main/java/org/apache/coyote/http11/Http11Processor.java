@@ -194,7 +194,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             return String.join("\r\n",
                     "HTTP/1.1 302 Found ",
-                    "Location: http://localhost:8080/404.html ",
+                    "Location: http://localhost:8080/401.html ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: 0 ",
                     "");

@@ -1,9 +1,5 @@
 package org.apache.coyote.common;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
@@ -30,11 +26,7 @@ public class Request {
 
     private Cookie parseCookie() {
         String cookies = headers.getCookies();
-        HashMap<String, String> collect = Arrays.stream(cookies.split("; "))
-                .map(cookie -> cookie.split("=", 2))
-                .filter(cookie -> cookie.length == 2)
-                .collect(HashMap::new, (map, entry) -> map.put(entry[0], entry[1]), HashMap::putAll);
-        return new Cookie(collect);
+        return new Cookie(cookies);
     }
 
     private Session parseSession() {
@@ -61,20 +53,13 @@ public class Request {
         return requestLine.getUri();
     }
 
-    public String getProtocol() {
-        return requestLine.getProtocol();
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers.getValues();
-    }
-
     public RequestBody getBody() {
         return body;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters.getValues();
+
+    public String getParameter(String key) {
+        return parameters.getValue(key);
     }
 
     public Session getSession() {

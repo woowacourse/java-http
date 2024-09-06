@@ -3,7 +3,6 @@ package org.apache.coyote.common;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class RequestBody {
 
@@ -31,11 +30,9 @@ public class RequestBody {
         return Arrays.stream(bodies)
                 .map(param -> param.split(delimiter, SPLIT_LIMIT))
                 .filter(entry -> entry.length == SPLIT_LIMIT)
-                .collect(Collectors.toMap(
-                        entry -> entry[0],
-                        entry -> entry[1],
-                        (existing, replacement) -> existing,
-                        HashMap::new));
+                .collect(HashMap::new,
+                         (map, entry) -> map.put(entry[0], entry[1]),
+                         HashMap::putAll);
     }
 
     public Map<String, String> getValues() {

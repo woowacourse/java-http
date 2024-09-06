@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.http.HttpHeaders;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +11,6 @@ import java.util.stream.Collectors;
 public class Http11RequestHeader {
 
     private static final String HEADER_DELIMITER = ": ";
-    private static final String EMPTY_STRING = "";
     private static final String HEADER_VALUE_DELIMITER = ",";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
@@ -26,8 +23,7 @@ public class Http11RequestHeader {
         this.httpHeaders = httpHeaders;
     }
 
-    public static Http11RequestHeader from(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public static Http11RequestHeader from(BufferedReader bufferedReader) throws IOException {
         StartLine startLine = StartLine.from(bufferedReader.readLine());
         HttpHeaders httpHeaders = HttpHeaders.of(extractRequestHeader(bufferedReader), (s1, s2) -> true);
 
@@ -36,7 +32,7 @@ public class Http11RequestHeader {
 
     private static Map<String, List<String>> extractRequestHeader(BufferedReader bufferedReader) {
         return bufferedReader.lines()
-                .takeWhile(line -> !EMPTY_STRING.equals(line))
+                .takeWhile(line -> !line.isBlank())
                 .map(line -> line.split(HEADER_DELIMITER))
                 .collect(Collectors.toMap(parts -> parts[HEADER_KEY_INDEX], Http11RequestHeader::extractHeaderValues));
     }
@@ -57,5 +53,14 @@ public class Http11RequestHeader {
 
     public List<String> getAcceptType() {
         return httpHeaders.allValues("Accept");
+    }
+
+    public int getContentLength() {
+        String contentLength = httpHeaders.firstValue("Content-Length").orElse("0");
+        return Integer.parseInt(contentLength);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return startLine.getHttpMethod();
     }
 }

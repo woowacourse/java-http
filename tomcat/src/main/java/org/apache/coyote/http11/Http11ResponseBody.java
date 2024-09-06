@@ -10,8 +10,8 @@ public class Http11ResponseBody {
         this.body = body;
     }
 
-    public static Http11ResponseBody of(String staticResource) {
-        return new Http11ResponseBody(staticResource);
+    public static Http11ResponseBody of(String response) {
+        return new Http11ResponseBody(response);
     }
 
     public int getContentLength() {

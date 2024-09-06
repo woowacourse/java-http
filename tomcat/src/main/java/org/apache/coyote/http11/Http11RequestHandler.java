@@ -5,12 +5,17 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11RequestHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_PATH = "/";
     private static final String STATIC_RESOURCE_PATH = "static";
     private static final Map<String, String> ACCESS_URI = Map.of(
@@ -18,13 +23,25 @@ public class Http11RequestHandler {
             "/register", "/register.html"
     );
 
-    public static Http11Response handle(Http11RequestHeader http11RequestHeader) {
+    public static Http11Response handle(Http11Request http11Request) {
+        Http11RequestHeader http11RequestHeader = http11Request.getHttp11RequestHeader();
+        Http11RequestBody http11RequestBody = http11Request.getHttp11RequestBody();
+
         RequestUri requestUri = http11RequestHeader.getRequestUri();
         HttpVersion httpVersion = http11RequestHeader.getHttpVersion();
         List<String> acceptTypes = http11RequestHeader.getAcceptType();
+        HttpMethod httpMethod = http11RequestHeader.getHttpMethod();
 
-        if (requestUri.hasQueryParameters()) {
-            return handleWithQueryParameters(requestUri, httpVersion, acceptTypes);
+        if (httpMethod.isPost()) {
+            if (requestUri.matches("/login")) {
+                return handleLogin(http11RequestBody, httpVersion, acceptTypes);
+            } else if (requestUri.matches("/register")) {
+                return handleRegister(http11RequestBody, httpVersion, acceptTypes);
+            }
+        }
+
+        if (httpMethod.isNotGet() && http11RequestBody.hasBody()) {
+            return getHttp11Response(http11RequestBody.getBody(), StatusLine.ok(httpVersion), acceptTypes);
         }
 
         return getStaticResource(requestUri.getRequestUri())
@@ -35,33 +52,57 @@ public class Http11RequestHandler {
                 });
     }
 
-    private static Http11Response handleWithQueryParameters(RequestUri requestUri,
-                                                            HttpVersion httpVersion,
-                                                            List<String> acceptTypes) {
-        Map<String, String> queryParameters = requestUri.getQueryParameters();
+    private static Http11Response handleLogin(Http11RequestBody http11RequestBody,
+                                              HttpVersion httpVersion,
+                                              List<String> acceptTypes) {
+        Map<String, String> loginData = parseBody(http11RequestBody.getBody());
+        String account = loginData.get("account");
+        String password = loginData.get("password");
 
-        if (!queryParameters.containsKey("account")) {
-            return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"),
-                    StatusLine.unAuthorized(httpVersion), acceptTypes);
-        }
-
-        String account = queryParameters.get("account");
-        String password = queryParameters.get("password");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"),
-                    StatusLine.unAuthorized(httpVersion), acceptTypes);
+                    StatusLine.unAuthorized(httpVersion),
+                    acceptTypes);
         }
 
-        return getHttp11Response(getStaticResource("/index.html").orElse("Index"), StatusLine.found(httpVersion),
+        log.info("로그인 성공! 아이디 : {}", account);
+
+        return getHttp11Response(getStaticResource("/index.html").orElse("Index"),
+                StatusLine.found(httpVersion),
                 acceptTypes);
     }
 
-    private static Http11Response getHttp11Response(String staticResource,
+    private static Http11Response handleRegister(Http11RequestBody http11RequestBody,
+                                                 HttpVersion httpVersion,
+                                                 List<String> acceptTypes) {
+        Map<String, String> registrationData = parseBody(http11RequestBody.getBody());
+        String account = registrationData.get("account");
+        String password = registrationData.get("password");
+        String email = registrationData.get("email");
+
+        User newUser = new User(account, password, email);
+        InMemoryUserRepository.save(newUser);
+
+        return getHttp11Response(getStaticResource("/index.html").orElse("Index"),
+                StatusLine.ok(httpVersion),
+                acceptTypes);
+    }
+
+    private static Map<String, String> parseBody(String body) {
+        List<String> params = Arrays.asList(body.split("&"));
+        return params.stream()
+                .map(param -> Arrays.asList(param.split("=")))
+                .collect(Collectors.toMap(
+                        param -> param.get(0),
+                        param -> param.size() > 1 ? param.get(1) : ""
+                ));
+    }
+
+    private static Http11Response getHttp11Response(String response,
                                                     StatusLine httpVersion,
                                                     List<String> acceptTypes) {
-        Http11ResponseBody responseBody = Http11ResponseBody.of(staticResource);
+        Http11ResponseBody responseBody = Http11ResponseBody.of(response);
         Http11ResponseHeader header = Http11ResponseHeader.of(httpVersion,
                 ContentType.from(acceptTypes),
                 responseBody.getContentLength());

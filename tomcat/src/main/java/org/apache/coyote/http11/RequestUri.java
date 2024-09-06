@@ -30,13 +30,12 @@ public class RequestUri {
         List<String> queryParams = Arrays.asList(queryString.split("&"));
         Map<String, String> queryParameters = queryParams.stream()
                 .map(query -> Arrays.asList(query.split("=")))
-                .collect(Collectors.toMap(List::getFirst, List::getLast));
+                .collect(Collectors.toMap(
+                        param -> param.get(0),
+                        param -> param.size() > 1 ? param.get(1) : ""
+                ));
 
         return new RequestUri(path, queryString, queryParameters);
-    }
-
-    public boolean hasQueryParameters() {
-        return !queryParameters.isEmpty();
     }
 
     public String getRequestUri() {
@@ -46,7 +45,7 @@ public class RequestUri {
         return String.join(QUERY_STRING_DELIMITER, path, queryString);
     }
 
-    public Map<String, String> getQueryParameters() {
-        return queryParameters;
+    public boolean matches(String requestUri) {
+        return path.equals(requestUri);
     }
 }

@@ -29,10 +29,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (OutputStream outputStream = connection.getOutputStream();
              InputStream inputStream = connection.getInputStream()) {
-            Http11RequestHeader http11RequestHeader = Http11RequestHeader.from(inputStream);
-            Http11Response http11Response = Http11RequestHandler.handle(http11RequestHeader);
-            final var response = http11Response.getResponse();
-            outputStream.write(response.getBytes());
+            // Http11Request 객체 만듦.
+            Http11Request request = Http11Request.of(inputStream);
+            // Http11RequestHandler -> Http11Request handle
+            Http11Response response = Http11RequestHandler.handle(request);
+            String responseString = response.getResponse();
+            outputStream.write(responseString.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

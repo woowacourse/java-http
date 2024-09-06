@@ -30,4 +30,8 @@ public class StartLine {
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
 }

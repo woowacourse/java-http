@@ -19,4 +19,16 @@ public enum HttpMethod {
             throw new IllegalArgumentException(String.format("Not found HTTP Method : %s", httpMethod));
         }
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isNotGet() {
+        return !isGet();
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
 }

@@ -12,13 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import util.ResourceFileLoader;
 
 public class ApiProcessor {
-
-    private static final Logger log = LoggerFactory.getLogger(ApiProcessor.class);
 
     private final PageProcessor pageProcessor;
 
@@ -39,15 +34,15 @@ public class ApiProcessor {
         String requestUri = splitPath[0];
 
         if (requestUri.equals("/login")) {
-            SessionManager sessionManager = SessionManager.getInstance();
-            String jsessionid = requestHeader.get("Cookie").split("=")[1];
-            Session session = sessionManager.findSession(jsessionid);
-            boolean a = session == null;
             if (methodType == POST) {
                 processLogin(outputStream, requestBody);
                 return;
             }
             if (methodType == GET) {
+                SessionManager sessionManager = SessionManager.getInstance();
+                String jsessionid = requestHeader.get("Cookie").split("=")[1];
+                Session session = sessionManager.findSession(jsessionid);
+
                 if (session != null && session.getAttribute("user") != null) {
                     User user = (User) session.getAttribute("user");
                     loginSuccess(outputStream, user);
@@ -81,18 +76,14 @@ public class ApiProcessor {
     }
 
     private Map<String, String> findParameterEntries(String requestPath) {
-        String[] queryParameters = findQueryParameters(requestPath);
+        String[] splitPath = requestPath.split("\\?");
+        String[] queryParameters = splitPath[1].split("&");
         Map<String, String> parameterMap = new HashMap<>();
         for (String queryParameter : queryParameters) {
             String[] queryParameterEntry = queryParameter.split("=");
             parameterMap.put(queryParameterEntry[0], queryParameterEntry[1]);
         }
         return parameterMap;
-    }
-
-    private String[] findQueryParameters(String requestPath) {
-        String[] splitPath = requestPath.split("\\?");
-        return splitPath[1].split("&");
     }
 
     private void processLogin(OutputStream outputStream, Map<String, String> requestBody) throws IOException {

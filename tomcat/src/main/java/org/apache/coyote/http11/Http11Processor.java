@@ -36,14 +36,14 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+
+            // request line
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            Map<String, String> httpRequestHeaders = new HashMap<>();
-            String requestTitle = br.readLine();
-            if (requestTitle == null) {
+            String requestLine = br.readLine();
+            if (requestLine == null) {
                 return;
             }
-            log.info(requestTitle);
-            StringTokenizer st = new StringTokenizer(requestTitle);
+            StringTokenizer st = new StringTokenizer(requestLine);
             MethodType requestMethodType = MethodType.toMethodType(st.nextToken());
             String requestPath = st.nextToken();
             if (requestPath.equals("/")) {
@@ -51,10 +51,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             // header
+            Map<String, String> httpRequestHeaders = new HashMap<>();
             String header = br.readLine();
             while (!"".equals(header)) {
                 String[] splitHeader = header.split(": ");
-//                log.info(splitHeader[0]+": "+splitHeader[1]);
                 httpRequestHeaders.put(splitHeader[0], splitHeader[1]);
                 header = br.readLine();
             }
@@ -73,7 +73,6 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             RequestPathType requestPathType = RequestPathType.reqeustPathToRequestPathType(requestPath);
-
             if (requestPathType.isAPI()) {
                 apiProcessor.process(connection, requestPath, requestMethodType, httpRequestHeaders, requestBody);
             }

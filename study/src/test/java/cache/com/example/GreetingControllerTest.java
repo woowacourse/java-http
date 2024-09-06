@@ -77,6 +77,7 @@ class GreetingControllerTest {
     void testCacheBustingOfStaticResources() {
         final var uri = String.format("%s/%s/js/index.js", PREFIX_STATIC_RESOURCES, version.getVersion());
 
+        System.out.println(uri);
         // "/resource-versioning/js/index.js" 경로의 정적 파일에 ETag를 사용한 캐싱이 적용되었는지 확인한다.
         final var response = webTestClient
                 .get()

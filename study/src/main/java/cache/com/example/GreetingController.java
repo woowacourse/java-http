@@ -25,16 +25,16 @@ public class GreetingController {
                 .cachePrivate()
                 .getHeaderValue();
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/etag")
     public String etag() {
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/resource-versioning")
     public String resourceVersioning() {
-        return "resource-versioning";
+        return "resource-versioning.html";
     }
 }

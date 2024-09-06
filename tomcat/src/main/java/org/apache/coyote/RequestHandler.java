@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.SessionManager;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.response.HttpResponseGenerator;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

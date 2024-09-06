@@ -8,6 +8,7 @@ import org.apache.coyote.http11.handler.GetRegisterHandler;
 import org.apache.coyote.http11.handler.HelloHandler;
 import org.apache.coyote.http11.handler.NotFoundHandler;
 import org.apache.coyote.http11.handler.PostLoginHandler;
+import org.apache.coyote.http11.handler.PostRegisterHandler;
 import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,7 @@ public class Http11Processor implements Runnable, Processor {
         AbstractHandler helloHandler = new HelloHandler();
         AbstractHandler staticResourceHandler = new StaticResourceHandler();
         AbstractHandler postLoginHandler = new PostLoginHandler();
+        AbstractHandler postRegisterHandler = new PostRegisterHandler();
         AbstractHandler getLoginHandler = new GetLoginHandler();
         AbstractHandler getRegisterHandler = new GetRegisterHandler();
         AbstractHandler notFoundHandler = new NotFoundHandler();
@@ -91,6 +93,7 @@ public class Http11Processor implements Runnable, Processor {
                 helloHandler,
                 staticResourceHandler,
                 postLoginHandler,
+                postRegisterHandler,
                 getLoginHandler,
                 getRegisterHandler
         );

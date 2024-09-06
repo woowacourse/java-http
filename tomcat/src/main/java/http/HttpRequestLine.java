@@ -41,4 +41,11 @@ public class HttpRequestLine {
     public HttpMethod getHttpMethod() {
         return method;
     }
+
+    public String getQueryParam() {
+        if (uri.getQuery() == null) {
+            return "";
+        }
+        return uri.getQuery();
+    }
 }

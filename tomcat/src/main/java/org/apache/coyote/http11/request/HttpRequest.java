@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpCookies;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMessageBody;
 import org.apache.coyote.http11.HttpProtocol;
@@ -53,5 +54,10 @@ public class HttpRequest {
 
     public String getFormData(final String name) {
         return httpMessageBody.getFormData(name);
+    }
+
+    public String getSessionId() {
+        HttpCookies cookies = HttpCookies.from(httpHeaders);
+        return cookies.getCookieValue("JSESSIONID");
     }
 }

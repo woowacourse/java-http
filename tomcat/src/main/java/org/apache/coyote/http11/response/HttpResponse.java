@@ -54,7 +54,7 @@ public class HttpResponse {
         return String.join("\r\n", lineMessage, headersMessage, bodyMessage);
     }
 
-    public void setJsessionCookie() {
-        httpHeaders.putHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
+    public void setJsessionCookie(UUID uuid) {
+        httpHeaders.putHeader("Set-Cookie", "JSESSIONID=" + uuid);
     }
 }

@@ -4,9 +4,12 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpProtocol;
 import org.apache.coyote.http11.HttpRequestHandler;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.line.Method;
 import org.apache.coyote.http11.request.line.Uri;
@@ -20,6 +23,7 @@ public class LoginController implements HttpRequestHandler {
     private static final String LOGIN_FAIL_PAGE = "/401.html";
     private static final String LOGIN_SUCCESS_REDIRECT_URI = "http://localhost:8080/index.html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final String ACCOUNT_PARAMETER = "account";
     private static final String PASSWORD_PARAMETER = "password";
     private static final Method SUPPORTING_METHOD = Method.GET;
@@ -55,8 +59,14 @@ public class LoginController implements HttpRequestHandler {
         if (found.isEmpty() || !found.get().checkPassword(password)) {
             return HttpResponse.ok(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
         }
+
+        UUID jsessionId = UUID.randomUUID();
+        Session session = new Session(jsessionId.toString());
+        session.setAttributes("user", found.get());
+        sessionManager.putSession(jsessionId.toString(), session);
+
         HttpResponse response = HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
-        response.setJsessionCookie();
+        response.setJsessionCookie(jsessionId);
         return response;
     }
 }

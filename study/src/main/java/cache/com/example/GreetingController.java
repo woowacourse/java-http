@@ -1,17 +1,21 @@
 package cache.com.example;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 @Controller
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(final HttpServletResponse response) {
+        final String cacheControl = CacheControl
+                .noCache()
+                .cachePrivate()
+                .getHeaderValue();
+        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
         return "index";
     }
 

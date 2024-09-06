@@ -37,66 +37,19 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
             String path = httpRequest.getPath();
-            HttpMethod httpRequestMethod = httpRequest.getHttpMethod();
 
             HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
 
             if (path.equals("/")) {
-                httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                        .addHttpStatusCode(HttpStatusCode.OK)
-                        .addResponseBody("Hello world!");
+                getRoot(httpResponse);
             } else if (path.endsWith(".html")) {
-                String responseBody = htmlReader.loadHtmlAsString(path);
-                httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                        .addHttpStatusCode(HttpStatusCode.OK)
-                        .addResponseBody(responseBody);
+                getHtml(httpResponse, path);
             } else if (path.startsWith("/static")) {
-                int lastIndexOfDot = path.lastIndexOf(".");
-                String postfix = path.substring(lastIndexOfDot + 1);
-                String responseBody = htmlReader.loadHtmlAsString(path);
-                httpResponse.addContentType(ContentType.from(postfix))
-                        .addHttpStatusCode(HttpStatusCode.OK)
-                        .addResponseBody(responseBody);
+                getStaticResource(httpResponse, path);
             } else if (path.startsWith("/login")) {
-                if (httpRequestMethod == HttpMethod.POST) {
-                    String redirectUrl = "/index.html";
-                    HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
-                    try {
-                        String sessionId = UserService.login(requestParameter);
-                        httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
-                                .addCookie("JSESSIONID", sessionId)
-                                .addCookie("Max-Age", "600")
-                                .addRedirectUrl(redirectUrl);
-                    } catch (IllegalArgumentException e) {
-                        httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
-                                .addRedirectUrl("/401.html");
-                    }
-                } else if (httpRequestMethod == HttpMethod.GET && !validateSession(httpRequest.getSessionId())) {
-                    String responseBody = htmlReader.loadHtmlAsString("login.html");
-                    httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                            .addHttpStatusCode(HttpStatusCode.OK)
-                            .addResponseBody(responseBody);
-                } else if (httpRequestMethod == HttpMethod.GET && validateSession(httpRequest.getSessionId())) {
-                    httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
-                            .addRedirectUrl("/index.html");
-                }
+                login(httpResponse, httpRequest);
             } else if (path.equals("/register")) {
-                if (httpRequestMethod == HttpMethod.POST) {
-                    String redirectUrl = "/index.html";
-                    HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
-                    try {
-                        UserService.saveUser(requestParameter);
-                    } catch (IllegalArgumentException e) {
-                        redirectUrl = "/400.html";
-                    }
-                    httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
-                            .addRedirectUrl(redirectUrl);
-                } else if (httpRequestMethod == HttpMethod.GET) {
-                    String responseBody = htmlReader.loadHtmlAsString("register.html");
-                    httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
-                            .addHttpStatusCode(HttpStatusCode.OK)
-                            .addResponseBody(responseBody);
-                }
+                register(httpResponse, httpRequest);
             }
 
             String response = HttpResponseParser.parse(httpResponse);
@@ -105,6 +58,74 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void getRoot(HttpResponse httpResponse) {
+        httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .addHttpStatusCode(HttpStatusCode.OK)
+                .addResponseBody("Hello world!");
+    }
+
+    private void getHtml(HttpResponse httpResponse, String path) throws IOException {
+        String responseBody = htmlReader.loadHtmlAsString(path);
+        httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                .addHttpStatusCode(HttpStatusCode.OK)
+                .addResponseBody(responseBody);
+    }
+
+    private void getStaticResource(HttpResponse httpResponse, String path) throws IOException {
+        int lastIndexOfDot = path.lastIndexOf(".");
+        String postfix = path.substring(lastIndexOfDot + 1);
+        String responseBody = htmlReader.loadHtmlAsString(path);
+        httpResponse.addContentType(ContentType.from(postfix))
+                .addHttpStatusCode(HttpStatusCode.OK)
+                .addResponseBody(responseBody);
+    }
+
+    private void login(HttpResponse httpResponse, HttpRequest httpRequest) throws IOException {
+        HttpMethod httpRequestMethod = httpRequest.getHttpMethod();
+        if (httpRequestMethod == HttpMethod.POST) {
+            String redirectUrl = "/index.html";
+            HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
+            try {
+                String sessionId = UserService.login(requestParameter);
+                httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                        .addCookie("JSESSIONID", sessionId)
+                        .addCookie("Max-Age", "600")
+                        .addRedirectUrl(redirectUrl);
+            } catch (IllegalArgumentException e) {
+                httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                        .addRedirectUrl("/401.html");
+            }
+        } else if (httpRequestMethod == HttpMethod.GET && !validateSession(httpRequest.getSessionId())) {
+            String responseBody = htmlReader.loadHtmlAsString("login.html");
+            httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                    .addHttpStatusCode(HttpStatusCode.OK)
+                    .addResponseBody(responseBody);
+        } else if (httpRequestMethod == HttpMethod.GET && validateSession(httpRequest.getSessionId())) {
+            httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                    .addRedirectUrl("/index.html");
+        }
+    }
+
+    private void register(HttpResponse httpResponse, HttpRequest httpRequest) throws IOException {
+        HttpMethod httpRequestMethod = httpRequest.getHttpMethod();
+        if (httpRequestMethod == HttpMethod.POST) {
+            String redirectUrl = "/index.html";
+            HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
+            try {
+                UserService.saveUser(requestParameter);
+            } catch (IllegalArgumentException e) {
+                redirectUrl = "/400.html";
+            }
+            httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                    .addRedirectUrl(redirectUrl);
+        } else if (httpRequestMethod == HttpMethod.GET) {
+            String responseBody = htmlReader.loadHtmlAsString("register.html");
+            httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                    .addHttpStatusCode(HttpStatusCode.OK)
+                    .addResponseBody(responseBody);
         }
     }
 

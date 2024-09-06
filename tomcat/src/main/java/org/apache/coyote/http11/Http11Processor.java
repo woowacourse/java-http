@@ -35,11 +35,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var request = createRequest(inputStream);
+            HttpRequest request = createRequest(inputStream);
             log.info("[REQUEST] = {}", request);
 
-            final var responseBody = createResponseBody(request.getUri());
-            Map<String, String> header = createHeader(request, responseBody.getBytes().length);
+            ContentType contentType = ContentType.findByUrl(request.getUrl());
+            String resourceUrl = getResourceUrl(contentType, request.getUrl());
+            String responseBody = createResponseBody(resourceUrl);
+
+            Map<String, String> header = createHeader(contentType, responseBody.getBytes().length);
 
             HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header, responseBody);
             final var response = httpResponse.getResponse();
@@ -63,6 +66,13 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
+    private String getResourceUrl(ContentType contentType, String rawUrl) {
+        if (rawUrl.contains(".")) {
+            return "static" + rawUrl;
+        }
+        return "static" + rawUrl + "." + contentType.getType();
+    }
+
     private String createResponseBody(String uri) throws IOException {
         URL resource = Http11Processor.class.getClassLoader().getResource(uri);
         if (resource == null) {
@@ -73,10 +83,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
     }
 
-    private static Map<String, String> createHeader(HttpRequest request, int length) {
+    private Map<String, String> createHeader(ContentType contentType, int length) {
         Map<String, String> header = new LinkedHashMap<>();
-        header.put("Content-Type", ContentType.findByUrl(request.getUri()).getValue() + ";" + "charset=utf-8 ");
+        header.put("Content-Type", contentType.getValue() + ";" + "charset=utf-8 ");
         header.put("Content-Length", length + " ");
         return header;
     }
+
 }

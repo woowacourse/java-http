@@ -5,16 +5,16 @@ import java.util.Map;
 
 public class HttpRequest {
     private String method;
-    private String uri;
+    private String url;
     private String httpVersion;
     private Map<String, String> headers;
     private Map<String, String> queries; // TODO refactor
     private String body;
 
-    public HttpRequest(String method, String uri, String httpVersion, Map<String, String> headers,
+    public HttpRequest(String method, String url, String httpVersion, Map<String, String> headers,
                        Map<String, String> queries, String body) {
         this.method = method;
-        this.uri = uri;
+        this.url = url;
         this.httpVersion = httpVersion;
         this.headers = headers;
         this.queries = queries;
@@ -25,8 +25,8 @@ public class HttpRequest {
         return method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getUrl() {
+        return url;
     }
 
     public String getHttpVersion() {
@@ -49,7 +49,7 @@ public class HttpRequest {
     public String toString() {
         return "HttpRequest{" +
                 "method='" + method + '\'' +
-                ", uri='" + uri + '\'' +
+                ", uri='" + url + '\'' +
                 ", httpVersion='" + httpVersion + '\'' +
                 ", headers=" + headers +
                 ", queries=" + queries +

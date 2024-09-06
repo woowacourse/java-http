@@ -35,22 +35,14 @@ public class HttpRequestParser {
             url = url.substring(0, url.indexOf("?"));
         }
         return new HttpRequest(requestLineParts[0],
-                parseUrl(url),
+                url,
                 requestLineParts[2],
                 headers,
                 queries,
                 body);
     }
 
-    private static String parseUrl(String rawUrl) {
-        if (rawUrl.endsWith(".html") || rawUrl.endsWith(".css") || rawUrl.endsWith(".js")) {
-            return "static/" + rawUrl.substring(1);
-        }
-        if (rawUrl.equals("/")) {
-            return "static/index.html";
-        }
-        return "static/" + rawUrl.substring(1) + ".html";
-    }
+
 
     private static Map<String, String> handleQueries(String url) { // TODO refactor, test
         if (url.contains("?")) {

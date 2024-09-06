@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
@@ -22,11 +23,9 @@ public class HttpHeaders {
     }
 
     public String buildHttpHeadersResponse() {
-        return String.join("\r\n",
-                headers.entrySet().stream()
-                        .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
-                        .toArray(String[]::new)
-        );
+        return headers.entrySet().stream()
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining("\r\n"));
     }
 
     public void addHeader(String key, String value) {

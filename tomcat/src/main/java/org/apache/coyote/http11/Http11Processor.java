@@ -44,51 +44,29 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              var outputStream = connection.getOutputStream()) {
 
-            String httpMethod = null;
-            String statusCode = "200 OK";
+            HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
+            String path = httpRequest.getPath();
+            HttpMethod httpMethod = httpRequest.getHttpMethod();
+            String requestBody = httpRequest.getRequestBody();
+
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
-            String uri = "/";
             String redirectUrl = null;
+            String statusCode = "200 OK";
             Map<String, String> responseCookies = new HashMap<>();
 
-            String startLine = bufferedReader.readLine();
-            if (startLine != null) {
-                String[] requestParts = startLine.split(" ");
-                if (requestParts.length >= 2) {
-                    httpMethod = requestParts[0].trim();
-                    uri = requestParts[1].trim();
-                }
-            }
-            Map<String, String> httpHeaders = new HashMap<>();
-            String requestLine = null;
-            while ((requestLine = bufferedReader.readLine()) != null && !requestLine.isEmpty()) {
-                String[] requestParts = requestLine.split(":");
-                if (requestParts.length >= 2) {
-                    httpHeaders.put(requestParts[0].trim(), requestParts[1].trim());
-                }
-            }
-            StringBuilder requestBodyBuilder = new StringBuilder();
-            if (httpHeaders.get("Content-Length") != null) {
-                int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
-                char[] bodyChars = new char[contentLength];
-                bufferedReader.read(bodyChars, 0, contentLength);
-                requestBodyBuilder.append(bodyChars);
-            }
-            String requestBody = requestBodyBuilder.toString();
-
-            if (uri.endsWith(".html")) {
-                String fileName = "static" + uri;
+            if (path.endsWith(".html")) {
+                String fileName = "static" + path;
                 responseBody = getHtmlResponseBody(fileName);
-            } else if (uri.endsWith(".css") || uri.endsWith(".js")) {
+            } else if (path.endsWith(".css") || path.endsWith(".js")) {
                 contentType = "text/css";
-                if (uri.endsWith(".js")) {
+                if (path.endsWith(".js")) {
                     contentType = "application/javascript";
                 }
-                String fileName = "static" + uri;
+                String fileName = "static" + path;
                 responseBody = getHtmlResponseBody(fileName);
-            } else if (uri.startsWith("/login")) {
-                if (httpMethod.equals("POST")) {
+            } else if (path.startsWith("/login")) {
+                if (httpMethod == HttpMethod.POST) {
                     Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))
                             .map(param -> param.split("=", 2))
                             .collect(Collectors.toMap(
@@ -111,12 +89,12 @@ public class Http11Processor implements Runnable, Processor {
                     statusCode = "302 Found";
                     UUID uuid = UUID.randomUUID();
                     responseCookies.put("JSESSIONID", uuid.toString());
-                } else if (httpMethod.equals("GET")) {
+                } else if (httpMethod == HttpMethod.GET) {
                     String fileName = "static/login.html";
                     responseBody = getHtmlResponseBody(fileName);
                 }
-            } else if (uri.equals("/register")) {
-                if (httpMethod.equals("POST")) {
+            } else if (path.equals("/register")) {
+                if (httpMethod == HttpMethod.POST) {
                     Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))
                             .map(param -> param.split("=", 2))
                             .collect(Collectors.toMap(
@@ -131,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
                     } catch (IllegalArgumentException e) {
                         redirectUrl = "/400.html";
                     }
-                } else if (httpMethod.equals("GET")) {
+                } else if (httpMethod == HttpMethod.GET) {
                     String fileName = "static/register.html";
                     responseBody = getHtmlResponseBody(fileName);
                 }

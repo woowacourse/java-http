@@ -25,12 +25,16 @@ public class RegisterController {
     }
 
     public void register(Request request, Response response) {
-        String account = request.getBodyValue("account");
-        String password = request.getBodyValue("password");
-        String email = request.getBodyValue("email");
-        User user = new User(account, password, email);
+        User user = createUser(request);
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공! 아이디 : {}", user.getAccount());
         response.configureViewAndStatus("/index", StatusCode.FOUND);
+    }
+
+    private User createUser(Request request) {
+        String account = request.getBodyValue("account");
+        String password = request.getBodyValue("password");
+        String email = request.getBodyValue("email");
+        return new User(account, password, email);
     }
 }

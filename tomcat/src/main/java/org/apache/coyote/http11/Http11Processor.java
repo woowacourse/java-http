@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
             String redirectUrl = null;
-            String statusCode = "200 OK";
+            HttpStatusCode statusCode = HttpStatusCode.OK;
             Map<String, String> responseCookies = new HashMap<>();
 
             if (path.endsWith(".html")) {
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
                     } catch (IllegalArgumentException e) {
                         redirectUrl = "/401.html";
                     }
-                    statusCode = "302 Found";
+                    statusCode = HttpStatusCode.FOUND;
                     UUID uuid = UUID.randomUUID();
                     responseCookies.put("JSESSIONID", uuid.toString());
                 } else if (httpMethod == HttpMethod.GET) {
@@ -88,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             } else if (path.equals("/register")) {
                 if (httpMethod == HttpMethod.POST) {
-                    statusCode = "302 Found";
+                    statusCode = HttpStatusCode.FOUND;
                     HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
                     String account = requestParameter.getValue("account");
                     String password = requestParameter.getValue("password");
@@ -107,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             List<String> headers = new ArrayList<>();
-            headers.add("HTTP/1.1 " + statusCode + " ");
+            headers.add("HTTP/1.1 " + statusCode.getString() + " ");
             headers.add("Content-Type: " + contentType + " ");
             headers.add("Content-Length: " + responseBody.getBytes().length + " ");
             String cookies = responseCookies.entrySet().stream()

@@ -18,12 +18,12 @@ public class UserService {
         return user;
     }
 
-    public User register(String account, String email, String password) {
+    public User register(String account, String password, String email) {
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(user -> {
                     throw new DuplicatedException("이미 존재하는 계정입니다.");
                 });
 
-        return InMemoryUserRepository.save(new User(account, email, password));
+        return InMemoryUserRepository.save(new User(account, password, email));
     }
 }

@@ -32,7 +32,7 @@ public class RegisterController extends AbstractController {
             return HttpResponse.redirect("/register.html").build();
         }
 
-        userService.register(account, email, password);
+        userService.register(account, password, email);
 
         return HttpResponse.redirect("/index.html").build();
     }

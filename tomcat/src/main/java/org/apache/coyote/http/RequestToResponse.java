@@ -30,7 +30,9 @@ public class RequestToResponse {
     private static final String REDIRECT = "/index.html";
     private static final String UNAUTHORIZED = "/401.html";
 
-    public String build(HttpRequest request) throws IOException {
+    private static final SessionManager sessionManager = SessionManager.getInstance();
+
+    public String build(HttpRequest request) {
         Path path = request.getRequestLine().getPath();
 
         if (path.getPath().equals("/")) {
@@ -58,10 +60,12 @@ public class RequestToResponse {
             return response.toResponse();
         } catch (NullPointerException e) {
             return HttpResponse.notFoundResponses().toResponse();
+        } catch (IOException e) {
+            return HttpResponse.serverErrorResponses().toResponse();
         }
     }
 
-    private String login(HttpRequest request) throws IOException {
+    private String login(HttpRequest request) {
         RequestLine requestLine = request.getRequestLine();
         Path path = requestLine.getPath();
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(MimeType.HTML.getExtension()));
@@ -72,6 +76,12 @@ public class RequestToResponse {
             header.setContentLength(responseBody.getBytes().length);
 
             if (requestLine.getMethod().equals(HttpMethod.GET)) {
+                if (request.getHeaders().hasHeader("Cookie") && request.getHeaders().getCookie().hasCookieName("JSESSIONID")) {
+                    StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
+                    header.setLocation(REDIRECT);
+                    HttpResponse response = new HttpResponse(statusLine, header, responseBody);
+                    return response.toResponse();
+                }
                 StatusLine statusLine = new StatusLine(HttpStatus.OK);
                 HttpResponse response = new HttpResponse(statusLine, header, responseBody);
                 return response.toResponse();
@@ -90,6 +100,8 @@ public class RequestToResponse {
             }
         } catch (NullPointerException e) {
             return HttpResponse.notFoundResponses().toResponse();
+        } catch (IOException e) {
+            return HttpResponse.serverErrorResponses().toResponse();
         }
         return HttpResponse.notFoundResponses().toResponse();
     }
@@ -99,6 +111,9 @@ public class RequestToResponse {
             log.info(user.toString());
             header.setLocation(REDIRECT);
             UUID uuid = UUID.randomUUID();
+            Session session = new Session(uuid.toString());
+            session.setAttribute("user", user);
+            sessionManager.add(session);
             HttpCookie cookie = new HttpCookie();
             cookie.setSessionId(uuid.toString());
             header.setCookie(cookie.toCookieResponse());
@@ -110,7 +125,7 @@ public class RequestToResponse {
         return response.toResponse();
     }
 
-    private String register(HttpRequest request) throws IOException {
+    private String register(HttpRequest request) {
         RequestLine requestLine = request.getRequestLine();
         Path path = requestLine.getPath();
         final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getPath()).concat(MimeType.HTML.getExtension()));
@@ -140,6 +155,8 @@ public class RequestToResponse {
             }
         } catch (NullPointerException e) {
             return HttpResponse.notFoundResponses().toResponse();
+        } catch (IOException e) {
+            return HttpResponse.serverErrorResponses().toResponse();
         }
         return HttpResponse.notFoundResponses().toResponse();
     }

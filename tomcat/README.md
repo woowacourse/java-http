@@ -17,6 +17,6 @@
   - [x] 로그인 요청 또한 POST 로 변경
 - [x] 쿠키에 JSESSIONID 저장
   - [x] 응답 헤더에 `Set-Cookie` 키에 `JSESSIONID=...` 값을 저장
-- [ ] Session 구현하기
-  - [ ] `Session` 객체의 키 값으로 `User` 객체 저장
-  - [ ] 로그인 된 상태에서 `/login` 으로 GET 요청 시 `/index.html` 로 리다이랙트
+- [x] Session 구현하기
+  - [x] `Session` 객체의 키 값으로 `User` 객체 저장
+  - [x] 로그인 된 상태에서 `/login` 으로 GET 요청 시 `/index.html` 로 리다이랙트

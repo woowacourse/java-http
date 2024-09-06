@@ -20,7 +20,7 @@ class HeaderTest {
     void ofString() {
         Header header = Header.of(bulkHeaders);
 
-        assertThatCode(() -> header.getKey("Host")).doesNotThrowAnyException();
+        assertThatCode(() -> header.getValue("Host")).doesNotThrowAnyException();
     }
 
     @Test
@@ -30,7 +30,7 @@ class HeaderTest {
 
         Header header = Header.of(headers);
 
-        assertThatCode(() -> header.getKey("Host")).doesNotThrowAnyException();
+        assertThatCode(() -> header.getValue("Host")).doesNotThrowAnyException();
     }
 
 }

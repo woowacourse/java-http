@@ -37,4 +37,12 @@ public class HttpResponse {
                 ""
         );
     }
+
+    public static HttpResponse serverErrorResponses() {
+        return new HttpResponse(
+                new StatusLine(HttpStatus.INTERNAL_SERVER_ERROR),
+                ResponseHeader.basicResponseHeader(0),
+                ""
+        );
+    }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http.request;
 
 import org.apache.coyote.http.Header;
+import org.apache.coyote.http.HttpCookie;
 
 public class RequestHeader {
 
@@ -14,8 +15,15 @@ public class RequestHeader {
         return header.hasHeader(headerName);
     }
 
+    public HttpCookie getCookie() {
+        if (header.hasHeader("Cookie")) {
+            return HttpCookie.of(header.getValue("Cookie"));
+        }
+        return new HttpCookie();
+    }
+
     public String getValue(String headerName) {
-        return header.getKey(headerName);
+        return header.getValue(headerName);
     }
 
     public String toResponse() {

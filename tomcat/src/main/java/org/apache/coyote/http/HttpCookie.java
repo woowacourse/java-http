@@ -11,8 +11,10 @@ public class HttpCookie {
 
     private final Map<String, String> cookies;
 
-    public HttpCookie of(String bulkCookie) {
-        validate(bulkCookie);
+    public static HttpCookie of(String bulkCookie) {
+        if (bulkCookie == null || bulkCookie.isEmpty()) {
+            throw new IllegalArgumentException("Invalid cookie " + bulkCookie);
+        }
         Map<String, String> cookie = Stream.of(bulkCookie.split(";"))
                 .map(String::trim)
                 .map(c -> c.split("="))
@@ -28,10 +30,8 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    private void validate(String cookie) {
-        if (cookie == null || cookie.isEmpty()) {
-            throw new IllegalArgumentException("Invalid cookie " + cookie);
-        }
+    public boolean hasCookieName(String cookieName) {
+        return cookies.containsKey(cookieName);
     }
 
     public String getCookieValue(String cookieName) {

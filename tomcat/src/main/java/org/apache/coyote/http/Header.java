@@ -36,7 +36,7 @@ public class Header {
         return headers.containsKey(header);
     }
 
-    public String getKey(String header) {
+    public String getValue(String header) {
         if (!headers.containsKey(header)) {
             throw new IllegalArgumentException("Header " + header + " not found");
         }

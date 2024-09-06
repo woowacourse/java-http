@@ -24,7 +24,7 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest create(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = new RequestLine(bufferedReader.readLine());
         RequestHeaders requestHeaders = createRequestHeaders(bufferedReader);
         RequestBody requestBody = createRequestBody(bufferedReader, requestHeaders);

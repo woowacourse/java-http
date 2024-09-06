@@ -33,14 +33,27 @@ public class RequestProcessor {
         return httpRequest.toString();
     }
 
-    public String processRequestBody() throws IOException, URISyntaxException {
+    public String processHttpResponse() throws URISyntaxException, IOException {
+        String responseBody = processResponseBody();
+        String contentMediaType = getContentMediaType();
+        String httpResponse = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentMediaType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody
+        );
+        return httpResponse;
+    }
+
+    private String processResponseBody() throws IOException, URISyntaxException {
         if (parser.isRootUri()) {
             return "Hello world!";
         }
         return parser.readResource();
     }
 
-    public String getContentMediaType() {
+    private String getContentMediaType() {
         HttpRequestHeaders requestHeaders = parser.getRequestHeaders();
         HttpRequestLine requestLine = parser.getRequestLine();
         Accept accept = requestHeaders.getAcceptValue();

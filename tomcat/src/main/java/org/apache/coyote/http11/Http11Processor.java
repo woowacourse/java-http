@@ -29,15 +29,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             RequestProcessor requestProcessor = new RequestProcessor(inputStream);
-            final var responseBody = requestProcessor.processRequestBody();
-            final var contentType = requestProcessor.getContentMediaType();
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            String response = requestProcessor.processHttpResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

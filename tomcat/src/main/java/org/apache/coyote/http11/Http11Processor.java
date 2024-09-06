@@ -5,7 +5,9 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,9 +38,9 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(Socket connection) {
-        try (var inputStream = connection.getInputStream();
+        try (InputStream inputStream = connection.getInputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-             var outputStream = connection.getOutputStream()) {
+             OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
             String path = httpRequest.getPath();
@@ -115,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
                 headers.add("Set-Cookie: " + cookies);
             }
 
-            var response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;
+            String response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;
 
             outputStream.write(response.getBytes());
             outputStream.flush();

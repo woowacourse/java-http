@@ -2,6 +2,7 @@ package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.catalina.Manager;
 import org.apache.coyote.http11.AbstractHandler;
 import org.apache.coyote.http11.ForwardResult;
 import org.apache.coyote.http11.HttpRequest;
@@ -21,7 +22,7 @@ public class PostRegisterHandler extends AbstractHandler {
     }
 
     @Override
-    protected ForwardResult forward(HttpRequest httpRequest) {
+    protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
         QueryParameter body = httpRequest.body();
         String account = body.get("account").orElseThrow();
         String password = body.get("password").orElseThrow();

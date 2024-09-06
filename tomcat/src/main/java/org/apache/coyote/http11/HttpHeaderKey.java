@@ -5,6 +5,8 @@ public enum HttpHeaderKey {
     CONTENT_LENGTH("Content-Length"),
     CONTENT_TYPE("Content-Type"),
     LOCATION("Location"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie"),
 
     ;
 

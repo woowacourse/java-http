@@ -1,5 +1,6 @@
 package com.techcourse.handler;
 
+import org.apache.catalina.Manager;
 import org.apache.coyote.http11.AbstractHandler;
 import org.apache.coyote.http11.ForwardResult;
 import org.apache.coyote.http11.HttpRequest;
@@ -18,7 +19,7 @@ public class GetRegisterHandler extends AbstractHandler {
     }
 
     @Override
-    protected ForwardResult forward(HttpRequest httpRequest) {
+    protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
         return new ForwardResult("register.html", HttpStatus.OK);
     }
 }

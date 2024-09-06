@@ -1,6 +1,9 @@
 package com.techcourse.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.Manager;
 import org.apache.coyote.http11.AbstractHandler;
 import org.apache.coyote.http11.ForwardResult;
 import org.apache.coyote.http11.Header;
@@ -23,12 +26,15 @@ public class PostLoginHandler extends AbstractHandler {
     }
 
     @Override
-    protected ForwardResult forward(HttpRequest httpRequest) {
+    protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
         QueryParameter queryParameter = httpRequest.body();
         Header header = new Header(Collections.emptyList());
         String redirectionPath = "401.html";
 
         if (isLoggedIn(queryParameter)) {
+            HttpSession session = findSessionOrCreate(sessionManager, createCookie(httpRequest));
+            session.setAttribute("user", getUser(queryParameter));
+            header.append(HttpHeaderKey.SET_COOKIE, getSessionKey() + "=" + session.getId());
             redirectionPath = "index.html";
         }
 
@@ -43,5 +49,10 @@ public class PostLoginHandler extends AbstractHandler {
                 .flatMap(InMemoryUserRepository::findByAccount)
                 .map(it -> it.checkPassword(password))
                 .orElse(false);
+    }
+
+    private User getUser(QueryParameter queryParameter) {
+        String account = queryParameter.get("account").orElseThrow();
+        return InMemoryUserRepository.findByAccount(account).orElseThrow();
     }
 }

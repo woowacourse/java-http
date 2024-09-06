@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Manager;
+
 import java.net.URI;
 import java.net.URL;
 
@@ -13,7 +15,7 @@ public class StaticResourceHandler extends AbstractHandler {
     }
 
     @Override
-    public ForwardResult forward(HttpRequest httpRequest) {
+    public ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
         URI uri = httpRequest.getUri();
 
         return new ForwardResult(uri.getPath(), HttpStatus.OK);

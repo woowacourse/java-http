@@ -7,6 +7,7 @@ import com.techcourse.handler.HelloHandler;
 import com.techcourse.handler.NotFoundHandler;
 import com.techcourse.handler.PostLoginHandler;
 import com.techcourse.handler.PostRegisterHandler;
+import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager sessionManager;
 
-    public Http11Processor(Socket connection) {
+    public Http11Processor(Socket connection, Manager sessionManager) {
         this.connection = connection;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -100,6 +103,6 @@ public class Http11Processor implements Runnable, Processor {
                 .findFirst()
                 .orElse(notFoundHandler);
 
-        return targetHandler.handle(httpRequest);
+        return targetHandler.handle(httpRequest, sessionManager);
     }
 }

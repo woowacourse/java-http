@@ -1,8 +1,6 @@
-package com.techcourse.service;
+package org.apache.coyote.session;
 
 import com.techcourse.model.User;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 
 public class SessionService {
 

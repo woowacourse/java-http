@@ -1,7 +1,6 @@
 package org.apache.coyote.controller;
 
 import com.techcourse.model.User;
-import com.techcourse.service.SessionService;
 import com.techcourse.service.UserService;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,6 +10,7 @@ import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
+import org.apache.coyote.session.SessionService;
 import org.apache.util.ResourceReader;
 import org.apache.util.parser.BodyParserFactory;
 import org.apache.util.parser.Parser;

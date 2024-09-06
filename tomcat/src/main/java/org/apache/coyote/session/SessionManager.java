@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.session;
 
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;

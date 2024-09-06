@@ -1,12 +1,11 @@
 package com.techcourse.presentation.requestparam;
 
-import com.techcourse.presentation.RequestParam;
 import com.techcourse.request.UserRequest;
 
 public class UserRequestParam extends RequestParam<UserRequest> {
 
-    public UserRequestParam(String queryString) {
-        super(queryString);
+    public UserRequestParam(String queryParam) {
+        super(queryParam);
     }
 
     @Override

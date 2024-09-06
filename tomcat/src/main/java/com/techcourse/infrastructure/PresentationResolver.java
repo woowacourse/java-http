@@ -2,9 +2,10 @@ package com.techcourse.infrastructure;
 
 import com.techcourse.presentation.DefaultPresentation;
 import com.techcourse.presentation.LoginPresentation;
-import http.HttpMethod;
-import java.io.UnsupportedEncodingException;
+import com.techcourse.presentation.RootPresentation;
 import java.util.List;
+import org.apache.coyote.ioprocessor.parser.HttpRequest;
+import org.apache.coyote.ioprocessor.parser.HttpResponse;
 
 public class PresentationResolver {
 
@@ -17,14 +18,17 @@ public class PresentationResolver {
     }
 
     public PresentationResolver() {
-        this(List.of(new LoginPresentation()));
+        this(List.of(
+                new LoginPresentation(),
+                new RootPresentation())
+        );
     }
 
-    public void view(HttpMethod method, String path, String queryParam) throws UnsupportedEncodingException {
-        presentations.stream()
-                .filter(presentation -> presentation.match(method, path))
+    public HttpResponse resolve(HttpRequest request) {
+        return presentations.stream()
+                .filter(presentation -> presentation.match(request))
                 .findFirst()
                 .orElse(defaultPresentation)
-                .view(queryParam);
+                .view(request);
     }
 }

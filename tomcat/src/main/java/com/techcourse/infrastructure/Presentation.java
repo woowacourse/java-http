@@ -1,9 +1,10 @@
 package com.techcourse.infrastructure;
 
-import http.HttpMethod;
+import org.apache.coyote.ioprocessor.parser.HttpRequest;
+import org.apache.coyote.ioprocessor.parser.HttpResponse;
 
 public interface Presentation {
-    void view(String queryParam);
+    HttpResponse view(HttpRequest request);
 
-    boolean match(HttpMethod method, String path);
+    boolean match(HttpRequest request);
 }

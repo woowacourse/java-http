@@ -1,4 +1,4 @@
-package com.techcourse.presentation;
+package com.techcourse.presentation.requestparam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -11,10 +11,10 @@ public abstract class RequestParam<O> {
     private static final String KEY_VALUE_DELIMITER = "=";
     private final Map<String, String> params;
 
-    public RequestParam(String queryString) {
+    public RequestParam(String queryParam) {
         Map<String, String> params = new HashMap<>();
-        if (queryString != null && !queryString.isEmpty()) {
-            String[] pairs = queryString.split(PARAM_DELIMITER);
+        if (queryParam != null && !queryParam.isEmpty()) {
+            String[] pairs = queryParam.split(PARAM_DELIMITER);
             for (String pair : pairs) {
                 String[] keyValue = pair.split(KEY_VALUE_DELIMITER);
                 String key = decode(keyValue[0]);

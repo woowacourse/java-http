@@ -1,22 +1,23 @@
 package org.apache.coyote.ioprocessor;
 
-import http.HttpRequestHeaders;
-import http.HttpRequestLine;
-import http.requestheader.Accept;
+import com.techcourse.infrastructure.PresentationResolver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import org.apache.coyote.ioprocessor.parser.RequestParser;
+import org.apache.coyote.ioprocessor.parser.HttpRequest;
+import org.apache.coyote.ioprocessor.parser.HttpResponse;
 
 public class RequestProcessor {
 
-    private final RequestParser parser;
+    private final HttpRequest httpRequest;
+    private final PresentationResolver resolver;
 
     public RequestProcessor(InputStream inputStream) throws IOException {
         String httpRequest = readRequestFromInputStream(inputStream);
-        this.parser = new RequestParser(httpRequest);
+        this.httpRequest = new HttpRequest(httpRequest);
+        this.resolver = new PresentationResolver();
     }
 
     private String readRequestFromInputStream(InputStream inputStream) throws IOException {
@@ -34,29 +35,7 @@ public class RequestProcessor {
     }
 
     public String processHttpResponse() throws URISyntaxException, IOException {
-        String responseBody = processResponseBody();
-        String contentMediaType = getContentMediaType();
-        String httpResponse = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentMediaType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
-        return httpResponse;
-    }
-
-    private String processResponseBody() throws IOException, URISyntaxException {
-        if (parser.isRootUri()) {
-            return "Hello world!";
-        }
-        return parser.readResource();
-    }
-
-    private String getContentMediaType() {
-        HttpRequestHeaders requestHeaders = parser.getRequestHeaders();
-        HttpRequestLine requestLine = parser.getRequestLine();
-        Accept accept = requestHeaders.getAcceptValue();
-        return accept.processContentType(requestLine.getUri());
+        HttpResponse response = resolver.resolve(httpRequest);
+        return response.buildResponse();
     }
 }

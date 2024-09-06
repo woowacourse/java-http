@@ -12,7 +12,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
             String path = httpRequest.getPath();
             HttpMethod httpMethod = httpRequest.getHttpMethod();
-            String requestBody = httpRequest.getRequestBody();
 
             String responseBody = "Hello world!";
             String contentType = "text/html;charset=utf-8";
@@ -67,14 +65,9 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = getHtmlResponseBody(fileName);
             } else if (path.startsWith("/login")) {
                 if (httpMethod == HttpMethod.POST) {
-                    Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))
-                            .map(param -> param.split("=", 2))
-                            .collect(Collectors.toMap(
-                                    keyValue -> keyValue[0],
-                                    keyValue -> keyValue[1]
-                            ));
-                    String account = paramMap.get("account");
-                    String password = paramMap.get("password");
+                    HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
+                    String account = requestParameter.getValue("account");
+                    String password = requestParameter.getValue("password");
                     redirectUrl = "/index.html";
                     try {
                         User user = InMemoryUserRepository.findByAccount(account)
@@ -95,15 +88,13 @@ public class Http11Processor implements Runnable, Processor {
                 }
             } else if (path.equals("/register")) {
                 if (httpMethod == HttpMethod.POST) {
-                    Map<String, String> paramMap = Arrays.stream(requestBody.split("&"))
-                            .map(param -> param.split("=", 2))
-                            .collect(Collectors.toMap(
-                                    keyValue -> keyValue[0],
-                                    keyValue -> keyValue[1]
-                            ));
                     statusCode = "302 Found";
+                    HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
+                    String account = requestParameter.getValue("account");
+                    String password = requestParameter.getValue("password");
+                    String email = requestParameter.getValue("email");
                     try {
-                        User user = new User(paramMap.get("account"), paramMap.get("password"), paramMap.get("email"));
+                        User user = new User(account, password, email);
                         InMemoryUserRepository.save(user);
                         redirectUrl = "/index.html";
                     } catch (IllegalArgumentException e) {

@@ -7,15 +7,17 @@ public class HttpRequest {
     private final String requestBody;
     private final ContentType contentType;
     private final Integer contentLength;
+    private final HttpRequestParameter httpRequestParameter;
 
     public HttpRequest(HttpMethod httpMethod, String path, HttpVersion httpVersion, String requestBody,
-                       ContentType contentType, Integer contentLength) {
+                       ContentType contentType, Integer contentLength, HttpRequestParameter httpRequestParameter) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.httpVersion = httpVersion;
         this.requestBody = requestBody;
         this.contentType = contentType;
         this.contentLength = contentLength;
+        this.httpRequestParameter = httpRequestParameter;
     }
 
     public HttpMethod getHttpMethod() {
@@ -40,5 +42,9 @@ public class HttpRequest {
 
     public Integer getContentLength() {
         return contentLength;
+    }
+
+    public HttpRequestParameter getHttpRequestParameter() {
+        return httpRequestParameter;
     }
 }

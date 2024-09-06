@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequestParser {
 
@@ -24,15 +25,20 @@ public class HttpRequestParser {
         Map<String, String> rawHttpRequestHeader = parseRawHttpRequestHeader(bufferedReader);
         ContentType contentType = null;
         Integer contentLength = null;
-        String requestBody = null;
+        String rawRequestBody = null;
+        HttpRequestParameter httpRequestParameter = null;
         if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PATCH) {
             contentType = ContentType.fromMimeType(rawHttpRequestHeader.get("Content-Type"))
                     .orElseThrow(() -> new IllegalArgumentException("HTTP 요청에 Content-Type이 없습니다."));
             String rawContentLength = rawHttpRequestHeader.get("Content-Length");
             contentLength = Integer.valueOf(rawContentLength);
-            requestBody = parseHttpRequestBody(contentLength, bufferedReader);
+            rawRequestBody = parseHttpRequestBody(contentLength, bufferedReader);
+            if (contentType == ContentType.URLENC) {
+                httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
+            }
         }
-        return new HttpRequest(httpMethod, path, httpVersion, requestBody, contentType, contentLength);
+        return new HttpRequest(httpMethod, path, httpVersion, rawRequestBody, contentType, contentLength,
+                httpRequestParameter);
     }
 
     private static Map<String, String> parseRawHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
@@ -54,5 +60,15 @@ public class HttpRequestParser {
         bufferedReader.read(bodyChars, 0, contentLength);
         requestBodyBuilder.append(bodyChars);
         return requestBodyBuilder.toString();
+    }
+
+    private static HttpRequestParameter parseHttpRequestParameter(String rawRequestBody) {
+        Map<String, String> paramMap = Arrays.stream(rawRequestBody.split("&"))
+                .map(param -> param.split("=", 2))
+                .collect(Collectors.toMap(
+                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[1]
+                ));
+        return new HttpRequestParameter(paramMap);
     }
 }

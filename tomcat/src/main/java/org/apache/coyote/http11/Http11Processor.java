@@ -1,15 +1,13 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,25 +64,15 @@ public class Http11Processor implements Runnable, Processor {
                 if (httpRequestMethod == HttpMethod.POST) {
                     String redirectUrl = "/index.html";
                     HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
-                    String account = requestParameter.getValue("account");
-                    String password = requestParameter.getValue("password");
                     try {
-                        User user = InMemoryUserRepository.findByAccount(account)
-                                .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
-                        if (!user.checkPassword(password)) {
-                            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-                        }
-                        log.info("user: " + user);
+                        String sessionId = UserService.login(requestParameter);
+                        httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                                .addCookie("JSESSIONID", sessionId)
+                                .addRedirectUrl(redirectUrl);
                     } catch (IllegalArgumentException e) {
-                        redirectUrl = "/401.html";
+                        httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                                .addRedirectUrl("/401.html");
                     }
-                    String sessionId = UUID.randomUUID().toString();
-                    Session session = new Session(sessionId);
-                    session.setAttribute("account", account);
-                    SessionManager.add(session);
-                    httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
-                            .addCookie("JSESSIONID", sessionId)
-                            .addRedirectUrl(redirectUrl);
                 } else if (httpRequestMethod == HttpMethod.GET && !validateSession(httpRequest.getSessionId())) {
                     String responseBody = htmlReader.loadHtmlAsString("login.html");
                     httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
@@ -98,12 +86,8 @@ public class Http11Processor implements Runnable, Processor {
                 if (httpRequestMethod == HttpMethod.POST) {
                     String redirectUrl = "/index.html";
                     HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
-                    String account = requestParameter.getValue("account");
-                    String password = requestParameter.getValue("password");
-                    String email = requestParameter.getValue("email");
                     try {
-                        User user = new User(account, password, email);
-                        InMemoryUserRepository.save(user);
+                        UserService.saveUser(requestParameter);
                     } catch (IllegalArgumentException e) {
                         redirectUrl = "/400.html";
                     }

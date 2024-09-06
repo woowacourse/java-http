@@ -92,6 +92,25 @@ public class Http11Processor implements Runnable, Processor {
                                 getClass().getClassLoader().getResource(resourcePath));
 
                         if (resource.isPresent()) {
+                            Cookie cookie = new Cookie(headers.getOrDefault("Cookie", ""));
+                            Optional<String> optionalSessionId = cookie.getJSessionId();
+
+                            if (optionalSessionId.isPresent()) {
+                                String sessionId = optionalSessionId.get();
+                                Session session = sessionManager.findSession(sessionId);
+                                if (session != null) {
+                                    String response = String.join("\r\n",
+                                            "HTTP/1.1 302 FOUND ",
+                                            "Location: /index.html ",
+                                            "Content-Length: 0 ",
+                                            "");
+
+                                    bufferedWriter.write(response);
+                                    bufferedWriter.flush();
+                                    return;
+                                }
+                            }
+
                             responseBody = new String(Files.readAllBytes(new File(resource.get().getFile()).toPath()));
 
                             final String response = String.join("\r\n",

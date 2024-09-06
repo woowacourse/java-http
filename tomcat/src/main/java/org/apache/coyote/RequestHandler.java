@@ -5,7 +5,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -71,11 +70,11 @@ public class RequestHandler {
     }
 
     private String processLoginRequest(final HttpRequest httpRequest) throws IOException {
-        if (Objects.equals(httpRequest.getMethod(), "GET")) {
+        if (httpRequest.isSameMethod(HttpMethod.GET)) {
             return processLoginGetRequest(httpRequest);
         }
 
-        if (Objects.equals(httpRequest.getMethod(), "POST")) {
+        if (httpRequest.isSameMethod(HttpMethod.POST)) {
             return processLoginPostRequest(httpRequest);
         }
 
@@ -119,11 +118,11 @@ public class RequestHandler {
     }
 
     private String processRegisterRequest(final HttpRequest httpRequest) throws IOException {
-        if (Objects.equals(httpRequest.getMethod(), "GET")) {
+        if (httpRequest.isSameMethod(HttpMethod.GET)) {
             return handleSimpleResource("register.html");
         }
 
-        if (Objects.equals(httpRequest.getMethod(), "POST")) {
+        if (httpRequest.isSameMethod(HttpMethod.POST)) {
             return processRegisterPostRequest(httpRequest);
         }
 

@@ -4,9 +4,10 @@ import java.util.Arrays;
 
 import org.apache.coyote.HttpCookie;
 import org.apache.coyote.HttpHeader;
+import org.apache.coyote.HttpMethod;
 
 public class HttpRequest {
-    private final String method;
+    private final HttpMethod method;
     private final String url;
     private final String path;
     private final String version;
@@ -15,7 +16,7 @@ public class HttpRequest {
     private final HttpCookie httpCookie;
 
     public HttpRequest(String method, String path, String version, HttpHeader[] headers, String body) {
-        this.method = method;
+        this.method = HttpMethod.valueOf(method);
         this.path = path;
         this.version = version;
         this.headers = headers;
@@ -41,7 +42,11 @@ public class HttpRequest {
                 .orElse(null);
     }
 
-    public String getMethod() {
+    public boolean isSameMethod(HttpMethod httpMethod) {
+        return this.method == httpMethod;
+    }
+
+    public HttpMethod getMethod() {
         return method;
     }
 

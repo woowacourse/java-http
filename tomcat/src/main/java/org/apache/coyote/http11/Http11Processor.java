@@ -115,13 +115,11 @@ public class Http11Processor implements Runnable, Processor {
         if (request.getQueryParam().size() < 2) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
-
-        String account = queryParams.get(ACCOUNT);
-        String password = queryParams.get(PASSWORD);
-        if (account == null || password == null) {
+        if (queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
-        Optional<User> user = authenticateUser(account, password);
+
+        Optional<User> user = authenticateUser(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
         if (user.isPresent()) {
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);

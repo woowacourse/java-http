@@ -68,6 +68,7 @@ public class Http11Processor implements Runnable, Processor {
                         String sessionId = UserService.login(requestParameter);
                         httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
                                 .addCookie("JSESSIONID", sessionId)
+                                .addCookie("Max-Age", "600")
                                 .addRedirectUrl(redirectUrl);
                     } catch (IllegalArgumentException e) {
                         httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)

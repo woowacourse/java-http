@@ -35,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
             int read = inputStream.read(buffer);
             HttpRequest request = new HttpRequest(new String(buffer, 0, read));
 
-            Servlet servlet = new Mapper().getServlet(request.getRequestURI());
+            Servlet servlet = Mapper.getInstance().getServlet(request.getRequestURI());
 
             HttpResponse response = new HttpResponse();
             servlet.service(request, response);

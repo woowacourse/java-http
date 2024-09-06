@@ -1,6 +1,7 @@
 package org.apache.catalina.mapper;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import org.apache.catalina.servlets.DefaultServlet;
 import org.apache.catalina.servlets.LoginServlet;
@@ -10,20 +11,31 @@ import org.apache.catalina.servlets.Servlet;
 /**
  * 요청의 URL을 실제 정적 파일 절대 경로로 매핑해준다.(동적 파일만)
  */
-public class Mapper {// TODO 싱글톤
+public class Mapper {
 
-    // TODO: 클래스 로더를 통해서 servlet을 가져옴?
-    private static final Map<Pattern, Servlet> mapper = Map.of(
+    private static final Map<Pattern, Servlet> values = Map.of(
             Pattern.compile(".*\\..*"), new DefaultServlet(),
             Pattern.compile("/"), new DefaultServlet(),
             Pattern.compile("^/login$"), new LoginServlet(),
             Pattern.compile("^/register$"), new RegisterServlet()
     );
 
+    private static Mapper instance;
+
+    private Mapper() {}
+
+    public static Mapper getInstance() {
+        if (instance == null) {
+            instance = new Mapper();
+        }
+        return instance;
+    }
+
     public Servlet getServlet(String url) {
-        Pattern key = mapper.keySet().stream()
+        Pattern key = values.keySet().stream()
                 .filter(urlPattern -> urlPattern.matcher(url).matches())
-                .findFirst().orElseThrow();// TODO servlet이 없다면 예외 발생
-        return mapper.get(key);
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("url(%s)에 매핑되는 서블릿이 존재하지 않습니다.".formatted(url)));
+        return values.get(key);
     }
 }

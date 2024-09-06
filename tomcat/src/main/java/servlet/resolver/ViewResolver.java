@@ -10,10 +10,10 @@ public class ViewResolver {
     public File resolveViewName(String viewName) {
         ClassLoader classLoader = this.getClass().getClassLoader();
         URL viewResource = classLoader.getResource(convert(viewName));
-        if (viewResource == null) {
-            viewResource = classLoader.getResource(convert("/404")); // todo status code 404
+        if (viewResource != null) {
+            return new File(viewResource.getFile());
         }
-        return new File(viewResource.getFile());
+        return null;
     }
 
     private String convert(String viewName) {

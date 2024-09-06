@@ -1,5 +1,7 @@
 package org.apache.catalina.core.request;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -10,7 +12,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    public final String request;
+    private final String request;
 
     public HttpRequest(String request) {
         this.request = request;
@@ -146,5 +148,26 @@ public class HttpRequest {
 
     public int getLocalPort() {
         return 8080;
+    }
+
+    public boolean hasCookie() {
+        String cookie = getHeader("Cookie");
+        return !cookie.isEmpty();
+    }
+
+    public String getHeader(String name) {
+        Map<String, String> headers = getHeaders();
+        if (!headers.containsKey(name)) {
+            return "";
+        }
+        return headers.get(name);
+    }
+
+    public Map<String, String> getHeaders() {
+        String[] startLineAndHeaders = request.split("\r\n\r\n")[0].split("\r\n");
+        String[] headers = Arrays.copyOfRange(startLineAndHeaders, 1, startLineAndHeaders.length);
+        return Arrays.stream(headers)
+                .map(header -> header.split(": ", 2))
+                .collect(toMap(header -> header[0], header -> header[1]));
     }
 }

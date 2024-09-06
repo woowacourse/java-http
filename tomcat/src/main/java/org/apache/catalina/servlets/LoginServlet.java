@@ -7,8 +7,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.catalina.core.request.HttpRequest;
+import org.apache.catalina.core.response.Cookie;
 import org.apache.catalina.core.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,6 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-
         String account = request.getParameter("account");
         InMemoryUserRepository.findByAccount(account)
                 .ifPresentOrElse(user -> login(request, response, user), () -> response.sendRedirect("/401.html"));
@@ -51,10 +52,18 @@ public class LoginServlet extends HttpServlet {
 
     private void login(HttpRequest request, HttpResponse response, User user) {
         if (user.checkPassword(request.getParameter("password"))) {
+            addCookie(request, response);
             log.info("user : {}", user);
             response.sendRedirect("/index.html");
             return;
         }
         response.sendRedirect("/401.html");
+    }
+
+    private void addCookie(HttpRequest request, HttpResponse response) {
+        if (!request.hasCookie()) {
+            Cookie cookie = new Cookie("JSESSIONID", UUID.randomUUID().toString());
+            response.addCookie(cookie);
+        }
     }
 }

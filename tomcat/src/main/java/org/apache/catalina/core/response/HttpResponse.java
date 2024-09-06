@@ -32,6 +32,10 @@ public class HttpResponse {
         headers.put("Content-Type", s);
     }
 
+    public void addCookie(Cookie cookie) {
+        headers.put("Set-Cookie", cookie.toString());
+    }
+
     public String getResponse() {
         String startLine = START_LiNE_FORMAT.formatted("HTTP/1.1", httpStatus.getStatusCode(), httpStatus.name());
         StringBuilder sb = new StringBuilder(startLine).append("\r\n");

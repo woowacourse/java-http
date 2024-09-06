@@ -30,7 +30,7 @@ public class MethodNotAllowedController extends Controller {
     public HttpResponse handle(HttpRequest request) throws IOException {
         HttpResponse response = new HttpResponse();
         String fileName = "405.html";
-        ResponseBody responseBody = new ResponseBody(getResponseBody(fileName));
+        ResponseBody responseBody = new ResponseBody(readResource(fileName));
         response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
         response.setContentType(MimeType.HTML);
         response.setBody(responseBody);
@@ -47,7 +47,7 @@ public class MethodNotAllowedController extends Controller {
         throw new UnsupportedMethodException("Method is not supported");
     }
 
-    private String getResponseBody(String fileName) throws IOException {
+    private String readResource(String fileName) throws IOException {
         URL resource = findResource(fileName);
         if (Objects.isNull(resource)) {
             throw new UncheckedServletException("Cannot find resource with name: " + fileName);

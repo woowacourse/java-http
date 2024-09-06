@@ -28,7 +28,7 @@ class FrontControllerTest {
     void index() throws IOException {
         // given
         final String request = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -39,10 +39,10 @@ class FrontControllerTest {
         HttpResponse response = frontController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 5518 \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 211988 \r\n" +
+                "Content-Type: text/css \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -80,7 +80,7 @@ class FrontControllerTest {
     void wrongMethod() throws IOException {
         // given
         final String request = String.join("\r\n",
-                "DELETE /login.html HTTP/1.1 ",
+                "DELETE /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

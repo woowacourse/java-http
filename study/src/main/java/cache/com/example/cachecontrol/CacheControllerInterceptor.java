@@ -11,7 +11,9 @@ public class CacheControllerInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
             ModelAndView modelAndView
     ) throws Exception {
-        response.addHeader("Cache-Control", "no-cache, private");
+        if(!response.containsHeader("Cache-Control")) {
+            response.addHeader("Cache-Control", "no-cache, private");
+        }
         HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
     }
 }

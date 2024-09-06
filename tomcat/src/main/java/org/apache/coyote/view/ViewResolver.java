@@ -20,6 +20,12 @@ public class ViewResolver {
     }
 
     public String resolve(HttpRequestHeader request) throws IOException {
+        if (GET_METHOD.equals(request.getHttpMethod())
+                && (request.getPath().startsWith("/login") || request.getPath().startsWith("/register"))
+                && (request.getCookies() != null && request.getCookies().get("JSESSIONID") != null)) {
+            return responseBuilder.buildRedirectResponse("/index.html");
+        }
+
         if (GET_METHOD.equals(request.getHttpMethod())) {
             return handleGetRequest(request.getPath());
         }

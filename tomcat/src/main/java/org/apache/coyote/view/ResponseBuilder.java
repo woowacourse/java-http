@@ -31,4 +31,10 @@ class ResponseBuilder {
                 "",
                 responseBody);
     }
+
+    String buildRedirectResponse(String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location);
+    }
 }

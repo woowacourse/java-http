@@ -69,6 +69,19 @@ public record HttpRequestHeader(
         return headers.get("Content-Type");
     }
 
+    public Map<String, String> getCookies() {
+        String cookie = headers.get("Cookie");
+        if (cookie == null) {
+            return null;
+        }
+
+        return Arrays.stream(cookie.split(";"))
+                .map(String::trim)
+                .map(part -> part.split("="))
+                .filter(parts -> parts.length == 2)
+                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+    }
+
     public String getHttpMethod() {
         return this.httpMethod;
     }

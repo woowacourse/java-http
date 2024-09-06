@@ -3,7 +3,9 @@ package study;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,54 +39,10 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        /*List<File> resoursesFiles = getResourceFile();
-        final String actual = resoursesFiles.stream()
-                .flatMap(resoursesFile -> Arrays.stream(resoursesFile.listFiles()))
-                .filter(file -> file.getName().equals(fileName))
-                .findFirst()
-                .orElseThrow()
-                .getName();*/
-
-        /*File resources = new File("/Users/mac/Desktop/zangsu/wooteco/Level4/java-http/study/src/test/resources");
-        final String actual = Arrays.stream(resources.listFiles())
-                .filter(file -> file.getName().equals(fileName))
-                .findFirst()
-                .orElseThrow()
-                .getName();*/
-
-        // 세상에 몰리 대박
         final URL resoucrcesUrl = getClass().getClassLoader().getResource(fileName);
         String actual = resoucrcesUrl.getFile();
 
         assertThat(actual).endsWith(fileName);
-    }
-
-    private List<File> getResourceFile() {
-        File file = new File(".").getAbsoluteFile();
-
-        List<File> results = new ArrayList<>();
-        addResourcesFile(file, results);
-        Arrays.stream(file.listFiles())
-                .filter(subFile -> subFile.getName().equals("resources"))
-                .forEach(subFile -> results.add(subFile));
-        return results;
-    }
-
-    private void addResourcesFile(File parent, List<File> results) {
-        for(File file : parent.listFiles()) {
-            if (file.isFile() && file.getName().equals("resources")) {
-                results.add(file);
-            } else {
-                addResourcesFile(file, results);
-            }
-        }
-    }
-
-    private File getCurrentProject() {
-        Path path = Paths.get("");
-        File file = path.toAbsolutePath().toFile();
-        System.out.println("file = " + file);
-        return file;
     }
 
     /**
@@ -94,14 +52,12 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
-
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final URL resoucrcesUrl = getClass().getClassLoader().getResource(fileName);
+        final List<String> actual = Files.readAllLines(Paths.get(resoucrcesUrl.getPath()));
 
         assertThat(actual).containsOnly("nextstep");
     }

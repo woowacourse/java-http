@@ -27,5 +27,9 @@ public class InMemoryUserRepository {
         database.remove(account);
     }
 
+    public static boolean doesExistAccount(String account) {
+        return database.containsKey(account);
+    }
+
     private InMemoryUserRepository() {}
 }

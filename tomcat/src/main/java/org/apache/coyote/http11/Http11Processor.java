@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.catalina.Session;
@@ -122,18 +121,15 @@ public class Http11Processor implements Runnable, Processor {
 
         String account = pairs.get("account");
         String password = pairs.get("password");
-        if (account != null & password != null) {
-            Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
-            if (foundUser.isPresent()) {
-                User user = foundUser.get();
-                if (user.checkPassword(password)) {
-                    log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
-                    Session session = new Session(UUID.randomUUID().toString());
-                    session.setAttribute("user", user);
-                    sessionManager.add(session);
-                    redirectToHomeSettingCookie(session.getId(), outputStream);
-                    return;
-                }
+        if (account != null & password != null & InMemoryUserRepository.doesExistAccount(account)) {
+            User user = InMemoryUserRepository.findByAccount(account).get();
+            if (user.checkPassword(password)) {
+                log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
+                Session session = new Session(UUID.randomUUID().toString());
+                session.setAttribute("user", user);
+                sessionManager.add(session);
+                redirectToHomeSettingCookie(session.getId(), outputStream);
+                return;
             }
         }
         redirectTo("/401.html", outputStream);

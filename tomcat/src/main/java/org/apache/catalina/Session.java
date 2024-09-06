@@ -28,7 +28,7 @@ public class Session {
         values.remove(name);
     }
 
-    public boolean isExistAttribute(String name) {
+    public boolean doesExistAttribute(String name) {
         return values.containsKey(name);
     }
 

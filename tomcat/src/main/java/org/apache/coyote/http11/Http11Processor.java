@@ -44,6 +44,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            // 3단계에 request를 처리해줄 클래스로 분리할 예정입니다.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String[] httpRequestFirstLine = bufferedReader.readLine().split(" ");
             String httpMethod = httpRequestFirstLine[0];
@@ -51,35 +52,11 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> headers = getHeaders(bufferedReader);
 
             if ("GET".equals(httpMethod)) {
-                if ("/favicon.ico".equals(uri)) {
-                    handleFaviconRequest(outputStream);
-                    return;
-                }
-                if ("/login".equals(uri)) {
-                    HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-                    String jSessionId = httpCookie.get("JSESSIONID");
-                    if (jSessionId != null) {
-                        Session session = sessionManager.findSession(jSessionId);
-                        if (session != null && session.isExistAttribute("user")) {
-                            writeRedirectResponse("/index.html", outputStream);
-                            return;
-                        }
-                    }
-                }
+                handleGetRequest(uri, new HttpCookie(headers.get("Cookie")), outputStream);
             }
             if ("POST".equals(httpMethod)) {
-                String requestBody = getRequestBody(headers, bufferedReader);
-                if ("/login".equals(uri)) {
-                    handleLogin(requestBody, outputStream);
-                    return;
-                }
-                if ("/register".equals(uri)) {
-                    handleRegister(requestBody, outputStream);
-                    return;
-                }
+                handlePostRequest(uri, getRequestBody(headers, bufferedReader), outputStream);
             }
-
-            writeStaticFileResponse(uri, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -98,11 +75,38 @@ public class Http11Processor implements Runnable, Processor {
         return headers;
     }
 
+    private void handleGetRequest(String uri, HttpCookie httpCookie, OutputStream outputStream) throws IOException {
+        if ("/favicon.ico".equals(uri)) {
+            handleFaviconRequest(outputStream);
+            return;
+        }
+        if ("/login".equals(uri) && doesLoggedIn(httpCookie)) {
+            writeRedirectResponse("/index.html", outputStream);
+            return;
+        }
+        writeStaticFileResponse(uri, outputStream);
+    }
+
     private void handleFaviconRequest(OutputStream outputStream) throws IOException {
         final var response = "HTTP/1.1 204 No Content \r\n" +
                 "Content-Length: 0 \r\n" +
                 "\r\n";
         writeResponse(outputStream, response);
+    }
+
+    private boolean doesLoggedIn(HttpCookie httpCookie) {
+        Session session = sessionManager.findSession(httpCookie.get("JSESSIONID"));
+        return session != null && session.doesExistAttribute("user");
+    }
+
+    public void handlePostRequest(String uri, String requestBody, OutputStream outputStream) throws IOException {
+        if ("/login".equals(uri)) {
+            handleLogin(requestBody, outputStream);
+            return;
+        }
+        if ("/register".equals(uri)) {
+            handleRegister(requestBody, outputStream);
+        }
     }
 
     private String getRequestBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {

@@ -18,4 +18,8 @@ public enum HttpVersion {
                 .filter(httpMethod -> httpMethod.value.equals(value))
                 .findAny();
     }
+
+    public String getValue() {
+        return value;
+    }
 }

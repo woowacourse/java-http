@@ -9,12 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,28 +39,35 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
             String path = httpRequest.getPath();
-            HttpMethod httpMethod = httpRequest.getHttpMethod();
+            HttpMethod httpRequestMethod = httpRequest.getHttpMethod();
 
-            String responseBody = "Hello world!";
-            String contentType = "text/html;charset=utf-8";
-            String redirectUrl = null;
-            HttpStatusCode statusCode = HttpStatusCode.OK;
-            Map<String, String> responseCookies = new HashMap<>();
+            HttpResponse httpResponse = new HttpResponse().addHttpVersion(HttpVersion.HTTP_1_1);
 
-            if (path.endsWith(".html")) {
-                responseBody = htmlReader.loadHtmlAsString(path);
-            } else if (path.endsWith(".css") || path.endsWith(".js")) {
-                contentType = "text/css";
-                if (path.endsWith(".js")) {
-                    contentType = "application/javascript";
-                }
-                responseBody = htmlReader.loadHtmlAsString(path);
+            if (path.equals("/")) {
+                httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                        .addHttpStatusCode(HttpStatusCode.OK)
+                        .addResponseBody("Hello world!");
+            } else if (path.endsWith(".html")) {
+                String responseBody = htmlReader.loadHtmlAsString(path);
+                httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                        .addHttpStatusCode(HttpStatusCode.OK)
+                        .addResponseBody(responseBody);
+            } else if (path.endsWith(".css")) {
+                String responseBody = htmlReader.loadHtmlAsString(path);
+                httpResponse.addContentType(new ContentType(MediaType.CSS, null))
+                        .addHttpStatusCode(HttpStatusCode.OK)
+                        .addResponseBody(responseBody);
+            } else if (path.endsWith(".js")) {
+                String responseBody = htmlReader.loadHtmlAsString(path);
+                httpResponse.addContentType(new ContentType(MediaType.JAVASCRIPT, null))
+                        .addHttpStatusCode(HttpStatusCode.OK)
+                        .addResponseBody(responseBody);
             } else if (path.startsWith("/login")) {
-                if (httpMethod == HttpMethod.POST) {
+                if (httpRequestMethod == HttpMethod.POST) {
+                    String redirectUrl = "/index.html";
                     HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
                     String account = requestParameter.getValue("account");
                     String password = requestParameter.getValue("password");
-                    redirectUrl = "/index.html";
                     try {
                         User user = InMemoryUserRepository.findByAccount(account)
                                 .orElseThrow(() -> new IllegalArgumentException("account에 해당하는 사용자가 없습니다."));
@@ -76,16 +78,18 @@ public class Http11Processor implements Runnable, Processor {
                     } catch (IllegalArgumentException e) {
                         redirectUrl = "/401.html";
                     }
-                    statusCode = HttpStatusCode.FOUND;
-                    UUID uuid = UUID.randomUUID();
-                    responseCookies.put("JSESSIONID", uuid.toString());
-                } else if (httpMethod == HttpMethod.GET) {
-                    String fileName = "login.html";
-                    responseBody = htmlReader.loadHtmlAsString(fileName);
+                    httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                            .addCookie("JSESSIONID", UUID.randomUUID().toString())
+                            .addRedirectUrl(redirectUrl);
+                } else if (httpRequestMethod == HttpMethod.GET) {
+                    String responseBody = htmlReader.loadHtmlAsString("login.html");
+                    httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                            .addHttpStatusCode(HttpStatusCode.OK)
+                            .addResponseBody(responseBody);
                 }
             } else if (path.equals("/register")) {
-                if (httpMethod == HttpMethod.POST) {
-                    statusCode = HttpStatusCode.FOUND;
+                if (httpRequestMethod == HttpMethod.POST) {
+                    String redirectUrl = "/index.html";
                     HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
                     String account = requestParameter.getValue("account");
                     String password = requestParameter.getValue("password");
@@ -93,31 +97,20 @@ public class Http11Processor implements Runnable, Processor {
                     try {
                         User user = new User(account, password, email);
                         InMemoryUserRepository.save(user);
-                        redirectUrl = "/index.html";
                     } catch (IllegalArgumentException e) {
                         redirectUrl = "/400.html";
                     }
-                } else if (httpMethod == HttpMethod.GET) {
-                    String fileName = "register.html";
-                    responseBody = htmlReader.loadHtmlAsString(fileName);
+                    httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                            .addRedirectUrl(redirectUrl);
+                } else if (httpRequestMethod == HttpMethod.GET) {
+                    String responseBody = htmlReader.loadHtmlAsString("register.html");
+                    httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
+                            .addHttpStatusCode(HttpStatusCode.OK)
+                            .addResponseBody(responseBody);
                 }
             }
 
-            List<String> headers = new ArrayList<>();
-            headers.add("HTTP/1.1 " + statusCode.getString() + " ");
-            headers.add("Content-Type: " + contentType + " ");
-            headers.add("Content-Length: " + responseBody.getBytes().length + " ");
-            String cookies = responseCookies.entrySet().stream()
-                    .map(entry -> entry.getKey() + "=" + entry.getValue())
-                    .collect(Collectors.joining("; "));
-            if (redirectUrl != null) {
-                headers.add("Location: " + redirectUrl);
-            }
-            if (!cookies.isEmpty()) {
-                headers.add("Set-Cookie: " + cookies);
-            }
-
-            String response = String.join("\r\n", headers) + "\r\n\r\n" + responseBody;
+            String response = HttpResponseParser.parse(httpResponse);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

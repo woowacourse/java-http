@@ -13,6 +13,11 @@ public class ContentType {
         this.charSet = getCharSetFromContents(contents);
     }
 
+    public ContentType(MediaType mediaType, String charSet) {
+        this.mediaType = mediaType;
+        this.charSet = charSet;
+    }
+
     private String getCharSetFromContents(String[] contents) {
         if (contents.length == 2) {
             return contents[1];
@@ -25,6 +30,9 @@ public class ContentType {
     }
 
     public String getString() {
+        if (charSet == null) {
+            return mediaType.getTypeName();
+        }
         return mediaType.getTypeName() + DELIMITER + charSet;
     }
 }

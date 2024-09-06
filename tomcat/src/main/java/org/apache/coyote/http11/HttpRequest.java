@@ -12,14 +12,15 @@ public class HttpRequest {
         this.body = new Body(inputReader.readBody());
     }
 
-    public boolean isCss() {
-        String uri = getUri();
-        int index = uri.lastIndexOf(".");
-
-        return uri.substring(index + 1).equals("css");
+    public boolean isCSS() {
+        return requestLine.isCSS();
     }
 
     public String getUri() {
         return requestLine.getUri();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 }

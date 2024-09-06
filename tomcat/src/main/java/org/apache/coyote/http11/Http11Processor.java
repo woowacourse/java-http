@@ -32,12 +32,12 @@ public class Http11Processor implements Runnable, Processor {
             InputReader inputReader = new InputReader(inputStream);
             HttpRequest request = new HttpRequest(inputReader);
 
-            ResourceHandler resourceHandler = new StaticResourceHandler(request.getUri());
-            FileReader fileReader = new FileReader(resourceHandler);
-            String responseBody = fileReader.read();
+            Controller controller = ControllerMapper.map(request.getPath());
+            String viewName = controller.process(request.getUri());
+            String responseBody = FileReader.read("static" + viewName);
 
             String response = "";
-            if (request.isCss()) {
+            if (request.isCSS()) {
                 response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/css;charset=utf-8 ",

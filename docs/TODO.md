@@ -10,7 +10,7 @@
 
 ### 2. CSS 지원하기
 
-- '.css' 파일을 받았을 경우, `Content-Type: text/html;charset=utf-8;`로 설정
+- '.css' 파일을 받았을 경우, `Content-Type: text/css;charset=utf-8;`로 설정
   - '.js', '.csv' 파일의 경우, `text/javascript`, `image/csv+xml`로 설정함
 
 ### 리펙터링

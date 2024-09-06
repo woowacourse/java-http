@@ -1,9 +1,15 @@
 handlebars:
   suffix: .html
 
-server:
-  tomcat:
-    accept-count: 1
-    max-connections: 1
-    threads:
-      max: 2
+#server:
+#  tomcat:
+#    accept-count: 1
+#    max-connections: 1
+#    threads:
+#      max: 2
+#spring:
+#  mvc:
+#    view:
+#      suffix: .html
+#  thymeleaf:
+#    suffix: .html

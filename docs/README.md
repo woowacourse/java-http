@@ -39,3 +39,5 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 ![img_3.png](img_3.png)
 
 * 카탈리나, 코요테 이녀석들은 뭐지
+
+* yml에 tomcat 지우니까 됨 알아보자.

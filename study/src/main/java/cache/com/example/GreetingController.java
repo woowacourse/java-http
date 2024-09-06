@@ -1,5 +1,7 @@
 package cache.com.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -10,9 +12,12 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 public class GreetingController {
 
+    private static final Logger log = LoggerFactory.getLogger(GreetingController.class);
+
     @GetMapping("/")
     public String index() {
-        return "index";
+        log.info("index 호출");
+        return "index.html";
     }
 
     /**
@@ -25,16 +30,16 @@ public class GreetingController {
                 .cachePrivate()
                 .getHeaderValue();
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/etag")
     public String etag() {
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/resource-versioning")
     public String resourceVersioning() {
-        return "resource-versioning";
+        return "resource-versioning.html";
     }
 }

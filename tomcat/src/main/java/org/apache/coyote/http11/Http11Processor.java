@@ -20,6 +20,7 @@ import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.body.RequestBody;
+import org.apache.coyote.http11.request.startLine.HttpMethod;
 import org.apache.coyote.http11.response.startLine.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,6 @@ public class Http11Processor implements Runnable, Processor {
             SessionManager sessionManager = new SessionManager();
 
             HttpRequest httpRequest = HttpRequest.create(bufferedReader);
-            HttpMethod httpMethod = httpRequest.getHttpMethod();
             String uri = httpRequest.getUri();
 
             if ("/".equals(uri)) {
@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
                 path = uri.substring(0, index);
             }
 
-            if (httpMethod == HttpMethod.GET && "/login".equals(path)) {
+            if (httpRequest.matchesMethod(HttpMethod.GET) && "/login".equals(path)) {
                 String resourcePath = "static" + path + ".html";
                 Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
 
@@ -114,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (httpMethod == HttpMethod.POST && "/login".equals(path)) {
+            if (httpRequest.matchesMethod(HttpMethod.POST) && "/login".equals(path)) {
                 RequestBody requestBody = httpRequest.getRequestBody();
                 Optional<User> optionalUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
 
@@ -159,7 +159,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (httpMethod == HttpMethod.GET && "/register".equals(path)) {
+            if (httpRequest.matchesMethod(HttpMethod.GET) && "/register".equals(path)) {
                 String resourcePath = "static" + path + ".html";
 
                 Optional<URL> resource = Optional.ofNullable(getClass().getClassLoader().getResource(resourcePath));
@@ -181,7 +181,7 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            if (httpMethod == HttpMethod.POST && "/register".equals(path)) {
+            if (httpRequest.matchesMethod(HttpMethod.POST) && "/register".equals(path)) {
                 RequestBody requestBody = httpRequest.getRequestBody();
 
                 String account = requestBody.get("account");

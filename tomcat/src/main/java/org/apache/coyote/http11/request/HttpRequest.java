@@ -7,9 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
+import org.apache.coyote.http11.request.startLine.HttpMethod;
 import org.apache.coyote.http11.request.startLine.RequestLine;
 
 public class HttpRequest {
@@ -72,6 +72,10 @@ public class HttpRequest {
         }
 
         return new RequestBody(params);
+    }
+
+    public boolean matchesMethod(HttpMethod method) {
+        return requestLine.matchesMethod(method);
     }
 
     public Optional<String> getHeader(String header) {

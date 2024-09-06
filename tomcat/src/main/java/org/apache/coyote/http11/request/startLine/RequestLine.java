@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.request.startLine;
 
-import org.apache.coyote.http11.HttpMethod;
-
 public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
@@ -36,6 +34,10 @@ public class RequestLine {
             throw new IllegalArgumentException("올바르지 않은 요청 라인 구조입니다.");
         }
         return requestParts;
+    }
+
+    public boolean matchesMethod(HttpMethod method) {
+        return httpMethod == method;
     }
 
     public HttpMethod getHttpMethod() {

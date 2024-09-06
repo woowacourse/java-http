@@ -15,7 +15,11 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public String getResponse() {
+    public byte[] getBytes() {
+        return getResponse().getBytes();
+    }
+
+    private String getResponse() {
         List<String> response = new ArrayList<>();
         response.add("HTTP/1.1 " + status.getCode() + " " + status.name() + " ");
         for (String key : headers.keySet()) {

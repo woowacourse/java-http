@@ -38,10 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = createRequest(inputStream);
             log.info("[REQUEST] = {}", request);
-
-            HttpResponse httpResponse = createResponse(request);
-
-            final var response = httpResponse.getResponse();
+            HttpResponse response = createResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -71,11 +68,9 @@ public class Http11Processor implements Runnable, Processor {
         ContentType contentType = ContentType.findByUrl(url);
         String resourceUrl = getResourceUrl(contentType, url);
         String responseBody = createResponseBody(resourceUrl);
+        Map<String, String> responseHeader = createResponseHeader(contentType, responseBody.getBytes().length);
 
-        Map<String, String> header = createHeader(contentType, responseBody.getBytes().length);
-
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header, responseBody);
-        return httpResponse;
+        return new HttpResponse(HttpStatus.OK, responseHeader, responseBody);
     }
 
     private String getResourceUrl(ContentType contentType, String rawUrl) {
@@ -95,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
     }
 
-    private Map<String, String> createHeader(ContentType contentType, int length) {
+    private Map<String, String> createResponseHeader(ContentType contentType, int length) {
         Map<String, String> header = new LinkedHashMap<>();
         header.put("Content-Type", contentType.getValue() + ";" + "charset=utf-8 ");
         header.put("Content-Length", length + " ");

@@ -88,9 +88,9 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = responseBody.getBytes(StandardCharsets.UTF_8).length;
 
         String response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.OK.compose(),
-                "Content-Type: " + contentType,
-                "Content-Length: " + contentLength,
+                "HTTP/1.1 " + HttpStatus.OK.compose() + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + contentLength + " ",
                 "",
                 responseBody
         );
@@ -105,9 +105,9 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = responseBody.getBytes(StandardCharsets.UTF_8).length;
 
         String response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.OK.compose(),
-                "Content-Type: " + contentType,
-                "Content-Length: " + contentLength,
+                "HTTP/1.1 " + HttpStatus.OK.compose() + " ",
+                "Content-Type: " + contentType + " ",
+                "Content-Length: " + contentLength + " ",
                 "",
                 responseBody
         );
@@ -132,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (session.isPresent()) {
                     String response = String.join("\r\n",
-                            "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                            "HTTP/1.1 " + HttpStatus.FOUND.compose() + " ",
                             "Location: /index.html ",
                             "Content-Length: 0 ",
                             "");
@@ -149,9 +149,9 @@ public class Http11Processor implements Runnable, Processor {
             int contentLength = responseBody.getBytes(StandardCharsets.UTF_8).length;
 
             String response = String.join("\r\n",
-                    "HTTP/1.1 " + HttpStatus.OK.compose(),
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + contentLength,
+                    "HTTP/1.1 " + HttpStatus.OK.compose() + " ",
+                    "Content-Type: " + contentType + " ",
+                    "Content-Length: " + contentLength + " ",
                     "",
                     responseBody
             );
@@ -182,10 +182,10 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             String response = String.join("\r\n",
-                    "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                    "Set-Cookie: " + cookie.toCookieHeader(),
-                    "Location: /index.html",
-                    "Content-Length: 0",
+                    "HTTP/1.1 " + HttpStatus.FOUND.compose() + " ",
+                    "Set-Cookie: " + cookie.toCookieHeader() + " ",
+                    "Location: /index.html ",
+                    "Content-Length: 0 ",
                     ""
             );
 
@@ -197,7 +197,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                "HTTP/1.1 " + HttpStatus.FOUND.compose() + " ",
                 "Location: /401.html ",
                 "Content-Length: 0 ",
                 ""
@@ -218,9 +218,9 @@ public class Http11Processor implements Runnable, Processor {
             int contentLength = responseBody.getBytes(StandardCharsets.UTF_8).length;
 
             String response = String.join("\r\n",
-                    "HTTP/1.1 " + HttpStatus.FOUND.compose(),
-                    "Content-Type: " + contentType,
-                    "Content-Length: " + contentLength,
+                    "HTTP/1.1 " + HttpStatus.FOUND.compose() + " ",
+                    "Content-Type: " + contentType + " ",
+                    "Content-Length: " + contentLength + " ",
                     "",
                     responseBody
             );
@@ -241,7 +241,7 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(newUser);
 
         String response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                "HTTP/1.1 " + HttpStatus.FOUND.compose() + " ",
                 "Location: /index.html ",
                 "Content-Length: 0 ",
                 ""
@@ -253,7 +253,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleNotFound(BufferedWriter bufferedWriter) throws IOException {
         String response = String.join("\r\n",
-                "HTTP/1.1 " + HttpStatus.FOUND.compose(),
+                "HTTP/1.1 " + HttpStatus.FOUND.compose() + " ",
                 "Location: /404.html ",
                 "Content-Length: 0 ",
                 ""

@@ -65,6 +65,10 @@ public record HttpRequestHeader(
         return Integer.parseInt(headers.get("Content-Length"));
     }
 
+    public String getContentType() {
+        return headers.get("Content-Type");
+    }
+
     public String getHttpMethod() {
         return this.httpMethod;
     }
@@ -75,9 +79,5 @@ public record HttpRequestHeader(
 
     public String getQueryStringValue(String key) {
         return this.queryString.get(key);
-    }
-
-    public String getHeader(String key) {
-        return headers.get(key);
     }
 }

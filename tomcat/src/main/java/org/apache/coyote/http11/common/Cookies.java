@@ -11,15 +11,6 @@ public class Cookies {
         this.cookies = new HashMap<>();
     }
 
-    public void addCookie(String cookieLine) {
-        String[] pairs = cookieLine.split("=");
-
-        String name = pairs[0];
-        String value = pairs[1];
-
-        cookies.put(name, value);
-    }
-
     public String getCookieLine() {
         return String.join(
                 "; ",
@@ -29,7 +20,15 @@ public class Cookies {
         );
     }
 
+    public void setCookie(String name, String value) {
+        cookies.put(name, value);
+    }
+
     public boolean hasJSESSIONID() {
         return cookies.containsKey("JSESSIONID");
+    }
+
+    public String getJSESSIONID() {
+        return cookies.get("JSESSIONID");
     }
 }

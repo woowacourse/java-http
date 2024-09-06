@@ -2,9 +2,9 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.coyote.exception.UnexpectQueryParamException;
-import org.apache.coyote.exception.UnexpectedHeaderException;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 
@@ -15,19 +15,25 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> params = new HashMap<>();
     private final String protocol;
-    private final Map<String, String[]> headers = new HashMap<>();
+    private final Map<String, List<String>> headers = new HashMap<>();
     private final String body;
     private final Cookies cookie;
 
     public HttpRequest(
-            String method, String uri, String path, String[] paramStrings, String protocol, String headers, String body
+            String method,
+            String uri,
+            String path,
+            String[] paramStrings,
+            String protocol,
+            String[] headerLines,
+            String body
     ) {
         this.method = HttpMethod.valueOf(method);
         this.uri = uri;
         this.path = path;
         mapQueryParams(paramStrings);
         this.protocol = protocol;
-        mapHeaders(headers);
+        mapHeaders(headerLines);
         this.cookie = new Cookies();
         parseCookies();
         this.body = body;
@@ -47,28 +53,31 @@ public class HttpRequest {
         }
     }
 
-    private void mapHeaders(String headerString) {
-        String[] headerLines = headerString.split("\r\n");
-
+    private void mapHeaders(String[] headerLines) {
         for (String headerLine : headerLines) {
             String[] pair = headerLine.split(": ");
-            String[] headerValues = pair[1].split(";");
+            List<String> headerValues = Arrays.stream(pair[1].split(";"))
+                    .toList();
 
             headers.put(
                     pair[0],
-                    Arrays.stream(headerValues)
-                            .map(String::trim).toArray(String[]::new)
+                    headerValues.stream()
+                            .map(String::trim)
+                            .toList()
             );
         }
     }
 
     private void parseCookies() {
-        String[] cookies = headers.get("Cookie");
+        List<String> cookies = headers.get("Cookie");
         if (cookies == null) {
-            throw new UnexpectedHeaderException("Cookie");
+            return;
         }
-        for (String cookieLine : cookies) {
-            cookie.addCookie(cookieLine);
+        for (String cookiePair : cookies) {
+            String[] pairs = cookiePair.split("=");
+            String name = pairs[0];
+            String value = pairs[1];
+            cookie.setCookie(name, value);
         }
     }
 
@@ -92,12 +101,8 @@ public class HttpRequest {
         return paramValue;
     }
 
-    public String[] getHeaders(String headerKey) {
-        String[] headerValues = headers.get(headerKey);
-        if (headerValues == null) {
-            throw new UnexpectedHeaderException(headerKey);
-        }
-        return headerValues;
+    public Cookies getCookies() {
+        return cookie;
     }
 
     @Override

@@ -21,7 +21,7 @@ public class HttpRequestParser {
         String protocol = requestLine[2];
         int resourceIndex = uri.indexOf("/");
         String path = uri.substring(resourceIndex + 1);
-        String headers = parseHeaders(requestStrings.split("\r\n"));
+        String[] headers = parseHeaders(requestStrings);
         String[] pairs = requestBody.split("&");
 
         return new HttpRequest(httpMethod, uri, path, pairs, protocol, headers, requestBody);
@@ -44,7 +44,8 @@ public class HttpRequestParser {
         return lines[0].split(" ");
     }
 
-    private String parseHeaders(String[] requestStrings) {
-        return Arrays.toString(Arrays.copyOfRange(requestStrings, 1, requestStrings.length));
+    private String[] parseHeaders(String requestStrings) {
+        String[] headers = requestStrings.split("\r\n\r\n")[0].split("\r\n");
+        return Arrays.copyOfRange(headers, 1, headers.length);
     }
 }

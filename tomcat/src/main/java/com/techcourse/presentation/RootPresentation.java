@@ -2,7 +2,7 @@ package com.techcourse.presentation;
 
 import com.techcourse.infrastructure.Presentation;
 import http.HttpMethod;
-import http.requestheader.HttpStatusCode;
+import http.HttpStatusCode;
 import org.apache.coyote.ioprocessor.parser.HttpRequest;
 import org.apache.coyote.ioprocessor.parser.HttpResponse;
 

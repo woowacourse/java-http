@@ -2,7 +2,7 @@ package com.techcourse.presentation;
 
 import com.techcourse.infrastructure.Presentation;
 import http.HttpMethod;
-import http.requestheader.HttpStatusCode;
+import http.HttpStatusCode;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;

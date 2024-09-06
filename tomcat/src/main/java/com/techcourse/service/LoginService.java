@@ -10,9 +10,13 @@ public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
 
-    public void findUser(UserRequest request) {
+    public boolean findUser(UserRequest request) {
+        if (InMemoryUserRepository.notExistByAccount(request.getAccount())) {
+            return false;
+        }
         User account = InMemoryUserRepository.findByAccount(request.getAccount())
                 .orElseThrow(() -> new RuntimeException("유저가 존재하지 않아요 ㅜㅜ"));
         log.info("user : {}", account);
+        return true;
     }
 }

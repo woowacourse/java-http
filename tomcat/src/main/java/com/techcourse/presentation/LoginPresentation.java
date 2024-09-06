@@ -4,14 +4,10 @@ import com.techcourse.infrastructure.Presentation;
 import com.techcourse.presentation.requestparam.UserRequestParam;
 import com.techcourse.request.UserRequest;
 import com.techcourse.service.LoginService;
+import http.HttpHeader;
 import http.HttpMethod;
-import http.requestheader.HttpStatusCode;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import http.HttpStatusCode;
+import java.util.List;
 import org.apache.coyote.ioprocessor.parser.HttpRequest;
 import org.apache.coyote.ioprocessor.parser.HttpResponse;
 
@@ -33,27 +29,16 @@ public class LoginPresentation implements Presentation {
     public HttpResponse view(HttpRequest request) {
         UserRequestParam requestParam = new UserRequestParam(request.getQueryParam());
         UserRequest userRequest = requestParam.toObject();
-        loginService.findUser(userRequest);
-        String responseBody = loadLoginPage();
-        return new HttpResponse(HttpStatusCode.OK, request.getMediaType(), responseBody);
+        String redirectionPage = processRedirectionPage(userRequest);
+        List<HttpHeader> headers = List.of(new HttpHeader("Location", redirectionPage));
+        return new HttpResponse(HttpStatusCode.FOUND, request.getMediaType(), headers);
     }
 
-    private String loadLoginPage() {
-        Path staticResourcePath = getStaticResourcePath();
-        try {
-            return Files.readString(staticResourcePath);
-        } catch (IOException e) {
-            throw new RuntimeException("파일을 읽을 수 없어요!");
+    private String processRedirectionPage(UserRequest request) {
+        if (loginService.findUser(request)) {
+            return "index.html";
         }
-    }
-
-    private Path getStaticResourcePath() {
-        try {
-            URL staticResourceUrl = getClass().getResource("/static/login.html");
-            return Paths.get(staticResourceUrl.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("파일 경로를 찾을 수 없네요..");
-        }
+        return "401.html";
     }
 
     @Override

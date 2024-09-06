@@ -75,15 +75,38 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
+                "Content-Length: 0 \r\n" +
+                "Location: index.html \r\n" +
+                "\r\n";
 
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFail() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=poke&password=www HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 0 \r\n" +
+                "Location: 401.html \r\n" +
+                "\r\n";
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

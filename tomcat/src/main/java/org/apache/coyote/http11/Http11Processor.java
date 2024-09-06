@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,18 +46,25 @@ public class Http11Processor implements Runnable, Processor {
             String[] httpRequestFirstLine = bufferedReader.readLine().split(" ");
             String httpMethod = httpRequestFirstLine[0];
             String uri = httpRequestFirstLine[1];
+            Map<String, String> headers = getHeaders(bufferedReader);
 
             if ("GET".equals(httpMethod)) {
                 if ("/favicon.ico".equals(uri)) {
                     handleFaviconRequest(outputStream);
                     return;
                 }
+                /*
+                TODO: GET /login 요청이 왔을 때
+                1. Cookie 확인 -> JSESSIONID가 있다면,
+                2. sessionManager.findSession(String id)를 활용해서 Session 객체 조회
+                3. session.isExistAttribute("user")로 세션에 저장된 유저객체가 있는지 질문
+                4. true가 나온다면 로그인이 잘 됐다고 판단하고, index.html로 리다이렉트
+                 */
             }
             if ("POST".equals(httpMethod)) {
-                Map<String, String> headers = getHeaders(bufferedReader);
                 String requestBody = getRequestBody(headers, bufferedReader);
                 if ("/login".equals(uri)) {
-                    handleLogin(headers.get("Cookie"), requestBody, outputStream);
+                    handleLogin(requestBody, outputStream);
                     return;
                 }
                 if ("/register".equals(uri)) {
@@ -98,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private void handleLogin(String cookie, String requestBody, OutputStream outputStream) throws IOException {
+    private void handleLogin(String requestBody, OutputStream outputStream) throws IOException {
         Map<String, String> pairs = getPairs(requestBody);
 
         String account = pairs.get("account");
@@ -107,31 +116,24 @@ public class Http11Processor implements Runnable, Processor {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
             if (foundUser.isPresent()) {
                 User user = foundUser.get();
+                /*
+                TODO: 로그인이 잘 됐으면, POST 요청이 날아올 일도 없다고 판단하자. 따라서 jsessionId == null인지 판단할 필요 없이 항상 응답에 Set-Cookie를 날린다.
+                로그인에 성공하면
+                1. UUID를 생성자에 넘기면서 Session 객체를 생성한다.
+                2. session.setAttribute("user", user)로 유저 객체를 세션에 저장한다.
+                3. writeRedirectResponseWithCookie에 UUID를 넘긴다.
+                 */
                 if (user.checkPassword(password)) {
+                    // 근데 로그인 성공했으면 그냥 set cookie 항상 하면 되는거 아닌가? 여기서 분기처리 왜했지?
                     log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
-                    String jsessionId = getJsessionId(cookie);
-                    if (jsessionId == null) {
-                        writeRedirectResponseWithCookie(HttpCookie.getJsessionId(account), "/index.html", outputStream);
-                        return;
-                    }
-                    writeRedirectResponse("/index.html", outputStream);
+                    Session session = new Session(UUID.randomUUID().toString());
+                    session.setAttribute("user", user);
+                    writeRedirectResponseWithCookie(session.getId(), "/index.html", outputStream);
                     return;
                 }
             }
         }
         writeRedirectResponse("/401.html", outputStream);
-    }
-
-    private String getJsessionId(String cookie) {
-        if (cookie == null) {
-            return null;
-        }
-        Map<String, String> cookiePairs = new HashMap<>();
-        for (String rawCookiePair : cookie.split(";")) {
-            String[] cookiePair = rawCookiePair.split("=");
-            cookiePairs.put(cookiePair[0], cookiePair[1]);
-        }
-        return cookiePairs.get("JSESSIONID");
     }
 
     private void handleRegister(String requestBody, OutputStream outputStream) throws IOException {

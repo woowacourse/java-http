@@ -28,6 +28,10 @@ public class Session {
         values.remove(name);
     }
 
+    public boolean isExistAttribute(String name) {
+        return values.containsKey(name);
+    }
+
     public void invalidate() {
         values.clear();
     }

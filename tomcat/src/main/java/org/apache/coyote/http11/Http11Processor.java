@@ -76,12 +76,72 @@ public class Http11Processor implements Runnable, Processor {
             return doGet(path);
         }
         if (method.equals("POST")) {
-            return doPost(path, requestHeader, requestBody);
+            return doPost(path, requestBody);
         }
         return null;
     }
 
-    private String doPost(String path, Map<String, String> requestHeader, String requestBody) throws IOException {
+    private String doGet(String path) throws IOException {
+        if (path.contains(".css")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.contains(".js")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.contains(".svg")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: image/svg+xml ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.equals("/")) {
+            String responseBody = "Hello world!";
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (!path.contains(".html")) {
+            path += ".html";
+        }
+        URL resource = getClass().getClassLoader().getResource("static" + path);
+        if (resource != null) {
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+        return null;
+    }
+
+    private String doPost(String path, String requestBody) {
         if (path.equals("/register")) {
             StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
             String account = "";
@@ -140,57 +200,5 @@ public class Http11Processor implements Runnable, Processor {
                     "");
         }
         return null;
-    }
-
-    private String doGet(String path) throws IOException {
-        if (path.equals("/")) {
-            return getRootPage();
-        }
-
-        if (path.endsWith("css")) {
-            final URL resource = getClass().getClassLoader().getResource("static" + path);
-            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/css;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if (path.endsWith("svg")) {
-            final URL resource = getClass().getClassLoader().getResource("static" + path);
-            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: image/svg+xml ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if (!path.contains(".")) {
-            path += ".html";
-        }
-        final URL resource = getClass().getClassLoader().getResource("static" + path);
-        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String getRootPage() {
-        final var responseBody = "Hello world!";
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

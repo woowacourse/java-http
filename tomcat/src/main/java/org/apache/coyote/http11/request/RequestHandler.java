@@ -37,7 +37,7 @@ public class RequestHandler {
 		}
 	}
 
-	private void handleLoginRequest(String httpMethod, String urlPath) throws IOException {
+	private void handleLoginRequest(String httpMethod, String urlPath) {
 		if(urlPath.equals("/login") && httpMethod.equals("GET")) {
 			if(httpRequest.getHeader("Cookie") != null) {
 			    Optional<String> sessionCookie = Arrays.asList(httpRequest.getHeader("Cookie").split("; "))

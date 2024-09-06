@@ -35,16 +35,8 @@ public class RequestBody {
                          HashMap::putAll);
     }
 
-    public Map<String, String> getValues() {
-        return values;
-    }
-
     public String getValue(String key) {
         return values.get(key);
-    }
-
-    public boolean missing(String field) {
-        return !values.containsKey(field);
     }
 
     @Override

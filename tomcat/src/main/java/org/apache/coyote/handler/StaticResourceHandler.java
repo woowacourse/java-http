@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
 import org.apache.coyote.common.ContentType;
+import org.apache.coyote.common.Header;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.Response;
 import org.apache.coyote.common.StatusCode;
@@ -28,8 +29,8 @@ public class StaticResourceHandler implements Handler {
         if (request.getUri().contains("/login") && session.getAttribute("user") != null) {
             return new Response(
                     StatusCode.FOUND,
-                    Map.of("Location", "/index.html",
-                           "Set-Cookie", "JSESSIONID=" + request.getSession().getId()),
+                    Map.of(Header.LOCATION.value(), "/index.html",
+                           Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()),
                     null);
         }
         return handle(request, StatusCode.OK);

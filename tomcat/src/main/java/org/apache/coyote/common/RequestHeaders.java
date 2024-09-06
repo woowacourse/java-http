@@ -8,9 +8,6 @@ public class RequestHeaders {
 
     private static final String COOKIE_FIELD_DELIMITER = ": ";
 
-    private static final String COOKIE_FIELD = "Cookie";
-    private static final String CONTENT_LENGTH_FIELD = "Content-Length";
-
     private final Map<String, String> values;
 
     public RequestHeaders(String[] headers) {
@@ -21,16 +18,17 @@ public class RequestHeaders {
                 .collect(Collectors.toMap(token -> token[0].trim(), token -> token[1].trim()));
     }
 
-    public Map<String, String> getValues() {
-        return values;
-    }
-
     public String getCookies() {
-        return values.getOrDefault(COOKIE_FIELD, "");
+        return values.getOrDefault(Header.COOKIE.value(), "");
     }
 
     public int getContentLength() {
-        return Integer.parseInt(values.getOrDefault(CONTENT_LENGTH_FIELD, "0"));
+        String contentLength = values.getOrDefault(Header.CONTENT_LENGTH.value(), "0");
+        try {
+            return Integer.parseInt(contentLength);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override

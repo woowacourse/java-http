@@ -3,6 +3,7 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
+import org.apache.coyote.common.Header;
 import org.apache.coyote.common.Request;
 import org.apache.coyote.common.RequestBody;
 import org.apache.coyote.common.Response;
@@ -15,9 +16,6 @@ public class LoginHandler implements Handler {
 
     @Override
     public Response handle(Request request) {
-        if (isInvalidRequestBody(request)) {
-            return StaticResourceHandler.getInstance().handle(request);
-        }
         try {
             login(request);
         } catch (IllegalArgumentException e) {
@@ -25,14 +23,9 @@ public class LoginHandler implements Handler {
         }
         return new Response(
                 StatusCode.FOUND,
-                Map.of("Location", "/index.html",
-                       "Set-Cookie", "JSESSIONID=" + request.getSession().getId()),
+                Map.of(Header.LOCATION.value(), "/index.html",
+                       Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()),
                 null);
-    }
-
-    private boolean isInvalidRequestBody(Request request) {
-        RequestBody requestBody = request.getBody();
-        return requestBody.missing(ACCOUNT_FIELD) || requestBody.missing(PASSWORD_FIELD);
     }
 
     private void login(Request request) {

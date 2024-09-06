@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
+import cache.com.example.version.CacheBustingWebConfig;
+
 @Configuration
 public class EtagFilterConfiguration {
 
@@ -12,6 +14,7 @@ public class EtagFilterConfiguration {
     public FilterRegistrationBean<ShallowEtagHeaderFilter> shallowEtagHeaderFilter() {
         FilterRegistrationBean<ShallowEtagHeaderFilter> filter = new FilterRegistrationBean<>();
         filter.setFilter(new ShallowEtagHeaderFilter());
+        filter.addUrlPatterns("/etag", CacheBustingWebConfig.PREFIX_STATIC_RESOURCES + "/*");
         return filter;
     }
 }

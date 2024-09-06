@@ -8,3 +8,7 @@ server:
     threads:
       min-spare: 2
       max: 2
+spring:
+  mvc:
+    view:
+      suffix: .html

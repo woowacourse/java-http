@@ -9,37 +9,37 @@ import java.util.List;
 
 public class InputReader {
 
-    private static final String NEWLINE = System.lineSeparator();
-    private static final String EMPTY_LINE = "";
+    private final BufferedReader reader;
 
-    private final List<String> requestLines;
-
-    public InputReader(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        this.requestLines = readAllLines(bufferedReader);
+    public InputReader(InputStream inputStream) {
+        this.reader =  new BufferedReader(new InputStreamReader(inputStream));
     }
 
-    private List<String> readAllLines(BufferedReader bufferedReader) throws IOException {
-        List<String> lines = new ArrayList<>();
-        while (bufferedReader.ready()) {
-            lines.add(bufferedReader.readLine());
+    public String readRequestLine() throws IOException {
+        String line = reader.readLine();
+
+        if (line == null) {
+            throw new IllegalArgumentException("잘못된 값입니다.");
         }
+        return line;
+    }
+
+    public List<String> readHeaders() throws IOException {
+        List<String> lines = new ArrayList<>();
+
+        String line = reader.readLine();
+        while (line != null && !line.isEmpty()) {
+            lines.add(line);
+            line = reader.readLine();
+        }
+
         return lines;
     }
 
-    public String readRequestLine() {
-        return requestLines.getFirst();
-    }
+    public String readBody(int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
 
-    public List<String> readHeaders() {
-        int toIndex = requestLines.indexOf(EMPTY_LINE);
-        return requestLines.subList(1, toIndex);
-    }
-
-    public String readBody() {
-        int fromIndex = requestLines.indexOf(EMPTY_LINE) + 1;
-        List<String> bodyLines = requestLines.subList(fromIndex, requestLines.size());
-
-        return String.join(NEWLINE, bodyLines);
+        return new String(buffer);
     }
 }

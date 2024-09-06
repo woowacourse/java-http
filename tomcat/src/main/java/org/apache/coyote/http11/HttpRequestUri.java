@@ -24,13 +24,19 @@ public class HttpRequestUri {
         this.queryParams = queryParams;
     }
 
-    public HttpResponse<?> processQueryParams(HttpMethod method) {
+    public HttpResponse<?> processParams(HttpMethod method) {
         if (queryParams.isEmpty()) {
             return new HttpResponseEntity<>().convertResponse();
         }
         ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
         HttpResponseEntity<?> response = controllerMapping.apply(queryParams);
         log.info("user : {}", response.body());
+        return response.convertResponse();
+    }
+
+    public HttpResponse<?> processParams(HttpMethod method, Map<String, String> bodies) {
+        ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
+        HttpResponseEntity<?> response = controllerMapping.apply(bodies);
         return response.convertResponse();
     }
 

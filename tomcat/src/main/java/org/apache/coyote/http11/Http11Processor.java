@@ -31,9 +31,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequestLine requestLine = new HttpRequestLine(bufferedReader.readLine());
 
-            HttpResponse<String> httpResponse = requestLine.getHttpResponse();
+            HttpRequest httpRequest = HttpRequestParser.from(bufferedReader);
+            HttpResponse<String> httpResponse = httpRequest.getHttpResponse();
 
             outputStream.write(httpResponse.convertToMessage().getBytes());
             outputStream.flush();

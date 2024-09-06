@@ -25,14 +25,14 @@ class HttpRequestUriTest {
 
     @DisplayName("로그인 처리시 쿼리 파리미터를 이용하여 조회한 유저 정보를 로그에 기록한다.")
     @Test
-    void processQueryParams() {
+    void processParams() {
         //given
         String expectedLog = "user : User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}";
         String path = "/login?account=gugu&password=password";
         HttpRequestUri requestUri = HttpRequestUriParser.parse(path);
 
         //when
-        requestUri.processQueryParams(HttpMethod.GET);
+        requestUri.processParams(HttpMethod.GET);
 
         //then
         List<ILoggingEvent> testLogs = listAppender.list;
@@ -44,14 +44,14 @@ class HttpRequestUriTest {
 
     @DisplayName("쿼리 파리미터가 없다면 로그에 아무것도 기록되지 않는다.")
     @Test
-    void processQueryParamsWithoutEmptyQueryParams() {
+    void processQueryParamsWithoutEmptyParams() {
         //given
         String expectedLog = "user : User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}";
         String path = "/login";
         HttpRequestUri requestUri = HttpRequestUriParser.parse(path);
 
         //when
-        requestUri.processQueryParams(HttpMethod.GET);
+        requestUri.processParams(HttpMethod.GET);
 
         //then
         List<ILoggingEvent> testLogs = listAppender.list;

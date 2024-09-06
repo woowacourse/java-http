@@ -26,4 +26,28 @@ public class UserController {
         httpResponse.addHeader(HttpHeaders.LOCATION, "/index.html");
         return httpResponse;
     }
+
+    public HttpResponseEntity<Void> registerUser(Map<String, String> data) {
+        String account = data.getOrDefault("account", "");
+        String email = data.getOrDefault("email", "");
+        String password = data.getOrDefault("password", "");
+
+        HttpResponseEntity<Void> httpResponse = new HttpResponseEntity<>(HttpStatus.FOUND, null);
+
+        if (account.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            httpResponse.addHeader(HttpHeaders.LOCATION, "/401.html");
+            return httpResponse;
+        }
+
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            httpResponse.addHeader(HttpHeaders.LOCATION, "/401.html");
+            return httpResponse;
+        }
+
+        User user = new User(account, email, password);
+        InMemoryUserRepository.save(user);
+
+        httpResponse.addHeader(HttpHeaders.LOCATION, "/index.html");
+        return httpResponse;
+    }
 }

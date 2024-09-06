@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.resource.VersionResourceResolver;
 
 @Configuration
 public class CacheBustingWebConfig implements WebMvcConfigurer {
@@ -25,10 +24,7 @@ public class CacheBustingWebConfig implements WebMvcConfigurer {
         registry.addResourceHandler(PREFIX_STATIC_RESOURCES + "/" + version.getVersion() + "/**")
                 .addResourceLocations("classpath:/static/")
                 .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS)
-                        .cachePublic())
-                .resourceChain(true)
-                .addResolver(new VersionResourceResolver()
-                        .addContentVersionStrategy("/**"));
+                        .cachePublic());
         ;
     }
 }

@@ -15,4 +15,12 @@ public class HttpRequest {
         this.headers = headers;
         this.payload = payload;
     }
+
+    public String getRequestMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path;
+    }
 }

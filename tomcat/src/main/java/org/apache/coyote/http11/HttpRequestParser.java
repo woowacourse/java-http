@@ -37,8 +37,9 @@ public class HttpRequestParser {
                 httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
             }
         }
+        Map<String, String> cookies = parseRequestCookies(rawHttpRequestHeader.get("Cookie"));
         return new HttpRequest(httpMethod, path, httpVersion, rawRequestBody, contentType, contentLength,
-                httpRequestParameter);
+                httpRequestParameter, cookies);
     }
 
     private static Map<String, String> parseRawHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
@@ -70,5 +71,17 @@ public class HttpRequestParser {
                         keyValue -> keyValue[1]
                 ));
         return new HttpRequestParameter(paramMap);
+    }
+
+    private static Map<String, String> parseRequestCookies(String rawRequestCookies) {
+        if (rawRequestCookies == null) {
+            return Map.of();
+        }
+        return Arrays.stream(rawRequestCookies.split(";"))
+                .map(String::trim)
+                .map(pair -> pair.split("="))
+                .collect(Collectors.toMap(
+                        keyValue -> keyValue[0],
+                        keyValue -> keyValue[1]));
     }
 }

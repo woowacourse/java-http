@@ -78,14 +78,21 @@ public class Http11Processor implements Runnable, Processor {
                     } catch (IllegalArgumentException e) {
                         redirectUrl = "/401.html";
                     }
+                    String sessionId = UUID.randomUUID().toString();
+                    Session session = new Session(sessionId);
+                    session.setAttribute("account", account);
+                    SessionManager.add(session);
                     httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
-                            .addCookie("JSESSIONID", UUID.randomUUID().toString())
+                            .addCookie("JSESSIONID", sessionId)
                             .addRedirectUrl(redirectUrl);
-                } else if (httpRequestMethod == HttpMethod.GET) {
+                } else if (httpRequestMethod == HttpMethod.GET && !validateSession(httpRequest.getSessionId())) {
                     String responseBody = htmlReader.loadHtmlAsString("login.html");
                     httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
                             .addHttpStatusCode(HttpStatusCode.OK)
                             .addResponseBody(responseBody);
+                } else if (httpRequestMethod == HttpMethod.GET && validateSession(httpRequest.getSessionId())) {
+                    httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
+                            .addRedirectUrl("/index.html");
                 }
             } else if (path.equals("/register")) {
                 if (httpRequestMethod == HttpMethod.POST) {
@@ -117,5 +124,12 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean validateSession(String sessionId) {
+        if (sessionId == null) {
+            return false;
+        }
+        return SessionManager.findSession(sessionId) != null;
     }
 }

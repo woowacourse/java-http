@@ -7,20 +7,18 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.apache.Method.GET;
+import static org.apache.Method.POST;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -43,87 +41,31 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader br = new BufferedReader(inputStreamReader);
+            HttpRequest httpRequest = new HttpRequest(inputStream);
 
-            Map<String, String> httpRequestHeaders = new HashMap<>();
-            String firstLine = br.readLine();
             String mimeType = "";
-            String requestBody = "";
             String responseBody = "";
             String response = "";
 
-            if (firstLine == null) {
-                return;
-            }
-
-            String[] firstLines = firstLine.split(" ");
-            httpRequestHeaders.put(firstLines[0], firstLines[1]);
-
-            while (true) {
-                String line = br.readLine();
-
-                if ("".equals(line)) {
-                    break;
-                }
-
-                String[] strings = line.split(": ");
-                httpRequestHeaders.put(strings[0], strings[1]);
-            }
-
-            if (firstLines[0].equals("POST")) {
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
-            }
-
-            if (firstLines[0].equals("GET")) {
-                if (firstLines[1].equals("/login") || firstLines[1].equals("/register")) {
-                    firstLines[1] = firstLines[1] + ".html";
-                }
-
-                if (firstLines[1].equals("/")) {
-                    firstLines[1] = "text/html";
-                }
-
-                String fileExtension = firstLines[1].split("\\.")[1];
-                mimeType = "text/" + fileExtension;
-
-                URL resource = getClass().getClassLoader().getResource("static" + firstLines[1]);
-                File file = new File(resource.getFile());
-                Path path = file.toPath();
-                responseBody = new String(Files.readAllBytes(path));
+            if (httpRequest.isMethod(GET)) {
+                mimeType = httpRequest.getMimeType();
+                responseBody = getResource(httpRequest.getPath());
                 response = getOKResponse(mimeType, responseBody);
-            }
+            } else if (httpRequest.isMethod(POST)) {
+                String requestBody = httpRequest.getRequestBody();
 
-            if (firstLines[1].startsWith("/login") && firstLines[0].equals("POST")) {
-                String account = requestBody.split("&")[0].split("=")[1];
-                String password = requestBody.split("&")[1].split("=")[1];
+                if (httpRequest.getPath().startsWith("/login")) {
+                    Session session = authenticate(requestBody);
 
-                Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-                if (optionalUser.isPresent()) {
-                    User user = optionalUser.get();
-                    if (user.checkPassword(password)) {
-                        log.info(user.toString());
-                        String uuid = UUID.randomUUID().toString();
-                        Session session = new Session(uuid);
-                        session.setAttribute("user", session);
-                        SessionManager.add(session);
-                        response = getRedirectResponse(uuid, responseBody, "/index.html");
-                    } else {
+                    if (session == null) {
                         response = getRedirectResponse(responseBody, "/401.html");
+                    } else {
+                        response = getRedirectResponse(session.getId(), responseBody, "/index.html");
                     }
-                } else {
-                    response = getRedirectResponse(responseBody, "/401.html");
+                } else if (httpRequest.getPath().startsWith("/register")) {
+                    Session session = register(requestBody);
+                    response = getRedirectResponse(session.getId(), responseBody, "/index.html");
                 }
-            } else if (firstLines[1].equals("/register") && firstLines[0].equals("POST")) {
-                String account = requestBody.split("&")[0].split("=")[1];
-                String password = requestBody.split("&")[1].split("=")[1];
-                String email = requestBody.split("&")[2].split("=")[1];
-
-                InMemoryUserRepository.save(new User(account, password, email));
-                response = getRedirectResponse(UUID.randomUUID().toString(), responseBody, "/index.html");
             }
 
             outputStream.write(response.getBytes());
@@ -131,6 +73,39 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Session authenticate(String requestBody) {
+        String account = requestBody.split("&")[0].split("=")[1];
+        String password = requestBody.split("&")[1].split("=")[1];
+
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+
+        if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
+            String uuid = UUID.randomUUID().toString();
+            Session session = new Session(uuid);
+            session.setAttribute("user", session);
+            SessionManager.add(session);
+
+            return session;
+        }
+
+        return null;
+    }
+
+    private Session register(String requestBody) {
+        String account = requestBody.split("&")[0].split("=")[1];
+        String password = requestBody.split("&")[1].split("=")[1];
+        String email = requestBody.split("&")[2].split("=")[1];
+
+        InMemoryUserRepository.save(new User(account, password, email));
+        return authenticate(requestBody);
+    }
+
+    private String getResource(String path) throws IOException { // 파일이 아닌 경우도 고려 필요
+        URL resource = getClass().getClassLoader().getResource("static" + path);
+        File file = new File(resource.getFile());
+        return new String(Files.readAllBytes(file.toPath()));
     }
 
     private String getOKResponse(String mimeType, String responseBody) {

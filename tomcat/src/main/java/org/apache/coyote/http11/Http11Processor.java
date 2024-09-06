@@ -13,6 +13,7 @@ import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
+import org.apache.catalina.request.Request;
 import org.apache.catalina.request.RequestReader;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponseContent;
@@ -36,15 +37,6 @@ public class Http11Processor implements Runnable, Processor {
     private static final String BAD_REQUEST_PAGE = "/400.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
     private static final String INDEX_PAGE = "/index.html";
-
-    private static final String HTTP_METHOD = "HttpMethod";
-    private static final String URL = "Url";
-    private static final String ACCEPT = "Accept";
-    private static final String IS_QUERY_PARAM = "IsQueryParam";
-    private static final String QUERY_PARAM_SIZE = "QueryParamSize";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String SET_COOKIE = "Set-Cookie";
-
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String EMAIL = "email";
@@ -64,26 +56,26 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            Map<String, String> headers = RequestReader.readHeaders(reader);
-            HttpCookie.setCookies(headers.get(SET_COOKIE));
-            handleRequestMethod(reader, headers);
+            Request request = RequestReader.readHeaders(reader);
+            HttpCookie.setCookies(request.getCookie());
+            handleRequestMethod(request);
         } catch (IOException e) {
             log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
-    private void handleRequestMethod(BufferedReader reader, Map<String, String> headers) {
-        String httpMethod = headers.get(HTTP_METHOD);
-        if ("GET" .equalsIgnoreCase(httpMethod)) {
-            handleGetRequest(headers);
-        } else if ("POST" .equalsIgnoreCase(httpMethod)) {
-            handlePostRequest(reader, headers);
+    private void handleRequestMethod(Request request) {
+        String httpMethod = request.getHttpMethod();
+        if (httpMethod.equals("GET")) {
+            handleGetRequest(request);
+        } else if (httpMethod.equals("POST")) {
+            handlePostRequest(request);
         } else {
             log.warn("지원되지 않는 HTTP 메서드: {}", httpMethod);
         }
     }
 
-    private void handleGetRequest(Map<String, String> headers) {
+    private void handleGetRequest(Request headers) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
             String response = generateResponseForUrl(headers).responseToString();
             outputStream.write(response.getBytes());
@@ -93,36 +85,34 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseContent generateResponseForUrl(Map<String, String> headers) {
-        String url = headers.get(URL);
-        String accept = headers.get(ACCEPT);
-        if (ROOT_PATH.equals(url)) {
+    private ResponseContent generateResponseForUrl(Request headers) {
+        String accept = headers.getFileType();
+        if (ROOT_PATH.equals(headers.getUrl())) {
             return new ResponseContent(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
-        if (Boolean.parseBoolean(headers.get(IS_QUERY_PARAM))) {
+        if (!headers.checkQueryParamIsEmpty()) {
             return generateResponseForQueryParam(headers);
         }
 
-        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(url);
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(headers.getUrl());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             return new ResponseContent(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
         }
-
-        return new ResponseContent(HttpStatus.OK, accept, FileReader.loadFileContent(url));
+        return new ResponseContent(HttpStatus.OK, accept, FileReader.loadFileContent(headers.getUrl()));
     }
 
-    private ResponseContent generateResponseForQueryParam(Map<String, String> headers) {
-        String url = headers.get(URL);
-        if (LOGIN_PATH.equals(url)) {
+    private ResponseContent generateResponseForQueryParam(Request headers) {
+        if (LOGIN_PATH.equals(headers.getUrl())) {
             return handleLoginRequest(headers);
         }
-        throw new RuntimeException("'" + url + "'는 정의되지 않은 URL입니다.");
+        throw new RuntimeException("'" + headers.getUrl() + "'는 정의되지 않은 URL입니다.");
     }
 
-    private ResponseContent handleLoginRequest(Map<String, String> queryParams) {
-        String accept = queryParams.get(ACCEPT);
-        if (Integer.parseInt(queryParams.get(QUERY_PARAM_SIZE)) < 2) {
+    private ResponseContent handleLoginRequest(Request request) {
+        String accept = request.getFileType();
+        Map<String, String> queryParams = request.getQueryParam();
+        if (request.getQueryParam().size() < 2) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
 
@@ -151,12 +141,9 @@ public class Http11Processor implements Runnable, Processor {
         return user;
     }
 
-    private void handlePostRequest(BufferedReader reader, Map<String, String> headers) {
-        int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
-        Map<String, String> bodyParams = RequestReader.readBody(reader, contentLength);
-
+    private void handlePostRequest(Request headers) {
         try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = generateResponseForUrl(headers, bodyParams).responseToString();
+            String response = generateResponseForPostUrl(headers).responseToString();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -164,20 +151,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static ResponseContent generateResponseForUrl(Map<String, String> headers, Map<String, String> bodyParams) {
-        String url = headers.get(URL);
-        String accept = headers.get(ACCEPT);
+    private static ResponseContent generateResponseForPostUrl(Request headers) {
+        String url = headers.getUrl();
+        String accept = headers.getFileType();
         if (REGISTER_PATH.equals(url)) {
-            return handleRegistration(bodyParams, accept);
+            return handleRegistration(headers.getBody(), accept);
         }
         return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(NOT_FOUND_PAGE));
     }
 
     private static ResponseContent handleRegistration(Map<String, String> bodyParams, String accept) {
-        if (InMemoryUserRepository.findByAccount(bodyParams.get(ACCOUNT)).isPresent()) {
+        String account = bodyParams.get(ACCOUNT);
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
-        InMemoryUserRepository.save(new User(bodyParams.get(ACCOUNT), bodyParams.get(EMAIL), bodyParams.get(PASSWORD)));
+        String password = bodyParams.get(PASSWORD);
+        String email = bodyParams.get(EMAIL);
+        InMemoryUserRepository.save(new User(account, email, password));
         return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent(INDEX_PAGE));
     }
 }

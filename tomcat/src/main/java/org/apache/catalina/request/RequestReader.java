@@ -17,16 +17,15 @@ public class RequestReader {
     private static final String PARAM_SEPARATOR = "&";
     private static final String PARAM_ASSIGNMENT = "=";
 
-    public static Map<String, String> readHeaders(BufferedReader reader) {
+    public static Request readHeaders(BufferedReader reader) {
         List<String> headerLines = readHeaderLines(reader);
         validateHeaderLines(headerLines);
 
         Map<String, String> headers = parseHeaders(headerLines);
-        addRequestLineDetails(headerLines.get(0), headers);
-        Map<String, String> queryParams = getQueryParams(headers.get("Url"));
-        headers.putAll(queryParams);
-        headers.put("Url", headers.get("Url").split(QUERY_SEPARATOR)[0]);
-        return headers;
+        Request request = new Request(headerLines.getFirst(), headers);
+        request.setQueryParam(getQueryParams(request.getUrlIncludeQuery()));
+        request.setBody(getBody(reader, request.getContentLength()));
+        return request;
     }
 
     private static List<String> readHeaderLines(BufferedReader reader) {
@@ -57,25 +56,7 @@ public class RequestReader {
                 .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
     }
 
-    private static void addRequestLineDetails(String requestLine, Map<String, String> headers) {
-        String[] parts = requestLine.split(" ");
-        if (parts.length < 2) {
-            throw new IllegalArgumentException("요청 헤더의 형식이 올바르지 않습니다.");
-        }
-        headers.put("HttpMethod", parts[0]);
-        headers.put("Url", parts[1]);
-        headers.put("Accept", extractMainFileType(headers.get("Accept")));
-    }
-
-    private static String extractMainFileType(String acceptHeader) {
-        if (acceptHeader == null) {
-            return "text/html";
-        }
-        String[] types = acceptHeader.split(",");
-        return types[0].trim();
-    }
-
-    public static Map<String, String> readBody(BufferedReader reader, int contentLength) {
+    private static Map<String, String> getBody(BufferedReader reader, int contentLength) {
         char[] buffer = new char[contentLength];
         try {
             int readChars = reader.read(buffer, 0, contentLength);
@@ -91,16 +72,9 @@ public class RequestReader {
     private static Map<String, String> getQueryParams(String url) {
         String[] separationUrl = url.split(QUERY_SEPARATOR, 2);
         if (separationUrl.length < 2) {
-            return Map.of("IsQueryParam", "false");
+            return Map.of();
         }
-
-        Map<String, String> params = getParamValues(separationUrl[1]);
-        if (params.isEmpty()) {
-            return Map.of("IsQueryParam", "false");
-        }
-        params.put("IsQueryParam", "true");
-        params.put("QueryParamSize", String.valueOf(params.size()));
-        return params;
+        return getParamValues(separationUrl[1]);
     }
 
     private static Map<String, String> getParamValues(String params) {

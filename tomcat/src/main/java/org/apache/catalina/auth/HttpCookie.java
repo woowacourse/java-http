@@ -1,6 +1,6 @@
 package org.apache.catalina.auth;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,18 +15,8 @@ public class HttpCookie {
         return cookiesToString();
     }
 
-    public static void setCookies(String setCookies) {
-        if (setCookies == null) {
-            return;
-        }
-        Map<String, String> map = Arrays.stream(setCookies.split(";"))
-                .map(param -> param.split("=", 2))
-                .filter(parts -> parts.length == 2 && parts[1] != null)
-                .collect(Collectors.toMap(
-                        parts -> parts[0].trim(),
-                        parts -> parts[1].trim()
-                ));
-        cookies.putAll(map);
+    public static void setCookies(Map<String, String> cookies) {
+        cookies.putAll(new HashMap<>(cookies));
     }
 
     public static String getId() {

@@ -20,4 +20,7 @@ public class Controller {
         return responseCreator.create(200, httpRequest.getPath());
     }
 
+    public String getLoginPage(HttpRequest httpRequest) throws IOException {
+        return responseCreator.create(200, httpRequest.getPath());
+    }
 }

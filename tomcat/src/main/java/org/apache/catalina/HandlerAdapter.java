@@ -25,6 +25,9 @@ public class HandlerAdapter {
             if (path.equals("/index.html")) {
                 return controller.getDefaultPage(httpRequest);
             }
+            if (path.equals("/login")) {
+                return controller.getLoginPage(httpRequest);
+            }
         }
         return responseCreator.create(200, path);
     }

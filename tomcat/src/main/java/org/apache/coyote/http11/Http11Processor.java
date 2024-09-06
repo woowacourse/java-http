@@ -76,12 +76,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (HttpMethod.POST.equals(method)) {
                 //TODO requestBody 객체 만들기
-                final int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
-                final char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                final var requestBody = new String(buffer);
-                log.info("requestBody = {}", requestBody);
-                final var body = parsingBody(requestBody);
+                final var body = parseRequestBody(httpHeaders, bufferedReader);
 
                 if (path.isEqualPath("/login")) {
                     final var user = createResponse(body, path, response, result);
@@ -103,6 +98,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HashMap<String, String> parseRequestBody(final HttpHeaders httpHeaders,
+                                                     final BufferedReader bufferedReader) throws IOException {
+        final int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        final var requestBody = new String(buffer);
+        return parsingBody(requestBody);
     }
 
     private String getFile(final Path path) throws IOException {

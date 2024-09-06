@@ -1,27 +1,30 @@
 package org.apache.coyote.http11;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+public class ContentType {
+    private static final String DELIMITER = ";";
 
-public enum ContentType {
-    ANY(List.of("*/*")),
-    TEXT(List.of("text/plain")),
-    JSON(List.of("application/json", "text/json")),
-    JAVASCRIPT(List.of("application/javascript", "text/javascript")),
-    CSS(List.of("text/css")),
-    HTML(List.of("text/html")),
-    URLENC(List.of("application/x-www-form-urlencoded"));
+    private final MediaType mediaType;
+    private final String charSet;
 
-    private final List<String> mimeTypes;
-
-    ContentType(List<String> mimeTypes) {
-        this.mimeTypes = mimeTypes;
+    public ContentType(String rawContentType) {
+        String[] contents = rawContentType.split(DELIMITER);
+        this.mediaType = MediaType.from(contents[0])
+                .orElseThrow(() -> new IllegalArgumentException("올바른 HTTP Content-Type이 아닙니다."));
+        this.charSet = getCharSetFromContents(contents);
     }
 
-    public static Optional<ContentType> fromMimeType(String mimeType) {
-        return Arrays.stream(ContentType.values())
-                .filter(contentType -> contentType.mimeTypes.contains(mimeType))
-                .findFirst();
+    private String getCharSetFromContents(String[] contents) {
+        if (contents.length == 2) {
+            return contents[1];
+        }
+        return null;
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public String getString() {
+        return mediaType.getTypeName() + DELIMITER + charSet;
     }
 }

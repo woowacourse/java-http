@@ -28,12 +28,12 @@ public class HttpRequestParser {
         String rawRequestBody = null;
         HttpRequestParameter httpRequestParameter = null;
         if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PATCH) {
-            contentType = ContentType.fromMimeType(rawHttpRequestHeader.get("Content-Type"))
-                    .orElseThrow(() -> new IllegalArgumentException("HTTP 요청에 Content-Type이 없습니다."));
+            String rawContentType = rawHttpRequestHeader.get("Content-Type");
+            contentType = new ContentType(rawContentType);
             String rawContentLength = rawHttpRequestHeader.get("Content-Length");
             contentLength = Integer.valueOf(rawContentLength);
             rawRequestBody = parseHttpRequestBody(contentLength, bufferedReader);
-            if (contentType == ContentType.URLENC) {
+            if (contentType.getMediaType() == MediaType.URLENC) {
                 httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
             }
         }

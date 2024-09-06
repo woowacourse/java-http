@@ -1,21 +1,12 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
+import com.techcourse.model.UserService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -23,18 +14,18 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String REQUEST_HEADER_SUFFIX = "";
-    private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String SUCCESS_STATUS_CODE = "200 OK";
     private static final String STATIC_PATH_PREFIX = "static";
     private static final String TEXT_CONTENT_TYPE_PREFIX = "text/";
-    private static final String HTML_TYPE = "html";
+    private static final String HTML_TYPE = ".html";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final UserService userService;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.userService = new UserService();
     }
 
     @Override
@@ -46,59 +37,43 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            // TODO: requestHeader 읽기 객체 분리
-            final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> lines = new ArrayList<>();
-            String line = br.readLine();
-            if (line.isEmpty()) {
-                return;
-            }
-            while (!REQUEST_HEADER_SUFFIX.equals(line)) {
-                lines.add(line);
-                line = br.readLine();
-            }
-
-            // TODO: requestHeader의 startLine 파싱 함수 분리
-            final String[] startLine = lines.get(0).split(" ");
-            if (startLine.length != 3) {
-                return;
-            }
-            final String httpMethodName = startLine[0];
-            final String requestURI = startLine[1];
-            final String httpVersion = startLine[2];
-            if (!HTTP_VERSION.equals(httpVersion)) {
-                return;
-            }
-
-            // TODO: startLine의 httpMethod, requestURI 값에 따라 처리 함수 분리
-            HttpMethod httpMethod = HttpMethod.findByName(httpMethodName);
-            if (HttpMethod.GET.equals(httpMethod)) {
-                Map<String, String> queryString = parseQueryString(requestURI);
-                if (requestURI.contains("/login")) {
-                    login(queryString.get("account"), queryString.get("password"));
-                    String type = parseTextContentType(HTML_TYPE);
-                    String path = parseStaticPath("/login.html");
-                    createResponse(outputStream, SUCCESS_STATUS_CODE, type, path);
-                    return;
-                }
-                if (requestURI.contains(".")) {
-                    String type = parseTextContentType(requestURI);
-                    String path = parseStaticPath(requestURI);
-                    createResponse(outputStream, SUCCESS_STATUS_CODE, type, path);
-                    return;
-                }
-                String type = parseTextContentType(HTML_TYPE);
-                createResponse(outputStream, SUCCESS_STATUS_CODE, type, requestURI);
-                return;
-            }
-            if (HttpMethod.POST.equals(httpMethod)) {
-                String type = parseTextContentType(HTML_TYPE);
-                createResponse(outputStream, SUCCESS_STATUS_CODE, type, requestURI);
-            }
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            final Http11Request request = Http11Parser.readHttpRequest(bufferedReader);
+            final Http11Response response = handle(request);
+            String serializedResponse = response.serializeResponse();
+            outputStream.write(serializedResponse.getBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Http11Response handle(Http11Request request) {
+        final String requestURI = request.getRequestURI();
+        final Http11Method httpMethod = request.getHttpMethod();
+
+        if (Http11Method.GET.equals(httpMethod)) {
+            Map<String, String> queryString = parseQueryString(requestURI);
+            if (requestURI.contains("/login")) {
+                userService.login(queryString.get("account"), queryString.get("password"));
+                String type = parseTextContentType(HTML_TYPE);
+                String path = parseStaticPath("/login.html");
+                return new Http11Response(SUCCESS_STATUS_CODE, type, path);
+            }
+            if (requestURI.contains(".")) {
+                String type = parseTextContentType(requestURI);
+                String path = parseStaticPath(requestURI);
+                return new Http11Response(SUCCESS_STATUS_CODE, type, path);
+            }
+            String type = parseTextContentType(HTML_TYPE);
+            return new Http11Response(SUCCESS_STATUS_CODE, type, requestURI);
+        }
+        if (Http11Method.POST.equals(httpMethod)) {
+            String type = parseTextContentType(HTML_TYPE);
+            return new Http11Response(SUCCESS_STATUS_CODE, type, requestURI);
+        }
+        throw new IllegalArgumentException("지원하지 않는 기능입니다.");
     }
 
     private Map<String, String> parseQueryString(String requestURI) {
@@ -120,36 +95,5 @@ public class Http11Processor implements Runnable, Processor {
 
     private String parseStaticPath(String filePath) {
         return STATIC_PATH_PREFIX + filePath;
-    }
-
-    private void createResponse(OutputStream outputStream, String statusCode, String contentType, String path)
-            throws IOException, URISyntaxException {
-        final String responseBody = createResponseBody(path);
-        final var response = String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private String createResponseBody(String resourcePath) throws IOException, URISyntaxException {
-        final URL resource = getClass().getClassLoader().getResource(resourcePath);
-        if (resource != null) {
-            final Path path = Paths.get(resource.toURI());
-            return Files.readString(path);
-        }
-        return "Hello world!";
-    }
-
-    private void login(String account, String password) {
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("계정 정보가 틀렸습니다."));
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("계정 정보가 틀렸습니다.");
-        }
-        log.info("user: {}", user);
     }
 }

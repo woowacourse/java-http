@@ -1,7 +1,10 @@
 package cache.com.example;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +13,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class GreetingController {
+
+    private final ResourceLoader resourceLoader;
+
+    public GreetingController(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     @GetMapping("/")
     public String index() {
@@ -32,11 +41,5 @@ public class GreetingController {
     @GetMapping("/etag")
     public String etag() {
         return "index.html";
-    }
-
-    @GetMapping("/resources/{version}/js/index.js")
-    public String resourceVersioning(@PathVariable String version) {
-        System.out.println("컨트롤러까지 잘 왔습니다");
-        return "/js/index.js";
     }
 }

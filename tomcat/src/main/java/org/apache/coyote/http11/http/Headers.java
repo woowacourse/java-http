@@ -11,7 +11,14 @@ public record Headers(Map<String, String> headers) {
         this(new LinkedHashMap<>());
     }
 
+    public String get(final String name) {
+        return headers.get(name);
+    }
+
     public void put(final String headerLine) {
+        if (!headerLine.contains(DELIMITER)) {
+            throw new IllegalArgumentException(headerLine);
+        }
         final var split = headerLine.split(DELIMITER);
         put(split[0], split[1]);
     }

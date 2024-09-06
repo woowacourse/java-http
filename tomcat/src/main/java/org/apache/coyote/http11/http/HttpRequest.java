@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 public class HttpRequest {
 
     private final String method;
-    private final String path;
+    private final String requestURI;
     private final String httpVersion;
     private final Headers headers;
     private final String body;
@@ -20,7 +20,7 @@ public class HttpRequest {
         final var requestLine = buffer.readLine();
         final var requestLineSplit = requestLine.split(" ");
         this.method = requestLineSplit[0];
-        this.path = requestLineSplit[1];
+        this.requestURI = requestLineSplit[1];
         this.httpVersion = requestLineSplit[2];
         this.headers = createHeaders(buffer);
         this.body = createBody(buffer);
@@ -46,11 +46,27 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return path;
+        int index = requestURI.lastIndexOf("?");
+        if (index == -1) {
+            return requestURI;
+        }
+        return requestURI.substring(0, index);
+    }
+
+    public String getQueryString() {
+        int index = requestURI.lastIndexOf("?");
+        if (index == -1) {
+            return "";
+        }
+        return requestURI.substring(index + 1);
     }
 
     public String getHttpVersion() {
         return httpVersion;
+    }
+
+    public String getAccept() {
+        return headers.get("Accept");
     }
 
     public String getBody() {
@@ -60,7 +76,7 @@ public class HttpRequest {
     @Override
     public String toString() {
         final var result = new StringJoiner("\r\n");
-        final var requestLine = method + " " + path + " " + httpVersion + " ";
+        final var requestLine = method + " " + requestURI + " " + httpVersion + " ";
         return result.add(requestLine)
                 .add(headers.toString())
                 .add(body)

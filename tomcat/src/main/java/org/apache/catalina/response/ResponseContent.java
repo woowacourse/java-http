@@ -29,6 +29,14 @@ public class ResponseContent {
     }
 
     public String responseToString() {
+        if (cookie.isEmpty()) {
+            return String.join("\r\n",
+                    HTTP_VERSION + " " + httpStatus.getValue() + " " + httpStatus.getReasonPhrase() + " ",
+                    HEADER_CONTENT_TYPE + contentType + ";" + DEFAULT_CHARSET + " ",
+                    HEADER_CONTENT_LENGTH + contentLength + " ",
+                    "",
+                    body);
+        }
         return String.join("\r\n",
                 HTTP_VERSION + " " + httpStatus.getValue() + " " + httpStatus.getReasonPhrase() + " ",
                 HEADER_CONTENT_TYPE + contentType + ";" + DEFAULT_CHARSET + " ",
@@ -36,5 +44,6 @@ public class ResponseContent {
                 HEADER_SET_COOKIE + cookie,
                 "",
                 body);
+
     }
 }

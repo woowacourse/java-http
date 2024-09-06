@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,19 +35,18 @@ class FrontControllerTest {
                 "");
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
-
         // when
-        String result = frontController.handle(httpRequest);
+        HttpResponse response = frontController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Length: 5518 \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
     @DisplayName("존재하지 않는 리소스에 접근하면 404 응답을 반환한다.")
@@ -62,17 +62,17 @@ class FrontControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = frontController.handle(httpRequest);
+        HttpResponse response = frontController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
     @DisplayName("잘못된 메서드로 요청하면 405 응답을 반환한다.")
@@ -88,16 +88,16 @@ class FrontControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = frontController.handle(httpRequest);
+        HttpResponse response = frontController.handle(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/405.html");
         var expected = "HTTP/1.1 405 METHOD NOT ALLOWED \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2190 \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 }

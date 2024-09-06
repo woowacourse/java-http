@@ -39,9 +39,9 @@ public class Http11Processor implements Runnable, Processor {
             String endpoint = request.getURI();
             log.info("Requested endpoint: {}, Method: {}", endpoint, request.getHttpMethod());
 
-            String response = frontController.handle(request);
+            HttpResponse response = frontController.handle(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

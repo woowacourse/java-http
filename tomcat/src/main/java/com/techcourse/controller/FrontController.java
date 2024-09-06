@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.coyote.http11.Http11Helper;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,6 @@ public class FrontController extends Controller {
     private static final FrontController instance = new FrontController();
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
 
-    private final Http11Helper http11Helper = Http11Helper.getInstance();
     private final Map<String, Controller> handlerMappings = new HashMap<>();
 
     public static FrontController getInstance() {
@@ -37,38 +35,36 @@ public class FrontController extends Controller {
     }
 
     @Override
-    public String handle(HttpRequest request) throws IOException {
-        Controller handler = getHandler(request);
+    public HttpResponse handle(HttpRequest request) throws IOException {
+        Controller handler = getHandler(request.getURI());
         if (Objects.isNull(handler)) {
             log.error("Error processing request for endpoint: {}", request.getURI());
 
-            String response = http11Helper.createResponse(HttpStatus.NOT_FOUND, "404.html");
-            return response;
+            handler = NotFoundController.getInstance();
         }
         try {
-            String response = handler.handle(request);
-
+            HttpResponse response = handler.handle(request);
             return response;
         } catch (UnsupportedMethodException e) {
             log.error("Error processing request for endpoint: {}", request.getURI());
 
-            String response = http11Helper.createResponse(HttpStatus.METHOD_NOT_ALLOWED, "405.html");
+            handler = MethodNotAllowedController.getInstance();
+            HttpResponse response = handler.handle(request);
             return response;
         }
     }
 
-    private Controller getHandler(HttpRequest request) {
-        String requestURI = request.getURI();
-        return handlerMappings.get(requestURI);
+    private Controller getHandler(String uri) {
+        return handlerMappings.get(uri);
     }
 
     @Override
-    protected String doPost(HttpRequest request) throws IOException {
+    protected HttpResponse doPost(HttpRequest request) throws IOException {
         throw new UnsupportedMethodException("Method is not supported");
     }
 
     @Override
-    protected String doGet(HttpRequest request) throws IOException {
+    protected HttpResponse doGet(HttpRequest request) throws IOException {
         throw new UnsupportedMethodException("Method is not supported");
     }
 }

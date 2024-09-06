@@ -4,14 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Optional;
 
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +34,7 @@ class LoginControllerTest {
         mockedRepository.close();
     }
 
-    @DisplayName("성공적인 로그인 요청에 대해 302 응답을 생성한다.")
+    @DisplayName("성공적인 로그인 요청에 대해 index.html로 리다이랙트한다.")
     @Test
     void loginSuccess() throws IOException {
         // given
@@ -54,20 +52,16 @@ class LoginControllerTest {
                 .thenReturn(Optional.of(mockUser));
 
         // when
-        String result = loginController.handle(httpRequest);
+        HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "Location: index.html ";
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인이 잘못되면 401 응답을 반환한다.")
+    @DisplayName("로그인이 잘못되면 401.html로 리다이랙트한다.")
     @Test
     void loginFailedInvalidPassword() throws IOException {
         // given
@@ -85,17 +79,13 @@ class LoginControllerTest {
                 .thenReturn(Optional.of(mockUser));
 
         // when
-        String result = loginController.handle(httpRequest);
+        HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        var expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2426 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: 401.html ";
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
     @DisplayName("로그인 화면을 응답한다.")
@@ -111,16 +101,12 @@ class LoginControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = loginController.handle(httpRequest);
+        HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3447 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: login.html ";
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 }

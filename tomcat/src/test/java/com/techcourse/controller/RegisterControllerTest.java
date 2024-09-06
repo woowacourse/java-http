@@ -4,13 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URL;
-import java.nio.file.Files;
 
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +32,7 @@ class RegisterControllerTest {
         mockedRepository.close();
     }
 
-    @DisplayName("성공적인 회원가입 요청에 대해 302 응답을 생성한다.")
+    @DisplayName("성공적인 회원가입 요청에 대해 index.html로 리다이랙트한다.")
     @Test
     void loginSuccess() throws IOException {
         // given
@@ -49,20 +47,16 @@ class RegisterControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = registerController.handle(httpRequest);
+        HttpResponse response = registerController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "Location: index.html ";
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
-    @DisplayName("회원가입이 잘못되면 400 응답을 반환한다.")
+    @DisplayName("회원가입이 잘못되면 400.html로 리다이랙트한다.")
     @Test
     void loginFailedInvalidPassword() throws IOException {
         // given
@@ -77,17 +71,13 @@ class RegisterControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = registerController.handle(httpRequest);
+        HttpResponse response = registerController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/400.html");
-        var expected = "HTTP/1.1 400 BAD REQUEST \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2512 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: 400.html ";
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 
     @DisplayName("회원가입 화면을 응답한다.")
@@ -103,16 +93,12 @@ class RegisterControllerTest {
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new StringReader(request)));
 
         // when
-        String result = registerController.handle(httpRequest);
+        HttpResponse response = registerController.handle(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 4319 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: register.html ";
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(response.toString()).isEqualTo(expected);
     }
 }

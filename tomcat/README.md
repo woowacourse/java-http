@@ -66,16 +66,16 @@ String queryString = uri.substring(index + 1);
 - [x] 로그인에 실패하면 `401.html`로 리다이렉트한다.
 
 ### 2. POST 방식으로 회원가입
-- [ ] `http://localhost:8080/register` 으로 접속하면 GET을 사용해서 회원가입 페이지(register.html)를 보여준다.
-- [ ] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
-- [ ] 회원가입을 완료하면 index.html로 리다이렉트한다.
-- [ ] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경한다.
+- [x] `http://localhost:8080/register` 으로 접속하면 GET을 사용해서 회원가입 페이지(register.html)를 보여준다.
+- [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다.
+- [x] 회원가입을 완료하면 index.html로 리다이렉트한다.
+- [x] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경한다.
 
 ### 3. Cookie에 JSESSIONID 값 저장하기
 > 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.  
 HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다.  
 세션을 구현하기 전에 먼저 쿠키를 구현해본다.  
-자바 진영에서 세션 아이디를 전달하는 이름으로 JSESSIONID를 사용한다.
+자바 진영에서 세션 아이디를 전달하는 이름으로 JSESSIONID를 사용한다.  
 - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가하고 JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 형태로 값을 전달한다.
 - [ ] 클라이언트 요청 헤더의 Cookie 필드에 값이 추가되는 것을 확인한다.
 - [ ] Cookie 클래스를 추가하고 HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.

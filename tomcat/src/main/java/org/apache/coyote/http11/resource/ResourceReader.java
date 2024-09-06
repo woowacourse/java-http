@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.apache.coyote.http11.http.ResourceNotFoundException;
+
 public class ResourceReader {
 
     private static final ClassLoader CLASS_LOADER = ClassLoader.getSystemClassLoader();
@@ -19,6 +21,9 @@ public class ResourceReader {
             return DEFAULT_RESOURCE;
         }
         final var url = CLASS_LOADER.getResource(DEFAULT_PATH + resourcePath);
+        if (url == null) {
+            throw new ResourceNotFoundException(resourcePath);
+        }
         final var path = Path.of(url.getPath());
         return Files.readString(path);
     }

@@ -1,10 +1,16 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.http.MediaType.TEXT_CSS;
+import static org.apache.coyote.http11.http.MediaType.TEXT_HTML;
+
 import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.http.Headers;
 import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.HttpStatusCode;
 import org.apache.coyote.http11.resource.ResourceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,25 +38,41 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            // 1. Request
             final var request = new HttpRequest(inputStream);
+            log.info("request: \n{}", request);
 
-            // 1.1.1. Find Static Resource
             final var body = ResourceReader.readString(request.getPath());
 
-            // 2. Response
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "",
+            final var headers = new Headers();
+            final var extension = extension(request.getPath());
+            final var mediaType = mediaType(extension);
+            headers.put("Content-Type", mediaType);
+            headers.put("Content-Type", "charset=utf-8");
+            headers.put("Content-Length", String.valueOf(body.getBytes().length));
+
+            final var httpResponse = new HttpResponse(
+                    request.getHttpVersion(),
+                    HttpStatusCode.OK,
+                    headers,
                     body
             );
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extension(final String path) {
+        final var index = path.lastIndexOf(".");
+        return path.substring(index + 1);
+    }
+
+    private String mediaType(final String extension) {
+        if (extension.equals("css")) {
+            return TEXT_CSS;
+        }
+        return TEXT_HTML;
     }
 }

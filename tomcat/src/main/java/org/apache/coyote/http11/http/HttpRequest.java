@@ -10,7 +10,7 @@ public class HttpRequest {
 
     private final String method;
     private final String path;
-    private final String protocol;
+    private final String httpVersion;
     private final Headers headers;
     private final String body;
 
@@ -21,7 +21,7 @@ public class HttpRequest {
         final var requestLineSplit = requestLine.split(" ");
         this.method = requestLineSplit[0];
         this.path = requestLineSplit[1];
-        this.protocol = requestLineSplit[2];
+        this.httpVersion = requestLineSplit[2];
         this.headers = createHeaders(buffer);
         this.body = createBody(buffer);
     }
@@ -38,31 +38,32 @@ public class HttpRequest {
 
     private String createBody(final BufferedReader reader) throws IOException {
         final var body = new StringJoiner("\r\n");
-        var line = reader.readLine();
-        while (line != null) {
+        while (reader.ready()) {
+            var line = reader.readLine();
             body.add(line);
-            line = reader.readLine();
         }
         return body.toString();
-    }
-
-    public String getMethod() {
-        return method;
     }
 
     public String getPath() {
         return path;
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public Headers getHeaders() {
-        return headers;
+    public String getHttpVersion() {
+        return httpVersion;
     }
 
     public String getBody() {
         return body;
+    }
+
+    @Override
+    public String toString() {
+        final var result = new StringJoiner("\r\n");
+        final var requestLine = method + " " + path + " " + httpVersion + " ";
+        return result.add(requestLine)
+                .add(headers.toString())
+                .add(body)
+                .toString();
     }
 }

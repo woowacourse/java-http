@@ -1,6 +1,7 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class RequestHeaders {
 
@@ -15,5 +16,9 @@ public class RequestHeaders {
 
     public String contentLength() {
         return headers.get("Content-Length");
+    }
+
+    public Optional<String> findJSessionId() {
+        return Optional.ofNullable(cookies.get("JSESSIONID"));
     }
 }

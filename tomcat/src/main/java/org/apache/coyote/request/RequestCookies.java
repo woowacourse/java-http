@@ -26,5 +26,7 @@ public class RequestCookies {
                 .collect(collectingAndThen(toMap(c -> c[0], c -> c[1]), RequestCookies::new));
     }
 
-    public String
+    public String get(String key) {
+        return cookies.get(key);
+    }
 }

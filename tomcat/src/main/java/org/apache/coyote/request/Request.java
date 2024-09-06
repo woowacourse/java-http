@@ -1,6 +1,11 @@
 package org.apache.coyote.request;
 
+import java.util.Optional;
+import org.apache.SessionManager;
+
 public class Request {
+
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     private final RequestLine requestLine;
 
@@ -36,5 +41,9 @@ public class Request {
 
     public boolean existQueryParams() {
         return requestLine.existQueryParams();
+    }
+
+    public Optional<String> findJSessionId() {
+        return headers.findJSessionId();
     }
 }

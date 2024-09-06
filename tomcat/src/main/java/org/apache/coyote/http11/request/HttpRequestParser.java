@@ -11,26 +11,62 @@ public class HttpRequestParser {
 
     private static final String DELIMITER_HEADER = ": ";
 
+    private static final String DELIMITER_QUERY_STRING = "?";
+
+    private static final String DELIMITER_QUERY_STRING_VALUES = "&";
+
+    private static final String DELIMITER_QUERY_STRING_VALUE = "=";
+
     private static final String EMPTY_LINE = "";
+
+    private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
         String [] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
+        QueryString queryString = parseQueryString(requestLine);
         HttpHeaders httpHeaders = parseHttpHeaders(bufferedReader);
 
-        return new HttpRequest(httpMethod, httpRequestPath, httpHeaders);
+        return new HttpRequest(httpMethod, httpRequestPath, queryString, httpHeaders);
     }
 
-    HttpMethod parseHttpMethod(String[] requestLine) {
+    private HttpMethod parseHttpMethod(String[] requestLine) {
         return HttpMethod.valueOf(requestLine[0]);
     }
 
-    HttpRequestPath parseHttpRequestPath(String[] requestLine) {
-        return new HttpRequestPath(requestLine[1]);
+    private HttpRequestPath parseHttpRequestPath(String[] requestLine) {
+        String requestUri = requestLine[1];
+        int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
+        if (queryStringDelimiterIndex == INVALID_QUERY_STRING_DELIMITER_INDEX) {
+            return new HttpRequestPath(requestLine[1]);
+        }
+        return new HttpRequestPath(requestUri.substring(0, queryStringDelimiterIndex));
     }
 
-    HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
+    private QueryString parseQueryString(String[] requestLine) {
+        Map<String, String> queryStrings = new HashMap<>();
+        String requestUri = requestLine[1];
+        int queryStringDelimiterIndex = findQueryStringDelimiterIndex(requestUri);
+        if (queryStringDelimiterIndex == INVALID_QUERY_STRING_DELIMITER_INDEX) {
+            return new QueryString(queryStrings);
+        }
+        String queryString = requestUri.substring(queryStringDelimiterIndex + 1);
+        String[] queryStringInfos = queryString.split(DELIMITER_QUERY_STRING_VALUES);
+        for (String queryStringInfo : queryStringInfos) {
+            String[] splittedQueryString = queryStringInfo.split(DELIMITER_QUERY_STRING_VALUE);
+            String key = splittedQueryString[0];
+            String value = splittedQueryString[1];
+            queryStrings.put(key, value);
+        }
+        return new QueryString(queryStrings);
+    }
+
+    private int findQueryStringDelimiterIndex(String requestLine) {
+        return requestLine.indexOf(DELIMITER_QUERY_STRING);
+    }
+
+    private HttpHeaders parseHttpHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
 
         String headerLine = bufferedReader.readLine();

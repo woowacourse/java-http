@@ -6,11 +6,17 @@ public class HttpRequest {
 
     private final HttpRequestPath httpRequestPath;
 
+    private final QueryString queryString;
+
     private final HttpHeaders httpHeaders;
 
-    public HttpRequest(HttpMethod httpMethod, HttpRequestPath httpRequestPath, HttpHeaders httpHeaders) {
+    public HttpRequest(HttpMethod httpMethod,
+                       HttpRequestPath httpRequestPath,
+                       QueryString queryString,
+                       HttpHeaders httpHeaders) {
         this.httpMethod = httpMethod;
         this.httpRequestPath = httpRequestPath;
+        this.queryString = queryString;
         this.httpHeaders = httpHeaders;
     }
 

@@ -17,6 +17,9 @@ public class FileReader {
     private static final String DEFAULT_RESPONSE = "Hello world!";
 
     public String readFile(String path) throws URISyntaxException, IOException {
+        if (path.equals("/login")) {
+            path = path.concat(".html");
+        }
         URI requestUri = new URI(path);
         String responseBody = DEFAULT_RESPONSE;
         if (!requestUri.toString().equals(ROOT_URI)) {

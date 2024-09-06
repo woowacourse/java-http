@@ -35,9 +35,26 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final HttpRequest httpRequest = HttpRequest.from(inputStream);
-            final String response = ResponseGenerator.generate(httpRequest.getUri(), httpRequest.getAcceptLine());
+//            System.out.println("시작");
+//            final String s = bufferedReader.lines().
+//                    filter(line -> line.startsWith("Accept")).
+//                    findFirst().
+//                    orElse("???");
+//            System.out.println("s"+s);
+
+//            bufferedReader.lines()
+//                    .forEach(System.out::println);
+
+
+
+
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+
+
+
+            final String response = ResponseGenerator.generate(httpRequest, bufferedReader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

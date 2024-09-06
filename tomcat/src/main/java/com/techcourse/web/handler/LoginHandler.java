@@ -36,21 +36,30 @@ public class LoginHandler extends RequestHandler {
 	public HttpResponse loginWithQuery(HttpRequest request) throws IOException {
 		Map<String, String> query = request.getRequestQuery();
 		String account = query.get("account");
+		String password = query.get("password");
 
-		Optional<User> user = InMemoryUserRepository.findByAccount(account);
-		if (user.isEmpty()) {
-			return HttpResponse.builder()
-				.protocol(request.getProtocol())
-				.statusCode(HttpStatusCode.NOT_FOUND)
-				.build();
-		}
-
-		log.info("user: {}", user);
+		logUser(account, password);
 
 		return HttpResponse.builder()
 			.protocol(request.getProtocol())
 			.statusCode(HttpStatusCode.OK)
 			.body(HttpResponse.Body.fromPath(request.getRequestPath()))
 			.build();
+	}
+
+	private void logUser(String account, String password) {
+		Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+		if (userOptional.isEmpty()) {
+			log.info("user not found. account: {}", account);
+			return;
+		}
+
+		User user = userOptional.get();
+		if (!user.checkPassword(password)) {
+			log.info("password not matched. account: {}", account);
+			return;
+		}
+
+		log.info("user: {}", user);
 	}
 }

@@ -16,7 +16,15 @@ public class HttpRequest {
         this.protocolVersion = protocolVersion;
     }
 
+    public String getQueryStringData(String input) {
+        return queryString.get(input);
+    }
+
     public String getPath() {
         return this.path;
+    }
+
+    public String getMethod() {
+        return this.method;
     }
 }

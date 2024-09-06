@@ -55,18 +55,11 @@ public class Http11Processor implements Runnable, Processor {
                     handleFaviconRequest(outputStream);
                     return;
                 }
-                /*
-                TODO: GET /login 요청이 왔을 때
-                1. Cookie 확인 -> JSESSIONID가 있다면,
-                2. sessionManager.findSession(String id)를 활용해서 Session 객체 조회
-                3. session.isExistAttribute("user")로 세션에 저장된 유저객체가 있는지 질문
-                4. true가 나온다면 로그인이 잘 됐다고 판단하고, index.html로 리다이렉트
-                 */
                 if ("/login".equals(uri)) {
                     HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-                    String jsessionId = httpCookie.get("JSESSIONID");
-                    if (jsessionId != null) {
-                        Session session = sessionManager.findSession(jsessionId);
+                    String jSessionId = httpCookie.get("JSESSIONID");
+                    if (jSessionId != null) {
+                        Session session = sessionManager.findSession(jSessionId);
                         if (session != null && session.isExistAttribute("user")) {
                             writeRedirectResponse("/index.html", outputStream);
                             return;
@@ -112,7 +105,7 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, response);
     }
 
-    private String getJsessionId(String cookie) {
+    private String getJSessionId(String cookie) {
         if (cookie == null) {
             return null;
         }
@@ -141,15 +134,7 @@ public class Http11Processor implements Runnable, Processor {
             Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
             if (foundUser.isPresent()) {
                 User user = foundUser.get();
-                /*
-                TODO: 로그인이 잘 됐으면, POST 요청이 날아올 일도 없다고 판단하자. 따라서 jsessionId == null인지 판단할 필요 없이 항상 응답에 Set-Cookie를 날린다.
-                로그인에 성공하면
-                1. UUID를 생성자에 넘기면서 Session 객체를 생성한다.
-                2. session.setAttribute("user", user)로 유저 객체를 세션에 저장한다.
-                3. writeRedirectResponseWithCookie에 UUID를 넘긴다.
-                 */
                 if (user.checkPassword(password)) {
-                    // 근데 로그인 성공했으면 그냥 set cookie 항상 하면 되는거 아닌가? 여기서 분기처리 왜했지?
                     log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
                     Session session = new Session(UUID.randomUUID().toString());
                     session.setAttribute("user", user);
@@ -181,9 +166,9 @@ public class Http11Processor implements Runnable, Processor {
         return queryStringPairs;
     }
 
-    private void writeRedirectResponseWithCookie(String jsessionId, String location, OutputStream outputStream) throws IOException {
+    private void writeRedirectResponseWithCookie(String jSessionId, String location, OutputStream outputStream) throws IOException {
         final var response = "HTTP/1.1 302 Found \r\n" +
-                "Set-Cookie: JSESSIONID=" + jsessionId + " \r\n" +
+                "Set-Cookie: JSESSIONID=" + jSessionId + " \r\n" +
                 "Location: http://localhost:8080" + location + " \r\n" +
                 "\r\n";
         writeResponse(outputStream, response);

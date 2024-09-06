@@ -69,7 +69,7 @@ class GreetingControllerTest {
 
     /**
      * http://localhost:8080/resource-versioning
-     * 위 url의 html 파일에서 사용하는 js, css와 같은 정적 파일에 캐싱을 적용한다.
+     * <p>위 url의 html 파일에서 사용하는 js, css와 같은 정적 파일에 캐싱을 적용한다.
      * 보통 정적 파일을 캐싱 무효화하기 위해 캐싱과 함께 버전을 적용시킨다.
      * 정적 파일에 변경 사항이 생기면 배포할 때 버전을 바꿔주면 적용된 캐싱을 무효화(Caching Busting)할 수 있다.
      */

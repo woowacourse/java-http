@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.message.request;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.message.HttpHeaders;
 
@@ -50,7 +48,7 @@ public class HttpRequest {
         return body;
     }
 
-    public Map<String, List<String>> getQueryParameters() {
+    public QueryParameters getQueryParameters() {
         return url.getQueryParameters();
     }
 }

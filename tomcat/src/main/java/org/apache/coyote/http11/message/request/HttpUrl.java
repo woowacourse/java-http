@@ -1,13 +1,10 @@
 package org.apache.coyote.http11.message.request;
 
-import java.util.List;
-import java.util.Map;
-
 public class HttpUrl {
     private final String path;
-    private final Map<String, List<String>> queryParameters;
+    private final QueryParameters queryParameters;
 
-    public HttpUrl(String path, Map<String, List<String>> queryParameters) {
+    public HttpUrl(String path, QueryParameters queryParameters) {
         this.path = path;
         this.queryParameters = queryParameters;
     }
@@ -16,7 +13,7 @@ public class HttpUrl {
         return path;
     }
 
-    public Map<String, List<String>> getQueryParameters() {
+    public QueryParameters getQueryParameters() {
         return queryParameters;
     }
 }

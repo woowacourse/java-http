@@ -1,14 +1,13 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
+import com.techcourse.exception.ResourceNotFoundException;
+import com.techcourse.session.SessionManager;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
-import org.apache.coyote.AbstractController;
-import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.util.FileReader;

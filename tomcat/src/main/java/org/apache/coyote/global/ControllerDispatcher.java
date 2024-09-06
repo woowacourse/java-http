@@ -1,18 +1,18 @@
 package org.apache.coyote.global;
 
+import com.techcourse.controller.AbstractController;
+import com.techcourse.controller.MemberController;
+import com.techcourse.controller.ViewController;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.AbstractController;
-import org.apache.coyote.controller.ViewController;
 import org.apache.coyote.global.exception.URIUnmappedException;
-import org.apache.coyote.controller.MemberController;
 import org.apache.coyote.http11.common.HttpMethod;
 
 public class ControllerDispatcher {
 
+    public static final ViewController CONTROLLER_VIEW = new ViewController();
     private static final Map<String, AbstractController> dispatchers = new HashMap<>();
     private static final MemberController CONTROLLER_MEMBER = new MemberController();
-    public static final ViewController CONTROLLER_VIEW = new ViewController();
 
     static {
         dispatchers.put("/", CONTROLLER_VIEW);

@@ -1,13 +1,12 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.exception.UnauthorizedException;
 import com.techcourse.model.User;
-import org.apache.coyote.AbstractController;
-import org.apache.coyote.exception.UnauthorizedException;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.Session;
-import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.http11.common.Cookies;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.util.HttpResponseBuilder;
@@ -51,6 +50,16 @@ public final class MemberController extends AbstractController {
         HttpResponseBuilder.setRedirection(httpResponse, "/401.html");
     }
 
+    private void register(HttpRequest request, HttpResponse httpResponse) {
+        String account = request.getParams("account");
+        String password = request.getParams("password");
+        String email = request.getParams("email");
+
+        InMemoryUserRepository.save(new User(account, password, email));
+
+        HttpResponseBuilder.setRedirection(httpResponse, "/");
+    }
+
     private void registerLoginSession(HttpRequest request, HttpResponse httpResponse, User user) {
         Cookies requestCookies = request.getCookies();
         if (!requestCookies.hasJSESSIONID() || SessionManager.isRegisitered(requestCookies.getJSESSIONID())) {
@@ -61,15 +70,5 @@ public final class MemberController extends AbstractController {
             cookies.setCookie("JSESSIONID", loginSession.getId());
             httpResponse.setCookies(cookies);
         }
-    }
-
-    private void register(HttpRequest request, HttpResponse httpResponse) {
-        String account = request.getParams("account");
-        String password = request.getParams("password");
-        String email = request.getParams("email");
-
-        InMemoryUserRepository.save(new User(account, password, email));
-
-        HttpResponseBuilder.setRedirection(httpResponse, "/");
     }
 }

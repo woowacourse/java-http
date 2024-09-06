@@ -1,4 +1,4 @@
-package org.apache.coyote.exception;
+package com.techcourse.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

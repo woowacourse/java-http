@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.catalina.manager.Session;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
+
+            SessionManager sessionManager = new SessionManager();
 
             String requestLine = bufferedReader.readLine();
             if (requestLine == null || requestLine.isBlank()) {
@@ -125,6 +129,9 @@ public class Http11Processor implements Runnable, Processor {
 
                                 if (sessionId.isEmpty()) {
                                     UUID uuid = UUID.randomUUID();
+                                    Session session = new Session(uuid.toString());
+                                    session.setAttribute("user", user);
+                                    sessionManager.add(session);
                                     cookie.addCookie(Cookie.JSESSIONID, uuid.toString());
                                 }
 

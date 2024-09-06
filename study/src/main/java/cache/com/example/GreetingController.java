@@ -30,7 +30,7 @@ public class GreetingController {
 
     @GetMapping("/etag")
     public String etag() {
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/resource-versioning")

@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
 
             if (!requestLine.isBlank()) {
                 String[] requestParts = requestLine.split(" ");
-                String method = requestParts[0];
+                HttpMethod httpMethod = HttpMethod.find(requestParts[0]);
                 String uri = requestParts[1];
                 String version = requestParts[2];
 
@@ -85,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
                         path = uri.substring(0, index);
                     }
 
-                    if ("GET".equals(method) && "/login".equals(path)) {
+                    if (httpMethod == HttpMethod.GET && "/login".equals(path)) {
                         String resourcePath = "static" + path + ".html";
 
                         Optional<URL> resource = Optional.ofNullable(
@@ -126,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
                         }
                     }
 
-                    if ("POST".equals(method) && "/login".equals(path)) {
+                    if (httpMethod == HttpMethod.POST && "/login".equals(path)) {
                         Map<String, String> params = new HashMap<>();
 
                         String[] paramPairs = body.toString().split("&");
@@ -180,7 +180,7 @@ public class Http11Processor implements Runnable, Processor {
                         return;
                     }
 
-                    if ("GET".equals(method) && "/register".equals(path)) {
+                    if (httpMethod == HttpMethod.GET && "/register".equals(path)) {
                         String resourcePath = "static" + path + ".html";
 
                         Optional<URL> resource = Optional.ofNullable(
@@ -202,7 +202,7 @@ public class Http11Processor implements Runnable, Processor {
                         }
                     }
 
-                    if ("POST".equals(method) && "/register".equals(path)) {
+                    if (httpMethod == HttpMethod.POST && "/register".equals(path)) {
                         Map<String, String> params = new HashMap<>();
 
                         String[] paramPairs = body.toString().split("&");

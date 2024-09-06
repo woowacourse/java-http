@@ -14,9 +14,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        requestHandlerMapper.register(new StaticResourceRequestHandler());
     }
 
     @Override
@@ -29,27 +31,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-
             HttpRequest request = new HttpRequest(inputStream);
-            log.info("request: {}", request);
-
-            if (request.getMethod() == HttpMethod.GET) {
-                byte[] resource = StaticResourceLoader.load(request.getUri());
-                String extension = request.getUri().toString()
-                        .substring(request.getUri().toString().lastIndexOf(".") + 1);
-                String responseBody = new String(resource);
-                HttpResponse response = HttpResponse.builder()
-                        .ok()
-                        .contentType(ContentType.fromExtension(extension))
-                        .body(responseBody)
-                        .build();
-                outputStream.write(HttpResponseWriter.write(response).getBytes());
-                outputStream.flush();
-                return;
-            }
-            HttpResponse response = HttpResponse.builder()
-                    .statusCode(StatusCode.METHOD_NOT_ALLOWED)
-                    .build();
+            HttpResponse response = requestHandlerMapper.handle(request);
             outputStream.write(HttpResponseWriter.write(response).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

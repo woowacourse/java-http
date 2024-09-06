@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import hoony.was.FrontController;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,12 +14,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
+    private final FrontController servlet = new FrontController();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        requestHandlerMapper.register(new LoginRequestHandler());
-        requestHandlerMapper.register(new StaticResourceRequestHandler());
     }
 
     @Override
@@ -34,10 +32,10 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
             log.info("Request: {}", request);
-            HttpResponse response = requestHandlerMapper.handle(request);
+            HttpResponse response = servlet.service(request);
             outputStream.write(HttpResponseWriter.write(response).getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }

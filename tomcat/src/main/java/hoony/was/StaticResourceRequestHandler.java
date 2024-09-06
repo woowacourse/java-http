@@ -1,4 +1,10 @@
-package org.apache.coyote.http11;
+package hoony.was;
+
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.StaticResourceLoader;
 
 public class StaticResourceRequestHandler implements RequestHandler {
 

@@ -1,7 +1,9 @@
-package org.apache.coyote.http11;
+package hoony.was;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpResponse;
 
 public class RequestHandlerMapper {
 

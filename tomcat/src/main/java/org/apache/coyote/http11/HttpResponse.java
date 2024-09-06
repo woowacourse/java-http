@@ -14,8 +14,8 @@ public class HttpResponse {
     public HttpResponse(String httpStatus, File file) throws IOException {
         this.httpStatus = httpStatus;
         this.mimeType = Files.probeContentType(file.toPath());
-        this.body = Files.readString(file.toPath());
-        this.contentLength = Files.readString(file.toPath()).getBytes().length;
+        this.body = new String(Files.readAllBytes(file.toPath()));
+        this.contentLength = Files.readAllBytes(file.toPath()).length;
     }
 
     public String toMessage() {

@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Method;
+import org.apache.coyote.http11.exception.NoHandlerException;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +20,14 @@ import com.techcourse.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
+    private final List<RequestHandler> requestHandlers;
     private final Socket connection;
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
+        this.requestHandlers = List.of(
+                new StaticResourceHandler()
+        );
     }
 
     @Override
@@ -42,13 +45,23 @@ public class Http11Processor implements Runnable, Processor {
 
             Request request = Request.parseFrom(getPlainRequest(requestBufferedReader));
             log.info("request : {}", request);
-            String response = getResponseString(request);
+            String response = getResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(Request request) throws IOException {
+        for (RequestHandler requestHandler : requestHandlers) {
+            String response = requestHandler.handle(request);
+            if (response != null) {
+                return response;
+            }
+        }
+        throw new NoHandlerException("핸들러가 존재하지 않습니다. request : " + request);
     }
 
     private List<String> getPlainRequest(BufferedReader requestBufferedReader) throws IOException {
@@ -58,26 +71,5 @@ public class Http11Processor implements Runnable, Processor {
             plainRequest.add(line);
         }
         return Collections.unmodifiableList(plainRequest);
-    }
-
-    private String getResponseString(Request request) throws IOException {
-        if (request.getMethod() == Method.GET) {
-            Content content = getContent(request);
-
-            return String.join("\r\n",
-                    String.format("%s 200 OK ", request.getHttpVersion()),
-                    String.format("Content-Type: %s;charset=utf-8 ", content.getContentType()),
-                    "Content-Length: " + content.getContent().getBytes().length + " ",
-                    "",
-                    content.getContent());
-        }
-        return null;
-    }
-
-    private Content getContent(Request request) throws IOException {
-        if (request.getTarget().equals("/")) {
-            return new Content("index.html");
-        }
-        return new Content(request.getTarget());
     }
 }

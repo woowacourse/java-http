@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 
 public class Content {
     private final String contentType;
@@ -13,6 +14,9 @@ public class Content {
         this.contentType = determineContentType(resourceName);
         String path = "static" + resourceName;
         URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            throw new NoSuchFileException("파일 " + resourceName + "이 존재하지 않습니다.");
+        }
         this.content = new String(Files.readAllBytes(new File(resource.getPath()).toPath()));
     }
 

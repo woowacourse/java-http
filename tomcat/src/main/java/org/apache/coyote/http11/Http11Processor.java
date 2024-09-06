@@ -55,16 +55,20 @@ public class Http11Processor implements Runnable, Processor {
 
             if (HttpMethod.GET.equals(method)) {
                 if (path.isEqualPath("/login")) {
-                    // TODO JSESSIONID가 유효한지도 확인해야하지 않나.
                     final var cookie = httpHeaders.get("Cookie");
-
                     final var httpCookie = HttpCookie.parse(cookie);
                     if (httpCookie.containsKey("JSESSIONID")) {
                         final var jSessionId = httpCookie.get("JSESSIONID");
                         final var session = sessionManager.findSession(jSessionId);
-                        final var sessionUser = (User) session.getAttribute("user");
-                        log.info("이미 로그인 유저 = {}", sessionUser);
-                        redirectIndex(response, path, result);
+                        if (session == null) {
+                            log.warn("유효하지 않은 세션입니다.");
+                            redirectIndex(response, path, result);
+                            response.setLocation("401.html");
+                        } else {
+                            final var sessionUser = (User) session.getAttribute("user");
+                            log.info("이미 로그인 유저 = {}", sessionUser);
+                            redirectIndex(response, path, result);
+                        }
                     } else {
                         generateOKResponse(response, path, result);
                     }

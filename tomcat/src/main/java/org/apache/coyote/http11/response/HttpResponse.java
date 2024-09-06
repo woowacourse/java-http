@@ -1,10 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.StringJoiner;
+
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MimeType;
 
 public class HttpResponse {
     private static final String CONTENT_LENGTH = "Content-Length";

@@ -23,9 +23,9 @@ public class HttpRequest {
         String headerLine = br.readLine();
 
         while (!("".equals(headerLine))) {
-            String[] headerLineValues = headerLine.split(":");
-            String headerName = headerLineValues[0].trim();
-            String headerValue = headerLineValues[1].trim();
+            String[] headerLineValues = parseWithTrim(headerLine, ":");
+            String headerName = headerLineValues[0];
+            String headerValue = headerLineValues[1];
 
             requestHeaders.put(headerName, headerValue);
 
@@ -38,6 +38,16 @@ public class HttpRequest {
             br.read(buffer, 0, contentLength);
             requestBody = new String(buffer);
         }
+    }
+
+    private String[] parseWithTrim(String line, String delimiter) {
+        String[] splited = line.split(delimiter);
+
+        for (int i = 0; i < splited.length; i++) {
+            splited[i] = splited[i].trim();
+        }
+
+        return splited;
     }
 
     public boolean isMethod(Method method) {
@@ -56,6 +66,18 @@ public class HttpRequest {
         }
 
         return requestLine[1];
+    }
+
+    public String getCookie() {
+        String[] cookies = parseWithTrim(requestHeaders.get("Cookie"), ";");
+
+        for (String cookie : cookies) {
+            if (cookie.startsWith("JSESSIONID")) {
+                return cookie.split("=")[1];
+            }
+        }
+
+        return null;
     }
 
     public String getMimeType() {

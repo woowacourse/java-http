@@ -48,9 +48,16 @@ public class Http11Processor implements Runnable, Processor {
             String response = "";
 
             if (httpRequest.isMethod(GET)) {
-                mimeType = httpRequest.getMimeType();
-                responseBody = getResource(httpRequest.getPath());
-                response = getOKResponse(mimeType, responseBody);
+                if (httpRequest.getPath().startsWith("/login")
+                        && httpRequest.getCookie() != null
+                        && getSession(httpRequest.getCookie()) != null) {
+                    Session session = getSession(httpRequest.getCookie());
+                    response = getRedirectResponse(session.getId(), responseBody, "/index.html");
+                } else {
+                    mimeType = httpRequest.getMimeType();
+                    responseBody = getResource(httpRequest.getPath());
+                    response = getOKResponse(mimeType, responseBody);
+                }
             } else if (httpRequest.isMethod(POST)) {
                 String requestBody = httpRequest.getRequestBody();
 
@@ -91,6 +98,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return null;
+    }
+
+    private Session getSession(String cookie) {
+        return SessionManager.findSession(cookie);
     }
 
     private Session register(String requestBody) {

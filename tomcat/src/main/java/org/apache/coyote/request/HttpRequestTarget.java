@@ -38,4 +38,9 @@ public class HttpRequestTarget {
         }
         throw new IllegalStateException("쿼리 파라미터가 존재하지 않습니다.");
     }
+
+    @Override
+    public String toString() {
+        return "path=" + path + " queryParameters=" + queryParameters.getValues();
+    }
 }

@@ -3,28 +3,28 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpRequestParser;
+import com.techcourse.http.HttpResponse;
 import com.techcourse.http.MimeType;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@AllArgsConstructor
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String CRLF = "\r\n";
 
     private final Socket connection;
-
-    public Http11Processor(final Socket connection) {
-        this.connection = connection;
-    }
 
     @Override
     public void run() {
@@ -34,11 +34,11 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()
         ) {
-            final HttpRequest request = HttpRequestParser.parse(inputStream);
-            final String response = generateResponse(request);
+            HttpRequest request = HttpRequestParser.parse(inputStream);
+            String response = generateResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -52,67 +52,52 @@ public class Http11Processor implements Runnable, Processor {
             String path = request.getPath();
             String method = request.getMethod();
             if ("/".equals(path) && method.equals("GET")) {
-                return rootPage();
+                return HttpResponse.ok("Hello world!")
+                        .setContentType(MimeType.HTML.getMimeType())
+                        .build();
             }
             if (path.equals("/login") && method.equals("GET")) {
-                return login(request);
+                return login(request).build();
             }
-            return getStaticResource(request);
+            return getStaticResource(request).build();
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage(), e);
-            return "HTTP/1.1 404 Not Found ";
+            return HttpResponse.notFound().build();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return "HTTP/1.1 500 Internal Server Error ";
+            return HttpResponse.internalServerError().build();
         }
     }
 
-    private String rootPage() {
-        return """
-                HTTP/1.1 200 OK \r
-                Content-Type: text/html;charset=utf-8 \r
-                Content-Length: 12 \r
-                \r
-                Hello world!""";
-    }
-
-    private String login(HttpRequest request) {
+    private HttpResponse login(HttpRequest request) {
         String account = request.getParameter("account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
         if (user.isEmpty() || !user.get().checkPassword(request.getParameter("password"))) {
-            return """
-                HTTP/1.1 302 Found \r
-                Location: /401.html \r
-                """;
+            return HttpResponse.found("/401.html");
         }
 
         log.info("user : {}", user.get());
 
-        return """
-                HTTP/1.1 302 Found \r
-                Location: /index.html \r
-                """;
+        return HttpResponse.found("/index.html");
     }
 
-    private String getStaticResource(HttpRequest request) throws IOException {
+    private HttpResponse getStaticResource(HttpRequest request) throws IOException {
         String requestPath = request.getPath();
-        URL resource = getClass().getClassLoader().getResource("static" + requestPath);
+
+        final String responseBody = readResource("static" + requestPath);
+        String endPath = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+        String mimeType = MimeType.from(endPath);
+
+        return HttpResponse.ok(responseBody)
+                .setContentType(mimeType);
+    }
+
+    private String readResource(String path) throws IOException {
+        URL resource = getClass().getClassLoader().getResource(path);
         if (resource == null) {
             throw new IllegalArgumentException("Resource not found");
         }
-
-        final String responseBody = new String(Files.readAllBytes(Path.of(resource.getPath())));
-        String endPath = requestPath.substring(requestPath.lastIndexOf("/") + 1);
-        String mimeType = MimeType.getMimeType(endPath);
-
-        return String.join(
-                CRLF,
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + mimeType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody
-        );
+        return new String(Files.readAllBytes(Path.of(resource.getPath())));
     }
 }

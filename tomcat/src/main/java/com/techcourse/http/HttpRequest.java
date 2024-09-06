@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HttpRequest {
+
     private String method;
     private String uri;
     private String path;

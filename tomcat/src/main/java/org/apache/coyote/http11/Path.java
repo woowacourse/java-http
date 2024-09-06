@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Path {
 
@@ -36,6 +37,10 @@ public class Path {
         this.url = getClass().getClassLoader().getResource("static" + target + ".html");
         this.extension = "html";
         this.queryString = new HashMap<>();
+    }
+
+    public boolean isEqualPath(final String target) {
+        return Objects.equals(value, target);
     }
 
     public String getContentType() {

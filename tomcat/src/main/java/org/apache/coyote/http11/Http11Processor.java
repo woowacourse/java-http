@@ -23,7 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final SessionManager sessionManager = new SessionManager(); //TODO refactor
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
             final var response = new Response();
 
             if (HttpMethod.GET.equals(method)) {
-                if (path.getValue().equals("/login")) { //TODO 디미터 법칙 지키기
+                if (path.isEqualPath("/login")) {
                     // TODO JSESSIONID가 유효한지도 확인해야하지 않나.
                     final var cookie = httpHeaders.get("Cookie");
 
@@ -84,13 +84,11 @@ public class Http11Processor implements Runnable, Processor {
                 log.info("requestBody = {}", requestBody);
                 final var body = parsingBody(requestBody);
 
-                if (path.getValue().equals("/login")) {
-                    // POST /login
+                if (path.isEqualPath("/login")) {
                     final var user = createResponse(body, path, response, result);
 
                     log.info("user login = {}", user);
-                } else if (path.getValue().equals("/register")) {
-                    // POST /register
+                } else if (path.isEqualPath("/register")) {
                     final var user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
                     redirectIndex(response, path, result);

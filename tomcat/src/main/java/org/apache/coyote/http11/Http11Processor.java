@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +35,12 @@ public class Http11Processor implements Runnable, Processor {
 
             if (request.getMethod() == HttpMethod.GET) {
                 byte[] resource = StaticResourceLoader.load(request.getUri());
+                String extension = request.getUri().toString()
+                        .substring(request.getUri().toString().lastIndexOf(".") + 1);
                 String responseBody = new String(resource);
                 HttpResponse response = HttpResponse.builder()
                         .ok()
-                        .contentType(ContentType.TEXT_HTML)
+                        .contentType(ContentType.fromExtension(extension))
                         .body(responseBody)
                         .build();
                 outputStream.write(HttpResponseWriter.write(response).getBytes());

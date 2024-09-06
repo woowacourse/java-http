@@ -54,6 +54,7 @@ class GreetingControllerTest {
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
+        // yml 파일 설정 추가
     }
 
     @Test

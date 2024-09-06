@@ -3,28 +3,15 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import org.apache.coyote.Processor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -47,33 +34,26 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            List<String> lines = new ArrayList<>();
+            HttpRequest httpRequest = new HttpReader(inputStream).getHttpRequest();
 
-            String line;
-            while ((line = bufferedReader.readLine()) != null){
-                lines.add(line);
-            }
+            RequestLine requestLine = httpRequest.getRequestLine();
 
-            StringTokenizer stringTokenizer = new StringTokenizer(lines.get(0));
+            String method = requestLine.getMethod();
+            String requestUrl = requestLine.getRequestUrl();
 
-            String method = stringTokenizer.nextToken();
-            String requestUrl = stringTokenizer.nextToken();
-
-            if(method.equals("GET") && requestUrl.equals("/")){
+            if (method.equals("GET") && requestUrl.equals("/")) {
                 responseRoot(outputStream);
             }
-            if(method.equals("GET") && requestUrl.equals("/index.html")){
+            if (method.equals("GET") && requestUrl.equals("/index.html")) {
                 responseIndex(outputStream);
             }
-            if(method.equals("GET") && requestUrl.contains(".css")){
+            if (method.equals("GET") && requestUrl.contains(".css")) {
                 responseCss(outputStream, requestUrl);
             }
-            if(method.equals("GET") && requestUrl.contains(".js")){
+            if (method.equals("GET") && requestUrl.contains(".js")) {
                 responseJs(outputStream, requestUrl);
             }
-            if(method.equals("GET") && requestUrl.contains("login")){
+            if (method.equals("GET") && requestUrl.contains("login")) {
                 responseLogin(outputStream, requestUrl);
             }
         } catch (IOException | UncheckedServletException e) {
@@ -88,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
         String[] keyValue = pairs[0].split("=");
         String account = keyValue[1];
 
-        if(InMemoryUserRepository.findByAccount(account).isPresent()){
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             User user = InMemoryUserRepository.findByAccount(account).get();
             log.info(user.toString());
         }
@@ -97,11 +77,11 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -112,11 +92,11 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/js;charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/js;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -127,11 +107,11 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/css;charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -142,11 +122,11 @@ public class Http11Processor implements Runnable, Processor {
         String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
 
         outputStream.write(response.getBytes());
         outputStream.flush();

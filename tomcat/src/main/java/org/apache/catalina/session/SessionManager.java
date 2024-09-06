@@ -8,6 +8,11 @@ import org.apache.catalina.Manager;
 public class SessionManager implements Manager {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
+
+    public static SessionManager getInstance() {
+        return SESSION_MANAGER;
+    }
 
     @Override
     public void add(HttpSession session) {

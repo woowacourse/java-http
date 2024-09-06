@@ -8,9 +8,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
-import org.apache.catalina.core.request.HttpRequest;
-import org.apache.catalina.core.response.HttpResponse;
-import org.apache.catalina.core.response.HttpStatus;
+import org.apache.catalina.servlets.http.request.HttpRequest;
+import org.apache.catalina.servlets.http.response.HttpResponse;
+import org.apache.catalina.servlets.http.response.HttpStatus;
 
 public class RegisterServlet extends HttpServlet {
 

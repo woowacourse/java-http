@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.catalina.core.request.HttpRequest;
-import org.apache.catalina.core.response.Cookie;
-import org.apache.catalina.core.response.HttpResponse;
+import org.apache.catalina.servlets.http.request.HttpRequest;
+import org.apache.catalina.servlets.http.Cookie;
+import org.apache.catalina.servlets.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

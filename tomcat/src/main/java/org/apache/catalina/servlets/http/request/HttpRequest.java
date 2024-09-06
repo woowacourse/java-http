@@ -1,4 +1,4 @@
-package org.apache.catalina.core.request;
+package org.apache.catalina.servlets.http.request;
 
 import static java.util.stream.Collectors.toMap;
 

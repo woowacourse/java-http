@@ -1,19 +1,17 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class HttpResponse {
     private HttpVersion httpVersion;
     private HttpStatusCode httpStatusCode;
     private ContentType contentType;
     private int contentLength;
-    private Map<String, String> responseCookies = new HashMap<>();
+    private HttpCookie httpCookie;
     private String responseBody;
     private String redirectUrl;
 
     public HttpResponse(HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
+        this.httpCookie = new HttpCookie();
     }
 
     public HttpResponse addHttpStatusCode(HttpStatusCode httpStatusCode) {
@@ -32,7 +30,7 @@ public class HttpResponse {
     }
 
     public HttpResponse addCookie(String key, String value) {
-        this.responseCookies.put(key, value);
+        this.httpCookie.addValue(key, value);
         return this;
     }
 
@@ -62,8 +60,8 @@ public class HttpResponse {
         return contentLength;
     }
 
-    public Map<String, String> getResponseCookies() {
-        return responseCookies;
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 
     public String getResponseBody() {

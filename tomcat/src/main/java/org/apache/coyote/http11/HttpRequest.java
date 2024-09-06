@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class HttpRequest {
     private final HttpMethod httpMethod;
     private final String path;
@@ -11,10 +8,11 @@ public class HttpRequest {
     private final ContentType contentType;
     private final Integer contentLength;
     private final HttpRequestParameter httpRequestParameter;
-    private final Map<String, String> cookies;
+    private final HttpCookie httpCookie;
 
     public HttpRequest(HttpMethod httpMethod, String path, HttpVersion httpVersion, String requestBody,
-                       ContentType contentType, Integer contentLength, HttpRequestParameter httpRequestParameter, Map<String, String> cookies) {
+                       ContentType contentType, Integer contentLength, HttpRequestParameter httpRequestParameter,
+                       HttpCookie httpCookie) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.httpVersion = httpVersion;
@@ -22,11 +20,11 @@ public class HttpRequest {
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.httpRequestParameter = httpRequestParameter;
-        this.cookies = new HashMap<>(cookies);
+        this.httpCookie = httpCookie;
     }
 
     public String getSessionId() {
-        return cookies.get("JSESSIONID");
+        return httpCookie.getValue("JSESSIONID");
     }
 
     public HttpMethod getHttpMethod() {

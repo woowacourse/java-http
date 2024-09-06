@@ -37,9 +37,9 @@ public class HttpRequestParser {
                 httpRequestParameter = parseHttpRequestParameter(rawRequestBody);
             }
         }
-        Map<String, String> cookies = parseRequestCookies(rawHttpRequestHeader.get("Cookie"));
+        HttpCookie httpCookie = HttpCookieParser.parseCookiesFromRequest(rawHttpRequestHeader.get("Cookie"));
         return new HttpRequest(httpMethod, path, httpVersion, rawRequestBody, contentType, contentLength,
-                httpRequestParameter, cookies);
+                httpRequestParameter, httpCookie);
     }
 
     private static Map<String, String> parseRawHttpRequestHeader(BufferedReader bufferedReader) throws IOException {

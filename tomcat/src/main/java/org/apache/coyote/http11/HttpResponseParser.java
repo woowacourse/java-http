@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.stream.Collectors;
-
 public class HttpResponseParser {
 
     public static String parse(HttpResponse httpResponse) {
@@ -15,9 +13,7 @@ public class HttpResponseParser {
             headerBuilder.append("Content-Length: ")
                     .append(httpResponse.getResponseBody().getBytes().length).append(" \r\n");
         }
-        String cookies = httpResponse.getResponseCookies().entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("; "));
+        String cookies = HttpCookieParser.formatCookiesForResponse(httpResponse.getHttpCookie());
         if (!cookies.isEmpty()) {
             headerBuilder.append("Set-Cookie: ").append(cookies).append(" \r\n");
         }

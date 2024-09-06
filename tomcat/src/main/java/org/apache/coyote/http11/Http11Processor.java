@@ -51,8 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             log.info("{} 요청 = {}", method, path);
 
             //TODO localhost:8080 요청시 resource가 null 임
-            final var resource = path.getUrl();
-            final var result = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final var result = getFile(path);
             final var response = new Response();
 
             if (HttpMethod.GET.equals(method)) {
@@ -104,6 +103,14 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getFile(final Path path) throws IOException {
+        final var resource = path.getUrl();
+        if (resource == null) {
+            return "";
+        }
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
     private HashMap<String, String> parsingBody(final String requestBody) {

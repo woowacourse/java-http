@@ -105,18 +105,6 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, response);
     }
 
-    private String getJSessionId(String cookie) {
-        if (cookie == null) {
-            return null;
-        }
-        Map<String, String> cookiePairs = new HashMap<>();
-        for (String rawCookiePair : cookie.split(";")) {
-            String[] cookiePair = rawCookiePair.split("=");
-            cookiePairs.put(cookiePair[0].trim(), cookiePair[1].trim());
-        }
-        return cookiePairs.get("JSESSIONID");
-    }
-
     private String getRequestBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
         int contentLength = Integer.parseInt(headers.get("Content-Length"));
         char[] buffer = new char[contentLength];

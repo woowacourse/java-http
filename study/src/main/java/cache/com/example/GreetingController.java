@@ -1,5 +1,7 @@
 package cache.com.example;
 
+import java.util.UUID;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
@@ -11,7 +13,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class GreetingController {
 
     @GetMapping("/")
-    public String index() {
+    public String index(final HttpServletResponse response) {
+        final String cacheControl = CacheControl
+                .noCache()
+                .cachePrivate()
+                .getHeaderValue();
+
+        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
         return "index";
     }
 
@@ -29,7 +37,9 @@ public class GreetingController {
     }
 
     @GetMapping("/etag")
-    public String etag() {
+    public String etag(final HttpServletResponse response) {
+        response.addHeader(HttpHeaders.ETAG, UUID.randomUUID().toString());
+
         return "index";
     }
 

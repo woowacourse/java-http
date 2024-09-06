@@ -31,8 +31,8 @@ public class LogInController extends Controller {
         }
 
         return new HttpResponse(
-                new HttpResponseStatusLine(401, "Unauthorized"),
-                null,
+                new HttpResponseStatusLine(302, "Found"),
+                Map.of("Location", "/401.html"),
                 null
         );
     }

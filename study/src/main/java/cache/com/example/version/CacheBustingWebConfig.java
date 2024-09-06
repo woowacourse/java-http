@@ -23,7 +23,7 @@ public class CacheBustingWebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler(PREFIX_STATIC_RESOURCES + "/" + version.getVersion() + "/**")
                 .addResourceLocations("classpath:/static/")
-                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic()) // Cache for one year and set public
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic())
                 .resourceChain(true)
                 .addResolver(new org.springframework.web.servlet.resource.VersionResourceResolver()
                         .addContentVersionStrategy("/**"));

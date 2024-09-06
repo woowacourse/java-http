@@ -1,6 +1,6 @@
 package org.apache.coyote.http.response;
 
-import static org.apache.coyote.http.Constants.CRLF;
+import static org.apache.coyote.util.Constants.CRLF;
 
 public class HttpResponse {
 

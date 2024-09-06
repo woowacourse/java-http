@@ -4,7 +4,7 @@ import org.apache.coyote.http.Header;
 
 import java.util.List;
 
-import static org.apache.coyote.http.Constants.CRLF;
+import static org.apache.coyote.util.Constants.CRLF;
 
 public class HttpRequest {
 

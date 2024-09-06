@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.http.Constants.*;
+import static org.apache.coyote.util.Constants.*;
 
 public class Header {
 

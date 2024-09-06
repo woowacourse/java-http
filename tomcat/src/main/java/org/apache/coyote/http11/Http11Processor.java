@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -187,8 +188,10 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
+        final String sessionId = generateSessionId();
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found",
+                "Set-Cookie: JSESSIONID=" + sessionId,
                 "Location: http://localhost:8080/index.html",
                 "Content-Type: text/html; charset=utf-8",
                 "Content-Length: 0",
@@ -201,6 +204,10 @@ public class Http11Processor implements Runnable, Processor {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElse(null);
         return user != null && user.checkPassword(password);
+    }
+
+    private String generateSessionId() {
+        return UUID.randomUUID().toString();
     }
 
     private void handleRegisterRequest(final OutputStream outputStream, final SimpleHttpRequest httpRequest)

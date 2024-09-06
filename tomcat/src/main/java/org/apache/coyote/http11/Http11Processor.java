@@ -17,6 +17,7 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.catalina.auth.HttpCookie;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
@@ -24,7 +25,7 @@ import com.techcourse.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
+    private static final String COOKIE_KEY = "JSESSIONID";
     private static final String DEFAULT_PAGE_CONTENT = "Hello world!";
     private static final String ROOT_PATH = "/";
     private static final String LOGIN_PATH = "/login";
@@ -69,9 +70,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handleRequestMethod(BufferedReader reader, Map<String, String> headers) {
         String httpMethod = headers.get(HTTP_METHOD);
-        if ("GET".equalsIgnoreCase(httpMethod)) {
+        if ("GET" .equalsIgnoreCase(httpMethod)) {
             handleGetRequest(headers);
-        } else if ("POST".equalsIgnoreCase(httpMethod)) {
+        } else if ("POST" .equalsIgnoreCase(httpMethod)) {
             handlePostRequest(reader, headers);
         } else {
             log.warn("지원되지 않는 HTTP 메서드: {}", httpMethod);
@@ -126,19 +127,21 @@ public class Http11Processor implements Runnable, Processor {
         if (account == null || password == null) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
-        if (authenticateUser(account, password)) {
-            return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
+        Optional<User> user = authenticateUser(account, password);
+        if (user.isPresent()) {
+            HttpCookie.saveAuthCookie();
+            String cookie = HttpCookie.getCookie();
+            return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE), cookie);
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
     }
 
-    private boolean authenticateUser(String account, String password) {
+    private Optional<User> authenticateUser(String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("인증된 사용자: {}", user.get());
-            return true;
         }
-        return false;
+        return user;
     }
 
     private void handlePostRequest(BufferedReader reader, Map<String, String> headers) {

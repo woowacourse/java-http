@@ -52,8 +52,8 @@
   - [x] 회원가입 완료 -> 저장 및 /index.html로 리다이렉트 (회원가입 버튼 -> POST)
 
 - Cookie에 JSESSIONID 값 저장하기 : 쿠키를 사용해 서버에 로그인 여부 저장
-  - [ ] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가
-  - [ ] Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie 반환 기능 구현
+  - [x] 서버에서 HTTP 응답을 전달할 때 응답 헤더에 Set-Cookie를 추가
+  - [x] Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie 반환 기능 구현
 
 - [ ] Session 구현하기 : 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부 체크
   - 로그인 성공 시,

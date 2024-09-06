@@ -1,5 +1,13 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +36,8 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        URL resource = getClass().getClassLoader().getResource(fileName);
+        final String actual = Objects.requireNonNull(resource).getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -44,11 +53,13 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = null;
+        final Path path = Path.of(getClass().getClassLoader().getResource(fileName).getPath());
 
         // todo
-        final List<String> actual = Collections.emptyList();
-
-        assertThat(actual).containsOnly("nextstep");
+        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
+            List<String> actual = bufferedReader.lines().toList();
+            assertThat(actual).containsOnly("nextstep");
+        } catch (Exception e) {
+        }
     }
 }

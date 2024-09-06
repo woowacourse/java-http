@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final String EXTENSION_OF_CSS = ".css";
 
     private final String httpMethod;
     private final String uri;
@@ -14,10 +13,6 @@ public class RequestLine {
         this.httpMethod = parts[0];
         this.uri = parts[1];
         this.httpVersion = parts[2];
-    }
-
-    public boolean isCSS() {
-        return uri.endsWith(EXTENSION_OF_CSS);
     }
 
     public String getPath() {

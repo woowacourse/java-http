@@ -10,6 +10,6 @@ public class CacheHandlerInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) {
-        response.addHeader("Cache-Control", "no-cache, private");
+        // response.addHeader("Cache-Control", "no-cache, private");
     }
 }

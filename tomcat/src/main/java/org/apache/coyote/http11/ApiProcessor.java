@@ -40,13 +40,14 @@ public class ApiProcessor {
             }
             if (methodType == GET) {
                 SessionManager sessionManager = SessionManager.getInstance();
-                String jsessionid = requestHeader.get("Cookie").split("=")[1];
-                Session session = sessionManager.findSession(jsessionid);
-
-                if (session != null && session.getAttribute("user") != null) {
-                    User user = (User) session.getAttribute("user");
-                    loginSuccess(outputStream, user);
-                    return;
+                if (requestHeader.containsKey("Cookie")) {
+                    String jsessionid = requestHeader.get("Cookie").split("=")[1];
+                    Session session = sessionManager.findSession(jsessionid);
+                    if (session != null && session.getAttribute("user") != null) {
+                        User user = (User) session.getAttribute("user");
+                        loginSuccess(outputStream, user);
+                        return;
+                    }
                 }
                 processLoginPage(outputStream);
                 return;

@@ -22,7 +22,6 @@ public enum HttpMethod {
         this.name = name;
     }
 
-
     public static HttpMethod fromName(final String target) {
         if (SUIT_CASE.containsKey(target)) {
             return SUIT_CASE.get(target);

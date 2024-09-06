@@ -19,8 +19,8 @@ public class Path {
                     .getResource("static" + target.substring(0, target.indexOf("?")) + ".html");
             final var query = target.substring(target.indexOf('?') + 1);
             this.queryString = new HashMap<>();
-            final String[] queryParams = query.split("&");
-            for (final String param : queryParams) {
+            final var queryParams = query.split("&");
+            for (final var param : queryParams) {
                 final var pair = param.split("=");
                 this.queryString.put(pair[0], pair[1]);
             }

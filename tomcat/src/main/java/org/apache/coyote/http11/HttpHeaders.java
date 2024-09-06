@@ -26,7 +26,7 @@ public class HttpHeaders {
             if (line == null || line.isBlank()) {
                 break;
             }
-            final String[] split = line.split(":");
+            final var split = line.split(":");
             httpRequestHeaders.put(split[0].strip(), split[1].strip());
         }
         return new HttpHeaders(httpRequestHeaders);

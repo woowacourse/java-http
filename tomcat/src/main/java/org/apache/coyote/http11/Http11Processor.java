@@ -142,6 +142,25 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    private void processFilesWithStatus(OutputStream outputStream, String path, HttpStatus httpStatus, String Cookie) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/" + path);
+        if (resource == null) {
+            return;
+        }
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        final var response = String.join("\r\n",
+                "HTTP/1.1 " + httpStatus.value() + " " + httpStatus.getReasonPhrase(),
+                "Set-Cookie:" + Cookie+ " ",
+                "Content-Type: text/" + readFileType(path) + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
     private void processRegister(String method, String body, OutputStream outputStream) throws IOException {
         if (method.equals("GET")) {
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
@@ -192,7 +211,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             if (user.checkPassword(queryParams.get("password").getFirst())) {
-                processFilesWithStatus(outputStream, "/index.html", HttpStatus.valueOf(302));
+                processFilesWithStatus(outputStream, "/index.html", HttpStatus.valueOf(302), Http11Cookie.sessionCookie().toString());
                 return;
             }
             processFilesWithStatus(outputStream, "/401.html", HttpStatus.valueOf(401));

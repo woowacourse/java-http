@@ -52,28 +52,24 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest readRequest(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder sb = new StringBuilder();
+        String line;
 
-        byte[] buffer = new byte[8192];  // TODO: buffer size의 배수만큼 요청이 오면 문제가 생김
-        while (true) {
-            int read = inputStream.read(buffer);
-            if (read == 0) {
-                break;
-            }
-            sb.append(new String(buffer, 0, read));
-//            System.out.println(sb);
-            if (read < buffer.length) {
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\r\n");
+            if (line.isEmpty()) {
                 break;
             }
         }
+        HttpRequest request = new HttpRequest(sb.toString());
 
-//        String line = reader.readLine();
-//        while (!line.isBlank()) {
-//            sb.append(line).append("\r\n");
-//            line = reader.readLine();
-//            System.out.println(line);
-//        }
+        if (request.getContentLength() > 0) {
+            char[] body = new char[request.getContentLength()];
+            reader.read(body);
+            request.setBody(new String(body));
+        }
+        log.info("Request: {}", request);
 
-        return new HttpRequest(sb.toString());
+        return request;
     }
 
     private HttpResponse createResponse(HttpRequest request) {

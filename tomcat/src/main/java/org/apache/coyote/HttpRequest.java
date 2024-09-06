@@ -1,16 +1,13 @@
 package org.apache.coyote;
 
 import jakarta.servlet.http.HttpSession;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
 public class HttpRequest {
+
     private static final String CRLF = "\r\n";
 
     private final String httpMethod;
@@ -18,7 +15,7 @@ public class HttpRequest {
     private final String version;
     private final Map<String, String> headers;
     private final Map<String, String> queryParameters;
-    private final String body;
+    private String body;
     private final Map<String, String> cookies;
 
     public HttpRequest(String request) {
@@ -29,7 +26,7 @@ public class HttpRequest {
         this.path = pathWithQuery.split("\\?")[0];
         this.version = requestLine[2];
         this.headers = parseHeaders(lines);
-        this.body = lines.length > 1 ? URLDecoder.decode(lines[lines.length - 1], StandardCharsets.UTF_8) : null;
+        this.body = null;
         this.queryParameters = parseQueryParameters(pathWithQuery);
         this.cookies = parseCookies(headers.getOrDefault("Cookie", null));
     }
@@ -120,5 +117,26 @@ public class HttpRequest {
             return Optional.empty();
         }
         return Optional.of(cookies.get(key));
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+                "body='" + body + '\'' +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", path='" + path + '\'' +
+                ", version='" + version + '\'' +
+                ", headers=" + headers +
+                ", queryParameters=" + queryParameters +
+                ", cookies=" + cookies +
+                '}';
     }
 }

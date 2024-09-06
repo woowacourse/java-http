@@ -188,7 +188,7 @@ class Http11ProcessorTest {
 
         @DisplayName("/register로 회원가입 페이지에 접근할 수 있다.")
         @Test
-        void loginPage() throws IOException {
+        void registerPage() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
                     "GET /register ",
@@ -214,6 +214,36 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
-    }
 
+        @DisplayName("회원가입 성공 시, index 페이지로 리다이렉트 한다.")
+        @Test
+        void registerSuccess() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 80 ",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "Accept: */* ",
+                    "",
+                    "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            var expected = String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/index.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+    }
 }

@@ -52,93 +52,142 @@ public class Http11Processor implements Runnable, Processor {
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             if (line.startsWith("GET")) {
-                final String requestUri = line.split(" ")[1];
-                final int index = requestUri.indexOf("?");
+                return doGet(line);
+            }
+            if (line.startsWith("POST")) {
+                return doPost(line, bufferedReader);
+            }
+        }
+        return null;
+    }
 
-                String path = requestUri;
-                String queryString = "";
-                if (index != -1) {
-                    path = requestUri.substring(0, index);
-                    queryString = requestUri.substring(index + 1);
+    private String doPost(String line, BufferedReader bufferedReader) throws IOException {
+        final String path = line.split(" ")[1];
+
+        if (path.equals("/register")) {
+            String contentLength = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.isEmpty()) {
+                    break;
                 }
-
-                if (path.equals("/")) {
-                    return getRootPage();
+                if (line.startsWith("Content-Length:")) {
+                    contentLength = line.split(" ")[1];
                 }
-
-                if (path.endsWith("css")) {
-                    final URL resource = getClass().getClassLoader().getResource("static" + path);
-                    final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-                    return String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
-                            "Content-Type: text/css;charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody);
+            }
+            int length = Integer.parseInt(contentLength);
+            char[] buffer = new char[length];
+            bufferedReader.read(buffer, 0, length);
+            String requestBody = new String(buffer);
+            StringTokenizer tokenizer = new StringTokenizer(requestBody);
+            String account = "";
+            String password = "";
+            String email = "";
+            while (tokenizer.hasMoreTokens()) {
+                String key = tokenizer.nextToken();
+                if (key.equals("account") && tokenizer.hasMoreTokens()) {
+                    account = tokenizer.nextToken();
+                } else if (key.equals("password") && tokenizer.hasMoreTokens()) {
+                    password = tokenizer.nextToken();
+                } else if (key.equals("email") && tokenizer.hasMoreTokens()) {
+                    email = tokenizer.nextToken();
                 }
+            }
+            InMemoryUserRepository.save(new User(account, password, email));
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/index.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
+        }
+        return null;
+    }
 
-                if (path.endsWith("svg")) {
-                    final URL resource = getClass().getClassLoader().getResource("static" + path);
-                    final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    private String doGet(String line) throws IOException {
+        final String requestUri = line.split(" ")[1];
+        final int index = requestUri.indexOf("?");
 
-                    return String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
-                            "Content-Type: image/svg+xml ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody);
+        String path = requestUri;
+        String queryString = "";
+        if (index != -1) {
+            path = requestUri.substring(0, index);
+            queryString = requestUri.substring(index + 1);
+        }
+
+        if (path.equals("/")) {
+            return getRootPage();
+        }
+
+        if (path.endsWith("css")) {
+            final URL resource = getClass().getClassLoader().getResource("static" + path);
+            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.endsWith("svg")) {
+            final URL resource = getClass().getClassLoader().getResource("static" + path);
+            final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: image/svg+xml ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (!path.contains(".")) {
+            path += ".html";
+        }
+        final URL resource = getClass().getClassLoader().getResource("static" + path);
+        final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        if (path.startsWith("/login") && !queryString.isEmpty()) {
+            StringTokenizer tokenizer = new StringTokenizer(queryString, "&|=");
+            String account = "";
+            String password = "";
+            while (tokenizer.hasMoreTokens()) {
+                if (tokenizer.nextToken().equals("account") && tokenizer.hasMoreTokens()) {
+                    account = tokenizer.nextToken();
                 }
-
-                if (!path.contains(".")) {
-                    path += ".html";
+                if (tokenizer.nextToken().equals("password") && tokenizer.hasMoreTokens()) {
+                    password = tokenizer.nextToken();
                 }
-                final URL resource = getClass().getClassLoader().getResource("static" + path);
-                final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            }
 
-                if (path.startsWith("/login") && !queryString.isEmpty()) {
-                    StringTokenizer tokenizer = new StringTokenizer(queryString, "&|=");
-                    String account = "";
-                    String password = "";
-                    while (tokenizer.hasMoreTokens()) {
-                        if (tokenizer.nextToken().equals("account") && tokenizer.hasMoreTokens()) {
-                            account = tokenizer.nextToken();
-                        }
-                        if (tokenizer.nextToken().equals("password") && tokenizer.hasMoreTokens()) {
-                            password = tokenizer.nextToken();
-                        }
-                    }
-
-                    Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
-                    if (loginUser.isPresent()) {
-                        final User user = loginUser.get();
-                        if (user.checkPassword(password)) {
-                            log.info("user : {}", user);
-                            return String.join("\r\n",
-                                    "HTTP/1.1 302 Found ",
-                                    "Location: http://localhost:8080/index.html ",
-                                    "Content-Type: text/html;charset=utf-8 ",
-                                    "Content-Length: 0 ",
-                                    "");
-                        }
-                    }
+            Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
+            if (loginUser.isPresent()) {
+                final User user = loginUser.get();
+                if (user.checkPassword(password)) {
+                    log.info("user : {}", user);
                     return String.join("\r\n",
                             "HTTP/1.1 302 Found ",
-                            "Location: http://localhost:8080/404.html ",
+                            "Location: http://localhost:8080/index.html ",
                             "Content-Type: text/html;charset=utf-8 ",
                             "Content-Length: 0 ",
                             "");
                 }
-
-                return String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
             }
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/404.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
         }
-        return null;
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private String getRootPage() {

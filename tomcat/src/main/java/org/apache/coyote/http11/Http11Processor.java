@@ -50,14 +50,11 @@ public class Http11Processor implements Runnable, Processor {
                 httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
                         .addHttpStatusCode(HttpStatusCode.OK)
                         .addResponseBody(responseBody);
-            } else if (path.endsWith(".css")) {
+            } else if (path.startsWith("/static")) {
+                int lastIndexOfDot = path.lastIndexOf(".");
+                String postfix = path.substring(lastIndexOfDot + 1);
                 String responseBody = htmlReader.loadHtmlAsString(path);
-                httpResponse.addContentType(new ContentType(MediaType.CSS, null))
-                        .addHttpStatusCode(HttpStatusCode.OK)
-                        .addResponseBody(responseBody);
-            } else if (path.endsWith(".js")) {
-                String responseBody = htmlReader.loadHtmlAsString(path);
-                httpResponse.addContentType(new ContentType(MediaType.JAVASCRIPT, null))
+                httpResponse.addContentType(ContentType.from(postfix))
                         .addHttpStatusCode(HttpStatusCode.OK)
                         .addResponseBody(responseBody);
             } else if (path.startsWith("/login")) {

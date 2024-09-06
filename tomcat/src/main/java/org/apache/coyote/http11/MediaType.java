@@ -25,6 +25,16 @@ public enum MediaType {
                 .findFirst();
     }
 
+    public static Optional<MediaType> findByPostfix(String postfix) {
+        return Arrays.stream(MediaType.values())
+                .filter(contentType -> contentType.existByPostfix(postfix))
+                .findFirst();
+    }
+
+    private boolean existByPostfix(String postfix) {
+        return typeNames.stream().anyMatch(name -> name.endsWith(postfix));
+    }
+
     public String getTypeName() {
         return typeNames.get(0);
     }

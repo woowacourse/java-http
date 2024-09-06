@@ -72,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private QueryParameter createQueryParameter(BufferedReader bufferedReader, Header header) throws IOException {
-        int length = Integer.parseInt(header.get("Content-Length").orElse("0"));
+        int length = Integer.parseInt(header.get(HttpHeaderKey.CONTENT_LENGTH.getName()).orElse("0"));
         char[] body = new char[length];
         bufferedReader.read(body);
         String bodyString = new String(body);

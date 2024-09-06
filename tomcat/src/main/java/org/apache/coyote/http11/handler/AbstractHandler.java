@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.HttpHeaderKey;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -22,10 +23,10 @@ public abstract class AbstractHandler {
         ForwardResult forwardResult = forward(httpRequest);
         String resourcePath = getClass().getClassLoader().getResource("static/" + forwardResult.path()).getPath();
         List<String> headerTokens = new ArrayList<>();
-        headerTokens.add("Content-Type: " + determineContentType(resourcePath));
+        headerTokens.add(HttpHeaderKey.CONTENT_TYPE.getName() + ": " + determineContentType(resourcePath));
 
         if (forwardResult.isRedirect()) {
-            headerTokens.add("Location:" + forwardResult.path());
+            headerTokens.add(HttpHeaderKey.LOCATION.getName() + ": " + forwardResult.path());
             return new HttpResponse(HttpStatus.FOUND, new Header(headerTokens), new byte[]{});
         }
 

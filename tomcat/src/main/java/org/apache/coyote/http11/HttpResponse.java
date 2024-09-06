@@ -23,7 +23,7 @@ public record HttpResponse(
         StringBuilder stringBuilder = new StringBuilder();
         Map<String, String> headerMap = header.getHeader();
         headerMap.forEach((key, value) -> stringBuilder.append(String.format(RESPONSE_HEADER_FORMAT, key, value)));
-        String format = String.format(RESPONSE_HEADER_FORMAT, "Content-Length", responseBody.length);
+        String format = String.format(RESPONSE_HEADER_FORMAT, HttpHeaderKey.CONTENT_LENGTH.getName(), responseBody.length);
         stringBuilder.append(format);
 
         return stringBuilder;

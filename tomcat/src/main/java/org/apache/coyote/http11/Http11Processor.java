@@ -84,13 +84,14 @@ public class Http11Processor implements Runnable, Processor {
         if (resource == null) {
             throw new IllegalArgumentException(fileName + "  파일이 존재하지 않습니다.");
         }
-        if (response.has5xxCode()) {
-            throw new RuntimeException("서버 내부에 오류 발생가 발생했습니다.");
-        }
         Path path = Path.of(resource.getPath());
         String contentType = Files.probeContentType(path);
         response.addBody(new String(Files.readAllBytes(path)));
         response.addContentType(contentType);
+        response.updateHttpStatus(HttpStatus.OK);
+        if (response.has5xxCode()) {
+            throw new RuntimeException("서버 내부에 오류 발생가 발생했습니다.");
+        }
     }
 
     private void login(HttpRequest request, HttpResponse response) throws IOException {

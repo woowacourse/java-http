@@ -1,5 +1,6 @@
 package org.apache.coyote.response;
 
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.util.FileTypeChecker;
 
@@ -37,6 +38,10 @@ public class HttpResponse {
         headers.add("Content-Length", "0");
     }
 
+    public void updateHttpStatus(HttpStatus newHttpStatus) {
+        startLine.updateStatus(newHttpStatus);
+    }
+
     public boolean has5xxCode() {
         return startLine.has5xxCode();
     }
@@ -56,7 +61,7 @@ public class HttpResponse {
                 startLine.toString(),
                 headers.toString(),
                 "",
-                body.toString()
+                body.getValue()
         );
     }
 }

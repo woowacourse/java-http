@@ -7,7 +7,7 @@ import org.apache.coyote.request.HttpRequest;
 public class HttpResponseStartLine {
 
     private final HttpVersion httpVersion;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
 
     public HttpResponseStartLine(HttpVersion httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
@@ -16,6 +16,10 @@ public class HttpResponseStartLine {
 
     public static HttpResponseStartLine defaultStartLineFrom(HttpRequest httpRequest) {
         return new HttpResponseStartLine(httpRequest.getVersion(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public void updateStatus(HttpStatus newHttpStatus) {
+        this.httpStatus = newHttpStatus;
     }
 
     public boolean has5xxCode() {

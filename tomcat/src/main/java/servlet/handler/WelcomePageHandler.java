@@ -1,8 +1,8 @@
 package servlet.handler;
 
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.Response;
-import org.apache.coyote.response.StatusCode;
+import servlet.http.request.Request;
+import servlet.http.response.Response;
+import servlet.http.StatusCode;
 
 public class WelcomePageHandler implements Handler {
 

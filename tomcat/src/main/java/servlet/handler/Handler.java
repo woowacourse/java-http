@@ -1,7 +1,7 @@
 package servlet.handler;
 
-import org.apache.coyote.request.Request;
-import org.apache.coyote.response.Response;
+import servlet.http.request.Request;
+import servlet.http.response.Response;
 
 @FunctionalInterface
 public interface Handler {

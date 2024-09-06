@@ -1,7 +1,7 @@
 package servlet;
 
-import org.apache.coyote.request.HttpMethod;
-import org.apache.coyote.request.Request;
+import servlet.http.HttpMethod;
+import servlet.http.request.Request;
 import servlet.handler.Handler;
 
 public class RequestMappingInfo {

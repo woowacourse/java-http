@@ -1,4 +1,4 @@
-package org.apache.catalina.request;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.HashMap;

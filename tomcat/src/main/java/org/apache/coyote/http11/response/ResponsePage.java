@@ -1,4 +1,4 @@
-package org.apache.catalina.response;
+package org.apache.coyote.http11.response;
 
 import java.util.Optional;
 

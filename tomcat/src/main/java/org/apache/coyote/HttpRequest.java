@@ -2,12 +2,13 @@ package org.apache.coyote;
 
 import java.util.Map;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.HttpMethod;
 
 public interface HttpRequest {
 
     String getRequestURI();
 
-    String getMethod();
+    HttpMethod getMethod();
 
     String getPath();
 

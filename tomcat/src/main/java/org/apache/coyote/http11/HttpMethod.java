@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
 
-public enum Http11Method {
+public enum HttpMethod {
 
     GET,
     POST,
@@ -15,15 +15,11 @@ public enum Http11Method {
     OPTIONS,
     ;
 
-    public static void validate(String method) {
+    public static HttpMethod from(String method) {
         try {
-            valueOf(method);
+            return valueOf(method);
         } catch (IllegalArgumentException e) {
             throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP Method가 아닙니다."));
         }
-    }
-
-    public boolean equals(String method) {
-        return this.name().equals(method);
     }
 }

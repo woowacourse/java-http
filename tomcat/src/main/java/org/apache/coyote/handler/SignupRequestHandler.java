@@ -1,8 +1,8 @@
 package org.apache.coyote.handler;
 
 import static org.apache.ResourceReader.readFile;
-import static org.apache.coyote.http11.Http11Method.GET;
-import static org.apache.coyote.http11.Http11Method.POST;
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -14,19 +14,19 @@ import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.http11.Http11Method;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.Http11Response;
 
 public class SignupRequestHandler implements RequestHandler {
 
-    private static final List<Http11Method> ALLOWED_METHODS = List.of(POST, GET);
+    private static final List<HttpMethod> ALLOWED_METHODS = List.of(POST, GET);
     private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
         return httpRequest.getPath().equals("/register")
-                && (ALLOWED_METHODS.contains(Http11Method.valueOf(httpRequest.getMethod())));
+                && (ALLOWED_METHODS.contains(httpRequest.getMethod()));
     }
 
     @Override

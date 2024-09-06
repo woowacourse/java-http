@@ -4,61 +4,44 @@ package org.apache.coyote.http11.request;
 import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.Http11Method;
+import org.apache.coyote.http11.HttpMethod;
 
 public class Http11RequestLine {
 
-    private static final String PROTOCOL = "HTTP";
-    private static final String PROTOCOL_VERSION = "1.1";
     private static final int REQUEST_LINE_LENGTH = 3;
-    private static final int VERSION_OF_PROTOCOL_LENGTH = 2;
-    private static final String VERSION_OF_PROTOCOL_DELIMITER = "/";
     private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String REQUEST_LINE_SEPARATOR = " ";
+    public static final String VERSION_OF_PROTOCOL = "HTTP/1.1";
 
-    private final Map<String, String> line;
-
+    private final HttpMethod method;
+    private final String uri;
 
     public Http11RequestLine(String line) {
-        validate(line);
-        this.line = new HashMap<>();
-        this.line.put("Method", line.split(" ")[0]);
-        this.line.put("URI", line.split(" ")[1]);
-        this.line.put("Protocol", line.split(" ")[2]);
+        String[] seperatedLine = line.split(REQUEST_LINE_SEPARATOR);
+        validate(seperatedLine);
+        this.method = HttpMethod.from(seperatedLine[0]);
+        this.uri = seperatedLine[1];
+        validateProtocol(seperatedLine[2]);
     }
 
-    private void validate(String line) {
-        if (StringUtils.isBlank(line) || line.split(" ").length != REQUEST_LINE_LENGTH) {
+    private void validate(String[] seperatedLine) {
+        if (seperatedLine.length != REQUEST_LINE_LENGTH) {
             throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP RequestLine이 아닙니다."));
         }
-        validateMethod(line);
-        validateProtocol(line);
     }
 
-    private void validateMethod(String startLine) {
-        String method = startLine.split(" ")[0];
-        Http11Method.validate(method);
-    }
-
-    private void validateProtocol(String startLine) {
-        String protocol = startLine.split(" ")[2];
-        if (protocol.split(VERSION_OF_PROTOCOL_DELIMITER).length != VERSION_OF_PROTOCOL_LENGTH) {
+    private void validateProtocol(String versionOfProtocol) {
+        if (!VERSION_OF_PROTOCOL.equals(versionOfProtocol)) {
             throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP 프로토콜 형식이 아닙니다."));
         }
-        if (!PROTOCOL.equals(protocol.split(VERSION_OF_PROTOCOL_DELIMITER)[0])) {
-            throw new UncheckedServletException(new IllegalArgumentException("요청이 HTTP 프로토콜이 아닙니다."));
-        }
-        if (!PROTOCOL_VERSION.equals(protocol.split(VERSION_OF_PROTOCOL_DELIMITER)[1])) {
-            throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP 프로토콜 버전이 아닙니다."));
-        }
     }
 
-    public String getMethod() {
-        return line.get("Method");
+    public HttpMethod getMethod() {
+        return this.method;
     }
 
     public String getURI() {
-        return line.get("URI");
+        return this.uri;
     }
 
     public String getPath() {

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.http11.HttpMethod;
 
 public class Http11Request implements HttpRequest {
 
@@ -26,7 +27,7 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 

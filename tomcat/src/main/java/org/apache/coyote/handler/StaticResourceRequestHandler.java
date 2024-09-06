@@ -6,7 +6,7 @@ import static org.apache.ResourceReader.readFile;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
-import org.apache.coyote.http11.Http11Method;
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.Http11Response;
 
@@ -14,7 +14,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
-        return canRead(httpRequest.getRequestURI()) && Http11Method.GET.equals(httpRequest.getMethod());
+        return canRead(httpRequest.getRequestURI()) && HttpMethod.GET.equals(httpRequest.getMethod());
     }
 
     @Override

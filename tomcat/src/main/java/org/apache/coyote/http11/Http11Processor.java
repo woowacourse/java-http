@@ -134,6 +134,7 @@ public class Http11Processor implements Runnable, Processor {
              */
             if ("GET".equals(requestMethod) && "/login".equals(path)) {
                 path = "/login.html";
+
                 /**
                  * JSESSIONID가 쿠키에 존재하는 경우
                  * 즉 이미 로그인을 완료한 상태인 경우, 바로 index.html로 리다이렉트

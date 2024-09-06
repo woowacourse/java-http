@@ -93,6 +93,10 @@ public class HttpResponse {
     }
 
     public HttpResponse setCookie(String key, String value) {
+        if (headers.get("Set-Cookie") != null) {
+            headers.put("Set-Cookie", "%s; %s=%s".formatted(headers.get("Set-Cookie"), key, value));
+            return this;
+        }
         headers.put("Set-Cookie", "%s=%s".formatted(key, value));
         return this;
     }

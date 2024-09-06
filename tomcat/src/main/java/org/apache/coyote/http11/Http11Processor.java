@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.auth.Session;
+import com.techcourse.auth.SessionManager;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.http.HttpRequest;
 import com.techcourse.http.HttpRequestParser;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final SessionManager sessionManager = SessionManager.getInstance();
     private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
@@ -53,6 +56,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String generateResponse(HttpRequest request) {
         try {
+            String jSession = request.getCookie(JSESSIONID);
+            if (isInvalidJSession(jSession)) {
+                return HttpResponse.found("/login.html")
+                        .setCookie(JSESSIONID, jSession).setCookie("Max-Age", "0")
+                        .build();
+            }
+
             String path = request.getPath();
             String method = request.getMethod();
             if ("/".equals(path) && method.equals("GET")) {
@@ -79,25 +89,38 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private boolean isInvalidJSession(String jSession) {
+        return jSession != null && sessionManager.findSession(jSession) == null;
+    }
+
     private HttpResponse login(HttpRequest request) throws IOException {
-        if (request.getParameters().isEmpty()) {
+        String jSession = request.getCookie(JSESSIONID);
+        if (request.getParameters().isEmpty() && jSession == null) {
             return getStaticResourceResponse("/login.html");
+        }
+        if (request.getParameters().isEmpty()) {
+            return HttpResponse.found("/index.html");
         }
 
         String account = request.getParameter("account");
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        Optional<User> userOpt = InMemoryUserRepository.findByAccount(account);
 
-        if (user.isEmpty() || !user.get().checkPassword(request.getParameter("password"))) {
+        if (userOpt.isEmpty() || !userOpt.get().checkPassword(request.getParameter("password"))) {
             return HttpResponse.found("/401.html");
         }
 
-        log.info("user : {}", user.get());
+        User user = userOpt.get();
+        log.info("user : {}", user);
 
-        HttpResponse redirect = HttpResponse.found("/index.html");
-        if (request.getCookie(JSESSIONID) == null) {
-            redirect.setCookie(JSESSIONID, UUID.randomUUID().toString());
+        HttpResponse response = HttpResponse.found("/index.html");
+        if (jSession == null) {
+            Session session = new Session(UUID.randomUUID().toString());
+            session.setAttribute("user", user);
+
+            sessionManager.add(session);
+            response.setCookie(JSESSIONID, session.getId());
         }
-        return redirect;
+        return response;
     }
 
     private HttpResponse register(HttpRequest request) {

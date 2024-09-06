@@ -13,10 +13,12 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
+    private final String requestBody;
 
     public HttpRequest(BufferedReader reader) throws IOException {
         this.requestLine = extractRequestLine(reader);
         this.headers = extractHeaders(reader);
+        this.requestBody = extractRequestBody(reader);
 
         log.info("request header: {}", headers);
     }
@@ -61,11 +63,27 @@ public class HttpRequest {
         return RequestHeaders;
     }
 
+    public String extractRequestBody(BufferedReader reader) throws IOException {
+        try {
+            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

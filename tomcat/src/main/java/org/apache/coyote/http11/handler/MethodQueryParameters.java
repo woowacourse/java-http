@@ -6,25 +6,25 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class QueryParameters {
+public class MethodQueryParameters {
     private final Map<String, String> queryParams;
 
-    private QueryParameters(Map<String, String> queryParams) {
+    private MethodQueryParameters(Map<String, String> queryParams) {
         this.queryParams = Map.copyOf(queryParams);
     }
 
-    public static QueryParameters empty() {
-        return new QueryParameters(Collections.emptyMap());
+    public static MethodQueryParameters empty() {
+        return new MethodQueryParameters(Collections.emptyMap());
     }
 
-    public static QueryParameters parseFrom(String queryStrings) {
+    public static MethodQueryParameters parseFrom(String queryStrings) {
         Map<String, String> queryParams = new HashMap<>();
         String[] queryParamTokens = queryStrings.split("&");
         for (String queryParam : queryParamTokens) {
             String[] split = queryParam.split("=");
             queryParams.put(split[0], split[1]);
         }
-        return new QueryParameters(queryParams);
+        return new MethodQueryParameters(queryParams);
     }
 
     public String getParam(String key) {

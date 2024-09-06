@@ -2,16 +2,16 @@ package org.apache.coyote.http11.handler;
 
 public class MethodRequest {
     private final String endPoint;
-    private final QueryParameters queryParams;
+    private final MethodQueryParameters queryParams;
 
     public MethodRequest(String url) {
         String[] targetToken = url.split("\\?");
         this.endPoint = targetToken[0];
 
         if (targetToken.length == 1) {
-            this.queryParams = QueryParameters.empty();
+            this.queryParams = MethodQueryParameters.empty();
         } else {
-            this.queryParams = QueryParameters.parseFrom(targetToken[1]);
+            this.queryParams = MethodQueryParameters.parseFrom(targetToken[1]);
         }
     }
 

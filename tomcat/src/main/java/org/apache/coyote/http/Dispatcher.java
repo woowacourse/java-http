@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.UUID;
 
 public class Dispatcher {
 
@@ -96,16 +95,11 @@ public class Dispatcher {
         return HttpResponse.notFoundResponses().toResponse();
     }
 
-    private static String getLoginResult(User user, Map<String, String> parsedBody, ResponseHeader header, StatusLine statusLine) {
+    private String getLoginResult(User user, Map<String, String> parsedBody, ResponseHeader header, StatusLine statusLine) {
         if (user.checkPassword(parsedBody.get("password"))) {
             log.info(user.toString());
             header.setLocation(REDIRECT);
-            UUID uuid = UUID.randomUUID();
-            Session session = new Session(uuid.toString());
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            HttpCookie cookie = new HttpCookie();
-            cookie.setSessionId(uuid.toString());
+            HttpCookie cookie = getHttpCookie(user);
             header.setCookie(cookie.toCookieResponse());
             HttpResponse response = new HttpResponse(statusLine, header, null);
             return response.toResponse();
@@ -113,6 +107,15 @@ public class Dispatcher {
         header.setLocation(UNAUTHORIZED);
         HttpResponse response = new HttpResponse(statusLine, header, null);
         return response.toResponse();
+    }
+
+    private HttpCookie getHttpCookie(User user) {
+        Session session = Session.getSession();
+        session.setUser(user);
+        sessionManager.add(session);
+        HttpCookie cookie = new HttpCookie();
+        cookie.setSessionId(session.getId());
+        return cookie;
     }
 
     private String getRegisterResponse(HttpRequest request) throws IOException {

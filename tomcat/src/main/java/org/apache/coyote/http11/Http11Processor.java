@@ -133,7 +133,7 @@ public class Http11Processor implements Runnable, Processor {
                     }
                 } else if (httpMethod.equals("GET")) {
                     String fileName = "static/register.html";
-                    requestBody = getHtmlResponseBody(fileName);
+                    responseBody = getHtmlResponseBody(fileName);
                 }
             }
 

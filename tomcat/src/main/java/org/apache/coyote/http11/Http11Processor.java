@@ -77,7 +77,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse login(HttpRequest request) {
+    private HttpResponse login(HttpRequest request) throws IOException {
+        if (request.getParameters().isEmpty()) {
+            return getStaticResourceResponse("/login.html");
+        }
+
         String account = request.getParameter("account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
 

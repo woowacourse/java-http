@@ -18,6 +18,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        requestHandlerMapper.register(new LoginRequestHandler());
         requestHandlerMapper.register(new StaticResourceRequestHandler());
     }
 
@@ -32,6 +33,7 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
+            log.info("Request: {}", request);
             HttpResponse response = requestHandlerMapper.handle(request);
             outputStream.write(HttpResponseWriter.write(response).getBytes());
             outputStream.flush();

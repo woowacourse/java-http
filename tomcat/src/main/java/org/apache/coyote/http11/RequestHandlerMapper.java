@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestHandlerMapper {
 
-    private final Set<RequestHandler> handlers = new HashSet<>();
+    private final List<RequestHandler> handlers = new ArrayList<>();
 
     public void register(RequestHandler handler) {
         handlers.add(handler);

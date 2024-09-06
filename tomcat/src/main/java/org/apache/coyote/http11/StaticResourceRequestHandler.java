@@ -9,7 +9,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest request) {
-        byte[] resource = StaticResourceLoader.load(request.getUri());
+        byte[] resource = StaticResourceLoader.load(request.getUri().getPath());
         String extension = request.getUri().toString()
                 .substring(request.getUri().toString().lastIndexOf(".") + 1);
         String responseBody = new String(resource);

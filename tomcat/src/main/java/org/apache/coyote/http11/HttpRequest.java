@@ -87,6 +87,10 @@ public class HttpRequest {
         return header;
     }
 
+    public String getParameter(String name) {
+        return queryParameter.get(name);
+    }
+
     public String getBody() {
         return body;
     }

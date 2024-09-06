@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +15,7 @@ public class StaticResourceLoader {
     }
 
     // TODO: 파일이 메모리보다 큰 경우, Stream을 활용해야 한다
-    public static byte[] load(URI uri) {
+    public static byte[] load(String uri) {
         try {
             URL resource = classLoader.getResource(STATIC_RESOURCE_PATH + uri);
             if (resource == null) {

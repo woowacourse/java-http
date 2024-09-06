@@ -27,7 +27,7 @@ public class QueryParameter {
      * @param name: Parameter name
      * @return Parameter value if exists, or null
      */
-    public String getParameter(String name) {
+    public String get(String name) {
         return parameters.get(name);
     }
 

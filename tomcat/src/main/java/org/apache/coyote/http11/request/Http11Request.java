@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
@@ -64,7 +63,7 @@ public class Http11Request implements HttpRequest {
     @Override
     public Session getSession() {
         Optional<Session> sessionOptional = SessionManager.getInstance().findSession(getCookie(JSESSIONID));
-        return sessionOptional.orElseGet(() -> new Session(UUID.randomUUID().toString()));
+        return sessionOptional.orElseGet(Session::new);
     }
 
 }

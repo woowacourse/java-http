@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.Session;
+import org.apache.catalina.manager.SessionManager;
 
 public class HttpRequest {
     private static final String METHOD = "Method";
@@ -70,8 +75,12 @@ public class HttpRequest {
         return new RequestBody(body.toString());
     }
 
+    public String getCookie() {
+        return headers.get(COOKIE);
+    }
+
     public String getURI() {
-        return uri.split("\\.")[0];
+        return uri;
     }
 
     public String getHttpMethod() {

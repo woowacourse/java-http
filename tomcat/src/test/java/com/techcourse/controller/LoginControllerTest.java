@@ -55,10 +55,11 @@ class LoginControllerTest {
         HttpResponse response = loginController.handle(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: index.html ";
+        String responseLine = "HTTP/1.1 302 FOUND";
+        String location = "Location: index.html";
+        String cookie = "Set-Cookie: JSESSIONID=";
 
-        assertThat(response.toString()).isEqualTo(expected);
+        assertThat(response.toString()).contains(responseLine, location, cookie);
     }
 
     @DisplayName("로그인이 잘못되면 401.html로 리다이랙트한다.")

@@ -41,7 +41,7 @@ class FrontControllerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 211988 \r\n" +
+                "Content-Length: 211991 \r\n" +
                 "Content-Type: text/css \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

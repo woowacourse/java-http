@@ -3,9 +3,11 @@ package com.techcourse.controller;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.coyote.http11.HttpCookie;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ public class LoginController extends Controller {
         } catch (UnauthorizedException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
-            return redirect("401.html");
+            return redirect("401.html", new HttpResponse());
         }
     }
 
@@ -47,16 +49,29 @@ public class LoginController extends Controller {
         User user = userService.login(account, password);
         log.info("User found: {}", user);
 
-        return redirect("index.html");
+        HttpCookie httpCookie = new HttpCookie(request.getCookie());
+        if (httpCookie.hasJSessionId()) {
+            return redirect("index.html", new HttpResponse());
+        }
+        HttpResponse response = new HttpResponse();
+        Session session = Session.createRandomSession();
+        session.setAttribute("user", user.getAccount());
+        response.setCookie(HttpCookie.ofJSessionId(session.getId()));
+
+        return redirect("index.html", response);
     }
+
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
-        return redirect("login.html");
+        HttpCookie httpCookie = new HttpCookie(request.getCookie());
+        if (httpCookie.hasJSessionId()) {
+            return redirect("index.html", new HttpResponse());
+        }
+        return redirect("login.html", new HttpResponse());
     }
 
-    private static HttpResponse redirect(String location) {
-        HttpResponse response = new HttpResponse();
+    private static HttpResponse redirect(String location, HttpResponse response) {
         response.setStatus(HttpStatus.FOUND);
         response.setLocation(location);
         return response;

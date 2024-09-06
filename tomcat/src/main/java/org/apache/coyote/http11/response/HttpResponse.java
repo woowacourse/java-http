@@ -11,7 +11,7 @@ import org.apache.coyote.http11.MimeType;
 
 public class HttpResponse {
     private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String COOKIE = "Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
     private static final String HTTP11 = "HTTP/1.1";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String LOCATION = "Location";
@@ -31,7 +31,7 @@ public class HttpResponse {
     }
 
     public void setCookie(String jSessionId) {
-        addHeader(COOKIE, jSessionId);
+        addHeader(SET_COOKIE, jSessionId);
     }
 
     public void addHeader(String key, String value) {
@@ -50,11 +50,11 @@ public class HttpResponse {
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner("\r\n");
-        joiner.add(version + " " + status.getMessage()+" ");
+        joiner.add(version + " " + status.getMessage() + " ");
         for (Entry<String, String> entry : headers.entrySet()) {
             joiner.add(entry.getKey() + ": " + entry.getValue() + " ");
         }
-        if(Objects.nonNull(body)) {
+        if (Objects.nonNull(body)) {
             joiner.add("");
             joiner.add(body.getBody());
         }

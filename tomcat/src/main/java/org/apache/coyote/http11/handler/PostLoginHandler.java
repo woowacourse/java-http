@@ -1,10 +1,14 @@
 package org.apache.coyote.http11.handler;
 
 import com.techcourse.db.InMemoryUserRepository;
+import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.HttpHeaderKey;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.QueryParameter;
 
 import java.net.URI;
+import java.util.Collections;
 
 public class PostLoginHandler extends AbstractHandler {
 
@@ -19,11 +23,15 @@ public class PostLoginHandler extends AbstractHandler {
     @Override
     protected ForwardResult forward(HttpRequest httpRequest) {
         QueryParameter queryParameter = httpRequest.body();
+        Header header = new Header(Collections.emptyList());
+        String redirectionPath = "401.html";
+
         if (isLoggedIn(queryParameter)) {
-            return new ForwardResult(true, "index.html");
+            redirectionPath = "index.html";
         }
 
-        return new ForwardResult(true, "401.html");
+        header.append(HttpHeaderKey.LOCATION, redirectionPath);
+        return new ForwardResult(HttpStatus.FOUND, header);
     }
 
     private boolean isLoggedIn(QueryParameter queryParameter) {

@@ -5,13 +5,10 @@ import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpHeaderKey;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class AbstractHandler {
 
@@ -20,17 +17,16 @@ public abstract class AbstractHandler {
     protected abstract ForwardResult forward(HttpRequest httpRequest);
 
     public HttpResponse handle(HttpRequest httpRequest) {
-        ForwardResult forwardResult = forward(httpRequest);
-        String resourcePath = getClass().getClassLoader().getResource("static/" + forwardResult.path()).getPath();
-        List<String> headerTokens = new ArrayList<>();
-        headerTokens.add(HttpHeaderKey.CONTENT_TYPE.getName() + ": " + determineContentType(resourcePath));
+        ForwardResult result = forward(httpRequest);
+        String resourcePath = getClass().getClassLoader().getResource("static/" + result.path()).getPath();
+        Header header = result.header();
+        header.append(HttpHeaderKey.CONTENT_TYPE, determineContentType(resourcePath));
 
-        if (forwardResult.isRedirect()) {
-            headerTokens.add(HttpHeaderKey.LOCATION.getName() + ": " + forwardResult.path());
-            return new HttpResponse(HttpStatus.FOUND, new Header(headerTokens), new byte[]{});
+        if (result.httpStatus().isRedirection()) {
+            return new HttpResponse(result.httpStatus(), header, new byte[]{});
         }
 
-        return new HttpResponse(HttpStatus.OK, new Header(headerTokens), readStaticResource(resourcePath));
+        return new HttpResponse(result.httpStatus(), header, readStaticResource(resourcePath));
     }
 
     private String determineContentType(String resourcePath) {

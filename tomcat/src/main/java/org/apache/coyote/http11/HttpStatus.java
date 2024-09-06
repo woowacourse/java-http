@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    FOUND(302, "Found")
+    FOUND(302, "Found"),
+    NOT_FOUND(404, "Not Found"),
 
     ;
 
@@ -17,5 +18,9 @@ public enum HttpStatus {
 
     public String getDescription() {
         return code + " " + name;
+    }
+
+    public boolean isRedirection() {
+        return code >= 300 && code < 400;
     }
 }

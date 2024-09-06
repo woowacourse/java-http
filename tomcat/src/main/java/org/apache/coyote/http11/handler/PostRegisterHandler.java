@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.QueryParameter;
 
 import java.net.URI;
@@ -26,6 +27,6 @@ public class PostRegisterHandler extends AbstractHandler {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        return new ForwardResult(false, "index.html");
+        return new ForwardResult("index.html", HttpStatus.OK);
     }
 }

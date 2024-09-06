@@ -8,7 +8,7 @@ public class QueryParameters {
     private final Map<String, List<String>> values;
 
     public QueryParameters(Map<String, List<String>> values) {
-        this.values = values;
+        this.values = Map.copyOf(values);
     }
 
     public String getValueBy(String key) {
@@ -20,6 +20,7 @@ public class QueryParameters {
         validateKey(key);
         return values.get(key);
     }
+
     private void validateKey(String key) {
         if (!values.containsKey(key)) {
             throw new IllegalArgumentException(key + "는 존재하지 않는 key 값 입니다.");

@@ -19,7 +19,8 @@ public class CacheBustingWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(PREFIX_STATIC_RESOURCES + "/" + version.getVersion() + "/**")
-                .addResourceLocations("classpath:/static/");
+        registry.addResourceHandler("resources/" + version.getVersion() + "/**")
+                .addResourceLocations("classpath:/static/js")
+                .setCachePeriod(31536000);
     }
 }

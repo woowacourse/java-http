@@ -4,6 +4,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -33,8 +34,9 @@ public class GreetingController {
         return "index.html";
     }
 
-    @GetMapping("/resource-versioning")
-    public String resourceVersioning() {
-        return "resource-versioning";
+    @GetMapping("/resources/{version}/js/index.js")
+    public String resourceVersioning(@PathVariable String version) {
+        System.out.println("컨트롤러까지 잘 왔습니다");
+        return "/js/index.js";
     }
 }

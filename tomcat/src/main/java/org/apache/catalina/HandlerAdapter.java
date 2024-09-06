@@ -29,6 +29,11 @@ public class HandlerAdapter {
                 return controller.getLoginPage(httpRequest);
             }
         }
+        if ("POST".equals(httpMethod)) {
+            if (path.equals("/login")) {
+                return controller.login(httpRequest);
+            }
+        }
         return responseCreator.create(200, path);
     }
 }

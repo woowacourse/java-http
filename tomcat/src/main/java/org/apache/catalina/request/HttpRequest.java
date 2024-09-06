@@ -1,5 +1,8 @@
 package org.apache.catalina.request;
 
+import org.apache.catalina.Cookies;
+import org.apache.catalina.Mapper;
+
 import java.util.Map;
 
 public class HttpRequest {
@@ -22,5 +25,9 @@ public class HttpRequest {
 
     public String getPath() {
         return path;
+    }
+
+    public Map<String, String> getPayload() {
+        return payload;
     }
 }

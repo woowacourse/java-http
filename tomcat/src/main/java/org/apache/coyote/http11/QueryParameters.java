@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryParameter {
+public class QueryParameters {
 
     private static final int SPLIT_LIMIT = 2;
     private static final String AMPERSAND = "&";
@@ -12,7 +12,7 @@ public class QueryParameter {
 
     private final Map<String, String> parameters = new HashMap<>();
 
-    public QueryParameter(String queryString) {
+    public QueryParameters(String queryString) {
         if (queryString == null || queryString.isEmpty()) {
             return;
         }

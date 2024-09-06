@@ -22,7 +22,7 @@ public class HttpRequest {
 
     private final HttpMethod method;
     private final URI uri;
-    private final QueryParameter queryParameter;
+    private final QueryParameters queryParameters;
     private final String version;
     private final HttpHeaders headers = new HttpHeaders();
     private final String body;
@@ -39,10 +39,10 @@ public class HttpRequest {
             int delimiterIndex = tokens[1].indexOf(QUESTION_MARK);
             if (delimiterIndex == -1) {
                 uri = URI.create(tokens[1]);
-                queryParameter = new QueryParameter(null);
+                queryParameters = new QueryParameters(null);
             } else {
                 uri = URI.create(tokens[1].substring(0, delimiterIndex));
-                queryParameter = new QueryParameter(tokens[1].substring(delimiterIndex + 1));
+                queryParameters = new QueryParameters(tokens[1].substring(delimiterIndex + 1));
             }
             version = tokens[2];
 
@@ -88,7 +88,7 @@ public class HttpRequest {
     }
 
     public String getParameter(String name) {
-        return queryParameter.get(name);
+        return queryParameters.get(name);
     }
 
     public String getBody() {
@@ -99,7 +99,7 @@ public class HttpRequest {
         return "HttpRequest{" +
                "method=" + method +
                ", uri=" + uri +
-               ", queryParameter=" + queryParameter +
+               ", queryParameters=" + queryParameters +
                ", version='" + version + '\'' +
                ", header=" + headers +
                ", body='" + body + '\'' +

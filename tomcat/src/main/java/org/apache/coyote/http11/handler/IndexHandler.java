@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class IndexHandler extends AbstractRequestHandler {
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         String responseBody = "Hello world!";
 
         response.setResponseBody(responseBody);

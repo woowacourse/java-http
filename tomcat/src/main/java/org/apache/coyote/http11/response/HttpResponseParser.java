@@ -9,7 +9,7 @@ public class HttpResponseParser {
 
     private static final String DELIMITER_HEADER = ": ";
 
-    public String parseResponse(HttpResponse httpResponse){
+    public String parseResponse(HttpResponse httpResponse) {
         String responseLine = parseResponseLine(httpResponse.getHttpStatusCode());
         String responseHeader = parseResponseHeaders(httpResponse.getHttpResponseHeaders());
         String responseBody = httpResponse.getHttpResponseBody().body();

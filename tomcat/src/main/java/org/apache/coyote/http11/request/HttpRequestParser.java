@@ -22,7 +22,7 @@ public class HttpRequestParser {
     private static final int INVALID_QUERY_STRING_DELIMITER_INDEX = -1;
 
     public HttpRequest parseRequest(BufferedReader bufferedReader) throws IOException {
-        String [] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
+        String[] requestLine = bufferedReader.readLine().split(DELIMITER_REQUEST_LINE);
         HttpMethod httpMethod = parseHttpMethod(requestLine);
         HttpRequestPath httpRequestPath = parseHttpRequestPath(requestLine);
         QueryString queryString = parseQueryString(requestLine);
@@ -70,7 +70,7 @@ public class HttpRequestParser {
         Map<String, String> headers = new HashMap<>();
 
         String headerLine = bufferedReader.readLine();
-        while(!EMPTY_LINE.equals(headerLine)) {
+        while (!EMPTY_LINE.equals(headerLine)) {
             String[] headerInfo = headerLine.split(DELIMITER_HEADER);
             String key = headerInfo[0];
             String value = headerInfo[1];

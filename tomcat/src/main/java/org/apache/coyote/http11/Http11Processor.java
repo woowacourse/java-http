@@ -4,16 +4,12 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
+import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
@@ -24,9 +20,6 @@ import org.apache.coyote.http11.response.HttpResponseParser;
 import org.apache.coyote.http11.response.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -55,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
             HttpResponseBody httpResponseBody = new HttpResponseBody(
                     fileReader.readFile(httpRequest.getHttpRequestPath()));
-            if (httpRequest.getHttpRequestPath().equals("/login")){
+            if (httpRequest.getHttpRequestPath().equals("/login")) {
                 login(httpRequest);
             }
 

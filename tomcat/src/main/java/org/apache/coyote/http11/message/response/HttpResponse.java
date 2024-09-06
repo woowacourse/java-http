@@ -38,11 +38,6 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(statusLine).append(System.lineSeparator());
-        sb.append(headers).append(System.lineSeparator());
-        sb.append(System.lineSeparator());
-        sb.append(body);
-        return sb.toString();
+        return String.join("\r\n", statusLine.toString(), headers.toString(), body.toString());
     }
 }

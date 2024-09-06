@@ -7,7 +7,7 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class HomeController extends FrontController {
 
-    private static final String HOME_MESSAGE = "Hello World!";
+    private static final String HOME_MESSAGE = "Hello world!";
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

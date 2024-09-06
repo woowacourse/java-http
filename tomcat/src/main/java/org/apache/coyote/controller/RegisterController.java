@@ -12,7 +12,7 @@ import org.apache.util.parser.Parser;
 
 public class RegisterController extends FrontController {
 
-    private final UserService userService = new UserService();
+    private final UserService userService = UserService.getInstance();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {

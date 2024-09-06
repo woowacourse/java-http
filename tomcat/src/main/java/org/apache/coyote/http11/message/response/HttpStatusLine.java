@@ -23,6 +23,6 @@ public class HttpStatusLine {
 
     @Override
     public String toString() {
-        return httpVersion + " " + httpStatus.getStatusCode() + " " + httpStatus.getMessage();
+        return httpVersion + " " + httpStatus.getStatusCode() + " " + httpStatus.getMessage() + " ";
     }
 }

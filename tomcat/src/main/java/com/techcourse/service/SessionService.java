@@ -6,10 +6,11 @@ import org.apache.coyote.http11.SessionManager;
 
 public class SessionService {
 
-    private final SessionManager sessionManager;
+    private static final SessionService INSTANCE = new SessionService();
 
-    public SessionService() {
-        this.sessionManager = new SessionManager();
+    private final SessionManager sessionManager = SessionManager.getInstance();
+
+    private SessionService() {
     }
 
     public void registerSession(String sessionId, User user) {
@@ -20,5 +21,9 @@ public class SessionService {
 
     public boolean isSessionExist(String sessionId) {
         return sessionManager.isExistSession(sessionId);
+    }
+
+    public static SessionService getInstance() {
+        return INSTANCE;
     }
 }

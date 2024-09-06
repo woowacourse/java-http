@@ -3,6 +3,7 @@ package org.apache.coyote.controller;
 import org.apache.coyote.http11.message.common.FileExtension;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.util.ResourceReader;
 
 public class StaticResourceController extends FrontController {
@@ -17,6 +18,7 @@ public class StaticResourceController extends FrontController {
 
         String extension = extractFileExtension(path);
 
+        response.setStatusLine(HttpStatus.OK);
         response.setContentType(FileExtension.getFileExtension(extension).getContentType());
         response.setHeader(CONTENT_LENGTH_HEADER, String.valueOf(resource.getBytes().length));
         response.setBody(resource);

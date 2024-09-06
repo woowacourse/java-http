@@ -5,6 +5,11 @@ import com.techcourse.model.User;
 
 public class UserService {
 
+    private static final UserService INSTANCE = new UserService();
+
+    private UserService() {
+    }
+
     public boolean isPasswordCorrect(User user, String password) {
         return user.checkPassword(password);
     }
@@ -22,5 +27,9 @@ public class UserService {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         System.out.println("회원가입 성공: " + user.getAccount());
+    }
+
+    public static UserService getInstance() {
+        return INSTANCE;
     }
 }

@@ -17,8 +17,8 @@ import org.apache.util.parser.Parser;
 
 public class LoginController extends FrontController {
 
-    private final UserService userService = new UserService();
-    private final SessionService sessionService = new SessionService();
+    private final UserService userService = UserService.getInstance();
+    private final SessionService sessionService = SessionService.getInstance();
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException, URISyntaxException {
@@ -29,14 +29,18 @@ public class LoginController extends FrontController {
         String account = params.get("account");
         String password = params.get("password");
 
-        if (userService.isAccountExist(account)) {
-            User user = userService.findUserByAccount(account);
-            if (userService.isPasswordCorrect(user, password)) {
-                handleSuccessfulLogin(response, user);
-            }
-        } else {
+        if (!userService.isAccountExist(account)) {
             handleFailedLogin(response);
+            return;
         }
+
+        User user = userService.findUserByAccount(account);
+        if (!userService.isPasswordCorrect(user, password)) {
+            handleFailedLogin(response);
+            return;
+        }
+
+        handleSuccessfulLogin(response, user);
     }
 
     private void handleSuccessfulLogin(HttpResponse response, User user) {

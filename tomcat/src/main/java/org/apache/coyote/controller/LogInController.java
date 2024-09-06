@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpResponseStatusLine;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,7 @@ public class LogInController extends Controller {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             log.info("optionalUser : {}", user);
+            SessionManager.add(new Session(user));
             return new HttpResponse(
                     new HttpResponseStatusLine(302, "Found"),
                     Map.of("Location", "/index.html"),

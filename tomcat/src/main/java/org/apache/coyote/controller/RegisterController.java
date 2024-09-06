@@ -6,6 +6,8 @@ import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpResponseStatusLine;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +21,9 @@ public class RegisterController extends Controller {
         String email = request.body().getAttribute("email");
         String password = request.body().getAttribute("password");
 
-        InMemoryUserRepository.save(new User(account, password, email));
+        User user = InMemoryUserRepository.save(new User(account, password, email));
         log.info("Register success: { account: {}, email: {}, password:{}}", account, email, password);
+        SessionManager.add(new Session(user));
 
         return new HttpResponse(
                 new HttpResponseStatusLine(302, "Found"),

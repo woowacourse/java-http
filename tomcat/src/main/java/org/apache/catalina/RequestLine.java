@@ -54,4 +54,20 @@ public class RequestLine {
         }
         return mappedQueryParams;
     }
+
+    public ContentType getContentType() {
+        return ContentType.findByPath(path);
+    }
+
+    public boolean isStaticRequest() {
+        return ContentType.isStaticFile(path);
+    }
+
+    public boolean isPath(String path) {
+        return this.path.equals(path);
+    }
+
+    public boolean isPathWithQuery(String path) {
+        return isPath(path) && hasQueryParam();
+    }
 }

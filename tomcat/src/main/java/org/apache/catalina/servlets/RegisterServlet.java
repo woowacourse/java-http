@@ -24,8 +24,7 @@ public class RegisterServlet extends HttpServlet {
         response.setResponseBody(fileContent);
     }
 
-    // TODO 뭔가 중복되는 코드 template 패턴으로 바꿔도 좋을 듯
-    private String getFileContent(URL resourceURL) throws IOException {
+    private String getFileContent(URL resourceURL) {
         if (resourceURL != null) {
             File file = new File(resourceURL.getFile());
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {

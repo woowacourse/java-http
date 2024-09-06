@@ -36,7 +36,7 @@ public class HttpRequest {
         return path.substring(i + 1);
     }
 
-    public String getRequestURI() { // 리소스만
+    public String getRequestURI() {
         String requestTarget = getRequestTarget();
         int queryStringIndex = requestTarget.indexOf('?');
         if (queryStringIndex == -1) {
@@ -45,9 +45,9 @@ public class HttpRequest {
         return requestTarget.substring(0, queryStringIndex);
     }
 
-    public StringBuffer getRequestURL() { // 전체 다
+    public StringBuilder getRequestURL() {
         String[] startLine = getStartLine().split(" ");
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(getScheme()).append("://").append(getServerName()).append(":").append(getLocalPort());
         sb.append(startLine[1]);
         return sb;
@@ -95,7 +95,7 @@ public class HttpRequest {
     }
 
 
-    public Map<String, String[]> getParameterMap() { // TODO getRequestURL 잘못 쓰임
+    public Map<String, String[]> getParameterMap() {
         Map<String, String[]> map = new LinkedHashMap<>();
         if (getMethod().equals("GET")) {
             addRequestBodyParam(map);

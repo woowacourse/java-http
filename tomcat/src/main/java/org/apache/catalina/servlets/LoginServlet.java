@@ -21,7 +21,6 @@ public class LoginServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
-
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");
@@ -40,7 +39,6 @@ public class LoginServlet extends HttpServlet {
         response.setResponseBody(fileContent);
     }
 
-    // TODO: 리팩토링 필요 중복 발생
     private String getFileContent(URL resourceURL) {
         if (resourceURL != null) {
             File file = new File(resourceURL.getFile());

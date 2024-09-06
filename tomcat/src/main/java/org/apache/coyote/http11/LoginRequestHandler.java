@@ -20,17 +20,23 @@ public class LoginRequestHandler implements RequestHandler {
     public HttpResponse handle(HttpRequest request) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
-        Optional<User> verifiedUser = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
-
-        if (verifiedUser.isPresent()) {
-            log.info("Verified user: {}", verifiedUser);
-        }
+        logUser(account, password);
         byte[] body = StaticResourceLoader.load("/login.html");
         return HttpResponse.builder()
                 .ok()
                 .contentType(ContentType.TEXT_HTML)
                 .body(new String(body))
                 .build();
+    }
+
+    private void logUser(String account, String password) {
+        if (account == null) {
+            return;
+        }
+        Optional<User> verifiedUser = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+        if (verifiedUser.isPresent()) {
+            log.info("Verified user: {}", verifiedUser);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.coyote.response;
 
+import com.techcourse.exception.UncheckedServletException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,6 +14,7 @@ public class HttpResponse {
 
     private static final String JSESSIONID = "JSESSIONID";
     private static final String SET_COOKIE = "Set-Cookie";
+    private static final String NOT_FOUND_FILENAME = "404.html";
 
     private final HttpStatusCode httpStatusCode;
     private final HttpHeader responseHeader;
@@ -33,11 +35,19 @@ public class HttpResponse {
             fileName += ".html";
         }
 
-        return new HttpResponse(
-                httpStatusCode,
-                FILE_READER.read(fileName),
-                ContentType.fromFileName(fileName)
-        );
+        try {
+            return new HttpResponse(
+                    httpStatusCode,
+                    FILE_READER.read(fileName),
+                    ContentType.fromFileName(fileName)
+            );
+        } catch (UncheckedServletException e) {
+            return new HttpResponse(
+                    HttpStatusCode.NOT_FOUND,
+                    FILE_READER.read(NOT_FOUND_FILENAME),
+                    ContentType.fromFileName(fileName)
+            );
+        }
     }
 
     public static HttpResponse redirectTo(String path) {

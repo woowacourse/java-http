@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final ClassLoader classLoader = Http11Processor.class.getClassLoader();
 
     private final Socket connection;
 
@@ -37,8 +36,8 @@ public class Http11Processor implements Runnable, Processor {
             log.info("request: {}", request);
 
             if (request.getMethod() == HttpMethod.GET) {
-                String indexFileName = classLoader.getResource("static/" + request.getUri()).getFile();
-                String responseBody = new String(Files.readAllBytes(Paths.get(indexFileName)));
+                byte[] resource = StaticResourceLoader.load(request.getUri());
+                String responseBody = new String(resource);
                 HttpResponse response = HttpResponse.builder()
                         .ok()
                         .contentType(ContentType.TEXT_HTML)

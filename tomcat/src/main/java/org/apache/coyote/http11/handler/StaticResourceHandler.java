@@ -7,6 +7,7 @@ import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.request.Method;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Content;
+import org.apache.coyote.http11.response.Response;
 
 public class StaticResourceHandler implements RequestHandler {
 
@@ -18,12 +19,7 @@ public class StaticResourceHandler implements RequestHandler {
 
         try {
             Content content = getContent(request);
-            return String.join("\r\n",
-                    String.format("%s 200 OK ", request.getHttpVersion()),
-                    String.format("Content-Type: %s;charset=utf-8 ", content.getContentType()),
-                    "Content-Length: " + content.getContent().getBytes().length + " ",
-                    "",
-                    content.getContent());
+            return Response.writeResponse(request, content.getContentType(), content.getContent());
         } catch (NoSuchFileException e) {
             return null;
         }

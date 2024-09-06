@@ -9,5 +9,6 @@ server:
     accept-count: 1
     max-connections: 1
     threads:
+      min-spare: 2
       max: 2
       min-spare: 2

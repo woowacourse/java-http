@@ -6,7 +6,6 @@ import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.handler.HandlerMapping;
-import org.apache.coyote.view.ModelAndView;
 import org.apache.coyote.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +47,8 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(HttpRequest request) throws IOException {
         Controller controller = handlerMapping.getController(request.header());
         if (controller != null) {
-            ModelAndView modelAndView = controller.process(request);
-            return viewResolver.resolve(modelAndView.getView());
+            HttpResponse httpResponse = controller.process(request);
+            return httpResponse.toString();
         }
 
         return viewResolver.resolve(request.header());

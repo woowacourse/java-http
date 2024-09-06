@@ -13,8 +13,22 @@ public class LoginHandler extends AbstractRequestHandler {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        if (alreadyLoggedIn(request, response)) return;
+
         response.setStaticResourceResponse("/login.html");
         response.write();
+    }
+
+    private static boolean alreadyLoggedIn(HttpRequest request, HttpResponse response) {
+        Session session = request.getSession(false);
+        boolean sessionAndUserExists = session != null && session.getAttribute("user") != null;
+
+        if (sessionAndUserExists) {
+            response.sendRedirect("/index.html");
+            response.write();
+            return true;
+        }
+        return false;
     }
 
     @Override

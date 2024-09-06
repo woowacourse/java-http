@@ -7,7 +7,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -39,6 +43,36 @@ class LoginHandlerTest {
                 "",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())
                 ));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("GET '/login' 요청 시 로그인 상태이면 '/index.html'로 리다이렉트한다.")
+    void login_already_logged_in() {
+        // given
+        Session session = saveSession();
+
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Cookie: JSESSIONID=" + session.getId(),
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
+                "Content-Length: 0 ",
+                "",
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -96,5 +130,16 @@ class LoginHandlerTest {
                 "");
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private static Session saveSession() {
+        User user = new User("account", "password", "example@gmail.com");
+        InMemoryUserRepository.save(user);
+
+        Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+
+        return session;
     }
 }

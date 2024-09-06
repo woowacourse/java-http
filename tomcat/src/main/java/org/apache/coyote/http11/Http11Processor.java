@@ -4,13 +4,9 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HtmlReader htmlReader = HtmlReader.getInstance();
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
@@ -54,15 +51,13 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> responseCookies = new HashMap<>();
 
             if (path.endsWith(".html")) {
-                String fileName = "static" + path;
-                responseBody = getHtmlResponseBody(fileName);
+                responseBody = htmlReader.loadHtmlAsString(path);
             } else if (path.endsWith(".css") || path.endsWith(".js")) {
                 contentType = "text/css";
                 if (path.endsWith(".js")) {
                     contentType = "application/javascript";
                 }
-                String fileName = "static" + path;
-                responseBody = getHtmlResponseBody(fileName);
+                responseBody = htmlReader.loadHtmlAsString(path);
             } else if (path.startsWith("/login")) {
                 if (httpMethod == HttpMethod.POST) {
                     HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
@@ -83,8 +78,8 @@ public class Http11Processor implements Runnable, Processor {
                     UUID uuid = UUID.randomUUID();
                     responseCookies.put("JSESSIONID", uuid.toString());
                 } else if (httpMethod == HttpMethod.GET) {
-                    String fileName = "static/login.html";
-                    responseBody = getHtmlResponseBody(fileName);
+                    String fileName = "login.html";
+                    responseBody = htmlReader.loadHtmlAsString(fileName);
                 }
             } else if (path.equals("/register")) {
                 if (httpMethod == HttpMethod.POST) {
@@ -101,8 +96,8 @@ public class Http11Processor implements Runnable, Processor {
                         redirectUrl = "/400.html";
                     }
                 } else if (httpMethod == HttpMethod.GET) {
-                    String fileName = "static/register.html";
-                    responseBody = getHtmlResponseBody(fileName);
+                    String fileName = "register.html";
+                    responseBody = htmlReader.loadHtmlAsString(fileName);
                 }
             }
 
@@ -127,23 +122,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getHtmlResponseBody(String fileName) throws IOException {
-        URL url = getClass().getClassLoader().getResource(fileName);
-        if (url != null) {
-            File file = new File(url.getFile());
-            Path path = file.toPath();
-
-            StringBuilder htmlContent = new StringBuilder();
-            try (BufferedReader htmlBufferedReader = new BufferedReader(new FileReader(path.toString()))) {
-                String line;
-                while ((line = htmlBufferedReader.readLine()) != null) {
-                    htmlContent.append(line).append("\n");
-                }
-            }
-            return htmlContent.toString();
-        }
-        return "Hello world!";
     }
 }

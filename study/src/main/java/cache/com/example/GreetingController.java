@@ -1,6 +1,7 @@
 package cache.com.example;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.UUID;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -24,12 +25,12 @@ public class GreetingController {
                 .cachePrivate()
                 .getHeaderValue();
         response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/etag")
     public String etag() {
-        return "index";
+        return "index.html";
     }
 
     @GetMapping("/resource-versioning")

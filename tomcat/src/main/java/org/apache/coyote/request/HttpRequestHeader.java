@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 
 public class HttpRequestHeader {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
-
     private final Map<String, List<String>> values;
 
     public HttpRequestHeader(Map<String, List<String>> values) {
@@ -15,8 +13,8 @@ public class HttpRequestHeader {
     }
 
     public int getContentLength() {
-        if (values.containsKey(CONTENT_LENGTH)) {
-            return Integer.parseInt(values.get(CONTENT_LENGTH).getFirst());
+        if (values.containsKey("Content-Length")) {
+            return Integer.parseInt(values.get("Content-Length").getFirst());
         }
         return 0;
     }

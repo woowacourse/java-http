@@ -29,4 +29,8 @@ public class RequestHeaders {
     public Map<String, String> getHeaders() {
         return headers;
     }
+
+    public String getCookieString() {
+        return getHeader("Cookie");
+    }
 }

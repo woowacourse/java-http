@@ -7,7 +7,7 @@ import com.techcourse.model.User;
 
 public class UserService {
 
-    public UserResponse login(String id, String password) {
+    public User login(String id, String password) {
         User user = InMemoryUserRepository.findByAccount(id)
                 .orElseThrow(() -> new AuthenticationException("사용자를 찾을 수 없습니다."));
 
@@ -15,17 +15,15 @@ public class UserService {
             throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
         }
 
-        return UserResponse.from(user);
+        return user;
     }
 
-    public UserResponse register(String account, String email, String password) {
+    public User register(String account, String email, String password) {
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(user -> {
                     throw new DuplicatedException("이미 존재하는 계정입니다.");
                 });
 
-        User saved = InMemoryUserRepository.save(new User(account, email, password));
-
-        return UserResponse.from(saved);
+        return InMemoryUserRepository.save(new User(account, email, password));
     }
 }

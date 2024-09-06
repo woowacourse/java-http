@@ -2,8 +2,10 @@ package org.apache.coyote.http11.domain.request;
 
 import java.io.IOException;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.domain.HttpMethod;
+import org.apache.coyote.http11.domain.cookie.Cookie;
+import org.apache.coyote.http11.domain.session.Session;
+import org.apache.coyote.http11.domain.session.SessionManager;
 
 public class HttpRequest {
 
@@ -11,24 +13,11 @@ public class HttpRequest {
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
 
-//    public HttpRequest(String requestLine, List<String> headerLines, String body) throws IOException {
-//        validateLineEmpty(requestLine);
-//        this.requestLine = new RequestLine(requestLine);
-//        this.requestHeaders = new RequestHeaders(headerLines);
-//        this.requestBody = new RequestBody(body);
-//    }
-
     public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody)
             throws IOException {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
-    }
-
-    private void validateLineEmpty(String line) {
-        if (StringUtils.isEmpty(line)) {
-            throw new IllegalArgumentException("Line is Empty");
-        }
     }
 
     public HttpMethod getMethod() {
@@ -57,6 +46,23 @@ public class HttpRequest {
 
     public Map<String, String> getParameters() {
         return requestLine.getQueryParameters();
+    }
+
+    public Cookie getCookie() {
+        if (requestHeaders.getCookieString() == null) {
+            return null;
+        }
+        return new Cookie(requestHeaders.getCookieString());
+    }
+
+    public Session getSession() {
+        Cookie cookie = getCookie();
+        if (cookie == null) {
+            return null;
+        }
+        String sessionId = cookie.getValue("JSESSIONID");
+        SessionManager sessionManager = SessionManager.getInstance();
+        return sessionManager.findSession(sessionId);
     }
 
     public String getHttpVersion() {

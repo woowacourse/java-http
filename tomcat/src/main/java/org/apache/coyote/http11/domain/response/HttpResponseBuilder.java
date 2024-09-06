@@ -2,10 +2,12 @@ package org.apache.coyote.http11.domain.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.coyote.http11.domain.cookie.Cookie;
 
 public class HttpResponseBuilder {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, String> responseHeaders = new LinkedHashMap<>();
     private HttpStatus httpStatus;
@@ -36,6 +38,12 @@ public class HttpResponseBuilder {
         this.messageBody = messageBody;
         return this;
     }
+
+    public HttpResponseBuilder setCookie(Cookie cookie) {
+        header(SET_COOKIE, cookie.toCookieString());
+        return this;
+    }
+
 
     public HttpResponse build() {
         return new HttpResponse(httpStatus, responseHeaders, messageBody);

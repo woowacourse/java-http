@@ -1,12 +1,9 @@
 package servlet.http.request;
 
 import java.util.Optional;
-import servlet.http.session.SessionManager;
 import servlet.http.HttpMethod;
 
 public class Request {
-
-    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     private final RequestLine requestLine;
 

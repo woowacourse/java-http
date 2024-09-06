@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.db.InMemoryUserRepository;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +11,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
+
+    public static final String QUERY_PARAMETER = "?";
+    public static final String STATIC = "/static";
+    public static final String HTML = ".html";
+    public static final String CSS = ".css";
+    public static final String JS = ".js";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -38,46 +47,112 @@ public class Http11Processor implements Runnable, Processor {
 
             final String line = bufferedReader.readLine();
 
+            if (line == null) {
+                return;
+            }
+
             final String[] httpRequestLine = line.split(" ");
             final String method = httpRequestLine[0];
             final String requestURL = httpRequestLine[1];
 
-            String contentType = "text/html;charset=utf-8 ";
-            String responseBody = "";
+            String contentType;
+            byte[] responseBody;
 
-            if (requestURL.endsWith(".css")) {
-                contentType = "text/css";
-            }
+            String resourcePath = determineResourcePath(requestURL);
+            contentType = determineContentType(resourcePath);
 
-            if (method.equals("GET") && !requestURL.equals("/")) {
-                URL resource = getClass().getResource("/static" + requestURL);
+            URL resource = getClass().getResource(resourcePath);
 
-                if (resource == null) {
-                    responseBody = "404 Not Found";
-                    contentType = "text/plain";
-                    resource = getClass().getResource("/static/404.html");
-                }
-
-                final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-                responseBody = new String(fileBytes);
-            }
-
-            if (method.equals("GET") && requestURL.equals("/")) {
-                responseBody = "Hello world!";
+            if (resource == null) {
+                responseBody = "404 Not Found".getBytes();
+                contentType = "text/plain";
+            } else {
+                responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
             }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType,
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.length + " ",
                     "",
-                    responseBody);
+                    "");
 
             outputStream.write(response.getBytes());
+            outputStream.write(responseBody);
             outputStream.flush();
 
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String determineResourcePath(String requestURL) {
+        if (requestURL.equals("/") || requestURL.equals("/index.html")) {
+            return "/static/index.html";
+        }
+
+        if (requestURL.contains(QUERY_PARAMETER)) {
+            String path = parseLoginQueryString(requestURL);
+            return STATIC + path + HTML;
+        }
+
+        if (requestURL.endsWith(HTML) || requestURL.endsWith(CSS) || requestURL.endsWith(JS)) {
+            return STATIC + requestURL;
+        }
+
+        return STATIC + requestURL + HTML;
+    }
+
+    private String determineContentType(String resourcePath) {
+        if (resourcePath.endsWith(CSS)) {
+            return "text/css ";
+        }
+
+        if (resourcePath.endsWith(JS)) {
+            return "application/javascript ";
+        }
+
+        return "text/html;charset=utf-8 ";
+    }
+
+    private String parseLoginQueryString(String requestURL) {
+        int index = requestURL.indexOf(QUERY_PARAMETER);
+        findUser(parseUserInfo(requestURL.substring(index + 1)));
+
+        return requestURL.substring(0, index);
+    }
+
+    private Map<String, String> parseUserInfo(String queryString) {
+        Map<String, String> userInfo = new HashMap<>();
+
+        String[] info = queryString.split("&");
+
+        for (String metadata : info) {
+            String[] temp = metadata.split("=");
+            String key = URLDecoder.decode(temp[0]);
+            String value = URLDecoder.decode(temp[1]);
+
+            userInfo.put(key, value);
+        }
+
+        return userInfo;
+    }
+
+    private void findUser(Map<String, String> userInfo) {
+        String account = userInfo.get("account");
+        String password = userInfo.get("password");
+
+        InMemoryUserRepository.findByAccount(account).ifPresent(
+                user -> {
+                    boolean isValidPassword = user.checkPassword(password);
+                    if (isValidPassword) {
+                        log.info("user : {}", user);
+                    }
+
+                    if (!isValidPassword) {
+                        log.info(user.getAccount() + "의 비밀번호가 잘못 입력되었습니다.");
+                    }
+                }
+        );
     }
 }

@@ -38,18 +38,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String path = bufferedReader.readLine().split(" ")[1];
-
-
-            path = updatePath(path);
-
             var responseBody = "Hello world!";
+            String url = bufferedReader.readLine().split(" ")[1];
 
-            if(!path.equals("/")) {
-                URL resource = getClass().getClassLoader().getResource("static" + path);;
-                final Path filePath = new File(resource.getPath()).toPath();
-                responseBody = Files.readString(filePath);
-            }
+            String path = getPathFromUrl(url);
+            responseBody = updateResponseBody(path, responseBody);
 
             String extension = path.split("\\.")[1];
             String contentType = "text/html";
@@ -71,29 +64,41 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String updatePath(String path) {
-        String url = path;
-        String account = "";
-        String password = "";
-
-        if(path.contains("/login")) {
-            if(path.contains("?")) {
-                int index = path.indexOf("?");
-                String queryString = path.substring(index + 1);
-                url = path.substring(0, index);
-                String[] params = queryString.split("&");
-                account = params[0].split("=")[1];
-                password = params[1].split("=")[1];
-            }
-            path += ".html";
-            if(!account.isBlank()) {
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-                if(user.checkPassword(password)) {
-                    log.info(user.toString());
-                }
-            }
+    private String updateResponseBody(String path, String responseBody) throws IOException {
+        if(!path.equals("/")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);;
+            final Path filePath = new File(resource.getPath()).toPath();
+            responseBody = Files.readString(filePath);
         }
-        return path;
+        return responseBody;
+    }
+
+    private static String getPathFromUrl(String path) {
+        String url = path;
+        if(path.contains("/login")) {
+            url = separateQueryString(path, url);
+        }
+        return url;
+    }
+
+    private static String separateQueryString(String path, String url) {
+        if(path.contains("?")) {
+            int index = path.indexOf("?");
+            String queryString = path.substring(index + 1);
+            url = path.substring(0, index) + ".html";
+            validateAccount(queryString);
+        }
+        return url;
+    }
+
+    private static void validateAccount(String queryString) {
+        String[] params = queryString.split("&");
+        String account = params[0].split("=")[1];
+        String password = params[1].split("=")[1];
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        if(user.checkPassword(password)) {
+            log.info(user.toString());
+        }
     }
 }

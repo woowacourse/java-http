@@ -29,6 +29,10 @@ public class HttpCookie {
         }
     }
 
+    public String getJESSIONID() {
+        return cookies.get("JSESSIONID");
+    }
+
     public String getResponse() {
         if (cookies.isEmpty()) {
             return "";
@@ -42,5 +46,9 @@ public class HttpCookie {
                     .append(";");
         }
         return String.valueOf(response);
+    }
+
+    public boolean hasESSIONID() {
+        return cookies.containsKey("JSESSIONID");
     }
 }

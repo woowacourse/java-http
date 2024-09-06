@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,11 @@ public class Http11Processor implements Runnable, Processor {
     public static final String STATIC_PATH = "/static";
 
     private final Socket connection;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionManager = new SessionManager();
     }
 
     @Override
@@ -70,29 +73,38 @@ public class Http11Processor implements Runnable, Processor {
                 }
                 if (uri.startsWith("/login")) {
                     contentType = "text/html; charset=utf-8 ";
-
-                    int index = uri.indexOf("?");
-                    if (index == -1) { // 쿼리 파라미터가 없는 경우
-                        statusCode = "200 OK";
-                        path = Path.of(getClass().getResource(STATIC_PATH + "/login.html").getPath());
+                    // session이 있는 경우 다른 설정은 하지 않고, 쿠키에 그 세션 아이디를 넣어주고 리다이렉션한다.
+                    if (header.containsKey("Cookie") && cookie.hasESSIONID() && sessionManager.isSessionExist(cookie.getJESSIONID())) {
+                        statusCode = "302 FOUND ";
+                        location = "/index.html";
                     }
-                    if (index != -1) { // 쿼리 파라미터가 있는 경우
-                        String queryString = uri.substring(index + 1);
-                        String[] userInfo = queryString.split("&");
-                        String account = userInfo[0].split("=")[1];
-                        String password = userInfo[1].split("=")[1];
-                        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                        if (!user.isPresent()
-                            || (user.isPresent() && !user.get().checkPassword(password))) {
-                            statusCode = "401 UNAUTHORIZED ";
-                            path = Path.of(getClass().getResource(STATIC_PATH + "/401.html").getPath());
+                    if (!header.containsKey("Cookie") || !cookie.hasESSIONID() || !sessionManager.isSessionExist(cookie.getJESSIONID())) {
+                        int index = uri.indexOf("?");
+                        if (index == -1) { // 쿼리 파라미터가 없는 경우
+                            statusCode = "200 OK";
+                            path = Path.of(getClass().getResource(STATIC_PATH + "/login.html").getPath());
                         }
-                        if (user.isPresent() && user.get().checkPassword(password)) {
-                            log.info(user.get().toString());
-                            statusCode = "302 FOUND ";
-                            location = "/index.html";
+                        if (index != -1) { // 쿼리 파라미터가 있는 경우
+                            String queryString = uri.substring(index + 1);
+                            String[] userInfo = queryString.split("&");
+                            String account = userInfo[0].split("=")[1];
+                            String password = userInfo[1].split("=")[1];
+                            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                            if (!user.isPresent()
+                                || (user.isPresent() && !user.get().checkPassword(password))) {
+                                statusCode = "401 UNAUTHORIZED ";
+                                path = Path.of(getClass().getResource(STATIC_PATH + "/401.html").getPath());
+                            }
+                            if (user.isPresent() && user.get().checkPassword(password)) {
+                                log.info(user.get().toString());
+                                statusCode = "302 FOUND ";
+                                location = "/index.html";
 
-                            cookie.setJSESSIONID();
+                                cookie.setJSESSIONID();
+                                Session session = new Session(cookie.getJESSIONID());
+                                session.setAttribute("user", user.get());
+                                sessionManager.add(new Session(cookie.getJESSIONID()));
+                            }
                         }
                     }
                 }

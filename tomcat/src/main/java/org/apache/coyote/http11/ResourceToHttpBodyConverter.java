@@ -24,8 +24,8 @@ public class ResourceToHttpBodyConverter {
         String responseBody = String.join(LINE_FEED, Files.readAllLines(path)) + LINE_FEED;
 
         HttpResponse response = HttpResponse.of(HttpStatus.OK, responseBody);
-        String mimeType = probeContentType(path);
-        response.setHeader("Content-Type", mimeType);
+        String contentType = probeContentType(path);
+        response.setHeader("Content-Type", contentType);
 
         return response;
     }

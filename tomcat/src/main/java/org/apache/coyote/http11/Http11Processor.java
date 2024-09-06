@@ -98,59 +98,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void loginUser(String httpRequestBody, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
-        User user = getUser(httpRequestBody);
-        if (user == null) {
-            httpResponseHeader.put("Location", "/401.html");
-            return;
-        }
-        String password = getUserInformation(httpRequestBody).get("password");
-        if (user.checkPassword(password)) {
-            processCookie(user, httpRequestHeader, httpResponseHeader);
-        } else if (!user.checkPassword(password)) {
-            httpResponseHeader.put("Location", "/401.html");
-        }
-    }
-
-    private boolean isAlreadyLogin(Map<String, String> httpRequestHeader) {
-        SessionManager sessionManager = SessionManager.getInstance();
-        String sessionId = getSession(httpRequestHeader);
-        if (sessionId.isEmpty()) {
-            return false;
-        }
-        Session session = sessionManager.findSession(sessionId);
-
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void processCookie(User user, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
-        final SessionManager sessionManager = SessionManager.getInstance();
-        final String sessionId = getSession(httpRequestHeader);
-
-        if (!sessionId.isEmpty()) {
-            return;
-        }
-        String newSessionId = UUID.randomUUID().toString();
-        Session session = new Session(newSessionId);
-        session.setAttribute("user", user);
-        sessionManager.add(session);
-        httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSessionId);
-    }
-
-    private String getSession(Map<String, String> httpRequestHeader) {
-        if (httpRequestHeader.containsKey("Cookie")) {
-            HttpCookie httpCookie = new HttpCookie(httpRequestHeader.get("Cookie"));
-            return httpCookie.getJSessionId();
-        }
-        return "";
-    }
-
     private Map<String, String> readHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> httpRequestHeader = new HashMap<>();
 
@@ -176,6 +123,50 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
+    private void loginUser(String httpRequestBody, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        User user = getUser(httpRequestBody);
+        if (user == null) {
+            httpResponseHeader.put("Location", "/401.html");
+            return;
+        }
+        String password = getUserInformation(httpRequestBody).get("password");
+        if (user.checkPassword(password)) {
+            processCookie(user, httpRequestHeader, httpResponseHeader);
+        } else if (!user.checkPassword(password)) {
+            httpResponseHeader.put("Location", "/401.html");
+        }
+    }
+
+    private void saveUser(String queryString) {
+        Map<String, String> userInformation = getUserInformation(queryString);
+
+        if (!userInformation.containsKey("account") || !userInformation.containsKey("password") || !userInformation.containsKey("email")) {
+            return;
+        }
+
+        String account = userInformation.get("account");
+        String password = userInformation.get("password");
+        String email = userInformation.get("email");
+
+        User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
+    }
+
+    private void processCookie(User user, Map<String, String> httpRequestHeader, Map<String, String> httpResponseHeader) {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final String sessionId = getSession(httpRequestHeader);
+
+        if (!sessionId.isEmpty()) {
+            return;
+        }
+        String newSessionId = UUID.randomUUID().toString();
+        Session session = new Session(newSessionId);
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        httpResponseHeader.put("Set-Cookie", "JSESSIONID=" + newSessionId);
+    }
+
     private String makeHttpResponseHeader(Map<String, String> httpResponseHeader, String responseBody) {
         StringBuilder response = new StringBuilder();
         String statusLine = "HTTP/1.1 " + httpResponseHeader.get("Status") + " \r\n";
@@ -189,6 +180,31 @@ public class Http11Processor implements Runnable, Processor {
         response.append(responseBody);
 
         return response.toString();
+    }
+
+    private boolean isAlreadyLogin(Map<String, String> httpRequestHeader) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        String sessionId = getSession(httpRequestHeader);
+        if (sessionId.isEmpty()) {
+            return false;
+        }
+        Session session = sessionManager.findSession(sessionId);
+
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getSession(Map<String, String> httpRequestHeader) {
+        if (httpRequestHeader.containsKey("Cookie")) {
+            HttpCookie httpCookie = new HttpCookie(httpRequestHeader.get("Cookie"));
+            return httpCookie.getJSessionId();
+        }
+        return "";
     }
 
     private boolean isHttpMethod(Map<String, String> httpRequestHeader, final String httpMethod) {
@@ -208,22 +224,6 @@ public class Http11Processor implements Runnable, Processor {
         }
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(userInformation.get("account"));
         return optionalUser.orElse(null);
-    }
-
-    private void saveUser(String queryString) {
-        Map<String, String> userInformation = getUserInformation(queryString);
-
-        if (!userInformation.containsKey("account") || !userInformation.containsKey("password") || !userInformation.containsKey("email")) {
-            return;
-        }
-
-        String account = userInformation.get("account");
-        String password = userInformation.get("password");
-        String email = userInformation.get("email");
-
-        User user = new User(account, password, email);
-
-        InMemoryUserRepository.save(user);
     }
 
     private Map<String, String> getUserInformation(String queryString) {

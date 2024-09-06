@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.File;
+import com.techcourse.model.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,12 +10,11 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 import org.apache.coyote.Processor;
-import org.apache.coyote.parsher.QueryParser;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.QueryParameters;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.util.FileTypeChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,35 +54,35 @@ public class Http11Processor implements Runnable, Processor {
 
     private void handle(HttpRequest request, HttpResponse response) throws IOException {
         try {
-            String endpoint = request.getEndpoint();
             HttpMethod method = request.getMethod();
-            if (method == HttpMethod.GET && "/".equals(endpoint)) {
-                getView("/index.html", response);
+            String targetPath = request.getTargetPath();
+            QueryParameters queryParameters = request.getTargetQueryParameters();
+            if (method.isGet() && "/".equals(targetPath)) {
+                getView("index.html", response);
                 return;
             }
-            if (method == HttpMethod.GET && "/index.html".equals(endpoint)) {
-                getView("/index.html", response);
-                return;
-            }
-            if (method == HttpMethod.GET && "/login".equals(endpoint)) {
-                getView("/login.html", response);
-                return;
-            }
-            if (method == HttpMethod.POST && "/login".equals(endpoint)) {
+            if (method == HttpMethod.GET && "/login".equals(targetPath) && queryParameters.hasParameters()) {
                 login(request, response);
                 return;
             }
-            getView("/401.html", response);
+            if (method == HttpMethod.GET && FileTypeChecker.isSupported(targetPath)) {
+                getView(targetPath, response);
+                return;
+            }
+            if (method == HttpMethod.GET && "/login".equals(targetPath)) {
+                getView("login.html", response);
+                return;
+            }
         } catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error("요청을 처리할 수 없습니다. detail : {}", exception.getMessage());
             getView("/404.html", response);
         }
     }
 
-    private void getView(String request, HttpResponse response) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + request);
+    private void getView(String fileName, HttpResponse response) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
         if (resource == null) {
-            throw new IllegalArgumentException("유효하지 하지 않은 요청 입니다.");
+            throw new IllegalArgumentException(fileName + "  파일이 존재하지 않습니다.");
         }
         Path path = Path.of(resource.getPath());
         String contentType = Files.probeContentType(path);
@@ -92,13 +91,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void login(HttpRequest request, HttpResponse response) throws IOException {
-        String body = request.getBody();
-        Map<String, List<String>> queryStrings = QueryParser.parse(body);
-        String account = queryStrings.get("account").getFirst();
-
-        InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다."));
-
-        getView("/index.html", response);
+        String account = request.getTargetQueryParameters().getValueBy("account");
+        String password = request.getTargetQueryParameters().getValueBy("password");
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseGet(() -> {
+                    log.debug("{} - 존재하지 않는 회원의 로그인 요청", account);
+                    throw new IllegalArgumentException("존재하지 않는 회원 입니다.");
+                });
+        if (!user.checkPassword(password)) {
+            log.debug("회원과 일치하지 않는 비밀번호 - 회원 정보 : {}, 입력한 비밀번호 {}", user, password);
+            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        }
+        log.info("{} - 회원 로그인 성공", user);
+        getView("index.html", response);
     }
 }

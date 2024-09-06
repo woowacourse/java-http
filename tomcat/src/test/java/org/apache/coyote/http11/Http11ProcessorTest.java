@@ -131,6 +131,43 @@ class Http11ProcessorTest {
         );
     }
 
+    @DisplayName("GET /login 헤더에 유효하지 않은 jsessionId가 오면 login.html을 반환한다.")
+    @Test
+    void invalidJsessionLogin() throws IOException {
+        // given
+        Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
+        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=invalidJsessionId ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        byte[] fileContent = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + fileContent.length + " \r\n" +
+                "\r\n" +
+                new String(fileContent);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     @DisplayName("올바른 회원 정보와 함께 로그인 요청이 오면 쿠키를 설정해주고 /index.html로 리다이렉트한다.")
     @Test
     void login() {

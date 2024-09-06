@@ -66,9 +66,8 @@ public class Http11Processor implements Runnable, Processor {
                     HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
                     String jsessionId = httpCookie.get("JSESSIONID");
                     if (jsessionId != null) {
-                        // TODO: 올바르지 않은 jsessionId가 왔을 때, 대처하기 위한 분기처리
                         Session session = sessionManager.findSession(jsessionId);
-                        if (session.isExistAttribute("user")) {
+                        if (session != null && session.isExistAttribute("user")) {
                             writeRedirectResponse("/index.html", outputStream);
                             return;
                         }

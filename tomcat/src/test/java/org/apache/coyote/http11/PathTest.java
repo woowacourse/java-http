@@ -23,7 +23,7 @@ class PathTest {
         assertAll(
                 () -> assertThat(request.getUrl().getPath()).endsWith(path),
                 () -> assertThat(request.getExtension()).isEqualTo(expected),
-                () -> assertThat(request.getQueryString()).isEmpty()
+                () -> assertThat(request.getRequestParam()).isEmpty()
         );
     }
 
@@ -38,6 +38,6 @@ class PathTest {
         final var expected = Map.of("account", "redddy", "password", "password");
 
         //then
-        assertThat(request.getQueryString()).isEqualTo(expected);
+        assertThat(request.getRequestParam()).isEqualTo(expected);
     }
 }

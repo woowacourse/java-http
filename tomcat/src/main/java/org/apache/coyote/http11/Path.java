@@ -11,7 +11,7 @@ public class Path {
     private final String value;
     private final URL url;
     private final String extension;
-    private final Map<String, String> queryString; //TODO request Param?
+    private final Map<String, String> requestParam;
 
     public Path(final String target) {
         this.value = target;
@@ -19,11 +19,11 @@ public class Path {
             this.url = getClass().getClassLoader()
                     .getResource("static" + target.substring(0, target.indexOf("?")) + ".html");
             final var query = target.substring(target.indexOf('?') + 1);
-            this.queryString = new HashMap<>();
+            this.requestParam = new HashMap<>();
             final var queryParams = query.split("&");
             for (final var param : queryParams) {
                 final var pair = param.split("=");
-                this.queryString.put(pair[0], pair[1]);
+                this.requestParam.put(pair[0], pair[1]);
             }
             this.extension = "html";
             return;
@@ -31,12 +31,12 @@ public class Path {
         if (target.contains(".")) {
             this.url = getClass().getClassLoader().getResource("static" + target);
             this.extension = target.substring(target.lastIndexOf(".") + 1);
-            this.queryString = new HashMap<>();
+            this.requestParam = new HashMap<>();
             return;
         }
         this.url = getClass().getClassLoader().getResource("static" + target + ".html");
         this.extension = "html";
-        this.queryString = new HashMap<>();
+        this.requestParam = new HashMap<>();
     }
 
     public boolean isEqualPath(final String target) {
@@ -62,8 +62,8 @@ public class Path {
         return extension;
     }
 
-    public Map<String, String> getQueryString() {
-        return Collections.unmodifiableMap(queryString);
+    public Map<String, String> getRequestParam() {
+        return Collections.unmodifiableMap(requestParam);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class Path {
         return "Path{" +
                "value=" + value +
                ", extension='" + extension + '\'' +
-               ", queryString=" + queryString +
+               ", queryString=" + requestParam +
                '}';
     }
 }

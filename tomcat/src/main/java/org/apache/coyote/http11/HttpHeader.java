@@ -27,4 +27,9 @@ public class HttpHeader {
     public Map<String, Object> getFields() {
         return Collections.unmodifiableMap(fields);
     }
+
+    @Override
+    public String toString() {
+        return fields.toString();
+    }
 }

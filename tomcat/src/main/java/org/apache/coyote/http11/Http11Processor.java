@@ -3,21 +3,15 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -45,20 +39,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            final var requestLine = br.readLine();
-            log.info("request line: {}", requestLine);
-
-            if (requestLine == null) {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            final var request = HttpRequest.from(reader);
+            if (request.getRequestLine() == null) {
                 return;
             }
 
-            final var requestLineTokens = requestLine.split(" ");
-            final var method = requestLineTokens[0];
-            final var url = requestLineTokens[1];
+            log.info("request line: {}", request.getRequestLine());
+
+            final var method = request.getRequestMethod();
+            final var url = request.getRequestPath();
 
             if ("/".equals(url)) {
-                build200Response(outputStream, "text/html", "Hello world!");
+                outputStream.write(HttpResponse.ok("text/html", "Hello world!"));
             }
             if ("/index.html".equals(url)) {
                 buildHtmlResponse(outputStream, url);
@@ -72,27 +65,17 @@ public class Http11Processor implements Runnable, Processor {
             if (url.matches("/assets/.*\\.js")) {
                 buildScriptResponse(outputStream, url);
             }
-            if ("/login".equals(url) && "GET".equals(method) && !isLogin(br, outputStream)) {
+            if ("/login".equals(url) && "GET".equals(method) && !isLogin(request, outputStream)) {
                 buildHtmlResponse(outputStream, url + ".html");
             }
             if ("/login".equals(url) && "POST".equals(method)) {
-                final var httpRequestHeaders = parseHttpHeaders(br);
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-
-                login(outputStream, new String(buffer));
+                login(outputStream, request);
             }
             if ("/register".equals(url) && "GET".equals(method)) {
                 buildHtmlResponse(outputStream, url + ".html");
             }
             if ("/register".equals(url) && "POST".equals(method)) {
-                final var httpRequestHeaders = parseHttpHeaders(br);
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-
-                register(outputStream, new String(buffer));
+                register(outputStream, request);
             }
 
             outputStream.flush();
@@ -101,27 +84,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private boolean isLogin(final BufferedReader br, final OutputStream outputStream) throws IOException {
-        final var httpRequestHeaders = parseHttpHeaders(br);
-        if (httpRequestHeaders.containsKey("Cookie")) {
-            final var cookies = parseCookie(httpRequestHeaders.get("Cookie"));
-            return cookies.containsKey("JSESSIONID") && hasSession(outputStream, cookies);
-        }
-        return false;
+    private boolean isLogin(final HttpRequest request, final OutputStream outputStream) throws IOException {
+        final var cookies = request.getCookies();
+        return cookies.containsKey("JSESSIONID") && hasSession(outputStream, cookies);
     }
 
     private boolean hasSession(final OutputStream outputStream, final Map<String, String> cookies) throws IOException {
         final var sessionId = cookies.get("JSESSIONID");
         if (SessionManager.findSession(sessionId) != null) {
-            build302Response(outputStream, "/index.html");
+            outputStream.write(HttpResponse.found("/index.html"));
             outputStream.flush();
             return true;
         }
         return false;
     }
 
-    private void login(final OutputStream outputStream, final String queryString) throws IOException {
-        Map<String, String> params = parseRequestString(queryString);
+    private void login(final OutputStream outputStream, final HttpRequest request) throws IOException {
+        Map<String, String> params = request.parseRequestQuery();
 
         if (InMemoryUserRepository.findByAccount(params.get("account")).isEmpty()) {
             buildHtmlResponse(outputStream, "/401.html");
@@ -137,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpCookie cookie = new HttpCookie("JSESSIONID=" + id);
             log.info("cookie: {}", cookie.getCookieValue("JSESSIONID"));
-            build302Response(outputStream, "/index.html", cookie);
+            outputStream.write(HttpResponse.found("/index.html", cookie));
             log.info("user: {}", user);
             return;
         }
@@ -145,42 +124,13 @@ public class Http11Processor implements Runnable, Processor {
         buildHtmlResponse(outputStream, "/401.html");
     }
 
-    private void register(final OutputStream outputStream, final String requestBody) {
-        final Map<String, String> userInfos = parseRequestString(requestBody);
+    private void register(final OutputStream outputStream, final HttpRequest request) throws IOException {
+        final Map<String, String> userInfos = request.parseRequestQuery();
 
         final User user = new User(userInfos.get("account"), userInfos.get("password"), userInfos.get("email"));
         InMemoryUserRepository.save(user);
 
-        build302Response(outputStream, "/index.html");
-    }
-
-    private Map<String, String> parseHttpHeaders(final BufferedReader reader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        var header = reader.readLine();
-
-        while (!"".equals(header)) {
-            final var tokens = header.split(": ");
-            headers.put(tokens[0], tokens[1]);
-            header = reader.readLine();
-        }
-
-        return headers;
-    }
-
-    private Map<String, String> parseCookie(final String cookieString) {
-        final var params = cookieString.split("; ");
-
-        return Arrays.stream(params)
-                .map(param -> param.split("="))
-                .collect(Collectors.toMap(token -> token[0], token -> token[1]));
-    }
-
-    private Map<String, String> parseRequestString(final String requestString) {
-        final var params = requestString.split("&");
-
-        return Arrays.stream(params)
-                .map(param -> param.split("="))
-                .collect(Collectors.toMap(token -> token[0], token -> token[1]));
+        outputStream.write(HttpResponse.found("/index.html"));
     }
 
     private String buildResponseBodyFromStaticFile(final String fileName) throws IOException {
@@ -193,55 +143,18 @@ public class Http11Processor implements Runnable, Processor {
     private void buildHtmlResponse(final OutputStream outputStream, final String fileName) throws IOException {
         final var responseBody = buildResponseBodyFromStaticFile(fileName);
 
-        build200Response(outputStream, "text/html", responseBody);
+        outputStream.write(HttpResponse.ok("text/html", responseBody));
     }
 
     private void buildStyleSheetResponse(final OutputStream outputStream, final String fileName) throws IOException {
         final var responseBody = buildResponseBodyFromStaticFile(fileName);
 
-        build200Response(outputStream, "text/css", responseBody);
+        outputStream.write(HttpResponse.ok("text/css", responseBody));
     }
 
     private void buildScriptResponse(final OutputStream outputStream, final String fileName) throws IOException {
         final var responseBody = buildResponseBodyFromStaticFile(fileName);
 
-        build200Response(outputStream, "text/javascript", responseBody);
-    }
-
-    private void build200Response(final OutputStream outputStream, final String fileType, final String responseBody) {
-        try (final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(bufferedOutputStream))) {
-            writer.write("HTTP/1.1 200 OK \r\n");
-            writer.write("Content-Type: " + fileType + ";charset=utf-8 \r\n");
-            writer.write("Content-Length: " + responseBody.getBytes().length + " \r\n");
-            writer.write("\r\n");
-            writer.write(responseBody);
-            writer.write("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void build302Response(final OutputStream outputStream, final String location) {
-        try (final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(bufferedOutputStream))) {
-            writer.write("HTTP/1.1 302 Found \r\n");
-            writer.write("Location: " + location + " \r\n");
-            writer.write("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void build302Response(final OutputStream outputStream, final String location, final HttpCookie cookie) {
-        try (final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
-             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(bufferedOutputStream))) {
-            writer.write("HTTP/1.1 302 Found \r\n");
-            writer.write("Set-Cookie: JSESSIONID=" + cookie.getCookieValue("JSESSIONID") + " \r\n");
-            writer.write("Location: " + location + " \r\n");
-            writer.write("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+        outputStream.write(HttpResponse.ok("text/javascript", responseBody));
     }
 }

@@ -41,8 +41,14 @@ public class HttpResponseBuilder {
         return statusCode(StatusCode.CREATED);
     }
 
+    public HttpResponseBuilder found(String location) {
+        headers.put("Location", location);
+        return statusCode(StatusCode.FOUND);
+    }
+
     public HttpResponse build() {
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        long contentLength = body == null ? 0 : body.getBytes().length;
+        headers.put("Content-Length", String.valueOf(contentLength));
         return new HttpResponse(headers, statusCode, body);
     }
 }

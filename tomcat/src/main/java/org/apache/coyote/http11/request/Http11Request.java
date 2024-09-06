@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.catalina.Cookie;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,29 +21,41 @@ public class Http11Request {
     private final Http11RequestHeaders header;
     private final String uri;
     private final Map<String, String> queryParameters;
+    private final Http11RequestBody requestBody;
 
-    public Http11Request(Http11RequestMethod method, Http11RequestHeaders header, String uri, Map<String, String> queryParameters) {
+    public Http11Request(Http11RequestMethod method, Http11RequestHeaders header, String uri, Map<String, String> queryParameters, Http11RequestBody requestBody) {
         this.method = method;
         this.header = header;
         this.uri = uri;
         this.queryParameters = queryParameters;
+        this.requestBody = requestBody;
     }
 
     public static Http11Request from(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
         assert protocol.equals(firstLine[2]);
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while (!Objects.equals(line = br.readLine(), "")) {
-            sb.append(line).append(System.lineSeparator());
+        StringBuilder headerSb = new StringBuilder();
+        String headerLine;
+        while (!Objects.equals(headerLine = br.readLine(), "")) {
+            headerSb.append(headerLine).append(System.lineSeparator());
+        }
+        Http11RequestHeaders http11RequestHeaders = Http11RequestHeaders.from(headerSb.toString());
+
+        Http11RequestBody body = null;
+        if (http11RequestHeaders.contains("Content-Length")) {
+            int contentLength = Integer.parseInt(http11RequestHeaders.get("Content-Length").trim());
+            char[] buffer = new char[contentLength];
+            br.read(buffer, 0, contentLength);
+            body = Http11RequestBody.from(new String(buffer));
         }
 
         return new Http11Request(
                 Http11RequestMethod.from(firstLine[0]),
-                Http11RequestHeaders.from(sb.toString()),
-                firstLine[1].split("\\?")[0],
-                Http11RequestParser.parseQuery(firstLine[1]));
+                http11RequestHeaders,
+                firstLine[1], //.split("\\?")[0],
+                Http11RequestParser.parseQuery(firstLine[1]),
+                body);
     }
 
     public boolean isStaticRequest() {
@@ -56,6 +69,16 @@ public class Http11Request {
         return false;
     }
 
+    public List<Cookie> getCookies() {
+        List<Cookie> cookies = new ArrayList<>();
+        for (String cookieString : header.get("Cookie").split(";")) {
+            String[] keyValue = cookieString.split("=");
+            assert keyValue.length == 2;
+            cookies.add(new Cookie(keyValue[0], keyValue[1]));
+        }
+        return cookies;
+    }
+
     public Http11RequestMethod getMethod() {
         return method;
     }
@@ -66,6 +89,14 @@ public class Http11Request {
 
     public Map<String, String> getQueryParameters() {
         return Map.copyOf(queryParameters);
+    }
+
+    public Http11RequestBody getRequestBody() {
+        return requestBody;
+    }
+
+    public Http11RequestHeaders getHeader() {
+        return header;
     }
 
     private static class Http11RequestParser {
@@ -88,20 +119,16 @@ public class Http11Request {
             }
             return queryMap;
         }
+    }
 
-        static List<Http11Accept> parseAccept(String accept) {
-            if (!accept.startsWith("Accept :")) {
-                return Collections.emptyList();
-            }
-            List<Http11Accept> list = new ArrayList<>();
-
-            String mediaRange = accept.split(";")[0];
-            for (String media : mediaRange.split(",")) {
-                Http11Accept http11Accept = Http11Accept.from(media);
-                if (http11Accept != null) list.add(http11Accept);
-            }
-
-            return list;
-        }
+    @Override
+    public String toString() {
+        return "Http11Request{" +
+                "method=" + method +
+                ", header=" + header +
+                ", uri='" + uri + '\'' +
+                ", queryParameters=" + queryParameters +
+                ", requestBody=" + requestBody +
+                '}';
     }
 }

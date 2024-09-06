@@ -22,4 +22,12 @@ public class Http11RequestHeaders {
 
         return new Http11RequestHeaders(map);
     }
+
+    public String get(String key) {
+        return headerMap.get(key);
+    }
+
+    public boolean contains(String key) {
+        return headerMap.containsKey(key);
+    }
 }

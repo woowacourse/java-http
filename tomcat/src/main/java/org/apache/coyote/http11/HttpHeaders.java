@@ -50,8 +50,8 @@ public class HttpHeaders {
 
             String[] valueParts = value.split("; ");
             for (String valuePart : valueParts) {
-                if (valuePart.startsWith("JSESSION=")) {
-                    return valuePart;
+                if (valuePart.startsWith("JSESSIONID=")) {
+                    return valuePart.substring("JSESSIONID=".length());
                 }
             }
         }

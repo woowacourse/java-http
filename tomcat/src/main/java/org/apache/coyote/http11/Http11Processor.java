@@ -1,21 +1,35 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.NoHandlerException;
+import org.apache.coyote.http11.handler.MethodHandler;
+import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import com.techcourse.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
+    private final List<RequestHandler> requestHandlers;
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
+        this.requestHandlers = List.of(
+                new MethodHandler(),
+                new StaticResourceHandler()
+        );
     }
 
     @Override
@@ -25,23 +39,39 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+    public void process(Socket connection) {
+        try (var inputStream = connection.getInputStream();
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             BufferedReader requestBufferedReader = new BufferedReader(inputStreamReader);
+             var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Request request = Request.parseFrom(getPlainRequest(requestBufferedReader));
+            log.info("request : {}", request);
+            String response = getResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(Request request) throws IOException {
+        for (RequestHandler requestHandler : requestHandlers) {
+            String response = requestHandler.handle(request);
+            if (response != null) {
+                return response;
+            }
+        }
+        throw new NoHandlerException("핸들러가 존재하지 않습니다. request : " + request);
+    }
+
+    private List<String> getPlainRequest(BufferedReader requestBufferedReader) throws IOException {
+        List<String> plainRequest = new ArrayList<>();
+        while (requestBufferedReader.ready()) {
+            String line = requestBufferedReader.readLine();
+            plainRequest.add(line);
+        }
+        return Collections.unmodifiableList(plainRequest);
     }
 }

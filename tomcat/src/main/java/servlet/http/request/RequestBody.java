@@ -13,14 +13,14 @@ public class RequestBody {
 
     private final Map<String, String> body;
 
+    private RequestBody(Map<String, String> body) {
+        this.body = body;
+    }
+
     protected static RequestBody from(String bodies) {
         return Arrays.stream(bodies.split("&"))
                 .map(body -> body.split("=", 2))
                 .collect(collectingAndThen(toMap(b -> b[0], b -> b[1]), RequestBody::new));
-    }
-
-    private RequestBody(Map<String, String> body) {
-        this.body = body;
     }
 
     protected String getValue(String key) {

@@ -11,7 +11,7 @@ public class RequestLine {
 
     private final HttpMethod httpMethod;
     private final String path;
-    private final String VersionOfProtocol;
+    private final String versionOfProtocol;
     private final Map<String, String> queryParams;
 
     public RequestLine(String requestLine) {
@@ -19,11 +19,11 @@ public class RequestLine {
 
         this.httpMethod = HttpMethod.valueOf(requestLineEntries[0]);
         this.path = requestLineEntries[1];
-        this.VersionOfProtocol = requestLineEntries[2];
+        this.versionOfProtocol = requestLineEntries[2];
         this.queryParams = mapQueryParam();
     }
 
-    public boolean isMethod(HttpMethod httpMethod) { // TODO: 상수화
+    public boolean isMethod(HttpMethod httpMethod) {
         return this.httpMethod == httpMethod;
     }
 

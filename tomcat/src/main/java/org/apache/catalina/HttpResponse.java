@@ -87,10 +87,12 @@ public class HttpResponse {
 
     public void setBody(String resource) throws IOException {
         this.body = mapBody(resource);
+        header.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
     }
 
-    public void setJSESSIONID() {
-        cookie.setJSESSIONID();
+    public void generateJSESSIONID() {
+        cookie.generateJSESSIONID();
+        header.put(HeaderName.SET_COOKIE.getValue(), cookie.getResponse());
     }
 
     public String getJESSIONID() {

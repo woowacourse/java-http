@@ -60,8 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (httpRequest.isPath("/login")) {
                         // session이 있는 경우 다른 설정은 하지 않고, 쿠키에 그 세션 아이디를 넣어주고 리다이렉션한다.
-                        if (httpRequest.hasCookie() && httpRequest.hasJESSIONID()
-                            && sessionManager.isSessionExist(httpRequest.getJESSIONID())) { // TODO: 객체에게 옮기기
+                        if (httpRequest.hasSession() && sessionManager.isSessionExist(httpRequest.getJESSIONID())) {  // TODO: 객체에게 옮기기
                             httpResponse.setStatusCode(StatusCode._302);
                             httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
                         }
@@ -83,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
                         if (user.isPresent() && user.get().checkPassword(password)) {
                             httpResponse.setStatusCode(StatusCode._302);
                             httpResponse.setBody("/index.html");
-                            httpResponse.setJSESSIONID();
+                            httpResponse.generateJSESSIONID();
                             Session session = new Session(httpResponse.getJESSIONID());
                             session.setAttribute("user", user.get());
                             sessionManager.add(session);

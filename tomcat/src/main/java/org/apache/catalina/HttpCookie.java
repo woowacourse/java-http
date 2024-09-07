@@ -31,7 +31,7 @@ public class HttpCookie {
         return cookies.containsKey(JSESSIONID_VALUE);
     }
 
-    public void setJSESSIONID() {
+    public void generateJSESSIONID() {
         if (!cookies.containsKey(JSESSIONID_VALUE)) {
             UUID uuid = UUID.randomUUID();
             cookies.put(JSESSIONID_VALUE, uuid.toString());

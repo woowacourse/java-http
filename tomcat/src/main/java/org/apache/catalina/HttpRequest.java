@@ -98,4 +98,8 @@ public class HttpRequest {
         }
         return new RequestBody();
     }
+
+    public boolean hasSession() {
+        return hasCookie() && httpCookie.hasJESSIONID();
+    }
 }

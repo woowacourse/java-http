@@ -18,6 +18,6 @@ class ResponseCookieTest {
 
         // then
         String expected = "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 \r\n";
-        assertThat(builder.toString()).contains(expected);
+        assertThat(builder.toString()).isEqualTo(expected);
     }
 }

@@ -13,6 +13,9 @@ public class ResourceReader {
     private static final String STATIC_RESOURCE_BASE_URL = "static";
     private static final String DEFAULT_RESOURCE_EXTENSION = ".html";
 
+    private ResourceReader() {
+    }
+
     public static boolean canRead(String path) {
         return toURL(path) != null;
     }

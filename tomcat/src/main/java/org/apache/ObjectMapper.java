@@ -12,6 +12,9 @@ import org.apache.coyote.http11.request.Http11RequestLine;
 
 public class ObjectMapper {
 
+    private ObjectMapper() {
+    }
+
     public static byte[] serialize(HttpResponse response) {
         return response.getResponseMessage().getBytes();
     }

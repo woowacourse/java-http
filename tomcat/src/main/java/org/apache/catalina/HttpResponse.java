@@ -16,10 +16,15 @@ public class HttpResponse {
     private final HttpCookie cookie;
     private String body; // TODO: final 적용
 
-    public HttpResponse(HttpRequest httpRequest) throws IOException {
+    public HttpResponse(HttpRequest httpRequest, ResourceType resourceType) throws IOException {
         this.statusLine = new StatusLine();
-        this.body = mapBody(httpRequest.getPath());
-        this.header = mapHeader(httpRequest);
+        if (resourceType == ResourceType.NON_STATIC) {
+            this.body = "";
+        }
+        if (resourceType == ResourceType.STATIC) {
+            this.body = mapBody(httpRequest.getPath());
+        }
+        this.header = mapHeader(httpRequest, resourceType);
         this.cookie = httpRequest.getHttpCookie();
     }
 
@@ -53,11 +58,13 @@ public class HttpResponse {
         return String.valueOf(response);
     }
 
-    private Map<String, String> mapHeader(HttpRequest httpRequest) {
+    private Map<String, String> mapHeader(HttpRequest httpRequest, ResourceType resourceType) {
         Map<String, String> headerEntry = new HashMap<>();
         headerEntry.put(HeaderName.SET_COOKIE.getValue(), httpRequest.getCookieResponse());
         headerEntry.put(HeaderName.CONTENT_TYPE.getValue(), httpRequest.getContentType().getResponse());
-        headerEntry.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
+        if (resourceType == ResourceType.STATIC) {
+            headerEntry.put(HeaderName.CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
+        }
         return headerEntry;
     }
 

@@ -37,10 +37,13 @@ public class HttpRequest {
     }
 
     private String mapBody(BufferedReader bufferedReader) throws IOException {
-        int contentLength = Integer.parseInt(get(HeaderName.CONTENT_LENGTH));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
-        return new String(buffer);
+        if (requestLine.isMethod(HttpMethod.POST)) {
+            int contentLength = Integer.parseInt(get(HeaderName.CONTENT_LENGTH));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
+            return new String(buffer);
+        }
+        return "";
     }
 
     public boolean isMethod(HttpMethod httpMethod) {

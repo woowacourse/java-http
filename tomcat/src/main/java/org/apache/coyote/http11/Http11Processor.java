@@ -96,13 +96,15 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (httpRequest.isMethod(HttpMethod.POST)) {
-                String account = httpRequest.getQueryParam("account");
-                String password = httpRequest.getQueryParam("password");
-                String email = httpRequest.getQueryParam("email");
-                InMemoryUserRepository.save(new User(account, password, email));
+                if (httpRequest.isPath("/register")) {
+                    String account = httpRequest.getQueryParam("account");
+                    String password = httpRequest.getQueryParam("password");
+                    String email = httpRequest.getQueryParam("email");
+                    InMemoryUserRepository.save(new User(account, password, email));
 
-                httpResponse.setStatusCode(StatusCode._302);
-                httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
+                    httpResponse.setStatusCode(StatusCode._302);
+                    httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
+                }
             }
 
             outputStream.write(httpResponse.getReponse().getBytes());

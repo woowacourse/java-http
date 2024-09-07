@@ -3,6 +3,7 @@ package org.apache.coyote.http11.controller;
 import com.techcourse.model.User;
 import com.techcourse.model.UserInfo;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBuilder;
@@ -25,13 +26,13 @@ public class UserController implements Controller {
             userService.save(user);
 
             return new ResponseBuilder()
-                    .statusCode(302)
+                    .statusCode(HttpStatusCode.FOUND_302)
                     .location("/index.html")
                     .build();
         }
 
         return new ResponseBuilder()
-                .statusCode(200)
+                .statusCode(HttpStatusCode.OK_200)
                 .viewUrl("/register.html")
                 .build();
     }

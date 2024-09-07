@@ -8,5 +8,4 @@ public interface Controller {
     boolean canHandle(String url);
 
     HttpResponse handle(HttpRequest httpRequest);
-
 }

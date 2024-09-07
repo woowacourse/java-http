@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -25,7 +26,7 @@ public class LoginController implements Controller {
         }
 
         return new ResponseBuilder()
-                .statusCode(200)
+                .statusCode(HttpStatusCode.OK_200)
                 .viewUrl("/login.html")
                 .build();
     }
@@ -34,7 +35,7 @@ public class LoginController implements Controller {
         Map<String, String> parameters = requestLine.getParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
         return new ResponseBuilder()
-                .statusCode(302)
+                .statusCode(HttpStatusCode.FOUND_302)
                 .location("/index.html")
                 .build();
     }

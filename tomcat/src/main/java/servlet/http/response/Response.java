@@ -45,6 +45,9 @@ public class Response {
     }
 
     public String getViewName() {
+        if (viewName == null) {
+            throw new IllegalStateException("viewName이 설정되지 않았습니다.");
+        }
         return viewName;
     }
 

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.catalina.connector.http.HttpResponse;
 import org.apache.catalina.engine.CatalinaServletEngine;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;

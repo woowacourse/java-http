@@ -2,7 +2,7 @@ package org.apache.catalina;
 
 import java.io.IOException;
 
-import org.apache.coyote.http11.Session;
+import org.apache.catalina.session.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a

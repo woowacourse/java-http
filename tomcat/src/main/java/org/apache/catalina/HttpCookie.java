@@ -7,30 +7,39 @@ import java.util.UUID;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID_VALUE = "JSESSIONID";
     private final Map<String, String> cookies;
 
     public HttpCookie(String rawCookies) {
-        this();
-        String[] cookiesElements = rawCookies.split("; ");
-        for (int i = 0; i < cookiesElements.length; i++) {
-            String[] cookiePair = cookiesElements[i].split("=");
-            cookies.put(cookiePair[0], cookiePair[1]);
-        }
+        this.cookies = mapCookies(rawCookies);
     }
 
-    public HttpCookie() {
-        cookies = new HashMap<>();
+    private static Map<String, String> mapCookies(String rawCookies) {
+        Map<String, String> cookieGroup = new HashMap<>();
+
+        if (rawCookies != null && !rawCookies.isBlank()) {
+            String[] cookiesElements = rawCookies.split("; ");
+            for (int i = 0; i < cookiesElements.length; i++) {
+                String[] cookiePair = cookiesElements[i].split("=");
+                cookieGroup.put(cookiePair[0], cookiePair[1]);
+            }
+        }
+        return cookieGroup;
+    }
+
+    public boolean hasJESSIONID() {
+        return cookies.containsKey(JSESSIONID_VALUE);
     }
 
     public void setJSESSIONID() {
-        if (!cookies.containsKey("JSESSIONID")) {
+        if (!cookies.containsKey(JSESSIONID_VALUE)) {
             UUID uuid = UUID.randomUUID();
-            cookies.put("JSESSIONID", uuid.toString());
+            cookies.put(JSESSIONID_VALUE, uuid.toString());
         }
     }
 
     public String getJESSIONID() {
-        return cookies.get("JSESSIONID");
+        return cookies.get(JSESSIONID_VALUE);
     }
 
     public String getResponse() {
@@ -46,9 +55,5 @@ public class HttpCookie {
                     .append(";");
         }
         return String.valueOf(response);
-    }
-
-    public boolean hasESSIONID() {
-        return cookies.containsKey("JSESSIONID");
     }
 }

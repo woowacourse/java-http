@@ -11,6 +11,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<HeaderName, String> header;
+    private final HttpCookie httpCookie;
     private final String body;  // TODO: 왜 안쓰이는지 보기
 
     public HttpRequest(InputStream inputStream) throws IOException {
@@ -20,6 +21,7 @@ public class HttpRequest {
         this.requestLine = new RequestLine(bufferedReader.readLine());
         this.header = mapHeader(bufferedReader);
         this.body = mapBody(bufferedReader);
+        this.httpCookie = new HttpCookie(header.get(HeaderName.COOKIE.getValue()));
     }
 
     private Map<HeaderName, String> mapHeader(BufferedReader bufferedReader) throws IOException {
@@ -72,5 +74,20 @@ public class HttpRequest {
 
     public boolean isPathWithQuery(String path) {
         return requestLine.isPathWithQuery(path);
+    }
+    public String getCookieResponse() {
+        return httpCookie.getResponse();
+    }
+
+    public boolean hasESSIONID() {
+       return httpCookie.hasJESSIONID();
+    }
+
+    public String getJESSIONID() {
+        return httpCookie.getJESSIONID();
+    }
+
+    public HttpCookie getHttpCookie() {
+        return httpCookie;
     }
 }

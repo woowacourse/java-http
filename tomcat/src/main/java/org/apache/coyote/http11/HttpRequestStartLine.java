@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.client.BadRequestException;
+
 public class HttpRequestStartLine {
 
     private String method;
@@ -20,7 +22,7 @@ public class HttpRequestStartLine {
         String[] split = raw.trim().split(" ");
         String uri = split[1].trim();
         if (split.length != 3) {
-            throw new IllegalArgumentException("잘못된 요청 헤더 형식입니다. =" + raw);
+            throw new BadRequestException("잘못된 요청 헤더 형식입니다. =" + raw);
         }
         String path = uri;
         HttpQuery httpQuery = null;

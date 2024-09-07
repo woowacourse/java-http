@@ -2,6 +2,7 @@ package com.techcourse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.controller.FrontController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestStartLine;
 import org.apache.coyote.http11.HttpResponse;
@@ -21,9 +22,10 @@ class FrontControllerTest {
                     "GET /login?account=gugu&password=password HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
+            FrontController controller = FrontController.getInstance();
 
             // when
-            FrontController.service(request, response);
+            controller.service(request, response);
 
             // then
             assertThat(response.getCode()).isEqualTo(HttpStatus.FOUND.getCode());
@@ -36,9 +38,10 @@ class FrontControllerTest {
                     "GET /login?account=NoExist&password=NoExist HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
+            FrontController controller = FrontController.getInstance();
 
             // when
-            FrontController.service(request, response);
+            controller.service(request, response);
 
             // then
             assertThat(response.getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());

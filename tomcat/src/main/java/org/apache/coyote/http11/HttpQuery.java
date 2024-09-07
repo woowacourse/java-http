@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.client.BadRequestException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,7 +30,7 @@ public class HttpQuery {
     private static void validateUri(String uri) {
         Matcher matcher = pattern.matcher(uri);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("잘못된 형식의 요청 쿼리입니다. = " + uri);
+            throw new BadRequestException("잘못된 형식의 요청 쿼리입니다. = " + uri);
         }
     }
 
@@ -50,13 +51,13 @@ public class HttpQuery {
 
     private static void validateQueryCharacter(String uri) {
         if (!uri.contains(QUERY_START_CHAR)) {
-            throw new IllegalArgumentException("쿼리가 존재하지 않습니다.");
+            throw new BadRequestException("쿼리가 존재하지 않습니다.");
         }
     }
 
     public String findByKey(String key) {
         if (!store.containsKey(key)) {
-            throw new IllegalArgumentException("일치하는 쿼리가 없습니다. = " + key);
+            throw new BadRequestException("일치하는 쿼리가 없습니다. = " + key);
         }
         return store.get(key);
     }

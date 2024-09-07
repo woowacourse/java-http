@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.exception.client.BadRequestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,10 @@ public class HttpHeaders {
         this.store = store;
     }
 
+    public static HttpHeaders of(HttpRequest request, HttpResponse response) {
+        return of(response.getView(), ContentType.findByPath(request.getPath()));
+    }
+
     public static HttpHeaders of(View view, ContentType contentType) {
         Map<String, String> store = new LinkedHashMap<>();
         store.put("Content-Type", contentType.getValue() + ";charset=utf-8");
@@ -36,7 +41,7 @@ public class HttpHeaders {
         raw = raw.trim();
         Matcher matcher = pattern.matcher(raw);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("잘못된 형식의 헤더입니다. = " + raw);
+            throw new BadRequestException("잘못된 형식의 헤더입니다. = " + raw);
         }
         String[] split = raw.split(DELIMITER);
         store.put(split[KEY_INDEX], split[VALUE_INDEX]);

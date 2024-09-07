@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.techcourse.exception.client.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,21 +29,21 @@ class HttpQueryTest {
         void 값이_존재하지_않으면_에러가_발생한다() {
             // when & then
             assertThatThrownBy(() -> HttpQuery.createByUri("/login?accoun="))
-                    .isExactlyInstanceOf(IllegalArgumentException.class);
+                    .isExactlyInstanceOf(BadRequestException.class);
         }
 
         @Test
         void 키가_존재하지_않으면_에러가_발생한다() {
             // when & then
             assertThatThrownBy(() -> HttpQuery.createByUri("/login?=tacan"))
-                    .isExactlyInstanceOf(IllegalArgumentException.class);
+                    .isExactlyInstanceOf(BadRequestException.class);
         }
 
         @Test
         void 키와_값이_존재하지_않으면_에러가_발생한다() {
             // when & then
             assertThatThrownBy(() -> HttpQuery.createByUri("/login?"))
-                    .isExactlyInstanceOf(IllegalArgumentException.class);
+                    .isExactlyInstanceOf(BadRequestException.class);
         }
     }
 }

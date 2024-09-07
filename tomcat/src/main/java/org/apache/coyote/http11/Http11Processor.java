@@ -1,16 +1,12 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.FrontController;
+import com.techcourse.controller.ControllerAdviser;
+import com.techcourse.controller.FrontController;
 import com.techcourse.exception.UncheckedServletException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +29,19 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+        HttpRequest request = null;
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = createRequest(inputStream);
+            request = createRequest(inputStream);
             log.info("[REQUEST] = {}", request);
             HttpResponse response = createResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (UncheckedServletException e) {
+            ControllerAdviser.service(e, request, new HttpResponse());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -61,7 +60,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createResponse(HttpRequest request) throws IOException {
         HttpResponse response = new HttpResponse();
-        FrontController.service(request, response);
+        FrontController frontController = FrontController.getInstance();
+        frontController.service(request, response);
         return response;
     }
 }

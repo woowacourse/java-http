@@ -66,8 +66,7 @@ public class HttpResponse {
         Path path = Path.of(getClass().getResource(STATIC_PATH + resource).getPath());
 
         Files.readAllLines(path)
-                .stream()
-                .forEach(line -> rawBody.append(line).append("\n"));
+                .forEach(line -> rawBody.append(line).append("\r\n"));
         return String.valueOf(rawBody);
     }
 
@@ -82,20 +81,12 @@ public class HttpResponse {
     public void setBody(String resource) throws IOException {
         this.body = mapBody(resource);
     }
-}
 
-//        if (uri.endsWith(".html")) {
-//            contentType = "text/html; charset=utf-8 ";
-//            statusCode = "200 OK";
-//            path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-//        }
-//        if (uri.endsWith(".css")) {
-//            contentType = "text/css; charset=utf-8 ";
-//            statusCode = "200 OK";
-//            path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-//        }
-//        if (uri.endsWith(".js")) {
-//            contentType = "application/javascript ";
-//            statusCode = "200 OK";
-//            path = Path.of(getClass().getResource(STATIC_PATH + uri).getPath());
-//        }
+    public void setJSESSIONID() {
+        cookie.setJSESSIONID();
+    }
+
+    public String getJESSIONID() {
+        return cookie.getJESSIONID();
+    }
+}

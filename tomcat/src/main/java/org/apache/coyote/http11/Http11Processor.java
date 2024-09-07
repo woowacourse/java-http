@@ -11,6 +11,7 @@ import org.apache.catalina.HttpMethod;
 import org.apache.catalina.HttpRequest;
 import org.apache.catalina.HttpResponse;
 import org.apache.catalina.RequestBody;
+import org.apache.catalina.ResourceType;
 import org.apache.catalina.Session;
 import org.apache.catalina.StatusCode;
 import org.apache.catalina.manager.SessionManager;
@@ -42,12 +43,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse();
+            HttpResponse httpResponse = new HttpResponse(httpRequest, ResourceType.NON_STATIC);
 
             if (httpRequest.isMethod(HttpMethod.GET)) {  // TODO: 404 추가하기
                 // 정적 파일인 경우
                 if (httpRequest.isStaticRequest()) {
-                    httpResponse = new HttpResponse(httpRequest);
+                    httpResponse = new HttpResponse(httpRequest, ResourceType.STATIC);
                 }
 
                 // 정적 파일이 아닌 경우

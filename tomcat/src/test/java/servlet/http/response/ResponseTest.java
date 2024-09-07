@@ -11,7 +11,7 @@ class ResponseTest {
     @Test
     void Response의_bytes를_반환한다() {
         // given
-        Response response = Response.create();
+        Response response = new Response();
         response.configureViewAndStatus("index.html", StatusCode.OK);
         response.contentType(MimeType.HTML);
         response.setBody("Hello, World!");

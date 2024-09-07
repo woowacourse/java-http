@@ -13,7 +13,7 @@ public class Response {
 
     private String viewName;
 
-    protected Response() {
+    public Response() {
         this(new ResponseLine(), new ResponseHeaders(), new ResponseBody());
     }
 
@@ -21,13 +21,6 @@ public class Response {
         this.responseLine = responseLine;
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
-    }
-
-    public static Response create() {
-        ResponseLine responseLine = new ResponseLine();
-        ResponseHeaders responseHeaders = new ResponseHeaders();
-        ResponseBody responseBody = new ResponseBody();
-        return new Response(responseLine, responseHeaders, responseBody);
     }
 
     public void configureViewAndStatus(String viewName, StatusCode statusCode) {

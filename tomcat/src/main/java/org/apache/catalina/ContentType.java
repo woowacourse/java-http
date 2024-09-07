@@ -3,9 +3,9 @@ package org.apache.catalina;
 import java.util.Arrays;
 
 public enum ContentType {
-    HTML("html", "text/html"),
-    CSS("css", "text/css"),
-    JS("js", "application/javascript");
+    HTML(".html", "text/html"),
+    CSS(".css", "text/css"),
+    JS(".js", "application/javascript");
 
     private final String format;
     private final String response;
@@ -17,14 +17,14 @@ public enum ContentType {
 
     public static ContentType findByPath(String path) {
         return Arrays.stream(values())
-                .filter(format -> path.endsWith("." + format))
+                .filter(type -> path.endsWith(type.format))
                 .findFirst()
                 .orElse(HTML);
     }
 
     public static boolean isStaticFile(String path) {
         return Arrays.stream(values())
-                .anyMatch(format -> path.endsWith("." + format));
+                .anyMatch(type -> path.endsWith(type.format));
     }
 
     public String getResponse() {

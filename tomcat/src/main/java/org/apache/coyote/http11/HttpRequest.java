@@ -28,6 +28,10 @@ public class HttpRequest {
         return new HttpRequest(startLine, headers, null);
     }
 
+    public boolean isSameMethod(HttpMethod method) {
+        return startLine.isSameMethod(method);
+    }
+
     public String findQuery(String key) {
         return startLine.findQuery(key);
     }

@@ -4,13 +4,13 @@ import com.techcourse.exception.client.BadRequestException;
 
 public class HttpRequestStartLine {
 
-    private String method;
+    private HttpMethod method;
     private String uri;
     private String httpVersion;
     private String path;
     private HttpQuery query;
 
-    public HttpRequestStartLine(String method, String uri, String httpVersion, String path, HttpQuery query) {
+    public HttpRequestStartLine(HttpMethod method, String uri, String httpVersion, String path, HttpQuery query) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -20,6 +20,7 @@ public class HttpRequestStartLine {
 
     public static HttpRequestStartLine createByString(String raw) {
         String[] split = raw.trim().split(" ");
+        HttpMethod method = HttpMethod.findByName(split[0]);
         String uri = split[1].trim();
         if (split.length != 3) {
             throw new BadRequestException("잘못된 요청 헤더 형식입니다. =" + raw);
@@ -30,7 +31,7 @@ public class HttpRequestStartLine {
             path = uri.substring(0, uri.indexOf("?"));
             httpQuery = HttpQuery.createByUri(uri);
         }
-        return new HttpRequestStartLine(split[0], uri, split[2], path, httpQuery);
+        return new HttpRequestStartLine(method, uri, split[2], path, httpQuery);
     }
 
     public String findQuery(String key) {
@@ -41,7 +42,11 @@ public class HttpRequestStartLine {
         return query != null;
     }
 
-    public String getMethod() {
+    public boolean isSameMethod(HttpMethod method) {
+        return this.method == method;
+    }
+
+    public HttpMethod getMethod() {
         return method;
     }
 

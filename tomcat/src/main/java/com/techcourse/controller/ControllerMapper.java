@@ -7,6 +7,7 @@ public enum ControllerMapper {
 
     MAIN("/", new MainPageController()),
     LOGIN("/login", new LoginController()),
+    REGISTER("/register", new RegisterController()),
     FILE(null, new FileController()),
     ;
 

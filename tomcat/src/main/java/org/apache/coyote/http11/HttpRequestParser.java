@@ -6,9 +6,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.exception.UncheckedHttpException;
 
 public class HttpRequestParser {
 
@@ -17,11 +18,14 @@ public class HttpRequestParser {
 
     public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
         HttpRequestLine requestLine = new HttpRequestLine(bufferedReader.readLine());
-        Map<HttpHeaders, String> headers = new EnumMap<>(HttpHeaders.class);
+        Map<String, String> headers = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!line.isEmpty()) {
             String[] splitLine = line.split(": ");
-            headers.put(HttpHeaders.from(splitLine[0]), splitLine[1]);
+            if (splitLine.length != 2) {
+                throw new UncheckedHttpException(new IllegalArgumentException());
+            }
+            headers.put(splitLine[0], splitLine[1]);
             line = bufferedReader.readLine();
         }
 

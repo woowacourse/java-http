@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -12,14 +12,14 @@ public class HttpResponse<T> {
 
     private final StatusLine statusLine;
     private final T body;
-    private final Map<HttpHeaders, String> headers = new EnumMap<>(HttpHeaders.class);
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public HttpResponse(HttpStatus httpStatus, T body, Map<HttpHeaders, String> headers) {
+    public HttpResponse(HttpStatus httpStatus, T body, Map<String, String> headers) {
         this(new StatusLine(httpStatus), body);
         headers.forEach(this::addHeader);
     }
 
-    public HttpResponse(StatusLine statusLine, T body, Map<HttpHeaders, String> headers) {
+    public HttpResponse(StatusLine statusLine, T body, Map<String, String> headers) {
         this(statusLine, body);
         headers.forEach(this::addHeader);
     }
@@ -29,7 +29,7 @@ public class HttpResponse<T> {
         this.body = body;
     }
 
-    public void addHeader(HttpHeaders header, String value) {
+    public void addHeader(String header, String value) {
         headers.put(header, value);
     }
 
@@ -48,8 +48,8 @@ public class HttpResponse<T> {
         return stringBuilder.toString();
     }
 
-    private String formatHeaderEntry(Map.Entry<HttpHeaders, String> entry) {
-        return entry.getKey().getHeader() + HEADER_DELIMITER + entry.getValue() + SPACE;
+    private String formatHeaderEntry(Map.Entry<String, String> entry) {
+        return entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE;
     }
 
     public T getBody() {

@@ -1,22 +1,21 @@
 package com.techcourse.controller.dto;
 
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
-public record HttpResponseEntity<T>(HttpStatus httpStatus, T body, Map<HttpHeaders, String> headers) {
+public record HttpResponseEntity<T>(HttpStatus httpStatus, T body, Map<String, String> headers) {
 
     public HttpResponseEntity() {
-        this(HttpStatus.OK, null, new EnumMap<>(HttpHeaders.class));
+        this(HttpStatus.OK, null, new LinkedHashMap<>());
     }
 
     public HttpResponseEntity(HttpStatus httpStatus, T body) {
-        this(httpStatus, body, new EnumMap<>(HttpHeaders.class));
+        this(httpStatus, body, new LinkedHashMap<>());
     }
 
-    public void addHeader(HttpHeaders key, String value) {
+    public void addHeader(String key, String value) {
         headers.put(key, value);
     }
 

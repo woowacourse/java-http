@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.catalina.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;

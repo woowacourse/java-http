@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.catalina.response;
 
 public class ResponseContent {
     private static final String HTTP_VERSION = "HTTP/1.1";

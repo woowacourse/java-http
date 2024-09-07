@@ -14,11 +14,11 @@ import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.RequestReader;
-import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseContent;
-import org.apache.coyote.http11.response.ResponsePage;
+import org.apache.catalina.request.Request;
+import org.apache.catalina.request.RequestReader;
+import org.apache.catalina.response.HttpStatus;
+import org.apache.catalina.response.ResponseContent;
+import org.apache.catalina.response.ResponsePage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

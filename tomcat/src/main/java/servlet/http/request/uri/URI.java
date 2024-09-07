@@ -4,13 +4,13 @@ public class URI {
 
     private static final int EMPTY_QUERY_PARAMS = 1;
 
-    private final PathVariable pathVariable;
+    private final Path path;
 
     private final QueryParams queryParams;
 
     public URI(String uri) {
         String[] uriParts = uri.split("\\?");
-        this.pathVariable = new PathVariable(uriParts[0]);
+        this.path = new Path(uriParts[0]);
         this.queryParams = createQueryParams(uriParts);
     }
 
@@ -22,7 +22,7 @@ public class URI {
     }
 
     public String getPath() {
-        return this.pathVariable.getPath();
+        return this.path.getPath();
     }
 
     public String getQueryParamValue(String key) {

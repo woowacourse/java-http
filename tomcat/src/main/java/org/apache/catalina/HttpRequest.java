@@ -64,8 +64,8 @@ public class HttpRequest {
         return httpCookie.getResponse();
     }
 
-    public boolean hasESSIONID() {
-       return httpCookie.hasJESSIONID();
+    public boolean hasJESSIONID() {
+        return httpCookie.hasJESSIONID();
     }
 
     public String getJESSIONID() {

@@ -59,13 +59,13 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (httpRequest.isPath("/login")) {
                         // session이 있는 경우 다른 설정은 하지 않고, 쿠키에 그 세션 아이디를 넣어주고 리다이렉션한다.
-                        if (httpRequest.hasCookie() && httpRequest.hasESSIONID() && sessionManager.isSessionExist(
-                                httpRequest.getJESSIONID())) { // TODO: 객체에게 옮기기
+                        if (httpRequest.hasCookie() && httpRequest.hasJESSIONID()
+                            && sessionManager.isSessionExist(httpRequest.getJESSIONID())) { // TODO: 객체에게 옮기기
                             httpResponse.setStatusCode(StatusCode._302);
                             httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
                         }
-                        if (!httpRequest.hasCookie() || !httpRequest.hasESSIONID() || !sessionManager.isSessionExist(
-                                httpRequest.getJESSIONID())) {
+                        if (!httpRequest.hasCookie() || !httpRequest.hasJESSIONID()
+                            || !sessionManager.isSessionExist(httpRequest.getJESSIONID())) {
                             httpResponse.setStatusCode(StatusCode._200);
                             httpResponse.setBody("/login.html");
                         }
@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
                         String account = httpRequest.getQueryParam("account");
                         String password = httpRequest.getQueryParam("password");
                         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                        if (!user.isPresent() || (user.isPresent() && !user.get().checkPassword(password))) {
+                        if (user.isEmpty() || !user.get().checkPassword(password)) {
                             httpResponse.setStatusCode(StatusCode._401);
                             httpResponse.setBody("/401.html");
                         }

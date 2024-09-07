@@ -101,5 +101,7 @@ class GreetingControllerTest {
                 .exchange()
                 .expectStatus()
                 .isNotModified();
+        // 해결: CacheBustingWebConfig 정적 자원 핸들러 등록
+        // TODO: 브라우저 확인
     }
 }

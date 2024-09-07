@@ -38,7 +38,8 @@ public class HttpRequestLine {
         if (httpMethod.isGet()) {
             HttpResponse<?> httpResponse = requestUri.processParams(httpMethod);
             return requestUri.getHttpResponse(httpResponse);
-        } else if (HttpMethod.POST.equals(httpMethod)) {
+        }
+        if (HttpMethod.POST.equals(httpMethod)) {
             HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, bodies);
             return requestUri.getHttpResponse(httpResponse);
         }

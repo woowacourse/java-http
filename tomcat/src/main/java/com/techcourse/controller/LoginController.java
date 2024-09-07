@@ -18,14 +18,14 @@ import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 
-public class PostLoginController implements Controller {
+public class LoginController implements Controller {
 
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
     private final InMemoryUserRepository userRepository;
 
-    public PostLoginController() {
+    public LoginController() {
         userRepository = new InMemoryUserRepository();
     }
 

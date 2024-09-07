@@ -1,10 +1,10 @@
 package org.apache.coyote.controller;
 
-import com.techcourse.controller.GetLoginController;
-import com.techcourse.controller.GetRegisterController;
+import com.techcourse.controller.LoginPageController;
+import com.techcourse.controller.RegisterPageController;
 import com.techcourse.controller.NotFoundController;
-import com.techcourse.controller.PostLoginController;
-import com.techcourse.controller.PostRegisterController;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -29,10 +29,10 @@ public class FrontController {
     private final Map<RequestKey, Controller> controllers = new HashMap<>();
 
     public FrontController() {
-        controllers.put(new RequestKey(HttpMethod.GET, "/login"), new GetLoginController());
-        controllers.put(new RequestKey(HttpMethod.POST, "/login"), new PostLoginController());
-        controllers.put(new RequestKey(HttpMethod.GET, "/register"), new GetRegisterController());
-        controllers.put(new RequestKey(HttpMethod.POST, "/register"), new PostRegisterController());
+        controllers.put(new RequestKey(HttpMethod.GET, "/login"), new LoginPageController());
+        controllers.put(new RequestKey(HttpMethod.POST, "/login"), new LoginController());
+        controllers.put(new RequestKey(HttpMethod.GET, "/register"), new RegisterPageController());
+        controllers.put(new RequestKey(HttpMethod.POST, "/register"), new RegisterController());
     }
 
     public HttpResponse dispatch(HttpRequest request) {

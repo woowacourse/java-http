@@ -17,13 +17,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("로그인 컨트롤러 테스트")
-class PostLoginControllerTest {
+class LoginControllerTest {
 
-    private PostLoginController postLoginController;
+    private LoginController loginController;
 
     @BeforeEach
     void setUp() {
-        postLoginController = new PostLoginController();
+        loginController = new LoginController();
     }
 
     @DisplayName("로그인 요청일 경우, 로그인을 시도한다.")
@@ -34,7 +34,7 @@ class PostLoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = postLoginController.run(request);
+        HttpResponse httpResponse = loginController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
@@ -78,7 +78,7 @@ class PostLoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = postLoginController.run(request);
+        HttpResponse httpResponse = loginController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

@@ -11,7 +11,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 
-public class PostRegisterController implements Controller {
+public class RegisterController implements Controller {
 
     private static final String ACCOUNT_KEY = "account";
     private static final String EMAIL_KEY = "email";
@@ -19,7 +19,7 @@ public class PostRegisterController implements Controller {
 
     private final InMemoryUserRepository userRepository;
 
-    public PostRegisterController() {
+    public RegisterController() {
         userRepository = new InMemoryUserRepository();
     }
 

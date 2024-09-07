@@ -13,7 +13,7 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.util.FileExtension;
 
-public class GetRegisterController implements Controller {
+public class RegisterPageController implements Controller {
 
     @Override
     public HttpResponse run(HttpRequest request) {

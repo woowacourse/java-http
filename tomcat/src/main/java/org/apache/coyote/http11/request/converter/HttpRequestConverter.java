@@ -28,7 +28,7 @@ public final class HttpRequestConverter {
         List<String> headerLines = new ArrayList<>();
 
         String headerLine;
-        while (!END_OF_HEADER.equals((headerLine = bufferedReader.readLine()))) {
+        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isBlank()) {
             headerLines.add(headerLine);
         }
         return new RequestHeader(headerLines);

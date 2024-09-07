@@ -18,7 +18,7 @@ class HttpRequestStartLineTest {
 
             // then
             Assertions.assertAll(
-                    () -> assertThat(startLine.getMethod()).isEqualTo("GET"),
+                    () -> assertThat(startLine.getMethod()).isEqualTo(HttpMethod.GET),
                     () -> assertThat(startLine.getUri()).isEqualTo("/login?account=gugu&password=password"),
                     () -> assertThat(startLine.getHttpVersion()).isEqualTo("HTTP/1.1"),
                     () -> assertThat(startLine.getPath()).isEqualTo("/login"),

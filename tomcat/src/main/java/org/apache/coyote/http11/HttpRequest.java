@@ -24,6 +24,11 @@ public class HttpRequest {
             headers.addByString(lines[i]);
             i++;
         }
+        i += 1;
+//        while (i < lines.length) {
+//
+//            i++
+//        }
         // TODO Body 처리
         return new HttpRequest(startLine, headers, null);
     }

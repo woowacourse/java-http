@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.client.BadRequestException;
+import org.apache.coyote.http11.query.HttpQuery;
 
 public class HttpRequestStartLine {
 
@@ -8,14 +9,14 @@ public class HttpRequestStartLine {
     private String uri;
     private String httpVersion;
     private String path;
-    private HttpQuery query;
+    private HttpQuery httpQuery;
 
-    public HttpRequestStartLine(HttpMethod method, String uri, String httpVersion, String path, HttpQuery query) {
+    public HttpRequestStartLine(HttpMethod method, String uri, String httpVersion, String path, HttpQuery httpQuery) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
         this.path = path;
-        this.query = query;
+        this.httpQuery = httpQuery;
     }
 
     public static HttpRequestStartLine createByString(String raw) {
@@ -35,11 +36,11 @@ public class HttpRequestStartLine {
     }
 
     public String findQuery(String key) {
-        return query.findByKey(key);
+        return httpQuery.findByKey(key);
     }
 
     public boolean hasQuery() {
-        return query != null;
+        return httpQuery != null;
     }
 
     public boolean isSameMethod(HttpMethod method) {
@@ -62,8 +63,8 @@ public class HttpRequestStartLine {
         return path;
     }
 
-    public HttpQuery getQuery() {
-        return query;
+    public HttpQuery getHttpQuery() {
+        return httpQuery;
     }
 
     @Override
@@ -73,7 +74,7 @@ public class HttpRequestStartLine {
                 ", uri='" + uri + '\'' +
                 ", httpVersion='" + httpVersion + '\'' +
                 ", path='" + path + '\'' +
-                ", query=" + query +
+                ", query=" + httpQuery +
                 '}';
     }
 }

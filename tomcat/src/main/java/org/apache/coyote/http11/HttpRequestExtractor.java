@@ -19,7 +19,6 @@ public class HttpRequestExtractor {
         String version = extractVersion(requestLine);
         Map<String, String> headers = extractHeaders(br);
         String body = extractBody(br);
-        // TODO: 메서드 호출 순서에 의존
 
         return new HttpRequest(version, httpMethod, uri, headers, body);
     }
@@ -54,7 +53,7 @@ public class HttpRequestExtractor {
         StringBuilder sb = new StringBuilder();
         while (br.ready()) {
             // 끝 개행이 없어 readLine 대신 read 사용
-            char[] one = Character.toChars(br.read()); // TODO: refactoring
+            char[] one = Character.toChars(br.read());
             sb.append(one);
         }
         return sb.toString();

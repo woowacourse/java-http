@@ -1,6 +1,8 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.executor.ExecutorService;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,7 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
+    private static final int MAX_INACTIVE_INTERVAL = 60 * 1000 * 15; // 15분
 
     private final ServerSocket serverSocket;
     private boolean stopped;
@@ -66,7 +69,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection);
+        final var processor = new Http11Processor(connection, new ExecutorService(), new SessionManager(MAX_INACTIVE_INTERVAL));
         new Thread(processor).start();
     }
 

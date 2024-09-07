@@ -6,13 +6,13 @@ import org.apache.coyote.http11.cookie.Cookies;
 import org.apache.coyote.http11.executor.ExecutorService;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -20,12 +20,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final ExecutorService executor;
-    private final SessionManager sessionManager = new SessionManager();
+    private final SessionManager sessionManager;
 
-
-    public Http11Processor(final Socket connection, final ExecutorService executor) {
+    public Http11Processor(final Socket connection, final ExecutorService executor, final SessionManager sessionManager) {
         this.connection = connection;
         this.executor = executor;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
+            sessionManager.cleanUpSession(LocalDateTime.now());
             final HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
             setSession(httpRequest);
             log.info("요청 [HTTP 메소드: {}, 경로: {}", httpRequest.getMethod(), httpRequest.getPath());
@@ -57,10 +57,6 @@ public class Http11Processor implements Runnable, Processor {
 
         sessionManager.findSession(httpRequest.getCookie(Cookies.SESSION_ID))
                 .ifPresentOrElse(httpRequest::setSession,
-                        () -> {
-                            final Session session = new Session();
-                            sessionManager.add(session);
-                            httpRequest.setSession(session);
-                        });
+                        () -> httpRequest.setSession(sessionManager.createSession(LocalDateTime.now())));
     }
 }

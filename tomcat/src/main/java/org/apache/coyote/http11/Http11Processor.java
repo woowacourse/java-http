@@ -4,12 +4,13 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,42 +73,49 @@ public class Http11Processor implements Runnable, Processor {
         return header;
     }
 
-    private void processGetRequest(String requestURL, OutputStream outputStream) throws URISyntaxException, IOException {
+    private void processGetRequest(String requestURL, OutputStream outputStream)
+            throws URISyntaxException, IOException {
         if ("/".equals(requestURL)) {
-                processRootRequest(outputStream);
-                return;
-            }
+            processRootRequest(outputStream);
+            return;
+        }
 
-        final Path path = findPath(requestURL);
-        byte[] fileBytes = Files.readAllBytes(path);
-        String contentType = URLConnection.guessContentTypeFromName(path.toString());
+        try {
+            final Path path = findPath(requestURL);
+            byte[] fileBytes = Files.readAllBytes(path);
+            String contentType = URLConnection.guessContentTypeFromName(path.toString());
 
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + fileBytes.length + " ",
-                "",
-                "");
+            final var response = String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Length: " + fileBytes.length + " ",
+                    "",
+                    "");
 
-        outputStream.write(response.getBytes());
-        outputStream.write(fileBytes);
+            outputStream.write(response.getBytes());
+            outputStream.write(fileBytes);
 
-        outputStream.flush();
+            outputStream.flush();
+        } catch (FileNotFoundException e) {
+            processGetRequest("/404.html", outputStream);
+        }
     }
 
-    private Path findPath(String requestURL) throws URISyntaxException {
+    private Path findPath(String requestURL) throws URISyntaxException, FileNotFoundException {
         if (!requestURL.contains(".")) {
             requestURL += ".html";
         }
 
-        URI resource = getClass().getClassLoader().getResource("static" + requestURL).toURI();
-        return Path.of(resource);
+        URL resource = getClass().getClassLoader().getResource("static" + requestURL);
+        if (resource == null) {
+            throw new FileNotFoundException();
+        }
+
+        return Path.of(resource.toURI());
     }
 
     private void processPostRequest(String requestURL, BufferedReader bufferedReader, OutputStream outputStream)
             throws URISyntaxException, IOException {
-        final Path path = findPath(requestURL);
-
         Map<String, String> header = getHeader(bufferedReader);
 
         int contentLength = Integer.parseInt(header.get("Content-Length"));

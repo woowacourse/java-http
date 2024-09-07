@@ -77,6 +77,11 @@ public class HttpRequest {
     public boolean isPathWithQuery(String path) {
         return requestLine.isPathWithQuery(path);
     }
+
+    public ContentType getContentType() {
+        return requestLine.getContentType();
+    }
+
     public String getCookieResponse() {
         return httpCookie.getResponse();
     }

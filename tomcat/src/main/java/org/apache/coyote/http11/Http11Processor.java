@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Optional;
 import org.apache.catalina.HeaderName;
-import org.apache.catalina.HttpCookie;
 import org.apache.catalina.HttpMethod;
 import org.apache.catalina.HttpRequest;
 import org.apache.catalina.HttpResponse;
@@ -44,8 +43,6 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse();
 
-            HttpCookie cookie = new HttpCookie(httpRequest.get(HeaderName.COOKIE));
-
             if (httpRequest.isMethod(HttpMethod.GET)) {  // TODO: 404 추가하기
                 // 정적 파일인 경우
                 if (httpRequest.isStaticRequest()) {
@@ -61,13 +58,13 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (httpRequest.isPath("/login")) {
                         // session이 있는 경우 다른 설정은 하지 않고, 쿠키에 그 세션 아이디를 넣어주고 리다이렉션한다.
-                        if (httpRequest.hasCookie() && cookie.hasESSIONID() && sessionManager.isSessionExist(
-                                cookie.getJESSIONID())) { // TODO: 객체에게 옮기기
+                        if (httpRequest.hasCookie() && httpRequest.hasESSIONID() && sessionManager.isSessionExist(
+                                httpRequest.getJESSIONID())) { // TODO: 객체에게 옮기기
                             httpResponse.setStatusCode(StatusCode._302);
                             httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
                         }
-                        if (!httpRequest.hasCookie() || !cookie.hasESSIONID() || !sessionManager.isSessionExist(
-                                cookie.getJESSIONID())) {
+                        if (!httpRequest.hasCookie() || !httpRequest.hasESSIONID() || !sessionManager.isSessionExist(
+                                httpRequest.getJESSIONID())) {
                             httpResponse.setStatusCode(StatusCode._200);
                             httpResponse.setBody("/login.html");
                         }
@@ -84,10 +81,10 @@ public class Http11Processor implements Runnable, Processor {
                         if (user.isPresent() && user.get().checkPassword(password)) {
                             httpResponse.setStatusCode(StatusCode._302);
                             httpResponse.setBody("/index.html");
-                            cookie.setJSESSIONID();
-                            Session session = new Session(cookie.getJESSIONID());
+                            httpResponse.setJSESSIONID();
+                            Session session = new Session(httpResponse.getJESSIONID());
                             session.setAttribute("user", user.get());
-                            sessionManager.add(new Session(cookie.getJESSIONID()));
+                            sessionManager.add(session);
                         }
                     }
 

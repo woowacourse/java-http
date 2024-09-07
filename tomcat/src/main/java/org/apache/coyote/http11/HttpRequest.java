@@ -1,58 +1,54 @@
 package org.apache.coyote.http11;
 
-import java.util.Collections;
-import java.util.Map;
-
 public class HttpRequest {
-    private String method;
-    private String url;
-    private String httpVersion;
-    private Map<String, String> headers;
-    private Map<String, String> queries; // TODO refactor
+    private static final int START_LINE_INDEX = 0;
+
+    private HttpRequestStartLine startLine;
+    private HttpHeaders httpHeaders;
     private String body;
 
-    public HttpRequest(String method, String url, String httpVersion, Map<String, String> headers,
-                       Map<String, String> queries, String body) {
-        this.method = method;
-        this.url = url;
-        this.httpVersion = httpVersion;
-        this.headers = headers;
-        this.queries = queries;
+    public HttpRequest(HttpRequestStartLine startLine, HttpHeaders httpHeaders,
+                       String body) {
+        this.startLine = startLine;
+        this.httpHeaders = httpHeaders;
         this.body = body;
     }
 
-    public String getMethod() {
-        return method;
+    public static HttpRequest createByString(String raw) {
+        String[] lines = raw.split("\r\n");
+        HttpRequestStartLine startLine = HttpRequestStartLine.createByString(lines[START_LINE_INDEX]);
+        HttpHeaders headers = new HttpHeaders();
+
+        int i = 1;
+        while (i < lines.length && !lines[i].isEmpty()) {
+            headers.addByString(lines[i]);
+            i++;
+        }
+        // TODO Body 처리
+        return new HttpRequest(startLine, headers, null);
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public Map<String, String> getHeaders() {
-        return Collections.unmodifiableMap(headers);
-    }
-
-    public Map<String, String> getQueries() {
-        return queries;
+    public String findQuery(String key) {
+        return startLine.findQuery(key);
     }
 
     public String getBody() {
         return body;
     }
 
+    public String getUri() {
+        return startLine.getUri();
+    }
+
+    public String getPath() {
+        return startLine.getPath();
+    }
+
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "method='" + method + '\'' +
-                ", uri='" + url + '\'' +
-                ", httpVersion='" + httpVersion + '\'' +
-                ", headers=" + headers +
-                ", queries=" + queries +
+                "startLine=" + startLine +
+                ", httpHeaders=" + httpHeaders +
                 ", body='" + body + '\'' +
                 '}';
     }

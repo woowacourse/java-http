@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = new byte[18000]; // TODO refactor
             int readByteCount = inputStream.read(bytes);
             String requestString = new String(bytes, 0, readByteCount, StandardCharsets.UTF_8);
-            return HttpRequestParser.parse(requestString);
+            return HttpRequest.createByString(requestString);
         } catch (IOException e) {
             log.error("IO Exception occur during make request object");
         }
@@ -82,10 +82,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         // 정적 파일을 응답
-        String url = request.getUrl();
-        ContentType contentType = ContentType.findByUrl(url);
+        String path = request.getPath();
+        ContentType contentType = ContentType.findByUrl(path);
 
-        String responseBody = createResponseBody(contentType, url);
+        String responseBody = createResponseBody(contentType, path);
         Map<String, String> responseHeader = createResponseHeader(contentType, responseBody.getBytes().length);
 
         response.setHeaders(responseHeader);

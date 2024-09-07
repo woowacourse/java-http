@@ -17,16 +17,16 @@ public class FrontController {
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
 
     public static void service(HttpRequest request, HttpResponse response) {
-        String url = request.getUrl();
-        if (url.endsWith("html") || url.endsWith("css") || url.endsWith("js")) {
+        String path = request.getPath();
+        if (path.endsWith("html") || path.endsWith("css") || path.endsWith("js")) {
             handleStaticFile(request, response);
             return;
         }
-        if (url.equals("/")) {
+        if (path.equals("/")) {
             handleIndex(response);
             return;
         }
-        if (url.equals("/login")) {
+        if (path.equals("/login")) {
             handleLogin(request, response);
             return;
         }
@@ -34,7 +34,7 @@ public class FrontController {
     }
 
     private static void handleStaticFile(HttpRequest request, HttpResponse response) {
-        String url = request.getUrl();
+        String url = request.getUri();
         ContentType contentType = ContentType.findByUrl(url);
         String resourceUrl = getResourceUrl(contentType, url);
         URL resource = Http11Processor.class.getClassLoader().getResource(resourceUrl);
@@ -58,9 +58,8 @@ public class FrontController {
     }
 
     private static void handleLogin(HttpRequest request, HttpResponse response) { // TODO Adviser 도입
-        Map<String, String> queries = request.getQueries();
         try {
-            User user = LoginService.login(queries.get("account"), queries.get("password"));
+            User user = LoginService.login(request.findQuery("account"), request.findQuery("password"));
             response.setStatus(HttpStatus.FOUND);
             log.info("Login Success = {}", user);
         } catch (IllegalArgumentException e) {

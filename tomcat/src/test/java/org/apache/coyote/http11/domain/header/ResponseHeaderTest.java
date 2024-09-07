@@ -13,8 +13,10 @@ class ResponseHeaderTest {
     void toCombinedHeader() {
         ResponseHeader responseHeader = new ResponseHeader(80, ContentType.HTML);
 
-        assertEquals(responseHeader.toCombinedHeader(), """
-                Content-Length: 80
-                Content-Type: text/html;charset=utf-8;""");
+        assertEquals(responseHeader.toCombinedHeader(),
+                String.join("\r\n",
+                        "Content-Length: 80 ",
+                        "Content-Type: text/html;charset=utf-8 "
+                ));
     }
 }

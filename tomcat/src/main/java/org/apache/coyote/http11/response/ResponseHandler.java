@@ -73,11 +73,11 @@ public class ResponseHandler {
 		}
 	}
 
-	public static void redirectWithSetCookie(String location, OutputStream outputStream) {
+	public static void redirectWithSetCookie(String location, String sessionId, OutputStream outputStream) {
 	    try {
 	        String contentType = "text/html";
 	        var response = "HTTP/1.1 302 Found \r\n" +
-	            "Set-Cookie: JSESSIONID" + UUID.randomUUID().toString() + " \r\n" +
+	            "Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
 	            "Location: " + location + " \r\n" +
 	            String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
 	            "Content-Length: 0";

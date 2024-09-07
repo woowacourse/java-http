@@ -67,8 +67,8 @@ public class RequestHandler {
 			User user = InMemoryUserRepository.findByAccount(account)
 				.orElse(new User("guest", "guest", "guest"));
 			if (user.checkPassword(password)) {
-				SessionManager.createSession(user);
-				ResponseHandler.redirectWithSetCookie("http://localhost:8080/index.html", outputStream);
+				String sessionId = SessionManager.createSession(user);
+				ResponseHandler.redirectWithSetCookie("http://localhost:8080/index.html", sessionId, outputStream);
 				return;
 			}
 		}

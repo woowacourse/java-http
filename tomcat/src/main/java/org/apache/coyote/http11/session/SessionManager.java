@@ -10,9 +10,10 @@ import com.techcourse.model.User;
 public final class SessionManager {
 	private static final Map<String, User> sessions = new HashMap<>();
 
-	public static void createSession(User user) {
+	public static String createSession(User user) {
 		String sessionId = UUID.randomUUID().toString();
 		sessions.put(sessionId, user);
+		return sessionId;
 	}
 
 	public static Optional<User> findUserBySession(String sessionId) {

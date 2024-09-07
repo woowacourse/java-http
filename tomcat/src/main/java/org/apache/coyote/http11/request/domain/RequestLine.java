@@ -15,11 +15,20 @@ public class RequestLine {
     private final ProtocolVersion protocolVersion;
 
     public RequestLine(String requestLine) {
-        List<String> requestLines = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
+        List<String> requestLines = splitToRequestLines(requestLine);
 
         this.requestMethod = RequestMethod.findMethod(requestLines.get(REQUEST_METHOD_INDEX).trim());
         this.requestPath = new RequestPath(requestLines.get(REQUEST_PATH_INDEX).trim());
         this.protocolVersion = new ProtocolVersion(requestLines.get(REQUEST_PROTOCOL).trim());
+    }
+
+    private List<String> splitToRequestLines(String requestLine) {
+        List<String> requestLines = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
+
+        if (requestLines.size() != 3) {
+            throw new IllegalArgumentException("HttpLine의 형식이 옳바르지 않습니다.");
+        }
+        return requestLines;
     }
 
     public RequestPath getRequestPath() {

@@ -12,7 +12,7 @@ public class ProtocolVersion {
     private final Version version;
 
     public ProtocolVersion(String inputProtocolVersion) {
-        List<String> protocolVersion = List.of(inputProtocolVersion.split(PROTOCOL_VERSION_COMBINATOR));
+        List<String> protocolVersion = splitToProtocolVersion(inputProtocolVersion);
 
         String protocol = protocolVersion.get(PROTOCOL_INDEX);
         String version = protocolVersion.get(VERSION_INDEX);
@@ -20,7 +20,16 @@ public class ProtocolVersion {
         this.protocol = Protocol.findProtocol(protocol);
         this.version = new Version(version);
     }
-    
+
+    private List<String> splitToProtocolVersion(String inputProtocolVersion) {
+        List<String> protocolVersion = List.of(inputProtocolVersion.split(PROTOCOL_VERSION_COMBINATOR));
+
+        if (protocolVersion.size() != 2) {
+            throw new IllegalArgumentException("Protocol Version의 형식이 옳바르지 않습니다.");
+        }
+        return protocolVersion;
+    }
+
     public String getCombinedProtocolVersion() {
         return protocol.name() + PROTOCOL_VERSION_COMBINATOR + getVersionValue();
     }

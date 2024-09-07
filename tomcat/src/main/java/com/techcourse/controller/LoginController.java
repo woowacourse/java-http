@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class LoginController implements Controller {
 
     private void addSession(HttpRequest request, Manager manager, User user, ResponseHeader header) {
         if (!isSessionExists(request)) {
-            Session session = Session.createRandomSession();
+            HttpSession session = Session.createRandomSession();
             manager.add(session);
             session.setAttribute("user", user.getAccount());
             header.setCookie(HttpCookie.ofJSessionId(session.getId()));

@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.controller.LoginController;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,13 +17,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("로그인 컨트롤러 테스트")
-class LoginControllerTest {
+class PostLoginControllerTest {
 
-    private LoginController loginController;
+    private PostLoginController postLoginController;
 
     @BeforeEach
     void setUp() {
-        loginController = new LoginController();
+        postLoginController = new PostLoginController();
     }
 
     @DisplayName("로그인 요청일 경우, 로그인을 시도한다.")
@@ -35,7 +34,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request);
+        HttpResponse httpResponse = postLoginController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
@@ -79,7 +78,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request);
+        HttpResponse httpResponse = postLoginController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

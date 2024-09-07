@@ -18,22 +18,19 @@ import org.apache.coyote.http11.request.RequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 
-public class LoginController implements Controller {
+public class PostLoginController implements Controller {
 
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
     private final InMemoryUserRepository userRepository;
 
-    public LoginController() {
+    public PostLoginController() {
         userRepository = new InMemoryUserRepository();
     }
 
     @Override
     public HttpResponse run(HttpRequest request) {
-        if (request.isBodyEmpty()) {
-            return redirectLoginPage();
-        }
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
@@ -51,13 +48,6 @@ public class LoginController implements Controller {
             return redirectDefaultPage(header);
         }
         return redirectUnauthorizedPage();
-    }
-
-    private HttpResponse redirectLoginPage() {
-        ResponseHeader header = new ResponseHeader();
-        header.setLocation("/login.html");
-        header.setContentType(MimeType.HTML);
-        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private Map<String, String> parseBody(String query) {

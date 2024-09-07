@@ -1,7 +1,8 @@
 package org.apache.coyote.controller;
 
-import com.techcourse.controller.LoginController;
+import com.techcourse.controller.GetLoginController;
 import com.techcourse.controller.NotFoundController;
+import com.techcourse.controller.PostLoginController;
 import com.techcourse.controller.RegisterController;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -10,9 +11,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestKey;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.util.FileExtension;
@@ -22,11 +25,13 @@ import org.slf4j.LoggerFactory;
 public class FrontController {
 
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
-    private final Map<String, Controller> controllers = new HashMap<>();
+    private final Map<RequestKey, Controller> controllers = new HashMap<>();
 
     public FrontController() {
-        controllers.put("/login", new LoginController());
-        controllers.put("/register", new RegisterController());
+        controllers.put(new RequestKey(HttpMethod.GET, "/login"), new GetLoginController());
+        controllers.put(new RequestKey(HttpMethod.POST, "/login"), new PostLoginController());
+        controllers.put(new RequestKey(HttpMethod.GET, "/register"), new RegisterController());
+        controllers.put(new RequestKey(HttpMethod.POST, "/register"), new RegisterController());
     }
 
     public HttpResponse dispatch(HttpRequest request) {
@@ -47,7 +52,7 @@ public class FrontController {
                 return new HttpResponse(HttpStatusCode.OK, header, "No File Found".getBytes());
             }
         }
-        Controller controller = getController(path);
+        Controller controller = getController(request.getMethod(), path);
         return controller.run(request);
     }
 
@@ -64,11 +69,11 @@ public class FrontController {
         }
     }
 
-    public Controller getController(String path) {
-        Controller controller = controllers.get(path);
+    public Controller getController(HttpMethod method, String path) {
+        Controller controller = controllers.get(new RequestKey(method, path));
         if (controller == null) {
             return new NotFoundController();
         }
-        return controllers.get(path);
+        return controller;
     }
 }

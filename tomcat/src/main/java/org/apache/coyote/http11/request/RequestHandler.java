@@ -12,7 +12,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class RequestHandler {
-	private HttpRequest httpRequest;
+
+	private final HttpRequest httpRequest;
 	private final OutputStream outputStream;
 
 	public RequestHandler(HttpRequest httpRequest, OutputStream outputStream) {

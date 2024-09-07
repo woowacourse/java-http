@@ -57,11 +57,9 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        URL url = getClass().getClassLoader().getResource(fileName);
-        File file = new File(url.getPath());
+        final URL url = getClass().getClassLoader().getResource(fileName);
+        final File file = new File(url.getPath());
         final Path path = file.toPath();
-        // TODO: 왜 아래와 같이 하면 테스트가 통과하지 않을까? File 클래스를 꼭 써야하는 이유는?
-        // Path path = Paths.get(url.getPath());
 
         // todo
         final List<String> actual = Files.readAllLines(path);

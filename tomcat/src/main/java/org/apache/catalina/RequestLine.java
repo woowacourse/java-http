@@ -18,9 +18,17 @@ public class RequestLine {
         String[] requestLineEntries = requestLine.split(" ");
 
         this.httpMethod = HttpMethod.valueOf(requestLineEntries[0]);
-        this.path = requestLineEntries[1];
+        this.queryParams = mapQueryParam(requestLineEntries[1]);
+        this.path = mapPath(requestLineEntries[1]);
         this.versionOfProtocol = requestLineEntries[2];
-        this.queryParams = mapQueryParam();
+    }
+
+    private String mapPath(String path) {
+        if (!queryParams.isEmpty()) {
+            int queryStringIndex = path.indexOf("?");
+            return path.substring(0, queryStringIndex);
+        }
+        return path;
     }
 
     public boolean isMethod(HttpMethod httpMethod) {
@@ -32,21 +40,21 @@ public class RequestLine {
     }
 
     public boolean hasQueryParam() {
-        return path.contains("?");
+        return !queryParams.isEmpty();
     }
 
     public String getQueryParam(String paramName) {
         return queryParams.get(paramName);
     }
 
-    private Map<String, String> mapQueryParam() {
+    private Map<String, String> mapQueryParam(String requestLineEntry) {
         Map<String, String> mappedQueryParams = new HashMap<>();
-        if (!path.contains("?")) {
+        if (!requestLineEntry.contains(QUERY_INDICATOR)) {
             return mappedQueryParams;
         }
 
-        int queryParamIndex = path.indexOf(QUERY_INDICATOR);
-        String queryString = path.substring(queryParamIndex + 1);
+        int queryParamIndex = requestLineEntry.indexOf(QUERY_INDICATOR);
+        String queryString = requestLineEntry.substring(queryParamIndex + 1);
         String[] splittedQueryString = queryString.split(QUERY_COMPONENT_DELIMITER);
 
         for (String queryParamEntry : splittedQueryString) {

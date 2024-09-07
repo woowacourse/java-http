@@ -7,9 +7,9 @@ import org.apache.coyote.http11.domain.body.ContentType;
 
 public class ResponseHeader {
 
-    public static final String HEADER_DELIMITER = "\n";
+    public static final String HEADER_DELIMITER = "\r\n";
     private static final String HEADER_COMBINATOR = ": ";
-    private static final String ENCODING_TYPE = ";charset=utf-8;";
+    private static final String ENCODING_TYPE = ";charset=utf-8";
 
     private final Map<String, String> headers;
 
@@ -29,7 +29,7 @@ public class ResponseHeader {
     public String toCombinedHeader() {
         return headers.entrySet()
                 .stream()
-                .map(entry -> entry.getKey() + HEADER_COMBINATOR + entry.getValue())
+                .map(entry -> entry.getKey() + HEADER_COMBINATOR + entry.getValue() + " ")
                 .collect(Collectors.joining(HEADER_DELIMITER));
     }
 }

@@ -18,7 +18,7 @@ public class HttpResponse {
 
     public byte[] combineResponseToBytes() {
         String response = String.join("\r\n",
-                responseLine.toCombinedResponse(),
+                responseLine.toCombinedResponse() + " ",
                 header.toCombinedHeader(),
                 "",
                 responseBody.getBody());

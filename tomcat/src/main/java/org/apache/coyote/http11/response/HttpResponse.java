@@ -92,11 +92,4 @@ public class HttpResponse {
         }
         return String.join(LINE_SEPARATOR, formattedHeaders);
     }
-
-//    public void addSession(Session session) {
-//        if (headers.containsKey("JSESSIONID")) {
-//            return;
-//        }
-//        headers.put("JSESSIONID", session.getId());
-//    }
 }

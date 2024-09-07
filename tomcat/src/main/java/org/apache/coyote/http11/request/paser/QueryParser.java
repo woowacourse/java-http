@@ -8,7 +8,7 @@ public abstract class QueryParser {
 
     private final Map<String, String> parsedQueries;
 
-    public QueryParser(String query) {
+    protected QueryParser(String query) {
         this.parsedQueries = parse(query);
     }
 

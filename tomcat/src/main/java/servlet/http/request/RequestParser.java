@@ -16,9 +16,6 @@ public class RequestParser {
 
     private RequestLine getRequestLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
-        if (requestLine == null) {
-            throw new IllegalArgumentException("Request line은 필수입니다.");
-        }
         return new RequestLine(requestLine);
     }
 

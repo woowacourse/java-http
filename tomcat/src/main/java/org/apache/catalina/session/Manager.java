@@ -1,5 +1,6 @@
 package org.apache.catalina.session;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -27,7 +28,7 @@ public interface Manager {
      *
      * @param session Session to be added
      */
-    void add(Session session);
+    void add(HttpSession session);
 
     /**
      * Return the active Session, associated with this Manager, with the
@@ -43,12 +44,12 @@ public interface Manager {
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    Session findSession(String id);
+    HttpSession findSession(String id);
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
      * @param session Session to be removed
      */
-    void remove(Session session);
+    void remove(HttpSession session);
 }

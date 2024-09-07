@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -96,11 +97,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private boolean isLoginUser(String sessionId) {
-        Session session = SESSION_MANAGER.findSession(sessionId);
-        if (session == null) {
-            return false;
-        }
-        return session.contains("user");
+        HttpSession session = SESSION_MANAGER.findSession(sessionId);
+        return session != null && session.getAttribute("user") != null;
     }
 
     private HttpResponse getFileResponse(String requestPath) {

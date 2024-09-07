@@ -105,7 +105,7 @@ class Http11ProcessorTest {
         @Test
         void loginSuccess() {
             String sessionId = "sessionId";
-            Session session = new Session(sessionId);
+            Session session = new Session(sessionId, true);
             String body = String.format("account=%s&password=%s", account, password);
             int contentLength = body.getBytes().length;
             String httpRequest = String.join("\r\n",
@@ -132,7 +132,7 @@ class Http11ProcessorTest {
         @Test
         void loginFail() {
             String sessionId = "sessionId";
-            Session session = new Session(sessionId);
+            Session session = new Session(sessionId, true);
             String body = String.format("account=%s&password=%s", "invalid account", "password");
             int contentLength = body.getBytes().length;
             String httpRequest = String.join("\r\n",
@@ -161,10 +161,8 @@ class Http11ProcessorTest {
         @DisplayName("회원 가입 시 올바르게 응답을 보낸다.")
         @Test
         void register() {
-            String sessionId = "sessionId";
             String account = "account";
             User user = new User(account, "password", "kkk@gmail.com");
-            Session session = new Session(sessionId);
             String body = "account=account&password=password&email=kkk@gmail.com";
             int contentLength = body.getBytes().length;
             String httpRequest = String.join("\r\n",
@@ -176,7 +174,7 @@ class Http11ProcessorTest {
                     body);
 
             StubSocket socket = new StubSocket(httpRequest);
-            Http11Processor processor = new Http11Processor(socket, () -> session);
+            Http11Processor processor = new Http11Processor(socket, new UuidSessionGenerator());
 
             processor.process(socket);
 

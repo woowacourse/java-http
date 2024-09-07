@@ -18,7 +18,7 @@ public class HttpRequestParser {
     private HttpRequestParser() {
     }
 
-    public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         HttpRequestLine requestLine = new HttpRequestLine(bufferedReader.readLine());
         Map<String, String> headers = new HashMap<>();
         String line = bufferedReader.readLine();

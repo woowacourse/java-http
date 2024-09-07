@@ -38,9 +38,9 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            InputStreamReader reader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(reader);
+             final var outputStream = connection.getOutputStream();
+             final InputStreamReader reader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(reader)) {
 
             HttpRequestFirstLine firstLine = new HttpRequestFirstLine(bufferedReader.readLine());
             String requestURL = firstLine.getUrl();

@@ -37,6 +37,10 @@ public class HttpRequestStartLine {
         return query.findByKey(key);
     }
 
+    public boolean hasQuery() {
+        return query != null;
+    }
+
     public String getMethod() {
         return method;
     }

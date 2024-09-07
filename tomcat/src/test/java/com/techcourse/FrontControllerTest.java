@@ -7,6 +7,8 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestStartLine;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.view.ViewResolver;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +16,26 @@ class FrontControllerTest {
 
     @Nested
     class 로그인 {
+
+        @Test
+        void 쿼리가_없으면_로그인_페이지를_반환한다() {
+            // given
+            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+                    "GET /login HTTP/1.1 ");
+            HttpRequest request = new HttpRequest(startLine, null, null);
+            HttpResponse response = new HttpResponse();
+            FrontController controller = FrontController.getInstance();
+
+            // when
+            controller.service(request, response);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.getCode()).isEqualTo(HttpStatus.OK.getCode()),
+                    () -> assertThat(response.getView().getContent()).isEqualTo(ViewResolver.getView("login.html").getContent())
+            );
+        }
+
 
         @Test
         void 로그인에_성공하면_302를_반환한다() {

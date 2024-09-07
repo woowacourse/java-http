@@ -32,6 +32,10 @@ public class HttpRequest {
         return startLine.findQuery(key);
     }
 
+    public boolean hasQuery() {
+        return startLine.hasQuery();
+    }
+
     public String getBody() {
         return body;
     }

@@ -13,14 +13,8 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpResponse(HttpStatus status, HttpHeaders headers, View view) {
-        this.status = status;
-        this.headers = headers;
-        this.view = view;
-    }
-
-    public boolean isError() {
-        return status != null && status.isClientError();
+    public void addHeader(String key, String value) {
+        headers.add(key, value);
     }
 
     public byte[] getBytes() {

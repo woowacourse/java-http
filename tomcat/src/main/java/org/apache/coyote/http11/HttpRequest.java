@@ -81,7 +81,7 @@ public class HttpRequest {
 
     public boolean hasFilePath() {
         if (path.contains(".")) {
-            int extensionIndex = path.indexOf(".");
+            int extensionIndex = path.lastIndexOf(".");
             if (path.substring(extensionIndex).length() > 1) {
                 return true;
             }

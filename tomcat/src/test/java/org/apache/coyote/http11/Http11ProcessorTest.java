@@ -62,7 +62,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("css 파일 요청을 보내면 적절한 Conte")
+    @DisplayName("css 파일 요청을 보내면 적절한 css 파일을 응답 본문에 반환한다.")
     @Test
     void cssContentType() throws IOException {
         // given

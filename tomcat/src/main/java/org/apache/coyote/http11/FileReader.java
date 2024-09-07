@@ -8,17 +8,18 @@ import java.nio.file.Paths;
 
 public class FileReader {
 
+    private static final String PREFIX_STATIC_RESOURCES = "/static/";
     private static final String DEFAULT_FILE_NAME = "default.html";
 
     public static String readResourceFile() throws URISyntaxException, IOException {
-        URL resource = FileReader.class.getResource("/static/" + DEFAULT_FILE_NAME);
+        URL resource = FileReader.class.getResource(PREFIX_STATIC_RESOURCES + DEFAULT_FILE_NAME);
         return Files.readString(Paths.get(resource.toURI()));
     }
 
     public static String readResourceFile(String fileName) throws URISyntaxException, IOException {
-        URL resource = FileReader.class.getResource("/static/" + fileName);
+        URL resource = FileReader.class.getResource(PREFIX_STATIC_RESOURCES + fileName);
         if (resource == null) {
-            resource = FileReader.class.getResource("/static/" + DEFAULT_FILE_NAME);
+            resource = FileReader.class.getResource(PREFIX_STATIC_RESOURCES + DEFAULT_FILE_NAME);
         }
         return Files.readString(Paths.get(resource.toURI()));
     }

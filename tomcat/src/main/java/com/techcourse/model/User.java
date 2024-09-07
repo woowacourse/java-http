@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import java.util.Map;
+
 public class User {
 
     private final Long id;
@@ -24,6 +26,13 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public Map<String, Object> toMap() {
+        return Map.of(
+                "id", id,
+                "account", account,
+                "email", email);
     }
 
     @Override

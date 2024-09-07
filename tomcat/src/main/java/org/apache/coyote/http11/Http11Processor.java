@@ -1,18 +1,23 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.coyote.Processor;
+import org.apache.coyote.controller.Controller;
+import org.apache.coyote.handler.HandlerMapping;
+import org.apache.coyote.view.ViewResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpRequestReceiver httpRequestReceiver = new HttpRequestReceiver();
+    private final HandlerMapping handlerMapping = new HandlerMapping();
+    private final ViewResolver viewResolver = new ViewResolver();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -29,19 +34,23 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpRequest request = httpRequestReceiver.receiveRequest(inputStream);
+            String response = getResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e, this);
         }
+    }
+
+    private String getResponse(HttpRequest request) throws IOException {
+        Controller controller = handlerMapping.getController(request.header());
+        if (controller != null) {
+            HttpResponse httpResponse = controller.process(request);
+            return httpResponse.toString();
+        }
+
+        return viewResolver.resolve(request.header());
     }
 }

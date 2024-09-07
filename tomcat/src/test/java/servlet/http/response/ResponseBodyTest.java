@@ -9,7 +9,7 @@ class ResponseBodyTest {
     @Test
     void ResponseBody를_조립한다() {
         // given
-        ResponseBody responseBody =ResponseBody.create();
+        ResponseBody responseBody = new ResponseBody();
         responseBody.setBody("Hello, World!");
 
         // when

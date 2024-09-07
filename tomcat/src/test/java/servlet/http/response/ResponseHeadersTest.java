@@ -9,7 +9,7 @@ class ResponseHeadersTest {
     @Test
     void ResponseHeaders를_조립한다() {
         // given
-        ResponseHeaders responseHeaders = ResponseHeaders.create();
+        ResponseHeaders responseHeaders = new ResponseHeaders();
         responseHeaders.contentType("text/html");
         responseHeaders.contentLength(1024);
 
@@ -29,7 +29,7 @@ class ResponseHeadersTest {
     @Test
     void 쿠키가_있다면_Set_Cookie_헤더도_함께_조립한다() {
         // given
-        ResponseHeaders responseHeaders = ResponseHeaders.create();
+        ResponseHeaders responseHeaders = new ResponseHeaders();
         responseHeaders.contentType("text/html");
         responseHeaders.contentLength(1024);
         responseHeaders.setJsessionid("656cef62-e3c4-40bc-a8df-94732920ed46");

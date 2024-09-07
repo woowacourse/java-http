@@ -10,7 +10,7 @@ class ResponseLineTest {
     @Test
     void ResponseLine을_조립한다() {
         // given
-        ResponseLine responseLine = ResponseLine.create();
+        ResponseLine responseLine = new ResponseLine();
         responseLine.setStatusCode(StatusCode.OK);
 
         // when

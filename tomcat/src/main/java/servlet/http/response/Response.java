@@ -13,6 +13,10 @@ public class Response {
 
     private String viewName;
 
+    protected Response() {
+        this(new ResponseLine(), new ResponseHeaders(), new ResponseBody());
+    }
+
     private Response(ResponseLine responseLine, ResponseHeaders responseHeaders, ResponseBody responseBody) {
         this.responseLine = responseLine;
         this.responseHeaders = responseHeaders;
@@ -20,9 +24,9 @@ public class Response {
     }
 
     public static Response create() {
-        ResponseLine responseLine = ResponseLine.create();
-        ResponseHeaders responseHeaders = ResponseHeaders.create();
-        ResponseBody responseBody = ResponseBody.create();
+        ResponseLine responseLine = new ResponseLine();
+        ResponseHeaders responseHeaders = new ResponseHeaders();
+        ResponseBody responseBody = new ResponseBody();
         return new Response(responseLine, responseHeaders, responseBody);
     }
 

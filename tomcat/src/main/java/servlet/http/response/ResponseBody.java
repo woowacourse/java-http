@@ -6,12 +6,12 @@ public class ResponseBody implements Assemblable {
 
     private String body;
 
-    private ResponseBody(String body) {
-        this.body = body;
+    protected ResponseBody() {
+        this(EMPTY_BODY);
     }
 
-    protected static ResponseBody create() {
-        return new ResponseBody(EMPTY_BODY);
+    private ResponseBody(String body) {
+        this.body = body;
     }
 
     protected void setBody(String body) {

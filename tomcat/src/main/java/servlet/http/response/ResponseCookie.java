@@ -12,12 +12,12 @@ public class ResponseCookie implements Assemblable {
 
     private final Map<String, String> cookies;
 
-    private ResponseCookie(Map<String, String> cookies) {
-        this.cookies = cookies;
+    protected ResponseCookie() {
+        this(new HashMap<>());
     }
 
-    protected static ResponseCookie create() {
-        return new ResponseCookie(new HashMap<>());
+    private ResponseCookie(Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 
     protected void setJsessionid(String jsessionid) {

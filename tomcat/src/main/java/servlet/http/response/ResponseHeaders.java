@@ -11,13 +11,13 @@ public class ResponseHeaders implements Assemblable {
 
     private final ResponseCookie responseCookie;
 
+    protected ResponseHeaders() {
+        this(new LinkedHashMap<>(), new ResponseCookie());
+    }
+
     private ResponseHeaders(Map<String, String> headers, ResponseCookie responseCookie) {
         this.headers = headers;
         this.responseCookie = responseCookie;
-    }
-
-    protected static ResponseHeaders create() {
-        return new ResponseHeaders(new LinkedHashMap<>(), ResponseCookie.create());
     }
 
     protected void contentType(String contentType) {

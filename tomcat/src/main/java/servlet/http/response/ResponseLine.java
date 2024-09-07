@@ -6,12 +6,12 @@ public class ResponseLine implements Assemblable {
 
     private StatusCode statusCode;
 
-    private ResponseLine(StatusCode statusCode) {
-        this.statusCode = statusCode;
+    protected ResponseLine() {
+        this(StatusCode.OK);
     }
 
-    protected static ResponseLine create() {
-        return new ResponseLine(StatusCode.OK);
+    private ResponseLine(StatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 
     protected void setStatusCode(StatusCode statusCode) {

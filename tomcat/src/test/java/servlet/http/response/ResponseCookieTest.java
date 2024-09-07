@@ -9,7 +9,7 @@ class ResponseCookieTest {
     @Test
     void ResponseCookie를_조립한다() {
         // given
-        ResponseCookie responseCookie = ResponseCookie.create();
+        ResponseCookie responseCookie = new ResponseCookie();
         responseCookie.setJsessionid("656cef62-e3c4-40bc-a8df-94732920ed46");
 
         // when

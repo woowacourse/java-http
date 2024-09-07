@@ -9,9 +9,11 @@ public enum ContentType {
     ;
 
     private String value;
+    private String type;
 
     ContentType(String value) {
         this.value = value;
+        this.type = value.substring(value.indexOf("/") + 1);
     }
 
     public String getValue() {
@@ -19,7 +21,7 @@ public enum ContentType {
     }
 
     public String getType() {
-        return value.substring(value.indexOf("/") + 1);
+        return type;
     }
 
     public static ContentType findByUrl(String url) {

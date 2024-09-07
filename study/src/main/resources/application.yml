@@ -1,9 +1,16 @@
-handlebars:
-  suffix: .html
-
 server:
   tomcat:
     accept-count: 1
     max-connections: 1
     threads:
       max: 2
+      min-spare: 2
+  compression:
+    enabled: true
+    mime-types: text/html
+    min-response-size: 1B
+spring:
+  mvc:
+    view:
+      suffix: .html
+

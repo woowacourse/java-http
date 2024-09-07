@@ -1,6 +1,9 @@
 package cache.com.example;
 
-import cache.com.example.version.ResourceVersion;
+import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +13,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.time.Duration;
-
-import static cache.com.example.version.CacheBustingWebConfig.PREFIX_STATIC_RESOURCES;
+import cache.com.example.version.ResourceVersion;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GreetingControllerTest {
@@ -68,10 +69,8 @@ class GreetingControllerTest {
     }
 
     /**
-     * http://localhost:8080/resource-versioning
-     * 위 url의 html 파일에서 사용하는 js, css와 같은 정적 파일에 캐싱을 적용한다.
-     * 보통 정적 파일을 캐싱 무효화하기 위해 캐싱과 함께 버전을 적용시킨다.
-     * 정적 파일에 변경 사항이 생기면 배포할 때 버전을 바꿔주면 적용된 캐싱을 무효화(Caching Busting)할 수 있다.
+     * http://localhost:8080/resource-versioning 위 url의 html 파일에서 사용하는 js, css와 같은 정적 파일에 캐싱을 적용한다. 보통 정적 파일을 캐싱 무효화하기
+     * 위해 캐싱과 함께 버전을 적용시킨다. 정적 파일에 변경 사항이 생기면 배포할 때 버전을 바꿔주면 적용된 캐싱을 무효화(Caching Busting)할 수 있다.
      */
     @Test
     void testCacheBustingOfStaticResources() {

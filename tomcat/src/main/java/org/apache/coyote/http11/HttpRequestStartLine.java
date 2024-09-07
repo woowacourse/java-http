@@ -31,6 +31,10 @@ public class HttpRequestStartLine {
         return new HttpRequestStartLine(split[0], uri, split[2], path, httpQuery);
     }
 
+    public String findQuery(String key) {
+        return query.findByKey(key);
+    }
+
     public String getMethod() {
         return method;
     }
@@ -49,10 +53,6 @@ public class HttpRequestStartLine {
 
     public HttpQuery getQuery() {
         return query;
-    }
-
-    public String findQuery(String key) {
-        return query.findByKey(key);
     }
 
     @Override

@@ -24,9 +24,9 @@ public enum ContentType {
         return type;
     }
 
-    public static ContentType findByUrl(String url) {
+    public static ContentType findByPath(String path) {
         return Arrays.stream(values())
-                .filter(contentType -> url.endsWith(contentType.getType()))
+                .filter(contentType -> path.endsWith(contentType.getType()))
                 .findAny()
                 .orElse(HTML);
     }

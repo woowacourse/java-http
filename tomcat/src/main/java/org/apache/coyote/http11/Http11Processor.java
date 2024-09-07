@@ -60,58 +60,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(HttpRequest request) throws IOException {
-        /**
-         * 지금은 모든 응답에 정적 페이지를 넣어주기 때문에 여기서 처리해도 될듯
-         *  ~~또한 굳이 응답 객체를 컨트롤러에서 생성할 이유가 안보임~~
-         *      -> 응답 코드 생성을 컨트롤러에서 처리해야기 때문에 응답 객체를 컨트롤러에서 생성해야함
-         *
-         *  응답 객체의 생성은 어디서 해야할까?
-         *      -> Processor가 하는게 맞을 것 같다. 이유는 요청 객체도 여기서 생성하기 때문에
-         *      요청과 응답 객체 생성의 책임을 한 곳으로 통일하는게 유지보수에 더 좋을 것 같기 떄문.
-         */
         HttpResponse response = new HttpResponse();
-
         FrontController.service(request, response);
-
-        if (response.isError()) { // TODO 중복 코드 리팩터링
-            String responseBody = createResponseBody(ContentType.HTML, "/" + response.getCode() + ".html");
-            response.setBody(responseBody);
-            Map<String, String> responseHeader = createResponseHeader(ContentType.HTML, responseBody.getBytes().length);
-            response.setHeaders(responseHeader);
-            return response;
-        }
-
-        // 정적 파일을 응답
-        String path = request.getPath();
-        ContentType contentType = ContentType.findByUrl(path);
-
-        String responseBody = createResponseBody(contentType, path);
-        Map<String, String> responseHeader = createResponseHeader(contentType, responseBody.getBytes().length);
-
-        response.setHeaders(responseHeader);
-        response.setBody(responseBody);
-
         return response;
-    }
-
-    private String createResponseBody(ContentType contentType, String url) throws IOException {
-        String resourceUrl = getResourceUrl(contentType, url);
-        URL resource = Http11Processor.class.getClassLoader().getResource(resourceUrl);
-        File file = new File(resource.getFile());
-        return new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-    }
-
-    private String getResourceUrl(ContentType contentType, String rawUrl) {
-        if (rawUrl.contains(".")) {
-            return "static" + rawUrl;
-        }
-        return "static" + rawUrl + "." + contentType.getType();
-    }
-
-    private Map<String, String> createResponseHeader(ContentType contentType, int length) {
-        Map<String, String> header = new LinkedHashMap<>();
-        header.put("Content-Type", contentType.getValue() + ";" + "charset=utf-8 ");
-        header.put("Content-Length", length + " ");
-        return header;
     }
 }

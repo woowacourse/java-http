@@ -1,6 +1,12 @@
 package com.techcourse.model;
 
-public class User {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class User implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final Long id;
     private final String account;
@@ -16,6 +22,10 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    public User withId(Long id) {
+        return new User(id, account, password, email);
     }
 
     public boolean checkPassword(String password) {

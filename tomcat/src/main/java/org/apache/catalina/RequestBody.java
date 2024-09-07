@@ -18,7 +18,7 @@ public class RequestBody {
 
         int contentLength = Integer.parseInt(bodyLength);
         char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
+        bufferedReader.read(buffer, 0, contentLength);
         String bodyLine = new String(buffer);
 
         String[] bodyElements = bodyLine.split("&");

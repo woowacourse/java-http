@@ -45,13 +45,11 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse(httpRequest, ResourceType.NON_STATIC);
 
-            if (httpRequest.isMethod(HttpMethod.GET)) {  // TODO: 404 추가하기
-                // 정적 파일인 경우
+            if (httpRequest.isMethod(HttpMethod.GET)) {
                 if (httpRequest.isStaticRequest()) {
                     httpResponse = new HttpResponse(httpRequest, ResourceType.STATIC);
                 }
 
-                // 정적 파일이 아닌 경우
                 if (!httpRequest.isStaticRequest()) {
                     if (httpRequest.isPath("/")) {
                         httpResponse.setStatusCode(StatusCode._200);
@@ -59,8 +57,7 @@ public class Http11Processor implements Runnable, Processor {
                     }
 
                     if (httpRequest.isPath("/login")) {
-                        // session이 있는 경우 다른 설정은 하지 않고, 쿠키에 그 세션 아이디를 넣어주고 리다이렉션한다.
-                        if (httpRequest.hasSession() && sessionManager.isSessionExist(httpRequest.getJESSIONID())) {  // TODO: 객체에게 옮기기
+                        if (httpRequest.hasSession() && sessionManager.isSessionExist(httpRequest.getJESSIONID())) {
                             httpResponse.setStatusCode(StatusCode._302);
                             httpResponse.setHeader(HeaderName.LOCATION, "/index.html");
                         }

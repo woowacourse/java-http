@@ -14,7 +14,7 @@ public class HttpResponse {
     private final StatusLine statusLine;
     private final Map<String, String> header;
     private final HttpCookie cookie;
-    private String body; // TODO: final 적용
+    private String body;
 
     public HttpResponse(HttpRequest httpRequest, ResourceType resourceType) throws IOException {
         this.statusLine = new StatusLine();

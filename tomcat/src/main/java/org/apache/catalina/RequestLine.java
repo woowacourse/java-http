@@ -41,6 +41,9 @@ public class RequestLine {
 
     private Map<String, String> mapQueryParam() {
         Map<String, String> mappedQueryParams = new HashMap<>();
+        if (!path.contains("?")) {
+            return mappedQueryParams;
+        }
 
         int queryParamIndex = path.indexOf(QUERY_INDICATOR);
         String queryString = path.substring(queryParamIndex + 1);

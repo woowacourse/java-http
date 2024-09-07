@@ -111,8 +111,8 @@ public class Http11Processor implements Runnable, Processor {
         log.info("user: {}", user);
         response.sendRedirection("/index.html");
 
-        UUID jSessionId = UUID.randomUUID();
-        Session session = new Session(jSessionId.toString());
+        String jSessionId = UUID.randomUUID().toString();
+        Session session = new Session(jSessionId);
         session.setAttribute("user", user);
         SessionManager.addSession(session.getId(), session);
         response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);

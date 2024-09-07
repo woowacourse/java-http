@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +11,8 @@ public class HttpQuery {
     private static final String pairRegex = "([a-zA-Z0-9]+)=([a-zA-Z0-9]+)";
     private static final Pattern pattern = Pattern.compile(regex);
     private static final Pattern pairPattern = Pattern.compile(pairRegex);
+    private static final String QUERY_START_CHAR = "?";
+    private static final String QUERY_DELIMITER = "&";
 
     private final Map<String, String> store;
 
@@ -19,14 +21,23 @@ public class HttpQuery {
     }
 
     public static HttpQuery createByUri(String uri) {
+        validateUri(uri);
+        Map<String, String> queryMap = createQueryMap(uri);
+        return new HttpQuery(queryMap);
+    }
+
+    private static void validateUri(String uri) {
         Matcher matcher = pattern.matcher(uri);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("잘못된 형식의 요청 쿼리입니다. = " + uri);
         }
-        Map<String, String> queryMap = new LinkedHashMap<>();
-        String queries = uri.substring(uri.indexOf("?") + 1);
-        validateQueryChracter(uri);
-        for (String query : queries.split("&")) {
+    }
+
+    private static Map<String, String> createQueryMap(String uri) {
+        Map<String, String> queryMap = new HashMap<>();
+        String queries = uri.substring(uri.indexOf(QUERY_START_CHAR) + 1);
+        validateQueryCharacter(uri);
+        for (String query : queries.split(QUERY_DELIMITER)) {
             Matcher pairMatcher = pairPattern.matcher(query);
             while (pairMatcher.find()) {
                 String key = pairMatcher.group(1);
@@ -34,11 +45,11 @@ public class HttpQuery {
                 queryMap.put(key, value);
             }
         }
-        return new HttpQuery(queryMap);
+        return queryMap;
     }
 
-    private static void validateQueryChracter(String uri) {
-        if (!uri.contains("?")) {
+    private static void validateQueryCharacter(String uri) {
+        if (!uri.contains(QUERY_START_CHAR)) {
             throw new IllegalArgumentException("쿼리가 존재하지 않습니다.");
         }
     }

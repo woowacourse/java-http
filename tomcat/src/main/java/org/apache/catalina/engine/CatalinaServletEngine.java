@@ -17,13 +17,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.catalina.connector.http.HttpCookie;
 import org.apache.catalina.connector.http.HttpResponse;
 import org.apache.catalina.connector.http.HttpStatus;
-import org.apache.coyote.http11.RequestLine;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.coyote.http11.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +36,7 @@ public class CatalinaServletEngine {
 
     public static void processRequest(Map<RequestLine, String> requestLine, Map<String, String> headers, String body, HttpResponse response) {
         if (requestLine.get(REQUEST_URI).equals("/")) {
-            String contentType = probeContentType("/index.html");
-            String content = findStaticFile("/index.html");
-            response.addHttpStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(content);
+            responseIndexPage(HttpStatus.OK, response);
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("GET")) {
@@ -49,33 +45,22 @@ public class CatalinaServletEngine {
             String sessionId = httpCookie.get("JSESSIONID");
             Session session = sessionManager.findSession(sessionId);
             if (Objects.nonNull(session)) {
-                response.addHttpStatus(HttpStatus.FOUND);
-                response.addHeader("Location", "/index.html");
-                response.addHeader("Content-Type", probeContentType("/index.html"));
-                response.setBody(findStaticFile("/index.html"));
+                responseIndexPage(HttpStatus.FOUND, response);
                 return;
             }
-            String contentType = probeContentType("/login.html");
-            String content = findStaticFile("/login.html");
-            response.addHttpStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(content);
+            responseLoginPage(response);
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("POST")) {
-            responseLogin(headers, body, response);
+            login(headers, body, response);
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("GET")) {
-            String contentType = probeContentType("/register.html");
-            String content = findStaticFile("/register.html");
-            response.addHttpStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(content);
+            responseRegisterPage(response);
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("POST")) {
-            responseRegister(body, response);
+            register(body, response);
             return;
         }
         String content = findStaticFile(requestLine.get(REQUEST_URI));
@@ -85,6 +70,29 @@ public class CatalinaServletEngine {
             response.addHeader("Content-Type", contentType);
             response.setBody(content);
         }
+    }
+
+    private static void responseIndexPage(HttpStatus httpStatus, HttpResponse response) {
+        response.addHttpStatus(httpStatus);
+        response.addHeader("Location", "/index.html");
+        response.addHeader("Content-Type", probeContentType("/index.html"));
+        response.setBody(findStaticFile("/index.html"));
+    }
+
+    private static void responseLoginPage(HttpResponse response) {
+        String contentType = probeContentType("/login.html");
+        String content = findStaticFile("/login.html");
+        response.addHttpStatus(HttpStatus.OK);
+        response.addHeader("Content-Type", contentType);
+        response.setBody(content);
+    }
+
+    private static void responseRegisterPage(HttpResponse response) {
+        String contentType = probeContentType("/register.html");
+        String content = findStaticFile("/register.html");
+        response.addHttpStatus(HttpStatus.OK);
+        response.addHeader("Content-Type", contentType);
+        response.setBody(content);
     }
 
     private static String probeContentType(String url) {
@@ -108,29 +116,14 @@ public class CatalinaServletEngine {
         }
     }
 
-    private static void responseLogin(Map<String, String> headers, String body, HttpResponse response) {
-        try {
-            Map<String, String> queryString = parseQueryStringType(body);
-            HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
-            login(httpCookie, queryString, response);
-        } catch (RuntimeException e) {
-            response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader("Location", "/404.html");
-            response.addHeader("Content-Type", probeContentType("/404.html"));
-            response.setBody(findStaticFile("/404.html"));
-        }
-    }
-
-    private static void login(HttpCookie httpCookie, Map<String, String> queryString, HttpResponse response) {
+    private static void login(Map<String, String> headers, String body, HttpResponse response) {
+        Map<String, String> queryString = parseQueryStringType(body);
+        HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
         String account = queryString.get("account");
         String password = queryString.get("password");
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isEmpty()) {
-            log.error("inputAccount={}, 해당하는 사용자를 찾을 수 없습니다.", account);
-            response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader("Location", "/404.html");
-            response.addHeader("Content-Type", probeContentType("/404.html"));
-            response.setBody(findStaticFile("/404.html"));
+            loginWithInvalidAccount(response, account);
             return;
         }
         User user = optionalUser.get();
@@ -138,6 +131,18 @@ public class CatalinaServletEngine {
             normalLogin(httpCookie, response, user);
             return;
         }
+        loginWithInvalidPassword(response, user, password);
+    }
+
+    private static void loginWithInvalidAccount(HttpResponse response, String account) {
+        log.error("inputAccount={}, 해당하는 사용자를 찾을 수 없습니다.", account);
+        response.addHttpStatus(HttpStatus.FOUND);
+        response.addHeader("Location", "/404.html");
+        response.addHeader("Content-Type", probeContentType("/404.html"));
+        response.setBody(findStaticFile("/404.html"));
+    }
+
+    private static void loginWithInvalidPassword(HttpResponse response, User user, String password) {
         log.error("user: {}, inputPassword={}, 비밀번호가 올바르지 않습니다.", user, password);
         response.addHttpStatus(HttpStatus.FOUND);
         response.addHeader("Location", "/401.html");
@@ -154,10 +159,7 @@ public class CatalinaServletEngine {
             sessionManager.add(session);
             response.addHeader("Set-Cookie", "JSESSIONID=" + session.getSessionId());
         }
-        response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader("Location", "/index.html");
-        response.addHeader("Content-Type", probeContentType("/index.html"));
-        response.setBody(findStaticFile("/index.html"));
+        responseIndexPage(HttpStatus.FOUND, response);
     }
 
     private static Map<String, String> parseQueryStringType(String queryString) {
@@ -171,36 +173,30 @@ public class CatalinaServletEngine {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
-    private static void responseRegister(String body, HttpResponse response) {
-        try {
-            Map<String, String> queryString = parseQueryStringType(body);
-            register(queryString, response);
-        } catch (RuntimeException e) {
-            response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader("Location", "/404.html");
-            response.addHeader("Content-Type", probeContentType("/404.html"));
-            response.setBody(findStaticFile("/404.html"));
-        }
-    }
-
-    private static void register(Map<String, String> queryString, HttpResponse response) {
+    private static void register(String body, HttpResponse response) {
+        Map<String, String> queryString = parseQueryStringType(body);
         String account = queryString.get("account");
         String password = queryString.get("password");
         String email = queryString.get("email");
         if (Objects.isNull(account) || Objects.isNull(password) || Objects.isNull(email)) {
-            log.error("account={}, password={}, email={}, 회원가입에 실패하였습니다.", account, password, email);
-            response.addHttpStatus(HttpStatus.FOUND);
-            response.addHeader("Location", "/404.html");
-            response.addHeader("Content-Type", probeContentType("/404.html"));
-            response.setBody(findStaticFile("/404.html"));
+            registerFailure(response, account, password, email);
             return;
         }
+        registerSuccess(response, account, password, email);
+    }
+
+    private static void registerFailure(HttpResponse response, String account, String password, String email) {
+        log.error("account={}, password={}, email={}, 회원가입에 실패하였습니다.", account, password, email);
+        response.addHttpStatus(HttpStatus.FOUND);
+        response.addHeader("Location", "/404.html");
+        response.addHeader("Content-Type", probeContentType("/404.html"));
+        response.setBody(findStaticFile("/404.html"));
+    }
+
+    private static void registerSuccess(HttpResponse response, String account, String password, String email) {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info("save user: {}", user);
-        response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader("Location", "/index.html");
-        response.addHeader("Content-Type", probeContentType("/index.html"));
-        response.setBody(findStaticFile("/index.html"));
+        responseIndexPage(HttpStatus.FOUND, response);
     }
 }

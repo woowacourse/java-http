@@ -33,13 +33,6 @@ public class HttpResponse {
         this.cookie = httpRequest.getHttpCookie();
     }
 
-    public HttpResponse() {
-        this.statusLine = new StatusLine();
-        this.header = new HashMap<>();
-        this.cookie = new HttpCookie("");
-        this.body = "";
-    }
-
     public String getReponse() {
         StringBuilder response = new StringBuilder();
 

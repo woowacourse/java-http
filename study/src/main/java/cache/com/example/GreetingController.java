@@ -1,23 +1,16 @@
 package cache.com.example;
 
-import java.time.Duration;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 @Controller
 public class GreetingController {
 
     @GetMapping("/")
-    public String index(HttpServletResponse response) {
-        String cacheControl = CacheControl
-                .noCache()
-                .cachePrivate()
-                .getHeaderValue();
-        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
+    public String index() {
         return "index.html";
     }
 
@@ -40,12 +33,7 @@ public class GreetingController {
     }
 
     @GetMapping("/resource-versioning")
-    public String resourceVersioning(HttpServletResponse response) {
-        String cacheControl = CacheControl
-                .maxAge(Duration.ofDays(365))
-                .cachePublic()
-                .getHeaderValue();
-        response.addHeader(HttpHeaders.CACHE_CONTROL, cacheControl);
+    public String resourceVersioning() {
         return "resource-versioning.html";
     }
 }

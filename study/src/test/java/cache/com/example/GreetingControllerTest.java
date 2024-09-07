@@ -36,8 +36,7 @@ class GreetingControllerTest {
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
-        // interceptor postHandle()에서 관련 헤더 삽입
-        // TODO: 상태코드 304 관련하여 더 실험해보기
+        // 해결: interceptor postHandle()에서 관련 헤더 삽입
     }
 
     @Test
@@ -54,7 +53,7 @@ class GreetingControllerTest {
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
-        // yml 파일 설정 추가
+        // 해결: yml 파일 설정 추가
     }
 
     @Test
@@ -68,6 +67,7 @@ class GreetingControllerTest {
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
+        // 해결: ShallowEtagHeaderFilter 필터 등록
     }
 
     /**

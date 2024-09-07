@@ -21,6 +21,7 @@ public class CacheBustingWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+        // 정적 자원을 제공하는 핸들러 등록
         CacheControl cacheControl = CacheControl
                 .maxAge(Duration.ofDays(365))
                 .cachePublic();

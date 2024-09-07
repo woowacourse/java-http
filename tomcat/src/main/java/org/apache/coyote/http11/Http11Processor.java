@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import org.apache.catalina.Manager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.FrontController;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,9 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Manager manager;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection, Manager manager) {
         this.connection = connection;
+        this.manager = manager;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
             FrontController frontController = new FrontController();
-            HttpResponse httpResponse = frontController.dispatch(httpRequest);
+            HttpResponse httpResponse = frontController.dispatch(httpRequest, manager);
 
             outputStream.write(httpResponse.toByte());
             outputStream.flush();

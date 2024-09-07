@@ -4,6 +4,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Manager;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.controller.Controller;
@@ -24,7 +25,7 @@ public class RegisterController implements Controller {
     }
 
     @Override
-    public HttpResponse run(HttpRequest request) {
+    public HttpResponse run(HttpRequest request, Manager manager) {
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 

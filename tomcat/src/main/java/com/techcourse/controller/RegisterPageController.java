@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.catalina.Manager;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.controller.Controller;
@@ -16,7 +17,7 @@ import org.apache.coyote.util.FileExtension;
 public class RegisterPageController implements Controller {
 
     @Override
-    public HttpResponse run(HttpRequest request) {
+    public HttpResponse run(HttpRequest request, Manager manager) {
         String resourcePath = "static/register.html";
         try {
             Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());

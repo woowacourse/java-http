@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +35,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request);
+        HttpResponse httpResponse = loginController.run(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
@@ -78,7 +79,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request);
+        HttpResponse httpResponse = loginController.run(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

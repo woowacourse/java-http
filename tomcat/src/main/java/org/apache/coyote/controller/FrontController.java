@@ -1,10 +1,10 @@
 package org.apache.coyote.controller;
 
-import com.techcourse.controller.LoginPageController;
-import com.techcourse.controller.RegisterPageController;
-import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.LoginPageController;
+import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.RegisterPageController;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.catalina.Manager;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
@@ -35,7 +36,7 @@ public class FrontController {
         controllers.put(new RequestKey(HttpMethod.POST, "/register"), new RegisterController());
     }
 
-    public HttpResponse dispatch(HttpRequest request) {
+    public HttpResponse dispatch(HttpRequest request, Manager manager) {
         log(request);
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
@@ -54,7 +55,7 @@ public class FrontController {
             }
         }
         Controller controller = getController(request.getMethod(), path);
-        return controller.run(request);
+        return controller.run(request, manager);
     }
 
     private void log(HttpRequest request) {

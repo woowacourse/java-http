@@ -11,7 +11,6 @@ import org.apache.catalina.Manager;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
 import org.apache.coyote.Session;
-import org.apache.coyote.SessionManager;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -31,7 +30,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse run(HttpRequest request) {
+    public HttpResponse run(HttpRequest request, Manager manager) {
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
@@ -43,8 +42,6 @@ public class LoginController implements Controller {
         if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
             User user = optionalUser.get();
             ResponseHeader header = new ResponseHeader();
-            Manager manager = SessionManager.getInstance();
-
             addSession(request, manager, user, header);
             return redirectDefaultPage(header);
         }

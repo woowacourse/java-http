@@ -13,8 +13,8 @@ public class Session implements HttpSession {
 
     private final String id;
     private final long creationTime;
-    private long lastAccessedTime;
     private final Map<String, Object> values = new ConcurrentHashMap<>();
+    private long lastAccessedTime;
     private int maxInactiveInterval;
     private boolean isNew;
 
@@ -50,13 +50,13 @@ public class Session implements HttpSession {
     }
 
     @Override
-    public void setMaxInactiveInterval(int interval) {
-        this.maxInactiveInterval = interval;
+    public int getMaxInactiveInterval() {
+        return maxInactiveInterval;
     }
 
     @Override
-    public int getMaxInactiveInterval() {
-        return maxInactiveInterval;
+    public void setMaxInactiveInterval(int interval) {
+        this.maxInactiveInterval = interval;
     }
 
     @Override
@@ -69,6 +69,10 @@ public class Session implements HttpSession {
     public Object getAttribute(String name) {
         updateLastAccessedTime();
         return values.get(name);
+    }
+
+    private void updateLastAccessedTime() {
+        this.lastAccessedTime = System.currentTimeMillis();
     }
 
     @Override
@@ -90,25 +94,25 @@ public class Session implements HttpSession {
     }
 
     @Override
+    public void putValue(String name, Object value) {
+        setAttribute(name, value);  // Alias for setAttribute
+    }
+
+    @Override
     public void setAttribute(String name, Object value) {
         updateLastAccessedTime();
         values.put(name, value);
     }
 
     @Override
-    public void putValue(String name, Object value) {
-        setAttribute(name, value);  // Alias for setAttribute
+    public void removeValue(String name) {
+        removeAttribute(name);
     }
 
     @Override
     public void removeAttribute(String name) {
         updateLastAccessedTime();
         values.remove(name);
-    }
-
-    @Override
-    public void removeValue(String name) {
-        removeAttribute(name);
     }
 
     @Override
@@ -119,9 +123,5 @@ public class Session implements HttpSession {
     @Override
     public boolean isNew() {
         return isNew;
-    }
-
-    private void updateLastAccessedTime() {
-        this.lastAccessedTime = System.currentTimeMillis();
     }
 }

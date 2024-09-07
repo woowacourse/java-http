@@ -6,6 +6,8 @@ import servlet.http.HttpHeader;
 
 public class RequestHeaders {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> headers;
 
     private final RequestCookies cookies;
@@ -20,6 +22,6 @@ public class RequestHeaders {
     }
 
     protected Optional<String> findJSessionId() {
-        return Optional.ofNullable(cookies.get("JSESSIONID"));
+        return Optional.ofNullable(cookies.get(JSESSIONID));
     }
 }

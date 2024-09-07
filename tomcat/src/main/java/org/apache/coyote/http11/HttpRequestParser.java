@@ -6,6 +6,8 @@ import java.util.Map;
 
 public class HttpRequestParser {
 
+    private HttpRequestParser() {}
+
     public static HttpRequest parse(String rawHttpRequest) {
 
         String[] lines = rawHttpRequest.split("\r\n");
@@ -41,8 +43,6 @@ public class HttpRequestParser {
                 queries,
                 body);
     }
-
-
 
     private static Map<String, String> handleQueries(String url) { // TODO refactor, test
         if (url.contains("?")) {

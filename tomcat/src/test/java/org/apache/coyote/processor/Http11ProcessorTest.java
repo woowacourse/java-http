@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.processor;
 
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

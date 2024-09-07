@@ -1,7 +1,9 @@
-package org.apache.catalina;
+package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.HttpMethod;
 
 public class RequestLine {
 

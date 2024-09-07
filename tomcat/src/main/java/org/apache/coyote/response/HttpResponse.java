@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.coyote.response;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,6 +6,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.coyote.http.HeaderName;
+import org.apache.coyote.coockie.HttpCookie;
+import org.apache.coyote.http.ResourceType;
+import org.apache.coyote.http.StatusCode;
+import org.apache.coyote.request.HttpRequest;
 
 public class HttpResponse {
 

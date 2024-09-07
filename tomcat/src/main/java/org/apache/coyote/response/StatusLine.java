@@ -1,4 +1,6 @@
-package org.apache.catalina;
+package org.apache.coyote.response;
+
+import org.apache.coyote.http.StatusCode;
 
 public class StatusLine {
 

@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.coyote.http;
 
 public enum HeaderName {
     CONTENT_LENGTH("Content-Length"),

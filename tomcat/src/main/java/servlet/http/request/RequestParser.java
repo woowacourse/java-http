@@ -8,25 +8,20 @@ import java.util.Map;
 public class RequestParser {
 
     public Request parse(BufferedReader reader) throws IOException {
-        RequestLine line = getRequestLine(reader);
-        RequestHeaders headers = getRequestHeaders(reader);
-        RequestBody body = getRequestBody(reader, headers.contentLength());
+        RequestLine line = new RequestLine(reader.readLine());
+        RequestHeaders headers = new RequestHeaders(getRequestHeaders(reader));
+        RequestBody body = RequestBody.from(getRequestBody(reader, headers.contentLength()));
         return new Request(line, headers, body);
     }
 
-    private RequestLine getRequestLine(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-        return new RequestLine(requestLine);
-    }
-
-    private RequestHeaders getRequestHeaders(BufferedReader reader) throws IOException {
+    private Map<String, String> getRequestHeaders(BufferedReader reader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String header = reader.readLine();
         while (isDataRemaining(header)) {
             putHeader(headers, header);
             header = reader.readLine();
         }
-        return new RequestHeaders(headers);
+        return headers;
     }
 
     private boolean isDataRemaining(String header) {
@@ -41,14 +36,14 @@ public class RequestParser {
         headers.put(headerParts[0], headerParts[1]);
     }
 
-    private RequestBody getRequestBody(BufferedReader reader, String contentLength) throws IOException {
+    private String getRequestBody(BufferedReader reader, String contentLength) throws IOException {
         if (isEmptyBody(reader, contentLength)) {
-            return RequestBody.EMPTY;
+            return null;
         }
         int length = Integer.parseInt(contentLength);
         char[] buffer = new char[length];
         reader.read(buffer, 0, length);
-        return RequestBody.from(new String(buffer));
+        return new String(buffer);
     }
 
     private boolean isEmptyBody(BufferedReader reader, String contentLength) throws IOException {

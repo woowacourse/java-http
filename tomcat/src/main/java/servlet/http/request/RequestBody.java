@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class RequestBody {
 
-    protected static final RequestBody EMPTY = new RequestBody(Collections.emptyMap());
+    private static final RequestBody EMPTY = new RequestBody(Collections.emptyMap());
 
     private final Map<String, String> body;
 
@@ -18,6 +18,10 @@ public class RequestBody {
     }
 
     protected static RequestBody from(String bodies) {
+        if (bodies == null) {
+            return EMPTY;
+        }
+
         return Arrays.stream(bodies.split("&"))
                 .map(body -> body.split("=", 2))
                 .collect(collectingAndThen(toMap(b -> b[0], b -> b[1]), RequestBody::new));

@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.UuidSessionGenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,26 +89,29 @@ class Http11ProcessorTest {
     @Nested
     class LoginTest {
 
-        private final String account = "account";
-        private final String password = "password";
-        private final User user = new User(account, password, "aaa@gmail.com");
+        private final User user1 = new User("account", "password", "email");
+        private final User user2 = new User("account2", "password2", "email2");
+        private final Session session = new Session("sessionId");
+        private final SessionManager sessionManager = new SessionManager();
 
         @BeforeEach
         void saveUser() {
-            InMemoryUserRepository.save(user);
+            InMemoryUserRepository.save(user1);
+            InMemoryUserRepository.save(user2);
         }
 
         @AfterEach
         void deleteUser() {
-            InMemoryUserRepository.delete(user);
+            InMemoryUserRepository.delete(user1);
+            InMemoryUserRepository.delete(user2);
+            session.invalidate();
+            sessionManager.remove(session);
         }
 
         @DisplayName("로그인 성공 시 올바르게 응답을 보낸다.")
         @Test
         void loginSuccess() {
-            String sessionId = "sessionId";
-            Session session = new Session(sessionId, true);
-            String body = String.format("account=%s&password=%s", account, password);
+            String body = String.format("account=%s&password=%s", "account", "password");
             int contentLength = body.getBytes().length;
             String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -124,16 +129,14 @@ class Http11ProcessorTest {
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 Found \r\n",
                     "Location: /index.html \r\n",
-                    "Set-Cookie: JSESSIONID=" + sessionId
+                    "Set-Cookie: JSESSIONID=" + session.getId()
             );
         }
 
         @DisplayName("로그인 실패 시 올바르게 응답을 보낸다.")
         @Test
         void loginFail() {
-            String sessionId = "sessionId";
-            Session session = new Session(sessionId, true);
-            String body = String.format("account=%s&password=%s", "invalid account", "password");
+            String body = String.format("account=%s&password=%s", "invalid", "password");
             int contentLength = body.getBytes().length;
             String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
@@ -151,6 +154,40 @@ class Http11ProcessorTest {
             assertThat(socket.output()).contains(
                     "HTTP/1.1 302 Found \r\n",
                     "Location: /401.html \r\n"
+            );
+        }
+
+        @DisplayName("세션이 존재하는 클라이언트가 로그인 요청 시 올바르게 세션 데이터를 업데이트한다.")
+        @Test
+        void sessionUserLogin() {
+            session.setAttribute("user", user1);
+            sessionManager.add(session);
+            String body = String.format("account=%s&password=%s", "account2", "password2");
+            int contentLength = body.getBytes().length;
+            String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: " + contentLength,
+                    "Cookie: JSESSIONID=" + session.getId(),
+                    "",
+                    body);
+
+            StubSocket socket = new StubSocket(httpRequest);
+            Http11Processor processor = new Http11Processor(socket, () -> session);
+
+            processor.process(socket);
+
+            assertAll(
+                    () -> assertThat(socket.output()).contains(
+                        "HTTP/1.1 302 Found \r\n",
+                        "Location: /index.html \r\n"
+                    ).doesNotContain("Set-Cookie: JSESSIONID=" + session.getId()),
+                    () -> {
+                        HttpSession session = sessionManager.findSession(this.session.getId());
+                        User user = (User) session.getAttribute("user");
+                        assertThat(user.getAccount()).isEqualTo(user2.getAccount());
+                    }
             );
         }
     }

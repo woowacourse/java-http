@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionGenerator;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -142,15 +141,22 @@ public class Http11Processor implements Runnable, Processor {
         String password = queries.get("password");
         validateLoginRequest(account, password);
 
+        HttpSession session = request.getSessionId()
+                .map(SESSION_MANAGER::findSession)
+                .orElseGet(sessionGenerator::create);
+
         try {
             User user = getLoginUser(account, password);
-            Session session = sessionGenerator.create();
-            session.setAttribute("user", user);
-            SESSION_MANAGER.add(session);
-            ResponseCookie sessionCookie = ResponseCookie.of(session);
             Map<String, String> headers = new HashMap<>();
             headers.put("Location", "/index.html");
-            headers.put("Set-Cookie", sessionCookie.toResponse());
+            session.setAttribute("user", user);
+
+            if (SESSION_MANAGER.findSession(session.getId()) == null) {
+                SESSION_MANAGER.add(session);
+                ResponseCookie sessionCookie = ResponseCookie.of(session);
+                headers.put("Set-Cookie", sessionCookie.toResponse());
+            }
+
             return new HttpResponse(HttpStatus.FOUND, headers);
         } catch (Exception e) {
             log.warn(e.getMessage(), e);

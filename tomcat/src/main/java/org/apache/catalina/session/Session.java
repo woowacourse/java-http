@@ -7,17 +7,16 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class Session implements HttpSession {
 
     private final String id;
-    private final boolean isNew;
     private final Map<String, Object> attributes = new HashMap<>();
 
-    public Session(String id, boolean isNew) {
+    public Session(String id) {
         this.id = id;
-        this.isNew = isNew;
     }
 
     @Override
@@ -108,6 +107,23 @@ public class Session implements HttpSession {
 
     @Override
     public boolean isNew() {
-        return isNew;
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Session session = (Session) o;
+        return Objects.equals(id, session.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

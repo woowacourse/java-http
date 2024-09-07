@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.catalina.session.Session;
+import jakarta.servlet.http.HttpSession;
 
 public class ResponseCookie {
 
@@ -14,7 +14,7 @@ public class ResponseCookie {
         this.value = value;
     }
 
-    public static ResponseCookie of(Session session) {
+    public static ResponseCookie of(HttpSession session) {
         return new ResponseCookie("JSESSIONID", session.getId());
     }
 

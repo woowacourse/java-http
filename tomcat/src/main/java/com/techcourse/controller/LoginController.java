@@ -17,7 +17,7 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private SessionManager sessionManager;
-    HttpCookie httpCookie;
+    private HttpCookie httpCookie;
 
     public LoginController() {
         this.sessionManager = SessionManager.getInstance();

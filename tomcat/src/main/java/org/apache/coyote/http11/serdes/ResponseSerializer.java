@@ -7,7 +7,7 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResponseSerializer {
-    private static String PROTOCOL_AND_VERSION = HttpResponse.PROTOCOL + "/" + HttpResponse.version;
+    private static String PROTOCOL_AND_VERSION = HttpResponse.PROTOCOL + "/" + HttpResponse.version + " ";
     private static String RESPONSE_DELIMITER = "\r\n";
     private static String BLANK = "";
 
@@ -28,15 +28,14 @@ public class ResponseSerializer {
     }
 
     private String resolveFirstLine(int statusCode, String statusMessage) {
-        StringBuilder builder = new StringBuilder(" ");
-        builder.append(PROTOCOL_AND_VERSION);
-        builder.append(statusCode);
-        builder.append(statusMessage + " ");
-        return builder.toString();
+        StringJoiner joiner = new StringJoiner(" ", PROTOCOL_AND_VERSION, " ");
+        joiner.add(String.valueOf(statusCode));
+        joiner.add(statusMessage);
+        return joiner.toString();
     }
 
     private String serializeHeader(HttpHeaders headers) {
-        StringJoiner joiner = new StringJoiner(" ");
+        StringJoiner joiner = new StringJoiner(" \r\n", BLANK, " ");
         Map<String, String> payLoads = headers.getPayLoads();
 
         payLoads.keySet().stream()

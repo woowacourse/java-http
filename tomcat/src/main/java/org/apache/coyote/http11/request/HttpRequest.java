@@ -25,7 +25,7 @@ public class HttpRequest {
     private HttpRequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
         validateNotNull(line);
-        String[] tokens = splitByDelimiter(line, " ");
+        String[] tokens = splitByDelimiter(line, " ", 3);
         return new HttpRequestLine(tokens[0], tokens[1], tokens[2]);
     }
 
@@ -35,15 +35,15 @@ public class HttpRequest {
         }
     }
 
-    private String[] splitByDelimiter(String line, String delimiter) {
-        return line.split(delimiter);
+    private String[] splitByDelimiter(String line, String delimiter, int limit) {
+        return line.split(delimiter, limit);
     }
 
     private HttpRequestHeader parseHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
         String line;
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] tokens = splitByDelimiter(line, HEADER_DELIMITER);
+            String[] tokens = splitByDelimiter(line, HEADER_DELIMITER, 2);
             httpRequestHeader.add(tokens[0], tokens[1]);
         }
         return httpRequestHeader;
@@ -67,8 +67,8 @@ public class HttpRequest {
     }
 
     private void parseRequestBody(HttpRequestBody httpRequestBody, String httpRequestBodyLine) {
-        for (String line : splitByDelimiter(httpRequestBodyLine, PARAMETER_DELIMITER)) {
-            String[] tokens = splitByDelimiter(line, KEY_VALUE_DELIMITER);
+        for (String line : splitByDelimiter(httpRequestBodyLine, PARAMETER_DELIMITER, 0)) {
+            String[] tokens = splitByDelimiter(line, KEY_VALUE_DELIMITER, 2);
             httpRequestBody.add(tokens[0], tokens[1]);
         }
     }

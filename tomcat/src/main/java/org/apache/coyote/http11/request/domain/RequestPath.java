@@ -10,7 +10,7 @@ public class RequestPath {
         if (path == null) {
             throw new NullPointerException("경로가 존재하지 않습니다.");
         }
-        this.path = path.trim();
+        this.path = path;
     }
 
     public String getPath() {

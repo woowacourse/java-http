@@ -175,12 +175,10 @@ class IOStreamTest {
 
             final StringBuilder actual = new StringBuilder();
 
-            String value = bufferedReader.readLine();
-            while(value != null) {
+            while(bufferedReader.ready()) {
+                String value = bufferedReader.readLine();
                 actual.append(value);
                 actual.append("\r\n");
-
-                value = bufferedReader.readLine();
             }
 
             assertThat(actual).hasToString(emoji);

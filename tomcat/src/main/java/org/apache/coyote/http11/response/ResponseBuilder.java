@@ -5,6 +5,7 @@ import org.apache.coyote.http11.request.HttpHeaders;
 
 public class ResponseBuilder {
 
+    private final ViewResolver viewResolver = new ViewResolver();
     private final HttpHeaderBuilder headerBuilder = new HttpHeaderBuilder();
     private String protocol = "HTTP";
     private double version = 1.1;
@@ -47,10 +48,11 @@ public class ResponseBuilder {
         return this;
     }
 
-    public ResponseBuilder responseBody(String responseBody) {
-        this.responseBody = Optional.of(responseBody);
+    public ResponseBuilder viewUrl(String viewUrl) {
+        String responseBody = viewResolver.findResponseFile(viewUrl);
         headerBuilder.contentLength(responseBody.getBytes().length);
-        return this;
+        this.responseBody = Optional.of(responseBody);
+        return this.contentType(viewUrl);
     }
 
     public HttpResponse build() {

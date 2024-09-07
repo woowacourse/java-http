@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.error;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import org.apache.coyote.http11.error.errorhandler.Error401Handler;
 import org.apache.coyote.http11.error.errorhandler.ErrorHandler;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public enum ErrorHandlerMapper {
 
@@ -23,7 +23,7 @@ public enum ErrorHandlerMapper {
                 .anyMatch(handler -> handler.exceptionClass == exception);
     }
 
-    public static Map<String, String> handleError(Class<? extends Exception> exception) {
+    public static HttpResponse handleError(Class<? extends Exception> exception) {
         return Stream.of(values())
                 .filter(handler -> handler.exceptionClass == exception)
                 .findAny()

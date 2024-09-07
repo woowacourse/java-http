@@ -1,9 +1,10 @@
 package org.apache.coyote.http11.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseBuilder;
 import org.apache.coyote.http11.service.LoginService;
 
 
@@ -17,25 +18,24 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public Map<String, String> handle(HttpRequest httpRequest) {
+    public HttpResponse handle(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
         if (requestLine.isQueryStringRequest()) {
-            return checkLogin(requestLine);
+            checkLogin2(requestLine);
         }
 
-        return resolveResponse(200, "/login.html");
+        return new ResponseBuilder()
+                .statusCode(200)
+                .viewUrl("/login.html")
+                .build();
     }
 
-    private Map<String, String> checkLogin(RequestLine requestLine) {
+    private HttpResponse checkLogin2(RequestLine requestLine) {
         Map<String, String> parameters = requestLine.getParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
-        return resolveResponse(302, "/index.html");
-    }
-
-    private Map<String, String> resolveResponse(int statusCode, String viewUrl){
-        Map<String, String> map = new HashMap<>();
-        map.put("statusCode", String.valueOf(statusCode));
-        map.put("url", viewUrl);
-        return map;
+        return new ResponseBuilder()
+                .statusCode(302)
+                .location("/index.html")
+                .build();
     }
 }

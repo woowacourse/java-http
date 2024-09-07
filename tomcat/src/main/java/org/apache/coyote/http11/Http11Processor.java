@@ -7,14 +7,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.controller.Controller;
 import org.apache.coyote.http11.controller.HandlerMapper;
 import org.apache.coyote.http11.error.ErrorHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
-import org.apache.coyote.http11.response.ResponseResolver;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +42,9 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-            String response = makeResponse(httpRequest);
+            HttpResponse response = makeResponse2(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.serialize().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -52,46 +52,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(HttpRequest httpRequest) throws IOException {
+    private HttpResponse makeResponse2(HttpRequest httpRequest) throws IOException {
         RequestLine requestLine = httpRequest.getRequestLine();
         try {
             if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
-                return resolveHandlerResponse(httpRequest);
+                return resolveHandlerResponse2(httpRequest);
             }
-            return ResponseResolver.resolveViewResponse(
-                    requestLine.getRequestURI(),
-                    findResponseContentType(requestLine.getRequestURI())
-            );
+            return new ResponseBuilder()
+                    .statusCode(200)
+                    .viewUrl(requestLine.getRequestURI())
+                    .build();
         } catch (Exception e) {
             if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
-                return resolveErrorHandlerResponse(requestLine, e);
+                return ErrorHandlerMapper.handleError(e.getClass());
             }
             throw new UncheckedServletException(e);
         }
     }
 
-    private String resolveErrorHandlerResponse(RequestLine requestLine, Exception e) {
-        Map<String, String> parameters = ErrorHandlerMapper.handleError(e.getClass());
-        return ResponseResolver.resolveResponse(
-                parameters,
-                findResponseContentType(requestLine.getRequestURI())
-        );
-    }
-
-    private String resolveHandlerResponse(HttpRequest httpRequest) {
+    private HttpResponse resolveHandlerResponse2(HttpRequest httpRequest) {
         Controller controller = HandlerMapper.mapTo(httpRequest.getRequestUri());
-        Map<String, String> responseParameters = controller.handle(httpRequest);
-        return ResponseResolver.resolveResponse(
-                responseParameters,
-                findResponseContentType(httpRequest.getRequestUri())
-        );
-    }
-
-    private String findResponseContentType(String url) {
-        String[] extension = url.split("\\.");
-        if (extension.length < 2) {
-            return "text/html";
-        }
-        return "text/" + extension[1];
+        return controller.handle(httpRequest);
     }
 }

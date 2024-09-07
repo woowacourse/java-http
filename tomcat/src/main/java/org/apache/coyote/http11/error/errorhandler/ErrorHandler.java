@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.error.errorhandler;
 
-import java.util.Map;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface ErrorHandler {
-    Map<String, String> handleError();
+    HttpResponse handleError();
 }

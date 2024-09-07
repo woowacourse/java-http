@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.response;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -14,6 +16,17 @@ public class ViewResolver {
     private static final String DEFAULT_RELATIVE_DIRECTORY_PATH = "tomcat/src/main/resources/static";
     private static final String DEFAULT_DIRECTORY_NAME = "static";
     private static final File DEFAULT_DIRECTORY_FILE = new File(DEFAULT_RELATIVE_DIRECTORY_PATH);
+
+
+    public String findResponseFile(String viewUri) {
+        try {
+            Path path = findViewPath(viewUri)
+                    .orElseThrow(() -> new IllegalArgumentException(viewUri + "잘못된 viewUri입니다."));
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Optional<Path> findViewPath(String url) {
         try {

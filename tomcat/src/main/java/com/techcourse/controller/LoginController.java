@@ -6,7 +6,6 @@ import com.techcourse.service.UserService;
 import org.apache.coyote.http11.domain.ResourceFinder;
 import org.apache.coyote.http11.domain.body.ContentType;
 import org.apache.coyote.http11.request.domain.RequestLine;
-import org.apache.coyote.http11.request.domain.RequestMethod;
 import org.apache.coyote.http11.request.domain.RequestPath;
 import org.apache.coyote.http11.request.model.HttpRequest;
 import org.apache.coyote.http11.request.paser.LoginQueryParser;
@@ -31,7 +30,7 @@ public class LoginController extends AbstractController {
     public boolean canHandle(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
 
-        return requestLine.isStartsWith(LOGIN_PATH) && requestLine.isSameMethod(RequestMethod.GET);
+        return requestLine.isStartsWith(LOGIN_PATH);
     }
 
     @Override

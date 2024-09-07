@@ -1,9 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.component;
 
 public enum HttpStatus {
 
     OK(200, "OK"),
-    CREATED(201, "Created"),
     FOUND(302, "Found"),
     UNAUTHORIZED(401, "Unauthorized");
 

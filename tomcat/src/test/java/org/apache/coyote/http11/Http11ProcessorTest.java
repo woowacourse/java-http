@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import org.apache.coyote.http11.component.MediaType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

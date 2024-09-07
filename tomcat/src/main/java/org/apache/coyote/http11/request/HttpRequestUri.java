@@ -1,10 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import com.techcourse.controller.ControllerMapping;
 import com.techcourse.controller.dto.HttpResponseEntity;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import org.apache.coyote.http11.PathInfo;
+import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

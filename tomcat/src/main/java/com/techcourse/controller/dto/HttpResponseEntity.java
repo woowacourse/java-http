@@ -2,8 +2,8 @@ package com.techcourse.controller.dto;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public record HttpResponseEntity<T>(HttpStatus httpStatus, T body, Map<String, String> headers) {
 

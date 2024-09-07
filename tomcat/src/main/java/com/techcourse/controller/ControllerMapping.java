@@ -5,7 +5,7 @@ import com.techcourse.exception.UncheckedServletException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.component.HttpMethod;
 
 public enum ControllerMapping {
 

@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.component.HttpHeaders;
+import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.component.MediaType;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class PathInfo {
 

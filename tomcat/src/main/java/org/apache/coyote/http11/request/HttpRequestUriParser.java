@@ -1,9 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.PathInfo;
+import org.apache.coyote.http11.component.MediaType;
 
 public class HttpRequestUriParser {
 

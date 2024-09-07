@@ -7,8 +7,8 @@ import com.techcourse.controller.dto.HttpResponseEntity;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.component.HttpHeaders;
+import org.apache.coyote.http11.component.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

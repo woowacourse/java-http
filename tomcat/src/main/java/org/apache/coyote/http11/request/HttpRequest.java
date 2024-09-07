@@ -1,7 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.IOException;
 import java.util.Map;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class HttpRequest {
 

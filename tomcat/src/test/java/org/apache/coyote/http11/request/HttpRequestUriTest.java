@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,6 +6,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
+import org.apache.coyote.http11.component.HttpMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

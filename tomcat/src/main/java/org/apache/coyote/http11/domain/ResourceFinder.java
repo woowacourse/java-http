@@ -18,7 +18,7 @@ public final class ResourceFinder {
         try {
             Path filePath = Path.of(resourceUrl.toURI());
 
-            return new String(Files.readAllBytes(filePath));
+            return Files.readString(filePath);
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e);
         } catch (NullPointerException e) {

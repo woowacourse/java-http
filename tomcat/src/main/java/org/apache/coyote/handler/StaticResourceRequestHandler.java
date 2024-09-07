@@ -1,8 +1,6 @@
 package org.apache.coyote.handler;
 
-import static org.apache.ResourceReader.canRead;
-import static org.apache.ResourceReader.readFile;
-
+import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
@@ -14,7 +12,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
 
     @Override
     public boolean canHandling(HttpRequest httpRequest) {
-        return canRead(httpRequest.getRequestURI()) && HttpMethod.GET.equals(httpRequest.getMethod());
+        return ResourceReader.canRead(httpRequest.getRequestURI()) && HttpMethod.GET.equals(httpRequest.getMethod());
     }
 
     @Override
@@ -22,7 +20,7 @@ public class StaticResourceRequestHandler implements RequestHandler {
         return Http11Response.builder()
                 .status(HttpStatus.OK)
                 .appendHeader("Content-Type", getContentType(httpRequest))
-                .body(readFile(httpRequest.getRequestURI()))
+                .body(ResourceReader.readFile(httpRequest.getRequestURI()))
                 .build();
     }
 

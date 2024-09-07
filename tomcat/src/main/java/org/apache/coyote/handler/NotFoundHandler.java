@@ -1,7 +1,6 @@
 package org.apache.coyote.handler;
 
-import static org.apache.ResourceReader.readFile;
-
+import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.RequestHandler;
@@ -20,7 +19,7 @@ public class NotFoundHandler implements RequestHandler {
         return Http11Response.builder()
                 .status(HttpStatus.NOT_FOUND)
                 .appendHeader("Content-Type", "text/html;charset=utf-8 ")
-                .body(readFile("/404.html"))
+                .body(ResourceReader.readFile("/404.html"))
                 .build();
     }
 }

@@ -1,15 +1,12 @@
 package org.apache.coyote.handler;
 
-import static org.apache.ResourceReader.readFile;
-import static org.apache.coyote.http11.HttpMethod.GET;
-import static org.apache.coyote.http11.HttpMethod.POST;
-
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.ResourceReader;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
@@ -25,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class LoginRequestHandler implements RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final List<HttpMethod> ALLOWED_METHODS = List.of(POST, GET);
+    private static final List<HttpMethod> ALLOWED_METHODS = List.of(HttpMethod.POST, HttpMethod.GET);
     private static final String SUCCESS_LOGIN_REDIRECT_PATH = "/index.html";
     private static final String UNAUTHORIZED_PATH = "/401.html";
     private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
@@ -38,10 +35,10 @@ public class LoginRequestHandler implements RequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
-        if (POST.equals(httpRequest.getMethod())) {
+        if (HttpMethod.POST.equals(httpRequest.getMethod())) {
             return post(httpRequest);
         }
-        if (GET.equals(httpRequest.getMethod())) {
+        if (HttpMethod.GET.equals(httpRequest.getMethod())) {
             return get(httpRequest);
         }
         throw new UncheckedServletException(new UnsupportedOperationException("지원하지 않는 HTTP METHOD 입니다."));
@@ -74,7 +71,7 @@ public class LoginRequestHandler implements RequestHandler {
         return Http11Response.builder()
                 .status(HttpStatus.OK)
                 .appendHeader("Content-Type", "text/html;charset=utf-8")
-                .body(readFile(httpRequest.getRequestURI()))
+                .body(ResourceReader.readFile(httpRequest.getRequestURI()))
                 .build();
     }
 

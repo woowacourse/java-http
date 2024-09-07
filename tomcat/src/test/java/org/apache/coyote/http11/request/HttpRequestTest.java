@@ -21,8 +21,9 @@ class HttpRequestTest {
                 "",
                 "");
         BufferedReader requestReader = new BufferedReader(new StringReader(rawRequest));
+        HttpRequest httpRequest = new HttpRequestReader(requestReader).read();
 
-        Queries queries = HttpRequest.of(requestReader).getQueries();
+        Queries queries = httpRequest.getQueries();
 
         assertAll(
                 () -> assertThat(queries.get("bread")).isEqualTo("white"),

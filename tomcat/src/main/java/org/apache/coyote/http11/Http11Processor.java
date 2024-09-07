@@ -18,6 +18,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestReader;
 import org.apache.coyote.http11.request.Queries;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -37,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             "/register",
             "/index"
     );
-    private final static SessionManager SESSION_MANAGER = new SessionManager();
+    private static final SessionManager SESSION_MANAGER = new SessionManager();
 
     private final Socket connection;
     private final SessionGenerator sessionGenerator;
@@ -56,10 +57,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
-             OutputStream outputStream = connection.getOutputStream()) {
+             OutputStream outputStream = connection.getOutputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest request = HttpRequest.of(bufferedReader);
+            HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
+            HttpRequest request = httpRequestReader.read();
             HttpResponse response = getResponse(request);
             String formattedResponse = response.toResponse();
 

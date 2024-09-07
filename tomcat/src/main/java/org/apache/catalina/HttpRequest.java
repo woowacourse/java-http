@@ -10,7 +10,7 @@ import java.util.Map;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<HeaderName, String> header;
+    private final Map<String, String> header;
     private final HttpCookie httpCookie;
     private final String body;  // TODO: 왜 안쓰이는지 보기
 
@@ -24,16 +24,15 @@ public class HttpRequest {
         this.httpCookie = new HttpCookie(header.get(HeaderName.COOKIE.getValue()));
     }
 
-    private Map<HeaderName, String> mapHeader(BufferedReader bufferedReader) throws IOException {
-        Map<HeaderName, String> header = new HashMap<>();
+    private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> header = new HashMap<>();
         String rawLine;
 
         while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
             String[] headerEntry = rawLine.split(": ", 2);
-            header.put(HeaderName.findByName(headerEntry[0]), headerEntry[1]);
+            header.put(headerEntry[0], headerEntry[1]);
         }
 
-        header.put(HeaderName.CONTENT_TYPE, requestLine.getContentType().getResponse());
         return header;
     }
 
@@ -53,11 +52,11 @@ public class HttpRequest {
     }
 
     public String get(HeaderName headerName) {
-        return header.get(headerName);
+        return header.get(headerName.getValue());
     }
 
     public boolean hasCookie() {
-        return header.containsKey(HeaderName.COOKIE);
+        return header.containsKey(HeaderName.COOKIE.getValue());
     }
 
     public String getQueryParam(String paramName) {

@@ -7,23 +7,18 @@ public class HttpCookie {
 
     private final Map<String, String> cookies = new HashMap<>();
 
-    public HttpCookie(String rawCookies) {
-        if (rawCookies.isEmpty()) {
-            return;
-        }
-        String[] cookies = rawCookies.split("; ");
-        for (String cookie : cookies) {
-            String key = cookie.split("=")[0];
-            String value = cookie.split("=")[1];
-            this.cookies.put(key, value);
-        }
+    public HttpCookie() {
     }
 
-    public boolean containsCookieKey(String key) {
-        return cookies.containsKey(key);
+    public void addCookie(String key, String value) {
+        cookies.put(key, value);
     }
 
-    public String getCookieValue(String key) {
+    public String getCookie(String key) {
         return cookies.get(key);
+    }
+
+    public boolean containsCookie(String key) {
+        return cookies.containsKey(key);
     }
 }

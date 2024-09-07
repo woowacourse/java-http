@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
@@ -17,16 +16,26 @@ public class HttpRequest {
                        String path,
                        Map<String, String> headers,
                        String body) {
-        this.version = Float.parseFloat(version); // TODO: 자리수 확인하기
+        this.version = Float.parseFloat(version);
         this.method = method;
         this.path = path;
         this.headers = headers;
         this.body = body;
     }
 
-    public HttpCookie getCookies() {
-        String cookies = headers.getOrDefault("Cookie", "");
-        return new HttpCookie(cookies);
+    public HttpCookie extractCookie() {
+        HttpCookie httpCookie = new HttpCookie();
+        String rawCookies = headers.get("Cookie");
+        if (rawCookies == null) {
+            return httpCookie;
+        }
+        String[] cookies = rawCookies.split("; ");
+        for (String cookie : cookies) {
+            String key = cookie.split("=")[0];
+            String value = cookie.split("=")[1];
+            httpCookie.addCookie(key, value);
+        }
+        return httpCookie;
     }
 
     public String getMethod() {
@@ -35,21 +44,6 @@ public class HttpRequest {
 
     public String getPath() {
         return path;
-    }
-
-    public Map<String, String> getQueryParams() { // TODO: test
-        Map<String, String> queryParams = new HashMap<>();
-        if (!path.contains("?")) {
-            return queryParams;
-        }
-        String queryString = path.split("\\?")[1];
-        String[] rawQueryParams = queryString.split("&");
-        for (String rawQueryParam : rawQueryParams) {
-            String key = rawQueryParam.split("=")[0];
-            String value = rawQueryParam.split("=")[1];
-            queryParams.put(key, value);
-        }
-        return queryParams;
     }
 
     public Map<String, String> getHeaders() {

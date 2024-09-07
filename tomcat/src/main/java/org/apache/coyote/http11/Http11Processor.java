@@ -72,11 +72,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void checkLogin(HttpRequest request, HttpResponse response) {
-        HttpCookie cookies = request.getCookies();
-        if (!cookies.containsCookieKey("JSESSIONID")) {
+        HttpCookie cookies = request.extractCookie();
+        if (!cookies.containsCookie("JSESSIONID")) {
             return;
         }
-        String jSessionId = cookies.getCookieValue("JSESSIONID");
+        String jSessionId = cookies.getCookie("JSESSIONID");
         boolean isLogin = SessionManager.containsSession(jSessionId);
         if (isLogin) {
             response.redirect("/index.html");
@@ -137,16 +137,6 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
 
         response.redirect("/index.html");
-    }
-
-    private void refresh(HttpRequest request, HttpResponse response) {
-        Map<String, String> headers = request.getHeaders();
-        String rawCookies = headers.getOrDefault("Cookie", "");
-        HttpCookie cookie = new HttpCookie(rawCookies);
-
-        if (!cookie.containsCookieKey("JSESSIONID")) {
-            response.addHeader("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-        }
     }
 
     // 아래는 응답 생성 관련

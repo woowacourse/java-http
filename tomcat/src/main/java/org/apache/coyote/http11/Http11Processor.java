@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse();
             execute(request, response);
 
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.parseResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -79,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
         String jSessionId = cookies.getCookie("JSESSIONID");
         boolean isLogin = SessionManager.containsSession(jSessionId);
         if (isLogin) {
-            response.redirect("/index.html");
+            response.sendRedirection("/index.html");
         }
     }
 
@@ -98,18 +98,18 @@ public class Http11Processor implements Runnable, Processor {
 
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
         if (rawUser.isEmpty()) {
-            response.statusUnauthorized();
+            response.setStatusUnauthorized();
             response.setBody(FileReader.readResourceFile("401.html"));
             return;
         }
         User user = rawUser.get();
         if (!user.checkPassword(password)) {
-            response.statusUnauthorized();
+            response.setStatusUnauthorized();
             response.setBody(FileReader.readResourceFile("401.html"));
             return;
         }
         log.info("user: {}", user);
-        response.redirect("/index.html");
+        response.sendRedirection("/index.html");
 
         UUID jSessionId = UUID.randomUUID();
         Session session = new Session(jSessionId.toString());
@@ -136,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        response.redirect("/index.html");
+        response.sendRedirection("/index.html");
     }
 
     // 아래는 응답 생성 관련

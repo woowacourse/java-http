@@ -6,25 +6,31 @@ import java.util.stream.Collectors;
 
 public class HttpResponse {
 
-    private final float version;
+    private static final float DEFAULT_HTTP_VERSION = 1.1F;
+    private static final int DEFAULT_HTTP_STATUS_CODE = 200;
+    private static final String DEFAULT_HTTP_STATUS_MESSAGE = "OK";
+    private static final String DEFAULT_HTTP_BODY = "";
+
+    private float version;
     private int statusCode;
     private String statusMessage;
-    private final Map<String, String> headers;
+    private Map<String, String> headers;
     private String body;
 
     public HttpResponse() {
-        this.version = 1.1F;
-        this.statusCode = 200;
-        this.statusMessage = "OK";
+        this.version = DEFAULT_HTTP_VERSION;
+        this.statusCode = DEFAULT_HTTP_STATUS_CODE;
+        this.statusMessage = DEFAULT_HTTP_STATUS_MESSAGE;
         this.headers = new LinkedHashMap<>();
-        this.body = "";
+        this.body = DEFAULT_HTTP_BODY;
     }
 
-    public String getResponse() {
+    public String parseResponse() {
         return String.join("\r\n",
                 parseResponseLine(),
                 parseHeaders(),
-                body);
+                "",
+                body).trim();
     }
 
     private String parseResponseLine() {
@@ -37,15 +43,15 @@ public class HttpResponse {
                 .collect(Collectors.joining("\r\n"));
     }
 
-    public void redirect(String location) {
+    public void setStatusUnauthorized() {
+        this.statusCode = 401;
+        this.statusMessage = "UNAUTHORIZED";
+    }
+
+    public void sendRedirection(String location) {
         this.statusCode = 302;
         this.statusMessage = "FOUND";
         this.headers.put("Location", location);
-    }
-
-    public void statusUnauthorized() {
-        this.statusCode = 401;
-        this.statusMessage = "UNAUTHORIZED";
     }
 
     public void addHeader(String key, String value) {

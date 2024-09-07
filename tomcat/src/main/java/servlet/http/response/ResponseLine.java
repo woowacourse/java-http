@@ -4,10 +4,12 @@ import servlet.http.StatusCode;
 
 public class ResponseLine implements Assemblable {
 
+    private static final StatusCode DEFAULT_STATUS_CODE = StatusCode.OK;
+
     private StatusCode statusCode;
 
     protected ResponseLine() {
-        this(StatusCode.OK);
+        this(DEFAULT_STATUS_CODE);
     }
 
     private ResponseLine(StatusCode statusCode) {

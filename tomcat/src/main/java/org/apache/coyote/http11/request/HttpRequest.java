@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.FileReader;
+
 public class HttpRequest {
 
     private final HttpMethod httpMethod;
@@ -25,7 +27,23 @@ public class HttpRequest {
     }
 
     public String getContentType() {
-        return httpRequestHeaders.getContentType();
+        try {
+            return httpRequestHeaders.getContentType();
+        } catch (NullPointerException e) {
+            return getContentTypeByFilePath(getHttpRequestPath());
+        }
+    }
+
+    private String getContentTypeByFilePath(String path) {
+        FileReader fileReader = FileReader.getInstance();
+        String fileExtension = fileReader.getFileExtension(path);
+        if (fileExtension.equals(".js")){
+            return "application/javascript";
+        }
+        if (fileExtension.equals(".css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 
     public String getQueryParameter(String key) {

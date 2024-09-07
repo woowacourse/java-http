@@ -43,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             HttpRequestParser httpRequestParser = new HttpRequestParser();
             HttpResponseParser httpResponseParser = new HttpResponseParser();
-            FileReader fileReader = new FileReader();
+            FileReader fileReader = FileReader.getInstance();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
             HttpResponseBody httpResponseBody = new HttpResponseBody(
@@ -64,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse mapToHttpResponse(HttpStatusCode code, HttpRequest request, HttpResponseBody responseBody) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", request.getContentType());
+        headers.put("Content-Type", request.getContentType() + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(responseBody.body().getBytes().length));
         HttpResponseHeaders httpResponseHeaders = new HttpResponseHeaders(headers);
         return new HttpResponse(code, httpResponseHeaders, responseBody);

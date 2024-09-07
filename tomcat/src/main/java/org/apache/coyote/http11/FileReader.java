@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -16,14 +15,15 @@ public class FileReader {
 
     private static final String DEFAULT_RESPONSE = "Hello world!";
 
+    private static final FileReader instance = new FileReader();
+
+    private FileReader() {
+    }
+
     public String readFile(String path) throws URISyntaxException, IOException {
-        if (path.equals("/login")) {
-            path = path.concat(".html");
-        }
-        URI requestUri = new URI(path);
         String responseBody = DEFAULT_RESPONSE;
-        if (!requestUri.toString().equals(ROOT_URI)) {
-            URL resource = getClass().getClassLoader().getResource(BASE_DIRECTORY + requestUri);
+        if (!path.equals(ROOT_URI)) {
+            URL resource = findFile(path);
             Path filePath = Path.of(resource.toURI());
             StringBuilder stringBuilder = new StringBuilder();
             List<String> fileLines = Files.readAllLines(filePath);
@@ -31,5 +31,25 @@ public class FileReader {
             responseBody = stringBuilder.toString();
         }
         return responseBody;
+    }
+
+    private URL findFile(String path) {
+        if (path.equals("/login")) {
+            path = path.concat(".html");
+        }
+        return getClass().getClassLoader().getResource(BASE_DIRECTORY + path);
+    }
+
+    public String getFileExtension(String path) {
+        if (path.equals(ROOT_URI)) {
+            return ".html";
+        }
+        String filePath = findFile(path).toString();
+        String[] splitFilePath = filePath.split("\\.");
+        return "." + splitFilePath[splitFilePath.length - 1];
+    }
+
+    public static FileReader getInstance() {
+        return instance;
     }
 }

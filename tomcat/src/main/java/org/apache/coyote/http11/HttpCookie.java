@@ -26,7 +26,7 @@ public class HttpCookie {
             if (keyValue.length == 2) {
                 String key = keyValue[0].trim();
                 String value = keyValue[1].trim();
-                cookies.put(key, value); // 맵에 저장
+                cookies.put(key, value);
             }
         }
     }

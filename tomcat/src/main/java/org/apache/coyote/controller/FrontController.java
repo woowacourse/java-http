@@ -5,21 +5,13 @@ import com.techcourse.controller.LoginPageController;
 import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.RegisterPageController;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;
 import org.apache.coyote.HttpMethod;
-import org.apache.coyote.HttpStatusCode;
-import org.apache.coyote.MimeType;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestKey;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseHeader;
 import org.apache.coyote.util.FileExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,19 +32,7 @@ public class FrontController {
         log(request);
         String path = request.getPath();
         if (FileExtension.isFileExtension(path)) {
-            String resourcePath = "static" + path;
-            try {
-                Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());
-                MimeType mimeType = MimeType.from(FileExtension.from(path));
-                byte[] body = Files.readAllBytes(filePath);
-                ResponseHeader header = new ResponseHeader();
-                header.setContentType(mimeType);
-                return new HttpResponse(HttpStatusCode.OK, header, body);
-            } catch (URISyntaxException | IOException e) {
-                ResponseHeader header = new ResponseHeader();
-                header.setContentType(MimeType.OTHER);
-                return new HttpResponse(HttpStatusCode.OK, header, "No File Found".getBytes());
-            }
+            return new StaticResourceController().service(request, manager);
         }
         Controller controller = getController(request.getMethod(), path);
         return controller.service(request, manager);

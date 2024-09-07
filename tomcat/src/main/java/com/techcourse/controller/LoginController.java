@@ -8,17 +8,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.catalina.Manager;
+import org.apache.coyote.ForwardResult;
 import org.apache.coyote.HttpStatusCode;
-import org.apache.coyote.MimeType;
 import org.apache.coyote.Session;
-import org.apache.coyote.controller.Controller;
+import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestHeader;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
@@ -30,7 +29,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse service(HttpRequest request, Manager manager) {
+    public ForwardResult execute(HttpRequest request, Manager manager) {
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
@@ -38,14 +37,15 @@ public class LoginController implements Controller {
         String password = parsedBody.get(PASSWORD_KEY);
 
         Optional<User> optionalUser = userRepository.findByAccount(account);
+        ResponseHeader header = new ResponseHeader();
 
         if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
             User user = optionalUser.get();
-            ResponseHeader header = new ResponseHeader();
             addSession(request, manager, user, header);
-            return redirectDefaultPage(header);
+            return new ForwardResult(HttpStatusCode.OK, "index.html", header);
         }
-        return redirectUnauthorizedPage();
+
+        return new ForwardResult(HttpStatusCode.FOUND, "401.html", header);
     }
 
     private Map<String, String> parseBody(String query) {
@@ -62,19 +62,6 @@ public class LoginController implements Controller {
             session.setAttribute("user", user.getAccount());
             header.setCookie(HttpCookie.ofJSessionId(session.getId()));
         }
-    }
-
-    private HttpResponse redirectDefaultPage(ResponseHeader header) {
-        header.setLocation("/index.html");
-        header.setContentType(MimeType.HTML);
-        return new HttpResponse(HttpStatusCode.FOUND, header);
-    }
-
-    private HttpResponse redirectUnauthorizedPage() {
-        ResponseHeader header = new ResponseHeader();
-        header.setLocation("/401.html");
-        header.setContentType(MimeType.HTML);
-        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private boolean isSessionExists(HttpRequest request) {

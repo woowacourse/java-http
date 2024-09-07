@@ -28,12 +28,12 @@ public class ResourceToResponseConverter {
     }
 
     private static String getContentType(final FileExtension extension) {
-        if (extension.equals(FileExtension.HTML)) {
-            return "text/html;charset=utf-8 ";
-        } else if (extension.equals(FileExtension.CSS)) {
-            return "text/css; ";
-        }
-        return "text/plain;charset=utf-8 ";
+        return switch (extension) {
+            case CSS -> "text/css;charset=utf-8 ";
+            case HTML -> "text/html;charset=utf-8 ";
+            case JAVASCRIPT -> "text/javascript;charset=utf-8 ";
+            case UNKNOWN -> "text/plain;charset=utf-8 ";
+        };
     }
 
     private ResourceToResponseConverter() {}

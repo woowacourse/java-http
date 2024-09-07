@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 public enum HttpMethod {
     GET("GET"),
     POST("POST"),
-    UPDATE("UPDATE"),
     PATCH("PATCH"),
     PUT("PUT"),
     DELETE("DELETE");

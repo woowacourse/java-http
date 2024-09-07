@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static util.StringUtil.findWithStartIndex1;
+import static util.StringUtil.findIndexStartIndexOne;
 
 public class Path {
     private static final Map<String, Path> CACHE = new HashMap<>();
@@ -21,15 +21,15 @@ public class Path {
     }
 
     public Path next() {
-        final int index = findWithStartIndex1(line, DELIMITER);
+        final int index = findIndexStartIndexOne(line, DELIMITER);
         if (index == -1) {
             throw new PathParseException(String.format("%s is Last Uri", line));
         }
-        return new Path(line.substring(findWithStartIndex1(line, DELIMITER)));
+        return new Path(line.substring(findIndexStartIndexOne(line, DELIMITER)));
     }
 
     public boolean last() {
-        return findWithStartIndex1(line, DELIMITER) == -1;
+        return findIndexStartIndexOne(line, DELIMITER) == -1;
     }
 
     public String value() {

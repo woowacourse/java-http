@@ -15,7 +15,7 @@ public class ResponseBuilder {
     private Optional<String> location;
 
 
-    public ResponseBuilder statusMessge(String statusMessage) {
+    public ResponseBuilder statusMessage(String statusMessage) {
         this.statusMessage = Optional.of(statusMessage);
         return this;
     }

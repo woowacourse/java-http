@@ -47,11 +47,11 @@ public class FrontController {
             log.info("COOKIE: key = {}, value = {}", key, request.getHeaders().getCookies().getCookies().get(key));
         }
         if (!request.isBodyEmpty()) {
-            log.info(request.getBody());
+            log.info("body = {}", request.getBody());
         }
     }
 
-    public Controller getController(HttpMethod method, String path) {
+    private Controller getController(HttpMethod method, String path) {
         Controller controller = controllers.get(new RequestKey(method, path));
         if (controller == null) {
             return new NotFoundController();

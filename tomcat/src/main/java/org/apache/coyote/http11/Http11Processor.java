@@ -111,7 +111,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             ResponseFile responseFile = ResponseFile.of(resource);
             return HttpResponse.createFileResponse(responseFile);
-        } catch (Exception e) {
+        } catch (IOException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
             return HttpResponse.createRedirectResponse(
                     HttpStatus.FOUND,

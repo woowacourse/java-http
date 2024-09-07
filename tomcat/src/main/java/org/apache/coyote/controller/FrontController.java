@@ -1,5 +1,8 @@
 package org.apache.coyote.controller;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.NotFoundController;
+import com.techcourse.controller.RegisterController;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;

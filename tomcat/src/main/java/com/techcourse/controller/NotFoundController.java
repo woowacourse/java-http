@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;

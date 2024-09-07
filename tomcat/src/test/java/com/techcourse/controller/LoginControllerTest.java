@@ -1,8 +1,9 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.techcourse.controller.LoginController;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

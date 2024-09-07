@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.controller.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;

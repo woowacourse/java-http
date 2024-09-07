@@ -1,9 +1,10 @@
 package org.apache.coyote.controller;
 
 import com.techcourse.controller.GetLoginController;
+import com.techcourse.controller.GetRegisterController;
 import com.techcourse.controller.NotFoundController;
 import com.techcourse.controller.PostLoginController;
-import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.PostRegisterController;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -30,8 +31,8 @@ public class FrontController {
     public FrontController() {
         controllers.put(new RequestKey(HttpMethod.GET, "/login"), new GetLoginController());
         controllers.put(new RequestKey(HttpMethod.POST, "/login"), new PostLoginController());
-        controllers.put(new RequestKey(HttpMethod.GET, "/register"), new RegisterController());
-        controllers.put(new RequestKey(HttpMethod.POST, "/register"), new RegisterController());
+        controllers.put(new RequestKey(HttpMethod.GET, "/register"), new GetRegisterController());
+        controllers.put(new RequestKey(HttpMethod.POST, "/register"), new PostRegisterController());
     }
 
     public HttpResponse dispatch(HttpRequest request) {

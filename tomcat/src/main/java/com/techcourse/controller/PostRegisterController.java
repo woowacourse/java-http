@@ -11,7 +11,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseHeader;
 
-public class RegisterController implements Controller {
+public class PostRegisterController implements Controller {
 
     private static final String ACCOUNT_KEY = "account";
     private static final String EMAIL_KEY = "email";
@@ -19,15 +19,12 @@ public class RegisterController implements Controller {
 
     private final InMemoryUserRepository userRepository;
 
-    public RegisterController() {
+    public PostRegisterController() {
         userRepository = new InMemoryUserRepository();
     }
 
     @Override
     public HttpResponse run(HttpRequest request) {
-        if (request.getBody().isEmpty()) {
-            return redirectRegisterPage();
-        }
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 
@@ -38,13 +35,6 @@ public class RegisterController implements Controller {
         userRepository.save(new User(account, password, email));
 
         return redirectDefaultPage();
-    }
-
-    private HttpResponse redirectRegisterPage() {
-        ResponseHeader header = new ResponseHeader();
-        header.setLocation("/register.html");
-        header.setContentType(MimeType.HTML);
-        return new HttpResponse(HttpStatusCode.FOUND, header);
     }
 
     private Map<String, String> parseBody(String query) {

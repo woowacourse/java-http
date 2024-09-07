@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.techcourse.controller.RegisterController;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,13 +16,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("회원가입 컨트롤러 테스트")
-class RegisterControllerTest {
+class PostRegisterControllerTest {
 
-    private RegisterController registerController;
+    private PostRegisterController postRegisterController;
 
     @BeforeEach
     void setUp() {
-        registerController = new RegisterController();
+        postRegisterController = new PostRegisterController();
     }
 
     @DisplayName("회원가입에 성공할 경우, index.html로 리다이렉트한다.")
@@ -58,7 +57,7 @@ class RegisterControllerTest {
         HttpRequest request = new HttpRequest(inputStream);
 
         // when
-        HttpResponse httpResponse = registerController.run(request);
+        HttpResponse httpResponse = postRegisterController.run(request);
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

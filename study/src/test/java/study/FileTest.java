@@ -54,7 +54,6 @@ class FileTest {
         final Path path = Path.of(resource.toURI());
 
         // todo
-        //final List<String> actual = Collections.emptyList();
         List<String> actual =  Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");

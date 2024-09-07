@@ -34,5 +34,23 @@ class RegisterControllerTest {
                     () -> assertThat(response.getView().getContent()).isEqualTo(ViewResolver.getView("register.html").getContent())
             );
         }
+
+        @Test
+        void 회원가입_POST_요청을_처리한다() {
+            // given
+            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+                    "POST /register HTTP/1.1 ");
+            HttpRequest request = new HttpRequest(startLine, null, null);
+            HttpResponse response = new HttpResponse();
+            FrontController controller = FrontController.getInstance();
+
+            // when
+            controller.service(request, response);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.getCode()).isEqualTo(HttpStatus.FOUND.getCode())
+            );
+        }
     }
 }

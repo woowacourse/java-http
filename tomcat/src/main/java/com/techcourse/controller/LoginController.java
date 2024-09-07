@@ -20,7 +20,7 @@ public class LoginController implements Controller{
     }
 
     private static void handleLogin(HttpRequest request, HttpResponse response) {
-        User user = LoginService.login(request.findQuery("account"), request.findQuery("password"));
+        User user = LoginService.login(request.findFromQueryParam("account"), request.findFromQueryParam("password"));
         response.setView(ViewResolver.getView("login.html"));
         response.setStatus(HttpStatus.FOUND);
         response.setHeaders(HttpHeaders.of(request, response));

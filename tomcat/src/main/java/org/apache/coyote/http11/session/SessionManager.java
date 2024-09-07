@@ -1,15 +1,23 @@
 package org.apache.coyote.http11.session;
 
-import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private final int maxInactiveInterval;
 
-    public void add(final Session session) {
+    public SessionManager(final int maxInactiveInterval) {
+        this.maxInactiveInterval = maxInactiveInterval;
+    }
+
+    public Session createSession(final LocalDateTime time) {
+        final Session session = new Session(time, maxInactiveInterval);
         SESSIONS.put(session.getId(), session);
+        return session;
     }
 
     public Optional<Session> findSession(final String id) {
@@ -18,5 +26,10 @@ public class SessionManager {
 
     public void remove(final Session session) {
         SESSIONS.remove(session.getId());
+    }
+    public void cleanUpSession(final LocalDateTime time){
+        SESSIONS.entrySet().stream()
+                .filter(entry -> entry.getValue().isExpired(time))
+                .forEach(entry -> SESSIONS.remove(entry.getKey()));
     }
 }

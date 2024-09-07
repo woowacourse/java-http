@@ -13,17 +13,17 @@ public class QueryParams {
 
     private final Map<String, String> queryParams;
 
+    private QueryParams(Map<String, String> queryParams) {
+        this.queryParams = queryParams;
+    }
+
     protected static QueryParams from(String queryParams) {
         return Arrays.stream(queryParams.split("&"))
                 .map(params -> params.split("=", 2))
                 .collect(collectingAndThen(toMap(p -> p[0], p -> p[1]), QueryParams::new));
     }
 
-    private QueryParams(Map<String, String> queryParams) {
-        this.queryParams = queryParams;
-    }
-
-    protected String getValue(String key) {
+    protected String get(String key) {
         if (!queryParams.containsKey(key)) {
             throw new IllegalArgumentException("Query parameter가 존재하지 않습니다.");
         }

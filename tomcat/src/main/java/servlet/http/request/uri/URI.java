@@ -26,7 +26,7 @@ public class URI {
     }
 
     public String getQueryParamValue(String key) {
-        return this.queryParams.getValue(key);
+        return this.queryParams.get(key);
     }
 
     public boolean existQueryParams() {

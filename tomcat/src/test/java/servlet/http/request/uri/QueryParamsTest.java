@@ -17,8 +17,8 @@ class QueryParamsTest {
 
         // then
         assertSoftly(softly -> {
-            softly.assertThat(actual.getValue("account")).isEqualTo("prin");
-            softly.assertThat(actual.getValue("password")).isEqualTo("1q2w3e4r!");
+            softly.assertThat(actual.get("account")).isEqualTo("prin");
+            softly.assertThat(actual.get("password")).isEqualTo("1q2w3e4r!");
         });
     }
 
@@ -31,7 +31,7 @@ class QueryParamsTest {
         QueryParams actual = QueryParams.from(queryParams);
 
         // then
-        assertThatThrownBy(() -> actual.getValue("name"))
+        assertThatThrownBy(() -> actual.get("name"))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Query parameter가 존재하지 않습니다.");
     }

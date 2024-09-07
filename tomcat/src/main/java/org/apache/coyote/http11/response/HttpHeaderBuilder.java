@@ -3,13 +3,12 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpHeaderBuilder {
     private Optional<String> contentType = Optional.of("text/html");
     private Optional<Integer> contentLength;
     private Optional<String> location;
-    private Optional<String> cookie;
     private Optional<String> setCookie;
 
     public HttpHeaderBuilder() {
@@ -30,11 +29,6 @@ public class HttpHeaderBuilder {
         return this;
     }
 
-    public HttpHeaderBuilder cookie(String cookie) {
-        this.cookie = Optional.of(cookie);
-        return this;
-    }
-
     public HttpHeaderBuilder setCookie(String setCookie) {
         this.setCookie = Optional.of(setCookie);
         return this;
@@ -46,7 +40,6 @@ public class HttpHeaderBuilder {
         contentType.ifPresent(type -> payLoads.put("Content-Type", type));
         contentLength.ifPresent(length -> payLoads.put("Content-Length", Integer.toString(length)));
         location.ifPresent(location -> payLoads.put("Location", location));
-        cookie.ifPresent(cookie -> payLoads.put("Cookie", cookie));
         setCookie.ifPresent(setCookie -> payLoads.put("Set-Cookie", setCookie));
 
         return new HttpHeaders(payLoads);

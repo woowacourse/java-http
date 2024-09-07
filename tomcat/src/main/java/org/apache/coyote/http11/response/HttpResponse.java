@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Optional;
-import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
 
 public class HttpResponse {

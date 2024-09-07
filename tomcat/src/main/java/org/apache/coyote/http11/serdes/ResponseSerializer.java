@@ -3,7 +3,7 @@ package org.apache.coyote.http11.serdes;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResponseSerializer {

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {

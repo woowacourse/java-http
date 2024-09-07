@@ -17,7 +17,7 @@ import org.apache.coyote.util.FileExtension;
 public class LoginPageController implements Controller {
 
     @Override
-    public HttpResponse run(HttpRequest request, Manager manager) {
+    public HttpResponse service(HttpRequest request, Manager manager) {
         String resourcePath = "static/login.html";
         try {
             Path filePath = Paths.get(getClass().getClassLoader().getResource(resourcePath).toURI());

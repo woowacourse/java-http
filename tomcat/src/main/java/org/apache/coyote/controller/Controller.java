@@ -6,5 +6,5 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    HttpResponse run(HttpRequest request, Manager manager);
+    HttpResponse service(HttpRequest request, Manager manager);
 }

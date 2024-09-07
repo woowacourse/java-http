@@ -35,7 +35,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request, new SessionManager());
+        HttpResponse httpResponse = loginController.service(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
@@ -79,7 +79,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request, new SessionManager());
+        HttpResponse httpResponse = loginController.service(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

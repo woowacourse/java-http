@@ -30,7 +30,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse run(HttpRequest request, Manager manager) {
+    public HttpResponse service(HttpRequest request, Manager manager) {
         String body = request.getBody();
         Map<String, String> parsedBody = parseBody(body);
 

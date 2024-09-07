@@ -58,7 +58,7 @@ class RegisterControllerTest {
         HttpRequest request = new HttpRequest(inputStream);
 
         // when
-        HttpResponse httpResponse = registerController.run(request, new SessionManager());
+        HttpResponse httpResponse = registerController.service(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

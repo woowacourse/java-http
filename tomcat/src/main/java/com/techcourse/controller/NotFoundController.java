@@ -17,7 +17,7 @@ import org.apache.coyote.util.FileExtension;
 public class NotFoundController implements Controller {
 
     @Override
-    public HttpResponse run(HttpRequest request, Manager manager) {
+    public HttpResponse service(HttpRequest request, Manager manager) {
         String path = "/404.html";
         String resourcePath = "static" + path;
         try {

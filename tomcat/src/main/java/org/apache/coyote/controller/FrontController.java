@@ -55,7 +55,7 @@ public class FrontController {
             }
         }
         Controller controller = getController(request.getMethod(), path);
-        return controller.run(request, manager);
+        return controller.service(request, manager);
     }
 
     private void log(HttpRequest request) {

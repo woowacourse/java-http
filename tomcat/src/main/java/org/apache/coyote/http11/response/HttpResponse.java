@@ -39,4 +39,13 @@ public class HttpResponse {
         }
         return headerBytes;
     }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "statusLine=" + statusLine +
+                ", header=" + header +
+                ", body=" + body +
+                '}';
+    }
 }

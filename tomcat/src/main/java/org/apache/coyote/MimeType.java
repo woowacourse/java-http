@@ -5,21 +5,23 @@ import org.apache.coyote.util.FileExtension;
 
 public enum MimeType {
 
-    HTML("text/html;charset=utf-8", FileExtension.HTML),
-    CSS("text/css", FileExtension.CSS),
-    JS("text/javascript", FileExtension.JS),
-    ICO("image/x-ico", FileExtension.ICO),
-    PNG("image/png", FileExtension.PNG),
-    JPG("image/jpeg", FileExtension.JPG),
-    SVG("image/svg+xml", FileExtension.SVG),
-    OTHER("text/plain", null),
+    HTML("text/html", CharsetType.UTF_8, FileExtension.HTML),
+    CSS("text/css", CharsetType.NONE, FileExtension.CSS),
+    JS("text/javascript", CharsetType.NONE, FileExtension.JS),
+    ICO("image/x-ico", CharsetType.NONE, FileExtension.ICO),
+    PNG("image/png", CharsetType.NONE, FileExtension.PNG),
+    JPG("image/jpeg", CharsetType.NONE, FileExtension.JPG),
+    SVG("image/svg+xml", CharsetType.UTF_8, FileExtension.SVG),
+    OTHER("text/plain", CharsetType.NONE, null),
     ;
 
-    private final String contentType;
+    private final String mimeType;
+    private final CharsetType charset;
     private final FileExtension extension;
 
-    MimeType(String contentType, FileExtension extension) {
-        this.contentType = contentType;
+    MimeType(String mimeType, CharsetType charset, FileExtension extension) {
+        this.mimeType = mimeType;
+        this.charset = charset;
         this.extension = extension;
     }
 
@@ -31,6 +33,9 @@ public enum MimeType {
     }
 
     public String getContentType() {
-        return contentType;
+        if (charset == CharsetType.NONE) {
+            return mimeType;
+        }
+        return mimeType + ";charset=" + charset.getCharset();
     }
 }

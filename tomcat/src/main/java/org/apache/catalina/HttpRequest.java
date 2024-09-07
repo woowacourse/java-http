@@ -12,7 +12,7 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> header;
     private final HttpCookie httpCookie;
-    private final String body;  // TODO: 왜 안쓰이는지 보기
+    private final RequestBody body;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -20,30 +20,8 @@ public class HttpRequest {
 
         this.requestLine = new RequestLine(bufferedReader.readLine());
         this.header = mapHeader(bufferedReader);
-        this.body = mapBody(bufferedReader);
+        this.body = mapBody(bufferedReader, header.get(HeaderName.CONTENT_LENGTH.getValue()));
         this.httpCookie = new HttpCookie(header.get(HeaderName.COOKIE.getValue()));
-    }
-
-    private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> header = new HashMap<>();
-        String rawLine;
-
-        while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
-            String[] headerEntry = rawLine.split(": ", 2);
-            header.put(headerEntry[0], headerEntry[1]);
-        }
-
-        return header;
-    }
-
-    private String mapBody(BufferedReader bufferedReader) throws IOException {
-        if (requestLine.isMethod(HttpMethod.POST)) {
-            int contentLength = Integer.parseInt(get(HeaderName.CONTENT_LENGTH));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength); // 어떻게 버퍼에 들어가는거지?
-            return new String(buffer);
-        }
-        return "";
     }
 
     public boolean isMethod(HttpMethod httpMethod) {
@@ -96,5 +74,28 @@ public class HttpRequest {
 
     public HttpCookie getHttpCookie() {
         return httpCookie;
+    }
+
+    public RequestBody getBody() {
+        return body;
+    }
+
+    private Map<String, String> mapHeader(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> rawHeader = new HashMap<>();
+        String rawLine;
+
+        while ((rawLine = bufferedReader.readLine()) != null && !rawLine.isEmpty()) {
+            String[] headerEntry = rawLine.split(": ", 2);
+            rawHeader.put(headerEntry[0], headerEntry[1]);
+        }
+
+        return rawHeader;
+    }
+
+    private RequestBody mapBody(BufferedReader bufferedReader, String bodyLength) throws IOException {
+        if (requestLine.isMethod(HttpMethod.POST)) {
+            return new RequestBody(bufferedReader, bodyLength);
+        }
+        return new RequestBody();
     }
 }

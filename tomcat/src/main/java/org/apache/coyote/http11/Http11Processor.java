@@ -10,6 +10,7 @@ import org.apache.catalina.HeaderName;
 import org.apache.catalina.HttpMethod;
 import org.apache.catalina.HttpRequest;
 import org.apache.catalina.HttpResponse;
+import org.apache.catalina.RequestBody;
 import org.apache.catalina.Session;
 import org.apache.catalina.StatusCode;
 import org.apache.catalina.manager.SessionManager;
@@ -97,9 +98,10 @@ public class Http11Processor implements Runnable, Processor {
 
             if (httpRequest.isMethod(HttpMethod.POST)) {
                 if (httpRequest.isPath("/register")) {
-                    String account = httpRequest.getQueryParam("account");
-                    String password = httpRequest.getQueryParam("password");
-                    String email = httpRequest.getQueryParam("email");
+                    RequestBody requestBody = httpRequest.getBody();
+                    String account = requestBody.get("account");
+                    String password = requestBody.get("password");
+                    String email = requestBody.get("email");
                     InMemoryUserRepository.save(new User(account, password, email));
 
                     httpResponse.setStatusCode(StatusCode._302);

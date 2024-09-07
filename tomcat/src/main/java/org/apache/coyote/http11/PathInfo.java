@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.exception.UncheckedHttpException;
+import org.apache.coyote.http11.component.FileExtension;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpMethod;
-import org.apache.coyote.http11.component.MediaType;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class PathInfo {
@@ -17,11 +17,11 @@ public class PathInfo {
     private static final ClassLoader CLASS_LOADER = PathInfo.class.getClassLoader();
 
     private final String filePath;
-    private final MediaType mediaType;
+    private final FileExtension fileExtension;
 
-    public PathInfo(String filePath, MediaType mediaType) {
+    public PathInfo(String filePath, FileExtension fileExtension) {
         this.filePath = filePath;
-        this.mediaType = mediaType;
+        this.fileExtension = fileExtension;
     }
 
     public ControllerMapping getControllerMapping(HttpMethod method) {
@@ -29,7 +29,7 @@ public class PathInfo {
     }
 
     public HttpResponse<String> getHttpResponse(HttpResponse<?> response) throws IOException {
-        URL resource = CLASS_LOADER.getResource(STATIC_FOLDER_NAME + filePath + mediaType.getExtension());
+        URL resource = CLASS_LOADER.getResource(STATIC_FOLDER_NAME + filePath + fileExtension.getExtension());
         if (resource == null) {
             throw new UncheckedHttpException(new IllegalArgumentException("잘못된 경로입니다."));
         }
@@ -37,7 +37,7 @@ public class PathInfo {
         String responseBody = new String(Files.readAllBytes(file.toPath()));
         HttpResponse<String> httpResponse = response.getFileResponse(responseBody);
         int contentLength = httpResponse.getBody().getBytes().length;
-        httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, mediaType.getValue());
+        httpResponse.addHeader(HttpHeaders.CONTENT_TYPE, fileExtension.getMediaType());
         httpResponse.addHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
         return httpResponse;
     }

@@ -8,16 +8,16 @@ public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final Map<String, String> headers;
-    private final Map<String, String> bodies;
+    private final RequestBody body;
 
-    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, Map<String, String> bodies) {
+    public HttpRequest(HttpRequestLine httpRequestLine, Map<String, String> headers, RequestBody body) {
         this.httpRequestLine = httpRequestLine;
         this.headers = headers;
-        this.bodies = bodies;
+        this.body = body;
     }
 
     public HttpResponse<String> getHttpResponse() throws IOException {
-        return httpRequestLine.getHttpResponse(bodies);
+        return httpRequestLine.getHttpResponse(body);
     }
 
     public Map<String, String> getHeaders() {

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
-import org.apache.coyote.http11.component.MediaType;
+import org.apache.coyote.http11.component.FileExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -68,7 +68,7 @@ class Http11ProcessorTest {
     void cssContentType() throws IOException {
         // given
         String path = "/css/styles.css";
-        MediaType expectedMediaType = MediaType.CSS;
+        FileExtension expectedFileExtension = FileExtension.CSS;
 
         String httpRequest = String.join("\r\n",
                 "GET " + path + " HTTP/1.1 ",
@@ -88,7 +88,7 @@ class Http11ProcessorTest {
         String responseBody = new String(
                 Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + expectedMediaType.getValue() + " \r\n" +
+                "Content-Type: " + expectedFileExtension.getMediaType() + " \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
@@ -101,7 +101,7 @@ class Http11ProcessorTest {
     void processWithoutExtension() throws IOException {
         //given
         String path = "/login";
-        MediaType expectedMediaType = MediaType.HTML;
+        FileExtension expectedFileExtension = FileExtension.HTML;
         String httpRequest = String.join("\r\n",
                 "GET " + path + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -120,7 +120,7 @@ class Http11ProcessorTest {
         String responseBody = new String(
                 Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + expectedMediaType.getValue() + " \r\n" +
+                "Content-Type: " + expectedFileExtension.getMediaType() + " \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;

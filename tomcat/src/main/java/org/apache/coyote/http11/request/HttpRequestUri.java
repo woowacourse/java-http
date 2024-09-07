@@ -37,9 +37,9 @@ public class HttpRequestUri {
         return response.convertResponse();
     }
 
-    public HttpResponse<?> processParams(HttpMethod method, Map<String, String> bodies) {
+    public HttpResponse<?> processParams(HttpMethod method, RequestBody body) {
         ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
-        HttpResponseEntity<?> response = controllerMapping.apply(bodies);
+        HttpResponseEntity<?> response = controllerMapping.apply(body.getBody());
         return response.convertResponse();
     }
 

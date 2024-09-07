@@ -9,7 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 import org.apache.coyote.http11.component.HttpMethod;
-import org.apache.coyote.http11.component.MediaType;
+import org.apache.coyote.http11.component.FileExtension;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ class PathInfoTest {
     @Test
     void getControllerMapping() {
         //given
-        PathInfo pathInfo = new PathInfo("/login", MediaType.HTML);
+        PathInfo pathInfo = new PathInfo("/login", FileExtension.HTML);
 
         //when
         ControllerMapping controllerMapping = pathInfo.getControllerMapping(HttpMethod.GET);
@@ -34,7 +34,7 @@ class PathInfoTest {
     @Test
     void getHttpResponse() throws IOException {
         //given
-        PathInfo pathInfo = new PathInfo("/index", MediaType.HTML);
+        PathInfo pathInfo = new PathInfo("/index", FileExtension.HTML);
         HttpResponse<Object> response = new HttpResponse<>(new StatusLine(), null);
 
         //when

@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.io.IOException;
-import java.util.Map;
 import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.component.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -36,13 +35,13 @@ public class HttpRequestLine {
         }
     }
 
-    public HttpResponse<String> getHttpResponse(Map<String, String> bodies) throws IOException {
+    public HttpResponse<String> getHttpResponse(RequestBody body) throws IOException {
         if (httpMethod.isGet()) {
             HttpResponse<?> httpResponse = requestUri.processParams(httpMethod);
             return requestUri.getHttpResponse(httpResponse);
         }
         if (HttpMethod.POST.equals(httpMethod)) {
-            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, bodies);
+            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, body);
             return requestUri.getHttpResponse(httpResponse);
         }
         throw new UncheckedHttpException(new UnsupportedOperationException("지원하지 않는 기능입니다."));

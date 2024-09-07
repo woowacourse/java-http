@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.PathInfo;
-import org.apache.coyote.http11.component.MediaType;
+import org.apache.coyote.http11.component.FileExtension;
 
 public class HttpRequestUriParser {
 
@@ -39,18 +39,18 @@ public class HttpRequestUriParser {
     private static PathInfo getFileAccessor(String path) {
         int extensionIndex = path.lastIndexOf(EXTENSION_DELIMITER);
         if (path.equals(ROOT_PATH)) {
-            return new PathInfo(INDEX_FILE, MediaType.HTML);
+            return new PathInfo(INDEX_FILE, FileExtension.HTML);
         }
         if (extensionIndex == path.length() - 1) {
             throw new UncheckedHttpException(new IllegalArgumentException("파일 경로는 .으로 끝날 수 없습니다."));
         }
 
         if (extensionIndex == -1) {
-            return new PathInfo(path, MediaType.HTML);
+            return new PathInfo(path, FileExtension.HTML);
         }
         String fileName = path.substring(0, extensionIndex);
         String extension = path.substring(extensionIndex);
-        MediaType mediaType = MediaType.from(extension);
-        return new PathInfo(fileName, mediaType);
+        FileExtension fileExtension = FileExtension.from(extension);
+        return new PathInfo(fileName, fileExtension);
     }
 }

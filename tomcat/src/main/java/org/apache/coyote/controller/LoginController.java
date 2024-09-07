@@ -2,9 +2,10 @@ package org.apache.coyote.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.catalina.Manager;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
@@ -59,16 +60,10 @@ public class LoginController implements Controller {
     }
 
     private Map<String, String> parseBody(String query) {
-        Map<String, String> result = new HashMap<>();
-        String[] pairs = query.split("&");
-
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=", 2);
-            String key = keyValue[0];
-            String value = keyValue[1];
-            result.put(key, value);
-        }
-        return result;
+        List<String> pairs = List.of(query.split("&"));
+        return pairs.stream()
+                .map(pair -> pair.split("=", 2))
+                .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 
     private void addSession(HttpRequest request, Manager manager, User user, ResponseHeader header) {

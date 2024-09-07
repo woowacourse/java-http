@@ -100,10 +100,10 @@ public class Http11RequestHandler {
     }
 
     private static Http11Response getHttp11Response(String response,
-                                                    StatusLine httpVersion,
+                                                    StatusLine statusLine,
                                                     List<String> acceptTypes) {
         Http11ResponseBody responseBody = Http11ResponseBody.of(response);
-        Http11ResponseHeader header = Http11ResponseHeader.of(httpVersion,
+        Http11ResponseHeader header = Http11ResponseHeader.of(statusLine,
                 ContentType.from(acceptTypes),
                 responseBody.getContentLength());
 

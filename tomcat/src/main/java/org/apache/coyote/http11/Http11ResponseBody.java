@@ -18,8 +18,7 @@ public class Http11ResponseBody {
         return body.getBytes(StandardCharsets.UTF_8).length;
     }
 
-    @Override
-    public String toString() {
+    public String getBody() {
         return body;
     }
 }

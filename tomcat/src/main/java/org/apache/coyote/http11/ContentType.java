@@ -24,6 +24,10 @@ public enum ContentType {
                 .orElseGet(() -> HTML);
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
     @Override
     public String toString() {
         return this.contentType;

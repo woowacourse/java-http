@@ -19,6 +19,6 @@ public class Http11Response {
     }
 
     public String getResponse() {
-        return String.format(RESPONSE_FORMAT, header, responseBody);
+        return String.format(RESPONSE_FORMAT, header.getResponseHeader(), responseBody.getBody());
     }
 }

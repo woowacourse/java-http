@@ -11,6 +11,8 @@ import org.apache.coyote.http11.request.model.HttpRequest;
 
 public final class HttpRequestConverter {
 
+    public static final String END_OF_HEADER = "";
+
     private HttpRequestConverter() {
     }
 
@@ -26,7 +28,7 @@ public final class HttpRequestConverter {
         List<String> headerLines = new ArrayList<>();
 
         String headerLine;
-        while (!"".equals((headerLine = bufferedReader.readLine()))) {
+        while ((headerLine = bufferedReader.readLine()) != null && !headerLine.isBlank()) {
             headerLines.add(headerLine);
         }
         return new RequestHeader(headerLines);

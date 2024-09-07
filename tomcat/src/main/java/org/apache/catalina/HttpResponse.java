@@ -13,17 +13,19 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final Map<HeaderName, String> header;
+    private final HttpCookie cookie;
     private String body; // TODO: final 적용
 
     public HttpResponse(HttpRequest httpRequest) throws IOException {
         this.statusLine = new StatusLine();
         this.header = mapHeader(httpRequest);
-        this.body = mapBody(httpRequest.getPath());
+        this.cookie = httpRequest.getHttpCookie();
     }
 
     public HttpResponse() {
         this.statusLine = new StatusLine();
         this.header = initHtmlHeader();
+        this.cookie = new HttpCookie("");
         this.body = "";
     }
 
@@ -61,6 +63,7 @@ public class HttpResponse {
         Map<HeaderName, String> headerEntry = new HashMap<>();
         headerEntry.put(HeaderName.CONTENT_TYPE, httpRequest.get(HeaderName.CONTENT_TYPE));
         headerEntry.put(HeaderName.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        headerEntry.put(HeaderName.SET_COOKIE.getValue(), httpRequest.getCookieResponse());
         return headerEntry;
     }
 

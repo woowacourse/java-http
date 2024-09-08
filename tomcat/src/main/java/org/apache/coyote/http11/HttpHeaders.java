@@ -14,7 +14,7 @@ public class HttpHeaders {
     public HttpHeaders(Map<String, String> payLoads) {
         this(payLoads, Optional.empty());
     }
-    
+
     public HttpHeaders(Map<String, String> payLoads, Optional<Cookie> cookie) {
         this.payLoads = payLoads;
         this.cookie = cookie;
@@ -59,5 +59,9 @@ public class HttpHeaders {
 
     public int contentLength() {
         return Integer.parseInt(payLoads.get("Content-Length"));
+    }
+
+    public Cookie getCookie() {
+        return cookie.get();
     }
 }

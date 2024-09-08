@@ -19,11 +19,10 @@ public class RequestMapping {
     }
 
     public Controller getController(HttpRequest request) {
-        for (final var entry : controllers.entrySet()) {
-            if (entry.getKey().test(request)) {
-                return entry.getValue();
-            }
-        }
-        return defaultController;
+        return controllers.entrySet().stream()
+                .filter((entry) -> entry.getKey().test(request))
+                .findAny()
+                .map(Map.Entry::getValue)
+                .orElse(defaultController);
     }
 }

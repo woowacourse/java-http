@@ -19,16 +19,13 @@ public class Http11InputStreamReader {
         List<String> lines = new ArrayList<>();
         String line;
 
-        boolean readingHeaders = true;
         while ((line = reader.readLine()) != null) {
             lines.add(line);
             if (line.isEmpty()) {
-                readingHeaders = false;
                 break;
             }
         }
-
-        if (readingHeaders) {
+        if (line == null) {
             log.warn("Incomplete headers received");
         }
 

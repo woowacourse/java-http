@@ -1,15 +1,17 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class Http11QueryParser {
 
     List<Http11Query> parse(String requestUri) {
         var rawQueries = parseToMap(requestUri);
-        return rawQueries.keySet().stream()
-                .map(key -> new Http11Query(key, rawQueries.get(key)))
-                .toList();
+        return rawQueries.entrySet().stream()
+                .map(entry -> new Http11Query(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     private LinkedHashMap<String, String> parseToMap(String requestUri) {
@@ -22,11 +24,15 @@ class Http11QueryParser {
             return new LinkedHashMap<>();
         }
 
-        LinkedHashMap<String, String> result = new LinkedHashMap<>();
-        for (String singleQueryString : queryString.split("&")) {
-            putQueryString(singleQueryString, result);
-        }
-        return result;
+        return Arrays.stream(queryString.split("&"))
+                .map(query -> query.split("="))
+                .filter(keyAndValue -> keyAndValue.length == 2)
+                .collect(Collectors.toMap(
+                        keyAndValue -> keyAndValue[0],
+                        keyAndValue -> keyAndValue[1],
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new
+                ));
     }
 
     private boolean notHasQueryString(String requestUri) {
@@ -35,13 +41,5 @@ class Http11QueryParser {
 
     private boolean isInValidQueryString(String queryString) {
         return !queryString.contains("=");
-    }
-
-    private void putQueryString(String singleQueryString, LinkedHashMap<String, String> result) {
-        String[] split = singleQueryString.split("=");
-        if (split.length != 2) {
-            return;
-        }
-        result.putLast(split[0], split[1]);
     }
 }

@@ -1,5 +1,6 @@
 package org.apache.catalina.response;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.catalina.auth.HttpCookie;
@@ -36,11 +37,8 @@ public enum ResponsePage {
     public static Optional<ResponsePage> fromUrl(String url) {
         Optional<Session> session = SessionManager.getInstance().findSession(HttpCookie.getId());
 
-        for (ResponsePage page : values()) {
-            if (page.url.equals(url) && page.isLogin == session.isPresent()) {
-                return Optional.of(page);
-            }
-        }
-        return Optional.empty();
+        return Arrays.stream(values())
+                .filter(page -> page.url.equals(url) && page.isLogin == session.isPresent())
+                .findAny();
     }
 }

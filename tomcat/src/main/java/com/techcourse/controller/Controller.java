@@ -6,6 +6,7 @@ import com.techcourse.session.SessionManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -36,7 +37,7 @@ public class Controller {
             return showLoginPage(request, response);
         }
         if (request.isTargetStatic()) {
-            return readStaticFile(response, request.getPath(), request.getTargetExtension());
+            return readStaticFile(response, request.getTargetPath(), request.getTargetExtension());
         }
         return createDynamicResponse(request, response);
     }
@@ -49,7 +50,7 @@ public class Controller {
         Optional<String> nullableSession = request.getSessionFromCookie();
         return nullableSession.map(SessionManager::findSession)
                 .map(session -> redirectToIndex(response))
-                .orElseGet(() -> readStaticFile(response, request.getPath(), request.getTargetExtension()));
+                .orElseGet(() -> readStaticFile(response, request.getTargetPath(), request.getTargetExtension()));
     }
 
     private boolean createDynamicResponse(HttpRequest request, HttpResponse response) {
@@ -105,12 +106,13 @@ public class Controller {
     }
 
     private boolean redirectTo401(HttpResponse response) {
+        URL resource = getClass().getClassLoader().getResource("static/401.html");
         try {
-            Path path = Path.of(getClass().getClassLoader().getResource("static/401.html").toURI());
+            Path path = Path.of(resource.toURI());
             response.setStatus(HttpStatus.UNAUTHORIZED);
             return readStaticFile(response, path, "html");
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
+            throw new IllegalArgumentException("cannot convert to URI: " + resource);
         }
     }
 

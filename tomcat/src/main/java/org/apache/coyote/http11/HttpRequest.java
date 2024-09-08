@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,13 +82,8 @@ public class HttpRequest {
         return httpRequestLine.getTargetExtension();
     }
 
-    public Path getPath() {
-        URL resource = httpRequestLine.getTargetUrl();
-        try {
-            return Path.of(resource.toURI());
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("cannot convert to URI: " + resource);
-        }
+    public Path getTargetPath() {
+        return httpRequestLine.getTargetPath();
     }
 
     public String getFromBody(String key) {

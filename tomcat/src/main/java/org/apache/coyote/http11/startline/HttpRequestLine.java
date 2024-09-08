@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.startline;
 
-import java.net.URL;
+import java.nio.file.Path;
 import org.apache.coyote.http11.header.RequestTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class HttpRequestLine {
     }
 
     public boolean isTargetStatic() {
-        return httpMethod.equals(HttpMethod.GET) && requestTarget.getUrl() != null;
+        return httpMethod.equals(HttpMethod.GET) && requestTarget.getPath() != null;
     }
 
     public boolean isTargetBlank() {
@@ -53,8 +53,8 @@ public class HttpRequestLine {
         return requestTarget.getTargetExtension();
     }
 
-    public URL getTargetUrl() {
-        return requestTarget.getUrl();
+    public Path getTargetPath() {
+        return requestTarget.getPath();
     }
 
     public HttpMethod getHttpMethod() {

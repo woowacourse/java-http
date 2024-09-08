@@ -1,7 +1,10 @@
 package org.apache.coyote.http11.header;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import org.apache.coyote.SubstringGenerator;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class RequestTarget {
 
@@ -20,18 +23,24 @@ public class RequestTarget {
     }
 
     public String getTargetExtension() {
-        if (value.contains(".")) {
-            return SubstringGenerator.splitByLast(".", value).getLast();
+        try {
+            return Files.probeContentType(getPath());
+        } catch (IOException e) {
+            throw new IllegalArgumentException("IO exception occured: " + e.getMessage());
         }
-        return "html";
     }
 
-    public URL getUrl() {
+    public Path getPath() {
         String path = value;
         if (!path.contains(".")) {
             path = path + ".html";
         }
-        return getClass().getClassLoader().getResource("static" + path);
+        URL resource = getClass().getClassLoader().getResource("static" + path);
+        try {
+            return Path.of(resource.toURI());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("cannot convert to URI: " + resource);
+        }
     }
 
     public boolean isBlank() {

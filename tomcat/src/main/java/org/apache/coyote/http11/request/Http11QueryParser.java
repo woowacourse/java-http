@@ -1,10 +1,18 @@
 package org.apache.coyote.http11.request;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 class Http11QueryParser {
 
-    LinkedHashMap<String, String> parse(String requestUri) {
+    List<Http11Query> parse(String requestUri) {
+        var rawQueries = parseToMap(requestUri);
+        return rawQueries.keySet().stream()
+                .map(key -> new Http11Query(key, rawQueries.get(key)))
+                .toList();
+    }
+
+    private LinkedHashMap<String, String> parseToMap(String requestUri) {
         if (notHasQueryString(requestUri)) {
             return new LinkedHashMap<>();
         }

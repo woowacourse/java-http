@@ -1,9 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
-import java.util.LinkedHashMap;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,9 +12,9 @@ class Http11QueryParserTest {
     void parseSingle() {
         Http11QueryParser queryStringParser = new Http11QueryParser();
 
-        LinkedHashMap<String, String> result = queryStringParser.parse("/login?account=1");
+        var result = queryStringParser.parse("/login?account=1");
 
-        assertThat(result).containsExactly(entry("account", "1"));
+        assertThat(result).containsExactly(new Http11Query("account", "1"));
     }
 
     @Test
@@ -24,9 +22,9 @@ class Http11QueryParserTest {
     void parseMany() {
         Http11QueryParser queryStringParser = new Http11QueryParser();
 
-        LinkedHashMap<String, String> result = queryStringParser.parse("/login?account=1&password=1234");
+        var result = queryStringParser.parse("/login?account=1&password=1234");
 
-        assertThat(result).containsExactly(entry("account", "1"), entry("password", "1234"));
+        assertThat(result).containsExactly(new Http11Query("account", "1"), new Http11Query("password", "1234"));
     }
 
     @Test
@@ -34,7 +32,7 @@ class Http11QueryParserTest {
     void parseNone() {
         Http11QueryParser queryStringParser = new Http11QueryParser();
 
-        LinkedHashMap<String, String> result = queryStringParser.parse("/login");
+        var result = queryStringParser.parse("/login");
 
         assertThat(result).isEmpty();
     }
@@ -44,8 +42,8 @@ class Http11QueryParserTest {
     void parseWeired() {
         Http11QueryParser queryStringParser = new Http11QueryParser();
 
-        LinkedHashMap<String, String> result = queryStringParser.parse("/login?account=&password=1");
+        var result = queryStringParser.parse("/login?account=&password=1");
 
-        assertThat(result).containsExactly(entry("password", "1"));
+        assertThat(result).containsExactly(new Http11Query("password", "1"));
     }
 }

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpSession;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -8,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.catalina.session.JSession;
-import org.apache.catalina.session.SessionManager;
 
 public record HttpRequest(
         String method,
@@ -99,15 +96,6 @@ public record HttpRequest(
         }
 
         return parameters;
-    }
-
-    public HttpSession getSession(SessionManager sessionManager) {
-        String sessionId = cookies.get(JSession.COOKIE_NAME);
-        if (sessionId == null) {
-            return null;
-        }
-
-        return sessionManager.findSession(sessionId);
     }
 
     public HttpRequest updatePath(String path) {

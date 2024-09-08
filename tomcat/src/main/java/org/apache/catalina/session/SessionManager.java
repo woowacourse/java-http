@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;
+import org.apache.coyote.http11.HttpRequest;
 
 public class SessionManager implements Manager {
 
@@ -36,5 +37,14 @@ public class SessionManager implements Manager {
     @Override
     public void remove(HttpSession session) {
         SESSIONS.remove(session.getId());
+    }
+
+    public HttpSession getSession(HttpRequest request) {
+        String sessionId = request.cookies().get(JSession.COOKIE_NAME);
+        if (sessionId == null) {
+            return null;
+        }
+
+        return SESSIONS.get(sessionId);
     }
 }

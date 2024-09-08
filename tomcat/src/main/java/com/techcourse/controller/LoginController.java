@@ -24,17 +24,15 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
-        if (request.cookies().containsKey(JSession.COOKIE_NAME)) {
-            HttpSession session = request.getSession(SessionManager.getInstance());
-            if (session != null) {
-                User user = (User) Objects.requireNonNull(session).getAttribute("user");
+        HttpSession session = SessionManager.getInstance().getSession(request);
+        if (session != null) {
+            User user = (User) Objects.requireNonNull(session).getAttribute("user");
 
-                log.info("이미 로그인한 사용자 입니다. - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
+            log.info("이미 로그인한 사용자 입니다. - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
 
-                responseBuilder.status(Status.FOUND)
-                        .location("/index.html");
-                return;
-            }
+            responseBuilder.status(Status.FOUND)
+                    .location("/index.html");
+            return;
         }
 
         if (request.parameters().containsKey("account") && request.parameters().containsKey("password")) {
@@ -45,9 +43,9 @@ public class LoginController extends AbstractController {
             if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {
                 User user = optionalUser.get();
                 String sessionId = UUID.randomUUID().toString();
-                JSession session = new JSession(sessionId);
-                session.setAttribute("user", user);
-                SessionManager.getInstance().add(session);
+                JSession jSession = new JSession(sessionId);
+                jSession.setAttribute("user", user);
+                SessionManager.getInstance().add(jSession);
 
                 log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
 

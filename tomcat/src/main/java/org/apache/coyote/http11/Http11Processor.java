@@ -55,12 +55,12 @@ public class Http11Processor implements Runnable, Processor {
             headers.put("Content-Type", DEFAULT_CHARSET);
             headers.put("Content-Length", String.valueOf(body.getBytes().length));
 
-            final var httpResponse = new HttpResponse(
-                    request.getHttpVersion(),
-                    HttpStatusCode.OK,
-                    headers,
-                    body
-            );
+            final var httpResponse = HttpResponse.builder()
+                    .httpVersion(request.getHttpVersion())
+                    .httpStatusCode(HttpStatusCode.OK)
+                    .headers(headers)
+                    .body(body)
+                    .build();
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();

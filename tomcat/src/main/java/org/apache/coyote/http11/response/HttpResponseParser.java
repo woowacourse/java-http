@@ -23,14 +23,14 @@ public class HttpResponseParser {
     private String parseResponseLine(HttpStatusCode httpStatusCode) {
         int code = httpStatusCode.getCode();
         String message = httpStatusCode.getMessage();
-        return "HTTP/1.1 " + code + " " + message + " ";
+        return "HTTP/1.1 " + code + " " + message;
     }
 
     private String parseResponseHeaders(HttpResponseHeaders httpResponseHeaders) {
         List<String> headers = new ArrayList<>();
         String[] keys = httpResponseHeaders.getKeys();
         for (String key : keys) {
-            headers.add(key + DELIMITER_HEADER + httpResponseHeaders.getValue(key) + " ");
+            headers.add(key + DELIMITER_HEADER + httpResponseHeaders.getValue(key));
         }
         return String.join("\r\n", headers);
     }

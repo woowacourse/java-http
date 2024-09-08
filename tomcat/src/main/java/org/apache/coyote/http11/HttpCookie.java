@@ -18,7 +18,7 @@ public class HttpCookie {
             return new HttpCookie(new HashMap<>());
         }
 
-        Map<String, String> cookies = Arrays.stream(rawCookies.replaceAll(" ", "").split(";"))
+        Map<String, String> cookies = Arrays.stream(rawCookies.split("; "))
                 .collect(Collectors.toMap(cookie -> cookie.split("=")[0], cookie -> cookie.split("=")[1]));
         return new HttpCookie(cookies);
     }

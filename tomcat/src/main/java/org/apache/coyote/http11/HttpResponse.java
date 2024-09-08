@@ -17,7 +17,7 @@ public class HttpResponse {
     }
 
     public String toHttpResponse() {
-        String statusLine = "HTTP/1.1 " + httpStatus.toHttpHeader() + " ";
+        String statusLine = "HTTP/1.1 " + httpStatus.getValue() + " " + httpStatus.getReason() + " ";
 
         if (body == null) {
             return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "");

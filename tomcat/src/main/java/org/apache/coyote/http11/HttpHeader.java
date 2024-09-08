@@ -21,7 +21,7 @@ public class HttpHeader {
 
     public static HttpHeader from(List<String> request) {
         Map<String, String> headers = request.stream()
-                .filter(r -> r.contains(":"))
+                .skip(1)
                 .collect(Collectors.toMap(r -> r.split(":")[0], r -> r.split(":")[1].trim()));
         return new HttpHeader(headers);
     }

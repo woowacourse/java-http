@@ -58,7 +58,6 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(Request request) throws IOException {
         for (RequestHandler requestHandler : requestHandlers) {
             String response = requestHandler.handle(request);
-            log.info("response : {}", response);
             if (response != null) {
                 return response;
             }

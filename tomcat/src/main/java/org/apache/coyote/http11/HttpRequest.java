@@ -8,18 +8,32 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.Method.POST;
+
 public class HttpRequest {
 
     private final String[] requestLine;
-    private final Map<String, String> requestHeaders = new HashMap<>();
+    private final Map<String, String> requestHeaders;
     private String requestBody = ""; // 추후 GET, POST 리팩토링
 
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        requestLine = bufferedReader.readLine().split(" ");
+        requestLine = readRequestLine(bufferedReader);
+        requestHeaders = readRequestHeaders(bufferedReader);
 
+        if (isMethod(POST)) {
+            requestBody = readRequestBody(bufferedReader);
+        }
+    }
+
+    private String[] readRequestLine(BufferedReader bufferedReader) throws IOException {
+        return bufferedReader.readLine().split(" ");
+    }
+
+    private Map<String, String> readRequestHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> requestHeaders = new HashMap<>();
         String headerLine = bufferedReader.readLine();
 
         while (!("".equals(headerLine))) {
@@ -32,12 +46,20 @@ public class HttpRequest {
             headerLine = bufferedReader.readLine();
         }
 
-        if (requestLine[0].equals("POST")) {
-            int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            requestBody = new String(buffer);
-        }
+        return requestHeaders;
+    }
+
+    private String readRequestBody(BufferedReader bufferedReader) throws IOException {
+        int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+        char[] buffer = readRequestBodyByLength(bufferedReader, contentLength);
+        return new String(buffer);
+    }
+
+    private char[] readRequestBodyByLength(BufferedReader bufferedReader, int length) throws IOException {
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+
+        return buffer;
     }
 
     private String[] parseWithTrim(String line, String delimiter) {

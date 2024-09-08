@@ -56,7 +56,10 @@ public class Http11Processor implements Runnable, Processor {
                     File requestFile = getRequestFile(request);
                     processFile(requestFile, "200 OK", outputStream);
                 } catch (NullPointerException e) {
+                    log.warn("존재하지 않는 파일 호출 (Path: %s)".formatted(request.getPath()));
                     processNotFoundPage(outputStream);
+                } catch (IOException e) {
+                    log.warn("파일 읽기/쓰기 과정에서 예외 발생 (Path: %s)".formatted(request.getPath()));
                 }
             }
             return true;
@@ -88,6 +91,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private void processNotFoundPage(OutputStream outputStream) throws IOException {
+        File file = getFile("/404.html");
+        processFile(file, "404 NOT FOUND", outputStream);
+    }
+
     private File getRequestFile(HttpRequest httpRequest) throws NullPointerException {
         String resourcePath = "static" + httpRequest.getPath();
         URL resource = getClass().getClassLoader().getResource(resourcePath);
@@ -98,18 +106,11 @@ public class Http11Processor implements Runnable, Processor {
         return new File(resource.getPath());
     }
 
-    private File getFile(String filePath) {
+    private File getFile(String filePath) throws NullPointerException {
         String resourcePath = "static" + filePath;
         URL resource = getClass().getClassLoader().getResource(resourcePath);
 
         File file = new File(resource.getPath());
         return file;
-    }
-
-    private void processNotFoundPage(OutputStream outputStream) throws IOException {
-        File requestFile = getFile("/404.html");
-        HttpResponse response = new HttpResponse("404 NOT FOUND", requestFile);
-        outputStream.write(response.toMessage().getBytes());
-        outputStream.flush();
     }
 }

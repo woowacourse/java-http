@@ -1,10 +1,6 @@
 handlebars:
   suffix: .html
 
-spring:
-  main:
-    web-application-type: none
-
 server:
   tomcat:
     accept-count: 1 # 스레드별 작업 대기열 큐 대기 갯수
@@ -12,15 +8,6 @@ server:
     threads:
       min-spare: 2
       max: 2  #스레드 풀에 대기 상태로 존재하는 최대 스레드 개수
-
-#debug: true
-#
-#logging:
-#  level:
-#    org:
-#      springframework: DEBUG
-#      apache:
-#        catalina: DEBUG
 
   compression:
     enabled: true

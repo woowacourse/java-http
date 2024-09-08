@@ -1,6 +1,6 @@
 package org.apache.catalina.response;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseContent {
@@ -9,11 +9,11 @@ public class ResponseContent {
 
     private final HttpStatus httpStatus;
     private final String body;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public ResponseContent(HttpStatus httpStatus, String contentType, String body) {
         this.httpStatus = httpStatus;
-        headers.put("Content-Type", contentType + "; " + DEFAULT_CHARSET);
+        headers.put("Content-Type", contentType + ";" + DEFAULT_CHARSET);
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }
@@ -29,7 +29,7 @@ public class ResponseContent {
                 .append(httpStatus.getValue())
                 .append(" ")
                 .append(httpStatus.getReasonPhrase()).append(" \r\n");
-        headers.forEach((key, value) -> response.append(key).append(": ").append(value).append("\r\n"));
+        headers.forEach((key, value) -> response.append(key).append(": ").append(value).append(" \r\n"));
         response.append("\r\n").append(body);
 
         return response.toString();

@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -16,17 +15,16 @@ public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private SessionManager sessionManager;
-    private HttpCookie httpCookie;
+    private final SessionManager sessionManager;
 
     public LoginController() {
         this.sessionManager = SessionManager.getInstance();
-        this.httpCookie = new HttpCookie();
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        if (request.hasCookie() && request.hasJSessionId()) {
+        Session session = sessionManager.findSession(request.getJSessionId());
+        if (isAuthenticated(session)) {
             response.addHttpResponseHeader("Location", "/index.html");
             response.setHttpStatusCode(302);
             response.setHttpStatusMessage("FOUND");
@@ -34,6 +32,10 @@ public class LoginController extends AbstractController {
         }
         response.setContentType(request);
         response.setHttpResponseBody(request.getUrlPath());
+    }
+
+    private boolean isAuthenticated(Session session) {
+        return session != null && session.getAttribute("user") != null;
     }
 
     @Override
@@ -52,9 +54,7 @@ public class LoginController extends AbstractController {
                 session.setAttribute("user", user);
                 sessionManager.add(session);
 
-                UUID jSessionId = UUID.randomUUID();
-                httpCookie.addJSessionId(jSessionId.toString());
-                response.addHttpResponseHeader("Set-Cookie", httpCookie.getJSessionId());
+                response.setJSessionId(session.getId());
             }
             response.addHttpResponseHeader("Location", "/index.html");
             response.setHttpStatusCode(302);

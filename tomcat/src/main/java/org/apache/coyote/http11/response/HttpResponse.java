@@ -37,6 +37,10 @@ public class HttpResponse {
         this.httpResponseHeader.add(key, value);
     }
 
+    public void setJSessionId(String jSessionId) {
+        this.httpResponseHeader.setJSessionId(jSessionId);
+    }
+
     public void setContentType(HttpRequest httpRequest) {
         if (httpRequest.matchesFileExtension(".css")) {
             this.httpResponseHeader.add("Content-Type", "text/css");
@@ -74,7 +78,7 @@ public class HttpResponse {
         String responseStatusLine = String.format("%s %d %s ", this.httpVersion, this.httpStatusCode, this.httpStatusMessage);
         httpResponse.append(responseStatusLine).append(CRLF);
 
-        appendHeader(httpResponse, "Set-Cookie", this.httpResponseHeader.get("Set-Cookie"));
+        appendHeader(httpResponse, "Set-Cookie", this.httpResponseHeader.getSetCookieValue());
         appendHeader(httpResponse, "Content-Type", this.httpResponseHeader.get("Content-Type"));
         appendHeader(httpResponse, "Content-Length", String.valueOf(this.httpResponseBody.getBytes().length));
         appendHeader(httpResponse, "Location", this.httpResponseHeader.get("Location"));

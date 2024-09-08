@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -41,12 +43,12 @@ public class HttpRequest {
 
     private HttpRequestHeader parseHttpRequestHeader(BufferedReader bufferedReader) throws IOException {
         String line;
-        HttpRequestHeader httpRequestHeader = new HttpRequestHeader();
+        Map<String, String> httpRequestHeaders = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             String[] tokens = splitByDelimiter(line, HEADER_DELIMITER, 2);
-            httpRequestHeader.add(tokens[0], tokens[1]);
+            httpRequestHeaders.put(tokens[0], tokens[1]);
         }
-        return httpRequestHeader;
+        return new HttpRequestHeader(httpRequestHeaders);
     }
 
     private HttpRequestBody parseHttpRequestBody(BufferedReader bufferedReader) throws IOException {
@@ -74,7 +76,7 @@ public class HttpRequest {
     }
 
     public boolean hasCookie() {
-        return this.httpRequestHeader.containsKey("Cookie");
+        return this.httpRequestHeader.containsKey(COOKIE_KEY);
     }
 
     public boolean hasJSessionId() {
@@ -92,6 +94,10 @@ public class HttpRequest {
 
     public String findRequestBodyBy(String key) {
         return this.httpRequestBody.findBy(key);
+    }
+
+    public String getJSessionId() {
+        return this.httpRequestHeader.getJSessionId();
     }
 
     public String getUrlPath() {

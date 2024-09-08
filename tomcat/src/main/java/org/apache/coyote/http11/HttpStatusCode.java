@@ -3,9 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatusCode {
 
     OK_200(200, "OK"),
-    FOUND_302(302, "FOUND"),
+    FOUND_302(302, "Found"),
     ;
-
 
     private final int code;
     private final String message;

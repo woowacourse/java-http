@@ -7,10 +7,10 @@ import org.apache.coyote.util.FileTypeChecker;
 public class HttpResponse {
 
     private final HttpResponseStartLine startLine;
-    private final HttpResponseHeaders headers;
+    private final HttpResponseHeader headers;
     private final HttpResponseBody body;
 
-    public HttpResponse(HttpResponseStartLine startLine, HttpResponseHeaders headers, HttpResponseBody body) {
+    public HttpResponse(HttpResponseStartLine startLine, HttpResponseHeader headers, HttpResponseBody body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -18,7 +18,7 @@ public class HttpResponse {
 
     public static HttpResponse from(HttpRequest httpRequest) {
         HttpResponseStartLine startLine = HttpResponseStartLine.defaultStartLineFrom(httpRequest);
-        return new HttpResponse(startLine, new HttpResponseHeaders(), new HttpResponseBody(null));
+        return new HttpResponse(startLine, new HttpResponseHeader(), new HttpResponseBody(null));
     }
 
     public void addContentType(String contentType) {

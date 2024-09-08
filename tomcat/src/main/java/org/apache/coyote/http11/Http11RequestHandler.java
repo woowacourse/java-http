@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,14 +79,25 @@ public class Http11RequestHandler {
         log.info("로그인 성공! 아이디 : {}", account);
 
         // Header에 Set-Cookie로 JSSESIONID를 줘야함.
-        return getHttp11Response(getStaticResource("/index.html").orElse("Index"), acceptTypes,
-                StatusLine.found(httpVersion));
+        Http11ResponseBody responseBody = Http11ResponseBody.of(getStaticResource("/index.html").orElse("Index"));
+        int contentLength = responseBody.getContentLength();
+        String contentType = ContentType.from(acceptTypes).getContentType();
+        HttpHeaders httpHeaders = HttpHeaders.of(
+                Map.of(CONTENT_TYPE, List.of(contentType),
+                        CONTENT_LENGTH, List.of(String.valueOf(contentLength)),
+                        "Location", List.of("/index.html"),
+                        "Set-Cookie", List.of("JSESSIONID=" + UUID.randomUUID())
+                ),
+                (s1, s2) -> true);
+        Http11ResponseHeader header = Http11ResponseHeader.of(StatusLine.found(httpVersion), httpHeaders);
+
+        return Http11Response.of(header, responseBody);
     }
 
-    private static HttpHeaders getHttpHeaders(List<String> acceptTypes, Http11ResponseBody responseBody) {
+    private static HttpHeaders getHttpHeaders(String contentType, int contentLength) {
         return HttpHeaders.of(
-                Map.of(CONTENT_TYPE, List.of(ContentType.from(acceptTypes).getContentType()),
-                        CONTENT_LENGTH, List.of(String.valueOf(responseBody.getContentLength()))),
+                Map.of(CONTENT_TYPE, List.of(contentType),
+                        CONTENT_LENGTH, List.of(String.valueOf(contentLength))),
                 (s1, s2) -> true);
     }
 
@@ -106,7 +118,9 @@ public class Http11RequestHandler {
 
     private static Http11Response getHttp11Response(String Index, List<String> acceptTypes, StatusLine httpVersion) {
         Http11ResponseBody responseBody = Http11ResponseBody.of(Index);
-        HttpHeaders httpHeaders = getHttpHeaders(acceptTypes, responseBody);
+        int contentLength = responseBody.getContentLength();
+        String contentType = ContentType.from(acceptTypes).getContentType();
+        HttpHeaders httpHeaders = getHttpHeaders(contentType, contentLength);
         Http11ResponseHeader header = Http11ResponseHeader.of(httpVersion, httpHeaders);
 
         return Http11Response.of(header, responseBody);

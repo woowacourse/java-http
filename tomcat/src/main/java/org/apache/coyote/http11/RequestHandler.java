@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +39,11 @@ public class RequestHandler {
         int index = requestUri.indexOf("?");
         String path = requestUri.substring(0, index);
 
-        Map<String, String> queryPairs = parseQueryString(requestUri, index);
+        Optional<Map<String, String>> parsed = parseQueryString(requestUri, index);
+        Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
 
         User account = InMemoryUserRepository.findByAccount(queryPairs.get("account"))
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(() -> new NoSuchElementException("account not found"));
 
         if (account.checkPassword(queryPairs.get("password"))) {
             log.info("user : {}", account);
@@ -50,15 +52,18 @@ public class RequestHandler {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private Map<String, String> parseQueryString(String requestUri, int index) {
+    private Optional<Map<String, String>> parseQueryString(String requestUri, int index) {
         String queryString = requestUri.substring(index + 1);
         String[] queryParameters = queryString.split("&");
 
         Map<String, String> keyValue = new HashMap<>();
         for (String queryParameter : queryParameters) {
+            if (!queryParameter.contains("=")) {
+                return Optional.empty();
+            }
             String[] pair = queryParameter.split("=");
             keyValue.put(pair[0], pair[1]);
         }
-        return keyValue;
+        return Optional.of(keyValue);
     }
 }

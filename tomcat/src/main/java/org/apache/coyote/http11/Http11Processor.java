@@ -86,8 +86,8 @@ public class Http11Processor implements Runnable, Processor {
         }
         Path path = Path.of(resource.getPath());
         String contentType = Files.probeContentType(path);
-        response.addBody(new String(Files.readAllBytes(path)));
         response.addContentType(contentType);
+        response.addBody(new String(Files.readAllBytes(path)));
         response.updateHttpStatus(HttpStatus.OK);
         if (response.has5xxCode()) {
             throw new RuntimeException("서버 내부에 오류 발생가 발생했습니다.");

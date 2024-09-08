@@ -6,16 +6,16 @@ import org.apache.coyote.request.HttpRequest;
 
 public class HttpResponseStartLine {
 
-    private final HttpVersion httpVersion;
     private HttpStatus httpStatus;
+    private final HttpVersion httpVersion;
 
-    public HttpResponseStartLine(HttpVersion httpVersion, HttpStatus httpStatus) {
-        this.httpVersion = httpVersion;
+    public HttpResponseStartLine(HttpStatus httpStatus, HttpVersion httpVersion) {
         this.httpStatus = httpStatus;
+        this.httpVersion = httpVersion;
     }
 
     public static HttpResponseStartLine defaultStartLineFrom(HttpRequest httpRequest) {
-        return new HttpResponseStartLine(httpRequest.getVersion(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new HttpResponseStartLine(HttpStatus.INTERNAL_SERVER_ERROR, httpRequest.getVersion());
     }
 
     public void updateStatus(HttpStatus newHttpStatus) {
@@ -32,7 +32,7 @@ public class HttpResponseStartLine {
                 " ",
                 httpVersion.getValue(),
                 String.valueOf(httpStatus.getCode()),
-                httpStatus.getText()
+                httpStatus.getText() + " "
         );
     }
 }

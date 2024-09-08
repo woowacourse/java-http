@@ -58,7 +58,6 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             Request request = RequestReader.readHeaders(reader);
-            HttpCookie.setCookies(request.getCookie());
             String response = handleRequest(request);
 
             outputStream.write(response.getBytes());
@@ -91,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
             return generateResponseForQueryParam(headers);
         }
 
-        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(headers.getUrl());
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(headers.getUrl(), headers.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
             return new ResponseContent(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
@@ -118,7 +117,8 @@ public class Http11Processor implements Runnable, Processor {
             Session session = new Session(UUID.randomUUID().toString());
             session.setAttribute("user", user);
             SessionManager.getInstance().add(session);
-            String cookie = HttpCookie.ofJSessionId(session.getId());
+            HttpCookie httpCookie = request.getCookie();
+            String cookie = httpCookie.ofJSessionId(session.getId());
 
             ResponseContent responseContent
                     = new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
@@ -158,7 +158,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
-        InMemoryUserRepository.save(new User(account, email, password));
+        InMemoryUserRepository.save(new User(account, password, email));
         return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent(INDEX_PAGE));
     }
 }

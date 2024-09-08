@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.catalina.auth.HttpCookie;
+
 public class Request {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String SET_COOKIE = "Set-Cookie";
@@ -81,17 +83,19 @@ public class Request {
         return Integer.parseInt(contentLength);
     }
 
-    public Map<String, String> getCookie() {
+    public HttpCookie getCookie() {
         String setCookies = headers.get(SET_COOKIE);
         if (setCookies == null) {
-            return new HashMap<>();
+            return new HttpCookie(new HashMap<>());
         }
-        return Arrays.stream(setCookies.split(";"))
+        Map<String, String> cookie = Arrays.stream(setCookies.split(";"))
                 .map(param -> param.split("=", 2))
                 .filter(parts -> parts.length == 2 && parts[1] != null)
                 .collect(Collectors.toMap(
                         parts -> parts[0].trim(),
                         parts -> parts[1].trim()
                 ));
+
+        return new HttpCookie(cookie);
     }
 }

@@ -28,7 +28,7 @@ public class ResponseContent {
         response.append(HTTP_VERSION + " ")
                 .append(httpStatus.getValue())
                 .append(" ")
-                .append(httpStatus.getReasonPhrase()).append(" ");
+                .append(httpStatus.getReasonPhrase()).append(" \r\n");
         headers.forEach((key, value) -> response.append(key).append(": ").append(value).append("\r\n"));
         response.append("\r\n").append(body);
 

@@ -34,8 +34,10 @@ public enum ResponsePage {
         return fileName;
     }
 
-    public static Optional<ResponsePage> fromUrl(String url) {
-        Optional<Session> session = SessionManager.getInstance().findSession(HttpCookie.getId());
+    public static Optional<ResponsePage> fromUrl(String url, HttpCookie cookie) {
+        String id = cookie.getId();
+        Optional<Session> session = SessionManager.getInstance()
+                .findSession(id);
 
         return Arrays.stream(values())
                 .filter(page -> page.url.equals(url) && page.isLogin == session.isPresent())

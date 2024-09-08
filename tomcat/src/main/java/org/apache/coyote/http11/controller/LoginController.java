@@ -25,7 +25,7 @@ public class LoginController implements Controller {
     public HttpResponse handle(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
         if (requestLine.isQueryStringRequest()) {
-            checkLogin(requestLine);
+            return checkLogin(requestLine);
         }
 
         return new ResponseBuilder()
@@ -37,7 +37,6 @@ public class LoginController implements Controller {
     private HttpResponse checkLogin(RequestLine requestLine) {
         Map<String, String> parameters = requestLine.getParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
-
         return new ResponseBuilder()
                 .statusCode(HttpStatusCode.FOUND_302)
                 .location("/index.html")
@@ -45,7 +44,7 @@ public class LoginController implements Controller {
                 .build();
     }
 
-    private static Cookie makeSessionCookie() {
+    private Cookie makeSessionCookie() {
         Session session = SessionGenerator.generate();
         return new Cookie(Map.of("JSESSIONID", session.getValue()));
     }

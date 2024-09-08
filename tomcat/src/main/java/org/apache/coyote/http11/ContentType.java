@@ -8,24 +8,25 @@ public enum ContentType {
     JS("application/javascript;charset=utf-8", "js"),
     HTML("text/html;charset=utf-8", "html"),
     PNG("image/png", "png"),
-    JPG("image/jpeg", "jpeg")
+    JPG("image/jpeg", "jpeg"),
+    ICO("image/x-icon", "ico")
     ;
 
     private final String contentType;
-    private final String extention;
+    private final String extension;
 
-    ContentType(String contentType, String extention) {
+    ContentType(String contentType, String extension) {
         this.contentType = contentType;
-        this.extention = extention;
+        this.extension = extension;
     }
 
     public String getContentType() {
         return contentType;
     }
 
-    public static ContentType getContentType(String extention) {
+    public static ContentType getContentType(String extension) {
         return Arrays.stream(values())
-                .filter(contentType1 -> contentType1.extention.equals(extention))
+                .filter(contentType1 -> contentType1.extension.equals(extension))
                 .findAny()
                 .orElseThrow();
     }

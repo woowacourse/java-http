@@ -60,7 +60,7 @@ public class HttpRequest {
         Map<String, String> httpHeader = new HashMap<>();
 
         String line = input.readLine();
-        while (!line.equals("")) {
+        while (!line.isEmpty()) {
             String[] header = line.split(": ");
             httpHeader.put(header[0], header[1]);
 

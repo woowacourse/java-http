@@ -1,8 +1,8 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.Session;
+import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 

@@ -2,16 +2,16 @@ package org.apache.catalina;
 
 public class Cookie {
 
-    private final String key;
+    private final String name;
     private final String value;
 
-    public Cookie(String key, String value) {
-        this.key = key;
+    public Cookie(String name, String value) {
+        this.name = name;
         this.value = value;
     }
 
-    public String getKey() {
-        return key;
+    public String getName() {
+        return name;
     }
 
     public String getValue() {

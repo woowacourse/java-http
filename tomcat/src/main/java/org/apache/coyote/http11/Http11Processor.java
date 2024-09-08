@@ -49,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             User user;
             List<Cookie> cookies = request.getCookies();
             for (Cookie cookie : cookies) {
-                if (Objects.equals(cookie.getKey(), "jsessionid")) {
+                if (Objects.equals(cookie.getName(), "jsessionid")) {
                     Session session = SessionManager.findSession(cookie.getValue());
                     if (session == null) return; // wrong access
                     user = session.getUser();

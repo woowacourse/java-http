@@ -5,7 +5,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
+import cache.com.example.etag.Etag;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
@@ -36,7 +38,6 @@ public class GreetingController {
     @GetMapping("/etag")
     public ResponseEntity<String> etag() {
         return ResponseEntity.ok()
-            .eTag(eTag)
             .body("index");
     }
 

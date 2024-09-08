@@ -17,8 +17,18 @@ public enum ContentType {
         this.extension = extension;
     }
 
+    public static ContentType determineContentType(String resourcePath) {
+        for (ContentType contentType : ContentType.values()) {
+            if (resourcePath.endsWith(contentType.getExtension())) {
+                return contentType;
+            }
+        }
+
+        return ContentType.PLAIN;
+    }
+
     public String getName() {
-        return name;
+        return name + ";charset=utf-8";
     }
 
     public String getExtension() {

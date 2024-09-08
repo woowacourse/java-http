@@ -18,24 +18,14 @@ public abstract class AbstractHandler {
         ForwardResult result = forward(httpRequest, sessionManager);
         String resourcePath = getClass().getClassLoader().getResource("static/" + result.path()).getPath();
         Header header = result.header();
-        header.append(HttpHeaderKey.CONTENT_TYPE, determineContentType(resourcePath));
+        String contentType = ContentType.determineContentType(resourcePath).getName();
+        header.append(HttpHeaderKey.CONTENT_TYPE, contentType);
 
         if (result.httpStatus().isRedirection()) {
             return new HttpResponse(result.httpStatus(), header, new byte[]{});
         }
 
         return new HttpResponse(result.httpStatus(), header, readStaticResource(resourcePath));
-    }
-
-    private String determineContentType(String resourcePath) {
-        String encodedContentTypeFormat = "%s;charset=utf-8";
-        for (ContentType contentType : ContentType.values()) {
-            if (resourcePath.endsWith(contentType.getExtension())) {
-                return String.format(encodedContentTypeFormat, contentType.getName());
-            }
-        }
-
-        return String.format(encodedContentTypeFormat, ContentType.PLAIN.getName());
     }
 
     private byte[] readStaticResource(String resourcePath) {

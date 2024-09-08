@@ -12,6 +12,10 @@ public class Header {
 
     private final Map<String, String> header = new HashMap<>();
 
+    public static Header empty() {
+        return new Header(Collections.emptyList());
+    }
+
     public Header(List<String> header) {
         parseHeader(header);
     }

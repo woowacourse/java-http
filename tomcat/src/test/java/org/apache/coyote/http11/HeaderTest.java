@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +57,7 @@ class HeaderTest {
     @Test
     @DisplayName("정의된 헤더를 추가할 수 있다.")
     void append() {
-        Header header = new Header(Collections.emptyList());
+        Header header = Header.empty();
 
         header.append(HttpHeaderKey.LOCATION, "/admin");
 
@@ -69,7 +68,7 @@ class HeaderTest {
     @Test
     @DisplayName("사용자 정의 헤더를 추가할 수 있다.")
     void appendCustom() {
-        Header header = new Header(Collections.emptyList());
+        Header header = Header.empty();
 
         header.append("a", "b");
 

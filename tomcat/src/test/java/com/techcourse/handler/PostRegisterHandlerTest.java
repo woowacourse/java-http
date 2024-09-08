@@ -6,8 +6,6 @@ import org.apache.coyote.http11.QueryParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PostRegisterHandlerTest {
@@ -33,6 +31,6 @@ class PostRegisterHandlerTest {
     }
 
     private HttpRequest createHttpRequest(String startLine) {
-        return new HttpRequest(startLine, new Header(Collections.emptyList()), new QueryParameter(""));
+        return new HttpRequest(startLine, Header.empty(), new QueryParameter(""));
     }
 }

@@ -13,7 +13,6 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.QueryParameter;
 
 import java.net.URI;
-import java.util.Collections;
 
 public class PostLoginHandler extends AbstractHandler {
 
@@ -28,7 +27,7 @@ public class PostLoginHandler extends AbstractHandler {
     @Override
     protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
         QueryParameter queryParameter = httpRequest.body();
-        Header header = new Header(Collections.emptyList());
+        Header header = Header.empty();
         String redirectionPath = "401.html";
 
         if (isLoggedIn(queryParameter)) {

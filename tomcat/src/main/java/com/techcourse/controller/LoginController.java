@@ -16,18 +16,16 @@ import org.apache.coyote.http11.Status;
 
 public class LoginController extends AbstractController {
 
-    private final SessionManager sessionManager;
     private final ResourceController resourceController;
 
     public LoginController() {
-        this.sessionManager = new SessionManager();
         this.resourceController = new ResourceController();
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
         if (request.cookies().containsKey(JSession.COOKIE_NAME)) {
-            HttpSession session = request.getSession(sessionManager);
+            HttpSession session = request.getSession(SessionManager.getInstance());
             if (session != null) {
                 User user = (User) Objects.requireNonNull(session).getAttribute("user");
 
@@ -49,7 +47,7 @@ public class LoginController extends AbstractController {
                 String sessionId = UUID.randomUUID().toString();
                 JSession session = new JSession(sessionId);
                 session.setAttribute("user", user);
-                sessionManager.add(session);
+                SessionManager.getInstance().add(session);
 
                 log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
 

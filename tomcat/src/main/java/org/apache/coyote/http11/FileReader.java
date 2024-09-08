@@ -39,7 +39,12 @@ public class FileReader {
         if (path.equals("/login")) {
             path = path.concat(".html");
         }
-        return getClass().getClassLoader().getResource(BASE_DIRECTORY + path);
+        URL url = getClass().getClassLoader().getResource(BASE_DIRECTORY + path);
+        if (url == null) {
+            String message = BASE_DIRECTORY + path + "에 파일이 존재하지 않습니다.";
+            throw new IllegalArgumentException(message);
+        }
+        return url;
     }
 
     public String getFileExtension(String path) {

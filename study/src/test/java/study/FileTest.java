@@ -39,23 +39,17 @@ class FileTest {
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다. File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        try {
-            URL resourceUrl = getClass().getClassLoader().getResource(fileName);
-            if (resourceUrl == null) {
-                throw new NullPointerException("resourceUrl is null");
-            }
-            URI resource = resourceUrl.toURI();
-            final Path path = Path.of(resource);
-            final List<String> actual = Files.readAllLines(path);
-
-            assertThat(actual).containsOnly("nextstep");
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("URI로 변경될 수 없습니다.");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        URL resourceUrl = getClass().getClassLoader().getResource(fileName);
+        if (resourceUrl == null) {
+            throw new NullPointerException("resourceUrl is null");
         }
+        URI resource = resourceUrl.toURI();
+        final Path path = Path.of(resource);
+        final List<String> actual = Files.readAllLines(path);
+
+        assertThat(actual).containsOnly("nextstep");
     }
 }

@@ -20,11 +20,15 @@ public class HttpRequest {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        requestLine = readRequestLine(bufferedReader);
-        requestHeaders = readRequestHeaders(bufferedReader);
+        try {
+            this.requestLine = readRequestLine(bufferedReader);
+            this.requestHeaders = readRequestHeaders(bufferedReader);
 
-        if (isMethod(POST)) {
-            requestBody = readRequestBody(bufferedReader);
+            if (isMethod(POST)) {
+                this.requestBody = readRequestBody(bufferedReader);
+            }
+        } catch (IOException ioException) {
+            throw new IOException("IOException 발생했습니다.");
         }
     }
 

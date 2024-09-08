@@ -101,8 +101,8 @@ public class Http11Processor implements Runnable, Processor {
             session.getAttribute("user");
             return true;
         } catch (IllegalArgumentException e) {
+            return false;
         }
-        return false;
     }
 
     private void getView(String view, Http11Response response) throws IOException {

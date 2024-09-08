@@ -99,13 +99,9 @@ public class Controller {
     }
 
     private boolean redirectToIndex(HttpResponse response) {
-        try {
-            Path path = Path.of(getClass().getClassLoader().getResource("static/index.html").toURI());
-            response.setStatus(HttpStatus.FOUND);
-            return readStaticFile(response, path, "html");
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("uri syntax error: " + e.getMessage());
-        }
+        response.setStatus(HttpStatus.FOUND);
+        response.addHeader(HttpHeader.LOCATION, "/index");
+        return true;
     }
 
     private boolean redirectTo401(HttpResponse response) {

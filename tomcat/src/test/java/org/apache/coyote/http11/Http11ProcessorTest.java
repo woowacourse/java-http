@@ -141,15 +141,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedLocation = "Location: /index";
         String expectedHttpStatus = HttpStatus.FOUND.getValue();
-        String expectedContentType = "text/html";
 
         assertThat(socket.output())
-                .contains(expectedBody)
-                .contains(expectedHttpStatus)
-                .contains(expectedContentType);
+                .contains(expectedLocation)
+                .contains(expectedHttpStatus);
     }
 
     @DisplayName("로그인 성공 테스트")
@@ -173,17 +170,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedLocation = "Location: /index";
+        String expectedCookie = "Set-Cookie: ";
         String expectedHttpStatus = HttpStatus.FOUND.getValue();
-        String expectedContentType = "text/html";
-        String expectedHeader = "Set-Cookie: ";
 
         assertThat(socket.output())
-                .contains(expectedBody)
-                .contains(expectedHttpStatus)
-                .contains(expectedContentType)
-                .contains(expectedHeader);
+                .contains(expectedLocation)
+                .contains(expectedCookie)
+                .contains(expectedHttpStatus);
     }
 
     @DisplayName("로그인 실패 테스트")
@@ -210,7 +204,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expectedHttpStatus = HttpStatus.UNAUTHORIZED.getValue();
-        String expectedContentType = "text/html";
+        String expectedContentType = "Content-Type: text/html";
 
         assertThat(socket.output())
                 .contains(expectedBody)
@@ -240,14 +234,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedLocation = "Location: /index";
         String expectedHttpStatus = HttpStatus.FOUND.getValue();
-        String expectedContentType = "text/html";
 
         assertThat(socket.output())
-                .contains(expectedBody)
-                .contains(expectedHttpStatus)
-                .contains(expectedContentType);
+                .contains(expectedLocation)
+                .contains(expectedHttpStatus);
     }
 }

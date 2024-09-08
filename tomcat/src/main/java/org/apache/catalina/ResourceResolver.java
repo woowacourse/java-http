@@ -1,23 +1,34 @@
 package org.apache.catalina;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 
 public class ResourceResolver {
 
     public String resolve(String path) {
-        int extension = path.lastIndexOf(".");
-        if (extension == -1) {
-            URL url = getClass().getClassLoader().getResource("static" + path + ".html");
-            return getPath(url);
+        if (path == null) {
+            return null;
         }
+        int extension = path.lastIndexOf(".");
         URL url = getClass().getClassLoader().getResource("static" + path);
-        return getPath(url);
+        if (extension == -1) {
+            url = getClass().getClassLoader().getResource("static" + path + ".html");
+        }
+        return readFile(url);
     }
 
-    private String getPath(URL url) {
+    private String readFile(URL url) {
         if (url == null) {
             return "Hello world!";
         }
-        return url.getPath();
+        File file = new File(url.getFile());
+        try {
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            return new String(bytes);
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

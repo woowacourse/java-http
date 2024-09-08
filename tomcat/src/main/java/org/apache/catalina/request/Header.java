@@ -7,8 +7,6 @@ public enum Header {
     CONTENT_TYPE("Content-Type"),
     COOKIE("Cookie"),
     HOST("Host"),
-    LOCATION("Location"),
-    SET_COOKIE("Set-Cookie"),
     OTHER("Other"),
     ;
 

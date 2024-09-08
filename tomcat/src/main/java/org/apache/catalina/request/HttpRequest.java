@@ -1,7 +1,6 @@
 package org.apache.catalina.request;
 
 import org.apache.catalina.Cookie;
-import org.apache.catalina.Mapper;
 
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public class HttpRequest {
 
     public String getSessionId() {
         String cookie = requestHeader.getCookie();
-        Cookie cookies = new Cookie(Mapper.toMap(cookie));
+        Cookie cookies = Cookie.parse(cookie);
         return cookies.getValue("JSESSIONID");
     }
 }

@@ -6,6 +6,8 @@ import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.request.RequestBody;
 import org.apache.catalina.request.RequestHeader;
 import org.apache.catalina.request.StartLine;
+import org.apache.catalina.response.HttpResponse;
+import org.apache.catalina.response.ResponseParser;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +27,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HandlerAdapter handlerAdapter;
+    private final ResponseParser responseParser;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.handlerAdapter = new HandlerAdapter();
+        this.responseParser = new ResponseParser();
     }
 
     @Override
@@ -48,8 +52,9 @@ public class Http11Processor implements Runnable, Processor {
             RequestBody requestBody = readBody(in, requestHeader);
             HttpRequest httpRequest = new HttpRequest(startLine, requestHeader, requestBody);
 
-            String response = handlerAdapter.handle(httpRequest);
+            HttpResponse httpResponse = handlerAdapter.handle(httpRequest);
 
+            String response = responseParser.parse(httpResponse);
             outputStream.write(response.getBytes());
             outputStream.flush();
 

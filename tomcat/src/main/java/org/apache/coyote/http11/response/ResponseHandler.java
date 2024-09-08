@@ -39,9 +39,16 @@ public class ResponseHandler {
 	}
 
 	private static String determineContentType(String fileName) {
-		if (fileName.endsWith("css")) return "text/css";
-		if (fileName.endsWith("js")) return "application/javascript";
-		return "text/html";
+		if (fileName.endsWith("css")) {
+			return "text/css";
+		}
+		if (fileName.endsWith("js")) {
+			return "application/javascript";
+		}
+		if(fileName.endsWith("html")) {
+			return "text/html";
+		}
+		return "application/json";
 	}
 
 	private static void sendNotFoundResponse(OutputStream outputStream) {

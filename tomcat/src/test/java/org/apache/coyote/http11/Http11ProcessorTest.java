@@ -113,11 +113,6 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expected);
     }
 
-    private String readFile(String resourcePath) throws IOException {
-        URL resource = getClass().getClassLoader().getResource(resourcePath);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
     @Test
     void loginTest() {
         // given
@@ -141,5 +136,37 @@ class Http11ProcessorTest {
                 "");
 
         assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    void registerPageTest() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String response = readFile("static/register.html");
+        List<String> expected = List.of(
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + response.getBytes().length,
+                "",
+                response);
+
+        assertThat(socket.output()).contains(expected);
+    }
+
+    private String readFile(String resourcePath) throws IOException {
+        URL resource = getClass().getClassLoader().getResource(resourcePath);
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

@@ -27,7 +27,7 @@ class Http11ProcessorTest {
         // then
         String expectedBody = "Hello world!";
         String expectedHttpStatus = HttpStatus.OK.getValue();
-        String expectedContentType = "text/html";
+        String expectedContentType = "Content-Type: text/html";
 
         assertThat(socket.output())
                 .contains(expectedBody)
@@ -54,7 +54,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expectedHttpStatus = HttpStatus.OK.getValue();
-        String expectedContentType = "text/html";
+        String expectedContentType = "Content-Type: text/html";
 
         assertThat(socket.output())
                 .contains(expectedBody)
@@ -83,7 +83,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expectedHttpStatus = HttpStatus.OK.getValue();
-        String expectedContentType = "text/css";
+        String expectedContentType = "Content-Type: text/css";
 
         assertThat(socket.output())
                 .contains(expectedBody)
@@ -112,7 +112,7 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expectedHttpStatus = HttpStatus.OK.getValue();
-        String expectedContentType = "text/html";
+        String expectedContentType = "Content-Type: text/html";
 
         assertThat(socket.output())
                 .contains(expectedBody)
@@ -122,7 +122,7 @@ class Http11ProcessorTest {
 
     @DisplayName("로그인한 상태로 로그인 페이지에 접근하면, index 페이지로 redirect된다.")
     @Test
-    void redirectWhenAlreadyLoggedIn() throws IOException {
+    void redirectWhenAlreadyLoggedIn() {
         // given
         User user = new User("account", "password", "mail@mail.com");
         String jSessionId = SessionManager.addUser(user);
@@ -151,7 +151,7 @@ class Http11ProcessorTest {
 
     @DisplayName("로그인 성공 테스트")
     @Test
-    void loginSuccess() throws IOException {
+    void loginSuccess() {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -214,7 +214,7 @@ class Http11ProcessorTest {
 
     @DisplayName("회원가입 테스트")
     @Test
-    void register() throws IOException {
+    void register() {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1",

@@ -8,6 +8,15 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        if (account.isBlank()) {
+            throw new IllegalArgumentException("Account cannot be blank");
+        }
+        if (password.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be blank");
+        }
+        if (email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be blank");
+        }
         this.id = id;
         this.account = account;
         this.password = password;

@@ -24,7 +24,6 @@ public class Http11Request {
         return new Http11Request(requestHeader, requestBody);
     }
 
-
     public Http11RequestHeader getHttp11RequestHeader() {
         return http11RequestHeader;
     }

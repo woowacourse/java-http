@@ -29,9 +29,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (OutputStream outputStream = connection.getOutputStream();
              InputStream inputStream = connection.getInputStream()) {
-            // Http11Request 객체 만듦.
             Http11Request request = Http11Request.from(inputStream);
-            // Http11RequestHandler -> Http11Request handle
             Http11Response response = Http11RequestHandler.handle(request);
             String responseString = response.getResponse();
             outputStream.write(responseString.getBytes());

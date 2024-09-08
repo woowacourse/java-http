@@ -52,6 +52,13 @@ public class Http11RequestHandler {
                 return processLogin(httpVersion, acceptTypes, account, password);
             }
         }
+
+        String cookie = http11RequestHeader.getCookie();
+        Http11Cookie http11Cookie = Http11Cookie.from(cookie);
+        if (!http11Cookie.isEmpty() && requestUri.matches("/login")) {
+            // 세션
+        }
+
         return getStaticResource(requestUri.getRequestUri())
                 .map(staticResource -> getHttp11Response(staticResource, acceptTypes, StatusLine.ok(httpVersion)))
                 .orElseGet(() -> getHttp11Response(getStaticResource("/404.html").orElse("404 Not Found"), acceptTypes,
@@ -109,11 +116,45 @@ public class Http11RequestHandler {
         String password = registrationData.get("password");
         String email = registrationData.get("email");
 
-        User newUser = new User(account, password, email);
-        InMemoryUserRepository.save(newUser);
+        // db에서 찾아서 있는 아이디면 예외
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            return redirectToRegister(httpVersion, acceptTypes);
+        }
 
-        return getHttp11Response(getStaticResource("/index.html").orElse("Index"), acceptTypes,
-                StatusLine.ok(httpVersion));
+        try {
+            User newUser = new User(account, password, email);
+            InMemoryUserRepository.save(newUser);
+        } catch (Exception e) {
+            return redirectToRegister(httpVersion, acceptTypes);
+        }
+
+        Http11ResponseBody responseBody = Http11ResponseBody.of(getStaticResource("/index.html").orElse("Index"));
+        int contentLength = responseBody.getContentLength();
+        String contentType = ContentType.from(acceptTypes).getContentType();
+        HttpHeaders httpHeaders = HttpHeaders.of(
+                Map.of(CONTENT_TYPE, List.of(contentType),
+                        CONTENT_LENGTH, List.of(String.valueOf(contentLength)),
+                        "Location", List.of("/index.html")
+                ),
+                (s1, s2) -> true);
+        Http11ResponseHeader header = Http11ResponseHeader.of(StatusLine.found(httpVersion), httpHeaders);
+
+        return Http11Response.of(header, responseBody);
+    }
+
+    private static Http11Response redirectToRegister(HttpVersion httpVersion, List<String> acceptTypes) {
+        Http11ResponseBody responseBody = Http11ResponseBody.of(
+                getStaticResource("/register.html").orElse("400 Bad Request"));
+        int contentLength = responseBody.getContentLength();
+        String contentType = ContentType.from(acceptTypes).getContentType();
+        HttpHeaders httpHeaders = HttpHeaders.of(
+                Map.of(CONTENT_TYPE, List.of(contentType),
+                        CONTENT_LENGTH, List.of(String.valueOf(contentLength)),
+                        "Location", List.of("/register.html")),
+                (s1, s2) -> true);
+        Http11ResponseHeader header = Http11ResponseHeader.of(StatusLine.found(httpVersion), httpHeaders);
+
+        return Http11Response.of(header, responseBody);
     }
 
     private static Http11Response getHttp11Response(String Index, List<String> acceptTypes, StatusLine httpVersion) {

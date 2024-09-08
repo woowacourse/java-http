@@ -63,4 +63,8 @@ public class Http11RequestHeader {
     public HttpMethod getHttpMethod() {
         return startLine.getHttpMethod();
     }
+
+    public String getCookie() {
+        return httpHeaders.firstValue("Cookie").orElseGet(() -> "");
+    }
 }

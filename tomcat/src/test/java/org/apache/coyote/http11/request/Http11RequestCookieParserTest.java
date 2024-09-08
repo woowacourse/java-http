@@ -47,7 +47,7 @@ class Http11RequestCookieParserTest {
     }
 
     @Test
-    @DisplayName("여러개의 쿠키를 잘 파싱하는지 확인")
+    @DisplayName("쿠키가 없을 때 잘 동작하는지 확인")
     void parseCookiesWhenCookieIsEmpty() {
         String requestMessage = """
                 GET /index.html HTTP/1.1\r

@@ -1,7 +1,7 @@
 package org.apache.catalina;
 
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import org.apache.coyote.Session;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a particular Container.  Different Manager
@@ -26,7 +26,7 @@ public interface Manager {
      *
      * @param session Session to be added
      */
-    void add(Session session);
+    void add(HttpSession session);
 
     /**
      * Return the active Session, associated with this Manager, with the specified session id (if any); otherwise
@@ -38,12 +38,12 @@ public interface Manager {
      * @throws IllegalStateException if a new session cannot be instantiated for any reason
      * @throws IOException           if an input/output error occurs while processing this request
      */
-    Session findSession(String id);
+    HttpSession findSession(String id);
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
      * @param session Session to be removed
      */
-    void remove(Session session);
+    void remove(HttpSession session);
 }

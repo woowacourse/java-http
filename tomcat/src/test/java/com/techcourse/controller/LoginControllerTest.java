@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +35,10 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request);
+        HttpResponse httpResponse = loginController.service(request, new SessionManager());
 
         // then
-        String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();
+        String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.OK.toStatus();
         String expectedLocationHeader = "Location: " + "/index.html";
         String expectedContentType = "Content-Type: " + MimeType.HTML.getContentType();
 
@@ -78,7 +79,7 @@ class LoginControllerTest {
         HttpRequest request = buildHttpRequest("POST", "/login", body);
 
         // when
-        HttpResponse httpResponse = loginController.run(request);
+        HttpResponse httpResponse = loginController.service(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

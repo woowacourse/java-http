@@ -16,4 +16,12 @@ public class StatusLine {
     public String getReponseString() {
         return version.getVersionString() + " " + statusCode.toStatus() + " ";
     }
+
+    @Override
+    public String toString() {
+        return "StatusLine{" +
+                "version=" + version +
+                ", statusCode=" + statusCode +
+                '}';
+    }
 }

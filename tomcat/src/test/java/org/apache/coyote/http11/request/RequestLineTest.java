@@ -32,7 +32,7 @@ class RequestLineTest {
     @Test
     void parseQueryParameter() {
         // given
-        String path = "/search";
+        String path = "/search/crew";
         String queryKey1 = "name";
         String queryValue1 = "Chocochip";
         String queryKey2 = "age";

@@ -30,6 +30,10 @@ public enum HttpStatusCode {
         this.message = message;
     }
 
+    public boolean isRedirection() {
+        return 300 <= this.code && this.code < 400;
+    }
+
     public int getCode() {
         return code;
     }

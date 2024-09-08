@@ -1,4 +1,4 @@
-package org.apache.coyote.controller;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.HttpStatusCode;
 import org.apache.coyote.MimeType;
+import org.apache.coyote.SessionManager;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +58,7 @@ class RegisterControllerTest {
         HttpRequest request = new HttpRequest(inputStream);
 
         // when
-        HttpResponse httpResponse = registerController.run(request);
+        HttpResponse httpResponse = registerController.service(request, new SessionManager());
 
         // then
         String expectedRequestLine = "HTTP/1.1 " + HttpStatusCode.FOUND.toStatus();

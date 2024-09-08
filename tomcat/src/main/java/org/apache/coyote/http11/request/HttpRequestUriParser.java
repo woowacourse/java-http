@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,8 +10,8 @@ import org.apache.coyote.http11.component.FileExtension;
 
 public class HttpRequestUriParser {
 
-    private static final String ROOT_PATH = "/";
-    private static final String INDEX_FILE = "/index";
+    private static final URI ROOT_PATH = URI.create("/");
+    private static final URI INDEX_FILE = URI.create("/index");
     private static final String EXTENSION_DELIMITER = ".";
     private static final String QUERY_DELIMITER = "?";
     private static final String QUERY_PARAMETER_DELIMITER = "&";
@@ -38,7 +39,7 @@ public class HttpRequestUriParser {
 
     private static PathInfo getFileAccessor(String path) {
         int extensionIndex = path.lastIndexOf(EXTENSION_DELIMITER);
-        if (path.equals(ROOT_PATH)) {
+        if (path.equals(ROOT_PATH.getPath())) {
             return new PathInfo(INDEX_FILE, FileExtension.HTML);
         }
         if (extensionIndex == path.length() - 1) {
@@ -46,11 +47,11 @@ public class HttpRequestUriParser {
         }
 
         if (extensionIndex == -1) {
-            return new PathInfo(path, FileExtension.HTML);
+            return new PathInfo(URI.create(path), FileExtension.HTML);
         }
         String fileName = path.substring(0, extensionIndex);
         String extension = path.substring(extensionIndex);
         FileExtension fileExtension = FileExtension.from(extension);
-        return new PathInfo(fileName, fileExtension);
+        return new PathInfo(URI.create(fileName), fileExtension);
     }
 }

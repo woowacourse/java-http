@@ -70,4 +70,22 @@ class UserControllerTest {
                 () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
         );
     }
+
+    @DisplayName("로그인에 성공하면 302와 SET-COOKIE 헤더에 값이 담긴다.")
+    @Test
+    void login() {
+        //given
+        Map<String, String> params = Map.of("account", "gugu", "password", "password");
+        UserController userController = new UserController();
+
+        //when
+        HttpResponseEntity<User> result = userController.login(params);
+
+        //then
+        assertAll(
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/index.html"),
+                () -> assertThat(result.headers()).containsKey(HttpHeaders.SET_COOKIE)
+        );
+    }
 }

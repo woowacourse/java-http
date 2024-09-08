@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.controller.dto.HttpResponseEntity;
 import com.techcourse.exception.UncheckedServletException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
@@ -9,22 +10,22 @@ import org.apache.coyote.http11.component.HttpMethod;
 
 public enum ControllerMapping {
 
-    SEARCH_USER(HttpMethod.GET, "/login", params -> new UserController().searchUserData(params)),
-    LOGIN_USER(HttpMethod.POST, "/login", params -> new UserController().login(params)),
-    REGISTER_USER(HttpMethod.POST, "/register", params -> new UserController().registerUser(params));
+    SEARCH_USER(HttpMethod.GET, URI.create("/login"), params -> new UserController().searchUserData(params)),
+    LOGIN_USER(HttpMethod.POST, URI.create("/login"), params -> new UserController().login(params)),
+    REGISTER_USER(HttpMethod.POST, URI.create("/register"), params -> new UserController().registerUser(params));
 
     private final HttpMethod httpMethod;
-    private final String path;
+    private final URI path;
     private final Function<Map<String, String>, HttpResponseEntity<?>> handler;
 
-    ControllerMapping(HttpMethod httpMethod, String path,
+    ControllerMapping(HttpMethod httpMethod, URI path,
                       Function<Map<String, String>, HttpResponseEntity<?>> handler) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.handler = handler;
     }
 
-    public static ControllerMapping of(HttpMethod httpMethod, String path) {
+    public static ControllerMapping of(HttpMethod httpMethod, URI path) {
         return Arrays.stream(values())
                 .filter(mapping -> mapping.httpMethod.equals(httpMethod) && mapping.path.equals(path))
                 .findFirst()

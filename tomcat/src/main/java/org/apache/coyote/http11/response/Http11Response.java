@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.request.HttpMimeType;
+
 public class Http11Response {
 
     private static final String protocol = "HTTP/1.1";
@@ -18,7 +20,7 @@ public class Http11Response {
     public Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
         this(httpStatusCode, responseBody,
                 Http11ResponseHeaders.from(String.join("\r\n",
-                "Content-Type: text/" + fileExtensions + ";charset=utf-8 ",
+                "Content-Type: " + HttpMimeType.from(fileExtensions).asString(),
                 "Content-Length: " + responseBody.getBytes().length + " ")));
     }
 

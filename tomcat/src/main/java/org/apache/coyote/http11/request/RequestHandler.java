@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Optional;
 
 import org.apache.coyote.http11.response.ResponseHandler;
 import org.apache.coyote.http11.session.Session;
@@ -42,7 +40,7 @@ public class RequestHandler {
 			Session session = new Session(httpRequest);
 			SessionManager.findUserBySession(session)
 				.ifPresentOrElse(
-					user -> ResponseHandler.redirect("http://localhost:8080/index.html", outputStream),
+					user -> ResponseHandler.redirect("/index.html", outputStream),
 					() -> ResponseHandler.printFileResource("static" + urlPath + ".html", outputStream));
 		} else if (httpMethod.equals("POST")) {
 			login();
@@ -54,19 +52,23 @@ public class RequestHandler {
 		if (body != null) {
 			String account = body.split("&")[0].split("=")[1];
 			String password = body.split("&")[1].split("=")[1];
-			User user = InMemoryUserRepository.findByAccount(account)
-				.orElse(new User("guest", "guest", "guest"));
-			if (user.checkPassword(password)) {
-				Session session = SessionManager.createSession(user);
-				ResponseHandler.redirectWithSetCookie("http://localhost:8080/index.html", session.getId(), outputStream);
-				return;
-			}
+			InMemoryUserRepository.findByAccount(account)
+				.ifPresentOrElse(
+					user -> loginUser(user, password),
+					() -> ResponseHandler.redirect("/401.html", outputStream)
+				);
 		}
-		ResponseHandler.redirect("http://localhost:8080/401.html", outputStream);
+		ResponseHandler.redirect("/401.html", outputStream);
 	}
 
+	private void loginUser(User user, String password) {
+		if (user.checkPassword(password)) {
+			Session session = SessionManager.createSession(user);
+			ResponseHandler.redirectWithSetCookie("/index.html", session.getId(), outputStream);
+		}
+	}
 
-	private void handleRegisterRequest(String httpMethod, String urlPath) throws IOException {
+	private void handleRegisterRequest(String httpMethod, String urlPath) {
 		if (httpMethod.equals("GET")) {
 			ResponseHandler.printFileResource("static" + urlPath + ".html", outputStream);
 			return;
@@ -78,7 +80,7 @@ public class RequestHandler {
 			String password = body.split("&")[2].split("=")[1];
 			User user = new User(account, mail, password);
 			InMemoryUserRepository.save(user);
-			ResponseHandler.redirect("http://localhost:8080/index.html", outputStream);
+			ResponseHandler.redirect("/index.html", outputStream);
 		}
 	}
 

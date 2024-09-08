@@ -3,7 +3,6 @@ package org.apache.coyote.http11.session;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import com.techcourse.model.User;
 

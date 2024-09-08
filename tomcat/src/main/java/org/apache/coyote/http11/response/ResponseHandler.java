@@ -63,11 +63,11 @@ public class ResponseHandler {
 		}
 	}
 
-	public static void redirect(String location, OutputStream outputStream) {
+	public static void redirect(String path, OutputStream outputStream) {
 	    try {
 	        String contentType = "text/html";
 	        var response = "HTTP/1.1 302 Found \r\n" +
-	            "Location: " + location + "\r\n" +
+	            "Location: http://localhost:8080" + path + "\r\n" +
 	            String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
 	            "Content-Length: 0";
 
@@ -78,12 +78,12 @@ public class ResponseHandler {
 		}
 	}
 
-	public static void redirectWithSetCookie(String location, String sessionId, OutputStream outputStream) {
+	public static void redirectWithSetCookie(String path, String sessionId, OutputStream outputStream) {
 	    try {
 	        String contentType = "text/html";
 	        var response = "HTTP/1.1 302 Found \r\n" +
 	            "Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
-	            "Location: " + location + " \r\n" +
+	            "Location: http://localhost:8080" + path + " \r\n" +
 	            String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
 	            "Content-Length: 0";
 

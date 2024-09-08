@@ -37,7 +37,7 @@ class IOStreamTest {
 
     /**
      * OutputStream 학습하기
-     *
+     * <p>
      * 자바의 기본 출력 클래스는 java.io.OutputStream이다.
      * OutputStream의 write(int b) 메서드는 기반 메서드이다.
      * <code>public abstract void write(int b) throws IOException;</code>
@@ -50,7 +50,7 @@ class IOStreamTest {
          * OutputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 쓰기 위해 write(int b) 메서드를 사용한다.
          * 예를 들어, FilterOutputStream은 파일로 데이터를 쓸 때,
          * 또는 DataOutputStream은 자바의 primitive type data를 다른 매체로 데이터를 쓸 때 사용한다.
-         * 
+         * <p>
          * write 메서드는 데이터를 바이트로 출력하기 때문에 비효율적이다.
          * <code>write(byte[] data)</code>와 <code>write(byte b[], int off, int len)</code> 메서드는
          * 1바이트 이상을 한 번에 전송 할 수 있어 훨씬 효율적이다.
@@ -74,7 +74,7 @@ class IOStreamTest {
         /**
          * 효율적인 전송을 위해 스트림에서 버퍼링을 사용 할 수 있다.
          * BufferedOutputStream 필터를 연결하면 버퍼링이 가능하다.
-         *
+         * <p>
          * 버퍼링을 사용하면 OutputStream을 사용할 때 flush를 사용하자.
          * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
@@ -108,19 +108,20 @@ class IOStreamTest {
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
 
-            try (outputStream) {}
+            try (outputStream) {
+            }
             verify(outputStream, atLeastOnce()).close();
         }
     }
 
     /**
      * InputStream 학습하기
-     *
+     * <p>
      * 자바의 기본 입력 클래스는 java.io.InputStream이다.
      * InputStream은 다른 매체로부터 바이트로 데이터를 읽을 때 사용한다.
      * InputStream의 read() 메서드는 기반 메서드이다.
      * <code>public abstract int read() throws IOException;</code>
-     * 
+     * <p>
      * InputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 읽기 위해 read() 메서드를 사용한다.
      */
     @Nested
@@ -158,7 +159,8 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            try (inputStream) {}
+            try (inputStream) {
+            }
             verify(inputStream, atLeastOnce()).close();
         }
     }
@@ -218,10 +220,9 @@ class IOStreamTest {
 
             final StringBuilder actual = new StringBuilder();
 
-            String s = bufferedReader.readLine();
-            while (s != null && !s.isBlank()) {
-                actual.append(s).append("\r\n");
-                s = bufferedReader.readLine();
+            String input;
+            while ((input = bufferedReader.readLine()) != null && !input.isBlank()) {
+                actual.append(input).append("\r\n");
             }
 
             assertThat(actual).hasToString(emoji);

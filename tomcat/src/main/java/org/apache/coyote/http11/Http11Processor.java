@@ -13,17 +13,16 @@ import org.apache.catalina.auth.HttpCookie;
 import org.apache.catalina.auth.Session;
 import org.apache.catalina.auth.SessionManager;
 import org.apache.catalina.io.FileReader;
-import org.apache.coyote.Processor;
 import org.apache.catalina.request.Request;
 import org.apache.catalina.request.RequestReader;
 import org.apache.catalina.response.HttpStatus;
 import org.apache.catalina.response.ResponseContent;
 import org.apache.catalina.response.ResponsePage;
+import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 
 public class Http11Processor implements Runnable, Processor {
@@ -55,34 +54,32 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+             final OutputStream outputStream = connection.getOutputStream()) {
+
             Request request = RequestReader.readHeaders(reader);
             HttpCookie.setCookies(request.getCookie());
-            handleRequestMethod(request);
+            String response = handleRequest(request);
+
+            outputStream.write(response.getBytes());
+            outputStream.flush();
         } catch (IOException e) {
             log.error("요청 처리 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
-    private void handleRequestMethod(Request request) {
+    private String handleRequest(Request request) {
         String httpMethod = request.getHttpMethod();
-        if (httpMethod.equals("GET")) {
-            handleGetRequest(request);
-        } else if (httpMethod.equals("POST")) {
-            handlePostRequest(request);
-        } else {
-            log.warn("지원되지 않는 HTTP 메서드: {}", httpMethod);
-        }
-    }
 
-    private void handleGetRequest(Request headers) {
-        try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = generateResponseForUrl(headers).responseToString();
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error("GET 요청 처리 중 오류 발생: {}", e.getMessage(), e);
+        if (httpMethod.equals("GET")) {
+            return generateResponseForUrl(request).responseToString();
         }
+        if (httpMethod.equals("POST")) {
+            return generateResponseForPostUrl(request).responseToString();
+        }
+        log.warn("지원되지 않는 HTTP 메서드: {}", httpMethod);
+        return new ResponseContent(HttpStatus.BAD_REQUEST, "text/html", FileReader.loadFileContent(BAD_REQUEST_PAGE))
+                .responseToString();
     }
 
     private ResponseContent generateResponseForUrl(Request headers) {
@@ -140,16 +137,6 @@ public class Http11Processor implements Runnable, Processor {
             return user;
         }
         return Optional.empty();
-    }
-
-    private void handlePostRequest(Request headers) {
-        try (final OutputStream outputStream = connection.getOutputStream()) {
-            String response = generateResponseForPostUrl(headers).responseToString();
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error("POST 요청 처리 중 오류 발생: {}", e.getMessage(), e);
-        }
     }
 
     private ResponseContent generateResponseForPostUrl(Request headers) {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.apache.coyote.view.View;
 
 public class HttpResponse {
@@ -26,7 +27,9 @@ public class HttpResponse {
         response.add("HTTP/1.1 " + status.getCode() + " " + status.name() + " ");
         response.addAll(headers.getHeaders());
         response.add("");
-        response.add(view.getContent());
+        if (view != null) {
+            response.add(view.getContent());
+        }
         return String.join("\r\n", response);
     }
 
@@ -38,7 +41,7 @@ public class HttpResponse {
         return view;
     }
 
-    public String findHeaderByKey(String key) {
+    public Optional<String> findHeaderByKey(String key) {
         return headers.findByKey(key);
     }
 

@@ -6,6 +6,7 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestStartLine;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.query.Query;
 import org.apache.coyote.view.ViewResolver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
@@ -40,7 +41,8 @@ class RegisterControllerTest {
             // given
             HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
                     "POST /register HTTP/1.1 ");
-            HttpRequest request = new HttpRequest(startLine, null, null);
+            Query query = Query.create("account=tacan&email=tacam@gmail.com&password=1234");
+            HttpRequest request = new HttpRequest(startLine, null, query);
             HttpResponse response = new HttpResponse();
             FrontController controller = FrontController.getInstance();
 

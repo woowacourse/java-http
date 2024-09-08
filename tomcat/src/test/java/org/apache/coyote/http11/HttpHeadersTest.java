@@ -20,7 +20,7 @@ class HttpHeadersTest {
             httpHeaders.addByString(source);
 
             // then
-            assertThat(httpHeaders.findByKey("Content-Type")).isEqualTo("text/js;charset=utf-8");
+            assertThat(httpHeaders.findByKey("Content-Type").get()).isEqualTo("text/js;charset=utf-8");
         }
 
         @Test
@@ -33,7 +33,7 @@ class HttpHeadersTest {
             httpHeaders.addByString(source);
 
             // then
-            assertThat(httpHeaders.findByKey("Accept")).isEqualTo("text/html,*/*;q=0.1");
+            assertThat(httpHeaders.findByKey("Accept").get()).isEqualTo("text/html,*/*;q=0.1");
         }
     }
 }

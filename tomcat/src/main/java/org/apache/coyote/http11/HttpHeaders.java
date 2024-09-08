@@ -4,6 +4,7 @@ import com.techcourse.exception.client.BadRequestException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.coyote.view.View;
@@ -30,10 +31,12 @@ public class HttpHeaders {
         return of(response.getView(), ContentType.findByPath(request.getPath()));
     }
 
-    public static HttpHeaders of(View view, ContentType contentType) { // TODO view 없을 경우도 처리
+    public static HttpHeaders of(View view, ContentType contentType) {
         Map<String, String> store = new LinkedHashMap<>();
-        store.put("Content-Type", contentType.getValue() + ";charset=utf-8");
-        store.put("Content-Length", String.valueOf(view.getContent().getBytes().length));
+        if (view != null && contentType != null) {
+            store.put("Content-Type", contentType.getValue() + ";charset=utf-8");
+            store.put("Content-Length", String.valueOf(view.getContent().getBytes().length));
+        }
         return new HttpHeaders(store);
     }
 
@@ -51,8 +54,9 @@ public class HttpHeaders {
         store.put(key, value);
     }
 
-    public String findByKey(String key) {
-        return store.get(key);
+    public Optional<String> findByKey(String key) {
+        String value = store.get(key);
+        return Optional.ofNullable(value);
     }
 
     public List<String> getHeaders() {

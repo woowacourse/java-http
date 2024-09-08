@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.Optional;
 import org.apache.coyote.http11.query.Query;
 
 public class HttpRequest {
@@ -39,6 +40,13 @@ public class HttpRequest {
 
     public String findFromQueryParam(String key) {
         return startLine.findQuery(key);
+    }
+
+    public Optional<String> findFromHeader(String key) {
+        if (httpHeaders == null) {
+            return Optional.empty();
+        }
+        return httpHeaders.findByKey(key);
     }
 
     public String findFromBody(String key) {

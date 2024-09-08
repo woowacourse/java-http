@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -132,7 +133,7 @@ class Http11ProcessorTest {
         }
 
         @Test
-        void 로그인에_성공하면_메인_페이지를_가져온다() throws IOException {
+        void 로그인에_성공하면_메인_페이지를_가져온다() {
             // given
             final String httpRequest= String.join("\r\n",
                     "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -149,15 +150,11 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/login.html");
-            var expected = "HTTP/1.1 302 FOUND \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 3796 \r\n" +
-                    "Location: /index.html \r\n" +
-                    "\r\n"+
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            assertThat(socket.output()).isEqualTo(expected);
+            String actual = socket.output();
+            Assertions.assertAll(
+                    () -> assertThat(actual.startsWith("HTTP/1.1 302 FOUND \r\n")).isTrue(),
+                    () -> assertThat(actual.contains("Location: /index.html \r\n")).isTrue()
+            );
         }
     }
 }

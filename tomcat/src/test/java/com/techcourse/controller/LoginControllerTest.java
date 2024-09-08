@@ -81,7 +81,7 @@ class LoginControllerTest {
             controller.service(request, response);
 
             // then
-            assertThat(response.findHeaderByKey("Set-Cookie")).isNotNull(); // TODO 고치기
+            assertThat(response.findHeaderByKey("Set-Cookie").isPresent()).isTrue();
         }
     }
 }

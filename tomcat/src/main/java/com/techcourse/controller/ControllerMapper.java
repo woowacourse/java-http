@@ -20,7 +20,7 @@ public enum ControllerMapper {
     }
 
     public static Controller findByPath(String path) {
-        if (path.endsWith("html") || path.endsWith("css") || path.endsWith("js")) {
+        if (path.endsWith(".html") || path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".ico")) {
             return FILE.controller;
         } else {
             return Arrays.stream(values())

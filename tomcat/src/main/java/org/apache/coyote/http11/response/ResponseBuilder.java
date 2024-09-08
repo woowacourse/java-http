@@ -22,6 +22,7 @@ public class ResponseBuilder {
 
     public ResponseBuilder location(String location) {
         headerBuilder.location(location);
+        headerBuilder.contentType(null);
         return this;
     }
 

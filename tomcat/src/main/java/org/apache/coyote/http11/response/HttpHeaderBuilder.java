@@ -16,7 +16,7 @@ public class HttpHeaderBuilder {
     }
 
     public HttpHeaderBuilder contentType(String contentType) {
-        this.contentType = Optional.of(contentType);
+        this.contentType = Optional.ofNullable(contentType);
         return this;
     }
 

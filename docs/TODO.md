@@ -48,5 +48,6 @@
 
 ### 기존 구현 변경하기
 
-- 
+- `StaticFileResponseUtils`, `ViewResponseUtils` 에서 HttpRespone를 반환하도록 변경
+- `HttpResponseWriter`를 도입하여, HttpResponse를 평문으로 바꾸는 작업을 담당함
 

@@ -11,6 +11,8 @@ import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestCreator;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseWriter;
 import org.apache.coyote.http11.response.StaticFileResponseUtils;
 import org.apache.coyote.http11.response.ViewResponseUtils;
 import org.apache.coyote.http11.response.view.View;
@@ -41,8 +43,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = createHttpRequest(inputStream);
-            String response = response(request);
-            writeResponse(outputStream, response);
+            HttpResponse response = response(request);
+            HttpResponseWriter.write(outputStream, response);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -53,20 +55,17 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequestCreator.createHttpRequest(reader);
     }
 
-    private String response(HttpRequest request) throws IOException {
+    private HttpResponse response(HttpRequest request) throws IOException {
         Optional<View> view = servletContainer.service(request);
         if (view.isPresent()) {
             return ViewResponseUtils.createResponse(view.get());
         }
+
         String filePath = request.getPath();
         if (StaticFileResponseUtils.isExistFile(filePath)) {
             return StaticFileResponseUtils.createResponse(filePath);
         }
-        return ViewResponseUtils.createResponse(NOT_FOUND_RESPONSE_VIEW);
-    }
 
-    private void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return ViewResponseUtils.createResponse(NOT_FOUND_RESPONSE_VIEW);
     }
 }

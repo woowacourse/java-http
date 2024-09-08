@@ -137,8 +137,9 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(password)) {
             log.info("인증된 사용자: {}", user.get());
+            return user;
         }
-        return user;
+        return Optional.empty();
     }
 
     private void handlePostRequest(Request headers) {

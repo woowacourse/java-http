@@ -44,7 +44,7 @@ public class Http11Request {
 
             Http11RequestBody body = null;
             if (http11RequestHeaders.contains("Content-Length")) {
-                int contentLength = Integer.parseInt(http11RequestHeaders.get("Content-Length").trim());
+                int contentLength = Integer.parseInt(http11RequestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
                 br.read(buffer, 0, contentLength);
                 body = Http11RequestBody.from(new String(buffer));

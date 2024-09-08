@@ -15,7 +15,7 @@ public class Http11RequestHeaders {
         Map<String, String> map = new HashMap<>();
 
         for (String headerLine : headerLines.split(System.lineSeparator())) {
-            String[] keyValue = headerLine.split(":");
+            String[] keyValue = headerLine.split(": ");
             assert keyValue.length == 2;
             map.put(keyValue[0], keyValue[1]);
         }

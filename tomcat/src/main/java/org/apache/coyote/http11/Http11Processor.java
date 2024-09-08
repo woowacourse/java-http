@@ -112,10 +112,7 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseContent handleLoginRequest(Request request) {
         String accept = request.getFileType();
         Map<String, String> queryParams = request.getQueryParam();
-        if (request.getQueryParam().size() < 2) {
-            return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
-        }
-        if (queryParams.get(ACCOUNT) == null || queryParams.get(PASSWORD) == null) {
+        if (isMissingRequiredParams(request, queryParams)) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));
         }
 
@@ -129,6 +126,11 @@ public class Http11Processor implements Runnable, Processor {
             return new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE), cookie);
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
+    }
+
+    private boolean isMissingRequiredParams(Request request, Map<String, String> queryParams) {
+        return request.getQueryParam().size() < 2 ||
+                (queryParams.get(ACCOUNT) == null && queryParams.get(PASSWORD) == null);
     }
 
     private Optional<User> authenticateUser(String account, String password) {

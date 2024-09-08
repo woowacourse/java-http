@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.util.Map;
 
 public record HttpResponse(
+        HttpVersion httpVersion,
         HttpStatus httpStatus,
         Header header,
         byte[] responseBody
@@ -16,7 +17,7 @@ public record HttpResponse(
     }
 
     private String getStartLine() {
-        return "HTTP/1.1 " + httpStatus.getDescription() + " ";
+        return httpVersion.getVersionName() + " " + httpStatus.getDescription() + " ";
     }
 
     private CharSequence getHeaders() {

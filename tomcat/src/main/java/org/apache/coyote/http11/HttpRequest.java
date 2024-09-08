@@ -11,4 +11,8 @@ public record HttpRequest(String startLine, Header header, QueryParameter body) 
     public URI getUri() {
         return URI.create(startLine.split(" ")[1]);
     }
+
+    public HttpVersion getHttpVersion() {
+        return HttpVersion.from(startLine.split(" ")[2]);
+    }
 }

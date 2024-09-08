@@ -32,6 +32,6 @@ public class HttpResponseParser {
         for (String key : keys) {
             headers.add(key + DELIMITER_HEADER + httpResponseHeaders.getValue(key));
         }
-        return String.join("\r\n", headers);
+        return String.join(DELIMITER_LINE, headers);
     }
 }

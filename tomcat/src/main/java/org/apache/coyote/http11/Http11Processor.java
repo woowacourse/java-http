@@ -1,21 +1,29 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.converter.HttpRequestConverter;
+import org.apache.coyote.http11.request.model.HttpRequest;
+import org.apache.coyote.http11.response.model.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final RequestProcessor requestProcessor;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestProcessor = new RequestProcessor();
     }
 
     @Override
@@ -26,19 +34,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpRequest httpRequest = HttpRequestConverter.convertFrom(bufferedReader);
+            HttpResponse httpResponse = requestProcessor.process(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.combineResponseToBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

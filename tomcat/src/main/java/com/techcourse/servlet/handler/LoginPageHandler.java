@@ -27,9 +27,11 @@ public class LoginPageHandler implements Handler {
         Optional<String> password = request.getQueryParameter("password");
         if (account.isPresent() && password.isPresent()) {
             leaveUserLog(account.get(), password.get());
+            return handle(account.get(), password.get());
         }
-
-        return View.createByStaticResource("/login.html");
+        return View.htmlBuilder()
+                .staticResource("/login.html")
+                .build();
     }
 
     private void leaveUserLog(String account, String password) {
@@ -37,5 +39,11 @@ public class LoginPageHandler implements Handler {
                 .ifPresentOrElse(
                         user -> log.info("user : {}", user),
                         () -> log.info("해당 유저가 존재하지 않습니다"));
+    }
+
+    private View handle(String account, String password) {
+        return InMemoryUserRepository.findByAccountAndPassword(account, password)
+                .map(user -> View.redirect("/index.html"))
+                .orElse(View.redirect("/401.html"));
     }
 }

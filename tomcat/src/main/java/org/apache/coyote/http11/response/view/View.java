@@ -1,30 +1,25 @@
 package org.apache.coyote.http11.response.view;
 
-import org.apache.coyote.http11.util.StaticFileUtils;
+import java.util.Map;
+import org.apache.coyote.http11.response.HttpStatus;
 
-public class View {
+public interface View {
 
-    private final ViewType type;
-    private final String content;
+    HttpStatus getStatus();
 
-    public View(ViewType type, String content) {
-        this.type = type;
-        this.content = content;
+    Map<String, String> getAddedHeaders();
+
+    String getContentType();
+
+    String getResponseBody();
+
+    static HtmlView.Builder htmlBuilder() {
+        return HtmlView.builder();
     }
 
-    public static View createByStaticResource(String path) {
-        return new View(ViewType.HTML, StaticFileUtils.readStaticFile(path));
-    }
-
-    public static View createByContent(String content) {
-        return new View(ViewType.HTML, content);
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public ViewType getType() {
-        return type;
+    static View redirect(String location) {
+        return RedirectView.builder()
+                .location(location)
+                .build();
     }
 }

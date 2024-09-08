@@ -82,6 +82,7 @@ public class HttpResponse {
 
         private HttpResponseBuilder() {
             this.headers = new HashMap<>();
+            this.body = "";
         }
 
         public HttpResponseBuilder ok() {
@@ -94,8 +95,13 @@ public class HttpResponse {
             return this;
         }
 
-        public HttpResponseBuilder setHeader(String key, String value) {
-            headers.put(key, value);
+        public HttpResponseBuilder status(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public HttpResponseBuilder addHeaders(Map<String, String> addedHeaders) {
+            headers.putAll(addedHeaders);
             return this;
         }
 

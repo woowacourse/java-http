@@ -51,3 +51,20 @@
 - `StaticFileResponseUtils`, `ViewResponseUtils` 에서 HttpRespone를 반환하도록 변경
 - `HttpResponseWriter`를 도입하여, HttpResponse를 평문으로 바꾸는 작업을 담당함
 
+# 2단계 - 로그인 구현하기
+
+### 1. HTTP Status Code 302
+
+- GET /login 요청이 일어났을 때
+  - 쿼리 파라미터 key에 account 또는 password가 없을 경우 -> login.html 페이지를 보여준다
+  - 쿼리 파라미터 ket에 account, password가 있을 때
+    - 해당 유저가 있을 경우 -> status code를 302, /index.html로 리다이렉트
+    - 해당 유저가 없을 경우 -> status code를 302, /401.html로 리다이렉트
+
+### 2. POST 방식으로 회원가입
+
+- GET /register 요청 시
+  - register.html 페이지를 보여준다.
+- POST /register (Content-Type : application/x-www-form-urlencoded) 요청 시
+  - `InMemoryUserRepository`에 회원 가입 실시
+  - 회원 가입이 완료되면 /index.html로 리다이렉트

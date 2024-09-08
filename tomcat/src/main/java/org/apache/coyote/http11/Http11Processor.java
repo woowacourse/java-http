@@ -13,6 +13,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestCreator;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseWriter;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.StaticFileResponseUtils;
 import org.apache.coyote.http11.response.ViewResponseUtils;
 import org.apache.coyote.http11.response.view.View;
@@ -22,7 +23,10 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final View NOT_FOUND_RESPONSE_VIEW = View.createByStaticResource("/404.html");
+    private static final View NOT_FOUND_RESPONSE_VIEW = View.htmlBuilder()
+            .status(HttpStatus.NOT_FOUND)
+            .staticResource("/404.html")
+            .build();
 
     private final Socket connection;
     private final ServletContainer servletContainer;

@@ -18,6 +18,8 @@ public class HomePageHandler implements Handler {
 
     @Override
     public View handle(HttpRequest request) {
-        return View.createByContent(RESPONSE_CONTENT);
+        return View.htmlBuilder()
+                .text(RESPONSE_CONTENT)
+                .build();
     }
 }

@@ -71,6 +71,7 @@ public class Http11Request {
 
     public List<Cookie> getCookies() {
         List<Cookie> cookies = new ArrayList<>();
+        if (!header.contains("Cookie")) return cookies;
         for (String cookieString : header.get("Cookie").split(";")) {
             String[] keyValue = cookieString.split("=");
             assert keyValue.length == 2;

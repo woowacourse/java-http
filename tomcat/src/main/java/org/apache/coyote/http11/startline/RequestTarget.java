@@ -25,7 +25,12 @@ public class RequestTarget {
         if (!path.contains(".")) {
             path = path + ".html";
         }
+
         URL resource = getClass().getClassLoader().getResource("static" + path);
+        if (resource == null) {
+            throw new IllegalArgumentException("Could not find resource " + path);
+        }
+
         try {
             return Path.of(resource.toURI());
         } catch (URISyntaxException e) {

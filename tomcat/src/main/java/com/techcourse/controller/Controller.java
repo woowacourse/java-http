@@ -106,11 +106,15 @@ public class Controller {
     }
 
     private boolean redirectTo401(HttpResponse response) {
-        URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String path = "static/401.html";
+        URL resource = getClass().getClassLoader().getResource(path);
+        if (resource == null) {
+            throw new IllegalArgumentException("Could not find resource " + path);
+        }
+
         try {
-            Path path = Path.of(resource.toURI());
             response.setStatus(HttpStatus.UNAUTHORIZED);
-            return readStaticFile(response, path);
+            return readStaticFile(response, Path.of(resource.toURI()));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("cannot convert to URI: " + resource);
         }

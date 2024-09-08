@@ -60,6 +60,6 @@ public class RequestTarget {
     }
 
     public boolean isBlank() {
-        return value.isBlank();
+        return value.isBlank() || value.equals("/");
     }
 }

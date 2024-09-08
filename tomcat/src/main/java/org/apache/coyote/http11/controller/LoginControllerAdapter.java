@@ -14,6 +14,7 @@ public enum LoginControllerAdapter {
     LOGIN_VIEW(httpRequest -> true, LoginControllerAdapter::loginView);
 
     private static LoginController loginController = LoginController.getInstance();
+
     private Predicate<HttpRequest> condition;
     private Function<HttpRequest, HttpResponse> handle;
 

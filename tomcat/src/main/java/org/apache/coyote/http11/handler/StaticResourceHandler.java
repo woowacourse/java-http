@@ -27,6 +27,9 @@ public class StaticResourceHandler implements RequestHandler {
 
     private Content getContent(Request request) throws IOException {
         String target = request.getTarget().equals("/") ? "index.html" : request.getTarget();
+        if (!target.contains(".")) {
+            target = target + ".html";
+        }
         return new Content(target);
     }
 }

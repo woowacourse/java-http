@@ -18,7 +18,10 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-        return values.get(name);
+        if (values.containsKey(name)) {
+            return values.get(name);
+        }
+        throw new IllegalArgumentException("해당 세션 값은 존재하지 않습니다.");
     }
 
     public void setAttribute(final String name, final Object value) {

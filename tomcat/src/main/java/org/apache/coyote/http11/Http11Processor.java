@@ -142,7 +142,7 @@ public class Http11Processor implements Runnable, Processor {
                 if (!user.checkPassword(bodys.get("password"))) {
                     throw new RuntimeException();
                 }
-                log.info("user: {}", user);
+                log.debug("user: {}", user);
             } catch (Exception e) {
                 processGetRequest("/401.html", outputStream);
             }

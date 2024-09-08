@@ -25,15 +25,13 @@ public class RequestHandler {
 		String httpMethod = httpRequest.getMethod();
 		String urlPath = httpRequest.getPath();
 
-		if (urlPath.endsWith("html")) {
+		if(urlPath.endsWith("html") || urlPath.endsWith("css") || urlPath.endsWith("js")) {
 			ResponseHandler.printFileResource("static" + urlPath, outputStream);
 		} else if (urlPath.startsWith("/login")) {
 			handleLoginRequest(httpMethod, urlPath);
 		} else if (urlPath.startsWith("/register")) {
 			handleRegisterRequest(httpMethod, urlPath);
-		} else if (urlPath.startsWith("/css") || urlPath.startsWith("/js") || urlPath.startsWith("/assets")) {
-			ResponseHandler.printFileResource("static" + urlPath, outputStream);
-		} else {
+		}  else {
 			sendHelloWorldResponse();
 		}
 	}
@@ -91,7 +89,6 @@ public class RequestHandler {
 			User user = new User(account, mail, password);
 			InMemoryUserRepository.save(user);
 			ResponseHandler.redirect("http://localhost:8080/index.html", outputStream);
-			return;
 		}
 	}
 

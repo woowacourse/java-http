@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,8 +28,8 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        URL resource = getClass().getClassLoader().getResource(fileName);
-        final String actual = resource.getPath();
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final String actual = resource.getPath(); // getPath vs getFile -> getPath (queryString 안써서)
 
         assertThat(actual).endsWith(fileName);
     }
@@ -45,11 +44,12 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        URL resource = getClass().getClassLoader().getResource(fileName);
-        final Path path = Paths.get(resource.toURI());
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final Path path = Path.of(resource.toURI()); // Paths.get vs Path.of -> Path.of (최신, 간단)
 
         // todo
         final List<String> actual = Files.lines(path).toList();
+        // Files.lines() vs Files.newBufferedReader() + bufferedReader.lines() -> Files.lines (읽을 파일 작아서)
 
         assertThat(actual).containsOnly("nextstep");
     }

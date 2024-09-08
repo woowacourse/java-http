@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.startline;
 
 import java.net.URL;
-import java.util.Map;
 import org.apache.coyote.http11.header.RequestTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,14 +39,6 @@ public class HttpRequestLine {
 
     public boolean isTargetBlank() {
         return requestTarget.isBlank();
-    }
-
-    public Map<String, String> parseQueryString() {
-        return requestTarget.parseQueryString();
-    }
-
-    public boolean containsQueryParameter() {
-        return requestTarget.containsQueryParameter();
     }
 
     public boolean targetStartsWith(String startsWith) {

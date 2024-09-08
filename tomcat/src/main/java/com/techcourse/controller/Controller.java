@@ -9,7 +9,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpRequest;
@@ -64,16 +63,15 @@ public class Controller {
     }
 
     private boolean isLoginRequest(HttpRequest request) {
-        return request.getHttpMethod() == HttpMethod.GET
-                && request.containsQueryParameter()
+        return request.getHttpMethod() == HttpMethod.POST
+                && request.containsBody()
                 && request.targetStartsWith("/login");
     }
 
     public boolean login(HttpRequest request, HttpResponse response) {
-        Map<String, String> parameters = request.parseQueryString();
-        Optional<User> nullableUser = InMemoryUserRepository.findByAccount(parameters.get("account"));
+        Optional<User> nullableUser = InMemoryUserRepository.findByAccount(request.getFromBody("account"));
         return nullableUser
-                .filter(user -> user.checkPassword(parameters.get("password")))
+                .filter(user -> user.checkPassword(request.getFromBody("password")))
                 .map(user -> loginAndRedirectToIndex(response, user))
                 .orElseGet(() -> redirectTo401(response));
     }

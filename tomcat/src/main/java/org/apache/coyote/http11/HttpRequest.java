@@ -9,7 +9,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.body.HttpRequestBody;
 import org.apache.coyote.http11.header.HttpHeader;
@@ -53,20 +52,12 @@ public class HttpRequest {
         return new HttpRequest(startLine, httpHeaders, requestBody);
     }
 
-    public Map<String, String> parseQueryString() {
-        return httpRequestLine.parseQueryString();
-    }
-
     public boolean isTargetStatic() {
         return httpRequestLine.isTargetStatic();
     }
 
     public boolean isTargetBlank() {
         return httpRequestLine.isTargetBlank();
-    }
-
-    public boolean containsQueryParameter() {
-        return httpRequestLine.containsQueryParameter();
     }
 
     public boolean targetStartsWith(String startsWith) {

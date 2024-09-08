@@ -78,10 +78,6 @@ public class HttpRequest {
         return httpRequestLine.getHttpMethod();
     }
 
-    public String getTargetExtension() {
-        return httpRequestLine.getTargetExtension();
-    }
-
     public Path getTargetPath() {
         return httpRequestLine.getTargetPath();
     }

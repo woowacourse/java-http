@@ -1,9 +1,7 @@
 package org.apache.coyote.http11.startline;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class RequestTarget {
@@ -20,14 +18,6 @@ public class RequestTarget {
 
     public boolean isEqualTo(String target) {
         return value.equals(target);
-    }
-
-    public String getTargetExtension() {
-        try {
-            return Files.probeContentType(getPath());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("IO exception occured: " + e.getMessage());
-        }
     }
 
     public Path getPath() {

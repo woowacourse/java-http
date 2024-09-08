@@ -48,10 +48,6 @@ public class HttpRequestLine {
         return requestTarget.isEqualTo(target);
     }
 
-    public String getTargetExtension() {
-        return requestTarget.getTargetExtension();
-    }
-
     public Path getTargetPath() {
         return requestTarget.getPath();
     }

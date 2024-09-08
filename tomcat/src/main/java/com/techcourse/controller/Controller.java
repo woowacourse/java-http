@@ -37,7 +37,7 @@ public class Controller {
             return showLoginPage(request, response);
         }
         if (request.isTargetStatic()) {
-            return readStaticFile(response, request.getTargetPath(), request.getTargetExtension());
+            return readStaticFile(response, request.getTargetPath());
         }
         return createDynamicResponse(request, response);
     }
@@ -50,7 +50,7 @@ public class Controller {
         Optional<String> nullableSession = request.getSessionFromCookie();
         return nullableSession.map(SessionManager::findSession)
                 .map(session -> redirectToIndex(response))
-                .orElseGet(() -> readStaticFile(response, request.getTargetPath(), request.getTargetExtension()));
+                .orElseGet(() -> readStaticFile(response, request.getTargetPath()));
     }
 
     private boolean createDynamicResponse(HttpRequest request, HttpResponse response) {
@@ -110,17 +110,18 @@ public class Controller {
         try {
             Path path = Path.of(resource.toURI());
             response.setStatus(HttpStatus.UNAUTHORIZED);
-            return readStaticFile(response, path, "html");
+            return readStaticFile(response, path);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("cannot convert to URI: " + resource);
         }
     }
 
-    public boolean readStaticFile(HttpResponse response, Path path, String targetExtension) {
+    public boolean readStaticFile(HttpResponse response, Path path) {
         try {
             if (Files.exists(path)) {
                 String responseBody = readFile(path);
-                response.addHeader(HttpHeader.CONTENT_TYPE, getContentType(targetExtension) + ";charset=utf-8");
+                String contentType = Files.probeContentType(path);
+                response.addHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8");
                 response.setBody(responseBody);
                 return response.isValid();
             }
@@ -140,12 +141,5 @@ public class Controller {
         }
         joiner.add("");
         return joiner.toString();
-    }
-
-    private String getContentType(String targetExtension) {
-        if (targetExtension.equals("ico") || targetExtension.equals("png") || targetExtension.equals("jpg")) {
-            return "image/" + targetExtension;
-        }
-        return "text/" + targetExtension;
     }
 }

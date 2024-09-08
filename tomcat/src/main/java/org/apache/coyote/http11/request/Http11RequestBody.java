@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ public class Http11RequestBody {
 
     public static Http11RequestBody from(String bodyLine) throws UnsupportedEncodingException {
         Map<String, String> map = new HashMap<>();
-        String decoded = URLDecoder.decode(bodyLine, "UTF-8");
+        if (bodyLine.isEmpty()) return new Http11RequestBody(map);
 
         for (String data : bodyLine.split("&")) {
             String[] keyValue = data.split("=");

@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class Http11RequestHeaders {
 
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> headerMap;
 
     public Http11RequestHeaders(Map<String, String> headerMap) {
@@ -29,5 +31,10 @@ public class Http11RequestHeaders {
 
     public boolean contains(String key) {
         return headerMap.containsKey(key);
+    }
+
+    public int getContentLength() {
+        if (!headerMap.containsKey(CONTENT_LENGTH)) return 0;
+        return Integer.parseInt(headerMap.get(CONTENT_LENGTH));
     }
 }

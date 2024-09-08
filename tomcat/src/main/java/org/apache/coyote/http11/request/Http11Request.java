@@ -42,17 +42,15 @@ public class Http11Request {
             }
             Http11RequestHeaders http11RequestHeaders = Http11RequestHeaders.from(headerSb.toString());
 
-            Http11RequestBody body = null;
-            if (http11RequestHeaders.contains("Content-Length")) {
-                int contentLength = Integer.parseInt(http11RequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                body = Http11RequestBody.from(new String(buffer));
-            }
+            int contentLength = http11RequestHeaders.getContentLength();
+            char[] buffer = new char[contentLength];
+            br.read(buffer, 0, contentLength);
+            Http11RequestBody body = Http11RequestBody.from(new String(buffer));
+
             return new Http11Request(
                     Http11RequestMethod.from(firstLine[0]),
                     http11RequestHeaders,
-                    firstLine[1], //.split("\\?")[0],
+                    firstLine[1],
                     Http11RequestParser.parseQuery(firstLine[1]),
                     body);
         }

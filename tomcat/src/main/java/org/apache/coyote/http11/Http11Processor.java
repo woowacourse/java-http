@@ -66,6 +66,7 @@ public class Http11Processor implements Runnable, Processor {
             Http11Method method = request.getMethod();
             if (method == Http11Method.GET && "/".equals(endpoint)) {
                 response.addBody("Hello world!");
+                response.addContentType("text/html");
                 return;
             }
             if (method == Http11Method.GET && "/login".equals(endpoint)) {

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import org.apache.coyote.http11.serdes.CookieSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
@@ -28,13 +29,20 @@ public class Cookie {
 
     private static void parseElement(Map<String, String> cookies, String element) {
         String[] parsedElement = element.split(ELEMENT_DELMITER);
-        String key = parsedElement[0];
-        String value = parsedElement[1];
+        String key = parsedElement[0].trim();
+        String value = parsedElement[1].trim();
         cookies.put(key, value);
     }
 
     public boolean has(String key) {
         return cookies.containsKey(key);
+    }
+
+    public String getByKey(String key){
+        if(!has(key)){
+            throw new NoSuchElementException(key + " 를 가진 cookie 값이 없습니다.");
+        }
+        return cookies.get(key);
     }
 
     public void put(String key, String value) {

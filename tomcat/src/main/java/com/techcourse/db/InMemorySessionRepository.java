@@ -11,8 +11,9 @@ public class InMemorySessionRepository {
         database.add(session);
     }
 
-    public static boolean exists(Session target) {
+    public static boolean existsById(String sessionId) {
         return database.stream()
-                .anyMatch(session -> session.equals(target));
+                .map(Session::getId)
+                .anyMatch(id -> id.equals(sessionId));
     }
 }

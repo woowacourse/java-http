@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.controller;
 
+import com.techcourse.db.InMemorySessionRepository;
+import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.auth.Session;
-import org.apache.coyote.http11.auth.SessionGenerator;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBuilder;
 import org.apache.coyote.http11.service.LoginService;
@@ -23,9 +23,12 @@ public class LoginController implements Controller {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
-        if (requestLine.isQueryStringRequest()) {
-            return checkLogin(requestLine);
+        if (httpRequest.isQueryStringRequest()) {
+            return checkLogin(httpRequest);
+        }
+
+        if (httpRequest.hasCookie() && httpRequest.getCookie().has("JSESSIONID")) {
+            return checkSession(httpRequest);
         }
 
         return new ResponseBuilder()
@@ -34,18 +37,38 @@ public class LoginController implements Controller {
                 .build();
     }
 
-    private HttpResponse checkLogin(RequestLine requestLine) {
-        Map<String, String> parameters = requestLine.getParameters();
-        loginService.checkLogin(parameters.get("account"), parameters.get("password"));
+    private HttpResponse checkSession(HttpRequest httpRequest) {
+        Cookie cookie = httpRequest.getCookie();
+        String jsessionid = cookie.getByKey("JSESSIONID");
+
+        if(!InMemorySessionRepository.existsById(jsessionid)){
+            throw new SecurityException("잘못된 세션 정보입니다.");
+        }
+
         return new ResponseBuilder()
                 .statusCode(HttpStatusCode.FOUND_302)
                 .location("/index.html")
-                .setCookie(makeSessionCookie())
                 .build();
     }
 
-    private Cookie makeSessionCookie() {
-        Session session = SessionGenerator.generate();
-        return new Cookie(Map.of("JSESSIONID", session.getValue()));
+    private HttpResponse checkLogin(HttpRequest httpRequest) {
+        Map<String, String> parameters = httpRequest.getQueryParameters();
+        loginService.checkLogin(parameters.get("account"), parameters.get("password"));
+
+        User user = loginService.findByAccount(parameters.get("account"));
+        Cookie userSessionCookie = makeUserSessionCookie(user);
+
+        return new ResponseBuilder()
+                .statusCode(HttpStatusCode.FOUND_302)
+                .location("/index.html")
+                .setCookie(userSessionCookie)
+                .build();
+    }
+
+    private Cookie makeUserSessionCookie(User user) {
+        Session session = new Session();
+        session.setAttribute("user", user);
+        InMemorySessionRepository.save(session);
+        return new Cookie(Map.of("JSESSIONID", session.getId()));
     }
 }

@@ -6,12 +6,12 @@ import java.util.StringJoiner;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class ResponseSerializer {
+public class ResponseSerializer implements Serializer<HttpResponse> {
     private static String PROTOCOL_AND_VERSION = HttpResponse.PROTOCOL + "/" + HttpResponse.version + " ";
     private static String RESPONSE_DELIMITER = "\r\n";
     private static String BLANK = "";
 
-
+    @Override
     public String serialize(HttpResponse response) {
         Optional<String> responseBody = response.getResponseBody();
         String firstLine = resolveFirstLine(response.getStatusCode(), response.getStatusMessage());

@@ -3,12 +3,13 @@ package org.apache.coyote.http11.response;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.serdes.ResponseSerializer;
+import org.apache.coyote.http11.serdes.Serializer;
 
 public class HttpResponse {
     public static final String PROTOCOL = "HTTP";
     public static final double version = 1.1;
 
-    private final ResponseSerializer serialzer;
+    private final Serializer<HttpResponse> serialzer;
     private final HttpHeaders headers;
     private final int statusCode;
     private final String statusMessage;

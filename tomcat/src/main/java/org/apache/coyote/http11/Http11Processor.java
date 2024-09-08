@@ -57,9 +57,10 @@ public class Http11Processor implements Runnable, Processor {
                     processFile(requestFile, "200 OK", outputStream);
                 } catch (NullPointerException e) {
                     log.warn("존재하지 않는 파일 호출 (Path: %s)".formatted(request.getPath()));
-                    processNotFoundPage(outputStream);
+                    return false;
                 } catch (IOException e) {
                     log.warn("파일 읽기/쓰기 과정에서 예외 발생 (Path: %s)".formatted(request.getPath()));
+                    return false;
                 }
             }
             return true;
@@ -98,11 +99,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private File getRequestFile(HttpRequest httpRequest) throws NullPointerException {
         String resourcePath = "static" + httpRequest.getPath();
+
         URL resource = getClass().getClassLoader().getResource(resourcePath);
 
-        if (httpRequest.getPath().equals("favicon.ico")) {
-            log.warn("favicon.ico 를 찾을 수 없습니다.");
-        }
         return new File(resource.getPath());
     }
 

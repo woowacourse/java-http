@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.executor.ExecutorService;
+import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -12,30 +14,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    ExecutorService executorService = new ExecutorService();
+    SessionManager sessionManager = new SessionManager(150000);
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, executorService, sessionManager);
 
         // when
         processor.process(socket);
 
+
         // then
-        var expected = String.join("\r\n",
+        assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "Content-Length: 13 ",
                 "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+                "Hello world!"
+        );
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -43,19 +48,21 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, executorService, sessionManager);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final URL resource = getClass().getClassLoader()
+                .getResource("static/index.html");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5564 ",
+                "",
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
     }
 }

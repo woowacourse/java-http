@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.net.http.HttpHeaders;
-import java.util.List;
-import java.util.Map;
 
 public class Http11ResponseHeader {
 
@@ -21,12 +19,7 @@ public class Http11ResponseHeader {
         this.httpHeaders = httpHeaders;
     }
 
-    public static Http11ResponseHeader of(StatusLine statusLine, ContentType contentType, int contentLength) {
-        HttpHeaders httpHeaders = HttpHeaders.of(
-                Map.of(CONTENT_TYPE, List.of(contentType.getContentType()),
-                        CONTENT_LENGTH, List.of(String.valueOf(contentLength))),
-                (s1, s2) -> true);
-
+    public static Http11ResponseHeader of(StatusLine statusLine, HttpHeaders httpHeaders) {
         return new Http11ResponseHeader(statusLine, httpHeaders);
     }
 

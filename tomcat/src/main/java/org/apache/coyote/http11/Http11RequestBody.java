@@ -13,7 +13,7 @@ public class Http11RequestBody {
         this.body = body;
     }
 
-    public static Http11RequestBody from(BufferedReader bufferedReader, int contentLength) throws IOException {
+    public static Http11RequestBody of(BufferedReader bufferedReader, int contentLength) throws IOException {
         StringBuilder bodyBuffer = readRequestBody(bufferedReader, contentLength);
 
         String encodedBody = bodyBuffer.toString();

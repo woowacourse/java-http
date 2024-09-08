@@ -40,7 +40,7 @@ public class HttpRequest {
         Map<String, String> requestHeaders = new HashMap<>();
         String headerLine = bufferedReader.readLine();
 
-        while (!("".equals(headerLine))) {
+        while (!("".equals(headerLine)) && headerLine != null) {
             String[] headerLineValues = parseWithTrim(headerLine, ":");
             String headerName = headerLineValues[0];
             String headerValue = headerLineValues[1];

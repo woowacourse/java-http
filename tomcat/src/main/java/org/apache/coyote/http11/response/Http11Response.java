@@ -19,14 +19,15 @@ public class Http11Response {
 
     public Http11Response(HttpStatusCode httpStatusCode, String responseBody, String fileExtensions) {
         this(httpStatusCode, responseBody,
-                Http11ResponseHeaders.from(String.join("\r\n",
-                "Content-Type: " + HttpMimeType.from(fileExtensions).asString(),
-                "Content-Length: " + responseBody.getBytes().length + " ")));
+                Http11ResponseHeaders.builder()
+                        .addHeader("Content-type", HttpMimeType.from(fileExtensions).asString())
+                        .addHeader("Content-Length", String.valueOf(responseBody.getBytes().length))
+                        .build());
     }
 
     public byte[] getBytes() {
         setFirstLine();
-        return String.join("\r\n",
+        return String.join(" \r\n",
                 firstLine,
                 headers.asString(),
                 responseBody).getBytes();
@@ -36,7 +37,7 @@ public class Http11Response {
         firstLine = String.join(" ",
                 protocol,
                 String.valueOf(statusCode.getValue()),
-                statusCode.getName()) + " ";
+                statusCode.getName());
     }
 
     public void addHeader(String key, String value) {

@@ -91,7 +91,10 @@ public class Http11Processor implements Runnable, Processor {
         User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        return new Http11Response(HttpStatusCode.FOUND, "", Http11ResponseHeaders.from("Location: /index.html"));
+        return new Http11Response(HttpStatusCode.FOUND, "",
+                Http11ResponseHeaders.builder().
+                        addHeader("Location", "/index.html")
+                        .build());
     }
 
     private Http11Response login(Http11Request request) {

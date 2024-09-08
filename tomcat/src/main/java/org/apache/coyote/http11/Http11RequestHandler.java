@@ -43,6 +43,14 @@ public class Http11RequestHandler {
             }
         }
 
+        if (requestUri.hasQueryParameters()) {
+            Map<String, String> queryParameters = requestUri.getQueryParameters();
+            if (queryParameters.containsKey("account") && queryParameters.containsKey("password")) {
+                String account = queryParameters.get("account");
+                String password = queryParameters.get("password");
+                return processLogin(httpVersion, acceptTypes, account, password);
+            }
+        }
         return getStaticResource(requestUri.getRequestUri())
                 .map(staticResource -> getHttp11Response(staticResource, acceptTypes, StatusLine.ok(httpVersion)))
                 .orElseGet(() -> getHttp11Response(getStaticResource("/404.html").orElse("404 Not Found"), acceptTypes,
@@ -56,6 +64,11 @@ public class Http11RequestHandler {
         String account = loginData.get("account");
         String password = loginData.get("password");
 
+        return processLogin(httpVersion, acceptTypes, account, password);
+    }
+
+    private static Http11Response processLogin(HttpVersion httpVersion, List<String> acceptTypes, String account,
+                                               String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty() || !user.get().checkPassword(password)) {
             return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"), acceptTypes,

@@ -38,6 +38,14 @@ public class RequestUri {
         return new RequestUri(path, queryString, queryParameters);
     }
 
+    public boolean matches(String requestUri) {
+        return path.equals(requestUri);
+    }
+
+    public boolean hasQueryParameters() {
+        return !queryParameters.isEmpty();
+    }
+
     public String getRequestUri() {
         if (queryString.isEmpty()) {
             return path;
@@ -45,7 +53,7 @@ public class RequestUri {
         return String.join(QUERY_STRING_DELIMITER, path, queryString);
     }
 
-    public boolean matches(String requestUri) {
-        return path.equals(requestUri);
+    public Map<String, String> getQueryParameters() {
+        return queryParameters;
     }
 }

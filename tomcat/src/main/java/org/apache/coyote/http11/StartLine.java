@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+
 public class StartLine {
 
     private static final String START_LINE_DELIMITER = " ";
@@ -33,5 +35,9 @@ public class StartLine {
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return requestUri.getQueryParameters();
     }
 }

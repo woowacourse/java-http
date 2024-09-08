@@ -5,7 +5,8 @@ import java.util.Arrays;
 enum ContentType {
     HTML("text/html"),
     CSS("text/css"),
-    JS("text/js");
+    JS("text/js"),
+    SVG("image/svg+xml");
 
     private final String rawContentType;
 

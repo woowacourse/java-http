@@ -14,7 +14,6 @@ public class RequestMapping {
     public RequestMapping() {
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
-        controllers.put("page", new PageController());
     }
 
     public Controller getController(String path) {

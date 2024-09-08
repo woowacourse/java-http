@@ -14,30 +14,15 @@ public class Http11RequestBody {
     }
 
     public static Http11RequestBody of(BufferedReader bufferedReader, int contentLength) throws IOException {
-        StringBuilder bodyBuffer = readRequestBody(bufferedReader, contentLength);
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
 
-        String encodedBody = bodyBuffer.toString();
+        String encodedBody = new String(buffer);
         String decodedBody = URLDecoder.decode(encodedBody, StandardCharsets.UTF_8);
 
         return new Http11RequestBody(decodedBody);
     }
-
-    private static StringBuilder readRequestBody(BufferedReader bufferedReader, int contentLength) throws IOException {
-        StringBuilder bodyBuffer = new StringBuilder();
-        char[] buffer = new char[contentLength];
-        int totalCharsRead = 0;
-
-        while (totalCharsRead < contentLength) {
-            int charsRead = bufferedReader.read(buffer, 0, Math.min(buffer.length, contentLength - totalCharsRead));
-            if (charsRead == -1) {
-                break;
-            }
-            bodyBuffer.append(buffer, 0, charsRead);
-            totalCharsRead += charsRead;
-        }
-        return bodyBuffer;
-    }
-
+    
     public boolean hasBody() {
         return !body.isBlank();
     }

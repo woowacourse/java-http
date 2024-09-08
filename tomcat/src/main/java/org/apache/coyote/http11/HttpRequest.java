@@ -23,26 +23,43 @@ public record HttpRequest(
     public static HttpRequest parse(List<String> lines) {
         String[] startLineParts = lines.getFirst().split(" ");
         String method = startLineParts[0];
+
         String path = "";
         Map<String, String> parameters = Map.of();
-        Map<String, String> headers = extractHeaders(lines);
-        Map<String, String> cookies = extractCookies(headers.get("Cookie"));
-        String protocolVersion = startLineParts[2];
-        String body = null;
-
         Pattern pattern = Pattern.compile("([^?]+)(\\?(.*))?");
         Matcher matcher = pattern.matcher(startLineParts[1]);
-
         if (matcher.find()) {
             path = matcher.group(1);
             parameters = extractParameters(matcher.group(3));
         }
 
-        if (lines.size() > 1 && lines.get(lines.size() - 2).isEmpty()) {
-            body = lines.getLast();
-        }
+        String protocolVersion = startLineParts[2];
+        Map<String, String> headers = extractHeaders(lines);
+        Map<String, String> cookies = extractCookies(headers.get("Cookie"));
+
+        String body = extractBody(lines);
 
         return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
+    }
+
+    private static String extractBody(List<String> lines) {
+        if (lines.size() > 1 && lines.get(lines.size() - 2).isEmpty()) {
+            return lines.getLast();
+        }
+        return null;
+    }
+
+    private static Map<String, String> extractHeaders(List<String> lines) {
+        Map<String, String> headers = new HashMap<>();
+
+        for (int i = 1; i < lines.size() - 2; i++) {
+            String[] lineParts = lines.get(i).trim().split(": ");
+            if (lineParts.length >= 2) {
+                headers.put(lineParts[0], lineParts[1]);
+            }
+        }
+
+        return headers;
     }
 
     private static Map<String, String> extractCookies(String cookieMessage) {
@@ -64,19 +81,6 @@ public record HttpRequest(
         }
 
         return cookies;
-    }
-
-    private static Map<String, String> extractHeaders(List<String> lines) {
-        Map<String, String> headers = new HashMap<>();
-
-        for (int i = 1; i < lines.size() - 2; i++) {
-            String[] lineParts = lines.get(i).trim().split(": ");
-            if (lineParts.length >= 2) {
-                headers.put(lineParts[0], lineParts[1]);
-            }
-        }
-
-        return headers;
     }
 
     public static Map<String, String> extractParameters(String query) {

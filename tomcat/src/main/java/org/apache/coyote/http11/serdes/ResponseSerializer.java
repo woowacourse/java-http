@@ -7,7 +7,7 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class ResponseSerializer implements Serializer<HttpResponse> {
-    private static String PROTOCOL_AND_VERSION = HttpResponse.PROTOCOL + "/" + HttpResponse.version + " ";
+    private static String PROTOCOL_AND_VERSION = "HTTP/" + HttpResponse.DEFAULT_VERSION.getVersion() + " ";
     private static String RESPONSE_DELIMITER = "\r\n";
     private static String BLANK = "";
 

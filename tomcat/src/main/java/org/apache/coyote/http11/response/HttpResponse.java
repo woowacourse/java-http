@@ -6,8 +6,8 @@ import org.apache.coyote.http11.serdes.ResponseSerializer;
 import org.apache.coyote.http11.serdes.Serializer;
 
 public class HttpResponse {
-    public static final String PROTOCOL = "HTTP";
-    public static final double version = 1.1;
+
+    public static final HttpVersion DEFAULT_VERSION = new HttpVersion(1.1);
 
     private final Serializer<HttpResponse> serialzer;
     private final HttpHeaders headers;

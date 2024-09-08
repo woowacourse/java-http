@@ -16,6 +16,10 @@ public class HttpResponseHeaders {
         return Optional.ofNullable(headers.get(key));
     }
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {

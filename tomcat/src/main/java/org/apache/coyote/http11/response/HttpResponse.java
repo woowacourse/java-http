@@ -40,8 +40,8 @@ public class HttpResponse {
         return headers.getHeader(key);
     }
 
-    public HttpResponseHeaders getHeaders() {
-        return headers;
+    public Map<String, String> getHeaders() {
+        return headers.getHeaders();
     }
 
     public String getBody() {
@@ -75,7 +75,7 @@ public class HttpResponse {
                 .toString();
     }
 
-    private static class HttpResponseBuilder {
+    public static class HttpResponseBuilder {
         private HttpStatus status;
         private Map<String, String> headers;
         private String body;
@@ -99,12 +99,12 @@ public class HttpResponse {
             return this;
         }
 
-        public HttpResponseBuilder setContentType(String type) {
+        public HttpResponseBuilder contentType(String type) {
             headers.put("Content-Type", type);
             return this;
         }
 
-        public HttpResponseBuilder setBody(String body) {
+        public HttpResponseBuilder body(String body) {
             this.body = body;
             return this;
         }

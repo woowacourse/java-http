@@ -74,7 +74,7 @@ public class HttpRequest {
                 .toString();
     }
 
-    private static class HttpRequestBuilder {
+    public static class HttpRequestBuilder {
 
         private HttpMethod method;
         private HttpUrl path;

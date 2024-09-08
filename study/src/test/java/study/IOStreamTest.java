@@ -4,10 +4,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * 자바는 스트림(Stream)으로부터 I/O를 사용한다.
@@ -39,7 +47,7 @@ class IOStreamTest {
          * OutputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 쓰기 위해 write(int b) 메서드를 사용한다.
          * 예를 들어, FilterOutputStream은 파일로 데이터를 쓸 때,
          * 또는 DataOutputStream은 자바의 primitive type data를 다른 매체로 데이터를 쓸 때 사용한다.
-         * 
+         *
          * write 메서드는 데이터를 바이트로 출력하기 때문에 비효율적이다.
          * <code>write(byte[] data)</code>와 <code>write(byte b[], int off, int len)</code> 메서드는
          * 1바이트 이상을 한 번에 전송 할 수 있어 훨씬 효율적이다.
@@ -63,7 +71,7 @@ class IOStreamTest {
         /**
          * 효율적인 전송을 위해 스트림에서 버퍼링을 사용 할 수 있다.
          * BufferedOutputStream 필터를 연결하면 버퍼링이 가능하다.
-         * 
+         *
          * 버퍼링을 사용하면 OutputStream을 사용할 때 flush를 사용하자.
          * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
@@ -108,7 +116,7 @@ class IOStreamTest {
      * InputStream은 다른 매체로부터 바이트로 데이터를 읽을 때 사용한다.
      * InputStream의 read() 메서드는 기반 메서드이다.
      * <code>public abstract int read() throws IOException;</code>
-     * 
+     *
      * InputStream의 서브 클래스(subclass)는 특정 매체에 데이터를 읽기 위해 read() 메서드를 사용한다.
      */
     @Nested

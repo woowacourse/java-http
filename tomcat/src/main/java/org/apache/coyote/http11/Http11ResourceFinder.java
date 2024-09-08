@@ -34,7 +34,7 @@ public class Http11ResourceFinder {
         }
 
         if (replaceFirstSlash.isEmpty()) {
-            return toRelativePath(INDEX_HTML);
+            return "static" + File.separator + INDEX_HTML;
         }
 
         if (!replaceFirstSlash.contains(".")) {

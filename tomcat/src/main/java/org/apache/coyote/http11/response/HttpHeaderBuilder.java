@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpHeaders;
 
 public class HttpHeaderBuilder {
@@ -30,8 +30,8 @@ public class HttpHeaderBuilder {
         return this;
     }
 
-    public HttpHeaderBuilder setCookie(String setCookie) {
-        this.setCookie = Optional.of(setCookie);
+    public HttpHeaderBuilder setCookie(Cookie cookie) {
+        this.setCookie = Optional.of(cookie.serialize());
         return this;
     }
 

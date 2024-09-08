@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Optional;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatusCode;
 
@@ -30,6 +31,11 @@ public class ResponseBuilder {
             String parsedType = "text/" + extension[1] + ";" + CHARACTER_ENCODE_POLICY;
             headerBuilder.contentType(parsedType);
         }
+        return this;
+    }
+
+    public ResponseBuilder setCookie(Cookie cookie){
+        headerBuilder.setCookie(cookie);
         return this;
     }
 

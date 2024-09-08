@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class SessionGenerator {
 
-    public Session generate() {
+    public static Session generate() {
         return new Session(UUID.randomUUID().toString());
     }
 }

@@ -5,6 +5,12 @@ import java.util.Map;
 import org.apache.coyote.http11.request.RequestBody;
 
 public class UserInfo {
+    private static final String USER_REGISTRATION_INFO_DELIMITER = "&";
+    private static final String INFO_ELEMENT_DELIMITER = "=";
+    private static final int ELEMENT_KEY_INDEX = 0;
+    private static final int ELEMENT_VALUE_INDEX = 1;
+
+
     private final String account;
     private final String password;
     private final String email;
@@ -18,11 +24,11 @@ public class UserInfo {
     public static UserInfo read(RequestBody requestBody) {
         Map<String, String> registerInfo = new HashMap<>();
         String body = requestBody.getContent();
-        String[] elements = body.split("&");
+        String[] elements = body.split(USER_REGISTRATION_INFO_DELIMITER);
 
         for (String element : elements) {
-            String[] parsedElement = element.split("=");
-            registerInfo.put(parsedElement[0], parsedElement[1]);
+            String[] parsedElement = element.split(INFO_ELEMENT_DELIMITER);
+            registerInfo.put(parsedElement[ELEMENT_KEY_INDEX], parsedElement[ELEMENT_VALUE_INDEX]);
         }
 
         return new UserInfo(

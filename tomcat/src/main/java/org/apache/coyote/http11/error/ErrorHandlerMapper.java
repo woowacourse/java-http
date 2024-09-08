@@ -28,7 +28,6 @@ public enum ErrorHandlerMapper {
                 .filter(handler -> handler.exceptionClass == exception)
                 .findAny()
                 .orElseThrow(()-> new NoSuchElementException("에러 핸들러가 존재하지 않습니다."))
-                .errorHandler
-                .handleError();
+                .errorHandler.handle();
     }
 }

@@ -26,7 +26,11 @@ public class PostLoginHandler extends AbstractHandler {
 
     @Override
     protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
-        QueryParameter queryParameter = httpRequest.body();
+        if (httpRequest.hasNotApplicationXW3FormUrlEncodedBody()) {
+            throw new RuntimeException();
+        }
+
+        QueryParameter queryParameter = new QueryParameter(httpRequest.body());
         Header header = Header.empty();
         String redirectionPath = "401.html";
 

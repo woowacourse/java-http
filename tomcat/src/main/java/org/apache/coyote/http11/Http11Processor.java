@@ -56,9 +56,9 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestLine = bufferedReader.readLine();
         Header header = createHeader(bufferedReader);
-        QueryParameter queryParameter = createQueryParameter(bufferedReader, header);
+        char[] requestBody = createRequestBody(bufferedReader, header);
 
-        return new HttpRequest(requestLine, header, queryParameter);
+        return new HttpRequest(requestLine, header, requestBody);
     }
 
     private Header createHeader(BufferedReader bufferedReader) throws IOException {
@@ -72,13 +72,12 @@ public class Http11Processor implements Runnable, Processor {
         return new Header(headerTokens);
     }
 
-    private QueryParameter createQueryParameter(BufferedReader bufferedReader, Header header) throws IOException {
+    private char[] createRequestBody(BufferedReader bufferedReader, Header header) throws IOException {
         int length = Integer.parseInt(header.get(HttpHeaderKey.CONTENT_LENGTH.getName()).orElse("0"));
-        char[] body = new char[length];
-        bufferedReader.read(body);
-        String bodyString = new String(body);
+        char[] requestBody = new char[length];
+        bufferedReader.read(requestBody);
 
-        return new QueryParameter(bodyString);
+        return requestBody;
     }
 
     private HttpResponse respondResource(HttpRequest httpRequest) throws IOException {

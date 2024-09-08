@@ -23,13 +23,21 @@ public class PostRegisterHandler extends AbstractHandler {
 
     @Override
     protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
-        QueryParameter body = httpRequest.body();
+        if (httpRequest.hasNotApplicationXW3FormUrlEncodedBody()) {
+            throw new RuntimeException();
+        }
+
+        registerNewUser(httpRequest);
+
+        return new ForwardResult("index.html", HttpStatus.OK);
+    }
+
+    private void registerNewUser(HttpRequest httpRequest) {
+        QueryParameter body = new QueryParameter(httpRequest.body());
         String account = body.get("account").orElseThrow();
         String password = body.get("password").orElseThrow();
         String email = body.get("email").orElseThrow();
 
         InMemoryUserRepository.save(new User(account, password, email));
-
-        return new ForwardResult("index.html", HttpStatus.OK);
     }
 }

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+
 public enum ContentType {
 
     HTML("text/html", ".html"),
@@ -7,6 +10,7 @@ public enum ContentType {
     CSS("text/css", ".css"),
     SVG("image/svg+xml", ".svg"),
     PLAIN("text/plain", ""),
+    APPLICATION_X_WWW_FORM_URL_ENCODED("application/x-www-form-urlencoded", ""),
     ;
 
     private final String name;
@@ -17,6 +21,13 @@ public enum ContentType {
         this.extension = extension;
     }
 
+    public static ContentType from(String contentTypeName) {
+        return Arrays.stream(values())
+                .filter(it -> it.name.equals(contentTypeName))
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new);
+    }
+
     public static ContentType determineContentType(String resourcePath) {
         for (ContentType contentType : ContentType.values()) {
             if (resourcePath.endsWith(contentType.getExtension())) {
@@ -25,6 +36,10 @@ public enum ContentType {
         }
 
         return ContentType.PLAIN;
+    }
+
+    public boolean isApplicationXW3FormUrlEncoded() {
+        return this.equals(APPLICATION_X_WWW_FORM_URL_ENCODED);
     }
 
     public String getName() {

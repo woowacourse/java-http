@@ -2,7 +2,6 @@ package com.techcourse.handler;
 
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.QueryParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +30,6 @@ class HelloHandlerTest {
     }
 
     private HttpRequest createHttpRequest(String startLine) {
-        return new HttpRequest(startLine, Header.empty(), new QueryParameter(""));
+        return new HttpRequest(startLine, Header.empty(), "".toCharArray());
     }
 }

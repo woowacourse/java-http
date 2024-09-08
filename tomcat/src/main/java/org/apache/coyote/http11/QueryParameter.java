@@ -11,6 +11,10 @@ public class QueryParameter {
 
     private final Map<String, String> queryParameter = new HashMap<>();
 
+    public QueryParameter(char[] body) {
+        this(new String(body));
+    }
+
     public QueryParameter(String queryParameter) {
         if (queryParameter == null) {
             queryParameter = "";

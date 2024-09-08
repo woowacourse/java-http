@@ -62,7 +62,7 @@ class Http11ProcessorTest {
     void style() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /css/style.css HTTP/1.1 ",
+                "GET /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -75,9 +75,14 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n";
+                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
 
-        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).isEqualTo(expected);
     }
 }

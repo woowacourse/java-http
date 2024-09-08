@@ -44,9 +44,6 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            var responseBody = "Hello world!";
-            HttpStatusCode statusCode;
-
             Http11Request request = Http11Request.from(inputStream);
 
             User user;

@@ -45,8 +45,8 @@ public class FileReader {
             return ".html";
         }
         String filePath = findFile(path).toString();
-        String[] splitFilePath = filePath.split("\\.");
-        return "." + splitFilePath[splitFilePath.length - 1];
+        int fileExtensionIndex = filePath.lastIndexOf(".");
+        return filePath.substring(fileExtensionIndex);
     }
 
     public static FileReader getInstance() {

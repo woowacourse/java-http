@@ -26,7 +26,7 @@ class FileTest {
      */
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
-        final String fileName = "a.txt";
+        final String fileName = "nextstep.txt";
         URL resource = getClass().getClassLoader().getResource(fileName);
 
         String actual = resource.getFile();

@@ -4,6 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 
 public enum HttpMethod {
     GET,
+    POST,
     ;
 
     public static HttpMethod from(String method) {

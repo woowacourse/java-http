@@ -14,21 +14,21 @@ public class HttpRequestCreator {
     }
 
     public static HttpRequest createHttpRequest(BufferedReader reader) throws IOException {
-        RequestStartLine startLine = createStartLine(reader);
-        return new HttpRequest(startLine);
+        HttpRequestStartLine startLine = createStartLine(reader);
+        return new HttpRequest(startLine, null, null); // TODO 기능 추가
     }
 
-    private static RequestStartLine createStartLine(BufferedReader reader) throws IOException {
+    private static HttpRequestStartLine createStartLine(BufferedReader reader) throws IOException {
         String startLine = readLine(reader);
         return createStartLine(startLine);
     }
 
-    private static RequestStartLine createStartLine(String startline) {
+    private static HttpRequestStartLine createStartLine(String startline) {
         String[] startLineComponents = startline.split(" ");
         if (startLineComponents.length != 3) {
             throw new UncheckedServletException("요청 시작 라인의 형식이 일치하지 않습니다.");
         }
-        return new RequestStartLine(startLineComponents[0], startLineComponents[1], startLineComponents[2]);
+        return new HttpRequestStartLine(startLineComponents[0], startLineComponents[1], startLineComponents[2]);
     }
 
     private static String readLine(BufferedReader reader) throws IOException {

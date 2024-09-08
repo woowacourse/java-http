@@ -5,16 +5,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-public class RequestStartLine {
+public class HttpRequestStartLine {
     private static final String AVAILABLE_VERSION = "HTTP/1.1";
 
     private final HttpMethod method;
     private final HttpUrl url;
 
-    public RequestStartLine(String method, String url, String protocolVersion) {
+    public HttpRequestStartLine(String method, String url, String protocolVersion) {
         validateVersion(protocolVersion);
         this.method = HttpMethod.from(method);
         this.url = new HttpUrl(url);
+    }
+
+    public HttpRequestStartLine(HttpMethod method, HttpUrl url, String protocolVersion) {
+        validateVersion(protocolVersion);
+        this.method = method;
+        this.url = url;
     }
 
     private void validateVersion(String version) {
@@ -44,7 +50,7 @@ public class RequestStartLine {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        RequestStartLine that = (RequestStartLine) object;
+        HttpRequestStartLine that = (HttpRequestStartLine) object;
         return method == that.method && Objects.equals(url, that.url);
     }
 
@@ -55,7 +61,7 @@ public class RequestStartLine {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", RequestStartLine.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", HttpRequestStartLine.class.getSimpleName() + "[", "]")
                 .add("method=" + method)
                 .add("path=" + url)
                 .toString();

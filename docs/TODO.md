@@ -1,5 +1,7 @@
 # 1단계 - HTTP 서버 구현하기
 
+- 아래 순서는 구현 순서대로 작성되었습니다.
+
 ### 1. GET /index.html 응답하기
 
 - HTTP Start Line 읽기
@@ -26,3 +28,25 @@
 
 - `/login?account=gugu&password=password`으로 접속하면 로그인 페이지(login.html)를 보여주기
   - 유저 정보('account', 'password')가 레포지토리 정보와 일치할 경우, 로그를 남딘다.
+
+# 3단계 - 리팩터링 (1,2 단계)
+
+### 1. HttpRequest 클래스 구현하기
+
+- HttpRequest에 구성 요소 추가하기
+  - Header 추가하기
+  - Body 추가하기
+- HttpRequest 사용의 편의성을 위해, 빌더 추가하기
+
+### 2. HttpResponse 클래스 구현하기
+
+- HttpResponse 구현하기
+  - HttpMethod 추가하기
+  - Header 추가하기
+  - Body 추가하기
+- HttpResponse 사용의 편의성을 위해, 빌더 추가하기
+
+### 기존 구현 변경하기
+
+- 
+

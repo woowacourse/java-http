@@ -18,8 +18,8 @@ class HttpRequestCreatorTest {
                 "",
                 "");;
         BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
-        RequestStartLine startLine = new RequestStartLine("GET", "/", "HTTP/1.1");
-        HttpRequest expected = new HttpRequest(startLine);
+        HttpRequestStartLine startLine = new HttpRequestStartLine("GET", "/", "HTTP/1.1");
+        HttpRequest expected = new HttpRequest(startLine, null, null);
 
         HttpRequest actual = HttpRequestCreator.createHttpRequest(reader);
 

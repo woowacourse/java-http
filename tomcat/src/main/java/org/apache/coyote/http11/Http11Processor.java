@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionGenerator;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.Processor;
@@ -38,6 +39,7 @@ public class Http11Processor implements Runnable, Processor {
             "/index"
     );
     private static final SessionManager SESSION_MANAGER = new SessionManager();
+    private static final RequestMapping REQUEST_MAPPING = RequestMapping.getInstance();
 
     private final Socket connection;
     private final SessionGenerator sessionGenerator;
@@ -62,6 +64,9 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
             HttpRequest request = httpRequestReader.read();
             HttpResponse response = getResponse(request);
+            try {
+                REQUEST_MAPPING.getController(request).service(request, response);
+            } catch (Exception e) {}
             String formattedResponse = response.toResponse();
 
             outputStream.write(formattedResponse.getBytes());

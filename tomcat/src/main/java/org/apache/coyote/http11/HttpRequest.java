@@ -16,11 +16,11 @@ public class HttpRequest {
 
     public HttpRequest(InputStream inputStream) throws IOException {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader br = new BufferedReader(inputStreamReader);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        requestLine = br.readLine().split(" ");
+        requestLine = bufferedReader.readLine().split(" ");
 
-        String headerLine = br.readLine();
+        String headerLine = bufferedReader.readLine();
 
         while (!("".equals(headerLine))) {
             String[] headerLineValues = parseWithTrim(headerLine, ":");
@@ -29,13 +29,13 @@ public class HttpRequest {
 
             requestHeaders.put(headerName, headerValue);
 
-            headerLine = br.readLine();
+            headerLine = bufferedReader.readLine();
         }
 
         if (requestLine[0].equals("POST")) {
             int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
-            br.read(buffer, 0, contentLength);
+            bufferedReader.read(buffer, 0, contentLength);
             requestBody = new String(buffer);
         }
     }

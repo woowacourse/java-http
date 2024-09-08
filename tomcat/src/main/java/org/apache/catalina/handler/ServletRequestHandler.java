@@ -14,7 +14,13 @@ public class ServletRequestHandler {
     private static final String TEXT_CONTENT_TYPE_PREFIX = "text/";
     private static final String HTML_TYPE = ".html";
 
-    public static Http11Response handle(Http11Request request) {
+    private final ViewResolver viewResolver;
+
+    public ServletRequestHandler(ViewResolver viewResolver) {
+        this.viewResolver = viewResolver;
+    }
+
+    public Http11Response handle(Http11Request request) {
         final UserService userService = new UserService();
         final String requestURI = request.getRequestURI();
         final Http11Method httpMethod = request.getHttpMethod();
@@ -25,12 +31,19 @@ public class ServletRequestHandler {
                 userService.login(queryString.get("account"), queryString.get("password"));
                 String type = parseTextContentType(HTML_TYPE);
                 String path = parseStaticPath("/login.html");
-                return new Http11Response(SUCCESS_STATUS_CODE, type, path);
+                String body = viewResolver.resolve(path);
+                return new Http11Response(SUCCESS_STATUS_CODE, type, body);
+            }
+            if (requestURI.equals("/")) {
+                String type = parseTextContentType(HTML_TYPE);
+                String body = "Hello world!";
+                return new Http11Response(SUCCESS_STATUS_CODE, type, body);
             }
             if (requestURI.contains(".")) {
                 String type = parseTextContentType(requestURI);
                 String path = parseStaticPath(requestURI);
-                return new Http11Response(SUCCESS_STATUS_CODE, type, path);
+                String body = viewResolver.resolve(path);
+                return new Http11Response(SUCCESS_STATUS_CODE, type, body);
             }
             String type = parseTextContentType(HTML_TYPE);
             return new Http11Response(SUCCESS_STATUS_CODE, type, requestURI);
@@ -42,7 +55,7 @@ public class ServletRequestHandler {
         throw new IllegalArgumentException("지원하지 않는 기능입니다.");
     }
 
-    private static Map<String, String> parseQueryString(String requestURI) {
+    private Map<String, String> parseQueryString(String requestURI) {
         Map<String, String> queries = new HashMap<>();
         if (requestURI.contains("?")) {
             int index = requestURI.indexOf("?");
@@ -55,11 +68,11 @@ public class ServletRequestHandler {
         return queries;
     }
 
-    private static String parseTextContentType(String filePath) {
+    private String parseTextContentType(String filePath) {
         return TEXT_CONTENT_TYPE_PREFIX + filePath.split("\\.")[1];
     }
 
-    private static String parseStaticPath(String filePath) {
+    private String parseStaticPath(String filePath) {
         return STATIC_PATH_PREFIX + filePath;
     }
 }

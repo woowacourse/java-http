@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.catalina.handler.ServletRequestHandler;
+import org.apache.catalina.handler.ViewResolver;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ServletRequestHandler requestHandler = new ServletRequestHandler(new ViewResolver());
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
@@ -32,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             final Http11Request request = Http11Parser.readHttpRequest(bufferedReader);
-            final Http11Response response = ServletRequestHandler.handle(request);
+            final Http11Response response = requestHandler.handle(request);
             final String serializedResponse = response.serializeResponse();
             outputStream.write(serializedResponse.getBytes());
             outputStream.flush();

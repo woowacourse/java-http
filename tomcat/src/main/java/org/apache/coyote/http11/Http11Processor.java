@@ -3,7 +3,9 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.catalina.HandlerAdapter;
 import org.apache.catalina.request.HttpRequest;
-import org.apache.catalina.request.RequestCreator;
+import org.apache.catalina.request.RequestBody;
+import org.apache.catalina.request.RequestHeader;
+import org.apache.catalina.request.StartLine;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +24,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestCreator requestCreator;
     private final HandlerAdapter handlerAdapter;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestCreator = new RequestCreator();
         this.handlerAdapter = new HandlerAdapter();
     }
 
@@ -42,38 +42,45 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> header = readHeader(in);
-            String payload = readPayload(in);
 
-            HttpRequest httpRequest = requestCreator.create(header, payload);
+            StartLine startLine = readStartLine(in);
+            RequestHeader requestHeader = readHeader(in);
+            RequestBody requestBody = readBody(in, requestHeader);
+            HttpRequest httpRequest = new HttpRequest(startLine, requestHeader, requestBody);
+
             String response = handlerAdapter.handle(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+
+            in.close();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private List<String> readHeader(BufferedReader in) throws IOException {
-        String line;
-        List<String> header = new ArrayList<>();
-        while ((line = in.readLine()) != null) {
-            if (line.isEmpty()) {
-                break;
-            }
-            header.add(line);
-        }
-        return header;
+    private StartLine readStartLine(BufferedReader in) throws IOException {
+        return StartLine.parse(in.readLine());
     }
 
-    private String readPayload(BufferedReader in) throws IOException {
-        StringBuilder payloadBuilder = new StringBuilder();
-        char c;
-        while (in.ready()) {
-            c = (char) in.read();
-            payloadBuilder.append(c);
+    private RequestHeader readHeader(BufferedReader in) throws IOException {
+        String line;
+        List<String> headers = new ArrayList<>();
+        while ((line = in.readLine()) != null && !line.isBlank()) {
+            headers.add(line);
         }
-        return URLDecoder.decode(payloadBuilder.toString(), StandardCharsets.UTF_8);
+        return RequestHeader.parse(headers);
+    }
+
+    private RequestBody readBody(BufferedReader in, RequestHeader requestHeader) throws IOException {
+        if (requestHeader.notContainsContentLength()) {
+            return RequestBody.empty();
+        }
+        int contentLength = requestHeader.getContentLength();
+        char[] buffer = new char[contentLength];
+        in.read(buffer, 0, contentLength);
+        String body = URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
+
+        return RequestBody.parse(body);
     }
 }

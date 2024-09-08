@@ -1,6 +1,7 @@
 package org.apache.catalina;
 
 import com.techcourse.controller.Controller;
+import org.apache.catalina.request.HttpMethod;
 import org.apache.catalina.request.HttpRequest;
 import org.apache.catalina.response.ResponseCreator;
 
@@ -16,9 +17,9 @@ public class HandlerAdapter {
     }
 
     public String handle(HttpRequest httpRequest) throws IOException {
-        String path = httpRequest.getPath();
-        String httpMethod = httpRequest.getRequestMethod();
-        if ("GET".equals(httpMethod)) {
+        String path = httpRequest.getUrl();
+        HttpMethod httpMethod = httpRequest.getHttpMethod();
+        if (httpMethod == HttpMethod.GET) {
             if (path.equals("/")) {
                 return controller.getHelloWorldPage(httpRequest);
             }
@@ -29,7 +30,7 @@ public class HandlerAdapter {
                 return controller.getLoginPage(httpRequest);
             }
         }
-        if ("POST".equals(httpMethod)) {
+        if (httpMethod == HttpMethod.POST) {
             if (path.equals("/login")) {
                 return controller.login(httpRequest);
             }

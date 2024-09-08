@@ -21,11 +21,11 @@ public class Controller {
     }
 
     public String getHelloWorldPage(HttpRequest httpRequest) throws IOException {
-        return responseCreator.create(200, httpRequest.getPath());
+        return responseCreator.create(200, httpRequest.getUrl());
     }
 
     public String getDefaultPage(HttpRequest httpRequest) throws IOException {
-        return responseCreator.create(200, httpRequest.getPath());
+        return responseCreator.create(200, httpRequest.getUrl());
     }
 
     public String getLoginPage(HttpRequest httpRequest) throws IOException {
@@ -34,11 +34,11 @@ public class Controller {
         if (session != null && session.getAttribute("user") != null) {
             return responseCreator.create(200, "/index.html"); // todo 리다이렉트
         }
-        return responseCreator.create(200, httpRequest.getPath());
+        return responseCreator.create(200, httpRequest.getUrl());
     }
 
     public String login(HttpRequest httpRequest) throws IOException {
-        Map<String, String> params = httpRequest.getPayload();
+        Map<String, String> params = httpRequest.getBody();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
         if (optionalUser.isEmpty()) {
             return responseCreator.create(401, "/401.html");
@@ -55,7 +55,7 @@ public class Controller {
     }
 
     public String register(HttpRequest httpRequest) throws IOException {
-        Map<String, String> payload = httpRequest.getPayload();
+        Map<String, String> payload = httpRequest.getBody();
         User user = new User(payload.get("account"), payload.get("password"), payload.get("email"));
         InMemoryUserRepository.save(user);
 

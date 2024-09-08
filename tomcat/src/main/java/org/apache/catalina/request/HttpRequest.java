@@ -7,32 +7,30 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final String method;
-    private final String path;
-    private final Map<String, String> headers;
-    private final Map<String, String> payload;
+    private final StartLine startLine;
+    private final RequestHeader requestHeader;
+    private final RequestBody requestBody;
 
-    public HttpRequest(String method, String path, Map<String, String> headers, Map<String, String> payload) {
-        this.method = method;
-        this.path = path;
-        this.headers = headers;
-        this.payload = payload;
+    public HttpRequest(StartLine startLine, RequestHeader requestHeader, RequestBody requestBody) {
+        this.startLine = startLine;
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
     }
 
-    public String getRequestMethod() {
-        return method;
+    public HttpMethod getHttpMethod() {
+        return startLine.getHttpMethod();
     }
 
-    public String getPath() {
-        return path;
+    public String getUrl() {
+        return startLine.getUrl();
     }
 
-    public Map<String, String> getPayload() {
-        return payload;
+    public Map<String, String> getBody() {
+        return requestBody.getBody();
     }
 
     public String getSessionId() {
-        String cookie = headers.get("Cookie");
+        String cookie = requestHeader.getCookie();
         Cookie cookies = new Cookie(Mapper.toMap(cookie));
         return cookies.getValue("JSESSIONID");
     }

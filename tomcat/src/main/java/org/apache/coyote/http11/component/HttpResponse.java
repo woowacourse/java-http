@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.component;
 
-public class HttpResponse implements HttpInteract {
+public class HttpResponse {
+    
+    private static final String LINE_DELIMITER = "\r\n";
 
     private final ResponseLine responseLine;
     private final ResponseHeader responseHeader;

@@ -1,7 +1,10 @@
 package org.apache.coyote.http11.component;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public enum Method {
     OPTION("OPTION"),
@@ -13,20 +16,8 @@ public enum Method {
     TRACE("TRACE"),
     CONNECT("CONNECT");
 
-    private static final Map<String, Method> converter;
-
-    static {
-        converter = Map.of(
-                OPTION.value, OPTION,
-                GET.value, GET,
-                HEAD.value, HEAD,
-                POST.value, POST,
-                PUT.value, PUT,
-                DELETE.value, DELETE,
-                TRACE.value, TRACE,
-                CONNECT.value, CONNECT
-        );
-    }
+    private static final Map<String, Method> converter = Arrays.stream(Method.values())
+            .collect(Collectors.toMap(Method::getValue, Function.identity()));
 
     private final String value;
 

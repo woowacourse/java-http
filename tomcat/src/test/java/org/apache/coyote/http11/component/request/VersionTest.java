@@ -17,8 +17,7 @@ class VersionTest {
         final var text = "HTTP/1.1";
 
         // when & then
-        assertThatCode(() -> new
-                Version(text))
+        assertThatCode(() -> new Version(text))
                 .doesNotThrowAnyException();
     }
 

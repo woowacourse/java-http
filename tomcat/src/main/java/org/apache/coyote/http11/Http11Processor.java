@@ -52,9 +52,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = new HttpRequest(plaintext);
 
-            if (httpRequest.getUri().toString().equals("/")) {
+            if (httpRequest.isSameUri("/")) {
                 renderWelcome(outputStream);
-            } else if (httpRequest.getUri().getPath().equals("/login")) {
+            } else if (httpRequest.isSameUri("/login")) {
                 renderLogin(httpRequest.getUri().toString(), outputStream);
             } else {
                 renderOther(httpRequest.getUri().toString(), outputStream);

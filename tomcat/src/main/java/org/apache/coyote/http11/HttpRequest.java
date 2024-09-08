@@ -107,12 +107,7 @@ public record HttpRequest(
             return null;
         }
 
-        HttpSession session = sessionManager.findSession(sessionId);
-        if (session == null || session.getAttribute("user") == null) {
-            return null;
-        }
-
-        return session;
+        return sessionManager.findSession(sessionId);
     }
 
     public HttpRequest updatePath(String path) {

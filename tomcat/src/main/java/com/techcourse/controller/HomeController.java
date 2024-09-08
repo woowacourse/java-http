@@ -9,7 +9,7 @@ public class HomeController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
         responseBuilder.status(Status.OK)
-                .addHeader("Content-Type", "text/html;charset=utf-8")
+                .contentType("text/html")
                 .body("Hello world!".getBytes());
     }
 }

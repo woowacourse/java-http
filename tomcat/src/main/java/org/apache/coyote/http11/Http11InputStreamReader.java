@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class Http11InputStreamReader {
 
+    private static final String CRLF = "\r\n";
     private static final Logger log = LoggerFactory.getLogger(Http11InputStreamReader.class);
 
     public static List<String> read(InputStream inputStream) throws IOException {
@@ -30,7 +31,7 @@ public class Http11InputStreamReader {
         }
 
         StringBuilder bodyBuilder = new StringBuilder();
-        String requestHeaders = String.join("\r\n", lines);
+        String requestHeaders = String.join(CRLF, lines);
         int contentLength = getContentLength(requestHeaders);
         if (contentLength > 0) {
             char[] body = new char[contentLength];
@@ -46,7 +47,7 @@ public class Http11InputStreamReader {
     }
 
     private static int getContentLength(String headers) {
-        for (String headerLine : headers.split("\r\n")) {
+        for (String headerLine : headers.split(CRLF)) {
             if (headerLine.toLowerCase().startsWith("content-length:")) {
                 try {
                     return Integer.parseInt(headerLine.split(":")[1].trim());

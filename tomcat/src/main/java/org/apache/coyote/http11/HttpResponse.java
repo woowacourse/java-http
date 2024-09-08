@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 public record HttpResponse(String protocolVersion, int statusCode, String statusText,
                            Map<String, String> headers, Map<String, String> cookies, byte[] body) {
 
+    private static final String CRLF = "\r\n";
+
     public static Builder builder() {
         return new Builder().protocolVersion("HTTP/1.1");
     }
@@ -25,18 +27,18 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
     public byte[] toMessage() {
         StringBuilder builder = new StringBuilder();
         builder.append(protocolVersion).append(" ").append(statusCode).append(" ").append(statusText).append(" ");
-        headers.forEach((key, value) -> builder.append("\r\n").append(key).append(": ").append(value).append(" "));
+        headers.forEach((key, value) -> builder.append(CRLF).append(key).append(": ").append(value).append(" "));
 
         if (!cookies.isEmpty()) {
             String cookiesMessage = cookies.entrySet().stream()
                     .map(Entry::toString)
                     .collect(Collectors.joining("; "));
-            builder.append("\r\n").append("Set-Cookie: ").append(cookiesMessage).append(" ");
+            builder.append(CRLF).append("Set-Cookie: ").append(cookiesMessage).append(" ");
         }
 
         if (body != null && body.length > 0) {
-            builder.append("\r\n").append("Content-Length: ").append(body.length).append(" ");
-            builder.append("\r\n\r\n");
+            builder.append(CRLF).append("Content-Length: ").append(body.length).append(" ");
+            builder.append(CRLF.repeat(2));
             return mergeByteArrays(builder.toString().getBytes(), body);
         }
 

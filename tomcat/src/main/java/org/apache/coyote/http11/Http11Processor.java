@@ -12,13 +12,12 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
 
     private final Socket connection;
-    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -36,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
 //            log.debug(request.toString());
 
             HttpResponse.Builder responseBuilder = HttpResponse.builder();
-            requestMapping.getController(request)
+            REQUEST_MAPPING.getController(request)
                     .service(request, responseBuilder);
             HttpResponse response = responseBuilder.build();
 //            log.debug(response.toString());

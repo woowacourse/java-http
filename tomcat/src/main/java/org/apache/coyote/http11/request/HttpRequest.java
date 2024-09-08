@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class HttpRequest {
 
+	private static final String CONTENT_LENGTH = "Content-Length";
+
 	private final String method;
 	private final String path;
 	private final Map<String, String> headers = new HashMap<>();
@@ -25,10 +27,10 @@ public class HttpRequest {
 	}
 
 	private String parseBody(BufferedReader reader) throws IOException {
-		if(headers.get("Content-Length") == null) {
+		if(headers.get(CONTENT_LENGTH) == null) {
 			return null;
 		}
-		int contentLength = Integer.parseInt(headers.get("Content-Length"));
+		int contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
 		if(contentLength > 0) {
 			char[] body = new char[contentLength];
 			reader.read(body, 0, contentLength);

@@ -14,7 +14,7 @@ public class GreetingController {
     @GetMapping("/")
     public ResponseEntity<String> index() {
         return ResponseEntity.ok()
-            .header("Content-Encoding", "gzip") 
+            .header("Content-Encoding", "gzip")
             .body("index");
     }
 

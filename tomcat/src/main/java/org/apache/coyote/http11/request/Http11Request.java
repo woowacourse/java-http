@@ -98,6 +98,17 @@ public class Http11Request {
         return header;
     }
 
+    @Override
+    public String toString() {
+        return "Http11Request{" +
+                "method=" + method +
+                ", header=" + header +
+                ", uri='" + uri + '\'' +
+                ", queryParameters=" + queryParameters +
+                ", requestBody=" + requestBody +
+                '}';
+    }
+
     private static class Http11RequestParser {
 
         static String[] parseFirstLine(String firstLine) {
@@ -118,16 +129,5 @@ public class Http11Request {
             }
             return queryMap;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Http11Request{" +
-                "method=" + method +
-                ", header=" + header +
-                ", uri='" + uri + '\'' +
-                ", queryParameters=" + queryParameters +
-                ", requestBody=" + requestBody +
-                '}';
     }
 }

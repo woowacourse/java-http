@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = httpRequestParser.parseRequest(bufferedReader);
             HttpResponseBody httpResponseBody = new HttpResponseBody(
                     fileReader.readFile(httpRequest.getHttpRequestPath()));
-            if (httpRequest.getHttpRequestPath().equals("/login")) {
+            if (httpRequest.getHttpRequestPath().contains("/login?")) {
                 login(httpRequest);
             }
 
@@ -73,7 +73,8 @@ public class Http11Processor implements Runnable, Processor {
     private void login(HttpRequest httpRequest) {
         String account = httpRequest.getQueryParameter("account");
         String password = httpRequest.getQueryParameter("password");
-        User foundUser = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+        User foundUser = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException(account + "는 존재하지 않는 계정입니다."));
         if (foundUser.checkPassword(password)) {
             log.info("user : " + foundUser);
         }

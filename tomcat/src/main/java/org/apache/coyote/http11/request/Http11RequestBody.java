@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ public class Http11RequestBody {
         this.bodyMap = bodyMap;
     }
 
-    public static Http11RequestBody from(String bodyLine) throws UnsupportedEncodingException {
+    public static Http11RequestBody from(String bodyLine) {
         Map<String, String> map = new HashMap<>();
         if (bodyLine.isEmpty()) return new Http11RequestBody(map);
 

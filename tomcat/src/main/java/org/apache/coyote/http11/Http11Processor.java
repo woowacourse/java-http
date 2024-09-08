@@ -52,8 +52,12 @@ public class Http11Processor implements Runnable, Processor {
             if (request.getPath().equals("/")) {
                 processString("Hello world!", "200 OK", outputStream);
             } else {
-                File requestFile = getRequestFile(request);
-                processFile(requestFile, "200 OK", outputStream);
+                try {
+                    File requestFile = getRequestFile(request);
+                    processFile(requestFile, "200 OK", outputStream);
+                } catch (NullPointerException e) {
+                    processNotFoundPage(outputStream);
+                }
             }
             return true;
         } catch (IOException e) {
@@ -80,15 +84,11 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(request);
         } catch (Exception e) {
             log.warn("요청을 처리할 수 없습니다.");
-
-            File requestFile = getFile("/404.html");
-            HttpResponse response = new HttpResponse("404 NOT FOUND", requestFile);
-            outputStream.write(response.toMessage().getBytes());
-            outputStream.flush();
+            processNotFoundPage(outputStream);
         }
     }
 
-    private File getRequestFile(HttpRequest httpRequest) {
+    private File getRequestFile(HttpRequest httpRequest) throws NullPointerException {
         String resourcePath = "static" + httpRequest.getPath();
         URL resource = getClass().getClassLoader().getResource(resourcePath);
 
@@ -102,6 +102,14 @@ public class Http11Processor implements Runnable, Processor {
         String resourcePath = "static" + filePath;
         URL resource = getClass().getClassLoader().getResource(resourcePath);
 
-        return new File(resource.getPath());
+        File file = new File(resource.getPath());
+        return file;
+    }
+
+    private void processNotFoundPage(OutputStream outputStream) throws IOException {
+        File requestFile = getFile("/404.html");
+        HttpResponse response = new HttpResponse("404 NOT FOUND", requestFile);
+        outputStream.write(response.toMessage().getBytes());
+        outputStream.flush();
     }
 }

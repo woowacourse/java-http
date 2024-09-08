@@ -1,5 +1,6 @@
 package thread.stage1;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConcurrencyTest {
 
-    @Test
+    /*
+    userServlet에서 join 하는 메서드를 sync 키워드로 동기화해 해결했다.
+     */
+    @RepeatedTest(1000)
     void test() throws InterruptedException {
         final var userServlet = new UserServlet();
 

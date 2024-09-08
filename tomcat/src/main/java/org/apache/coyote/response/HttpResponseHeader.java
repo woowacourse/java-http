@@ -32,6 +32,10 @@ public class HttpResponseHeader {
         values.put("Content-Length", List.of(String.valueOf(length)));
     }
 
+    public void addLocation(String redirectUri) {
+        values.put("Location", List.of(redirectUri));
+    }
+
     @Override
     public String toString() {
         return values.entrySet().stream()

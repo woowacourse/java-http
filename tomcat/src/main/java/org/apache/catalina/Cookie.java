@@ -7,7 +7,6 @@ public class Cookie {
     private static final String COOKIE_DELIMITER = "&";
     private static final String SPLIT_DELIMITER = "=";
 
-
     private final Map<String, String> values;
 
     public Cookie(Map<String, String> values) {
@@ -18,7 +17,7 @@ public class Cookie {
         if (cookie == null) {
             return new Cookie(Map.of());
         }
-        
+
         Map<String, String> values = new HashMap<>();
         String[] splits = cookie.split(COOKIE_DELIMITER);
         for (String split : splits) {

@@ -6,6 +6,7 @@ import java.util.Map;
 public class RequestBody {
 
     private static final String BODY_DELIMITER = "&";
+    public static final String SPLIT_DELIMITER = "=";
 
     private final Map<String, String> body;
 
@@ -18,7 +19,7 @@ public class RequestBody {
 
         String[] params = rawBody.split(BODY_DELIMITER);
         for (String param : params) {
-            String[] keyValue = param.split("=");
+            String[] keyValue = param.split(SPLIT_DELIMITER);
             body.put(keyValue[0], keyValue[1]);
         }
 

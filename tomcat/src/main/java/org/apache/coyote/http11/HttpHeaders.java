@@ -9,7 +9,7 @@ public class HttpHeaders {
 
     private final Map<String, String> header;
 
-    public HttpHeaders(final Map<String, String> header) {
+    private HttpHeaders(final Map<String, String> header) {
         this.header = header;
     }
 

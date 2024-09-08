@@ -38,6 +38,10 @@ public class HttpResponse {
         return view;
     }
 
+    public String findHeaderByKey(String key) {
+        return headers.findByKey(key);
+    }
+
     public void setStatus(HttpStatus status) {
         this.status = status;
     }

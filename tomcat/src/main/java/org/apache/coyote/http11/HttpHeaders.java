@@ -30,7 +30,7 @@ public class HttpHeaders {
         return of(response.getView(), ContentType.findByPath(request.getPath()));
     }
 
-    public static HttpHeaders of(View view, ContentType contentType) {
+    public static HttpHeaders of(View view, ContentType contentType) { // TODO view 없을 경우도 처리
         Map<String, String> store = new LinkedHashMap<>();
         store.put("Content-Type", contentType.getValue() + ";charset=utf-8");
         store.put("Content-Length", String.valueOf(view.getContent().getBytes().length));

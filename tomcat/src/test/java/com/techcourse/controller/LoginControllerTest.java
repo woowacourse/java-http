@@ -1,8 +1,7 @@
-package com.techcourse;
+package com.techcourse.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.controller.FrontController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestStartLine;
 import org.apache.coyote.http11.HttpResponse;
@@ -12,8 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class FrontControllerTest {
-
+class LoginControllerTest {
     @Nested
     class 로그인 {
 
@@ -32,7 +30,8 @@ class FrontControllerTest {
             // then
             Assertions.assertAll(
                     () -> assertThat(response.getCode()).isEqualTo(HttpStatus.OK.getCode()),
-                    () -> assertThat(response.getView().getContent()).isEqualTo(ViewResolver.getView("login.html").getContent())
+                    () -> assertThat(response.getView().getContent()).isEqualTo(
+                            ViewResolver.getView("login.html").getContent())
             );
         }
 
@@ -67,6 +66,22 @@ class FrontControllerTest {
 
             // then
             assertThat(response.getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.getCode());
+        }
+
+        @Test
+        void 로그인을_성공하면_헤더에_쿠키를_포함한다() {
+            // given
+            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+                    "GET /login?account=gugu&password=password HTTP/1.1 ");
+            HttpRequest request = new HttpRequest(startLine, null, null);
+            HttpResponse response = new HttpResponse();
+            FrontController controller = FrontController.getInstance();
+
+            // when
+            controller.service(request, response);
+
+            // then
+            assertThat(response.findHeaderByKey("Set-Cookie")).isNotNull(); // TODO 고치기
         }
     }
 }

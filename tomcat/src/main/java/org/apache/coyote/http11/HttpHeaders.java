@@ -2,11 +2,12 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
+    private static final String HEADER_PAYLOAD_DELIMITER = ":";
 
     private final Map<String, String> payLoads;
     private final Optional<Cookie> cookie;
@@ -21,32 +22,23 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders readRequestHeader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> payLoads = new HashMap<>();
-        Optional<Cookie> cookie = Optional.empty();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            if (line.isBlank()) {
-                break;
-            }
+        Map<String, String> payLoads = bufferedReader.lines()
+                .takeWhile(line -> !line.isBlank())
+                .map(line -> line.split(HEADER_PAYLOAD_DELIMITER, 2))
+                .collect(Collectors.toMap(
+                        split -> split[0].strip(),
+                        split -> split[1].strip()
+                ));
 
-            String[] split = line.split(":");
+        return new HttpHeaders(payLoads, initializeCookie(payLoads));
+    }
 
-            if (split.length != 2) {
-                continue;
-            }
-
-            String key = split[0].trim();
-            String value = split[1].trim();
-
-            if (key.equals("Cookie")) {
-                cookie = Optional.of(Cookie.read(value));
-                continue;
-            }
-
-            payLoads.put(key, value);
+    private static Optional<Cookie> initializeCookie(Map<String, String> payLoad) {
+        if (payLoad.containsKey("Cookie")) {
+            String rawValue = payLoad.get("Cookie");
+            return Optional.of(Cookie.read(rawValue));
         }
-
-        return new HttpHeaders(payLoads, cookie);
+        return Optional.empty();
     }
 
     public Map<String, String> getPayLoads() {

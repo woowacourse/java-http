@@ -9,6 +9,6 @@ public class HttpVersion {
     }
 
     public double getVersion() {
-        return getVersion();
+        return version;
     }
 }

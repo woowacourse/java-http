@@ -33,27 +33,38 @@ public class Http11Request {
 
     public static Http11Request from(InputStream inputStream) throws IOException {
         try(BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
-            assert protocol.equals(firstLine[2]);
-            StringBuilder headerSb = new StringBuilder();
-            String headerLine;
-            while (!Objects.equals(headerLine = br.readLine(), "")) {
-                headerSb.append(headerLine).append(System.lineSeparator());
-            }
-            Http11RequestHeaders http11RequestHeaders = Http11RequestHeaders.from(headerSb.toString());
 
-            int contentLength = http11RequestHeaders.getContentLength();
-            char[] buffer = new char[contentLength];
-            br.read(buffer, 0, contentLength);
-            Http11RequestBody body = Http11RequestBody.from(new String(buffer));
+            String[] firstLine = Http11RequestParser.parseFirstLine(br.readLine());
+            String method = firstLine[0];
+            String uri = firstLine[1];
+
+            Http11RequestHeaders headers = parseHeader(br);
+            Http11RequestBody body = parseBody(headers, br);
 
             return new Http11Request(
-                    Http11RequestMethod.from(firstLine[0]),
-                    http11RequestHeaders,
-                    firstLine[1],
-                    Http11RequestParser.parseQuery(firstLine[1]),
+                    Http11RequestMethod.from(method),
+                    headers,
+                    uri,
+                    Http11RequestParser.parseQuery(uri),
                     body);
         }
+    }
+
+    private static Http11RequestHeaders parseHeader(BufferedReader br) throws IOException {
+        StringBuilder headerSb = new StringBuilder();
+        String headerLine;
+        while (!Objects.equals(headerLine = br.readLine(), "")) {
+            headerSb.append(headerLine).append(System.lineSeparator());
+        }
+        return Http11RequestHeaders.from(headerSb.toString());
+    }
+
+    private static Http11RequestBody parseBody(Http11RequestHeaders http11RequestHeaders, BufferedReader br) throws IOException {
+        int contentLength = http11RequestHeaders.getContentLength();
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        Http11RequestBody body = Http11RequestBody.from(new String(buffer));
+        return body;
     }
 
     public boolean isStaticRequest() {
@@ -114,6 +125,7 @@ public class Http11Request {
         static String[] parseFirstLine(String firstLine) {
             String[] split = firstLine.split(" ");
             assert split.length == 3;
+            assert protocol.equals(split[2]);
             return split;
         }
 

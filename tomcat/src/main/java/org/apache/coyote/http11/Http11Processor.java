@@ -62,12 +62,11 @@ public class Http11Processor implements Runnable, Processor {
                         final var session = sessionManager.findSession(jSessionId);
                         if (session == null) {
                             log.warn("유효하지 않은 세션입니다.");
-                            redirectIndex(response, path, result);
-                            response.setLocation("401.html");
+                            redirectLocation(response, path, result, "401.html");
                         } else {
                             final var sessionUser = (User) session.getAttribute("user");
                             log.info("이미 로그인 유저 = {}", sessionUser);
-                            redirectIndex(response, path, result);
+                            redirectLocation(response, path, result, "index.html");
                         }
                     } else {
                         generateOKResponse(response, path, result);
@@ -87,7 +86,7 @@ public class Http11Processor implements Runnable, Processor {
                 } else if (path.isEqualPath("/register")) {
                     final var user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
-                    redirectIndex(response, path, result);
+                    redirectLocation(response, path, result, "index.html");
                 }
 
                 outputStream.write(response.toHttpResponse().getBytes());
@@ -136,12 +135,13 @@ public class Http11Processor implements Runnable, Processor {
         response.setSourceCode(result);
     }
 
-    private void redirectIndex(final Response response, final Path request, final String result) {
+    private void redirectLocation(final Response response, final Path request, final String result,
+                                  final String location) {
         response.setStatusCode(302);
         response.setSc("FOUND");
         response.setContentType(request.getContentType());
         response.setContentLength(result.getBytes().length);
-        response.setLocation("index.html");
+        response.setLocation(location);
         response.setSourceCode(result);
     }
 
@@ -156,7 +156,7 @@ public class Http11Processor implements Runnable, Processor {
             if (!user.checkPassword(password)) {
                 throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
             }
-            redirectIndex(response, request, result);
+            redirectLocation(response, request, result, "index.html");
             final var uuid = UUID.randomUUID();
             response.setCookie("JSESSIONID=" + uuid);
             final var session = new Session(uuid.toString());
@@ -165,8 +165,7 @@ public class Http11Processor implements Runnable, Processor {
             return user;
         } catch (final IllegalArgumentException e) {
             log.warn(e.getMessage());
-            redirectIndex(response, request, result);
-            response.setLocation("401.html");
+            redirectLocation(response, request, result, "401.html");
             return null;
         }
     }

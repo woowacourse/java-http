@@ -2,7 +2,6 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import com.techcourse.session.Session;
 import com.techcourse.session.SessionManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -96,15 +95,9 @@ public class Controller {
     }
 
     private boolean loginAndRedirectToIndex(HttpResponse response, User user) {
-        response.addSessionToCookies(addSession(user));
+        String jSessionId = SessionManager.addUser(user);
+        response.addSessionToCookies(jSessionId);
         return redirectToIndex(response);
-    }
-
-    private String addSession(User user) {
-        Session session = new Session();
-        session.setAttribute("user", user);
-        SessionManager.add(session);
-        return session.getId();
     }
 
     private boolean redirectToIndex(HttpResponse response) {

@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.techcourse.session.Session;
+import com.techcourse.model.User;
 import com.techcourse.session.SessionManager;
 import java.io.File;
 import java.io.IOException;
@@ -124,14 +124,14 @@ class Http11ProcessorTest {
     @Test
     void redirectWhenAlreadyLoggedIn() throws IOException {
         // given
-        Session session = new Session();
-        SessionManager.add(session);
+        User user = new User("account", "password", "mail@mail.com");
+        String jSessionId = SessionManager.addUser(user);
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",
                 "Accept: text/html",
                 "Connection: keep-alive",
-                "Cookie: JSESSIONID=" + session.getId()
+                "Cookie: JSESSIONID=" + jSessionId
         );
 
         final var socket = new StubSocket(httpRequest);

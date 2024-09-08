@@ -112,7 +112,7 @@ public record HttpRequest(
             return null;
         }
 
-        return sessionManager.findSession(sessionId);
+        return session;
     }
 
     public HttpRequest updatePath(String path) {

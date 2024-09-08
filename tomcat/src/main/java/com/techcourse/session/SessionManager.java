@@ -22,8 +22,4 @@ public class SessionManager {
     public static Session findSession(String id) {
         return sessions.get(id);
     }
-
-    public static void remove(Session session) {
-        sessions.remove(session.getId());
-    }
 }

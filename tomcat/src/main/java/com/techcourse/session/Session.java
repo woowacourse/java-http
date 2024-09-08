@@ -22,10 +22,6 @@ public class Session {
         attributes.put(key, value);
     }
 
-    public Object getAttribute(String key) {
-        return attributes.get(key);
-    }
-
     public String getId() {
         return id;
     }

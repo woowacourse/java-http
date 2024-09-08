@@ -34,7 +34,7 @@ public class Http11Response {
         firstLine = String.join(" ",
                 protocol,
                 String.valueOf(statusCode.getValue()),
-                statusCode.getName());
+                statusCode.getName()) + " ";
     }
 
     public void addHeader(String key, String value) {

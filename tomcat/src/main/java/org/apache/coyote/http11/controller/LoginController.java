@@ -14,7 +14,16 @@ import org.apache.coyote.http11.service.LoginService;
 
 public class LoginController implements Controller {
 
+    public static LoginController INSTANCE = new LoginController();
+
     private final LoginService loginService = new LoginService();
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public boolean canHandle(String url) {
@@ -23,25 +32,21 @@ public class LoginController implements Controller {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) {
-        if (httpRequest.isQueryStringRequest()) {
-            return checkLogin(httpRequest);
-        }
+        return LoginControllerAdapter.adapt(httpRequest);
+    }
 
-        if (httpRequest.hasCookie() && httpRequest.getCookie().has("JSESSIONID")) {
-            return checkSession(httpRequest);
-        }
-
+    public HttpResponse loginView(HttpRequest httpRequest) {
         return new ResponseBuilder()
                 .statusCode(HttpStatusCode.OK_200)
                 .viewUrl("/login.html")
                 .build();
     }
 
-    private HttpResponse checkSession(HttpRequest httpRequest) {
+    public HttpResponse checkSession(HttpRequest httpRequest) {
         Cookie cookie = httpRequest.getCookie();
         String jsessionid = cookie.getByKey("JSESSIONID");
 
-        if(!InMemorySessionRepository.existsById(jsessionid)){
+        if (!InMemorySessionRepository.existsById(jsessionid)) {
             throw new SecurityException("잘못된 세션 정보입니다.");
         }
 
@@ -51,10 +56,9 @@ public class LoginController implements Controller {
                 .build();
     }
 
-    private HttpResponse checkLogin(HttpRequest httpRequest) {
+    public HttpResponse checkLogin(HttpRequest httpRequest) {
         Map<String, String> parameters = httpRequest.getQueryParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
-
         User user = loginService.findByAccount(parameters.get("account"));
         Cookie userSessionCookie = makeUserSessionCookie(user);
 

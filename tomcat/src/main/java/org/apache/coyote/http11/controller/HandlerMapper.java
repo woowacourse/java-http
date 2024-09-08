@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public enum HandlerMapper {
-    LOGIN_CONTROLLER(uri -> new LoginController().canHandle(uri), new LoginController()),
+    LOGIN_CONTROLLER(uri -> LoginController.getInstance().canHandle(uri), LoginController.getInstance()),
     USER_CONTROLLER(uri -> new UserController().canHandle(uri), new UserController()),
     ;
 

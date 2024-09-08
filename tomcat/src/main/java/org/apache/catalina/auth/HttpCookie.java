@@ -26,14 +26,14 @@ public class HttpCookie {
         return UUID.randomUUID().toString();
     }
 
-    public static void saveAuthCookie(String id) {
+    private static void saveAuthCookie(String id) {
         if (cookies.containsKey(AUTH_COOKIE_KEY)) {
             return;
         }
         HttpCookie.cookies.put(AUTH_COOKIE_KEY, id);
     }
 
-    public static String cookiesToString() {
+    private static String cookiesToString() {
         return cookies.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));

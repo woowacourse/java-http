@@ -41,11 +41,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var requestMethodAndUrl = bufferedReader.readLine();
+            final var requestLine = bufferedReader.readLine();
 
             final var httpHeaders = HttpHeaders.parse(bufferedReader);
 
-            final var texts = requestMethodAndUrl.split(" ");
+            final var texts = requestLine.split(" ");
             final var method = HttpMethod.fromName(texts[0]);
             final var path = new Path(texts[1]);
             log.info("{} 요청 = {}", method, path);

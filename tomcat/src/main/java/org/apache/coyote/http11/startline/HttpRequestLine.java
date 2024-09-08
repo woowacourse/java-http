@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.startline;
 
 import java.nio.file.Path;
-import org.apache.coyote.http11.header.RequestTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

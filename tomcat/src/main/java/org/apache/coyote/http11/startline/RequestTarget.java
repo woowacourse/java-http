@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.header;
+package org.apache.coyote.http11.startline;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

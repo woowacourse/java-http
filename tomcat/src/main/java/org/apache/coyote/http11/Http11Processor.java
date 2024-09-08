@@ -152,7 +152,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static ResponseContent generateResponseForPostUrl(Request headers) {
+    private ResponseContent generateResponseForPostUrl(Request headers) {
         String url = headers.getUrl();
         String accept = headers.getFileType();
         if (REGISTER_PATH.equals(url)) {
@@ -161,7 +161,7 @@ public class Http11Processor implements Runnable, Processor {
         return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(NOT_FOUND_PAGE));
     }
 
-    private static ResponseContent handleRegistration(Map<String, String> bodyParams, String accept) {
+    private ResponseContent handleRegistration(Map<String, String> bodyParams, String accept) {
         String account = bodyParams.get(ACCOUNT);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             return new ResponseContent(HttpStatus.BAD_REQUEST, accept, FileReader.loadFileContent(BAD_REQUEST_PAGE));

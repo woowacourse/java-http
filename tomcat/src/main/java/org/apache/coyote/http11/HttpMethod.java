@@ -11,7 +11,7 @@ public enum HttpMethod {
 
     public static HttpMethod from(String value) {
         return Arrays.stream(values())
-                .filter(it -> it.name().equalsIgnoreCase(value))
+                .filter(it -> it.name().equals(value))
                 .findFirst()
                 .orElseThrow(NoSuchElementException::new);
     }

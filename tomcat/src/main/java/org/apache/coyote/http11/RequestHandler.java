@@ -28,15 +28,17 @@ public class RequestHandler {
         if (Objects.equals(requestUri, "/")) {
             return "Hello world!";
         }
-        if (requestUri.startsWith("/login?")) {
+        if (requestUri.startsWith("/login")) {
             return login();
         }
-        final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return getResponseBody("static" + requestUri);
     }
 
     public String login() throws IOException {
         int index = requestUri.indexOf("?");
+        if (index == -1) {
+            return getResponseBody("static" + requestUri);
+        }
         String path = requestUri.substring(0, index);
 
         Optional<Map<String, String>> parsed = parseQueryString(requestUri, index);
@@ -48,7 +50,15 @@ public class RequestHandler {
         if (account.checkPassword(queryPairs.get("password"))) {
             log.info("user : {}", account);
         }
-        final URL resource = getClass().getClassLoader().getResource("static" + path + ".html");
+        return getResponseBody("static" + path);
+    }
+
+    private String getResponseBody(String path) throws IOException {
+        if (!path.contains(".")) {
+            final URL resource = getClass().getClassLoader().getResource(path + ".html");
+            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        }
+        final URL resource = getClass().getClassLoader().getResource(path);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class Session {
+	public static final String SESSION_HEADER_KEY = "JSESSIONID";
 	private final String id;
 
 	public Session() {
@@ -14,9 +15,9 @@ public class Session {
 	}
 
 	public Session(HttpRequest httpRequest) {
-		this.id = Arrays.asList(httpRequest.getHeader("Cookie").split("; "))
+		this.id = Arrays.asList(httpRequest.getCookie().split("; "))
 			.stream()
-			.filter(cookie -> cookie.startsWith("JSESSIONID"))
+			.filter(cookie -> cookie.startsWith(SESSION_HEADER_KEY))
 			.findAny()
 			.orElseGet(null);
 	}

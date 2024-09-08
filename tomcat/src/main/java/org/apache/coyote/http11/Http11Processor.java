@@ -5,7 +5,9 @@ import com.techcourse.controller.RequestMapping;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -32,10 +34,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (
-                final var inputStream = connection.getInputStream();
-                final var outputStream = connection.getOutputStream()
+                final InputStream inputStream = connection.getInputStream();
+                final OutputStream outputStream = connection.getOutputStream();
+                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 

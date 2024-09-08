@@ -13,20 +13,12 @@ public class HttpHeaders {
         this.header = header;
     }
 
-    public static HttpHeaders parse(final BufferedReader bufferedReader) {
-        var line = " ";
+    public static HttpHeaders parse(final BufferedReader bufferedReader) throws IOException {
         final var httpRequestHeaders = new HashMap<String, String>();
-        while (!line.isEmpty()) {
-            try {
-                line = bufferedReader.readLine();
-            } catch (final IOException e) {
-                throw new IllegalStateException("IOException 발생");
-            }
-            if (line == null || line.isBlank()) {
-                break;
-            }
-            final var split = line.split(":");
-            httpRequestHeaders.put(split[0].strip(), split[1].strip());
+        var line = "";
+        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
+            final int index = line.indexOf(":");
+            httpRequestHeaders.put(line.substring(0, index).strip(), line.substring(index + 1).strip());
         }
         return new HttpHeaders(httpRequestHeaders);
     }

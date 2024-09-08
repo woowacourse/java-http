@@ -22,6 +22,10 @@ public class ResponseContent {
         headers.put(key, value);
     }
 
+    public void addLocation(String url) {
+        headers.put("Location", "http://localhost:8080" + url);
+    }
+
     public String responseToString() {
         StringBuilder response = new StringBuilder();
 

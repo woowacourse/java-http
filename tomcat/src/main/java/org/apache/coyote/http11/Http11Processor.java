@@ -123,6 +123,7 @@ public class Http11Processor implements Runnable, Processor {
             ResponseContent responseContent
                     = new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
             responseContent.addHeader("Set-Cookie", cookie);
+            responseContent.addLocation(INDEX_PAGE);
             return responseContent;
         }
         return new ResponseContent(HttpStatus.UNAUTHORIZED, accept, FileReader.loadFileContent(UNAUTHORIZED_PAGE));
@@ -159,6 +160,9 @@ public class Http11Processor implements Runnable, Processor {
         String password = bodyParams.get(PASSWORD);
         String email = bodyParams.get(EMAIL);
         InMemoryUserRepository.save(new User(account, password, email));
-        return new ResponseContent(HttpStatus.CREATED, accept, FileReader.loadFileContent(INDEX_PAGE));
+        ResponseContent responseContent
+                = new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));
+        responseContent.addLocation(INDEX_PAGE);
+        return responseContent;
     }
 }

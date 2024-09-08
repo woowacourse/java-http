@@ -22,20 +22,16 @@ public class HttpResponse {
     }
 
     public void addContentType(String contentType) {
-        if (FileTypeChecker.isHtml(contentType)) {
-            headers.add("Content-Type", contentType + ";charset=utf-8");
-            return;
-        }
-        headers.add("Content-Type", contentType);
+        headers.addContentType(contentType);
     }
 
     public void addBody(String newBody) {
         this.body.update(newBody);
         if (this.body.hasBody()) {
-            headers.add("Content-Length", String.valueOf(newBody.getBytes().length));
+            headers.addContentLength(newBody.getBytes().length);
             return;
         }
-        headers.add("Content-Length", "0");
+        headers.addContentLength(0);
     }
 
     public void updateHttpStatus(HttpStatus newHttpStatus) {

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.util.FileTypeChecker;
 
 public class HttpResponseHeader {
 
@@ -17,6 +18,18 @@ public class HttpResponseHeader {
 
     public void add(String name, String value) {
         this.values.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+    }
+
+    public void addContentType(String contentType) {
+        if (contentType.equals("text/html")) {
+            values.put("Content-Type", List.of(contentType + ";charset=utf-8"));
+            return;
+        }
+        values.put("Content-Type", List.of(contentType));
+    }
+
+    public void addContentLength(int length) {
+        values.put("Content-Length", List.of(String.valueOf(length)));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.learningTest;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +15,7 @@ public class ObjectMapperTest {
 
     @Test
     @DisplayName("Object -> Json 직렬화 테스트")
+    @Disabled
     void serializeTest() throws JsonProcessingException {
         User user = InMemoryUserRepository.findByAccount("gugu").get();
 

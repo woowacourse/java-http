@@ -63,8 +63,7 @@ public class Http11Request {
         int contentLength = http11RequestHeaders.getContentLength();
         char[] buffer = new char[contentLength];
         br.read(buffer, 0, contentLength);
-        Http11RequestBody body = Http11RequestBody.from(new String(buffer));
-        return body;
+        return Http11RequestBody.from(new String(buffer));
     }
 
     public boolean isStaticRequest() {

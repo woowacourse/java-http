@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.coyote.http11.response.ResponseHandler;
+import org.apache.coyote.http11.session.Session;
 import org.apache.coyote.http11.session.SessionManager;
 
 import com.techcourse.db.InMemoryUserRepository;
@@ -37,22 +38,12 @@ public class RequestHandler {
 	}
 
 	private void handleLoginRequest(String httpMethod, String urlPath) {
-		if(urlPath.equals("/login") && httpMethod.equals("GET")) {
-			if(httpRequest.getHeader("Cookie") != null) {
-			    Optional<String> sessionCookie = Arrays.asList(httpRequest.getHeader("Cookie").split("; "))
-			        .stream()
-			        .filter(cookie -> cookie.startsWith("JSESSIONID"))
-			        .findAny();
-			    if(!sessionCookie.isEmpty()) {
-			        String sessionId = sessionCookie.get().split("=")[1];
-			        Optional<User> userBySession = SessionManager.findUserBySession(sessionId);
-			        if(userBySession.isPresent()) {
-			            ResponseHandler.redirect("http://localhost:8080/index.html", outputStream);
-			            return;
-			        }
-			    }
-			}
-			ResponseHandler.printFileResource("static" + urlPath +".html",  outputStream);
+		if (urlPath.equals("/login") && httpMethod.equals("GET")) {
+			Session session = new Session(httpRequest);
+			SessionManager.findUserBySession(session)
+				.ifPresentOrElse(
+					user -> ResponseHandler.redirect("http://localhost:8080/index.html", outputStream),
+					() -> ResponseHandler.printFileResource("static" + urlPath + ".html", outputStream));
 		} else if (httpMethod.equals("POST")) {
 			login();
 		}
@@ -66,13 +57,12 @@ public class RequestHandler {
 			User user = InMemoryUserRepository.findByAccount(account)
 				.orElse(new User("guest", "guest", "guest"));
 			if (user.checkPassword(password)) {
-				String sessionId = SessionManager.createSession(user);
-				ResponseHandler.redirectWithSetCookie("http://localhost:8080/index.html", sessionId, outputStream);
+				Session session = SessionManager.createSession(user);
+				ResponseHandler.redirectWithSetCookie("http://localhost:8080/index.html", session.getId(), outputStream);
 				return;
 			}
 		}
 		ResponseHandler.redirect("http://localhost:8080/401.html", outputStream);
-		return;
 	}
 
 

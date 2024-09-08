@@ -20,15 +20,17 @@ public record Headers(Map<String, String> headers) {
             throw new IllegalArgumentException(headerLine);
         }
         final var split = headerLine.split(DELIMITER);
-        put(split[0], split[1]);
+        headers.remove(split[0]);
+        add(split[0], split[1]);
     }
 
-    public void put(final String name, final String value) {
+    public Headers add(final String name, final String value) {
         if (headers.containsKey(name)) {
-            headers.merge(name, value, (v1, v2) -> v1 + ";" + v2);
-            return;
+            headers.merge(name, value, (v1, v2) -> v1 + "," + v2);
+            return this;
         }
         headers.put(name, value);
+        return this;
     }
 
     @Override

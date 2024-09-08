@@ -6,6 +6,7 @@ import static org.apache.coyote.http11.http.MediaType.TEXT_HTML;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -47,20 +48,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = new HttpRequest(inputStream);
-
-            String body = mapResource(request);
-
-            final var headers = new Headers();
-            headers.put("Content-Type", contentType(request.getAccept()));
-            headers.put("Content-Type", DEFAULT_CHARSET);
-            headers.put("Content-Length", String.valueOf(body.getBytes().length));
-
-            final var httpResponse = HttpResponse.builder()
-                    .httpVersion(request.getHttpVersion())
-                    .httpStatusCode(HttpStatusCode.OK)
-                    .headers(headers)
-                    .body(body)
-                    .build();
+            final var httpResponse = mapResource(request);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -69,21 +57,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String mapResource(final HttpRequest request) throws IOException {
-        String body = "";
+    private HttpResponse mapResource(final HttpRequest request) throws IOException {
+        final var defaultResourcePath = "static";
+        URL url;
+        var status = HttpStatusCode.OK;
+        var body = "";
         if (Objects.equals(request.getPath(), "/")) {
             body = "Hello world!";
         }
         if (Objects.equals(request.getPath(), "/index.html")) {
-            var url = CLASS_LOADER.getResource("static" + request.getPath());
+            url = CLASS_LOADER.getResource(defaultResourcePath + "/index.html");
             body = Files.readString(Path.of(url.getPath()));
         }
         if (Objects.equals(request.getPath(), "/css/styles.css")) {
-            var url = CLASS_LOADER.getResource("static" + request.getPath());
+            url = CLASS_LOADER.getResource(defaultResourcePath + "/css/styles.css");
             body = Files.readString(Path.of(url.getPath()));
         }
         if (Objects.equals(request.getPath(), "/login")) {
-            var url = CLASS_LOADER.getResource("static" + request.getPath() + ".html");
+            url = CLASS_LOADER.getResource(defaultResourcePath + "/login.html");
             body = Files.readString(Path.of(url.getPath()));
             String queryString = request.getQueryString();
             if (!queryString.isBlank()) {
@@ -93,18 +84,44 @@ public class Http11Processor implements Runnable, Processor {
                     String[] keyValue = param.split("=");
                     queryParams.put(keyValue[0], keyValue[1]);
                 }
-                var account = queryParams.get("username");
+                var account = queryParams.get("account");
+                var password = queryParams.get("password");
                 var user = InMemoryUserRepository.findByAccount(account).orElse(null);
-                log.info("user: {}", user);
+                if (user == null || !user.checkPassword(password)) {
+                    url = CLASS_LOADER.getResource(defaultResourcePath + "/401.html");
+                    status = HttpStatusCode.UNAUTHORIZED;
+                    body = Files.readString(Path.of(url.getPath()));
+                } else {
+                    status = HttpStatusCode.FOUND;
+                    url = CLASS_LOADER.getResource(defaultResourcePath + "/index.html");
+                    body = Files.readString(Path.of(url.getPath()));
+                    log.info("user: {}", user);
+                }
             }
         }
-        return body;
+
+        final var headers = new Headers()
+                .add("Content-Type", contentType(request.getAccept()))
+                .add("Content-Length", contentLength(body));
+
+        return HttpResponse.builder()
+                .httpVersion(request.getHttpVersion())
+                .httpStatusCode(status)
+                .headers(headers)
+                .body(body)
+                .build();
     }
 
     private String contentType(final String accept) {
+        String contentType = TEXT_HTML;
         if (accept != null && accept.contains(TEXT_CSS)) {
-            return TEXT_CSS;
+            contentType = TEXT_CSS;
         }
-        return TEXT_HTML;
+        return contentType + ";" + DEFAULT_CHARSET;
+    }
+
+    private String contentLength(final String body) {
+        byte[] bodyBytes = body.getBytes();
+        return String.valueOf(bodyBytes.length);
     }
 }

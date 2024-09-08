@@ -1,49 +1,37 @@
 package org.apache.catalina.response;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ResponseContent {
     private static final String HTTP_VERSION = "HTTP/1.1";
     private static final String DEFAULT_CHARSET = "charset=utf-8";
-    private static final String HEADER_CONTENT_TYPE = "Content-Type: ";
-    private static final String HEADER_CONTENT_LENGTH = "Content-Length: ";
-    private static final String HEADER_SET_COOKIE = "Set-Cookie: ";
 
     private final HttpStatus httpStatus;
-    private final String contentType;
-    private final int contentLength;
     private final String body;
-    private String cookie = "";
+    private final Map<String, String> headers = new HashMap<>();
 
     public ResponseContent(HttpStatus httpStatus, String contentType, String body) {
         this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.contentLength = body.getBytes().length;
+        headers.put("Content-Type", contentType + "; " + DEFAULT_CHARSET);
+        headers.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }
 
-    public ResponseContent(HttpStatus httpStatus, String contentType, String body, String cookie) {
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.contentLength = body.getBytes().length;
-        this.body = body;
-        this.cookie = cookie;
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 
     public String responseToString() {
-        if (cookie.isEmpty()) {
-            return String.join("\r\n",
-                    HTTP_VERSION + " " + httpStatus.getValue() + " " + httpStatus.getReasonPhrase() + " ",
-                    HEADER_CONTENT_TYPE + contentType + ";" + DEFAULT_CHARSET + " ",
-                    HEADER_CONTENT_LENGTH + contentLength + " ",
-                    "",
-                    body);
-        }
-        return String.join("\r\n",
-                HTTP_VERSION + " " + httpStatus.getValue() + " " + httpStatus.getReasonPhrase() + " ",
-                HEADER_CONTENT_TYPE + contentType + ";" + DEFAULT_CHARSET + " ",
-                HEADER_CONTENT_LENGTH + contentLength + " ",
-                HEADER_SET_COOKIE + cookie,
-                "",
-                body);
+        StringBuilder response = new StringBuilder();
 
+        response.append(HTTP_VERSION + " ")
+                .append(httpStatus.getValue())
+                .append(" ")
+                .append(httpStatus.getReasonPhrase()).append(" ");
+        headers.forEach((key, value) -> response.append(key).append(": ").append(value).append("\r\n"));
+        response.append("\r\n").append(body);
+
+        return response.toString();
     }
 }

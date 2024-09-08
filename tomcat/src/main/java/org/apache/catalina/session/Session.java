@@ -17,6 +17,14 @@ public class Session {
         this.id = id;
     }
 
+    public static Session empty() {
+        return new Session(null);
+    }
+
+    public boolean isPresent() {
+        return id != null;
+    }
+
     public String getId() {
         return id;
     }

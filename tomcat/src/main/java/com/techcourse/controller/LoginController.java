@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
             if (session != null) {
                 User user = (User) Objects.requireNonNull(session).getAttribute("user");
 
-                log.info("세션 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
+                log.info("이미 로그인한 사용자 입니다. - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
 
                 responseBuilder.status(Status.FOUND)
                         .location("/index.html");

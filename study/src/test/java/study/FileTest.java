@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -106,9 +107,12 @@ class FileTest {
         //Path path = Path.of(getClass().getClassLoader().getResource(fileName).getPath()); -> (X) : java.nio.file.InvalidPathException: Illegal char <:> at index 2:
         //Path path = Path.of(getClass().getClassLoader().getResource(fileName).toURI()); -> (O)
         Path path = new File(getClass().getClassLoader().getResource(fileName).getPath()).toPath();
+        List<String> actual;
+        try (Stream<String> lines = Files.lines(path)) {
+            actual = lines.toList();
+        }
 
-        List<String> actual = Files.lines(path).toList();
-        actual.stream().forEach(System.out::println);
+        actual.forEach(System.out::println);
 
         assertThat(actual).containsOnly("nextstep");
     }

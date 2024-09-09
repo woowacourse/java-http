@@ -216,13 +216,14 @@ class IOStreamTest {
         @Test
         void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
-
-            final byte[] actual = bufferedInputStream.readAllBytes();
-
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            try (
+                    final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+                    final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            ) {
+                final byte[] actual = bufferedInputStream.readAllBytes();
+                assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
+                assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            }
         }
     }
 
@@ -248,12 +249,15 @@ class IOStreamTest {
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            final StringBuilder actual = new StringBuilder();
-            reader.lines().forEach(line -> actual.append(line).append(System.lineSeparator()));
-            assertThat(actual).hasToString(emoji);
+            try (
+                    final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes(StandardCharsets.UTF_8));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            ) {
+                final StringBuilder actual = new StringBuilder();
+                reader.lines().forEach(line -> actual.append(line).append(System.lineSeparator()));
+                assertThat(actual).hasToString(emoji);
+            } catch (IOException e) {
+            }
         }
     }
 }

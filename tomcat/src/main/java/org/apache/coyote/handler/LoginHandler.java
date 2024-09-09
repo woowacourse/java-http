@@ -7,6 +7,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.catalina.session.Session;
+import org.apache.http.StandardHttpHeader;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;
 
@@ -69,6 +70,6 @@ public class LoginHandler extends Handler {
     private String addCookie(final String response, final HttpCookie cookie) {
         return response
                 .concat("\n")
-                .concat("Set-Cookie: " + cookie.toString());
+                .concat(StandardHttpHeader.SET_COOKIE.getValue() + ": " + cookie.toString());
     }
 }

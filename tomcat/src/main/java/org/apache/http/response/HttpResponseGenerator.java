@@ -1,6 +1,7 @@
 package org.apache.http.response;
 
 public class HttpResponseGenerator {
+
     public static String getOkResponse(String mimeType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",

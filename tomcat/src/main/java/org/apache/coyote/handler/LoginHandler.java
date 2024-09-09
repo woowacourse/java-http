@@ -15,6 +15,7 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
 public class LoginHandler extends Handler {
+
     private static final LoginHandler INSTANCE = new LoginHandler();
     private final SessionManager sessionManager = SessionManager.getInstance();
 

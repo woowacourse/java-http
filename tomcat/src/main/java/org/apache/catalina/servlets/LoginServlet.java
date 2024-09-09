@@ -64,7 +64,7 @@ public class LoginServlet extends HttpServlet {
             log.info("user : {}", user);
             Session session = request.getSession(true);
             session.setAttribute("user", user);
-            response.addCookie(Cookies.ofJSessionId(session.getId()));
+            response.addCookie(new Cookie("JSESSIONID", session.getId()));
             response.sendRedirect("/index.html");
             return;
         }

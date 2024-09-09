@@ -57,12 +57,4 @@ public class HttpRequest {
     public HttpRequestBody getHttpRequestBody() {
         return httpRequestBody;
     }
-
-    @Override
-    public String toString() {
-        return "HttpRequest{\n" +
-                "httpRequestHeader=" + httpRequestHeader +
-                ",\n httpRequestBody=" + httpRequestBody +
-                "\n}";
-    }
 }

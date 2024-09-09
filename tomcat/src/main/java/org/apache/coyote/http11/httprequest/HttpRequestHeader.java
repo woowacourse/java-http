@@ -17,11 +17,4 @@ public class HttpRequestHeader {
     public String getValue(String key) {
         return headers.get(key);
     }
-
-    @Override
-    public String toString() {
-        return "HttpRequestHeader{" +
-                ", \nheaders=" + headers +
-                '}';
-    }
 }

@@ -28,6 +28,7 @@ public class DefaultController extends AbstractController {
             String fileName = "static" + path;
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
             if (resourceUrl == null) {
+                httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.NOT_FOUND);
                 resourceUrl = getClass().getClassLoader().getResource("static/404.html");
             }
             Path filePath = Path.of(resourceUrl.toURI());

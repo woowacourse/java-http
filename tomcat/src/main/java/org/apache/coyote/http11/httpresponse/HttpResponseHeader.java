@@ -11,10 +11,6 @@ public class HttpResponseHeader {
         this.headers = headers;
     }
 
-    public void addHeaders(HttpHeaderName key, String value) {
-        headers.put(key, value);
-    }
-
     public String getString() {
         StringBuilder sb = new StringBuilder();
         int size = headers.keySet().size();

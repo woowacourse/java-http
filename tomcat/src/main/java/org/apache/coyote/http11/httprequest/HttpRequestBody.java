@@ -11,11 +11,4 @@ public class HttpRequestBody {
     public String getBody() {
         return body;
     }
-
-    @Override
-    public String toString() {
-        return "HttpRequestBody{\n" +
-                "body='" + body + '\'' +
-                "\n}";
-    }
 }

@@ -37,4 +37,19 @@ class FileReaderTest {
         String expected = "Hello world!";
         assertThat(fileContent).isEqualTo(expected);
     }
+
+    @Test
+    void should_returnDefaultFileContent_when_readInvalidResourceFile() {
+        // given & when
+        String fileContent;
+        try {
+            fileContent = FileReader.readResourceFile("/invalid.html");
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // then
+        String expected = "Hello world!";
+        assertThat(fileContent).isEqualTo(expected);
+    }
 }

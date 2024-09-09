@@ -146,11 +146,11 @@ public class Http11Processor implements Runnable, Processor {
         if (requestPath.equals("/")) {
             return FileReader.readResourceFile();
         }
-        String fileName = chooseFileName(requestPath);
-        return FileReader.readResourceFile(fileName);
+        String filePath = chooseFilePath(requestPath);
+        return FileReader.readResourceFile(filePath);
     }
 
-    private String chooseFileName(String requestPath) {
+    private String chooseFilePath(String requestPath) {
         if (requestPath.contains(".")) {
             return "/" + requestPath;
         }

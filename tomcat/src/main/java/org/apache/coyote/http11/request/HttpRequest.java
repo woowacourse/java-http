@@ -1,10 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
@@ -24,9 +20,9 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest parse(InputStream inputStream, BufferedReader bufferedReader) throws IOException {
-        RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-        RequestHeaders requestHeaders = new RequestHeaders(readHeaders(bufferedReader));
+    public static HttpRequest parse(HttpRequestReader httpRequestReader) throws IOException {
+        RequestLine requestLine = new RequestLine(httpRequestReader.readRequestLine());
+        RequestHeaders requestHeaders = new RequestHeaders(httpRequestReader.readRequestHeaders());
 
         int contentLength = requestHeaders.get("Content-Length")
                 .map(Integer::parseInt)
@@ -36,31 +32,11 @@ public class HttpRequest {
             String mediaType = requestHeaders.get(ContentType.HEADER)
                     .orElseThrow(() -> new IllegalArgumentException("요청 헤더를 찾을 수 없습니다."));
 
-            RequestBody requestBody = new RequestBody(mediaType, readRequestBody(inputStream, contentLength));
+            RequestBody requestBody = new RequestBody(mediaType, httpRequestReader.readRequestBody(contentLength));
             return new HttpRequest(requestLine, requestHeaders, requestBody);
         }
 
         return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
-    }
-
-    private static List<String> readHeaders(BufferedReader bufferedReader) throws IOException {
-        List<String> headers = new ArrayList<>();
-
-        String headerField = bufferedReader.readLine();
-
-        while (!headerField.isBlank()) {
-            headers.add(headerField);
-            headerField = bufferedReader.readLine();
-        }
-
-        return headers;
-    }
-
-    private static byte[] readRequestBody(InputStream inputStream, int contentLength) throws IOException {
-        byte[] bodyBytes = new byte[contentLength];
-        inputStream.read(bodyBytes);
-
-        return bodyBytes;
     }
 
     public Optional<String> getHeader(String header) {

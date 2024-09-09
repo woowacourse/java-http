@@ -10,7 +10,7 @@ class StaticResourceControllerTest {
     @Test
     @DisplayName("빈 요청이 왔을 때 기본 파일이름을 반환한다.")
     void process() {
-        StaticResourceController controller = new StaticResourceController();
+        Controller controller = StaticResourceController.getInstance();
 
         String result = controller.process("/");
 

@@ -18,6 +18,6 @@ public class ControllerMapper {
         if (CONTROLLER_MAPPER.containsKey(path)) {
             return CONTROLLER_MAPPER.get(path);
         }
-        return new StaticResourceController();
+        return StaticResourceController.getInstance();
     }
 }

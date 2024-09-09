@@ -8,7 +8,7 @@ public class HttpCookie {
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String KEY_VALUE_SEPARATOR = "=";
 
-    public final Map<String, String> cookie;
+    private final Map<String, String> cookie;
 
     public HttpCookie(Map<String, String> cookie) {
         this.cookie = cookie;

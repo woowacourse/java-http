@@ -10,11 +10,17 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 
+    private static final RequestMapping INSTANCE = new RequestMapping();
+
     private final Map<String, Controller> controllerMapping = new HashMap<>();
 
-    public RequestMapping() {
+    private RequestMapping() {
         controllerMapping.put("/login", new LoginController());
         controllerMapping.put("/register", new RegisterController());
+    }
+
+    public static RequestMapping getInstance() {
+        return INSTANCE;
     }
 
     public Controller getController(HttpRequest request) {

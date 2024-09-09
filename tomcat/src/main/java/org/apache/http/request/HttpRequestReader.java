@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.http.HttpHeader;
-import org.apache.http.StandardHttpHeader;
+import org.apache.http.header.HttpHeader;
+import org.apache.http.header.StandardHttpHeader;
 
 public class HttpRequestReader {
 

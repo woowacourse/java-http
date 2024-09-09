@@ -1,4 +1,4 @@
-package org.apache.http;
+package org.apache.http.header;
 
 public class HttpHeader {
     private final String key;

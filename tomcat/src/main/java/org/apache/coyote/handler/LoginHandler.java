@@ -7,7 +7,7 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.catalina.session.Session;
-import org.apache.http.StandardHttpHeader;
+import org.apache.http.header.StandardHttpHeader;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;
 

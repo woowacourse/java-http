@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.http.HttpCookie;
-import org.apache.http.HttpHeader;
+import org.apache.http.header.HttpHeader;
 import org.apache.http.HttpMethod;
 
 public class HttpRequest {

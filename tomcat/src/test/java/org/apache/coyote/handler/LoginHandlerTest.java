@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
-import org.apache.http.HttpHeader;
+import org.apache.http.header.HttpHeader;
 import org.apache.http.request.HttpRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package org.apache.http;
+package org.apache.http.header;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;

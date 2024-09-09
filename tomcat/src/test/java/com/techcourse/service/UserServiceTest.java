@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.techcourse.exception.AuthenticationException;
 import com.techcourse.exception.DuplicatedException;
+import com.techcourse.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +16,9 @@ class UserServiceTest {
     void login() {
         UserService userService = new UserService();
 
-        UserResponse userResponse = userService.login("gugu", "password");
+        User user = userService.login("gugu", "password");
 
-        assertThat(userResponse.email()).isEqualTo("hkkang@woowahan.com");
+        assertThat(user.getEmail()).isEqualTo("hkkang@woowahan.com");
     }
 
     @Test
@@ -45,9 +46,9 @@ class UserServiceTest {
     void register() {
         UserService userService = new UserService();
 
-        UserResponse userResponse = userService.register("loki", "loki@email.com", "password");
+        User user = userService.register("loki", "loki@email.com", "password");
 
-        assertThat(userResponse.account()).isEqualTo("loki");
+        assertThat(user.getAccount()).isEqualTo("loki");
     }
 
     @Test

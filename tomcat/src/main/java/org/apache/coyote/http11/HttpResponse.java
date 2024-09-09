@@ -69,11 +69,6 @@ public record HttpResponse(String protocolVersion, int statusCode, String status
             return this;
         }
 
-        public Builder addHeader(String key, String value) {
-            headers.put(key, value);
-            return this;
-        }
-
         public Builder addCookie(String key, String value) {
             cookies.put(key, value);
             return this;

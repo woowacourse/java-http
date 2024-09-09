@@ -166,4 +166,57 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void registerView() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String contentBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                String.format("Content-Length: %d \r\n", contentBody.getBytes().length) +
+                "\r\n" +
+                contentBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void registerSuccess() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register?account=HoeSeong123&password=eyeTwinkle&email=chorong@wooteco.com HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 301 FOUND \r\n" +
+                "Location: /index.html \r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

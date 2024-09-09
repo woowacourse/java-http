@@ -37,14 +37,16 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
             String path = httpRequest.getPath();
+            System.out.println("first path: " + path);
 
-            HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1);
+            HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
+                    .addHttpStatusCode(HttpStatusCode.NOT_FOUND);
 
             if (path.equals("/")) {
                 getRoot(httpResponse);
             } else if (path.endsWith(".html")) {
                 getHtml(httpResponse, path);
-            } else if (path.startsWith("/static")) {
+            } else if (path.startsWith("/css") || path.startsWith("/js")) {
                 getStaticResource(httpResponse, path);
             } else if (path.startsWith("/login")) {
                 login(httpResponse, httpRequest);
@@ -75,9 +77,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void getStaticResource(HttpResponse httpResponse, String path) throws IOException {
+        System.out.println("path: " + path);
         int lastIndexOfDot = path.lastIndexOf(".");
         String postfix = path.substring(lastIndexOfDot + 1);
         String responseBody = htmlReader.loadHtmlAsString(path);
+        System.out.println("responseBody: " + responseBody);
         httpResponse.addContentType(ContentType.from(postfix))
                 .addHttpStatusCode(HttpStatusCode.OK)
                 .addResponseBody(responseBody);

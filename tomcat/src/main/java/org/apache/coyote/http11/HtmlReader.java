@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class HtmlReader {
     private static final HtmlReader INSTANCE = new HtmlReader();
     private static final String FILE_PATH_PREFIX = "static";
-    private static final String NOT_FOUND_HTML = FILE_PATH_PREFIX + "404.html";
+    private static final String NOT_FOUND_HTML = FILE_PATH_PREFIX + "/404.html";
 
     private HtmlReader() {
     }

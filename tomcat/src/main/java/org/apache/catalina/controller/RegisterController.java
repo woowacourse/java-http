@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        responseRegisterPage(response);
+        responseRegisterPage(request, response);
     }
 
     private void responseRegisterSuccess(HttpResponse response) {
@@ -37,10 +37,10 @@ public class RegisterController extends AbstractController {
         response.setLocation("/index.html");
     }
 
-    private void responseRegisterPage(HttpResponse response) throws IOException {
+    private void responseRegisterPage(HttpRequest request, HttpResponse response) throws IOException {
         View view = ViewResolver.getView("/register.html");
         response.setStatus200();
         response.setResponseBody(view.getContent());
-        response.setContentTypeHtml();
+        response.setContentType(request.getContentType());
     }
 }

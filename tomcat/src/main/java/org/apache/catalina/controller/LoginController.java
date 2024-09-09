@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
                 return;
             }
         }
-        responseLoginPage(response);
+        responseLoginPage(request, response);
     }
 
     @Override
@@ -74,11 +74,11 @@ public class LoginController extends AbstractController {
         return session;
     }
 
-    private void responseLoginPage(HttpResponse response) throws IOException {
+    private void responseLoginPage(HttpRequest request, HttpResponse response) throws IOException {
         View view = ViewResolver.getView("/login.html");
         response.setStatus200();
         response.setResponseBody(view.getContent());
-        response.setContentTypeHtml();
+        response.setContentType(request.getContentType());
     }
 
     private void responseLoginSuccess(HttpResponse response, Session session) {

@@ -13,39 +13,33 @@ public class ViewController extends AbstractController {
         String path = request.getRequestLine().getPath();
 
         if (path.equals("/")) {
-            responseDefaultPage(response);
+            responseDefaultPage(request, response);
         } else {
             View view = ViewResolver.getView(path);
             if (view == null) {
-                responseNotFoundPage(response);
+                responseNotFoundPage(request, response);
             } else {
                 responseResource(request, response, view);
             }
         }
     }
 
-    private void responseDefaultPage(HttpResponse response) {
+    private void responseDefaultPage(HttpRequest request, HttpResponse response) {
         response.setStatus200();
-        response.setContentTypeHtml();
+        response.setContentType(request.getContentType());
         response.setResponseBody("Hello world!");
     }
 
-    private void responseNotFoundPage(HttpResponse response) throws IOException {
+    private void responseNotFoundPage(HttpRequest request, HttpResponse response) throws IOException {
         View notFoundView = ViewResolver.getView("/404.html");
         response.setStatus404();
         response.setResponseBody(notFoundView.getContent());
-        response.setContentTypeHtml();
+        response.setContentType(request.getContentType());
     }
 
-    private static void responseResource(HttpRequest request, HttpResponse response, View view) {
+    private void responseResource(HttpRequest request, HttpResponse response, View view) {
         response.setStatus200();
         response.setResponseBody(view.getContent());
-
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("text/css")) {
-            response.setContentTypeCss();
-        } else {
-            response.setContentTypeHtml();
-        }
+        response.setContentType(request.getContentType());
     }
 }

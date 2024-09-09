@@ -18,6 +18,10 @@ public class HttpRequest {
         return header.getHeader(key);
     }
 
+    public String getContentType() {
+        return header.getContentType();
+    }
+
     public Map<String, String> getFormData() {
         return requestBody.getFormData();
     }
@@ -28,9 +32,5 @@ public class HttpRequest {
 
     public RequestLine getRequestLine() {
         return requestLine;
-    }
-
-    public RequestBody getRequestBody() {
-        return requestBody;
     }
 }

@@ -51,5 +51,5 @@ public class Http11Request {
             throw new IllegalArgumentException("HttpRequest의 startLine 형식이 잘못되었습니다.");
         }
         return startLine;
-    }ㅁ
+    }
 }

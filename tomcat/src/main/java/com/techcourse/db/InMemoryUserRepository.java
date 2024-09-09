@@ -23,5 +23,13 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
+    public static void deleteByAccount(String account) {
+        database.remove(account);
+    }
+
+    public static boolean doesExistAccount(String account) {
+        return database.containsKey(account);
+    }
+
     private InMemoryUserRepository() {}
 }

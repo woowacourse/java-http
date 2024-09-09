@@ -14,7 +14,7 @@ public enum RequestPathType {
         if (split.length == 2) {
             return RESOURCE;
         }
-        throw new IllegalArgumentException("존재하는 PathType입니다.");
+        throw new IllegalArgumentException("존재하지 않는 PathType입니다.");
     }
 
     public boolean isAPI() {

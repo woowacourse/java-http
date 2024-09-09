@@ -22,6 +22,10 @@ public class HttpRequest {
         return header.getContentType();
     }
 
+    public String getCookie() {
+        return header.getCookie();
+    }
+
     public Map<String, String> getFormData() {
         return requestBody.getFormData();
     }

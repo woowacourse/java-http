@@ -54,12 +54,13 @@ public class LoginController extends AbstractController {
     }
 
     private Session extractSession(HttpRequest request) {
-        String cookie = request.getHeader("Cookie");
-        Map<String, String> cookies = new HashMap<>();
-        for (String cookieParts : cookie.split(" ")) {
-            String[] keyAndValue = cookieParts.split("=");
-            cookies.put(keyAndValue[0], keyAndValue[1]);
-        }
+        String cookie = request.getCookie();
+        if (cookie == null) {
+            Map<String, String> cookies = new HashMap<>();
+            for (String cookieParts : cookie.split(" ")) {
+                String[] keyAndValue = cookieParts.split("=");
+                cookies.put(keyAndValue[0], keyAndValue[1]);
+            }
 
         String jsessionId = cookies.get("JSESSIONID");
         SessionManager sessionManager = new SessionManager();

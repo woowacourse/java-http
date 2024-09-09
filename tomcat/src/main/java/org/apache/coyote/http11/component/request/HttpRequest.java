@@ -1,9 +1,14 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.request;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import org.apache.coyote.http11.component.common.Body;
+import org.apache.coyote.http11.component.common.FormUrlEncodedBody;
+import org.apache.coyote.http11.component.common.Method;
+import org.apache.coyote.http11.component.common.Version;
 
 public class HttpRequest {
     private static final String LINE_DELIMITER = "\r\n";
@@ -36,7 +41,7 @@ public class HttpRequest {
     }
 
     public boolean isSameUri(String uriText) {
-        return getUri().toString().equals(uriText);
+        return getUri().getPath().equals(uriText);
     }
 
     public Version getVersion() {

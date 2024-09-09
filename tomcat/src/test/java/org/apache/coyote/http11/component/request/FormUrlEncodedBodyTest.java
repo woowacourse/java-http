@@ -3,7 +3,7 @@ package org.apache.coyote.http11.component.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.http11.component.FormUrlEncodedBody;
+import org.apache.coyote.http11.component.common.FormUrlEncodedBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

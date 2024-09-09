@@ -1,6 +1,8 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.response;
 
 import java.util.stream.Collectors;
+
+import org.apache.coyote.http11.component.common.Headers;
 
 public class ResponseHeader extends Headers {
 

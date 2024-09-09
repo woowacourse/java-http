@@ -1,7 +1,10 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.request;
 
 import java.net.URI;
 import java.util.List;
+
+import org.apache.coyote.http11.component.common.Method;
+import org.apache.coyote.http11.component.common.Version;
 
 public class RequestLine {
 

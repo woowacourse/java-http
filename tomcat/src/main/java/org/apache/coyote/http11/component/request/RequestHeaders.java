@@ -1,8 +1,10 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.request;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.apache.coyote.http11.component.common.Headers;
 
 public class RequestHeaders extends Headers {
 

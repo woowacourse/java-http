@@ -10,12 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.component.HttpRequest;
-import org.apache.coyote.http11.component.HttpResponse;
-import org.apache.coyote.http11.component.ResponseHeader;
-import org.apache.coyote.http11.component.ResponseLine;
-import org.apache.coyote.http11.component.StatusCode;
-import org.apache.coyote.http11.component.Version;
+import org.apache.coyote.http11.component.common.StatusCode;
+import org.apache.coyote.http11.component.common.Version;
+import org.apache.coyote.http11.component.request.HttpRequest;
+import org.apache.coyote.http11.component.response.HttpResponse;
+import org.apache.coyote.http11.component.response.ResponseHeader;
+import org.apache.coyote.http11.component.response.ResponseLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,11 +79,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private void renderLogin(final String path, final OutputStream outputStream) throws IOException {
         final var split = path.split("\\?")[0];
-        final var resource = getClass().getClassLoader().getResource("static/" + split + ".html");
-        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
+        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("FOUND", 302));
         final var responseHeader = new ResponseHeader();
-        final var response = new HttpResponse(ok, responseHeader,
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+        responseHeader.put("Location", "http://localhost:8080/index.html");
+        final var response = new HttpResponse(ok, responseHeader, "");
         outputStream.write(response.getResponseText().getBytes());
         outputStream.flush();
     }

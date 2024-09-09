@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.common;
 
 public class StatusCode {
 

@@ -1,7 +1,7 @@
-package org.apache.coyote.http11.component;
+package org.apache.coyote.http11.component.response;
 
 public class HttpResponse {
-    
+
     private static final String LINE_DELIMITER = "\r\n";
 
     private final ResponseLine responseLine;

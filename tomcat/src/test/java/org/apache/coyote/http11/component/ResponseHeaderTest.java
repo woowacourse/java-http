@@ -2,6 +2,7 @@ package org.apache.coyote.http11.component;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import org.apache.coyote.http11.component.response.ResponseHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

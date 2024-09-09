@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.Cookies;
-import org.apache.coyote.http11.executor.ExecutorService;
+import org.apache.coyote.http11.executor.RequestExecutors;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.SessionManager;
@@ -19,10 +19,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ExecutorService executor;
+    private final RequestExecutors executor;
     private final SessionManager sessionManager;
 
-    public Http11Processor(final Socket connection, final ExecutorService executor, final SessionManager sessionManager) {
+    public Http11Processor(final Socket connection, final RequestExecutors executor, final SessionManager sessionManager) {
         this.connection = connection;
         this.executor = executor;
         this.sessionManager = sessionManager;

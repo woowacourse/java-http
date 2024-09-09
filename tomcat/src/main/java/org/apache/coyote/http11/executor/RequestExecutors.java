@@ -6,11 +6,11 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 import java.util.List;
 
-public class ExecutorService {
+public class RequestExecutors {
     private final List<Executor> executors;
     private final Executor pageExecutor = new ResourceExecutor();
 
-    public ExecutorService() {
+    public RequestExecutors() {
         this.executors = List.of(new LoginGetExecutor(), new RegisterGetExecutor(), new RegisterPostExecutor(),
                 new LoginPostExecutor()
         );

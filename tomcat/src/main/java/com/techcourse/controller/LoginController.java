@@ -6,7 +6,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.session.JSession;
@@ -28,7 +27,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
         HttpSession session = SessionManager.getInstance().getSession(request);
         if (session != null) {
-            processSessionLogin(responseBuilder, session);
+            processSessionLogin(responseBuilder);
             return;
         }
 
@@ -43,11 +42,7 @@ public class LoginController extends AbstractController {
         resourceController.doGet(request.updatePath("login.html"), responseBuilder);
     }
 
-    private void processSessionLogin(Builder responseBuilder, HttpSession session) {
-        User user = (User) Objects.requireNonNull(session).getAttribute("user");
-
-        log.info("이미 로그인한 사용자 입니다. - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
-
+    private void processSessionLogin(Builder responseBuilder) {
         responseBuilder.status(Status.FOUND)
                 .location("/index.html");
     }
@@ -66,7 +61,7 @@ public class LoginController extends AbstractController {
         jSession.setAttribute("user", user);
         SessionManager.getInstance().add(jSession);
 
-        log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
+        log.info("로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
 
         responseBuilder.status(Status.FOUND)
                 .location("/index.html")

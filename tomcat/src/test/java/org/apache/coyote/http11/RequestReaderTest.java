@@ -43,7 +43,7 @@ class RequestReaderTest {
         // given
         String expected = "account=poke&email=poke@zzang.com&password=password";
         String httpRequest = String.join("\r\n",
-                "Post /register HTTP/1.1 ",
+                "POST /register HTTP/1.1 ",
                 "Host: localhost",
                 "Connection: keep-alive",
                 "Content-Length: " + expected.getBytes().length,

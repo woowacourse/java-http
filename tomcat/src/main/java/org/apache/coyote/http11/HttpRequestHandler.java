@@ -9,8 +9,7 @@ public class HttpRequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
-    public HttpResponse handle(RequestLine line, String responseBody) {
-        // Method, Path, Body
+    public HttpResponse handle(RequestLine line, String responseBody, HttpCookies cookies) {
         if (line.getMethod().equals("GET") && line.getUrl().equals("/")) {
             return rootPage();
         }
@@ -23,8 +22,12 @@ public class HttpRequestHandler {
         return staticPage(line.getUrl());
     }
 
+    public HttpResponse handle(RequestLine line, String responseBody) {
+        return handle(line, responseBody, new HttpCookies());
+    }
+
     public HttpResponse handle(RequestLine line) {
-        return handle(line, "");
+        return handle(line, "", new HttpCookies());
     }
 
     private HttpResponse register(String body) {
@@ -34,6 +37,7 @@ public class HttpRequestHandler {
         InMemoryUserRepository.save(newAccount);
         return HttpResponse.builder()
                 .statusCode(HttpStatusCode.FOUND)
+                .createSession()
                 .redirect("index.html");
     }
 
@@ -50,6 +54,7 @@ public class HttpRequestHandler {
         if (account.checkPassword(queryParam.getValue("password"))) {
             return HttpResponse.builder()
                     .statusCode(HttpStatusCode.FOUND)
+                    .createSession()
                     .redirect("index.html");
         }
 

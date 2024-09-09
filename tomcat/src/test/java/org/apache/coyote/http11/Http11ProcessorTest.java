@@ -59,7 +59,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void loginSuccess() throws IOException {
+    void loginSuccess() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -75,13 +75,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: index.html \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=", "HTTP/1.1 302 Found");
     }
 
     @Test
@@ -110,5 +104,28 @@ class Http11ProcessorTest {
                 body;
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void register() throws IOException {
+        // given
+        final String requestBody = "account=poke&email=poke@zzang.com&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length,
+                "",
+                requestBody
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=", "HTTP/1.1 302 Found");
     }
 }

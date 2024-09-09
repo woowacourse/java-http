@@ -6,6 +6,10 @@ public class HttpResponse {
     private HttpStatusCode statusCode;
     private String body;
 
+    private HttpResponse() {
+        this.headers = new HttpResponseHeader();
+    }
+
     public static HttpResponse builder() {
         return new HttpResponse();
     }
@@ -16,10 +20,8 @@ public class HttpResponse {
     }
 
     public HttpResponse responseBody(String body) {
-        HttpResponseHeader headers = new HttpResponseHeader();
-        headers.addHeader("Content-Type", "text/html;charset=utf-8");
-        headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-        this.headers = headers;
+        this.headers.addHeader("Content-Type", "text/html;charset=utf-8");
+        this.headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
         return this;
     }
@@ -33,12 +35,9 @@ public class HttpResponse {
                     .responseBody(notFoundResource);
         }
 
-        HttpResponseHeader headers = new HttpResponseHeader();
         HttpContentType contentType = HttpContentType.matchContentType(path);
         headers.addHeader("Content-Type", contentType.getContentType() + ";charset=utf-8");
         headers.addHeader("Content-Length", String.valueOf(resource.getBytes().length));
-
-        this.headers = headers;
         this.body = resource;
         return this;
     }
@@ -54,11 +53,16 @@ public class HttpResponse {
 
     public HttpResponse redirect(String uri) {
         this.body = "";
-        HttpResponseHeader headers = new HttpResponseHeader();
         headers.addHeader("Location", uri);
         headers.addHeader("Content-Type", "text/html;charset=utf-8");
         headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
-        this.headers = headers;
+        return this;
+    }
+
+    public HttpResponse createSession() {
+        HttpCookies cookies = new HttpCookies();
+        cookies.createSession();
+        this.headers.addHeader("Set-Cookie", cookies.buildOutput());
         return this;
     }
 }

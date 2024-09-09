@@ -3,10 +3,12 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookies {
 
+    public static final String SESSION_NAME = "JSESSIONID";
     public static final String COOKIES_DELIMITER = "; ";
     public static final String VALUE_DELIMITER = "=";
 
@@ -37,12 +39,21 @@ public class HttpCookies {
     }
 
     public String getCookieValue(String name) {
-        return cookies.get(name);
+        return cookies.getOrDefault(name, "");
     }
 
     public String buildOutput() {
         return cookies.entrySet().stream()
                 .map(entry -> entry.getKey() + VALUE_DELIMITER + entry.getValue())
                 .collect(Collectors.joining(COOKIES_DELIMITER));
+    }
+
+    public boolean hasSession() {
+        return !getCookieValue(SESSION_NAME).isEmpty();
+    }
+
+    public void createSession() {
+        String uuid = UUID.randomUUID().toString();
+        cookies.put(SESSION_NAME, uuid);
     }
 }

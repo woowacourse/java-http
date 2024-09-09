@@ -21,4 +21,8 @@ public class RequestHeaders {
     public String getHeaderValue(String name) {
         return headers.getOrDefault(name, "");
     }
+
+    public HttpCookies getCookies() {
+        return new HttpCookies(getHeaderValue("Cookie"));
+    }
 }

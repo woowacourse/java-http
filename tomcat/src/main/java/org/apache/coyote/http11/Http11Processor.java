@@ -3,21 +3,23 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.http.MediaType.DEFAULT_CHARSET;
 import static org.apache.coyote.http11.http.MediaType.TEXT_CSS;
 import static org.apache.coyote.http11.http.MediaType.TEXT_HTML;
+import static org.apache.coyote.http11.http.MediaType.TEXT_JAVASCRIPT;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.http.Headers;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatusCode;
+import org.apache.coyote.http11.http.NoHandlerFoundException;
+import org.apache.coyote.http11.http.NoResourceFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,84 +46,117 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream()
+        ) {
             final var request = new HttpRequest(inputStream);
-            final var httpResponse = mapResource(request);
-
-            outputStream.write(httpResponse.getBytes());
+            final var response = handle(request);
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpResponse mapResource(final HttpRequest request) throws IOException {
-        final var defaultResourcePath = "static";
-        URL url;
-        var status = HttpStatusCode.OK;
-        var body = "";
+    private HttpResponse handle(final HttpRequest request) throws IOException {
+        if (isStaticPath(request)) {
+            return handleStaticResource(request);
+        }
         if (Objects.equals(request.getPath(), "/")) {
-            body = "Hello world!";
-        }
-        if (Objects.equals(request.getPath(), "/index.html")) {
-            url = CLASS_LOADER.getResource(defaultResourcePath + "/index.html");
-            body = Files.readString(Path.of(url.getPath()));
-        }
-        if (Objects.equals(request.getPath(), "/css/styles.css")) {
-            url = CLASS_LOADER.getResource(defaultResourcePath + "/css/styles.css");
-            body = Files.readString(Path.of(url.getPath()));
+            return handleRoot(request);
         }
         if (Objects.equals(request.getPath(), "/login")) {
-            url = CLASS_LOADER.getResource(defaultResourcePath + "/login.html");
-            body = Files.readString(Path.of(url.getPath()));
-            String queryString = request.getQueryString();
-            if (!queryString.isBlank()) {
-                Map<String, String> queryParams = new ConcurrentHashMap<>();
-                var params = queryString.split("&");
-                for (String param : params) {
-                    String[] keyValue = param.split("=");
-                    queryParams.put(keyValue[0], keyValue[1]);
-                }
-                var account = queryParams.get("account");
-                var password = queryParams.get("password");
-                var user = InMemoryUserRepository.findByAccount(account).orElse(null);
-                if (user == null || !user.checkPassword(password)) {
-                    url = CLASS_LOADER.getResource(defaultResourcePath + "/401.html");
-                    status = HttpStatusCode.UNAUTHORIZED;
-                    body = Files.readString(Path.of(url.getPath()));
-                } else {
-                    status = HttpStatusCode.FOUND;
-                    url = CLASS_LOADER.getResource(defaultResourcePath + "/index.html");
-                    body = Files.readString(Path.of(url.getPath()));
-                    log.info("user: {}", user);
-                }
-            }
+            return handleLogin(request);
         }
+        throw new NoHandlerFoundException(request.getPath());
+    }
 
-        final var headers = new Headers()
-                .add("Content-Type", contentType(request.getAccept()))
-                .add("Content-Length", contentLength(body));
+    private boolean isStaticPath(final HttpRequest request) {
+        final var staticExtensions = List.of(".html", ".css", ".js");
+        final var path = request.getPath();
+        return staticExtensions.stream().anyMatch(path::endsWith);
+    }
 
+    private HttpResponse handleStaticResource(final HttpRequest request) throws IOException {
+        var path = resourcePath(request.getPath());
+        final var body = Files.readString(path);
         return HttpResponse.builder()
                 .httpVersion(request.getHttpVersion())
-                .httpStatusCode(status)
-                .headers(headers)
+                .httpStatusCode(HttpStatusCode.OK)
+                .contentType(contentType(request))
+                .contentLength(body)
                 .body(body)
                 .build();
     }
 
-    private String contentType(final String accept) {
-        String contentType = TEXT_HTML;
-        if (accept != null && accept.contains(TEXT_CSS)) {
-            contentType = TEXT_CSS;
-        }
-        return contentType + ";" + DEFAULT_CHARSET;
+    private HttpResponse handleRoot(final HttpRequest request) {
+        var status = HttpStatusCode.OK;
+        var body = "Hello world!";
+        return HttpResponse.builder()
+                .httpVersion(request.getHttpVersion())
+                .httpStatusCode(status)
+                .contentType(contentType(request))
+                .contentLength(body)
+                .body(body)
+                .build();
     }
 
-    private String contentLength(final String body) {
-        byte[] bodyBytes = body.getBytes();
-        return String.valueOf(bodyBytes.length);
+    private HttpResponse handleLogin(final HttpRequest request) throws IOException {
+        var status = HttpStatusCode.OK;
+        var path = resourcePath("/login.html");
+        var body = Files.readString(path);
+        String queryString = request.getQueryString();
+        if (!queryString.isBlank()) {
+            Map<String, String> queryParams = new ConcurrentHashMap<>();
+            var params = queryString.split("&");
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                queryParams.put(keyValue[0], keyValue[1]);
+            }
+            var account = queryParams.get("account");
+            var password = queryParams.get("password");
+            var user = InMemoryUserRepository.findByAccount(account).orElse(null);
+            if (user == null || !user.checkPassword(password)) {
+                status = HttpStatusCode.UNAUTHORIZED;
+                path = resourcePath("/401.html");
+                body = Files.readString(path);
+            } else {
+                status = HttpStatusCode.FOUND;
+                path = resourcePath("/index.html");
+                body = Files.readString(path);
+                log.info("user: {}", user);
+            }
+        }
+        return HttpResponse.builder()
+                .httpVersion(request.getHttpVersion())
+                .httpStatusCode(status)
+                .contentType(contentType(request))
+                .contentLength(body)
+                .body(body)
+                .build();
+    }
+
+    private Path resourcePath(final String path) {
+        final var url = CLASS_LOADER.getResource("static" + path);
+        if (url == null) {
+            throw new NoResourceFoundException(path);
+        }
+        return Path.of(url.getPath());
+    }
+
+    private String contentType(final HttpRequest request) {
+        if (request.getPath().endsWith(".html") || request.getAccept().contains(TEXT_HTML)) {
+            return TEXT_HTML + ";" + DEFAULT_CHARSET;
+        }
+
+        if (request.getPath().endsWith(".css") || request.getAccept().contains(TEXT_CSS)) {
+            return TEXT_CSS + ";" + DEFAULT_CHARSET;
+        }
+
+        if (request.getPath().endsWith(".js") || request.getAccept().contains(TEXT_JAVASCRIPT)) {
+            return TEXT_JAVASCRIPT + ";" + DEFAULT_CHARSET;
+        }
+        return null;
     }
 }

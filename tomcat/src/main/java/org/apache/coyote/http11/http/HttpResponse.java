@@ -80,6 +80,25 @@ public class HttpResponse {
             return this;
         }
 
+        public Builder contentType(String contentType) {
+            initHeaderIfNotExist();
+            headers.add("Content-Type", contentType);
+            return this;
+        }
+
+        public Builder contentLength(String body) {
+            initHeaderIfNotExist();
+            long length = body.getBytes().length;
+            headers.add("Content-Length", String.valueOf(length));
+            return this;
+        }
+
+        private void initHeaderIfNotExist() {
+            if (headers == null) {
+                headers = new Headers();
+            }
+        }
+
         public Builder body(String body) {
             this.body = body;
             return this;

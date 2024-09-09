@@ -1,30 +1,25 @@
 package org.apache.coyote.http11.handler;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class MethodQueryParameters {
+public class QueryParameters {
     private final Map<String, String> queryParams;
 
-    private MethodQueryParameters(Map<String, String> queryParams) {
+    private QueryParameters(Map<String, String> queryParams) {
         this.queryParams = Map.copyOf(queryParams);
     }
 
-    public static MethodQueryParameters empty() {
-        return new MethodQueryParameters(Collections.emptyMap());
-    }
-
-    public static MethodQueryParameters parseFrom(String queryStrings) {
+    public static QueryParameters parseFrom(String queryStrings) {
         Map<String, String> queryParams = new HashMap<>();
         String[] queryParamTokens = queryStrings.split("&");
         for (String queryParam : queryParamTokens) {
             String[] split = queryParam.split("=");
             queryParams.put(split[0], split[1]);
         }
-        return new MethodQueryParameters(queryParams);
+        return new QueryParameters(queryParams);
     }
 
     public String getParam(String key) {

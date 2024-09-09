@@ -41,7 +41,7 @@ public class DefaultResourceHandler implements RequestHandler {
     }
 
     private String loginResponse(Request request) throws IOException {
-        MethodQueryParameters methodRequest = MethodQueryParameters.parseFrom(request.getTarget().split("/")[1]);
+        QueryParameters methodRequest = QueryParameters.parseFrom(request.getTarget().split("/")[1]);
         if (request.getTarget().contains("?")) {
             boolean isLogin = login(
                     methodRequest.getParam("account"),
@@ -64,7 +64,7 @@ public class DefaultResourceHandler implements RequestHandler {
 
     private String registerResponse(Request request) throws IOException {
         if (request.getTarget().contains("?")) {
-            MethodQueryParameters queryParameters = MethodQueryParameters.parseFrom(
+            QueryParameters queryParameters = QueryParameters.parseFrom(
                     request.getTarget().split("/")[1]);
             register(queryParameters);
             return Response.writeAsFound(request, "/index.html");
@@ -75,7 +75,7 @@ public class DefaultResourceHandler implements RequestHandler {
         return Response.writeAsStaticResource(request, resource.getContentType(), resource.getContent());
     }
 
-    private void register(MethodQueryParameters methodRequest) {
+    private void register(QueryParameters methodRequest) {
         InMemoryUserRepository.save(new User(
                 methodRequest.getParam("account"),
                 methodRequest.getParam("password"),

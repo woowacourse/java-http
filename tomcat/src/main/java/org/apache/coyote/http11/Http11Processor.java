@@ -23,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final String HTML = ".html";
     public static final String CSS = ".css";
     public static final String JS = ".js";
+    public static final String SVG = ".svg";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -58,20 +59,21 @@ public class Http11Processor implements Runnable, Processor {
             String contentType;
             byte[] responseBody;
 
+            String httpStatus = "200 OK ";
             String resourcePath = determineResourcePath(requestURL);
             contentType = determineContentType(resourcePath);
 
             URL resource = getClass().getResource(resourcePath);
 
             if (resource == null) {
-                responseBody = "404 Not Found".getBytes();
-                contentType = "text/plain";
-            } else {
-                responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+                resource = getClass().getResource("/static/404.html");
+                httpStatus = "404 NOT FOUND ";
             }
 
+            responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+
             final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
+                    "HTTP/1.1 " + httpStatus,
                     "Content-Type: " + contentType,
                     "Content-Length: " + responseBody.length + " ",
                     "",
@@ -89,6 +91,10 @@ public class Http11Processor implements Runnable, Processor {
     private String determineResourcePath(String requestURL) {
         if (requestURL.equals("/") || requestURL.equals("/index.html")) {
             return "/static/index.html";
+        }
+
+        if (requestURL.endsWith(SVG)) {
+            return STATIC + "/assets/img/error-404-monochrome.svg";
         }
 
         if (requestURL.contains(QUERY_PARAMETER)) {
@@ -110,6 +116,10 @@ public class Http11Processor implements Runnable, Processor {
 
         if (resourcePath.endsWith(JS)) {
             return "application/javascript ";
+        }
+
+        if (resourcePath.endsWith(SVG)) {
+            return "image/svg+xml ";
         }
 
         return "text/html;charset=utf-8 ";

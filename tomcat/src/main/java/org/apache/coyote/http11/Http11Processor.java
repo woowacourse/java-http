@@ -8,9 +8,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.component.common.Version;
+import org.apache.coyote.http11.component.common.body.TextTypeBody;
 import org.apache.coyote.http11.component.request.HttpRequest;
 import org.apache.coyote.http11.component.response.HttpResponse;
 import org.apache.coyote.http11.component.response.ResponseHeader;
@@ -44,7 +46,8 @@ public class Http11Processor implements Runnable, Processor {
              final var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final var plaintext = bufferedReader.readLine();
+            final var plaintext = bufferedReader.lines()
+                    .collect(Collectors.joining("\r\n"));
 
             if (plaintext == null) {
                 return;
@@ -82,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         final var ok = new ResponseLine(new Version(1, 1), new StatusCode("FOUND", 302));
         final var responseHeader = new ResponseHeader();
         responseHeader.put("Location", "http://localhost:8080/index.html");
-        final var response = new HttpResponse(ok, responseHeader, "");
+        final var response = new HttpResponse(ok, responseHeader, new TextTypeBody(""));
         outputStream.write(response.getResponseText().getBytes());
         outputStream.flush();
     }
@@ -92,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
         final var responseHeader = new ResponseHeader();
         final var response = new HttpResponse(ok, responseHeader,
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+                new TextTypeBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath()))));
         outputStream.write(response.getResponseText().getBytes());
         outputStream.flush();
     }

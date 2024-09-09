@@ -1,23 +1,24 @@
 package org.apache.coyote.http11.component.response;
 
+import org.apache.coyote.http11.component.common.body.Body;
+
 public class HttpResponse {
 
     private static final String LINE_DELIMITER = "\r\n";
 
     private final ResponseLine responseLine;
     private final ResponseHeader responseHeader;
-    // TODO: 범용적인 Body로 바꿀 것
-    private final String htmlBody;
+    private final Body<?> body;
 
-    public HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader, final String htmlBody) {
+    public HttpResponse(final ResponseLine responseLine, final ResponseHeader responseHeader, final Body<?> body) {
         this.responseLine = responseLine;
         this.responseHeader = responseHeader;
-        this.htmlBody = htmlBody;
+        this.body = body;
     }
 
     public String getResponseText() {
         return responseLine.getResponseText() + LINE_DELIMITER + responseHeader.getResponseText() + LINE_DELIMITER
                 + LINE_DELIMITER
-                + htmlBody;
+                + body.deserialize();
     }
 }

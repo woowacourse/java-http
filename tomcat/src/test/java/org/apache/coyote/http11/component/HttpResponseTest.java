@@ -3,6 +3,7 @@ package org.apache.coyote.http11.component;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 import org.apache.coyote.http11.component.common.Version;
+import org.apache.coyote.http11.component.common.body.TextTypeBody;
 import org.apache.coyote.http11.component.response.HttpResponse;
 import org.apache.coyote.http11.component.response.ResponseHeader;
 import org.apache.coyote.http11.component.response.ResponseLine;
@@ -22,7 +23,7 @@ class HttpResponseTest {
         responseHeader.put("fram", "6");
         responseHeader.put("Authorization", "Bearer=token");
         final var dummyHtml = "<html>\r\n <p></p>";
-        final var sut = new HttpResponse(responseLine, responseHeader, dummyHtml);
+        final var sut = new HttpResponse(responseLine, responseHeader, new TextTypeBody(dummyHtml));
 
         // when & then
         assertThatCode(sut::getResponseText)

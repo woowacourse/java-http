@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.apache.coyote.handler.Handler;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.request.HttpRequestParser;
 import org.apache.coyote.Processor;
@@ -40,7 +41,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = HttpRequestParser.parseRequest(bufferedReader);
             final RequestHandlerAdapter requestHandlerAdapter = new RequestHandlerAdapter();
-            final String response = requestHandlerAdapter.handle(httpRequest);
+            final Handler handler = requestHandlerAdapter.getHandler(httpRequest);
+            final String response = handler.handle(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

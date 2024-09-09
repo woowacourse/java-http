@@ -23,6 +23,6 @@ public class HttpCookie {
     }
 
     public Map<String, String> getCookies() {
-        return cookies;
+        return new HashMap<>(cookies);
     }
 }

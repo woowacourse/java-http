@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
@@ -90,12 +91,13 @@ public class ApiProcessor {
     private void processLogin(OutputStream outputStream, Map<String, String> requestBody) throws IOException {
         String account = requestBody.get("account");
         String password = requestBody.get("password");
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 User입니다."));
-
-        if (user.checkPassword(password)) {
-            loginSuccess(outputStream, user);
-            return;
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if(optionalUser.isPresent()){
+            User user = optionalUser.get();
+            if (user.checkPassword(password)) {
+                loginSuccess(outputStream, user);
+                return;
+            }
         }
         loginFail(outputStream);
     }

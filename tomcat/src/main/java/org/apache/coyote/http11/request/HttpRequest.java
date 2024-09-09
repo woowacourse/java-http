@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.body.RequestBody;
@@ -26,23 +28,23 @@ public class HttpRequest {
 
     public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = new RequestLine(bufferedReader.readLine());
-        RequestHeaders requestHeaders = createRequestHeaders(bufferedReader);
+        RequestHeaders requestHeaders = new RequestHeaders(readHeaders(bufferedReader));
         RequestBody requestBody = createRequestBody(bufferedReader, requestHeaders);
 
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
-    private static RequestHeaders createRequestHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+    private static List<String> readHeaders(BufferedReader bufferedReader) throws IOException {
+        List<String> headers = new ArrayList<>();
 
-        String headerLine = bufferedReader.readLine();
-        while (!headerLine.isBlank()) {
-            String[] header = headerLine.split(": ");
-            headers.put(header[0], header[1]);
-            headerLine = bufferedReader.readLine();
+        String headerField = bufferedReader.readLine();
+
+        while (!headerField.isBlank()) {
+            headers.add(headerField);
+            headerField = bufferedReader.readLine();
         }
 
-        return new RequestHeaders(headers);
+        return headers;
     }
 
     private static RequestBody createRequestBody(BufferedReader bufferedReader, RequestHeaders requestHeaders)

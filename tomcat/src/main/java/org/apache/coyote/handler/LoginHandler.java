@@ -7,7 +7,6 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.mapping.ResourceHandlerMapping;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;
 
@@ -36,19 +35,19 @@ public class LoginHandler extends Handler {
             return processLoginPostRequest(httpRequest);
         }
 
-        return ResourceHandlerMapping.getInstance().handleSimpleResource("404.html");
+        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
 
     }
 
     private String processLoginGetRequest(final HttpRequest httpRequest) {
         HttpCookie httpCookie = httpRequest.getHttpCookie();
         if (httpCookie == null) {
-            return ResourceHandlerMapping.getInstance().handleSimpleResource("login.html");
+            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/login.html", "HTTP/1.1", null, null));
         }
 
         String sessionId = httpCookie.getValue("JSESSIONID=");
         if (sessionManager.findSession(sessionId) == null) {
-            return ResourceHandlerMapping.getInstance().handleSimpleResource("login.html");
+            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/login.html", "HTTP/1.1", null, null));
         }
         return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
     }
@@ -60,7 +59,7 @@ public class LoginHandler extends Handler {
 
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
         if (userOptional.isEmpty()) {
-            return ResourceHandlerMapping.getInstance().handleSimpleResource("401.html");
+            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/401.html", "HTTP/1.1", null, null));
         }
 
         final User user = userOptional.get();
@@ -73,7 +72,7 @@ public class LoginHandler extends Handler {
                     new HttpCookie("JSESSIONID=" + session.getId()));
         }
 
-        return ResourceHandlerMapping.getInstance().handleSimpleResource("404.html");
+        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
     }
 
     private String addCookie(final String response, final HttpCookie cookie) {

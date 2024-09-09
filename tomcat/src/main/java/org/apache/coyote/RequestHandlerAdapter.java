@@ -1,6 +1,6 @@
 package org.apache.coyote;
 
-import org.apache.coyote.mapping.ResourceHandlerMapping;
+import org.apache.coyote.handler.StaticResourceHandler;
 import org.apache.coyote.mapping.UrlHandlerMapping;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;
@@ -19,7 +19,7 @@ public class RequestHandlerAdapter {
 
         final String resourceName = paths[paths.length - 1];
         if (resourceName.contains(".")) {
-            return ResourceHandlerMapping.getInstance().handleSimpleResource(resourceName);
+            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "404.html", "HTTP/1.1", null, null));
         }
 
         return UrlHandlerMapping.getInstance().mapping(httpRequest);

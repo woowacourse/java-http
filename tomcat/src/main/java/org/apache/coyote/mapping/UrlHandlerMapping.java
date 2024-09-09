@@ -2,6 +2,7 @@ package org.apache.coyote.mapping;
 
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.RegisterHandler;
+import org.apache.coyote.handler.StaticResourceHandler;
 import org.apache.http.request.HttpRequest;
 
 public class UrlHandlerMapping extends HandlerMapping {
@@ -11,9 +12,13 @@ public class UrlHandlerMapping extends HandlerMapping {
     private UrlHandlerMapping() {
     }
 
+    public static UrlHandlerMapping getInstance() {
+        return INSTANCE;
+    }
+
     @Override
     public String mapping(HttpRequest httpRequest) {
-        final String uri = httpRequest.getUrl();
+        final String uri = httpRequest.getPath();
         if (uri.contains("login")) {
             return LoginHandler.getInstance().handle(httpRequest);
         }
@@ -22,10 +27,6 @@ public class UrlHandlerMapping extends HandlerMapping {
             return RegisterHandler.getInstance().handle(httpRequest);
         }
 
-        return ResourceHandlerMapping.getInstance().handleSimpleResource("404.html");
-    }
-
-    public static UrlHandlerMapping getInstance() {
-        return INSTANCE;
+        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
     }
 }

@@ -1,7 +1,6 @@
 package org.apache.coyote.handler;
 
 import org.apache.http.HttpMethod;
-import org.apache.coyote.mapping.ResourceHandlerMapping;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;
 
@@ -21,14 +20,14 @@ public class RegisterHandler extends Handler {
 
     public String handle(final HttpRequest httpRequest) {
         if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return ResourceHandlerMapping.getInstance().handleSimpleResource("register.html");
+            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/register.html", "HTTP/1.1", null, null));
         }
 
         if (httpRequest.isSameMethod(HttpMethod.POST)) {
             return processRegisterPostRequest(httpRequest);
         }
 
-        return ResourceHandlerMapping.getInstance().handleSimpleResource("401.html");
+        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/401.html", "HTTP/1.1", null, null));
     }
 
     private String processRegisterPostRequest(final HttpRequest httpRequest) {

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.exception.CanNotHandleRequest;
+import org.apache.coyote.http11.exception.NoSuchUserException;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.StaticResource;
@@ -22,11 +23,13 @@ public class StaticResourceHandler implements RequestHandler {
         log.info("request : {}", request);
         if (request.isStaticResourceRequest()) {
             StaticResource staticResource = new StaticResource(request.getTarget());
-            return Response.writeResponse(request, staticResource.getContentType(), staticResource.getContent());
+            return Response.writeStaticResourceResponse(request, staticResource.getContentType(),
+                    staticResource.getContent());
         }
         if (request.getTarget().equals("/")) {
             StaticResource staticResource = new StaticResource("/index.html");
-            return Response.writeResponse(request, staticResource.getContentType(), staticResource.getContent());
+            return Response.writeStaticResourceResponse(request, staticResource.getContentType(),
+                    staticResource.getContent());
         }
         if (request.getTarget().contains("login")) {
             return loginResponse(request);
@@ -37,14 +40,22 @@ public class StaticResourceHandler implements RequestHandler {
     private String loginResponse(Request request) throws IOException {
         MethodRequest methodRequest = new MethodRequest(request.getTarget());
         if (request.getTarget().contains("?")) {
-            checkLogin(methodRequest.getParam("account"));
+            boolean isLogin = login(
+                    methodRequest.getParam("account"),
+                    methodRequest.getParam("password")
+            );
+            if (isLogin) {
+                return Response.writeFoundResponse(request, "/index.html");
+            }
+            return Response.writeFoundResponse(request, "/401.html");
         }
         StaticResource resource = new StaticResource("/login.html");
-        return Response.writeResponse(request, resource.getContentType(), resource.getContent());
+        return Response.writeStaticResourceResponse(request, resource.getContentType(), resource.getContent());
     }
 
-    private void checkLogin(String account) {
-        User user = InMemoryUserRepository.findByAccount(account).get();
-        log.info("User : {}", user);
+    private boolean login(String account, String password) throws NoSuchUserException {
+        User user = InMemoryUserRepository.findByAccount(account).
+                orElseThrow(() -> new NoSuchUserException(account + " 에 해당하는 유저를 찾을 수 없습니다."));
+        return user.checkPassword(password);
     }
 }

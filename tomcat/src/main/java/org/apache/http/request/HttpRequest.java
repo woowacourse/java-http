@@ -1,6 +1,7 @@
 package org.apache.http.request;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpHeader;
@@ -8,7 +9,6 @@ import org.apache.http.HttpMethod;
 
 public class HttpRequest {
     private final HttpMethod method;
-    private final String url;
     private final String path;
     private final String version;
     private final HttpHeader[] headers;
@@ -20,25 +20,16 @@ public class HttpRequest {
         this.path = path;
         this.version = version;
         this.headers = headers;
-        this.url = parseUrl(path);
         this.body = body;
         this.httpCookie = parseCookie(headers);
     }
 
-    private String parseUrl(final String path) {
-        HttpHeader hostHeader = Arrays.stream(headers)
-                .filter(header -> header.getKey().equalsIgnoreCase("host"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Host 헤더가 존재하지 않습니다."));
-
-        return hostHeader.getValue() + path;
-    }
-
     private HttpCookie parseCookie(HttpHeader[] headers) {
-        return Arrays.stream(headers)
-                .filter(header -> header.getKey().equalsIgnoreCase("Cookie"))
-                .findFirst()
-                .map(header -> new HttpCookie(header.getValue()))
+        return Optional.ofNullable(headers)
+                .flatMap(hs -> Arrays.stream(hs)
+                        .filter(header -> header.getKey().equalsIgnoreCase("Cookie"))
+                        .findFirst()
+                        .map(header -> HttpCookie.of(header.getValue())))
                 .orElse(null);
     }
 
@@ -48,10 +39,6 @@ public class HttpRequest {
 
     public HttpMethod getMethod() {
         return method;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public String getPath() {

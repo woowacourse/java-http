@@ -63,10 +63,12 @@ public class LoginHandler extends Handler {
         sessionManager.add(session);
         return addCookie(
                 HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
-                new HttpCookie("JSESSIONID=" + session.getId()));
+                HttpCookie.of("JSESSIONID=" + session.getId()));
     }
 
     private String addCookie(final String response, final HttpCookie cookie) {
-        return response.concat("\n").concat("Set-Cookie: " + cookie.toString());
+        return response
+                .concat("\n")
+                .concat("Set-Cookie: " + cookie.toString());
     }
 }

@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -205,8 +207,7 @@ class IOStreamTest {
                  final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 final Stream<String> emojiStream = bufferedReader.lines(); // bufferedReader.lines() vs bufferedReader.readLine() -> lines() (읽을 파일 작아서)
 
-                final StringBuilder actual = new StringBuilder();
-                emojiStream.forEach(e -> actual.append(e).append("\r\n"));
+                final String actual = emojiStream.collect(Collectors.joining("\r\n", "", "\r\n"));
 
                 assertThat(actual).hasToString(emoji);
             }

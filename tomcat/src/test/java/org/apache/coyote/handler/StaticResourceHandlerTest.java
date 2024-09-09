@@ -31,11 +31,11 @@ class StaticResourceHandlerTest {
     @DisplayName("정적 리소스 처리: 확장자에 따라 다른 경로에 있는 리소스를 반환")
     void handle_When_Different_Extension_Resource() throws IOException {
         final URL resourceURL = getClass().getClassLoader().getResource("static/css/styles.css");
-        final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
+        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
         final String response = handler.handle(new HttpRequest("GET", "styles.css", "HTTP/1.1", null, null));
 
-        assertThat(response).contains(responseBody);
+        assertThat(response).contains(fileContent);
     }
 }

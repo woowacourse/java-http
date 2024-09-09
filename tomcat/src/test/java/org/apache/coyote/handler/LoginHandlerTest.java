@@ -32,12 +32,12 @@ class LoginHandlerTest {
     @Test
     @DisplayName("GET 요청 처리: 세션이 없는 경우 로그인 페이지를 반환")
     void handle_GetRequest_Without_Session() throws IOException {
+        final URL resourceURL = getClass().getClassLoader().getResource("static/login.html");
+        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
+
         final HttpRequest request = new HttpRequest("GET", "/login", "HTTP/1.1", null, null);
 
-        final URL resourceURL = getClass().getClassLoader().getResource("static/login.html");
-        final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
-
-        assertTrue(loginHandler.handle(request).contains(responseBody));
+        assertTrue(loginHandler.handle(request).contains(fileContent));
     }
 
     @Test
@@ -73,35 +73,35 @@ class LoginHandlerTest {
     @Test
     @DisplayName("POST 요청 처리: 비밀번호가 올바르지 않는 경우 로그인 실패")
     void handle_PostRequest_With_InvalidCredentials() throws IOException {
-        HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
+        final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
+        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
+
+        final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
                 "account=gugu&password=wrongpassword");
 
-        final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
-        final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
-
-        assertThat(loginHandler.handle(request)).contains(responseBody);
+        assertThat(loginHandler.handle(request)).contains(fileContent);
     }
 
     @Test
     @DisplayName("POST 요청 처리: 존재하지 않는 계정 정보로 로그인 실패")
     void handle_PostRequest_WithNonexistentUser() throws IOException {
+        final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
+        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
+
         final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
                 "account=nonexistent&password=anypassword");
 
-        final URL resourceURL = getClass().getClassLoader().getResource("static/401.html");
-        final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
-
-        assertThat(loginHandler.handle(request)).contains(responseBody);
+        assertThat(loginHandler.handle(request)).contains(fileContent);
     }
 
     @Test
     @DisplayName("지원하지 않는 메소드 처리: 404 페이지 반환")
     void handle_UnsupportedMethod() throws IOException {
-        HttpRequest request = new HttpRequest("PUT", "/login", "HTTP/1.1", null, null);
-
         final URL resourceURL = getClass().getClassLoader().getResource("static/404.html");
-        final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
+        final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
-        assertThat(loginHandler.handle(request)).contains(responseBody);
+        final HttpRequest request = new HttpRequest("PUT", "/login", "HTTP/1.1", null, null);
+
+        assertThat(loginHandler.handle(request)).contains(fileContent);
     }
 }

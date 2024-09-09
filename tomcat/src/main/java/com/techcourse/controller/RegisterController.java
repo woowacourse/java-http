@@ -3,26 +3,32 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import com.techcourse.util.StaticResourceManager;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RegisterController {
+
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String STATIC_RESOURCE_PATH = "static/register.html";
 
     public HttpResponse doGet(HttpRequest request) {
-        MediaType mediaType = MediaType.fromAcceptHeader(request.getAccept());
-        return new HttpResponse(200, "OK")
+        MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
+        return new HttpResponse(HttpStatusCode.OK)
                 .addHeader("Content-Type", mediaType.getValue())
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
     }
 
     public HttpResponse doPost(HttpRequest httpRequest) {
-        Map<String, String> body = httpRequest.parseFormBody();
+        Map<String, String> body = Arrays.stream(httpRequest.getBody().split("&"))
+                .map(s -> s.split("="))
+                .collect(HashMap::new, (m, e) -> m.put(e[0], e[1]), Map::putAll);
 
         String account = body.get("account");
         String password = body.get("password");

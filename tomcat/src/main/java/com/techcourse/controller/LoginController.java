@@ -8,9 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,17 +22,17 @@ public class LoginController {
     private static final SessionManager sessionManager = new SessionManager();
 
     public HttpResponse doGet(HttpRequest request) {
-        MediaType mediaType = MediaType.fromAcceptHeader(request.getAccept());
+        MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
 
         // 로그인한 경우 index.html로 리다이렉트
-        Optional<HttpSession> session = request.getSession(sessionManager);
+        Optional<HttpSession> session = sessionManager.getSession(request.getSessionId());
         boolean isLogin = session.map(s -> s.getAttribute("user") != null)
                 .orElse(false);
         if (isLogin) {
             return HttpResponse.redirect("index.html");
         }
 
-        return new HttpResponse(200, "OK")
+        return new HttpResponse(HttpStatusCode.OK)
                 .addHeader("Content-Type", mediaType.getValue())
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
     }
@@ -52,7 +53,7 @@ public class LoginController {
         }
 
         // 세션이 있으면 세션에 유저 정보를 넣어주고, 없다면 생성해서 넣어줌
-        HttpSession httpSession = request.getSession(sessionManager)
+        HttpSession httpSession = sessionManager.getSession(request.getSessionId())
                 .orElse(new Session(UUID.randomUUID().toString()));
         httpSession.setAttribute("user", user);
         sessionManager.add(httpSession);

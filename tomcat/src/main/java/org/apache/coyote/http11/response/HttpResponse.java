@@ -1,0 +1,80 @@
+package org.apache.coyote.http11.response;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
+import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.http11.HttpStatusCode;
+
+public class HttpResponse {
+
+    private static final double VERSION = 1.1;
+    private static final String CRLF = "\r\n";
+
+    private final ResponseLine responseLine;
+    private final HttpHeader headers;
+    private ResponseBody body;
+
+    public HttpResponse(HttpStatusCode statusCode, HttpHeader headers) {
+        this(statusCode, headers, null);
+    }
+
+    public HttpResponse(HttpStatusCode statusCode) {
+        this(statusCode, new HttpHeader(new HashMap<>()), null);
+    }
+
+    public HttpResponse(HttpStatusCode statusCode, HttpHeader headers, byte[] body) {
+        this.responseLine = new ResponseLine("HTTP/" + VERSION, statusCode);
+        this.headers = headers;
+        this.body = new ResponseBody(body);
+        headers.headers().put("Content-Length", String.valueOf(this.body.size()));
+    }
+
+    public static HttpResponse redirect(String location) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Location", location);
+        return new HttpResponse(HttpStatusCode.FOUND, new HttpHeader(headers), null);
+    }
+
+    public HttpResponse addHeader(String key, String value) {
+        headers.headers().put(key, value);
+        return this;
+    }
+
+    public HttpResponse addCookie(String key, String value) {
+        if (headers.headers().containsKey("Set-Cookie")) {
+            headers.headers().put("Set-Cookie", headers.headers().get("Set-Cookie") + "; " + key + "=" + value);
+            return this;
+        }
+        headers.headers().put("Set-Cookie", key + "=" + value);
+        return this;
+    }
+
+    public HttpResponse setBody(String body) {
+        this.body = new ResponseBody(body.getBytes());
+        headers.headers().put("Content-Length", String.valueOf(this.body.size()));
+        return this;
+    }
+
+    public String toHttpMessage() {
+        StringJoiner joiner = new StringJoiner(CRLF);
+        joiner.add(responseLine.toResponseString());
+        joiner.add(headers.toString());
+        joiner.add("");
+        joiner.add(new String(body.body()));
+        return joiner.toString();
+    }
+
+    public byte[] getAsBytes() {
+        return toHttpMessage().getBytes();
+    }
+
+    @Override
+    public String toString() {
+        return "HttpResponse{" +
+                "responseLine=" + responseLine +
+                ", header=" + headers +
+                ", body=" + body +
+                '}';
+    }
+}

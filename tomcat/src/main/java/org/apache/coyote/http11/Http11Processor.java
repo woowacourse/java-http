@@ -10,10 +10,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.HttpRequest;
-import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
         }
-        HttpRequest request = new HttpRequest(sb.toString());
+        HttpRequest request = HttpRequest.from(sb.toString());
 
         if (request.getContentLength() > 0) {
             char[] body = new char[request.getContentLength()];
@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
         log.info("Requested MediaType: {}", mediaType);
 
         String responseBody = StaticResourceManager.read("static" + request.getPath());
-        return new HttpResponse(200, "OK")
+        return new HttpResponse(HttpStatusCode.OK)
                 .addHeader("Content-Type", mediaType.getValue())
                 .setBody(responseBody);
     }

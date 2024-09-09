@@ -31,14 +31,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String requestBody = request.getRequestBody();
-        if (requestBody == null) {
+        if (!request.hasBodyData()) {
             throw new IllegalArgumentException("Query string is missing in the request");
         }
 
-        Map<String, String> requestForm = extractFormData(requestBody);
-        String userName = requestForm.get("account");
-        String password = requestForm.get("password");
+        Map<String, String> requestFormData = request.getFormData();
+        String userName = requestFormData.get("account");
+        String password = requestFormData.get("password");
 
         Optional<User> account = InMemoryUserRepository.findByAccount(userName);
         if (account.isEmpty()) {
@@ -73,17 +72,6 @@ public class LoginController extends AbstractController {
         SessionManager sessionManager = new SessionManager();
         sessionManager.add(session);
         return session;
-    }
-
-    private Map<String, String> extractFormData(String requestBody) {
-        Map<String, String> requestData = new HashMap<>();
-        String[] keyValuePairs = requestBody.split("&");
-        for (String keyValuePair : keyValuePairs) {
-            String[] keyValue = keyValuePair.split("=");
-            requestData.put(keyValue[0], keyValue[1]);
-        }
-
-        return requestData;
     }
 
     private void responseLoginPage(HttpResponse response) throws IOException {

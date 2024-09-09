@@ -13,12 +13,8 @@ public class HttpResponse {
     private static final String COOKIE = "Set-Cookie";
 
     private StatusLine statusLine;
-    private Map<String, String> headers;
+    private Map<String, String> headers = new LinkedHashMap<>();
     private String responseBody;
-
-    public HttpResponse() {
-        this.headers = new LinkedHashMap<>();
-    }
 
     public void setStatus200() {
         statusLine = new StatusLine("HTTP/1.1", "200", "OK");

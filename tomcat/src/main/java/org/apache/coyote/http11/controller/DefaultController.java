@@ -12,11 +12,11 @@ import org.apache.coyote.http11.httpresponse.HttpResponseBody;
 import org.apache.coyote.http11.httpresponse.HttpResponseHeader;
 import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 
-public class PageController extends AbstractController {
+public class DefaultController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        return null;
+        throw new RuntimeException();
     }
 
     @Override
@@ -30,6 +30,9 @@ public class PageController extends AbstractController {
             }
             String fileName = "static" + path;
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
+            if (resourceUrl == null) {
+                resourceUrl = getClass().getClassLoader().getResource("static/404.html");
+            }
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
             HttpResponseHeader httpResponseHeader = new HttpResponseHeader();

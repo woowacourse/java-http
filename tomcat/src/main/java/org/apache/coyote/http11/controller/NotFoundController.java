@@ -9,7 +9,7 @@ import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 
-public class DefaultController extends AbstractController {
+public class NotFoundController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
@@ -19,15 +19,9 @@ public class DefaultController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
-            HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
-
-            String path = httpRequest.getPath();
-            if (!httpRequest.getPath().contains(".")) {
-                path += ".html";
-            }
-            String fileName = "static" + path;
+            String fileName = "static/404.html";
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
-
+            HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.NOT_FOUND);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
 

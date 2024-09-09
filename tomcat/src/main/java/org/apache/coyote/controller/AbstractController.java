@@ -35,7 +35,7 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException(request.getMethod().getMethod());
     }
 
-    protected HttpResponse generateResponse(String path, HttpStatus status) throws IOException {
+    protected HttpResponse generateResponse(String path, HttpStatus status) throws IOException, NullPointerException {
         final URL resource = HttpResponse.class.getClassLoader().getResource(path);
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

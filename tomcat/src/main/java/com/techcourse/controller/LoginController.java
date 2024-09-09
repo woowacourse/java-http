@@ -69,7 +69,7 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private HttpResponse alreadyLoggedIn(HttpRequest request) throws Exception {
+    private HttpResponse alreadyLoggedIn(HttpRequest request) throws IOException, NullPointerException {
         Path path = request.getPath();
 
         HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);

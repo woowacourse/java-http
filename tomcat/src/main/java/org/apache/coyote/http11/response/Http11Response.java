@@ -1,5 +1,11 @@
 package org.apache.coyote.http11.response;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class Http11Response {
 
     private Http11ResponseStartLine startLine;
@@ -20,6 +26,17 @@ public class Http11Response {
     public void sendRedirect(String url) {
         this.startLine = new Http11ResponseStartLine(HttpStatusCode.FOUND);
         addHeader("Location", url);
+    }
+
+    public void addStaticBody(String name) throws IOException {
+        URL resource = getClass().getClassLoader().getResource("static" + name);
+        if (resource == null) {
+            throw new IllegalArgumentException("존재하지 않는 자원입니다.");
+        }
+        Path path = new File(resource.getFile()).toPath();
+        String contentType = Files.probeContentType(path);
+        addBody(new String(Files.readAllBytes(path)));
+        addContentType(contentType);
     }
 
     public void addCookie(String key, String value) {

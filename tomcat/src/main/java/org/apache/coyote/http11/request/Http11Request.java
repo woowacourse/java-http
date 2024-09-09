@@ -94,6 +94,10 @@ public class Http11Request {
         return startLine.getEndPoint();
     }
 
+    public Http11RequestStartLine getStartLine() {
+        return startLine;
+    }
+
     public Http11RequestHeader getHeaders() {
         return headers;
     }

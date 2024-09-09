@@ -41,14 +41,10 @@ public class LoginHandler extends Handler {
 
     private String processLoginGetRequest(final HttpRequest httpRequest) {
         HttpCookie httpCookie = httpRequest.getHttpCookie();
-        if (httpCookie == null) {
+        if (httpCookie == null || ! sessionManager.existsById(httpCookie.getValue("JSESSIONID"))) {
             return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/login.html", "HTTP/1.1", null, null));
         }
 
-        String sessionId = httpCookie.getValue("JSESSIONID=");
-        if (sessionManager.findSession(sessionId) == null) {
-            return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/login.html", "HTTP/1.1", null, null));
-        }
         return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
     }
 

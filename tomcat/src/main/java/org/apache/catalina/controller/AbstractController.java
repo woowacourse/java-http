@@ -1,28 +1,30 @@
 package org.apache.catalina.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
 
-    private final Map<HttpEndpoint, BiConsumer<HttpRequest, HttpResponse>> handlers;
-
-    public AbstractController(Map<HttpEndpoint, BiConsumer<HttpRequest, HttpResponse>> handlers) {
-        this.handlers = handlers;
-    }
+    private final List<Handler> handlers = new ArrayList<>();
 
     @Override
-    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpEndpoint httpEndpoint = HttpEndpoint.of(httpRequest);
-        handlers.get(httpEndpoint).accept(httpRequest, httpResponse);
+    public void service(HttpRequest request, HttpResponse response) {
+        Handler requestHandler = handlers.stream()
+                .filter(handler -> handler.canHandle(request))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("요청을 처리할 수 없는 컨트롤러입니다."));
+        requestHandler.handle(request, response);
     }
 
     public List<HttpEndpoint> getEndpoints() {
-        return handlers.keySet()
-                .stream()
+        return handlers.stream()
+                .map(Handler::getEndpoint)
                 .toList();
+    }
+
+    protected void registerHandlers(List<Handler> handlers) {
+        this.handlers.addAll(handlers);
     }
 }

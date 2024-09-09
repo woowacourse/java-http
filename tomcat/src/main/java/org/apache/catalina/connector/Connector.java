@@ -67,6 +67,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
+
         var processor = new Http11Processor(connection, new UuidSessionGenerator());
         new Thread(processor).start();
     }

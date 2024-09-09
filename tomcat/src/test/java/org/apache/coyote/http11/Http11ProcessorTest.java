@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
+import org.apache.catalina.controller.ControllerRegistry;
+import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.UuidSessionGenerator;
@@ -24,6 +26,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        ControllerRegistry.registerControllers(RequestMapping.getInstance());
+    }
 
     @Nested
     class ResourceFileTest {

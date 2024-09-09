@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import org.apache.catalina.session.Session;
 
 public class HttpRequest {
 
@@ -45,6 +47,13 @@ public class HttpRequest {
         return Optional.of(sessionId);
     }
 
+    public String getQuery(String key) {
+        return requestLine.getQuery(key);
+    }
+
+    public Set<String> getQueryKeys() {
+        return requestLine.getQueryKeys();
+    }
 
     public static class Builder {
         private RequestLine requestLine;

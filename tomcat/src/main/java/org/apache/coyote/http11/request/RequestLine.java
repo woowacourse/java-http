@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class RequestLine {
 
@@ -43,6 +44,10 @@ public class RequestLine {
         return RequestUri.of(uri);
     }
 
+    public String getQuery(String key) {
+        return requestUri.getQuery(key);
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
@@ -57,5 +62,9 @@ public class RequestLine {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    public Set<String> getQueryKeys() {
+        return requestUri.getQueryKeys();
     }
 }

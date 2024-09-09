@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Queries {
 
@@ -42,5 +43,9 @@ public class Queries {
 
     public String get(String key) {
         return values.get(key);
+    }
+
+    public Set<String> getParameters() {
+        return values.keySet();
     }
 }

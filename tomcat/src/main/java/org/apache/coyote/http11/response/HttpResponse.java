@@ -10,20 +10,30 @@ public class HttpResponse {
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String STATUS_LINE_FORMAT = "%s %d %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
+    private static final String REDIRECTION_HEADER = "Location";
+    private static final String COOKIE_HEADER = "Set-Cookie";
 
     private final Protocol protocol = Protocol.HTTP11;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
     private final Map<String, String> headers;
-    private final String responseBody;
+    private String body;
+
+    public HttpResponse() {
+        this(null, new HashMap<>(), null);
+    }
+
+    public HttpResponse(HttpStatus httpStatus) {
+        this(httpStatus, new HashMap<>(), null);
+    }
 
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headers) {
         this(httpStatus, headers, "");
     }
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String responseBody) {
+    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, String body) {
         this.httpStatus = httpStatus;
         this.headers = headers;
-        this.responseBody = responseBody;
+        this.body = body;
     }
 
     public static HttpResponse createRedirectResponse(HttpStatus httpStatus, String location) {
@@ -62,6 +72,18 @@ public class HttpResponse {
         );
     }
 
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    public void addRedirectHeader(String location) {
+        headers.put(REDIRECTION_HEADER, location);
+    }
+
+    public void addCookie(ResponseCookie cookie) {
+        headers.put(COOKIE_HEADER, cookie.toResponse());
+    }
+
     public String toResponse() {
         String statusLine = getStatusLine();
         String headers = getHeaders();
@@ -71,7 +93,7 @@ public class HttpResponse {
                 statusLine,
                 headers,
                 "",
-                responseBody
+                body
         );
     }
 
@@ -91,5 +113,15 @@ public class HttpResponse {
             formattedHeaders.add(formattedHeader);
         }
         return String.join(LINE_SEPARATOR, formattedHeaders);
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void addFile(ResponseFile responseFile) {
+        headers.put("Content-Type", responseFile.getContentType());
+        headers.put("Content-Length", String.valueOf(responseFile.getContentLength()));
+        body = responseFile.getContent();
     }
 }

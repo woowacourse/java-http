@@ -16,21 +16,21 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public void sendRedirect(String s) {
-        headers.put("Location", s);
+    public void sendRedirect(String location) {
+        headers.put("Location", location);
         setStatus(HttpStatus.FOUND.getStatusCode());
     }
 
-    public void setStatus(int i) {
-        this.httpStatus = HttpStatus.from(i);
+    public void setStatus(int status) {
+        this.httpStatus = HttpStatus.from(status);
     }
 
-    public void setContentLength(int i) {
-        headers.put("Content-Length", String.valueOf(i));
+    public void setContentLength(int contentLength) {
+        headers.put("Content-Length", String.valueOf(contentLength));
     }
 
-    public void setContentType(String s) {
-        headers.put("Content-Type", s);
+    public void setContentType(String contentType) {
+        headers.put("Content-Type", contentType);
     }
 
     public void addCookie(Cookie cookie) {

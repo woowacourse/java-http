@@ -86,46 +86,46 @@ public class HttpRequest {
         return Collections.enumeration(map.keySet());
     }
 
-    public String[] getParameterValues(String s) {
+    public String[] getParameterValues(String name) {
         Map<String, String[]> map = getParameterMap();
-        if (map.containsKey(s)) {
-            return map.get(s);
+        if (map.containsKey(name)) {
+            return map.get(name);
         }
         return new String[0];
     }
 
 
     public Map<String, String[]> getParameterMap() {
-        Map<String, String[]> map = new LinkedHashMap<>();
+        Map<String, String[]> parameterMap = new LinkedHashMap<>();
         if (getMethod().equals("GET")) {
-            addRequestBodyParam(map);
-            addQueryStringParam(map);
-            return map;
+            addRequestBodyParam(parameterMap);
+            addQueryStringParam(parameterMap);
+            return parameterMap;
         }
         if (getMethod().equals("POST")) {
-            addQueryStringParam(map);
-            addRequestBodyParam(map);
-            return map;
+            addQueryStringParam(parameterMap);
+            addRequestBodyParam(parameterMap);
+            return parameterMap;
         }
-        return map;
+        return parameterMap;
     }
 
-    private void addRequestBodyParam(Map<String, String[]> map) {
+    private void addRequestBodyParam(Map<String, String[]> parameterMap) {
         String requestBody = getRequestBody();
-        parseParam(requestBody, map);
+        parseParam(requestBody, parameterMap);
     }
 
-    private void addQueryStringParam(Map<String, String[]> map) {
+    private void addQueryStringParam(Map<String, String[]> parameterMap) {
         String requestUrl = getRequestURL().toString();
         int i = requestUrl.indexOf('?');
         if (i == -1) {
             return;
         }
         String query = requestUrl.substring(i + 1);
-        parseParam(query, map);
+        parseParam(query, parameterMap);
     }
 
-    private void parseParam(String query, Map<String, String[]> map) {
+    private void parseParam(String query, Map<String, String[]> parameterMap) {
         if (query.isEmpty()) {
             return;
         }
@@ -137,7 +137,7 @@ public class HttpRequest {
             String[] values = Arrays.stream(split[1].split(","))
                     .map(value -> URLDecoder.decode(value, StandardCharsets.UTF_8))
                     .toArray(String[]::new);
-            map.put(key, values);
+            parameterMap.put(key, values);
         }
     }
 

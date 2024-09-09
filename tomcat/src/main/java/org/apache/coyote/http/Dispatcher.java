@@ -27,12 +27,15 @@ public class Dispatcher {
     }
 
     public String dispatch(HttpRequest request) {
-        Controller controller = getController(request.getPath());
         try {
+            Controller controller = getController(request.getPath());
+            log.info("controller: {}", controller.getClass());
             return controller.service(request).toResponse();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | IllegalArgumentException e) {
+            log.error(e.getMessage(), e);
             return HttpResponse.notFoundResponses().toResponse();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return HttpResponse.serverErrorResponses().toResponse();
         }
     }

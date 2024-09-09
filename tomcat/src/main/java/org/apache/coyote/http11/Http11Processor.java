@@ -41,11 +41,15 @@ public class Http11Processor implements Runnable, Processor {
             Dispatcher dispatcher = new Dispatcher();
 
             HttpRequest request = getRequestHeader(bufferedReader);
+            log.info("\nrequest uri: {}\nrequest method: {}\nrequest body: {}",
+                    request.getPath().getUri(), request.getMethod().getMethod(), request.getBody());
+
             if (request.getMethod().equals(HttpMethod.POST)) {
                 getRequestBody(bufferedReader, request);
             }
 
             final var response = dispatcher.dispatch(request);
+            log.info("\nresponse: {}", response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

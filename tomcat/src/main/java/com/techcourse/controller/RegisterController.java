@@ -1,23 +1,25 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
-import com.techcourse.model.User;
+import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http.MimeType;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
-import org.apache.coyote.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
 
 public class RegisterController extends AbstractController {
 
     private static final String REDIRECT_LOCATION = "/index.html";
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+
+    private final LoginService loginService = new LoginService();
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
@@ -38,11 +40,12 @@ public class RegisterController extends AbstractController {
             HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
             response.setRedirectLocation(REDIRECT_LOCATION);
 
-            //TODO: LoginService 혹은 RegisterService 로 분리하기
-            Map<String, String> parsedBody = StringUtils.separateKeyValue(request.getBody());
-            InMemoryUserRepository.save(new User(parsedBody.get("account"), parsedBody.get("password"), parsedBody.get("email")));
+            loginService.register(request.getBody());
 
             return response;
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            return doGet(request);
         } catch (NullPointerException e) {
             return new NotFoundController().doGet(request);
         } catch (IOException e) {

@@ -61,6 +61,7 @@ public class LoginController extends AbstractController {
         return loginFailResponse;
     }
 
+    //TODO: 로그인 로직 분리
     private HttpResponse alreadyLoggedIn(HttpRequest request) throws Exception {
         Path path = request.getPath();
 
@@ -70,6 +71,7 @@ public class LoginController extends AbstractController {
         return response;
     }
 
+    //TODO: 옵셔널 처리, 값 등
     private boolean loginSuccess(HttpRequest request, HttpResponse response) {
         Map<String, String> parsedBody = StringUtils.separateKeyValue(request.getBody());
         String account = parsedBody.get("account");

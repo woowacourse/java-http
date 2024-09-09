@@ -1,7 +1,7 @@
 package org.apache.coyote.mapper;
 
 import org.apache.coyote.request.HttpRequest;
-import org.apache.handler.Handler;
+import org.apache.coyote.handler.Handler;
 
 public interface HandlerMapping {
 

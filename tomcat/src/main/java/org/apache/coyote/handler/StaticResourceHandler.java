@@ -1,4 +1,4 @@
-package org.apache.handler;
+package org.apache.coyote.handler;
 
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.request.HttpRequest;

@@ -10,8 +10,8 @@ import org.apache.coyote.controller.HomeController;
 import org.apache.coyote.controller.LoginController;
 import org.apache.coyote.controller.UserController;
 import org.apache.coyote.request.HttpRequest;
-import org.apache.handler.Handler;
-import org.apache.handler.RequestHandler;
+import org.apache.coyote.handler.Handler;
+import org.apache.coyote.handler.RequestHandler;
 
 public class AnnotationHandlerMapping implements HandlerMapping {
 

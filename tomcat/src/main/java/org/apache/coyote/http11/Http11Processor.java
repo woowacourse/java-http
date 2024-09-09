@@ -13,7 +13,7 @@ import org.apache.coyote.mapper.HandlerMapping;
 import org.apache.coyote.mapper.StaticResourceHandlerMapping;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.handler.Handler;
+import org.apache.coyote.handler.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

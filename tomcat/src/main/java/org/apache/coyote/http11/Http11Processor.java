@@ -10,12 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.component.common.StatusCode;
 import org.apache.coyote.http11.component.common.Version;
 import org.apache.coyote.http11.component.request.HttpRequest;
 import org.apache.coyote.http11.component.response.HttpResponse;
 import org.apache.coyote.http11.component.response.ResponseHeader;
 import org.apache.coyote.http11.component.response.ResponseLine;
+import org.apache.coyote.http11.component.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

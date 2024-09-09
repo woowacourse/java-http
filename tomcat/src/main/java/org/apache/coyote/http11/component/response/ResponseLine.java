@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.component.response;
 
-import org.apache.coyote.http11.component.common.StatusCode;
 import org.apache.coyote.http11.component.common.Version;
 
 public class ResponseLine {

@@ -2,11 +2,11 @@ package org.apache.coyote.http11.component;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
-import org.apache.coyote.http11.component.common.StatusCode;
 import org.apache.coyote.http11.component.common.Version;
 import org.apache.coyote.http11.component.response.HttpResponse;
 import org.apache.coyote.http11.component.response.ResponseHeader;
 import org.apache.coyote.http11.component.response.ResponseLine;
+import org.apache.coyote.http11.component.response.StatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

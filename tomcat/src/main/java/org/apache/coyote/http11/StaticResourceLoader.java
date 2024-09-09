@@ -7,10 +7,13 @@ import java.net.URL;
 import java.nio.file.Files;
 
 public class StaticResourceLoader {
+
+    private static final String STATIC_RESOURCE_DIRECTORY = "static";
+
     public String load(String path) {
-        URL resource = getClass().getClassLoader().getResource(path);
+        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + path);
         if (resource == null) {
-            throw new RuntimeException("파일이 존재하지 않습니다 : %s".formatted(path));
+            return "";
         }
         try {
             File file = new File(resource.toURI());

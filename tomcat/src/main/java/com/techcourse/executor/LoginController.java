@@ -1,20 +1,25 @@
 package com.techcourse.executor;
 
+import com.techcourse.controller.AbstractController;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import org.apache.coyote.http11.*;
+import org.apache.coyote.file.ResourcesReader;
+import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.ResourceToResponseConverter;
 import org.apache.coyote.http11.cookie.Cookies;
-import org.apache.coyote.http11.executor.Executor;
-import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.Session;
 
-public class LoginPostExecutor implements Executor {
+public class LoginController extends AbstractController {
+    @Override
+    protected HttpResponse doGet(final HttpRequest request) {
+        return ResourceToResponseConverter.convert(HttpStatusCode.OK, ResourcesReader.read(Path.from("login.html")));
+    }
 
     @Override
-    public HttpResponse execute(final HttpRequest request) {
+    protected HttpResponse doPost(final HttpRequest request) {
         if (request.existSessionAttribute("user")) {
             return movePageResponse();
         }
@@ -25,12 +30,6 @@ public class LoginPostExecutor implements Executor {
                 .filter(user -> user.checkPassword(password))
                 .map(user -> login(request, user))
                 .orElseGet(() -> ResourceToResponseConverter.redirect(HttpStatusCode.FOUND, Path.from("401.html")));
-    }
-
-    @Override
-    public boolean isMatch(final HttpRequest request) {
-        return request.getMethod() == HttpMethod.POST && request.getPath()
-                .equals("/login");
     }
 
     private HttpResponse login(final HttpRequest request, final User user) {

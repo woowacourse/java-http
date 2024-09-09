@@ -22,15 +22,23 @@ public class HttpRequestHandler {
 
     private HttpResponse loginPage(String url) {
         QueryParam queryParam = new QueryParam(parseQueryString(url));
-
+        if (queryParam.getValue("password").isEmpty()) {
+            return HttpResponse.builder()
+                    .statusCode(HttpStatusCode.OK)
+                    .staticResource("/login.html");
+        }
         User account = InMemoryUserRepository.findByAccount(queryParam.getValue("account"))
                 .orElseThrow(() -> new RuntimeException("계정 정복가 존재하지 않습니다."));
 
-        log.info("user : {}", account);
+        if (account.checkPassword(queryParam.getValue("password"))) {
+            return HttpResponse.builder()
+                    .statusCode(HttpStatusCode.FOUND)
+                    .redirect("index.html");
+        }
 
         return HttpResponse.builder()
-                .statusCode(HttpStatusCode.OK)
-                .staticResource("/login.html");
+                .statusCode(HttpStatusCode.UNAUTHORIZED)
+                .staticResource("/401.html");
     }
 
     private String parseQueryString(String uri) {

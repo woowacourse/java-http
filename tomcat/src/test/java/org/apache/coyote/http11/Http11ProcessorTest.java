@@ -59,7 +59,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login() throws IOException {
+    void loginSuccess() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -70,18 +70,45 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: index.html \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFail() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         // when
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 401 Unauthorized \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.getBytes().length + " \r\n" +
                 "\r\n" +
                 body;
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

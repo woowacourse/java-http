@@ -15,7 +15,7 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
+        final var socket = new StubSocket(); // 가짜 socket
         final var processor = new Http11Processor(socket);
 
         // when
@@ -35,7 +35,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -49,13 +49,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html"); // src/main/resources 하위
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).isEqualTo(expected.trim());
     }
 }

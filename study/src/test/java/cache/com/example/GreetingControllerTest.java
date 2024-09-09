@@ -32,10 +32,11 @@ class GreetingControllerTest {
                 .uri("/")
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().cacheControl(CacheControl.noCache().cachePrivate())
+                .expectHeader().cacheControl(CacheControl.noCache().cachePrivate()) // chaining
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
+        // 해결: interceptor postHandle()에서 관련 헤더 삽입
     }
 
     @Test
@@ -52,6 +53,7 @@ class GreetingControllerTest {
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
+        // 해결: yml 파일 설정 추가
     }
 
     @Test
@@ -65,6 +67,7 @@ class GreetingControllerTest {
                 .expectBody(String.class).returnResult();
 
         log.info("response body\n{}", response.getResponseBody());
+        // 해결: ShallowEtagHeaderFilter 필터 등록
     }
 
     /**
@@ -98,5 +101,7 @@ class GreetingControllerTest {
                 .exchange()
                 .expectStatus()
                 .isNotModified();
+        // 해결: CacheBustingWebConfig 정적 자원 핸들러 등록
+        // TODO: 브라우저 확인
     }
 }

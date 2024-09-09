@@ -7,7 +7,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CacheWebConfig implements WebMvcConfigurer {
 
+    private final CacheInterceptorHandler cacheInterceptorHandler;
+
+    public CacheWebConfig(CacheInterceptorHandler cacheInterceptorHandler) {
+        this.cacheInterceptorHandler = cacheInterceptorHandler;
+    }
+
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
+        registry.addInterceptor(cacheInterceptorHandler);
     }
 }

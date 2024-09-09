@@ -74,7 +74,8 @@ public class HttpResponse {
                 responseBody
         );
 
-        log.info("[Response] header: {}", header);
+        log.info("[Response] Status Line: {}", statusLine.getStatusLine());
+        log.info("[Response] Headers: {}", header);
 
         return response;
     }

@@ -26,20 +26,23 @@ public class HttpRequestParser {
         String protocol = "";
 
         String firstLine = reader.readLine();
-        log.info("[Request] requestLine: {}", firstLine);
 
-        String[] requestLineParts = firstLine.split(" ");
-        method = requestLineParts[0];
-        String uri = requestLineParts[1];
-        protocol = requestLineParts[2];
+        if (firstLine != null) {
+            log.info("[Request] requestLine: {}", firstLine);
 
-        int index = uri.indexOf("?");
-        if (index != -1) {
-            path = uri.substring(0, index);
-            queryString = uri.substring(index + 1);
-        } else {
-            path = uri;
-            queryString = null;
+            String[] requestLineParts = firstLine.split(" ");
+            method = requestLineParts[0];
+            String uri = requestLineParts[1];
+            protocol = requestLineParts[2];
+
+            int index = uri.indexOf("?");
+            if (index != -1) {
+                path = uri.substring(0, index);
+                queryString = uri.substring(index + 1);
+            } else {
+                path = uri;
+                queryString = null;
+            }
         }
 
         return new RequestLine(method, path, queryString, protocol);

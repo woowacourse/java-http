@@ -9,6 +9,11 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class ViewController extends AbstractController {
 
     @Override
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
+        responseNotFoundPage(request, response);
+    }
+
+    @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String path = request.getRequestLine().getPath();
 

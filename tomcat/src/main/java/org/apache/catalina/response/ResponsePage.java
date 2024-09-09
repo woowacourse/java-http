@@ -26,6 +26,10 @@ public enum ResponsePage {
         this.isLogin = isLogin;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public HttpStatus getStatus() {
         return status;
     }

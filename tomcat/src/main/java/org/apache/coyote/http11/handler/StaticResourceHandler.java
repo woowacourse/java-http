@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
-import java.nio.file.NoSuchFileException;
 
 import org.apache.coyote.http11.RequestHandler;
+import org.apache.coyote.http11.exception.CanNotHandleRequest;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.StaticResource;
 import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,28 +19,28 @@ public class StaticResourceHandler implements RequestHandler {
 
     @Override
     public String handle(Request request) throws IOException {
-        try {
-            StaticResource staticResource = getContent(request);
+        log.info("request : {}", request);
+        if (request.isStaticResourceRequest()) {
+            StaticResource staticResource = new StaticResource(request.getTarget());
             return Response.writeResponse(request, staticResource.getContentType(), staticResource.getContent());
-        } catch (NoSuchFileException e) {
-            return null;
         }
-    }
-
-    private StaticResource getContent(Request request) throws IOException {
-        String target = request.getTarget().equals("/") ? "index.html" : request.getTarget();
-        if (target.contains("login")) {
+        if (request.getTarget().equals("/")) {
+            StaticResource staticResource = new StaticResource("/index.html");
+            return Response.writeResponse(request, staticResource.getContentType(), staticResource.getContent());
+        }
+        if (request.getTarget().contains("login")) {
             return loginResponse(request);
         }
-        return new StaticResource(target);
+        throw new CanNotHandleRequest("처리할 수 없는 요청입니다. : " + request.getTarget());
     }
 
-    private StaticResource loginResponse(Request request) throws IOException {
+    private String loginResponse(Request request) throws IOException {
         MethodRequest methodRequest = new MethodRequest(request.getTarget());
         if (request.getTarget().contains("?")) {
             checkLogin(methodRequest.getParam("account"));
         }
-        return new StaticResource(methodRequest.getEndPoint() + ".html");
+        StaticResource resource = new StaticResource("/login.html");
+        return Response.writeResponse(request, resource.getContentType(), resource.getContent());
     }
 
     private void checkLogin(String account) {

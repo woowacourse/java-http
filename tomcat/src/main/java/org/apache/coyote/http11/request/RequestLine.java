@@ -11,6 +11,11 @@ public record RequestLine (
         return new RequestLine(Method.findByName(token[0]), token[1], token[2]);
     }
 
+    public boolean isStaticResourceRequest() {
+        String[] pathToken = target.split("/");
+        return pathToken[pathToken.length - 1].contains(".");
+    }
+
     @Override
     public String toString() {
         return "RequestLine{" +

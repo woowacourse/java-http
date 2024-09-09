@@ -14,6 +14,10 @@ public class Request {
         return new Request(RequestLine.parseFrom(request.getFirst()));
     }
 
+    public boolean isStaticResourceRequest() {
+        return requestLine.isStaticResourceRequest();
+    }
+
     public Method getMethod() {
         return requestLine.method();
     }

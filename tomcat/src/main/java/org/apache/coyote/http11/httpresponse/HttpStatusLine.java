@@ -12,6 +12,11 @@ public class HttpStatusLine {
         this.httpStatusCode = httpStatusCode;
     }
 
+    public String getString() {
+        return version + " " + httpStatusCode.getCode() + " "
+                + httpStatusCode.getMessage();
+    }
+
     public String getVersion() {
         return version;
     }

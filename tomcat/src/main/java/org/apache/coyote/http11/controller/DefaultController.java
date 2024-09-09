@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
@@ -36,7 +35,7 @@ public class DefaultController extends AbstractController {
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
             HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
-            httpResponseHeader.addHeaders("Content-Type", ContentType.getContentType(path.split("\\.")[1]).getContentType());
+            httpResponseHeader.addHeaders("Content-Type", Files.probeContentType(filePath) + ";charset=utf-8");
             httpResponseHeader.addHeaders("Content-Length", String.valueOf(responseBody.getBytes().length));
             HttpResponseBody httpResponseBody = new HttpResponseBody(responseBody);
 

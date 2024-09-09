@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.httpresponse;
 
-import java.util.Map;
-
 public class HttpResponse {
 
     private final HttpStatusLine httpStatusLine;
@@ -23,31 +21,21 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        String statusLine = httpStatusLine.getVersion() + " " + httpStatusLine.getHttpStatusCode().getCode() + " "
-                + httpStatusLine.getHttpStatusCode().getMessage();
-        Map<String, String> headers = httpResponseHeader.getHeaders();
-        StringBuilder sb = new StringBuilder();
-        int size = headers.keySet().size();
-        int i = 1;
-        for (String key : headers.keySet()) {
-            if (i < size) {
-                sb.append(key).append(": ").append(headers.get(key)).append(" \r\n");
-                size++;
-            } else {
-                sb.append(key).append(": ").append(headers.get(key));
-            }
-        }
+        String statusLine = httpStatusLine.getString();
+
+        String responseHeader = httpResponseHeader.getString();
+
         if (httpResponseBody != null) {
             String responseBody = httpResponseBody.getBody();
             String join = String.join("\r\n",
                     statusLine,
-                    sb.toString(),
+                    responseHeader,
                     responseBody);
             return join.getBytes();
         }
         String join = String.join("\r\n",
                 statusLine,
-                sb.toString());
+                responseHeader);
         return join.getBytes();
     }
 

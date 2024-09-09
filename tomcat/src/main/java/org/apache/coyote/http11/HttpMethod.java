@@ -4,24 +4,18 @@ import java.util.Arrays;
 
 public enum HttpMethod {
 
-    GET("GET"),
-    POST("POST")
+    GET,
+    POST
     ;
-
-    private final String name;
-
-    HttpMethod(String name) {
-        this.name = name;
-    }
 
     public static HttpMethod getHttpMethod(String name) {
         return Arrays.stream(values())
-                .filter(httpMethod -> httpMethod.name.equals(name))
+                .filter(httpMethod -> httpMethod.name().equals(name))
                 .findAny()
                 .orElseThrow();
     }
 
     public boolean isMethod(String name) {
-        return this.name.equals(name);
+        return name().equals(name);
     }
 }

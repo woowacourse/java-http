@@ -126,15 +126,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getLoginResponse(HttpRequest request, HttpCookie cookie) {
-        if (cookie.hasJSESSIONID()) {
-            final var response = new HttpResponse(HttpStatus.FOUND);
-            response.setRedirect("/index.html");
-            return response.getResponse();
-        }
-        final var session = getSession(request);
         final var response = new HttpResponse(HttpStatus.FOUND);
         response.setRedirect("/index.html");
-        response.setCookie("JSESSIONID", session.getId());
+        if (!cookie.hasJSESSIONID()) {
+            final var session = getSession(request);
+            response.setCookie("JSESSIONID", session.getId());
+        }
         return response.getResponse();
     }
 

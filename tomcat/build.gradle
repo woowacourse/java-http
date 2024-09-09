@@ -2,7 +2,6 @@ plugins {
     id 'java'
 }
 
-
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -12,11 +11,20 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
 dependencies {
     implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
     implementation 'org.reflections:reflections:0.10.2'
     implementation 'ch.qos.logback:logback-classic:1.5.7'
     implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     testImplementation 'org.assertj:assertj-core:3.26.0'
     testImplementation 'org.mockito:mockito-core:5.12.0'

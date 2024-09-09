@@ -9,12 +9,12 @@ import java.util.Optional;
 
 import org.apache.http.HttpHeader;
 
-public class HttpRequestParser {
+public class HttpRequestReader {
 
-    private HttpRequestParser() {
+    private HttpRequestReader() {
     }
 
-    public static HttpRequest parseRequest(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final String request = bufferedReader.readLine();
 
         final String[] requestStartLine = request.split(" ");
@@ -22,11 +22,11 @@ public class HttpRequestParser {
         final String path = requestStartLine[1];
         final String version = requestStartLine[2];
 
-        final HttpHeader[] headers = parseRequestHeaders(bufferedReader);
-        return new HttpRequest(method, path, version, headers, parseRequestBody(headers, bufferedReader));
+        final HttpHeader[] headers = readRequestHeaders(bufferedReader);
+        return new HttpRequest(method, path, version, headers, readRequestBody(headers, bufferedReader));
     }
 
-    private static HttpHeader[] parseRequestHeaders(final BufferedReader bufferedReader) throws IOException {
+    private static HttpHeader[] readRequestHeaders(final BufferedReader bufferedReader) throws IOException {
         String header = bufferedReader.readLine();
 
         final List<HttpHeader> headers = new ArrayList<>();
@@ -39,7 +39,7 @@ public class HttpRequestParser {
         return headers.toArray(HttpHeader[]::new);
     }
 
-    private static String parseRequestBody(final HttpHeader[] headers, final BufferedReader bufferedReader) throws IOException {
+    private static String readRequestBody(final HttpHeader[] headers, final BufferedReader bufferedReader) throws IOException {
         Optional<HttpHeader> httpHeader = Arrays.stream(headers)
                 .filter(header -> header.getKey().equalsIgnoreCase("Content-Length"))
                 .findFirst();

@@ -9,7 +9,7 @@ import java.net.Socket;
 
 import org.apache.coyote.handler.Handler;
 import org.apache.http.request.HttpRequest;
-import org.apache.http.request.HttpRequestParser;
+import org.apache.http.request.HttpRequestReader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.HandlerMapping;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = HttpRequestParser.parseRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequestReader.readHttpRequest(bufferedReader);
             final HandlerMapping handlerMapping = new HandlerMapping();
             final Handler handler = handlerMapping.getHandler(httpRequest);
             final String response = handler.handle(httpRequest);

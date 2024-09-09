@@ -16,6 +16,10 @@ public class StringUtil {
         return new BiValue<>(str.substring(0, index), str.substring(index + 1));
     }
 
+    public static String combineWithDelimiter(final BiValue<String, String> biValue, final String delimiter) {
+        return biValue.first() + delimiter + biValue.second();
+    }
+
     public static String blankIfNull(final String str) {
         return str == null ? BLANK : str;
     }

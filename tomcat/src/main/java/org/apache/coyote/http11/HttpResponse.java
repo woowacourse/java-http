@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.session.Session;
+
 public class HttpResponse {
 
     private HttpResponseHeader headers;
@@ -59,9 +61,11 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse createSession() {
+    public HttpResponse createSession(String name, Object object) {
         HttpCookies cookies = new HttpCookies();
-        cookies.createSession();
+        Session session = new Session();
+        session.store(name, object);
+        cookies.createSession(session);
         this.headers.addHeader("Set-Cookie", cookies.buildOutput());
         return this;
     }

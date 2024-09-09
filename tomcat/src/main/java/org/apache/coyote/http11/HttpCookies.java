@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpCookies {
 
@@ -48,12 +50,13 @@ public class HttpCookies {
                 .collect(Collectors.joining(COOKIES_DELIMITER));
     }
 
-    public boolean hasSession() {
-        return !getCookieValue(SESSION_NAME).isEmpty();
+    public String getSessionId() {
+        return getCookieValue(SESSION_NAME);
     }
 
-    public void createSession() {
-        String uuid = UUID.randomUUID().toString();
-        cookies.put(SESSION_NAME, uuid);
+    public void createSession(Session session) {
+        String sessionId = UUID.randomUUID().toString();
+        SessionManager.getInstance().setSession(sessionId, session);
+        cookies.put(SESSION_NAME, sessionId);
     }
 }

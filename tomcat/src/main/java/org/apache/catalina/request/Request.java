@@ -12,8 +12,8 @@ public class Request {
     private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, String> headers;
-    private Map<String, String> body;
-    private Map<String, String> queryParam;
+    private Map<String, String> body = new HashMap<>();
+    private Map<String, String> queryParam = new HashMap<>();
     private final String httpMethod;
     private final String urlIncludeQuery;
     private final String url;
@@ -31,14 +31,6 @@ public class Request {
         this.fileType = extractMainFileType(headers.get("Accept"));
     }
 
-    public void setBody(Map<String, String> body) {
-        this.body = new HashMap<>(body);
-    }
-
-    public void setQueryParam(Map<String, String> queryParam) {
-        this.queryParam = new HashMap<>(queryParam);
-    }
-
     private String extractMainFileType(String acceptHeader) {
         if (acceptHeader == null) {
             return "text/html";
@@ -49,6 +41,14 @@ public class Request {
 
     public boolean checkQueryParamIsEmpty() {
         return queryParam.isEmpty();
+    }
+
+    public void setBody(Map<String, String> body) {
+        this.body = new HashMap<>(body);
+    }
+
+    public void setQueryParam(Map<String, String> queryParam) {
+        this.queryParam = new HashMap<>(queryParam);
     }
 
     public Map<String, String> getBody() {

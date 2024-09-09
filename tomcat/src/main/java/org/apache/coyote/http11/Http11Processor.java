@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.NoHandlerException;
-import org.apache.coyote.http11.handler.StaticResourceHandler;
+import org.apache.coyote.http11.handler.DefaultResourceHandler;
 import org.apache.coyote.http11.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class Http11Processor implements Runnable, Processor {
         this.connection = connection;
         this.requestHandlers = List.of(
                 //new MethodHandler(),
-                new StaticResourceHandler()
+                new DefaultResourceHandler()
         );
     }
 

@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class StaticResourceHandler implements RequestHandler {
+public class DefaultResourceHandler implements RequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(StaticResourceHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultResourceHandler.class);
 
     @Override
     public String handle(Request request) throws IOException {

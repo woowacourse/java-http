@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 public class HttpRequest {
+    private static final String JSESSIONID_COOKIE_NAME = "JSESSIONID";
+
     private final HttpMethod httpMethod;
     private final String path;
     private final HttpVersion httpVersion;
@@ -24,7 +26,7 @@ public class HttpRequest {
     }
 
     public String getSessionId() {
-        return httpCookie.getValue("JSESSIONID");
+        return httpCookie.getValue(JSESSIONID_COOKIE_NAME);
     }
 
     public HttpMethod getHttpMethod() {

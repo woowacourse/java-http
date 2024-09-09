@@ -1,12 +1,11 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,17 +28,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            RequestReader reader = new RequestReader(inputStream);
+            RequestLine requestLine = reader.getRequestLine();
+            HttpRequestHandler handler = new HttpRequestHandler();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            HttpResponse response = handler.handle(requestLine);
+            outputStream.write(response.build().getBytes());
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

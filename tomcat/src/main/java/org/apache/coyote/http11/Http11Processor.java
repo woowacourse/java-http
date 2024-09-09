@@ -1,20 +1,28 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ResourceProcessor resourceProcessor;
+    private final ApiProcessor apiProcessor;
 
     public Http11Processor(final Socket connection) {
+        this.resourceProcessor = new ResourceProcessor();
+        this.apiProcessor = new ApiProcessor();
         this.connection = connection;
     }
 
@@ -29,17 +37,49 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            // request line
+            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
+            String requestLine = br.readLine();
+            if (requestLine == null) {
+                return;
+            }
+            StringTokenizer st = new StringTokenizer(requestLine);
+            MethodType requestMethodType = MethodType.toMethodType(st.nextToken());
+            String requestPath = st.nextToken();
+            if (requestPath.equals("/")) {
+                requestPath = "/index.html";
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            // header
+            Map<String, String> httpRequestHeaders = new HashMap<>();
+            String header = br.readLine();
+            while (!"".equals(header)) {
+                String[] splitHeader = header.split(": ");
+                httpRequestHeaders.put(splitHeader[0], splitHeader[1]);
+                header = br.readLine();
+            }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            // body
+            Map<String, String> requestBody = new HashMap<>();
+            if (requestMethodType.isPost()) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+                String[] requestBodyParams = new String(buffer).split("&");
+                for (String requestBodyParam : requestBodyParams) {
+                    String[] paramEntry = requestBodyParam.split("=");
+                    requestBody.put(paramEntry[0], paramEntry[1]);
+                }
+            }
+
+            RequestPathType requestPathType = RequestPathType.reqeustPathToRequestPathType(requestPath);
+            if (requestPathType.isAPI()) {
+                apiProcessor.process(connection, requestPath, requestMethodType, httpRequestHeaders, requestBody);
+            }
+            if (requestPathType.isResource()) {
+                resourceProcessor.process(connection, requestPath);
+            }
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

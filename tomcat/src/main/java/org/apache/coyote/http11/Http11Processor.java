@@ -118,7 +118,7 @@ public class Http11Processor implements Runnable, Processor {
             session.setAttribute("user", user);
             SessionManager.getInstance().add(session);
             HttpCookie httpCookie = request.getCookie();
-            String cookie = httpCookie.ofJSessionId(session.getId());
+            String cookie = httpCookie.getCookies(session.getId());
 
             ResponseContent responseContent
                     = new ResponseContent(HttpStatus.FOUND, accept, FileReader.loadFileContent(INDEX_PAGE));

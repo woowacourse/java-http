@@ -14,16 +14,9 @@ public class HttpCookie {
         cookies.putAll(new HashMap<>(cookies));
     }
 
-    public String ofJSessionId(String id) {
+    public String getCookies(String id) {
         saveAuthCookie(id);
         return cookiesToString();
-    }
-
-    public String getId() {
-        if (cookies.containsKey(AUTH_COOKIE_KEY)) {
-            return cookies.get(AUTH_COOKIE_KEY);
-        }
-        return UUID.randomUUID().toString();
     }
 
     private void saveAuthCookie(String id) {
@@ -37,5 +30,12 @@ public class HttpCookie {
         return cookies.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));
+    }
+
+    public String getId() {
+        if (cookies.containsKey(AUTH_COOKIE_KEY)) {
+            return cookies.get(AUTH_COOKIE_KEY);
+        }
+        return UUID.randomUUID().toString();
     }
 }

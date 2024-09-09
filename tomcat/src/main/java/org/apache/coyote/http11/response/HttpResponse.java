@@ -23,13 +23,13 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(String version, int statusCode,
-                                    String contentType, String body) {
+    public static HttpResponse of(String version, int statusCode, String statusMessage,
+                                  String contentType, String body) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("Content-Type", contentType + ";charset=utf-8");
         headers.put("Content-Length", body.getBytes().length);
 
-        return new HttpResponse(version, statusCode, "OK", headers, body);
+        return new HttpResponse(version, statusCode, statusMessage, headers, body);
     }
 
     public void addHeader(String key, String value) {

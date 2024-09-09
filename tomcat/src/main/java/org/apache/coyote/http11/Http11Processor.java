@@ -47,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody;
             if (page.equals("/")) {
                 responseBody = "Hello world!";
-                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "OK", "text/html", responseBody);
             } else if (page.startsWith("/login") && httpMethod.equals("POST")) {
                 String requestBody = httpRequest.getBody();
                 String account = requestBody.split("&")[0].split("=")[1];
@@ -64,12 +64,12 @@ public class Http11Processor implements Runnable, Processor {
                     sessionManager.add(session);
 
                     responseBody = new String(ResourceLoader.loadResource("static/index.html"));
-                    httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                    httpResponse = HttpResponse.of(version, 302, "FOUND", "text/html", responseBody);
                     httpResponse.addHeader("Location", "/index.html");
                     httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
                 } else {
                     responseBody = new String(ResourceLoader.loadResource("static/401.html"));
-                    httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                    httpResponse = HttpResponse.of(version, 302, "FOUND", "text/html", responseBody);
                     httpResponse.addHeader("Location", "/401.html");
                 }
             } else if (page.startsWith("/login") && httpMethod.equals("GET")) {
@@ -82,14 +82,14 @@ public class Http11Processor implements Runnable, Processor {
 
                     if (session != null && session.getAttribute("user") != null) {
                         responseBody = new String(ResourceLoader.loadResource("static/index.html"));
-                        httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                        httpResponse = HttpResponse.of(version, 302, "FOUND", "text/html", responseBody);
                     } else {
                         responseBody = new String(ResourceLoader.loadResource("static" + page + ".html"));
-                        httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                        httpResponse = HttpResponse.of(version, 200, "OK", "text/html", responseBody);
                     }
                 } else {
                     responseBody = new String(ResourceLoader.loadResource("static" + page + ".html"));
-                    httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                    httpResponse = HttpResponse.of(version, 200, "OK", "text/html", responseBody);
                 }
             } else if (page.equals("/register") && httpMethod.equals("POST")) {
                 String requestBody = httpRequest.getBody();
@@ -98,20 +98,20 @@ public class Http11Processor implements Runnable, Processor {
                 String password = requestBody.split("&")[2].split("=")[1];
                 InMemoryUserRepository.save(new User(account, email, password));
                 responseBody = new String(ResourceLoader.loadResource("static/index.html"));
-                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "OK", "text/html", responseBody);
                 httpResponse.addHeader("Location", "/index.html");
             } else if (page.startsWith("/css/")) {
                 responseBody = new String(ResourceLoader.loadResource("static" + page));
-                httpResponse = HttpResponse.of(version, 200, "text/css", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "OK", "text/css", responseBody);
             } else if (page.contains(".js")) {
                 responseBody = new String(ResourceLoader.loadResource("static" + page));
-                httpResponse = HttpResponse.of(version, 200, "text/javascript", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "OK", "text/javascript", responseBody);
             } else if (page.endsWith(".html")) {
                 responseBody = new String(ResourceLoader.loadResource("static" + page));
-                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "OK", "text/html", responseBody);
             } else {
                 responseBody = new String(ResourceLoader.loadResource("static" + page + ".html"));
-                httpResponse = HttpResponse.of(version, 200, "text/html", responseBody);
+                httpResponse = HttpResponse.of(version, 200, "OK", "text/html", responseBody);
             }
             httpResponse.send(outputStream);
         } catch (IOException | UncheckedServletException e) {

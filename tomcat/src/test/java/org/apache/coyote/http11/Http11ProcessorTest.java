@@ -94,7 +94,7 @@ class Http11ProcessorTest {
     void login() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -115,6 +115,54 @@ class Http11ProcessorTest {
                 String.format("Content-Length: %d \r\n", contentBody.getBytes().length) +
                 "\r\n" +
                 contentBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginSuccess() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 301 FOUND \r\n" +
+                "Location: /index.html \r\n" +
+                "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void loginFailed() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 301 FOUND \r\n" +
+                "Location: /401.html \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

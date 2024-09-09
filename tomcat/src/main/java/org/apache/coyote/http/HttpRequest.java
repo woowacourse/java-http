@@ -9,18 +9,20 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
+    private final String requestBody;
 
-    private HttpRequest(RequestLine requestLine, Map<String, String> headers) {
+    private HttpRequest(RequestLine requestLine, Map<String, String> headers, String requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest from(BufferedReader request) throws IOException {
         RequestLine requestLine = RequestLine.from(request.readLine());
         Map<String, String> headers = parseHeaders(request);
-        parseRequestBody(request, headers);
+        String requestBody = parseRequestBody(request, headers);
 
-        return new HttpRequest(requestLine, headers);
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 
     private static Map<String, String> parseHeaders(BufferedReader request) throws IOException {
@@ -35,15 +37,16 @@ public class HttpRequest {
         return headers;
     }
 
-    private static void parseRequestBody(BufferedReader request, Map<String, String> headers) throws IOException {
+    private static String parseRequestBody(BufferedReader request, Map<String, String> headers) throws IOException {
         if (headers.containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(headers.get("Content-Length"));
             if (contentLength > 0) {
                 char[] buffer = new char[contentLength];
                 request.read(buffer, 0, contentLength);
-                headers.put("requestBody", new String(buffer));
+                return new String(buffer);
             }
         }
+        return "";
     }
 
     public boolean containsCookie() {
@@ -63,6 +66,6 @@ public class HttpRequest {
     }
 
     public String getRequestBody() {
-        return headers.get("requestBody");
+        return requestBody;
     }
 }

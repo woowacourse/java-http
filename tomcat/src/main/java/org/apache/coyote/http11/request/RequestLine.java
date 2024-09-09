@@ -13,7 +13,10 @@ public record RequestLine (
 
     public boolean isStaticResourceRequest() {
         String[] pathToken = target.split("/");
-        return pathToken[pathToken.length - 1].contains(".");
+        String extension = pathToken[pathToken.length - 1];
+        return extension.contains(".css") ||
+                extension.contains(".html") ||
+                extension.contains(".js");
     }
 
     @Override

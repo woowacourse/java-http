@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
-
 public class RegisterController extends AbstractController {
 
     private static final String REDIRECT_LOCATION = "/index.html";
@@ -25,7 +23,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         try {
             Path path = request.getPath();
-            return generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK);
+            return generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK);
         } catch (NullPointerException e) {
             return new NotFoundController().doGet(request);
         } catch (IOException e) {
@@ -37,7 +35,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doPost(HttpRequest request) throws Exception {
         try {
             Path path = request.getPath();
-            HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
+            HttpResponse response = generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
             response.setRedirectLocation(REDIRECT_LOCATION);
 
             loginService.register(request.getBody());

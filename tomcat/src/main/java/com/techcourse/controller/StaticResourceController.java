@@ -8,15 +8,13 @@ import org.apache.coyote.http.response.HttpStatus;
 
 import java.io.IOException;
 
-import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
-
 public class StaticResourceController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         try {
             Path path = request.getPath();
-            return generateResponse(STATIC_RESOURCE_LOCATION + path.getUri(), HttpStatus.OK);
+            return generateStaticResponse(path.getUri(), HttpStatus.OK);
         } catch (NullPointerException e) {
             return new NotFoundController().doGet(request);
         } catch (IOException e) {

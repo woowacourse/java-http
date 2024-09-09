@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
-
 public class LoginController extends AbstractController {
 
     private static final String REDIRECT_LOCATION = "/index.html";
@@ -35,7 +33,7 @@ public class LoginController extends AbstractController {
         }
         try {
             Path path = request.getPath();
-            return generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK);
+            return generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK);
         } catch (NullPointerException e) {
             return new NotFoundController().doGet(request);
         } catch (IOException e) {
@@ -51,8 +49,8 @@ public class LoginController extends AbstractController {
         try {
             Path path = request.getPath();
 
-            HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
-            HttpResponse loginFailResponse = generateResponse(STATIC_RESOURCE_LOCATION + UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED);
+            HttpResponse response = generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
+            HttpResponse loginFailResponse = generateStaticResponse(UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED);
 
             if (login(request, response)) {
                 return response;
@@ -71,7 +69,7 @@ public class LoginController extends AbstractController {
     private HttpResponse alreadyLoggedIn(HttpRequest request) throws IOException, NullPointerException {
         Path path = request.getPath();
 
-        HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
+        HttpResponse response = generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
         response.setRedirectLocation(REDIRECT_LOCATION);
 
         return response;

@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
+
 public abstract class AbstractController implements Controller {
 
     @Override
@@ -35,8 +37,8 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException(request.getMethod().getMethod());
     }
 
-    protected HttpResponse generateResponse(String path, HttpStatus status) throws IOException, NullPointerException {
-        final URL resource = HttpResponse.class.getClassLoader().getResource(path);
+    protected HttpResponse generateStaticResponse(String path, HttpStatus status) throws IOException, NullPointerException {
+        final URL resource = HttpResponse.class.getClassLoader().getResource(STATIC_RESOURCE_LOCATION + path);
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         StatusLine statusLine = new StatusLine(status);

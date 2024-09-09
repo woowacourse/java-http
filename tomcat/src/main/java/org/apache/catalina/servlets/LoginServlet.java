@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
 import org.apache.catalina.servlets.http.Cookie;
-import org.apache.catalina.servlets.http.Cookies;
 import org.apache.catalina.servlets.http.Session;
 import org.apache.catalina.servlets.http.SessionManager;
 import org.apache.catalina.servlets.http.request.HttpRequest;

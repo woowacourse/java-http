@@ -2,10 +2,8 @@ package org.apache.catalina.connector;
 
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.executor.Executor;
 import org.apache.coyote.http11.executor.RequestExecutors;
 import org.apache.coyote.http11.header.Headers;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
@@ -53,29 +51,23 @@ class ConnectorTest {
     }
 
     private final RequestExecutors requestExecutors = new RequestExecutors(
-            Collections.singletonList(new Executor() {
-
-                @Override
-                public HttpResponse execute(final HttpRequest req) {
-                    try {
-                        Thread.sleep(8000);
-                    } catch (final InterruptedException e) {
-                        throw new RuntimeException(e);
+            Collections.singletonMap("/hello", request -> {
+                        {
+                            try {
+                                Thread.sleep(8000);
+                            } catch (final InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            return new HttpResponse(
+                                    HttpStatusCode.OK,
+                                    new Headers(),
+                                    "HTTP/1.1",
+                                    new byte[]{}
+                            );
+                        }
                     }
-                    return new HttpResponse(
-                            HttpStatusCode.OK,
-                            new Headers(),
-                            "HTTP/1.1",
-                            new byte[]{}
-                    );
-                }
+            ));
 
-                @Override
-                public boolean isMatch(final HttpRequest req) {
-                    return true;
-                }
-            })
-    );
     private final SessionManager sessionManager = new SessionManager();
     BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(100);
     ThreadPoolExecutor executorService = new ThreadPoolExecutor(

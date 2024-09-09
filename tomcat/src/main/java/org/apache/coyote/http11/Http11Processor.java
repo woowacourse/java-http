@@ -9,6 +9,7 @@ import org.apache.catalina.controller.Controller;
 import org.apache.catalina.handler.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,9 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = new HttpRequest(reader);
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpRequest request = httpRequestParser.parseRequest(reader);
+
             HttpResponse response = new HttpResponse();
 
             RequestMapping requestMapping = new RequestMapping();
@@ -44,6 +47,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

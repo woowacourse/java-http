@@ -48,14 +48,12 @@ public class LoginController extends AbstractController {
                 throw new IllegalArgumentException();
             }
 
-            if (!request.hasCookie() || !request.hasJSessionId()) {
-                UUID sessionId = UUID.randomUUID();
-                Session session = new Session(sessionId.toString());
-                session.setAttribute("user", user);
-                sessionManager.add(session);
-
-                response.setJSessionId(session.getId());
-            }
+            UUID sessionId = UUID.randomUUID();
+            Session session = new Session(sessionId.toString());
+            session.setAttribute("user", user);
+            sessionManager.add(session);
+            
+            response.setJSessionId(session.getId());
             response.addHttpResponseHeader("Location", "/index.html");
             response.setHttpStatusCode(302);
             response.setHttpStatusMessage("FOUND");

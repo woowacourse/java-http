@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 
 class RequestReaderTest {
 
-    @DisplayName("Http Request를 읽어올 수 있다.")
+    @DisplayName("Http GET Request를 읽어올 수 있다.")
     @Test
-    void readHttpRequest() throws IOException {
+    void readGetHttpRequest() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -34,6 +34,29 @@ class RequestReaderTest {
                 () -> assertThat(requestHeaders.getHeaderValue("Connection")).isEqualTo("keep-alive")
         );
 
+        inputStream.close();
+    }
+
+    @DisplayName("Http POST Request를 읽어올 수 있다.")
+    @Test
+    void readPostHttpRequest() throws IOException {
+        // given
+        String expected = "account=poke&email=poke@zzang.com&password=password";
+        String httpRequest = String.join("\r\n",
+                "Post /register HTTP/1.1 ",
+                "Host: localhost",
+                "Connection: keep-alive",
+                "Content-Length: " + expected.getBytes().length,
+                "",
+                expected);
+        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+
+        // when
+        RequestReader requestReader = new RequestReader(inputStream);
+        String actual = requestReader.getRequestBody();
+
+        // then
+        assertThat(actual).isEqualTo(expected);
         inputStream.close();
     }
 }

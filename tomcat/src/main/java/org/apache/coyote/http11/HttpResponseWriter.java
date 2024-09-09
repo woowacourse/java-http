@@ -32,7 +32,7 @@ public class HttpResponseWriter {
     }
 
     private static void writeStringWithCSRF(final OutputStream out, final String str) throws IOException {
-        out.write(str.getBytes());
+        out.write((str.endsWith(" ") ? str : str + " ".getBytes()).getBytes());
         writeCSRF(out);
     }
 

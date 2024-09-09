@@ -1,12 +1,22 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.Controller;
+import org.apache.coyote.http11.controller.HandlerMapper;
+import org.apache.coyote.http11.error.ErrorHandlerMapper;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,22 +36,41 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final var responseBody = "Hello world!";
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            HttpResponse response = makeResponse(httpRequest);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.serialize().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
         }
+    }
+
+    private HttpResponse makeResponse(HttpRequest httpRequest) throws IOException {
+        RequestLine requestLine = httpRequest.getRequestLine();
+        try {
+            if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
+                return resolveHandlerResponse2(httpRequest);
+            }
+            return new ResponseBuilder()
+                    .statusCode(HttpStatusCode.OK_200)
+                    .viewUrl(requestLine.getRequestURI())
+                    .build();
+        } catch (Exception e) {
+            if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
+                return ErrorHandlerMapper.handleError(e.getClass());
+            }
+            throw new UncheckedServletException(e);
+        }
+    }
+
+    private HttpResponse resolveHandlerResponse2(HttpRequest httpRequest) {
+        Controller controller = HandlerMapper.mapTo(httpRequest.getRequestUri());
+        return controller.handle(httpRequest);
     }
 }

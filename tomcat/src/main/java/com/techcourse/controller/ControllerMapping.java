@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.controller.dto.HttpResponseEntity;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.service.UserService;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
@@ -11,10 +12,12 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public enum ControllerMapping {
 
-    SEARCH_USER(HttpMethod.GET, URI.create("/login"), (params, request) -> new UserController().searchUserData(params)),
-    LOGIN_USER(HttpMethod.POST, URI.create("/login"), (params, request) -> new UserController().login(params, request)),
+    SEARCH_USER(HttpMethod.GET, URI.create("/login"),
+            (params, req) -> new UserController(new UserService()).searchUserData(params)),
+    LOGIN_USER(HttpMethod.POST, URI.create("/login"),
+            (params, req) -> new UserController(new UserService()).login(params, req)),
     REGISTER_USER(HttpMethod.POST, URI.create("/register"),
-            (params, request) -> new UserController().registerUser(params));
+            (params, req) -> new UserController(new UserService()).registerUser(params));
 
     private final HttpMethod httpMethod;
     private final URI path;

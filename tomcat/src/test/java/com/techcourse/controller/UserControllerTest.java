@@ -4,92 +4,135 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.controller.dto.HttpResponseEntity;
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.service.UserService;
 import java.util.Map;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestLine;
 import org.apache.coyote.http11.request.RequestBody;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class UserControllerTest {
 
-    @DisplayName("로그인 데이터를 조회한다.")
+    private UserController userController;
+
+    @BeforeEach
+    void setup() {
+        userController = new UserController(new UserService());
+    }
+
+    @DisplayName("유저 데이터를 조회하면 302 FOUND와 Location 헤더에 /index.html를 반환한다.")
     @Test
     void searchUserData() {
         //given
-        String target = "gugu";
-        Map<String, String> params = Map.of("account", target, "password", "password");
-        User user = InMemoryUserRepository.findByAccount(target)
-                .orElseThrow();
-        UserController userController = new UserController();
+        String account = "gugu";
+        String password = "password";
+        Map<String, String> params = Map.of("account", account, "password", password);
 
         //when
         HttpResponseEntity<User> result = userController.searchUserData(params);
 
         //then
         assertAll(
-                () -> assertThat(result.body()).isEqualTo(user),
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/index.html")
         );
     }
 
-    @DisplayName("유효하지 않는 account로 조회하면 401.html로 리다이렉트 한다.")
+    @DisplayName("유저 데이터 조회 실패하면 302 FOUND와 Location 헤더에 /401.html를 반환한다.")
     @Test
-    void searchUserDataInvalidAccount() {
+    void searchUserDataNotExist() {
         //given
-        Map<String, String> params = Map.of("account", "daon", "password", "password");
-        UserController userController = new UserController();
+        String account = "";
+        String password = "password";
+        Map<String, String> params = Map.of("account", account, "password", password);
 
         //when
         HttpResponseEntity<User> result = userController.searchUserData(params);
 
         //then
         assertAll(
-                () -> assertThat(result.body()).isNull(),
                 () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
         );
     }
 
-    @DisplayName("유효하지 않는 비밀번호로 조회하면 401.html로 리다이렉트 한다.")
-    @Test
-    void searchUserDataInvalidPassword() {
-        //given
-        String target = "pass";
-        Map<String, String> params = Map.of("account", "gugu", "password", target);
-        UserController userController = new UserController();
-
-        //when
-        HttpResponseEntity<User> result = userController.searchUserData(params);
-
-        //then
-        assertAll(
-                () -> assertThat(result.body()).isNull(),
-                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
-                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
-        );
-    }
-
-    @DisplayName("로그인에 성공하면 302와 SET-COOKIE 헤더에 값이 담긴다.")
+    @DisplayName("로그인에 성공하면 302 FOUND와 Location 헤더에 /index.html를 반환한다.")
     @Test
     void login() {
         //given
-        Map<String, String> params = Map.of("account", "gugu", "password", "password");
-        UserController userController = new UserController();
+        String account = "gugu";
+        String password = "password";
+        Map<String, String> params = Map.of("account", account, "password", password);
+        HttpRequest httpRequest =
+                new HttpRequest(new HttpRequestLine("POST /login HTTP/1.1"), Map.of(), new RequestBody());
 
         //when
-        HttpResponseEntity<User> result = userController.login(params,
-                new HttpRequest(new HttpRequestLine("GET /login HTTP1.1"), Map.of(), new RequestBody()));
+        HttpResponseEntity<User> result = userController.login(params, httpRequest);
 
         //then
         assertAll(
                 () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/index.html"),
                 () -> assertThat(result.headers()).containsKey(HttpHeaders.SET_COOKIE)
+        );
+    }
+
+    @DisplayName("로그인에 실패하면 302 FOUND와 Location 헤더에 /401.html를 반환한다.")
+    @Test
+    void loginNotExist() {
+        //given
+        String account = "";
+        String password = "password";
+        Map<String, String> params = Map.of("account", account, "password", password);
+
+        //when
+        HttpResponseEntity<User> result = userController.searchUserData(params);
+
+        //then
+        assertAll(
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
+        );
+    }
+
+    @DisplayName("회원가입을 성공하면 302 FOUND와 Location 헤더에 /index.html를 반환한다.")
+    @Test
+    void register() {
+        //given
+        String account = "gugu";
+        String password = "password";
+        Map<String, String> params = Map.of("account", account, "password", password);
+
+        //when
+        HttpResponseEntity<User> result = userController.searchUserData(params);
+
+        //then
+        assertAll(
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/index.html")
+        );
+    }
+
+    @DisplayName("회원가입에 실패하면 302 FOUND와 Location 헤더에 /401.html를 반환한다.")
+    @Test
+    void registerAlreadyExistAccount() {
+        //given
+        String account = "";
+        String password = "password";
+        Map<String, String> params = Map.of("account", account, "password", password);
+
+        //when
+        HttpResponseEntity<User> result = userController.searchUserData(params);
+
+        //then
+        assertAll(
+                () -> assertThat(result.httpStatus()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(result.headers()).containsEntry(HttpHeaders.LOCATION, "/401.html")
         );
     }
 }

@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.request.Http11Request;
@@ -122,17 +123,18 @@ public class Http11Processor implements Runnable, Processor {
         String account = queryStrings.get("account").getFirst();
         String password = queryStrings.get("password").getFirst();
 
-        InMemoryUserRepository.findByAccount(account)
-                .ifPresent((user -> {
-                    if (user.checkPassword(password)) {
-                        Session session = request.getSession();
-                        session.setAttribute("user", user);
-                        response.addCookie("JSESSIONID", session.getId());
-                        response.sendRedirect("/index.html");
-                        return;
-                    }
-                    response.sendRedirect("/401.html");
-                }));
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.checkPassword(password)) {
+                Session session = request.getSession();
+                session.setAttribute("user", user);
+                response.addCookie("JSESSIONID", session.getId());
+                response.sendRedirect("/index.html");
+                return;
+            }
+        }
+        response.sendRedirect("/401.html");
     }
 
     private void register(Http11Request request, Http11Response response) {

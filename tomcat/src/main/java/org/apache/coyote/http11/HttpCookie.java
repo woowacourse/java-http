@@ -14,7 +14,7 @@ public class HttpCookie {
         this.cookies = new HashMap<>(cookies);
     }
 
-    public void addValue(String key, String value) {
+    public void setValue(String key, String value) {
         cookies.put(key, value);
     }
 

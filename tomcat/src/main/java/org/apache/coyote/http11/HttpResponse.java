@@ -30,7 +30,7 @@ public class HttpResponse {
     }
 
     public HttpResponse addCookie(String key, String value) {
-        this.httpCookie.addValue(key, value);
+        this.httpCookie.setValue(key, value);
         return this;
     }
 

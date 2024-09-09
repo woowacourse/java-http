@@ -25,16 +25,16 @@ public class RegisterServlet extends HttpServlet {
     }
 
     private String getFileContent(URL resourceURL) {
-        if (resourceURL != null) {
-            File file = new File(resourceURL.getFile());
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String collect = reader.lines().collect(Collectors.joining("\n"));
-                return collect + "\n";
-            } catch (IOException e) {
-                return "Hello world!";
-            }
+        if (resourceURL == null) {
+            return "";
         }
-        return "";
+        File file = new File(resourceURL.getFile());
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String collect = reader.lines().collect(Collectors.joining("\n"));
+            return collect + "\n";
+        } catch (IOException e) {
+            return "Hello world!";
+        }
     }
 
     @Override

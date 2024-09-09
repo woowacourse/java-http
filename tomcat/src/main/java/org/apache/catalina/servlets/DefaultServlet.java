@@ -35,7 +35,7 @@ public class DefaultServlet implements Servlet {
         response.setResponseBody(fileContent);
     }
 
-    private String getFileContent(URL resourceURL) throws IOException {
+    private String getFileContent(URL resourceURL) {
         if (resourceURL == null) {
             return "";
         }

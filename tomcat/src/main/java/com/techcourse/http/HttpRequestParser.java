@@ -26,7 +26,7 @@ public class HttpRequestParser {
         String startLine = reader.readLine();
         String[] startLineParts = startLine.split(" ");
         String method = startLineParts[0];
-        String uri = startLineParts[1];
+        String uri = URLDecoder.decode(startLineParts[1], StandardCharsets.UTF_8);
 
         request.setMethod(method);
         request.setUri(uri);

@@ -5,9 +5,18 @@ import org.apache.coyote.file.Resource;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.path.Path;
+import org.apache.coyote.http11.response.Charset;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
+import util.BiValue;
+import util.StringUtil;
+
+import static org.apache.coyote.http11.response.Charset.UTF_8;
+import static org.apache.coyote.http11.response.ContentType.*;
 
 public class ResourceToResponseConverter {
+
+    private static final String DELIMITER = ";";
 
     public static HttpResponse convert(final HttpStatusCode statusCode, final Resource resource) {
         return new HttpResponse(statusCode, createDefaultHeaders(resource), "HTTP/1.1", resource.getBytes());
@@ -29,11 +38,15 @@ public class ResourceToResponseConverter {
 
     private static String getContentType(final FileExtension extension) {
         return switch (extension) {
-            case CSS -> "text/css;charset=utf-8 ";
-            case HTML -> "text/html;charset=utf-8 ";
-            case JAVASCRIPT -> "text/javascript;charset=utf-8 ";
-            case UNKNOWN -> "text/plain;charset=utf-8 ";
+            case CSS -> combineContentAndCharset(CSS, UTF_8);
+            case HTML -> combineContentAndCharset(HTML, UTF_8);
+            case JAVASCRIPT -> combineContentAndCharset(JAVASCRIPT, UTF_8);
+            case UNKNOWN -> combineContentAndCharset(PLAIN, UTF_8);
         };
+    }
+
+    private static String combineContentAndCharset(final ContentType contentType, final Charset charset) {
+        return StringUtil.combineWithDelimiter(new BiValue<>(contentType.getMimeType(), charset.getType()), DELIMITER);
     }
 
     private ResourceToResponseConverter() {}

@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
-import org.apache.coyote.http11.controller.ResourceLoader;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -24,8 +23,7 @@ public class LoginController extends AbstractController {
         String password = requestBody.split("&")[1].split("=")[1];
 
         User user = InMemoryUserRepository.findByAccount(account).get();
-
-        String responseBody;
+        String responseBody = new String(request.toHttpResponseBody());
 
         if (user.checkPassword(password)) {
             log.info("user : {}", user);
@@ -33,8 +31,6 @@ public class LoginController extends AbstractController {
             Session session = new Session(jSessionId.toString());
             session.setAttribute("user", user);
             sessionManager.add(session);
-
-            responseBody = new String(ResourceLoader.loadResource("static/index.html"));
 
             response.addVersion(request.getVersion());
             response.addStatusCode(302);
@@ -46,8 +42,6 @@ public class LoginController extends AbstractController {
             response.addBody(responseBody);
 
         } else {
-            responseBody = new String(ResourceLoader.loadResource("static/401.html"));
-
             response.addVersion(request.getVersion());
             response.addStatusCode(302);
             response.addStatusMessage("FOUND");
@@ -61,14 +55,14 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         Map<String, String> headers = request.getHeaders();
-        String responseBody;
+        String responseBody = new String(request.toHttpResponseBody());
         if (headers.containsKey("Cookie") &&
                 headers.get("Cookie").startsWith("JSESSIONID=")) {
             String jSessionId = headers.get("Cookie").split("=")[1];
             Session session = sessionManager.findSession(jSessionId);
 
             if (session != null && session.getAttribute("user") != null) {
-                responseBody = new String(ResourceLoader.loadResource("static/index.html"));
+
                 response.addVersion(request.getVersion());
                 response.addStatusCode(302);
                 response.addStatusMessage("FOUND");
@@ -77,7 +71,6 @@ public class LoginController extends AbstractController {
                 response.addHeader("Location", "/index.html");
                 response.addBody(responseBody);
             } else {
-                responseBody = new String(ResourceLoader.loadResource("static" + request.getPath() + ".html"));
                 response.addVersion(request.getVersion());
                 response.addStatusCode(200);
                 response.addStatusMessage("OK");
@@ -86,7 +79,6 @@ public class LoginController extends AbstractController {
                 response.addBody(responseBody);
             }
         } else {
-            responseBody = new String(ResourceLoader.loadResource("static" + request.getPath() + ".html"));
             response.addVersion(request.getVersion());
             response.addStatusCode(200);
             response.addStatusMessage("OK");

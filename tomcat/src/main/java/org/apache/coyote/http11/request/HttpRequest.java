@@ -1,9 +1,14 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.controller.ResourceLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +66,26 @@ public class HttpRequest {
 
     public boolean isPost() {
         return method.equals("POST");
+    }
+
+    public byte[] toHttpResponseBody() throws URISyntaxException, IOException {
+        URL url = ResourceLoader.class.getClassLoader().getResource(loadResourceName(path));
+        if (url == null) {
+            throw new IllegalArgumentException("존재하지 않는 리소스 입니다." + path);
+        }
+
+        Path path = Path.of(url.toURI());
+        return Files.readAllBytes(path);
+    }
+
+    private String loadResourceName(String path) {
+        if (path.equals("/")) {
+            return "static/index.html";
+        }
+        if (!path.endsWith(".html") && !path.contains(".")) {
+            return "static" + path + ".html";
+        }
+        return "static" + path;
     }
 
     public String getContentType() {

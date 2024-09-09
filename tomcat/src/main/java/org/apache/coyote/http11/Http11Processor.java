@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
+import com.techcourse.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -152,17 +154,17 @@ public class Http11Processor implements Runnable, Processor {
         String account = userInfo.get("account");
         String password = userInfo.get("password");
 
-        InMemoryUserRepository.findByAccount(account).ifPresent(
-                user -> {
-                    boolean isValidPassword = user.checkPassword(password);
-                    if (isValidPassword) {
-                        log.info("user : {}", user);
-                    }
+        Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
 
-                    if (!isValidPassword) {
-                        log.info(user.getAccount() + "의 비밀번호가 잘못 입력되었습니다.");
-                    }
-                }
-        );
+        if (loginUser.isEmpty()) {
+            log.info(account + "는(은) 등록되지 않은 계정입니다.");
+            return;
+        }
+
+        loginUser.filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> log.info("user : {}", user),
+                        () -> log.info(account + "의 비밀번호가 잘못 입력되었습니다.")
+                );
     }
 }

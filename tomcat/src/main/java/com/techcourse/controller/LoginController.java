@@ -30,7 +30,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
-        if (request.getCookie().hasCookieName("JSESSIONID")) {
+        if (request.hasCookieWithSession()) {
             return alreadyLoggedIn(request);
         }
         try {
@@ -45,8 +45,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws Exception {
-        //TODO: 메서드 물어볼 수 있게 수정
-        if (request.getCookie().hasCookieName("JSESSIONID")) {
+        if (request.hasCookieWithSession()) {
             return alreadyLoggedIn(request);
         }
         try {

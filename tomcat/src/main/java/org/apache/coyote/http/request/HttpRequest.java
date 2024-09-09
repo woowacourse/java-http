@@ -1,7 +1,5 @@
 package org.apache.coyote.http.request;
 
-import org.apache.coyote.http.HttpCookie;
-
 import java.util.List;
 
 import static org.apache.coyote.util.Constants.CRLF;
@@ -36,8 +34,8 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public HttpCookie getCookie() {
-        return headers.getCookie();
+    public boolean hasCookieWithSession() {
+        return headers.hasCookieWithSession();
     }
 
     public int getContentLength() {

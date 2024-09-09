@@ -15,8 +15,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -124,17 +122,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse register(HttpRequest request) {
-        Map<String, String> parameters = new HashMap<>();
-        String body = request.getBody();
-        for (String data : body.split("&")) {
-            String[] keyValue = data.split("=");
-            parameters.put(keyValue[0], keyValue[1]);
-        }
-
         InMemoryUserRepository.save(new User(
-                parameters.get("account"),
-                parameters.get("password"),
-                parameters.get("email")
+                request.getParameter("account"),
+                request.getParameter("password"),
+                request.getParameter("email")
         ));
 
         return HttpResponse.found("/index.html");

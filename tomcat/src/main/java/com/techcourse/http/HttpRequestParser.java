@@ -86,12 +86,17 @@ public class HttpRequestParser {
 
         int contentLength = Integer.parseInt(contentLengthHeader);
         char[] bodyChars = new char[contentLength];
-        int readChars = reader.read(bodyChars, 0, contentLength);
 
-        if (readChars != contentLength) {
+        if (reader.read(bodyChars, 0, contentLength) != contentLength) {
             throw new IOException("Failed to read the entire request body");
         }
 
-        request.setBody(URLDecoder.decode(new String(bodyChars), StandardCharsets.UTF_8));
+        String contentTypeHeader = request.getHeader("Content-Type");
+        if ("application/x-www-form-urlencoded".equals(contentTypeHeader)) {
+            parseParameters(request, new String(bodyChars));
+            return;
+        }
+
+        request.setBody(new String(bodyChars));
     }
 }

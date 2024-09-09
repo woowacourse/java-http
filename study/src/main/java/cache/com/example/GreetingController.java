@@ -1,7 +1,6 @@
 package cache.com.example;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.UUID;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;

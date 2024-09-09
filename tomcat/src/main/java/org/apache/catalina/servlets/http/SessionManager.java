@@ -7,7 +7,7 @@ import org.apache.catalina.Manager;
 
 public class SessionManager implements Manager {
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> session = new HashMap<>();
 
     private static SessionManager instance;
 
@@ -22,21 +22,21 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(Session session) {
-        SESSIONS.put(session.getId(), session);
+        SessionManager.session.put(session.getId(), session);
     }
 
     @Override
     public Session findSession(String id) throws IOException {
-        return SESSIONS.get(id);
+        return session.get(id);
     }
 
     @Override
     public void remove(Session session) {
-        SESSIONS.remove(session.getId());
+        SessionManager.session.remove(session.getId());
     }
 
 
     public boolean hasSession(String sessionId) {
-        return SESSIONS.containsKey(sessionId);
+        return session.containsKey(sessionId);
     }
 }

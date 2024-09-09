@@ -69,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private List<String> readHttpHeaders(InputView inputView) throws IOException {
-        ArrayList<String> headerLines = new ArrayList<>();
+        List<String> headerLines = new ArrayList<>();
         String line;
         while (!StringUtils.isEmpty(line = inputView.readLine())) {
             headerLines.add(line);

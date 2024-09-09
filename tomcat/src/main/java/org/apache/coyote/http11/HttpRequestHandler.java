@@ -17,16 +17,8 @@ public class HttpRequestHandler {
     }
 
     private HttpResponse staticPage(String url) {
-        StaticResourceLoader loader = new StaticResourceLoader();
-        String resource = loader.load(url);
-        if (resource.isEmpty()) {
-            String notFoundResource = loader.load("/404.html");
-            return HttpResponse.builder()
-                    .statusCode(HttpStatusCode.NOT_FOUND)
-                    .responseBody(notFoundResource);
-        }
         return HttpResponse.builder()
                 .statusCode(HttpStatusCode.OK)
-                .responseBody(resource);
+                .staticResource(url);
     }
 }

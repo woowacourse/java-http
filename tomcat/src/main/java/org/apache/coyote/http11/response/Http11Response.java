@@ -8,22 +8,16 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class Http11Response implements HttpResponse {
 
-    private final String protocol;
-    private final int statusCode;
-    private final String statusMessage;
-    private final Map<String, String> headers;
-    private final String body;
+    private String protocol;
+    private int statusCode;
+    private String statusMessage;
+    private Map<String, String> headers;
+    private String body;
 
-    private Http11Response(Http11ResponseBuilder builder) {
-        this.protocol = builder.protocol;
-        this.statusCode = builder.statusCode;
-        this.statusMessage = builder.statusMessage;
-        this.headers = builder.headers;
-        this.body = builder.body;
-    }
-
-    public static Http11ResponseBuilder builder() {
-        return new Http11ResponseBuilder();
+    public Http11Response() {
+        this.protocol = "HTTP/1.1";
+        this.headers = new LinkedHashMap<>();
+        this.body = "";
     }
 
     @Override
@@ -41,38 +35,20 @@ public class Http11Response implements HttpResponse {
         );
     }
 
-    public static class Http11ResponseBuilder {
-        private String protocol;
-        private int statusCode;
-        private String statusMessage;
-        private Map<String, String> headers;
-        private String body;
+    @Override
+    public void setStatus(HttpStatus status) {
+        this.statusCode = status.statusCode();
+        this.statusMessage = status.statusMessage();
+    }
 
-        private Http11ResponseBuilder() {
-            this.protocol = "HTTP/1.1";
-            this.headers = new LinkedHashMap<>();
-            this.body = "";
-        }
+    @Override
+    public void setHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
 
-        public Http11ResponseBuilder status(HttpStatus status) {
-            this.statusCode = status.statusCode();
-            this.statusMessage = status.statusMessage();
-            return this;
-        }
-
-        public Http11ResponseBuilder appendHeader(String key, String value) {
-            this.headers.put(key, value);
-            return this;
-        }
-
-        public Http11ResponseBuilder body(String body) {
-            this.body = body;
-            appendHeader("Content-Length", body.getBytes().length + " ");
-            return this;
-        }
-
-        public Http11Response build() {
-            return new Http11Response(this);
-        }
+    @Override
+    public void setBody(String body) {
+        this.body = body;
+        setHeader("Content-Length", body.getBytes().length + " ");
     }
 }

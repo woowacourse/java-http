@@ -3,41 +3,27 @@ package org.apache.coyote.handler;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
-import java.util.List;
 import java.util.Map;
 import org.apache.ResourceReader;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.RequestHandler;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.response.Http11Response;
 
-public class SignupRequestHandler implements RequestHandler {
+public class SignupRequestHandler extends AbstractRequestHandler {
 
-    private static final List<HttpMethod> ALLOWED_METHODS = List.of(HttpMethod.POST, HttpMethod.GET);
     private static final String SESSION_ID_COOKIE_NAME = "JSESSIONID";
 
     @Override
-    public boolean canHandling(HttpRequest httpRequest) {
-        return httpRequest.getPath().equals("/register")
-                && (ALLOWED_METHODS.contains(httpRequest.getMethod()));
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.setStatus(HttpStatus.OK);
+        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8");
+        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        if (HttpMethod.POST.equals(httpRequest.getMethod())) {
-            return post(httpRequest);
-        }
-        if (HttpMethod.GET.equals(httpRequest.getMethod())) {
-            return get(httpRequest);
-        }
-        throw new UncheckedServletException(new UnsupportedOperationException("지원하지 않는 HTTP METHOD 입니다."));
-    }
-
-    private Http11Response post(HttpRequest httpRequest) {
+    protected void post(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> param = httpRequest.getParsedBody();
         User newUser = new User(param.get("account"), param.get("password"), param.get("email"));
         validateExists(newUser);
@@ -45,24 +31,16 @@ public class SignupRequestHandler implements RequestHandler {
         Session session = httpRequest.getSession();
         session.setAttribute("user", newUser);
         SessionManager.getInstance().add(session);
-        return Http11Response.builder()
-                .status(HttpStatus.FOUND)
-                .appendHeader("Set-Cookie", SESSION_ID_COOKIE_NAME + "=" + session.getId())
-                .appendHeader("Location", "/index.html")
-                .build();
+
+        httpResponse.setStatus(HttpStatus.FOUND);
+        httpResponse.setHeader("Set-Cookie", SESSION_ID_COOKIE_NAME + "=" + session.getId());
+        httpResponse.setHeader("Location", "/index.html");
+        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 
     private void validateExists(User user) {
         if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
             throw new UncheckedServletException(new IllegalStateException("이미 존재하는 아이디 입니다."));
         }
-    }
-
-    private Http11Response get(HttpRequest httpRequest) {
-        return Http11Response.builder()
-                .status(HttpStatus.OK)
-                .appendHeader("Content-Type", "text/html;charset=utf-8")
-                .body(ResourceReader.readFile(httpRequest.getRequestURI()))
-                .build();
     }
 }

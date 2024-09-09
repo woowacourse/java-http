@@ -1,24 +1,22 @@
 package org.apache.coyote.handler;
 
+import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.RequestHandler;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.response.Http11Response;
 
-public class RootRequestHandler implements RequestHandler {
+public class RootRequestHandler extends AbstractRequestHandler {
 
     @Override
-    public boolean canHandling(HttpRequest httpRequest) {
-        return "/".equals(httpRequest.getRequestURI());
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.setStatus(HttpStatus.OK);
+        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8 ");
+        httpResponse.setBody("Hello world!");
+
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        return Http11Response.builder()
-                .status(HttpStatus.OK)
-                .appendHeader("Content-Type", "text/html;charset=utf-8 ")
-                .body("Hello world!")
-                .build();
+    protected void post(HttpRequest httpRequest, HttpResponse response) {
+        throw new UncheckedServletException(new UnsupportedOperationException("지원하지 않는 HTTP METHOD 입니다."));
     }
 }

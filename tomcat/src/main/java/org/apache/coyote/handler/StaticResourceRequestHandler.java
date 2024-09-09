@@ -1,27 +1,18 @@
 package org.apache.coyote.handler;
 
+import com.techcourse.exception.UncheckedServletException;
 import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
-import org.apache.coyote.RequestHandler;
-import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.response.Http11Response;
 
-public class StaticResourceRequestHandler implements RequestHandler {
-
-    @Override
-    public boolean canHandling(HttpRequest httpRequest) {
-        return ResourceReader.canRead(httpRequest.getRequestURI()) && HttpMethod.GET.equals(httpRequest.getMethod());
-    }
+public class StaticResourceRequestHandler extends AbstractRequestHandler {
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        return Http11Response.builder()
-                .status(HttpStatus.OK)
-                .appendHeader("Content-Type", getContentType(httpRequest))
-                .body(ResourceReader.readFile(httpRequest.getRequestURI()))
-                .build();
+    protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse.setStatus(HttpStatus.OK);
+        httpResponse.setHeader("Content-Type", getContentType(httpRequest));
+        httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 
     private String getContentType(HttpRequest httpRequest) {
@@ -30,5 +21,10 @@ public class StaticResourceRequestHandler implements RequestHandler {
             return "text/" + httpRequest.getRequestURI().substring(index + 1) + ";charset=utf-8 ";
         }
         return httpRequest.getHeader("Accept").split(",")[0];
+    }
+
+    @Override
+    protected void post(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new UncheckedServletException(new UnsupportedOperationException("지원하지 않는 HTTP METHOD 입니다."));
     }
 }

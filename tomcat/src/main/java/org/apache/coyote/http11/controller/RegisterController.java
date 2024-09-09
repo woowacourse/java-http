@@ -13,6 +13,8 @@ import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 
 public class RegisterController extends AbstractController {
 
+    private static final String REGISTER_PATH = "static/register.html";
+
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         String requestBody = httpRequest.getBody();
@@ -43,8 +45,7 @@ public class RegisterController extends AbstractController {
         try {
             HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.OK);
 
-            String fileName = "static/register.html";
-            var resourceUrl = getClass().getClassLoader().getResource(fileName);
+            var resourceUrl = getClass().getClassLoader().getResource(REGISTER_PATH);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
 

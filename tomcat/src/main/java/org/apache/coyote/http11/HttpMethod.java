@@ -10,7 +10,7 @@ public enum HttpMethod {
 
     public static HttpMethod getHttpMethod(String name) {
         return Arrays.stream(values())
-                .filter(httpMethod -> httpMethod.name().equals(name))
+                .filter(httpMethod -> httpMethod.isMethod(name))
                 .findAny()
                 .orElseThrow();
     }

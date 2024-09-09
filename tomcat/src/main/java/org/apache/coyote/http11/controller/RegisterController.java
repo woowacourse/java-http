@@ -9,8 +9,6 @@ import java.nio.file.Path;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.httpresponse.HttpResponseBody;
-import org.apache.coyote.http11.httpresponse.HttpResponseHeader;
 import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 
 public class RegisterController extends AbstractController {
@@ -34,10 +32,10 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
 
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
-        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
-        httpResponseHeader.addHeaders("Location", "/index.html");
 
-        return new HttpResponse(httpStatusLine, httpResponseHeader);
+        return new HttpResponse.Builder(httpStatusLine)
+                .location("/index.html")
+                .build();
     }
 
     @Override
@@ -49,12 +47,12 @@ public class RegisterController extends AbstractController {
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
-            HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
-            httpResponseHeader.addHeaders("Content-Type", Files.probeContentType(filePath) + ";charset=utf-8");
-            httpResponseHeader.addHeaders("Content-Length", String.valueOf(responseBody.getBytes().length));
-            HttpResponseBody httpResponseBody = new HttpResponseBody(responseBody);
 
-            return new HttpResponse(httpStatusLine, httpResponseHeader, httpResponseBody);
+            return new HttpResponse.Builder(httpStatusLine)
+                    .contentType(Files.probeContentType(filePath) + ";charset=utf-8")
+                    .contentLength(String.valueOf(responseBody.getBytes().length))
+                    .responseBody(responseBody)
+                    .build();
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }

@@ -1,17 +1,17 @@
 package org.apache.coyote.http11.httpresponse;
 
-import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeaderName;
 
 public class HttpResponseHeader {
 
-    private final Map<String, String> headers;
+    private final Map<HttpHeaderName, String> headers;
 
-    public HttpResponseHeader() {
-        this.headers = new HashMap<>();
+    public HttpResponseHeader(Map<HttpHeaderName, String> headers) {
+        this.headers = headers;
     }
 
-    public void addHeaders(String key, String value) {
+    public void addHeaders(HttpHeaderName key, String value) {
         headers.put(key, value);
     }
 
@@ -19,19 +19,19 @@ public class HttpResponseHeader {
         StringBuilder sb = new StringBuilder();
         int size = headers.keySet().size();
         int i = 1;
-        for (String key : headers.keySet()) {
+        for (HttpHeaderName key : headers.keySet()) {
             if (i < size) {
-                sb.append(key).append(": ").append(headers.get(key)).append(" \r\n");
+                sb.append(key.getName()).append(": ").append(headers.get(key)).append(" \r\n");
                 size++;
             } else {
-                sb.append(key).append(": ").append(headers.get(key));
+                sb.append(key.getName()).append(": ").append(headers.get(key));
             }
         }
 
         return sb.toString();
     }
 
-    public Map<String, String> getHeaders() {
+    public Map<HttpHeaderName, String> getHeaders() {
         return headers;
     }
 }

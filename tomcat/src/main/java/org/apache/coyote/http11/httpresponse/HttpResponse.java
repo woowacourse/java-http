@@ -1,12 +1,16 @@
 package org.apache.coyote.http11.httpresponse;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.coyote.http11.HttpHeaderName;
+
 public class HttpResponse {
 
     private final HttpStatusLine httpStatusLine;
     private final HttpResponseHeader httpResponseHeader;
     private final HttpResponseBody httpResponseBody;
 
-    public HttpResponse(
+    private HttpResponse(
             HttpStatusLine httpStatusLine,
             HttpResponseHeader httpResponseHeader,
             HttpResponseBody httpResponseBody
@@ -14,10 +18,6 @@ public class HttpResponse {
         this.httpStatusLine = httpStatusLine;
         this.httpResponseHeader = httpResponseHeader;
         this.httpResponseBody = httpResponseBody;
-    }
-
-    public HttpResponse(HttpStatusLine httpStatusLine, HttpResponseHeader httpResponseHeader) {
-        this(httpStatusLine, httpResponseHeader, null);
     }
 
     public byte[] getBytes() {
@@ -49,5 +49,45 @@ public class HttpResponse {
 
     public HttpResponseBody getHttpResponseBody() {
         return httpResponseBody;
+    }
+
+    public static class Builder {
+        private final HttpStatusLine httpStatusLine;
+        private final Map<HttpHeaderName, String> headers;
+        private HttpResponseBody httpResponseBody;
+
+        public Builder(HttpStatusLine httpStatusLine) {
+            this.httpStatusLine = httpStatusLine;
+            this.headers = new HashMap<>();
+        }
+
+        public Builder location(String location) {
+            headers.put(HttpHeaderName.LOCATION, location);
+            return this;
+        }
+
+        public Builder contentType(String contentType) {
+            headers.put(HttpHeaderName.CONTENT_TYPE, contentType);
+            return this;
+        }
+
+        public Builder contentLength(String contentLength) {
+            headers.put(HttpHeaderName.CONTENT_LENGTH, contentLength);
+            return this;
+        }
+
+        public Builder setCookie(String setCookie) {
+            headers.put(HttpHeaderName.SET_COOKIE, setCookie);
+            return this;
+        }
+
+        public Builder responseBody(String responseBody) {
+            this.httpResponseBody = new HttpResponseBody(responseBody);
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(httpStatusLine, new HttpResponseHeader(headers), httpResponseBody);
+        }
     }
 }

@@ -11,8 +11,7 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.httpresponse.HttpResponseBody;
-import org.apache.coyote.http11.httpresponse.HttpResponseHeader;
+import org.apache.coyote.http11.httpresponse.HttpResponse.Builder;
 import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,18 +39,18 @@ public class LoginController extends AbstractController {
         UUID uuid = UUID.randomUUID();
 
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
-        HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
+        Builder builder = new Builder(httpStatusLine);
         if (user.checkPassword(password)) {
             session.save(uuid.toString(), user);
-            httpResponseHeader.addHeaders("Set-Cookie", "JSESSIONID=" + uuid);
-            httpResponseHeader.addHeaders("Location", "/index.html");
+            builder.setCookie("JSESSIONID=" + uuid);
+            builder.location("/index.html");
             log.info(user.toString());
         } else {
-            httpResponseHeader.addHeaders("Location", "/401.html");
+            builder.location("/401.html");
             log.error("비밀번호 불일치");
         }
 
-        return new HttpResponse(httpStatusLine, httpResponseHeader);
+        return builder.build();
     }
 
     @Override
@@ -71,10 +70,10 @@ public class LoginController extends AbstractController {
                     User user = session.getUser(cookie);
                     log.info(user.toString());
                     httpStatusLine = new HttpStatusLine(httpStatusLine.getVersion(), HttpStatusCode.FOUND);
-                    HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
-                    httpResponseHeader.addHeaders("Set-Cookie", "JSESSIONID=" + cookie);
-                    httpResponseHeader.addHeaders("Location", "/index.html");
-                    return new HttpResponse(httpStatusLine, httpResponseHeader);
+                    return new HttpResponse.Builder(httpStatusLine)
+                            .setCookie("JSESSIONID=" + cookie)
+                            .location("/index.html")
+                            .build();
                 }
             }
 
@@ -82,12 +81,12 @@ public class LoginController extends AbstractController {
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
-            HttpResponseHeader httpResponseHeader = new HttpResponseHeader();
-            httpResponseHeader.addHeaders("Content-Type", Files.probeContentType(filePath) + ";charset=utf-8");
-            httpResponseHeader.addHeaders("Content-Length", String.valueOf(responseBody.getBytes().length));
-            HttpResponseBody httpResponseBody = new HttpResponseBody(responseBody);
 
-            return new HttpResponse(httpStatusLine, httpResponseHeader, httpResponseBody);
+            return new HttpResponse.Builder(httpStatusLine)
+                    .contentType(Files.probeContentType(filePath) + ";charset=utf-8")
+                    .contentLength(String.valueOf(responseBody.getBytes().length))
+                    .responseBody(responseBody)
+                    .build();
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }

@@ -54,21 +54,16 @@ public class LoginHandler extends Handler {
         final String password = params[1].split("=")[1];
 
         final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-        if (userOptional.isEmpty()) {
+        if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
             return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/401.html", "HTTP/1.1", null, null));
         }
 
-        final User user = userOptional.get();
-        if (user.checkPassword(password)) {
-            final Session session = new Session(UUID.randomUUID().toString());
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            return addCookie(
-                    HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
-                    new HttpCookie("JSESSIONID=" + session.getId()));
-        }
-
-        return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
+        final Session session = new Session(UUID.randomUUID().toString());
+        session.setAttribute("user", userOptional.get());
+        sessionManager.add(session);
+        return addCookie(
+                HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
+                new HttpCookie("JSESSIONID=" + session.getId()));
     }
 
     private String addCookie(final String response, final HttpCookie cookie) {

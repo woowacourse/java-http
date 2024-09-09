@@ -81,21 +81,23 @@ public class Http11Processor implements Runnable, Processor {
                 .responseToString();
     }
 
-    private Response generateResponseForUrl(Request headers) {
-        String accept = headers.getFileType();
-        if (ROOT_PATH.equals(headers.getUrl())) {
+    private Response generateResponseForUrl(Request request) {
+        String accept = request.getFileType();
+        if (ROOT_PATH.equals(request.getUrl())) {
             return new Response(HttpStatus.OK, accept, DEFAULT_PAGE_CONTENT);
         }
-        if (!headers.checkQueryParamIsEmpty()) {
-            return generateResponseForQueryParam(headers);
+        if (!request.checkQueryParamIsEmpty()) {
+            return generateResponseForQueryParam(request);
         }
 
-        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(headers.getUrl(), headers.getCookie());
+        Optional<ResponsePage> responsePage = ResponsePage.fromUrl(request.getUrl(), request.getCookie());
         if (responsePage.isPresent()) {
             ResponsePage page = responsePage.get();
-            return new Response(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
+            Response response = new Response(page.getStatus(), accept, FileReader.loadFileContent(page.getFileName()));
+            response.addLocation(page.getFileName());
+            return response;
         }
-        return new Response(HttpStatus.OK, accept, FileReader.loadFileContent(headers.getUrl()));
+        return new Response(HttpStatus.OK, accept, FileReader.loadFileContent(request.getUrl()));
     }
 
     private Response generateResponseForQueryParam(Request headers) {
@@ -115,7 +117,7 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> user = authenticateUser(queryParams.get(ACCOUNT), queryParams.get(PASSWORD));
         if (user.isPresent()) {
             Session session = new Session(UUID.randomUUID().toString());
-            session.setAttribute("user", user);
+            session.setAttribute(session.getId(), user);
             SessionManager.getInstance().add(session);
             HttpCookie httpCookie = request.getCookie();
             String cookie = httpCookie.getCookies(session.getId());

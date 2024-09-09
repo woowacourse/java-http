@@ -9,7 +9,7 @@ import org.apache.catalina.auth.HttpCookie;
 
 public class Request {
     private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String COOKIE = "Cookie";
 
     private final Map<String, String> headers;
     private Map<String, String> body = new HashMap<>();
@@ -84,7 +84,7 @@ public class Request {
     }
 
     public HttpCookie getCookie() {
-        String setCookies = headers.get(SET_COOKIE);
+        String setCookies = headers.get(COOKIE);
         if (setCookies == null) {
             return new HttpCookie(new HashMap<>());
         }

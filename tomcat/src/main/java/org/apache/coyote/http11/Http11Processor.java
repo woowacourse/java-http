@@ -4,6 +4,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -32,9 +34,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+    public void process(Socket connection) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest request = HttpRequestExtractor.extract(inputStream);
             HttpResponse response = new HttpResponse();

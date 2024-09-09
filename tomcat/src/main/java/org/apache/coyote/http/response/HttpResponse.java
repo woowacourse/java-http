@@ -16,6 +16,16 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public void setRedirectLocation(String destination) {
+        if (statusLine.needRedirectLocation()) {
+            headers.setLocation(destination);
+        }
+    }
+
+    public void setCookie(String cookie) {
+        headers.setCookie(cookie);
+    }
+
     public String toResponse() {
         return String.join(CRLF,
                 statusLine.toResponse() + headers.toResponse(),

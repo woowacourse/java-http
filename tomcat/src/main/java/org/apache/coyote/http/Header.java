@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.util.Constants.*;
+import static org.apache.coyote.util.Constants.CRLF;
+import static org.apache.coyote.util.Constants.SPACE;
 
 public abstract class Header {
 

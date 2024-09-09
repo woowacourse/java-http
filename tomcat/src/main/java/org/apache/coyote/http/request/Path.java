@@ -39,6 +39,10 @@ public class Path {
         return new HashMap<>();
     }
 
+    public boolean isResourceUri() {
+        return uri.contains(".");
+    }
+
     public boolean hasQueryParameter() {
         return parameters != null && !parameters.isEmpty();
     }

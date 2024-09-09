@@ -20,6 +20,10 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
+    public boolean needRedirectLocation() {
+        return httpStatus.equals(HttpStatus.FOUND);
+    }
+
     public String toResponse() {
         return String.join(SPACE,
                 version.getVersion(),

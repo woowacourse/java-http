@@ -24,4 +24,4 @@
 # 3단계 - 리팩터링
 
 - [x] Request, Response 객체 분리
-- [ ] Controller 인터페이스 추가
+- [x] Controller 인터페이스 추가

@@ -99,13 +99,13 @@ public class Http11Processor implements Runnable, Processor {
         Optional<User> rawUser = InMemoryUserRepository.findByAccount(account);
         if (rawUser.isEmpty()) {
             response.setStatusUnauthorized();
-            response.setBody(FileReader.readResourceFile("401.html"));
+            response.setBody(FileReader.readResourceFile("/401.html"));
             return;
         }
         User user = rawUser.get();
         if (!user.checkPassword(password)) {
             response.setStatusUnauthorized();
-            response.setBody(FileReader.readResourceFile("401.html"));
+            response.setBody(FileReader.readResourceFile("/401.html"));
             return;
         }
         log.info("user: {}", user);
@@ -152,9 +152,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String chooseFileName(String requestPath) {
         if (requestPath.contains(".")) {
-            return requestPath;
+            return "/" + requestPath;
         }
-        return requestPath + ".html";
+        return "/" + requestPath + ".html";
     }
 
     private String decideContentTypeHeader(HttpRequest request) {

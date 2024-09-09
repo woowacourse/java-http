@@ -34,9 +34,6 @@ public class HttpRequestParser {
             String[] keyAndValue = header.split(": ");
             headers.add(new HttpHeader(keyAndValue[0], keyAndValue[1]));
             header = bufferedReader.readLine();
-            if(header.isEmpty()) {
-                break;
-            }
         }
 
         return headers.toArray(HttpHeader[]::new);

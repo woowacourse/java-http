@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -25,9 +26,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionStorage sessionStorage;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.sessionStorage = new SessionStorage();
     }
 
     @Override
@@ -82,6 +85,8 @@ public class Http11Processor implements Runnable, Processor {
 
         String requestTarget = httpRequestMessage.getStartLine().split(" ")[1];
         String redirectTarget = "/index.html";
+        String uuid = "";
+        boolean loginSuccess = false;
         if (requestTarget.equals("/register")) {
             final User user = new User(queryStorage.get("account"), queryStorage.get("password"), queryStorage.get("email"));
             InMemoryUserRepository.save(user);
@@ -91,10 +96,24 @@ public class Http11Processor implements Runnable, Processor {
                     .orElseThrow(() -> new IllegalArgumentException("해당 account가 존재하지 않습니다."));
             if (user.checkPassword(queryStorage.get("password"))) {
                 log.info("user : {}", user);
+                loginSuccess = true;
+                final UUID userUuid = SessionStorage.generateUUID();
+                sessionStorage.add(userUuid);
+                uuid = userUuid.toString();
             }
             else {
                 redirectTarget = "/401.html";
            }
+        }
+        boolean noSession = false;
+        if (queryStorage.containsKey("Cookie")) {
+            final HttpCookie httpCookie = new HttpCookie(queryStorage.get("Cookie"));
+            if (!httpCookie.existSessionId("JSESSIONID")) {
+                final UUID newUuid = SessionStorage.generateUUID();
+                sessionStorage.add(newUuid);
+                uuid = newUuid.toString();
+                noSession = true;
+            }
         }
 
         String statusCode = "302 Found";
@@ -102,6 +121,10 @@ public class Http11Processor implements Runnable, Processor {
         var headers = String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " ");
         headers += "\r\n" + "Location: " + redirectTarget + " ";
+
+        if (loginSuccess || noSession) {
+            headers += "\r\n" + "Set-Cookie: JSESSIONID=" + uuid;
+        }
 
         return String.join("\r\n",
                 headers,

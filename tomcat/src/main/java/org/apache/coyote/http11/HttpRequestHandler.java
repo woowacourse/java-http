@@ -9,7 +9,7 @@ public class HttpRequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
-    public HttpResponse handle(RequestLine line) {
+    public HttpResponse handle(RequestLine line, String responseBody) {
         // Method, Path, Body
         if (line.getMethod().equals("GET") && line.getUrl().equals("/")) {
             return rootPage();
@@ -17,7 +17,24 @@ public class HttpRequestHandler {
         if (line.getMethod().equals("GET") && line.getUrl().startsWith("/login")) {
             return loginPage(line.getUrl());
         }
+        if (line.getMethod().equals("POST") && line.getUrl().startsWith("/register")) {
+            return register(responseBody);
+        }
         return staticPage(line.getUrl());
+    }
+
+    public HttpResponse handle(RequestLine line) {
+        return handle(line, "");
+    }
+
+    private HttpResponse register(String body) {
+        QueryParam param = new QueryParam(body);
+        User newAccount = new User(param.getValue("account"), param.getValue("password"), param.getValue("email"));
+        log.info("user : {}", newAccount);
+        InMemoryUserRepository.save(newAccount);
+        return HttpResponse.builder()
+                .statusCode(HttpStatusCode.FOUND)
+                .redirect("index.html");
     }
 
     private HttpResponse loginPage(String url) {
@@ -28,7 +45,7 @@ public class HttpRequestHandler {
                     .staticResource("/login.html");
         }
         User account = InMemoryUserRepository.findByAccount(queryParam.getValue("account"))
-                .orElseThrow(() -> new RuntimeException("계정 정복가 존재하지 않습니다."));
+                .orElseThrow(() -> new RuntimeException("계정 정보가 존재하지 않습니다."));
 
         if (account.checkPassword(queryParam.getValue("password"))) {
             return HttpResponse.builder()

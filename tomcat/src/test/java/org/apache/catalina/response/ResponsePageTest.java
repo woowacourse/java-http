@@ -14,7 +14,7 @@ class ResponsePageTest {
     @Test
     @DisplayName("성공 : 로그인이 안됐을 때 url에 맞는 ResponsePage을 알아낼 수 있다.")
     void fromUrlSuccessByIsNotLogin() {
-        ResponsePage expected = ResponsePage.LOGIN_IS_LOGIN;
+        ResponsePage expected = ResponsePage.LOGIN_IS_NOT_LOGIN;
 
         Optional<ResponsePage> actual = ResponsePage.fromUrl(expected.getUrl(), new HttpCookie(new HashMap<>()));
 

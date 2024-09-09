@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public static void saveUser(HttpRequestParameter requestParameter) {
+    public static void createUser(HttpRequestParameter requestParameter) {
         String account = requestParameter.getValue("account");
         String password = requestParameter.getValue("password");
         String email = requestParameter.getValue("email");

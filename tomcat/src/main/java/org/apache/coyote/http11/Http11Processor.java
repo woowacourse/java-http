@@ -37,7 +37,6 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
             String path = httpRequest.getPath();
-            System.out.println("first path: " + path);
 
             HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP_1_1)
                     .addHttpStatusCode(HttpStatusCode.NOT_FOUND);
@@ -77,11 +76,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void getStaticResource(HttpResponse httpResponse, String path) throws IOException {
-        System.out.println("path: " + path);
         int lastIndexOfDot = path.lastIndexOf(".");
         String postfix = path.substring(lastIndexOfDot + 1);
         String responseBody = htmlReader.loadHtmlAsString(path);
-        System.out.println("responseBody: " + responseBody);
         httpResponse.addContentType(ContentType.from(postfix))
                 .addHttpStatusCode(HttpStatusCode.OK)
                 .addResponseBody(responseBody);
@@ -119,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
             String redirectUrl = "/index.html";
             HttpRequestParameter requestParameter = httpRequest.getHttpRequestParameter();
             try {
-                UserService.saveUser(requestParameter);
+                UserService.createUser(requestParameter);
             } catch (IllegalArgumentException e) {
                 redirectUrl = "/400.html";
             }

@@ -7,12 +7,14 @@ public class UserServlet {
 
     private final List<User> users = new ArrayList<>();
 
-    public void service(final User user) {
+    public void service(final User user) throws InterruptedException {
         join(user);
     }
 
-    private void join(final User user) {
+    private void join(final User user) throws InterruptedException {
         if (!users.contains(user)) {
+            // 동시성 의도적 발생
+            //Thread.sleep(100);
             users.add(user);
         }
     }

@@ -12,6 +12,10 @@ public class HttpProcessor implements Runnable {
 
     @Override
     public void run() {
-        userServlet.service(user);
+        try {
+            userServlet.service(user);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

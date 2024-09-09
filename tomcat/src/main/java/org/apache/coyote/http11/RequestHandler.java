@@ -24,36 +24,43 @@ public class RequestHandler {
         this.requestUri = requestUri;
     }
 
-    public String generateResponseBody() throws IOException {
+    public String getResponse() throws IOException {
         if (Objects.equals(requestUri, "/")) {
-            return "Hello world!";
+            return generate200Response("/", "Hello world!");
         }
         if (requestUri.startsWith("/login")) {
-            return login();
+            return generateLoginResponse();
         }
-        return getResponseBody("static" + requestUri);
+        String responseBody = generateResponseBody("static" + requestUri);
+        return generate200Response(requestUri, responseBody);
     }
 
-    public String login() throws IOException {
+    private String generateLoginResponse() throws IOException {
         int index = requestUri.indexOf("?");
         if (index == -1) {
-            return getResponseBody("static" + requestUri);
+            String responseBody = generateResponseBody("static" + requestUri);
+            return generate200Response(requestUri, responseBody);
         }
-        String path = requestUri.substring(0, index);
 
+        if (login(index)) {
+            return generate302Response("/index.html");
+        }
+        return generate302Response("/401.html");
+    }
+
+    private boolean login(int index) {
         Optional<Map<String, String>> parsed = parseQueryString(requestUri, index);
         Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
 
-        User account = InMemoryUserRepository.findByAccount(queryPairs.get("account"))
-                .orElseThrow(() -> new NoSuchElementException("account not found"));
-
-        if (account.checkPassword(queryPairs.get("password"))) {
+        Optional<User> account = InMemoryUserRepository.findByAccount(queryPairs.get("account"));
+        if (account.isPresent() && account.get().checkPassword(queryPairs.get("password"))) {
             log.info("user : {}", account);
+            return true;
         }
-        return getResponseBody("static" + path);
+        return false;
     }
 
-    private String getResponseBody(String path) throws IOException {
+    private String generateResponseBody(String path) throws IOException {
         if (!path.contains(".")) {
             final URL resource = getClass().getClassLoader().getResource(path + ".html");
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -71,9 +78,32 @@ public class RequestHandler {
             if (!queryParameter.contains("=")) {
                 return Optional.empty();
             }
-            String[] pair = queryParameter.split("=");
+            String[] pair = queryParameter.split("=", -1);
             keyValue.put(pair[0], pair[1]);
         }
         return Optional.of(keyValue);
+    }
+
+    private String generate200Response(String requestUri, String responseBody) {
+        var response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        if (requestUri.startsWith("/css")) {
+            response = response.replace("text/html", "text/css");
+        }
+        return response;
+    }
+
+    private String generate302Response(String location) {
+        var response = String.join("\r\n",
+                "HTTP/1.1 302 FOUND ",
+                "Location: " + location,
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + 0 + " "
+        );
+        return response;
     }
 }

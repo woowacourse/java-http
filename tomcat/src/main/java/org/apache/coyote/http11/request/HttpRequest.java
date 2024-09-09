@@ -2,17 +2,15 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.request.body.RequestBody;
 import org.apache.coyote.http11.request.header.RequestHeaders;
 import org.apache.coyote.http11.request.startLine.HttpMethod;
 import org.apache.coyote.http11.request.startLine.RequestLine;
+import org.apache.coyote.http11.response.header.ContentType;
 
 public class HttpRequest {
 
@@ -26,12 +24,23 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest parse(InputStream inputStream, BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = new RequestLine(bufferedReader.readLine());
         RequestHeaders requestHeaders = new RequestHeaders(readHeaders(bufferedReader));
-        RequestBody requestBody = createRequestBody(bufferedReader, requestHeaders);
 
-        return new HttpRequest(requestLine, requestHeaders, requestBody);
+        int contentLength = requestHeaders.get("Content-Length")
+                .map(Integer::parseInt)
+                .orElse(0);
+
+        if (contentLength > 0) {
+            String mediaType = requestHeaders.get(ContentType.HEADER)
+                    .orElseThrow(() -> new IllegalArgumentException("요청 헤더를 찾을 수 없습니다."));
+
+            RequestBody requestBody = new RequestBody(mediaType, readRequestBody(inputStream, contentLength));
+            return new HttpRequest(requestLine, requestHeaders, requestBody);
+        }
+
+        return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
     }
 
     private static List<String> readHeaders(BufferedReader bufferedReader) throws IOException {
@@ -47,37 +56,11 @@ public class HttpRequest {
         return headers;
     }
 
-    private static RequestBody createRequestBody(BufferedReader bufferedReader, RequestHeaders requestHeaders)
-            throws IOException {
-        StringBuilder body = new StringBuilder();
-        int contentLength = requestHeaders.get("Content-Length")
-                .map(Integer::parseInt)
-                .orElse(0);
+    private static byte[] readRequestBody(InputStream inputStream, int contentLength) throws IOException {
+        byte[] bodyBytes = new byte[contentLength];
+        inputStream.read(bodyBytes);
 
-        if (contentLength > 0) {
-            char[] bodyChars = new char[contentLength];
-            bufferedReader.read(bodyChars, 0, contentLength);
-            body.append(bodyChars);
-        }
-
-        Map<String, String> params = new HashMap<>();
-
-        String[] paramPairs = body.toString().split("&");
-        for (String pair : paramPairs) {
-            String[] keyValue = pair.split("=");
-            if (keyValue.length == 2) {
-                params.put(
-                        URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8),
-                        URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8)
-                );
-            }
-        }
-
-        return new RequestBody(params);
-    }
-
-    public boolean matchesMethod(HttpMethod method) {
-        return requestLine.matchesMethod(method);
+        return bodyBytes;
     }
 
     public Optional<String> getHeader(String header) {

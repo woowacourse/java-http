@@ -8,23 +8,35 @@ import com.techcourse.view.View;
 import com.techcourse.view.ViewResolver;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        if (!request.hasBodyData()) {
-            throw new IllegalArgumentException("RequestBody is missing in the request");
+        try {
+            if (!request.hasBodyData()) {
+                throw new IllegalArgumentException("RequestBody is missing in the request");
+            }
+
+            Map<String, String> requestFormData = request.getFormData();
+            String account = requestFormData.get("account");
+            String password = requestFormData.get("password");
+            String email = requestFormData.get("email");
+
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+            responseRegisterSuccess(response);
+
+        } catch (IllegalArgumentException e) {
+            response.setStatus400();
+            response.setResponseBody(e.getMessage());
+            log.info("Bad Request: {}", e.getMessage());
+
         }
-
-        Map<String, String> requestFormData = request.getFormData();
-        String account = requestFormData.get("account");
-        String password = requestFormData.get("password");
-        String email = requestFormData.get("email");
-
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
-        responseRegisterSuccess(response);
     }
 
     @Override

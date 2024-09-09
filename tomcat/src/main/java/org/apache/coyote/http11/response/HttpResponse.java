@@ -28,6 +28,10 @@ public class HttpResponse {
         statusLine = new StatusLine("HTTP/1.1", "302", "Found");
     }
 
+    public void setStatus400() {
+        statusLine = new StatusLine("HTTP/1.1", "400", "Bad Request");
+    }
+
     public void setStatus404() {
         statusLine = new StatusLine("HTTP/1.1", "404", "Not Found");
     }

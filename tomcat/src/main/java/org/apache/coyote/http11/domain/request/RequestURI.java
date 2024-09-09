@@ -5,13 +5,13 @@ import org.apache.commons.lang3.StringUtils;
 
 public class RequestURI {
 
-    private static final String QUESTION_MARK = "?";
+    private static final String QUERY_DELIMITER = "?";
 
     private final String path;
     private final QueryParameters queryParameters;
 
     public RequestURI(String requestURI) {
-        int questionMarkIndex = requestURI.indexOf(QUESTION_MARK);
+        int questionMarkIndex = requestURI.indexOf(QUERY_DELIMITER);
         if (isQueryEmpty(questionMarkIndex)) {
             this.path = requestURI;
             this.queryParameters = new QueryParameters(StringUtils.EMPTY);

@@ -2,8 +2,8 @@ package org.apache.coyote;
 
 import org.apache.coyote.mapping.ResourceHandlerMapping;
 import org.apache.coyote.mapping.UrlHandlerMapping;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.http.request.HttpRequest;
+import org.apache.http.response.HttpResponseGenerator;
 
 public class RequestHandlerAdapter {
     private static final String PATH_DELIMITER = "/";

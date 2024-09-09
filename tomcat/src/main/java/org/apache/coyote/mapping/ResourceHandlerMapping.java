@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.http.response.HttpResponseGenerator;
 
 public class ResourceHandlerMapping {
 

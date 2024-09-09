@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.HttpRequestParser;
+import org.apache.http.request.HttpRequest;
+import org.apache.http.request.HttpRequestParser;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandlerAdapter;
 import org.slf4j.Logger;

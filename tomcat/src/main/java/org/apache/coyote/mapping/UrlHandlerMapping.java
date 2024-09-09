@@ -2,7 +2,7 @@ package org.apache.coyote.mapping;
 
 import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.handler.RegisterHandler;
-import org.apache.coyote.request.HttpRequest;
+import org.apache.http.request.HttpRequest;
 
 public class UrlHandlerMapping extends HandlerMapping {
 

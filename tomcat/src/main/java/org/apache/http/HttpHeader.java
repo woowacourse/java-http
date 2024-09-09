@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.http;
 
 public class HttpHeader {
     private final String key;

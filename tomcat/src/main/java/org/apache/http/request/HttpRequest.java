@@ -1,10 +1,10 @@
-package org.apache.coyote.request;
+package org.apache.http.request;
 
 import java.util.Arrays;
 
-import org.apache.coyote.HttpCookie;
-import org.apache.coyote.HttpHeader;
-import org.apache.coyote.HttpMethod;
+import org.apache.http.HttpCookie;
+import org.apache.http.HttpHeader;
+import org.apache.http.HttpMethod;
 
 public class HttpRequest {
     private final HttpMethod method;

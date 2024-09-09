@@ -1,4 +1,4 @@
-package org.apache.coyote.request;
+package org.apache.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.coyote.HttpHeader;
+import org.apache.http.HttpHeader;
 
 public class HttpRequestParser {
 

@@ -1,9 +1,9 @@
 package org.apache.coyote.handler;
 
-import org.apache.coyote.HttpMethod;
+import org.apache.http.HttpMethod;
 import org.apache.coyote.mapping.ResourceHandlerMapping;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.response.HttpResponseGenerator;
+import org.apache.http.request.HttpRequest;
+import org.apache.http.response.HttpResponseGenerator;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;

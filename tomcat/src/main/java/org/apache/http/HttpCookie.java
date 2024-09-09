@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.http;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -11,7 +11,6 @@ public class ViewResolver {
 
     public String resolve(String resourcePath) {
         try {
-            System.out.println("resourcePath = " + resourcePath);
             final URL resource = getClass().getClassLoader().getResource(resourcePath);
             if (resource != null) {
                 final Path path = Paths.get(resource.toURI());

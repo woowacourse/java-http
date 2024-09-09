@@ -1,6 +1,5 @@
 package cache.com.example.cachecontrol;
 
-import cache.com.example.version.ResourceVersion;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,7 +9,7 @@ public class CacheWebConfig implements WebMvcConfigurer {
 
     private final CacheWebInterceptor cacheWebInterceptor;
 
-    public CacheWebConfig(final CacheWebInterceptor cacheWebInterceptor, final ResourceVersion version) {
+    public CacheWebConfig(final CacheWebInterceptor cacheWebInterceptor) {
         this.cacheWebInterceptor = cacheWebInterceptor;
     }
 

@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.executor.LoginGetExecutor;
+import com.techcourse.executor.LoginPostExecutor;
+import com.techcourse.executor.RegisterGetExecutor;
+import com.techcourse.executor.RegisterPostExecutor;
 import org.apache.coyote.http11.executor.RequestExecutors;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
@@ -9,12 +13,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
-    RequestExecutors requestExecutors = new RequestExecutors();
+    RequestExecutors requestExecutors = new RequestExecutors(
+            List.of(new LoginGetExecutor(), new RegisterGetExecutor(), new RegisterPostExecutor(), new LoginPostExecutor()
+            ));
     SessionManager sessionManager = new SessionManager(150000);
 
     @Test

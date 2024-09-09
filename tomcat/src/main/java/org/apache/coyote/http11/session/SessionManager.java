@@ -20,7 +20,7 @@ public class SessionManager {
     }
 
     public Session createSession(final LocalDateTime time) {
-        final Session session = new Session(time, maxInactiveInterval);
+        final Session session = new Session(time, time.plusSeconds(maxInactiveInterval));
         SESSIONS.put(session.getId(), session);
         return session;
     }

@@ -8,19 +8,20 @@ import java.util.UUID;
 public class Session {
 
     private final String id;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values;
     private final LocalDateTime createdTime;
-    private final int maxInactiveInterval;
+    private final LocalDateTime expiresTime;
 
-    public Session(final LocalDateTime createdTime, final int maxInactiveInterval) {
-        this(String.valueOf(UUID.randomUUID()), createdTime, maxInactiveInterval);
+    public Session(final LocalDateTime createdTime, final LocalDateTime expiresTime) {
+        this(String.valueOf(UUID.randomUUID()), createdTime, expiresTime);
 
     }
 
-    public Session(final String id, final LocalDateTime createdTime, final int maxInactiveInterval) {
+    public Session(final String id, final LocalDateTime createdTime, final LocalDateTime expiresTime) {
         this.id = id;
+        this.values = new HashMap<>();
         this.createdTime = createdTime;
-        this.maxInactiveInterval = maxInactiveInterval;
+        this.expiresTime = expiresTime;
     }
 
     public String getId() {
@@ -40,7 +41,6 @@ public class Session {
     }
 
     public boolean isExpired(final LocalDateTime time) {
-        final LocalDateTime expiredTime = createdTime.plusSeconds(maxInactiveInterval);
-        return time.isAfter(expiredTime) || time.isEqual(expiredTime);
+        return time.isAfter(expiresTime);
     }
 }

@@ -13,7 +13,7 @@ class SessionTest {
     @DisplayName("최대 시간이 지나면, 만료가 된다.")
     void expired_when_over_max_inactive_interval() {
         final LocalDateTime time = LocalDateTime.now();
-        final Session session = new Session(time, 5);
+        final Session session = new Session(time, time.plusSeconds(5));
 
         final boolean result = session.isExpired(time.plusSeconds(6));
         assertThat(result).isTrue();

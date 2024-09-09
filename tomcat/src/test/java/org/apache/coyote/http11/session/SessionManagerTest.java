@@ -32,6 +32,6 @@ class SessionManagerTest {
         assertFalse(findSession1.isPresent());
         // 만료시간과 일치하면 삭제한다.
         assertTrue(findSession2.isPresent());
-        assertFalse(findSession3.isPresent());
+        assertTrue(findSession3.isPresent());
     }
 }

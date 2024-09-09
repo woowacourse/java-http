@@ -105,6 +105,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponseBasedOnSession(HttpRequest request, HttpCookie cookie) throws IOException {
+        if (SessionManager.getInstance().hasSession(cookie.getJSESSIONID())) {
+            return handleSessionExist(request, cookie);
+        }
+        return renderHtmlPage(request);
+    }
+
+    private String handleSessionExist(HttpRequest request, HttpCookie cookie) throws IOException {
         final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
         final var user = (User) session.getAttribute("user");
         if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
@@ -128,7 +135,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getLoginResponse(HttpRequest request, HttpCookie cookie) {
         final var response = new HttpResponse(HttpStatus.FOUND);
         response.setRedirect("/index.html");
-        if (!cookie.hasJSESSIONID()) {
+        if (!cookie.hasJSESSIONID() || !SessionManager.getInstance().hasSession(cookie.getJSESSIONID())) {
             final var session = getSession(request);
             response.setCookie("JSESSIONID", session.getId());
         }

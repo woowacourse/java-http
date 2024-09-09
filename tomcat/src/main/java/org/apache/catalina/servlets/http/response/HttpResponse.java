@@ -18,7 +18,7 @@ public class HttpResponse {
 
     public void sendRedirect(String s) {
         headers.put("Location", s);
-        setStatus(302);
+        setStatus(HttpStatus.FOUND.getStatusCode());
     }
 
     public void setStatus(int i) {

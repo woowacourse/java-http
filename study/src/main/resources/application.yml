@@ -8,3 +8,6 @@ server:
     threads:
       min-spare: 2
       max: 2
+  compression:
+    min-response-size: 10
+    enabled: true

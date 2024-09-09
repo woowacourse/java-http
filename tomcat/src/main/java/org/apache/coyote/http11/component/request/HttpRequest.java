@@ -3,6 +3,7 @@ package org.apache.coyote.http11.component.request;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.coyote.http11.component.common.body.Body;
@@ -52,7 +53,15 @@ public class HttpRequest {
         return getUri().getPath().equals(uriText);
     }
 
+    public Map<String, String> getHeadersPojo() {
+        return requestHeaders.getValues();
+    }
+
     public RequestHeaders getHeaders() {
         return requestHeaders;
+    }
+
+    public String getMethodText() {
+        return requestLine.getMethod().getValue();
     }
 }

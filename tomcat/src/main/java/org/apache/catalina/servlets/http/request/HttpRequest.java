@@ -88,10 +88,7 @@ public class HttpRequest {
 
     public String[] getParameterValues(String name) {
         Map<String, String[]> map = getParameterMap();
-        if (map.containsKey(name)) {
-            return map.get(name);
-        }
-        return new String[0];
+        return map.getOrDefault(name, new String[0]);
     }
 
 

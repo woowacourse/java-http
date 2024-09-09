@@ -9,7 +9,7 @@ public enum Http11Method {
     public static Http11Method findByName(String name) {
         return Arrays.stream(values())
                 .filter(method -> method.name().equals(name))
-                .findFirst()
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Http11Method 입니다."));
     }
 }

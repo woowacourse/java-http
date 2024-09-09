@@ -11,6 +11,17 @@ public class HttpRequest {
     private final RequestHeader header;
     private RequestBody body;
 
+    private HttpRequest(HttpMethod method, String uri, RequestHeader header, RequestBody body) {
+        this.method = method;
+        this.uri = uri;
+        this.header = header;
+        this.body = body;
+    }
+
+    private HttpRequest(HttpMethod method, String uri, RequestHeader header) {
+        this(method, uri, header, null);
+    }
+
     public static HttpRequest of(final String requestLine, final BufferedReader reader) throws IOException {
         final var parts = requestLine.split(" ");
         final var method = HttpMethod.valueOf(parts[0]);
@@ -21,17 +32,6 @@ public class HttpRequest {
             return new HttpRequest(method, uri, header, body);
         }
         return new HttpRequest(method, uri, header);
-    }
-
-    private HttpRequest(HttpMethod method, String uri, RequestHeader header) {
-        this(method, uri, header, null);
-    }
-
-    private HttpRequest(HttpMethod method, String uri, RequestHeader header, RequestBody body) {
-        this.method = method;
-        this.uri = uri;
-        this.header = header;
-        this.body = body;
     }
 
     public boolean isGet() {

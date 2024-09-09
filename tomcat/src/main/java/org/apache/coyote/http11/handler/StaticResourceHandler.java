@@ -20,10 +20,6 @@ public class StaticResourceHandler implements RequestHandler {
 
     @Override
     public String handle(Request request) throws IOException {
-        if (request.getMethod() != Method.GET) {
-            return null;
-        }
-
         try {
             Content content = getContent(request);
             return Response.writeResponse(request, content.getContentType(), content.getContent());

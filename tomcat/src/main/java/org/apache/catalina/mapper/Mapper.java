@@ -1,6 +1,7 @@
 package org.apache.catalina.mapper;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import org.apache.catalina.servlets.DefaultServlet;
@@ -32,10 +33,10 @@ public class Mapper {
     }
 
     public Servlet getServlet(String url) {
-        Pattern key = values.keySet().stream()
-                .filter(urlPattern -> urlPattern.matcher(url).matches())
+        return values.entrySet().stream()
+                .filter(servlet -> servlet.getKey().matcher(url).matches())
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("url(%s)에 매핑되는 서블릿이 존재하지 않습니다.".formatted(url)));
-        return values.get(key);
+                .orElseThrow(() -> new NoSuchElementException("url(%s)에 매핑되는 서블릿이 존재하지 않습니다.".formatted(url)))
+                .getValue();
     }
 }

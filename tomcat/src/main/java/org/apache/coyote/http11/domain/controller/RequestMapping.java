@@ -36,9 +36,5 @@ public class RequestMapping {
         }
         return controller;
     }
-
-    public boolean canHandle(HttpRequest request) {
-        return controllers.containsKey(request.getPath());
-    }
 }
 

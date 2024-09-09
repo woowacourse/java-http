@@ -13,7 +13,6 @@ class HttpResponseTest {
     @Test
     void build() {
         // given
-        String path = "index.html";
         String body = "body contents";
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -51,5 +50,28 @@ class HttpResponseTest {
 
         // then
         assertThat(actual).contains(contentType);
+    }
+
+    @DisplayName("HTTP redirect response 값을 생성한다.")
+    @Test
+    void redirect() {
+        // given
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: index.html ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 0 ",
+                "\r\n"
+        );
+
+        // when
+        String actual = HttpResponse
+                .builder()
+                .statusCode(HttpStatusCode.FOUND)
+                .redirect("index.html")
+                .build();
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 }

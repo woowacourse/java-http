@@ -51,4 +51,14 @@ public class HttpResponse {
                 body
         );
     }
+
+    public HttpResponse redirect(String uri) {
+        this.body = "";
+        HttpResponseHeader headers = new HttpResponseHeader();
+        headers.addHeader("Location", uri);
+        headers.addHeader("Content-Type", "text/html;charset=utf-8");
+        headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        this.headers = headers;
+        return this;
+    }
 }

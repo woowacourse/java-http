@@ -44,7 +44,9 @@ public class ResourceHandlerMapping {
         final String extension = fileNames[1];
 
         if (STATIC_RESOURCE_EXTENSIONS.containsKey(extension)) {
-            return STATIC_RESOURCE_ROOT_PATH.concat(STATIC_RESOURCE_EXTENSIONS.get(extension)).concat(PATH_DELIMITER)
+            return STATIC_RESOURCE_ROOT_PATH
+                    .concat(STATIC_RESOURCE_EXTENSIONS.get(extension))
+                    .concat(PATH_DELIMITER)
                     .concat(resourcePath);
         }
 

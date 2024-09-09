@@ -8,11 +8,11 @@ import java.util.Map.Entry;
 
 public class HttpResponse {
 
-    private final String version;
-    private final int statusCode;
-    private final String statusMessage;
-    private final Map<String, Object> headers;
-    private final String body;
+    private String version;
+    private int statusCode;
+    private String statusMessage;
+    private Map<String, Object> headers;
+    private String body;
 
     public HttpResponse(String version, int statusCode, String statusMessage, Map<String, Object> headers,
                         String body) {
@@ -21,6 +21,10 @@ public class HttpResponse {
         this.statusMessage = statusMessage;
         this.headers = headers;
         this.body = body;
+    }
+
+    public HttpResponse() {
+        headers = new HashMap<>();
     }
 
     public static HttpResponse of(String version, int statusCode, String statusMessage,
@@ -32,8 +36,24 @@ public class HttpResponse {
         return new HttpResponse(version, statusCode, statusMessage, headers, body);
     }
 
-    public void addHeader(String key, String value) {
+    public void addVersion(String version) {
+        this.version = version;
+    }
+
+    public void addStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void addStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+
+    public void addHeader(String key, Object value) {
         headers.put(key, value);
+    }
+
+    public void addBody(String body) {
+        this.body = body;
     }
 
     public void send(OutputStream outputStream) {

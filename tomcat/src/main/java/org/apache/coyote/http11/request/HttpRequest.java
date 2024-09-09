@@ -55,6 +55,24 @@ public class HttpRequest {
         return new HttpRequest(method, path, version, headers, null);
     }
 
+    public boolean isGet() {
+        return method.equals("GET");
+    }
+
+    public boolean isPost() {
+        return method.equals("POST");
+    }
+
+    public String getContentType() {
+        if (path.endsWith(".css")) {
+            return "text/css;charset=utf-8";
+        }
+        if (path.endsWith(".js")) {
+            return "text/javascript";
+        }
+        return "text/html";
+    }
+
     public String getHttpMethod() {
         return method;
     }

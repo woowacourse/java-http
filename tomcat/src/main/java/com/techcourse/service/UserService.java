@@ -3,7 +3,6 @@ package com.techcourse.service;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.UUID;
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequestParameter;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
@@ -11,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UserService {
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public static void saveUser(HttpRequestParameter requestParameter) {
         String account = requestParameter.getValue("account");

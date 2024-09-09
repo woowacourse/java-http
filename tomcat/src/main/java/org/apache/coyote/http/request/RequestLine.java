@@ -18,7 +18,10 @@ public class RequestLine {
         String originMethod = requestLines.get(0);
         String originPath = requestLines.get(1);
         String originVersion = requestLines.get(2);
-        return new RequestLine(HttpMethod.findByMethod(originMethod), new Path(originPath), HttpVersion.findByVersion(originVersion));
+        return new RequestLine(
+                HttpMethod.findByMethod(originMethod),
+                new Path(originPath),
+                HttpVersion.findByVersion(originVersion));
     }
 
     private RequestLine(HttpMethod method, Path path, HttpVersion version) {

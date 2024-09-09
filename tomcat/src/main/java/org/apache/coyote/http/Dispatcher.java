@@ -30,7 +30,7 @@ public class Dispatcher {
     private static final SessionManager sessionManager = SessionManager.getInstance();
 
     public String dispatch(HttpRequest request) {
-        Path path = request.getRequestLine().getPath();
+        Path path = request.getPath();
 
         try {
             if (path.getUri().equals("/")) {
@@ -51,7 +51,7 @@ public class Dispatcher {
     }
 
     private String gerResourceResponse(Path path) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()));
+        final URL resource = getClass().getClassLoader().getResource(STATIC + path.getUri());
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         StatusLine statusLine = new StatusLine(HttpStatus.OK);
@@ -64,15 +64,15 @@ public class Dispatcher {
     }
 
     private String getLoginResponse(HttpRequest request) throws IOException {
-        HttpMethod method = request.getRequestLine().getMethod();
-        Path path = request.getRequestLine().getPath();
-        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()).concat(MimeType.HTML.getExtension()));
+        HttpMethod method = request.getMethod();
+        Path path = request.getPath();
+        final URL resource = getClass().getClassLoader().getResource(STATIC + path.getUri() + MimeType.HTML.getExtension());
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         ResponseHeader header = new ResponseHeader();
         header.setContentType(MimeType.HTML.getContentType());
         header.setContentLength(responseBody.getBytes().length);
 
-        if (request.getHeaders().getCookie().hasCookieName("JSESSIONID")) {
+        if (request.getCookie().hasCookieName("JSESSIONID")) {
             StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
             header.setLocation(REDIRECT);
             HttpResponse response = new HttpResponse(statusLine, header, responseBody);
@@ -87,7 +87,7 @@ public class Dispatcher {
 
         if (method.equals(HttpMethod.POST)) {
             StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
-            Map<String, String> parsedBody = StringUtils.separate(request.getBody());
+            Map<String, String> parsedBody = StringUtils.separateKeyValue(request.getBody());
             return InMemoryUserRepository.findByAccount(parsedBody.get("account"))
                     .map(user -> getLoginResult(user, parsedBody, header, statusLine))
                     .orElse(new HttpResponse(new StatusLine(HttpStatus.OK), header, responseBody).toResponse());
@@ -119,9 +119,9 @@ public class Dispatcher {
     }
 
     private String getRegisterResponse(HttpRequest request) throws IOException {
-        HttpMethod method = request.getRequestLine().getMethod();
-        Path path = request.getRequestLine().getPath();
-        final URL resource = getClass().getClassLoader().getResource(STATIC.concat(path.getUri()).concat(MimeType.HTML.getExtension()));
+        HttpMethod method = request.getMethod();
+        Path path = request.getPath();
+        final URL resource = getClass().getClassLoader().getResource(STATIC + path.getUri() + MimeType.HTML.getExtension());
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         ResponseHeader header = new ResponseHeader();
         header.setContentType(MimeType.HTML.getContentType());
@@ -134,7 +134,7 @@ public class Dispatcher {
         }
 
         if (method.equals(HttpMethod.POST)) {
-            Map<String, String> parsedBody = StringUtils.separate(request.getBody());
+            Map<String, String> parsedBody = StringUtils.separateKeyValue(request.getBody());
             InMemoryUserRepository.save(new User(parsedBody.get("account"), parsedBody.get("password"), parsedBody.get("email")));
             StatusLine statusLine = new StatusLine(HttpStatus.FOUND);
             header.setLocation(REDIRECT);

@@ -34,7 +34,7 @@ public class Path {
 
     private Map<String, String> findParameters(String path) {
         if (path.contains("?")) {
-            return StringUtils.separate(path.substring(path.indexOf("?") + 1));
+            return StringUtils.separateKeyValue(path.substring(path.indexOf("?") + 1));
         }
         return new HashMap<>();
     }

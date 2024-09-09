@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             Dispatcher dispatcher = new Dispatcher();
 
             HttpRequest request = getRequestHeader(bufferedReader);
-            if (request.getRequestLine().getMethod().equals(HttpMethod.POST)) {
+            if (request.getMethod().equals(HttpMethod.POST)) {
                 getRequestBody(bufferedReader, request);
             }
 
@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
 
     private void getRequestBody(final BufferedReader bufferedReader, final HttpRequest request) throws IOException {
-        int contentLength = Integer.parseInt(request.getHeaders().getContentLength());
+        int contentLength = request.getContentLength();
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);

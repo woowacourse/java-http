@@ -18,7 +18,7 @@ public class HttpResponse {
 
     public String toResponse() {
         return String.join(CRLF,
-                statusLine.toResponse().concat(headers.toResponse()),
+                statusLine.toResponse() + headers.toResponse(),
                 "", body);
     }
 

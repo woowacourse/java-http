@@ -6,10 +6,13 @@ import java.util.stream.Collectors;
 
 public class StringUtils {
 
-    public static Map<String, String> separate(String term) {
-        List<String> bodies = List.of(term.split(Constants.AMPERSAND));
+    public static final String MULTIPLE_CONDITION_SEPARATOR = "&";
+    public static final String KEY_VALUE_SEPARATOR = "=";
+
+    public static Map<String, String> separateKeyValue(String term) {
+        List<String> bodies = List.of(term.split(MULTIPLE_CONDITION_SEPARATOR));
         return bodies.stream()
-                .map(s -> s.split(Constants.EQUAL))
+                .map(s -> s.split(KEY_VALUE_SEPARATOR))
                 .collect(Collectors.toMap(s -> s[0], s -> s[1]));
     }
 

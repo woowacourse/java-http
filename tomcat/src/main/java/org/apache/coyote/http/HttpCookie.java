@@ -50,6 +50,8 @@ public class HttpCookie {
     }
 
     public String toCookieResponse() {
-        return cookies.entrySet().stream().map(c -> c.getKey().concat("=").concat(c.getValue())).collect(Collectors.joining("; "));
+        return cookies.entrySet().stream()
+                .map(c -> c.getKey() + "=" + c.getValue())
+                .collect(Collectors.joining("; "));
     }
 }

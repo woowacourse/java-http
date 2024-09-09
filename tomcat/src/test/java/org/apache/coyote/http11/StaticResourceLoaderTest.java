@@ -11,8 +11,23 @@ public class StaticResourceLoaderTest {
     @Test
     void loadStaticResource() {
         // given
-        String path = "someResource.txt";
+        String path = "/someResource.txt";
         String expected = "hello test";
+        StaticResourceLoader loader = new StaticResourceLoader();
+
+        // when
+        String actual = loader.load(path);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("확장자가 존재하지 않을 경우 .html 확장자인 파일을 읽는다.")
+    @Test
+    void loadStaticResourceWithoutExtension() {
+        // given
+        String path = "/register";
+        String expected = "register content";
         StaticResourceLoader loader = new StaticResourceLoader();
 
         // when

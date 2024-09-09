@@ -11,7 +11,8 @@ public class StaticResourceLoader {
     private static final String STATIC_RESOURCE_DIRECTORY = "static";
 
     public String load(String path) {
-        URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_DIRECTORY + path);
+        String staticPath = convertStaticPath(path);
+        URL resource = getClass().getClassLoader().getResource(staticPath);
         if (resource == null) {
             return "";
         }
@@ -21,5 +22,12 @@ public class StaticResourceLoader {
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String convertStaticPath(String path) {
+        if (path.contains(".")) {
+            return STATIC_RESOURCE_DIRECTORY + path;
+        }
+        return STATIC_RESOURCE_DIRECTORY + path + ".html";
     }
 }

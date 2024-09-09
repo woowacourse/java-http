@@ -128,13 +128,13 @@ class RequestTest {
 
         int actual = request.getContentLength();
 
-        assertThat(actual).isEqualTo(0);
+        assertThat(actual).isZero();
     }
 
     @Test
     @DisplayName("성공 : 쿠키를 알 수 있다.")
     void getCookie() {
-        Request request = new Request("GET /index.html HTTP/1.1", Map.of("Set-Cookie", "Id=324;JSessionId=34567"));
+        Request request = new Request("GET /index.html HTTP/1.1", Map.of("Cookie", "Id=324;JSessionId=34567"));
 
         HttpCookie actual = request.getCookie();
 

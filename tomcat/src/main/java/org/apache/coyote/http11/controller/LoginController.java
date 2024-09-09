@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.UUID;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpCookieConvertor;
@@ -13,7 +14,6 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
-import org.apache.coyote.http11.httpresponse.HttpResponse.Builder;
 import org.apache.coyote.http11.httpresponse.HttpStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,11 @@ public class LoginController extends AbstractController {
     protected HttpResponse doPost(HttpRequest httpRequest) {
         String requestBody = httpRequest.getBody();
         String[] token = requestBody.split("&");
-        for (String t : token) {
-            if (t.split("=").length < 2) {
-                throw new RuntimeException("변수가 부족합니다");
-            }
+        if (checkToken(token)) {
+            log.error("일부 항목이 누락되었습니다.");
+            return new HttpResponse.Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND))
+                    .location("/login")
+                    .build();
         }
         String account = token[0].split("=")[1];
         String password = token[1].split("=")[1];
@@ -42,18 +43,22 @@ public class LoginController extends AbstractController {
         UUID uuid = UUID.randomUUID();
 
         HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
-        Builder builder = new Builder(httpStatusLine);
         if (user.checkPassword(password)) {
             session.save(uuid.toString(), user);
-            builder.setCookie("JSESSIONID=" + uuid);
-            builder.location("/index.html");
             log.info(user.toString());
-        } else {
-            builder.location("/401.html");
-            log.error("비밀번호 불일치");
+            return new HttpResponse.Builder(httpStatusLine)
+                    .setCookie("JSESSIONID=" + uuid)
+                    .location("/index.html")
+                    .build();
         }
+        log.error("비밀번호 불일치");
+        return new HttpResponse.Builder(httpStatusLine)
+                .location("/401.html")
+                .build();
+    }
 
-        return builder.build();
+    private boolean checkToken(String[] token) {
+        return Arrays.stream(token).anyMatch(t -> t.split("=").length < 2);
     }
 
     @Override

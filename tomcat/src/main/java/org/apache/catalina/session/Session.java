@@ -29,7 +29,7 @@ public class Session {
         return values;
     }
 
-    public void setAttribute(String sessionId, Object value) {
-        values.put(sessionId, value);
+    public void setAttribute(String name, Object value) {
+        values.put(name, value);
     }
 }

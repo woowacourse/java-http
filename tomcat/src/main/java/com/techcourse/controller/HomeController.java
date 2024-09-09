@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpResponse;
 
 public class HomeController extends AbstractController {
 

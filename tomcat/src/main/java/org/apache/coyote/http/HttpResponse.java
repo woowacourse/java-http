@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

@@ -22,7 +22,7 @@ public class UrlHandlerMapping extends HandlerMapping {
             return RegisterHandler.getInstance().handle(httpRequest);
         }
 
-        throw new IllegalCallerException("유효하지 않은 기능입니다.");
+        return ResourceHandlerMapping.getInstance().handleSimpleResource("404.html");
     }
 
     public static UrlHandlerMapping getInstance() {

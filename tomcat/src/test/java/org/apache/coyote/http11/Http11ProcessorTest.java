@@ -105,7 +105,7 @@ class Http11ProcessorTest {
     void getLoginPageWithAlreadyLogin()  {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=randomUUID ",
@@ -198,7 +198,7 @@ class Http11ProcessorTest {
     void getRegisterPage() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
+                "GET /register.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

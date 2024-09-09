@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;

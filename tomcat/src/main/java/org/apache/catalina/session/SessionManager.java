@@ -1,9 +1,7 @@
-package org.apache.catalina;
+package org.apache.catalina.session;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.coyote.Session;
 
 public class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();

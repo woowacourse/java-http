@@ -3,10 +3,10 @@ package org.apache.coyote.handler;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.catalina.SessionManager;
+import org.apache.catalina.session.SessionManager;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
-import org.apache.coyote.Session;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.mapping.ResourceHandlerMapping;
 import org.apache.http.request.HttpRequest;
 import org.apache.http.response.HttpResponseGenerator;

@@ -105,4 +105,8 @@ public record HttpRequest(
     public Map<String, String> extractUrlEncodedBody() {
         return extractParameters(body);
     }
+
+    public boolean hasParameters(List<String> keys) {
+        return keys.stream().allMatch(parameters::containsKey);
+    }
 }

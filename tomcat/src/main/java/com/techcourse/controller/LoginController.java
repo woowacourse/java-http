@@ -5,6 +5,7 @@ import static org.reflections.Reflections.log;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,28 +24,6 @@ public class LoginController extends AbstractController {
         this.resourceController = new ResourceController();
     }
 
-    private static void processSessionLogin(Builder responseBuilder, HttpSession session) {
-        User user = (User) Objects.requireNonNull(session).getAttribute("user");
-
-        log.info("이미 로그인한 사용자 입니다. - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
-
-        responseBuilder.status(Status.FOUND)
-                .location("/index.html");
-    }
-
-    private static void processAccountLogin(Builder responseBuilder, User user) {
-        String sessionId = UUID.randomUUID().toString();
-        JSession jSession = new JSession(sessionId);
-        jSession.setAttribute("user", user);
-        SessionManager.getInstance().add(jSession);
-
-        log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
-
-        responseBuilder.status(Status.FOUND)
-                .location("/index.html")
-                .addCookie(JSession.COOKIE_NAME, sessionId);
-    }
-
     @Override
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
         HttpSession session = SessionManager.getInstance().getSession(request);
@@ -53,7 +32,7 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        if (request.parameters().containsKey("account") && request.parameters().containsKey("password")) {
+        if (request.hasParameters(List.of("account", "password"))) {
             findValidUser(request).ifPresentOrElse(
                     user -> processAccountLogin(responseBuilder, user),
                     () -> responseBuilder.status(Status.FOUND).location("/401.html")
@@ -64,11 +43,33 @@ public class LoginController extends AbstractController {
         resourceController.doGet(request.updatePath("login.html"), responseBuilder);
     }
 
+    private void processSessionLogin(Builder responseBuilder, HttpSession session) {
+        User user = (User) Objects.requireNonNull(session).getAttribute("user");
+
+        log.info("이미 로그인한 사용자 입니다. - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
+
+        responseBuilder.status(Status.FOUND)
+                .location("/index.html");
+    }
+
     private Optional<User> findValidUser(HttpRequest request) {
         String account = request.parameters().get("account");
         String password = request.parameters().get("password");
 
         return InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
+    }
+
+    private void processAccountLogin(Builder responseBuilder, User user) {
+        String sessionId = UUID.randomUUID().toString();
+        JSession jSession = new JSession(sessionId);
+        jSession.setAttribute("user", user);
+        SessionManager.getInstance().add(jSession);
+
+        log.info("계정 정보 로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
+
+        responseBuilder.status(Status.FOUND)
+                .location("/index.html")
+                .addCookie(JSession.COOKIE_NAME, sessionId);
     }
 }

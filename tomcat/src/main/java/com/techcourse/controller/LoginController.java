@@ -62,16 +62,17 @@ public class LoginController extends AbstractController {
                 cookies.put(keyAndValue[0], keyAndValue[1]);
             }
 
-        String jsessionId = cookies.get("JSESSIONID");
-        SessionManager sessionManager = new SessionManager();
-        return sessionManager.findSession(jsessionId);
+            String jsessionId = cookies.get("JSESSIONID");
+            return SessionManager.findSession(jsessionId);
+        }
+
+        return null;
     }
 
     private Session saveSession(User user) {
         Session session = new Session();
         session.setAttribute("user", user);
-        SessionManager sessionManager = new SessionManager();
-        sessionManager.add(session);
+        SessionManager.add(session);
         return session;
     }
 

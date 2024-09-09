@@ -52,7 +52,7 @@ public class ServletRequestHandler {
             String type = parseTextContentType(HTML_TYPE);
             return new Http11Response(SUCCESS_STATUS_CODE, type, requestURI);
         }
-        throw new IllegalArgumentException("지원하지 않는 기능입니다.");
+        throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI);
     }
 
     private Map<String, String> parseQueryString(String requestURI) {

@@ -16,7 +16,7 @@ public class Http11Request {
     private void validate() {
         String httpVersion = parseStartLine()[2];
         if (!HTTP11_VERSION.equals(httpVersion)) {
-            throw new IllegalArgumentException("지원하지 않는 HttpRequest version 입니다.");
+            throw new IllegalArgumentException("해당 Http version 은 지원하지 않습니다: " + httpVersion);
         }
     }
 

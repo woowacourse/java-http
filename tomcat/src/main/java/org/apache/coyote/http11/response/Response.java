@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.request.Request;
 
 public class Response {
-    public static String writeStaticResourceResponse(Request request, String contentType, String content) {
+    public static String writeAsStaticResource(Request request, String contentType, String content) {
         if (content == null) {
             return null;
         }
@@ -15,7 +15,7 @@ public class Response {
                 content);
     }
 
-    public static String writeFoundResponse(Request request, String target) {
+    public static String writeAsFound(Request request, String target) {
         return String.join("\r\n",
                 String.format("%s 301 FOUND ", request.getHttpVersion()),
                 String.format("Location: %s ",target),

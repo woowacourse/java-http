@@ -23,12 +23,12 @@ public class StaticResourceHandler implements RequestHandler {
         log.info("request : {}", request);
         if (request.isStaticResourceRequest()) {
             StaticResource staticResource = new StaticResource(request.getTarget());
-            return Response.writeStaticResourceResponse(request, staticResource.getContentType(),
+            return Response.writeAsStaticResource(request, staticResource.getContentType(),
                     staticResource.getContent());
         }
         if (request.getTarget().equals("/")) {
             StaticResource staticResource = new StaticResource("/index.html");
-            return Response.writeStaticResourceResponse(request, staticResource.getContentType(),
+            return Response.writeAsStaticResource(request, staticResource.getContentType(),
                     staticResource.getContent());
         }
         if (request.getTarget().contains("login")) {
@@ -45,12 +45,12 @@ public class StaticResourceHandler implements RequestHandler {
                     methodRequest.getParam("password")
             );
             if (isLogin) {
-                return Response.writeFoundResponse(request, "/index.html");
+                return Response.writeAsFound(request, "/index.html");
             }
-            return Response.writeFoundResponse(request, "/401.html");
+            return Response.writeAsFound(request, "/401.html");
         }
         StaticResource resource = new StaticResource("/login.html");
-        return Response.writeStaticResourceResponse(request, resource.getContentType(), resource.getContent());
+        return Response.writeAsStaticResource(request, resource.getContentType(), resource.getContent());
     }
 
     private boolean login(String account, String password) throws NoSuchUserException {

@@ -1,7 +1,7 @@
 package com.techcourse.controller;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import com.techcourse.service.LoginService;
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http.HttpCookie;
 import org.apache.coyote.http.MimeType;
@@ -11,12 +11,10 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.Path;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
-import org.apache.coyote.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.apache.coyote.util.Constants.STATIC_RESOURCE_LOCATION;
 
@@ -28,6 +26,7 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private final SessionManager sessionManager = SessionManager.getInstance();
+    private final LoginService loginService = new LoginService();
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
@@ -46,22 +45,30 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws Exception {
+        //TODO: 메서드 물어볼 수 있게 수정
         if (request.getCookie().hasCookieName("JSESSIONID")) {
             return alreadyLoggedIn(request);
         }
+        try {
+            Path path = request.getPath();
 
-        Path path = request.getPath();
+            HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
+            HttpResponse loginFailResponse = generateResponse(STATIC_RESOURCE_LOCATION + UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED);
 
-        HttpResponse response = generateResponse(STATIC_RESOURCE_LOCATION + path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND);
-        HttpResponse loginFailResponse = generateResponse(STATIC_RESOURCE_LOCATION + UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED);
-
-        if (loginSuccess(request, response)) {
-            return response;
+            if (login(request, response)) {
+                return response;
+            }
+            return loginFailResponse;
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            return doGet(request);
+        } catch (NullPointerException e) {
+            return new NotFoundController().doGet(request);
+        } catch (IOException e) {
+            return new InternalServerErrorController().doGet(request);
         }
-        return loginFailResponse;
     }
 
-    //TODO: 로그인 로직 분리
     private HttpResponse alreadyLoggedIn(HttpRequest request) throws Exception {
         Path path = request.getPath();
 
@@ -71,20 +78,17 @@ public class LoginController extends AbstractController {
         return response;
     }
 
-    //TODO: 옵셔널 처리, 값 등
-    private boolean loginSuccess(HttpRequest request, HttpResponse response) {
-        Map<String, String> parsedBody = StringUtils.separateKeyValue(request.getBody());
-        String account = parsedBody.get("account");
-        String password = parsedBody.get("password");
-        User user = InMemoryUserRepository.findByAccount(account).get();
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
+    private boolean login(HttpRequest request, HttpResponse response) {
+        try {
+            User user = loginService.login(request.getBody());
             response.setRedirectLocation(REDIRECT_LOCATION);
             HttpCookie cookie = getHttpCookie(user);
             response.setCookie(cookie.toCookieResponse());
             return true;
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            return false;
         }
-        return false;
     }
 
     private HttpCookie getHttpCookie(User user) {

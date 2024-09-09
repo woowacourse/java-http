@@ -7,7 +7,7 @@ public class StatusLine {
     private static final String STATUS_LINE_DELIMITER = " ";
 
     private final String httpVersion;
-    private final HttpStatus httpStatus;
+    private HttpStatus httpStatus;
 
     public StatusLine() {
         this("HTTP/1.1", HttpStatus.OK);
@@ -19,6 +19,10 @@ public class StatusLine {
 
     private StatusLine(String httpVersion, HttpStatus httpStatus) {
         this.httpVersion = httpVersion;
+        this.httpStatus = httpStatus;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
 

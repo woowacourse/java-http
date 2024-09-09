@@ -5,21 +5,23 @@ import com.techcourse.exception.UncheckedServletException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import org.apache.coyote.http11.component.HttpMethod;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public enum ControllerMapping {
 
-    SEARCH_USER(HttpMethod.GET, URI.create("/login"), params -> new UserController().searchUserData(params)),
-    LOGIN_USER(HttpMethod.POST, URI.create("/login"), params -> new UserController().login(params)),
-    REGISTER_USER(HttpMethod.POST, URI.create("/register"), params -> new UserController().registerUser(params));
+    SEARCH_USER(HttpMethod.GET, URI.create("/login"), (params, request) -> new UserController().searchUserData(params)),
+    LOGIN_USER(HttpMethod.POST, URI.create("/login"), (params, request) -> new UserController().login(params, request)),
+    REGISTER_USER(HttpMethod.POST, URI.create("/register"),
+            (params, request) -> new UserController().registerUser(params));
 
     private final HttpMethod httpMethod;
     private final URI path;
-    private final Function<Map<String, String>, HttpResponseEntity<?>> handler;
+    private final BiFunction<Map<String, String>, HttpRequest, HttpResponseEntity<?>> handler;
 
     ControllerMapping(HttpMethod httpMethod, URI path,
-                      Function<Map<String, String>, HttpResponseEntity<?>> handler) {
+                      BiFunction<Map<String, String>, HttpRequest, HttpResponseEntity<?>> handler) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.handler = handler;
@@ -34,7 +36,7 @@ public enum ControllerMapping {
                 );
     }
 
-    public HttpResponseEntity<?> apply(Map<String, String> params) {
-        return handler.apply(params);
+    public HttpResponseEntity<?> apply(Map<String, String> params, HttpRequest httpRequest) {
+        return handler.apply(params, httpRequest);
     }
 }

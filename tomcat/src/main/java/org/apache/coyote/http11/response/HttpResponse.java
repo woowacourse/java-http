@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
 
 public class HttpResponse<T> {
@@ -30,12 +31,13 @@ public class HttpResponse<T> {
         this.body = body;
     }
 
-    public void addHeader(String header, String value) {
-        headers.put(header, value);
+    public void sendRedirect(String path) {
+        statusLine.setHttpStatus(HttpStatus.FOUND);
+        addHeader(HttpHeaders.LOCATION, path);
     }
 
-    public HttpResponse<String> getFileResponse(String body) {
-        return new HttpResponse<>(statusLine, body, headers);
+    public void addHeader(String header, String value) {
+        headers.put(header, value);
     }
 
     public String convertToMessage() {
@@ -47,6 +49,10 @@ public class HttpResponse<T> {
                 .append(CRLF).append(body);
 
         return stringBuilder.toString();
+    }
+
+    public HttpResponse<String> getFileResponse(String body) {
+        return new HttpResponse<>(statusLine, body, headers);
     }
 
     private String formatHeaderEntry(Map.Entry<String, String> entry) {

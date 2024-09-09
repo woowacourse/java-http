@@ -4,9 +4,12 @@ import java.io.IOException;
 import org.apache.coyote.exception.UncheckedHttpException;
 import org.apache.coyote.http11.component.HttpMethod;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRequestLine {
 
+    private static final Logger log = LoggerFactory.getLogger(HttpRequestLine.class);
     private static final String REQUEST_LINE_DELIMITER = " ";
     private static final int REQUEST_LINE_COUNT = 3;
 
@@ -35,13 +38,19 @@ public class HttpRequestLine {
         }
     }
 
-    public HttpResponse<String> getHttpResponse(RequestBody body) throws IOException {
+    public HttpResponse<String> getHttpResponse(RequestBody body, HttpRequest httpRequest) throws IOException {
         if (httpMethod.isGet()) {
-            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod);
-            return requestUri.getHttpResponse(httpResponse);
+            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, httpRequest);
+            HttpResponse<String> response = requestUri.getHttpResponse(httpResponse);
+            log.info("============================= + {}", response.getBody().substring(0, 10));
+            if (requestUri.isLogin() && httpRequest.getSession(false) != null) {
+                log.info("============================= + {}", httpRequest.getSession(false).getId());
+                response.sendRedirect("/index.html");
+            }
+            return response;
         }
         if (HttpMethod.POST.equals(httpMethod)) {
-            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, body);
+            HttpResponse<?> httpResponse = requestUri.processParams(httpMethod, body, httpRequest);
             return requestUri.getHttpResponse(httpResponse);
         }
         throw new UncheckedHttpException(new UnsupportedOperationException("지원하지 않는 기능입니다."));

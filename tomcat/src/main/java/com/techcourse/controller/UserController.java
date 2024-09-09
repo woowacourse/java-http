@@ -6,9 +6,12 @@ import com.techcourse.model.User;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class UserController {
 
@@ -31,7 +34,7 @@ public class UserController {
         return httpResponse;
     }
 
-    public HttpResponseEntity<User> login(Map<String, String> params) {
+    public HttpResponseEntity<User> login(Map<String, String> params, HttpRequest request) {
         String account = params.getOrDefault("account", "");
         String password = params.getOrDefault("password", "");
 
@@ -43,9 +46,11 @@ public class UserController {
             return httpResponse;
         }
 
+        Session session = request.getSession(true);
+        SessionManager.getInstance().add(session);
         HttpResponseEntity<User> httpResponse = new HttpResponseEntity<>(HttpStatus.FOUND, user.get());
         httpResponse.addHeader(HttpHeaders.LOCATION, "/index.html");
-        httpResponse.addHeader(HttpHeaders.SET_COOKIE, new HttpCookie().makeSessionCookie().getCookieToMessage());
+        httpResponse.addCookie(HttpCookie.ofJSessionId(session.getId()));
         return httpResponse;
     }
 

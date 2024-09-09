@@ -9,6 +9,9 @@ import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.http11.component.HttpHeaders;
 import org.apache.coyote.http11.component.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestLine;
+import org.apache.coyote.http11.request.RequestBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -79,7 +82,8 @@ class UserControllerTest {
         UserController userController = new UserController();
 
         //when
-        HttpResponseEntity<User> result = userController.login(params);
+        HttpResponseEntity<User> result = userController.login(params,
+                new HttpRequest(new HttpRequestLine("GET /login HTTP1.1"), Map.of(), new RequestBody()));
 
         //then
         assertAll(

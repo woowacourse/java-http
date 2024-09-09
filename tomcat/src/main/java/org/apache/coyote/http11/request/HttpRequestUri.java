@@ -27,19 +27,23 @@ public class HttpRequestUri {
         this.queryParams = queryParams;
     }
 
-    public HttpResponse<?> processParams(HttpMethod method) {
+    public boolean isLogin() {
+        return pathInfo.isLogin();
+    }
+
+    public HttpResponse<?> processParams(HttpMethod method, HttpRequest httpRequest) {
         if (queryParams.isEmpty()) {
             return new HttpResponseEntity<>().convertResponse();
         }
         ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
-        HttpResponseEntity<?> response = controllerMapping.apply(queryParams);
+        HttpResponseEntity<?> response = controllerMapping.apply(queryParams, httpRequest);
         log.info("user : {}", response.body());
         return response.convertResponse();
     }
 
-    public HttpResponse<?> processParams(HttpMethod method, RequestBody body) {
+    public HttpResponse<?> processParams(HttpMethod method, RequestBody body, HttpRequest httpRequest) {
         ControllerMapping controllerMapping = pathInfo.getControllerMapping(method);
-        HttpResponseEntity<?> response = controllerMapping.apply(body.getBody());
+        HttpResponseEntity<?> response = controllerMapping.apply(body.getBody(), httpRequest);
         return response.convertResponse();
     }
 

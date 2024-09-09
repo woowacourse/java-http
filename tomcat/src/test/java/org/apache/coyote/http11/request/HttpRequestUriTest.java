@@ -6,6 +6,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
+import java.util.Map;
 import org.apache.coyote.http11.component.HttpMethod;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,9 @@ class HttpRequestUriTest {
         HttpRequestUri requestUri = HttpRequestUriParser.parse(path);
 
         //when
-        requestUri.processParams(HttpMethod.GET);
+        requestUri.processParams(HttpMethod.GET,
+                new HttpRequest(new HttpRequestLine("GET /login?account=gugu&password=password HTTP/1.1"),
+                        Map.of(), new RequestBody()));
 
         //then
         List<ILoggingEvent> testLogs = listAppender.list;
@@ -52,7 +55,9 @@ class HttpRequestUriTest {
         HttpRequestUri requestUri = HttpRequestUriParser.parse(path);
 
         //when
-        requestUri.processParams(HttpMethod.GET);
+        requestUri.processParams(HttpMethod.GET,
+                new HttpRequest(new HttpRequestLine("GET /login?account=gugu&password=password HTTP/1.1"),
+                        Map.of(), new RequestBody()));
 
         //then
         List<ILoggingEvent> testLogs = listAppender.list;

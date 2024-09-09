@@ -1,11 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class RequestLine {
-
-    private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
 
     private final String method;
     private final String path;
@@ -17,8 +12,6 @@ public class RequestLine {
         this.path = path;
         this.queryString = queryString;
         this.version = version;
-
-        log.info("request Line: {} {} {} {}", method, path, queryString, version);
     }
 
     public boolean hasQueryString() {

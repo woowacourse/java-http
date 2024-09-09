@@ -3,8 +3,12 @@ package org.apache.coyote.http11.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.HttpCookie;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
 
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private static final String LOCATION = "Location";
@@ -36,12 +40,8 @@ public class HttpResponse {
         headers.put(LOCATION, locationPath);
     }
 
-    public void setContentTypeHtml() {
-        headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
-    }
-
-    public void setContentTypeCss() {
-        headers.put(CONTENT_TYPE, "text/css");
+    public void setContentType(String contentType) {
+        headers.put(CONTENT_TYPE, contentType);
     }
 
     public void setResponseBody(String content) {
@@ -68,10 +68,14 @@ public class HttpResponse {
             header.append(COOKIE + ": ").append(headers.get(COOKIE) + " ").append(LINE_SEPARATOR);
         }
 
-        return String.join(LINE_SEPARATOR,
+        String response = String.join(LINE_SEPARATOR,
                 statusLine.getStatusLine(),
                 header.toString(),
                 responseBody
         );
+
+        log.info("[Response] header: {}", header);
+
+        return response;
     }
 }

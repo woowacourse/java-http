@@ -9,10 +9,21 @@ public class HttpResponse {
     private final ResponseHeader header;
     private ResponseBody body;
 
-    public HttpResponse(final HttpStatus status) {
+    public HttpResponse(HttpStatus status, String protocolVersion, ResponseHeader header, ResponseBody body) {
         this.status = status;
-        this.protocolVersion = "HTTP/1.1";
-        this.header = new ResponseHeader();
+        this.protocolVersion = protocolVersion;
+        this.header = header;
+        this.body = body;
+    }
+
+    public HttpResponse(final HttpStatus status) {
+        this(status, "HTTP/1.1", new ResponseHeader(), null);
+    }
+
+    public HttpResponse(final HttpStatus status, final ResponseBody body) {
+        this(status, "HTTP/1.1", new ResponseHeader(), body);
+        header.add("Content-Type", body.getContentType() + ";charset=utf-8");
+        header.add("Content-Length", body.getContentLength());
     }
 
     public void setRedirect(final String location) {
@@ -23,12 +34,6 @@ public class HttpResponse {
 
     public void setCookie(final String name, final String value) {
         header.add("Set-Cookie", name + "=" + value);
-    }
-
-    public void setBody(final ResponseBody body) {
-        this.body = body;
-        header.add("Content-Type", body.getContentType() + ";charset=utf-8");
-        header.add("Content-Length", body.getContentLength());
     }
 
     public String getResponse() {

@@ -68,21 +68,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String renderDefaultPage() {
-        final var response = new HttpResponse(HttpStatus.OK);
-        response.setBody(new ResponseBody("text/html", "Hello world!"));
+        final var response = new HttpResponse(HttpStatus.OK, new ResponseBody("text/html", "Hello world!"));
         return response.getResponse();
     }
 
     private String renderStaticResource(HttpRequest request) throws IOException {
         final var responseBody = ResourceLoader.loadStaticResource(request.getUri());
-        final var response = new HttpResponse(HttpStatus.OK);
-        response.setBody(responseBody);
+        final var response = new HttpResponse(HttpStatus.OK, responseBody);
         return response.getResponse();
     }
 
     private String renderHtmlPage(HttpRequest request) throws IOException {
-        final var response = new HttpResponse(HttpStatus.OK);
-        response.setBody(ResourceLoader.loadHtmlResource(request.getUri()));
+        final var response = new HttpResponse(HttpStatus.OK, ResourceLoader.loadHtmlResource(request.getUri()));
         return response.getResponse();
     }
 

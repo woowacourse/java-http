@@ -26,6 +26,9 @@ public enum MediaType {
     }
 
     public static Optional<MediaType> findByPostfix(String postfix) {
+        if (postfix.endsWith("js")) {
+            return Optional.of(JAVASCRIPT);
+        }
         return Arrays.stream(MediaType.values())
                 .filter(contentType -> contentType.existByPostfix(postfix))
                 .findFirst();

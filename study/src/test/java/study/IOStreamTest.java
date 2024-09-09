@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -138,7 +139,7 @@ class IOStreamTest {
              */
 
             inputStream.read(bytes);
-            final String actual = new String(bytes, "UTF-8");
+            final String actual = new String(bytes, StandardCharsets.UTF_8);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);

@@ -18,8 +18,4 @@ spring:
       cache-control:
         max-age: 365d
         public: true
-    chain:
-      strategy:
-        content:
-          enabled: true
-          paths: /js/*
+

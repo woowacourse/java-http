@@ -13,6 +13,10 @@ public class HttpCookie {
                 .collect(Collectors.toMap(value -> value[0], value -> value[1]));
     }
 
+    public boolean contains(final String key) {
+        return cookies.containsKey(key);
+    }
+
     public String getCookieValue(final String key) {
         return cookies.get(key);
     }

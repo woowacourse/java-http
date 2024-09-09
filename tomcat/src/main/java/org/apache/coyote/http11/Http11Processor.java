@@ -144,10 +144,14 @@ public class Http11Processor implements Runnable, Processor {
     private String decideResponseBody(HttpRequest request) throws IOException, URISyntaxException {
         String requestPath = request.getPath();
         if (requestPath.equals("/")) {
-            return FileReader.readResourceFile();
+            return FileReader.readResourceFile("/default.html");
         }
         String filePath = chooseFilePath(requestPath);
-        return FileReader.readResourceFile(filePath);
+        try {
+            return FileReader.readResourceFile(filePath);
+        } catch (IllegalArgumentException e) {
+            return "";
+        }
     }
 
     private String chooseFilePath(String requestPath) {

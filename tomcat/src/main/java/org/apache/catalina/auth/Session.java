@@ -13,10 +13,6 @@ public class Session {
         this.id = id;
     }
 
-    public String getId() {
-        return id;
-    }
-
     public Object getAttribute(final String name) {
         if (values.containsKey(name)) {
             return values.get(name);
@@ -30,6 +26,14 @@ public class Session {
 
     public void removeAttribute(final String name) {
         values.remove(name);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Map<String, Object> getValues() {
+        return new HashMap<>(values);
     }
 
     @Override

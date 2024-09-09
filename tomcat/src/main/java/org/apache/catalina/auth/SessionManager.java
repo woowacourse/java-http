@@ -9,6 +9,12 @@ public class SessionManager implements Manager {
     private static final Map<String, Session> SESSIONS = new HashMap<>();
     private static final SessionManager instance = new SessionManager();
 
+    private SessionManager() {}
+
+    public static SessionManager getInstance() {
+        return instance;
+    }
+
     @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);
@@ -29,10 +35,4 @@ public class SessionManager implements Manager {
                 .findAny()
                 .ifPresent(SESSIONS::remove);
     }
-
-    public static SessionManager getInstance() {
-        return instance;
-    }
-
-    private SessionManager() {}
 }

@@ -26,7 +26,7 @@ public class ServletRequestHandler {
         final Http11Method httpMethod = request.getHttpMethod();
 
         if (Http11Method.GET.equals(httpMethod)) {
-            Map<String, String> queryString = parseQueryString(requestURI);
+            Map<String, String> queryString = request.getQueryParameters();
             if (requestURI.contains("/login")) {
                 userService.login(queryString.get("account"), queryString.get("password"));
                 String type = parseTextContentType(HTML_TYPE);
@@ -53,19 +53,6 @@ public class ServletRequestHandler {
             return new Http11Response(SUCCESS_STATUS_CODE, type, requestURI);
         }
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI);
-    }
-
-    private Map<String, String> parseQueryString(String requestURI) {
-        Map<String, String> queries = new HashMap<>();
-        if (requestURI.contains("?")) {
-            int index = requestURI.indexOf("?");
-            String queryString = requestURI.substring(index + 1);
-            for (String eachQueryString : queryString.split("&")) {
-                String[] parsedEachQueryString = eachQueryString.split("=");
-                queries.put(parsedEachQueryString[0], parsedEachQueryString[1]);
-            }
-        }
-        return queries;
     }
 
     private String parseTextContentType(String filePath) {

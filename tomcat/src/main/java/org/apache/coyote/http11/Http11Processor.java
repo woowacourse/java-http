@@ -17,7 +17,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HtmlReader htmlReader = HtmlReader.getInstance();
+    private final ResourceReader resourceReader = ResourceReader.getInstance();
 
     public Http11Processor(Socket connection) {
         this.connection = connection;
@@ -69,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void getHtml(HttpResponse httpResponse, String path) throws IOException {
-        String responseBody = htmlReader.loadHtmlAsString(path);
+        String responseBody = resourceReader.loadResourceAsString(path);
         httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
                 .addHttpStatusCode(HttpStatusCode.OK)
                 .addResponseBody(responseBody);
@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
     private void getStaticResource(HttpResponse httpResponse, String path) throws IOException {
         int lastIndexOfDot = path.lastIndexOf(".");
         String postfix = path.substring(lastIndexOfDot + 1);
-        String responseBody = htmlReader.loadHtmlAsString(path);
+        String responseBody = resourceReader.loadResourceAsString(path);
         httpResponse.addContentType(ContentType.from(postfix))
                 .addHttpStatusCode(HttpStatusCode.OK)
                 .addResponseBody(responseBody);
@@ -100,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
                         .addRedirectUrl("/401.html");
             }
         } else if (httpRequestMethod == HttpMethod.GET && !validateSession(httpRequest.getSessionId())) {
-            String responseBody = htmlReader.loadHtmlAsString("login.html");
+            String responseBody = resourceReader.loadResourceAsString("login.html");
             httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
                     .addHttpStatusCode(HttpStatusCode.OK)
                     .addResponseBody(responseBody);
@@ -123,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
             httpResponse.addHttpStatusCode(HttpStatusCode.FOUND)
                     .addRedirectUrl(redirectUrl);
         } else if (httpRequestMethod == HttpMethod.GET) {
-            String responseBody = htmlReader.loadHtmlAsString("register.html");
+            String responseBody = resourceReader.loadResourceAsString("register.html");
             httpResponse.addContentType(new ContentType(MediaType.HTML, "charset=utf-8"))
                     .addHttpStatusCode(HttpStatusCode.OK)
                     .addResponseBody(responseBody);

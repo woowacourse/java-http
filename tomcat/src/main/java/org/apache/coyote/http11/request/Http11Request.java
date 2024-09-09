@@ -82,10 +82,6 @@ public class Http11Request {
         return new String(buffer);
     }
 
-    public boolean isStaticResourceRequest() {
-        return startLine.getMethod() == Http11Method.GET && startLine.getEndPoint().contains(".");
-    }
-
     public Http11Method getMethod() {
         return startLine.getMethod();
     }

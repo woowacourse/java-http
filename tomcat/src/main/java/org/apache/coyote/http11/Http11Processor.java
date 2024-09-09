@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
 
             // body
             Map<String, String> requestBody = new HashMap<>();
-            if (requestMethodType == MethodType.POST) {
+            if (requestMethodType.isPost()) {
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
                 br.read(buffer, 0, contentLength);

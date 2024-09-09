@@ -34,11 +34,11 @@ public class ApiProcessor {
         String requestUri = splitPath[0];
 
         if (requestUri.equals("/login")) {
-            if (methodType == POST) {
+            if (methodType.isPost()) {
                 processLogin(outputStream, requestBody);
                 return;
             }
-            if (methodType == GET) {
+            if (methodType.isGet()) {
                 SessionManager sessionManager = SessionManager.getInstance();
                 if (requestHeader.containsKey("Cookie")) {
                     String jsessionid = requestHeader.get("Cookie").split("=")[1];
@@ -55,12 +55,12 @@ public class ApiProcessor {
         }
 
         if (requestUri.equals("/register")) {
-            if (methodType == POST) {
+            if (methodType.isPost()) {
                 processRegisterPost(outputStream, requestBody);
-            }
-            if (methodType == GET) {
-                pageProcessor.process(outputStream, "register");
                 return;
+            }
+            if (methodType.isGet()) {
+                pageProcessor.process(outputStream, "register");
             }
         }
     }

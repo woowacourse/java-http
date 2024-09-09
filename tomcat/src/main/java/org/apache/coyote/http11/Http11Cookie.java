@@ -24,7 +24,11 @@ public class Http11Cookie {
         return new Http11Cookie(cookieMap);
     }
 
-    public boolean isEmpty() {
-        return cookies.isEmpty();
+    public boolean isJSessionIdEmpty() {
+        return !cookies.containsKey("JSESSIONID");
+    }
+
+    public String getJSessionId() {
+        return cookies.get("JSESSIONID");
     }
 }

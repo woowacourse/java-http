@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,7 @@ public class Http11RequestHandler {
             "/login", "/login.html",
             "/register", "/register.html"
     );
+    private static final SessionManager SESSION_MANAGER = SessionManager.getInstance();
 
     public static Http11Response handle(Http11Request http11Request) {
         Http11RequestHeader http11RequestHeader = http11Request.getHttp11RequestHeader();
@@ -55,8 +58,26 @@ public class Http11RequestHandler {
 
         String cookie = http11RequestHeader.getCookie();
         Http11Cookie http11Cookie = Http11Cookie.from(cookie);
-        if (!http11Cookie.isEmpty() && requestUri.matches("/login")) {
-            // 세션
+        if (!http11Cookie.isJSessionIdEmpty() && requestUri.matches("/login")) {
+            String jSessionId = http11Cookie.getJSessionId();
+            Session session = SESSION_MANAGER.findSession(jSessionId);
+            if (session == null) {
+                return getHttp11Response(getStaticResource("/401.html").orElse("401 Unauthorized"), acceptTypes,
+                        StatusLine.unAuthorized(httpVersion));
+            }
+            Http11ResponseBody responseBody = Http11ResponseBody.of(getStaticResource("/index.html").orElse("Index"));
+            int contentLength = responseBody.getContentLength();
+            String contentType = ContentType.from(acceptTypes).getContentType();
+            HttpHeaders httpHeaders = HttpHeaders.of(
+                    Map.of(CONTENT_TYPE, List.of(contentType),
+                            CONTENT_LENGTH, List.of(String.valueOf(contentLength)),
+                            "Location", List.of("/index.html"),
+                            "Set-Cookie", List.of("JSESSIONID=" + jSessionId)
+                    ),
+                    (s1, s2) -> true);
+            Http11ResponseHeader header = Http11ResponseHeader.of(StatusLine.found(httpVersion), httpHeaders);
+
+            return Http11Response.of(header, responseBody);
         }
 
         return getStaticResource(requestUri.getRequestUri())
@@ -85,20 +106,27 @@ public class Http11RequestHandler {
 
         log.info("로그인 성공! 아이디 : {}", account);
 
-        // Header에 Set-Cookie로 JSSESIONID를 줘야함.
         Http11ResponseBody responseBody = Http11ResponseBody.of(getStaticResource("/index.html").orElse("Index"));
         int contentLength = responseBody.getContentLength();
         String contentType = ContentType.from(acceptTypes).getContentType();
+        String uuid = UUID.randomUUID().toString();
+        saveSessionUser(uuid, account, user.get());
         HttpHeaders httpHeaders = HttpHeaders.of(
                 Map.of(CONTENT_TYPE, List.of(contentType),
                         CONTENT_LENGTH, List.of(String.valueOf(contentLength)),
                         "Location", List.of("/index.html"),
-                        "Set-Cookie", List.of("JSESSIONID=" + UUID.randomUUID())
+                        "Set-Cookie", List.of("JSESSIONID=" + uuid)
                 ),
                 (s1, s2) -> true);
         Http11ResponseHeader header = Http11ResponseHeader.of(StatusLine.found(httpVersion), httpHeaders);
 
         return Http11Response.of(header, responseBody);
+    }
+
+    private static void saveSessionUser(String uuid, String account, User user) {
+        Session session = new Session(uuid);
+        session.setAttribute(account, user);
+        SESSION_MANAGER.add(session);
     }
 
     private static HttpHeaders getHttpHeaders(String contentType, int contentLength) {

@@ -16,7 +16,7 @@ public enum Method {
     TRACE("TRACE"),
     CONNECT("CONNECT");
 
-    private static final Map<String, Method> converter = Arrays.stream(Method.values())
+    private static final Map<String, Method> CONVERTER = Arrays.stream(Method.values())
             .collect(Collectors.toMap(Method::getValue, Function.identity()));
 
     private final String value;
@@ -26,7 +26,7 @@ public enum Method {
     }
 
     public static Method from(final String plaintext) {
-        final var method = converter.get(plaintext);
+        final var method = CONVERTER.get(plaintext);
         return Objects.requireNonNull(method);
     }
 

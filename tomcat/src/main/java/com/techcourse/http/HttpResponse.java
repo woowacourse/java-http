@@ -21,11 +21,11 @@ public class HttpResponse {
     private String body;
 
     private HttpResponse(int statusCode, String statusMessage, String body) {
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.headers = new HashMap<>();
-        this.cookie = new HttpCookie();
-        this.body = body;
+        this(statusCode, statusMessage, new HashMap<>(), new HttpCookie(), body);
+    }
+
+    private HttpResponse(int statusCode, String statusMessage) {
+        this(statusCode, statusMessage, "");
     }
 
     public static HttpResponse ok(String body) {
@@ -33,29 +33,25 @@ public class HttpResponse {
     }
 
     public static HttpResponse found(String location) {
-        return new HttpResponse(
-                302, "Found", new HashMap<>(Map.of("Location", location)), new HttpCookie(), ""
-        );
+        return new HttpResponse(302, "Found").setHeader("Location", location);
     }
 
     public static HttpResponse notFound() {
-        return new HttpResponse(404, "Not Found", "");
+        return new HttpResponse(404, "Not Found");
     }
 
     public static HttpResponse internalServerError() {
-        return new HttpResponse(500, "Internal Server Error", "");
+        return new HttpResponse(500, "Internal Server Error");
     }
 
     public String build() {
-        if (body.isBlank()) {
-            return "%s %d %s \r\n%s\r\n"
-                    .formatted(HTTP_VERSION, statusCode, statusMessage, getHeadersString());
-        }
         if (cookie.isExist()) {
             headers.put("Set-Cookie", cookie.serialize());
         }
+        if (!body.isBlank()) {
+            headers.put("Content-Length", String.valueOf(body.getBytes().length));
+        }
 
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
         return "%s %d %s \r\n%s\r\n%s"
                 .formatted(HTTP_VERSION, statusCode, statusMessage, getHeadersString(), body);
     }

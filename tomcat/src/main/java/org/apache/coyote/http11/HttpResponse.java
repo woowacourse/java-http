@@ -10,6 +10,7 @@ public class HttpResponse {
     private static final int DEFAULT_HTTP_STATUS_CODE = 200;
     private static final String DEFAULT_HTTP_STATUS_MESSAGE = "OK";
     private static final String DEFAULT_HTTP_BODY = "";
+    private static final String HTTP_MESSAGE_LINE_SEPARATOR = "\r\n";
 
     private float version;
     private int statusCode;
@@ -26,7 +27,7 @@ public class HttpResponse {
     }
 
     public String parseResponse() {
-        return String.join("\r\n",
+        return String.join(HTTP_MESSAGE_LINE_SEPARATOR,
                 parseResponseLine(),
                 parseHeaders(),
                 "",
@@ -40,7 +41,7 @@ public class HttpResponse {
     private String parseHeaders() {
         return headers.entrySet().stream()
                 .map(header -> String.format("%s: %s ", header.getKey(), header.getValue()))
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(HTTP_MESSAGE_LINE_SEPARATOR));
     }
 
     public void setStatusUnauthorized() {

@@ -22,10 +22,6 @@ public class HttpResponse {
         this(null, new HashMap<>(), null);
     }
 
-    public HttpResponse(HttpStatus httpStatus) {
-        this(httpStatus, new HashMap<>(), null);
-    }
-
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headers) {
         this(httpStatus, headers, "");
     }
@@ -58,30 +54,16 @@ public class HttpResponse {
         );
     }
 
-    public static HttpResponse createFileResponse(ResponseFile responseFile) {
-        Map<String, String> headers = new HashMap<>();
-        String responseBody = responseFile.getContent();
-        int contentLength = responseBody.getBytes().length;
-        headers.put("Content-Type", responseFile.getContentType());
-        headers.put("Content-Length", String.valueOf(contentLength));
-
-        return new HttpResponse(
-                HttpStatus.OK,
-                headers,
-                responseBody
-        );
-    }
-
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
 
     public void addRedirectHeader(String location) {
-        headers.put(REDIRECTION_HEADER, location);
+        addHeader(REDIRECTION_HEADER, location);
     }
 
     public void addCookie(ResponseCookie cookie) {
-        headers.put(COOKIE_HEADER, cookie.toResponse());
+        addHeader(COOKIE_HEADER, cookie.toResponse());
     }
 
     public String toResponse() {

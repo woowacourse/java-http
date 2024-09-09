@@ -11,6 +11,8 @@ public class HttpHeaders {
     private static final String HEADER_SEPARATOR = ": ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String COOKIE_KEY = "Cookie";
+    private static final String SESSION_KEY = "JSESSIONID";
 
     private final Map<String, String> values;
 
@@ -53,5 +55,10 @@ public class HttpHeaders {
         } catch (NumberFormatException e) {
             return OptionalInt.empty();
         }
+    }
+
+    public String getSessionId() {
+        RequestCookies requestCookies = RequestCookies.of(values.get(COOKIE_KEY));
+        return requestCookies.get(SESSION_KEY);
     }
 }

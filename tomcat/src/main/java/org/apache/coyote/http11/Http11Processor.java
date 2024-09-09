@@ -9,6 +9,7 @@ import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionGenerator;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.apache.coyote.http11.exception.UnauthorizedException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestReader;
@@ -45,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
+            HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader, sessionGenerator);
             HttpRequest request = httpRequestReader.read();
             HttpResponse response = getResponse(request);
             String formattedResponse = response.toResponse();
@@ -62,13 +63,17 @@ public class Http11Processor implements Runnable, Processor {
             HttpResponse response = new HttpResponse();
             Controller controller = REQUEST_MAPPING.getController(request);
             controller.service(request, response);
+
+            return response;
         } catch (UnauthorizedException unauthorizedException) {
             return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/401.html");
-        } catch (IllegalAccessException illegalAccessException) {
-            return HttpResponse.createTextResponse(HttpStatus.BAD_REQUEST, illegalAccessException.getMessage());
+        } catch (IllegalArgumentException illegalArgumentException) {
+            return HttpResponse.createTextResponse(HttpStatus.BAD_REQUEST, illegalArgumentException.getMessage());
+        } catch (FileNotFoundException fileNotFoundException) {
+            return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/404.html");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return HttpResponse.createTextResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 발생했습니다.");
         }
-        return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

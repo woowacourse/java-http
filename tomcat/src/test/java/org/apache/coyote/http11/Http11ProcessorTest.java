@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.controller.ControllerRegistry;
-import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.UuidSessionGenerator;
@@ -29,14 +28,14 @@ class Http11ProcessorTest {
 
     @BeforeEach
     void setUp() {
-        ControllerRegistry.registerControllers(RequestMapping.getInstance());
+        ControllerRegistry.registerControllers("com.techcourse.controller");
     }
 
     @Nested
     class ResourceFileTest {
         @DisplayName("특정 엔드포인트에 대한 올바른 HTML 파일을 반환한다.")
         @ParameterizedTest
-        @ValueSource(strings = {"/index", "/login", "/register"})
+        @ValueSource(strings = {"/login", "/register"})
         void getResourceHtml(String requestPath) throws IOException {
             String httpRequest = String.join("\r\n",
                     "GET " + requestPath + " HTTP/1.1 ",

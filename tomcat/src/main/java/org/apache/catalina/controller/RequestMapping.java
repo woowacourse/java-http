@@ -20,7 +20,12 @@ public class RequestMapping {
         ENDPOINT_CONTROLLER_MAPPING.put(endpoint, controller);
     }
 
-    public Controller getController(HttpRequest httpRequest) {
-        return ENDPOINT_CONTROLLER_MAPPING.get(HttpEndpoint.of(httpRequest));
+    public Controller getController(HttpRequest request) {
+        HttpEndpoint httpEndpoint = HttpEndpoint.of(request);
+        Controller controller = ENDPOINT_CONTROLLER_MAPPING.get(httpEndpoint);
+        if (controller == null) {
+            return new ResourceController();
+        }
+        return controller;
     }
 }

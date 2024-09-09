@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import org.apache.catalina.session.UuidSessionGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ class HttpRequestTest {
                 "",
                 "");
         BufferedReader requestReader = new BufferedReader(new StringReader(rawRequest));
-        HttpRequest httpRequest = new HttpRequestReader(requestReader).read();
+        HttpRequest httpRequest = new HttpRequestReader(requestReader, new UuidSessionGenerator()).read();
 
         Queries queries = httpRequest.getQueries();
 

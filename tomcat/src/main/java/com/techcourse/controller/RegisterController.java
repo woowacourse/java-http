@@ -1,9 +1,11 @@
-package org.apache.catalina.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.List;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.catalina.controller.AbstractController;
+import org.apache.catalina.controller.Handler;
+import org.apache.catalina.controller.HttpEndpoint;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Queries;
@@ -15,13 +17,12 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String REGISTER_PAGE = "/register.html";
     private static final HttpEndpoint REGISTER_POST = new HttpEndpoint("/register", HttpMethod.POST);
     private static final HttpEndpoint REGISTER_GET = new HttpEndpoint("/register", HttpMethod.GET);
 
     public RegisterController() {
-        super();
         List<Handler> handlers = List.of(
                 new Handler(REGISTER_POST, this::doRegisterPost),
                 new Handler(REGISTER_GET, this::doRegisterGet)
@@ -32,6 +33,7 @@ public class RegisterController extends AbstractController {
     private void doRegisterGet(HttpRequest request, HttpResponse response) {
         ResponseFile registerFile = ResponseFile.of(REGISTER_PAGE);
         response.addFile(registerFile);
+        response.setHttpStatus(HttpStatus.OK);
     }
 
     private void doRegisterPost(HttpRequest request, HttpResponse response) {

@@ -14,34 +14,37 @@ public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String HEADER_SEPARATOR = ": ";
 
-    private int statusCode;
-    private String statusMessage;
+    private HttpStatusCode httpStatusCode;
     private Map<String, String> headers;
     private HttpCookie cookie;
     private String body;
 
-    private HttpResponse(int statusCode, String statusMessage, String body) {
-        this(statusCode, statusMessage, new HashMap<>(), new HttpCookie(), body);
+    private HttpResponse(HttpStatusCode statusCode, String body) {
+        this(statusCode, new HashMap<>(), new HttpCookie(), body);
     }
 
-    private HttpResponse(int statusCode, String statusMessage) {
-        this(statusCode, statusMessage, "");
+    private HttpResponse(int statusCode, String body) {
+        this(HttpStatusCode.from(statusCode), new HashMap<>(), new HttpCookie(), body);
+    }
+
+    private HttpResponse(HttpStatusCode statusCode) {
+        this(statusCode, "");
     }
 
     public static HttpResponse ok(String body) {
-        return new HttpResponse(200, "OK", body);
+        return new HttpResponse(HttpStatusCode.OK, body);
     }
 
     public static HttpResponse found(String location) {
-        return new HttpResponse(302, "Found").setHeader("Location", location);
+        return new HttpResponse(HttpStatusCode.FOUND).setHeader("Location", location);
     }
 
     public static HttpResponse notFound() {
-        return new HttpResponse(404, "Not Found");
+        return new HttpResponse(HttpStatusCode.NOT_FOUND);
     }
 
     public static HttpResponse internalServerError() {
-        return new HttpResponse(500, "Internal Server Error");
+        return new HttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
 
     public String build() {
@@ -53,7 +56,7 @@ public class HttpResponse {
         }
 
         return "%s %d %s \r\n%s\r\n%s"
-                .formatted(HTTP_VERSION, statusCode, statusMessage, getHeadersString(), body);
+                .formatted(HTTP_VERSION, httpStatusCode.getCode(), httpStatusCode.getMessage(), getHeadersString(), body);
     }
 
     private String getHeadersString() {
@@ -66,16 +69,6 @@ public class HttpResponse {
                     .append(CRLF);
         }
         return headersString.toString();
-    }
-
-    public HttpResponse setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-        return this;
-    }
-
-    public HttpResponse setStatusMessage(String statusMessage) {
-        this.statusMessage = statusMessage;
-        return this;
     }
 
     public HttpResponse setHeader(String key, String value) {

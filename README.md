@@ -24,7 +24,13 @@
 
 ---
 
-- [*] 1단계 기능 구현
+- [x] 1단계 기능 구현
     1. GET /index.html 응답하기
     2. CSS 지원하기
     3. Query String Parsing
+
+- [x] 2단계 기능 구현
+    1. HTTP Status Code 302
+    2. 회원 가입 기능
+    3. Cookie에 JSESSIONID 값 저장하기
+    4. Session 구현하기

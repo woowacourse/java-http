@@ -1,6 +1,8 @@
 package cache.com.example;
 
 import cache.com.example.version.ResourceVersion;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ class GreetingControllerTest {
     private WebTestClient webTestClient;
 
     @Test
+    @DisplayName("성공 : 캐시 무효화")
     void testNoCachePrivate() {
         final var response = webTestClient
                 .get()
@@ -39,6 +42,7 @@ class GreetingControllerTest {
     }
 
     @Test
+    @DisplayName("성공 : gzip 압축")
     void testCompression() {
         final var response = webTestClient
                 .get()
@@ -55,6 +59,7 @@ class GreetingControllerTest {
     }
 
     @Test
+    @DisplayName("성공 : ETag 사용")
     void testETag() {
         final var response = webTestClient
                 .get()
@@ -74,6 +79,7 @@ class GreetingControllerTest {
      * 정적 파일에 변경 사항이 생기면 배포할 때 버전을 바꿔주면 적용된 캐싱을 무효화(Caching Busting)할 수 있다.
      */
     @Test
+    @DisplayName("성공 : 정적 파일에 캐싱")
     void testCacheBustingOfStaticResources() {
         final var uri = String.format("%s/%s/js/index.js", PREFIX_STATIC_RESOURCES, version.getVersion());
 

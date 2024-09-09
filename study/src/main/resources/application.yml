@@ -8,3 +8,7 @@ server:
     threads:
       min-spare: 2
       max: 2
+  compression:
+    enabled: true
+    mime-types: text/html,application/json,text/xml,text/css,text/plain
+    min-response-size: 10

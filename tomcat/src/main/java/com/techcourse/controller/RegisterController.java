@@ -22,7 +22,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse.Builder responseBuilder) {
-        Map<String, String> body = HttpRequest.extractParameters(request.body());
+        Map<String, String> body = request.extractUrlEncodedBody();
 
         if (!body.containsKey("account") ||
                 !body.containsKey("password") ||

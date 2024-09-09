@@ -39,11 +39,22 @@ public record HttpRequest(
         return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
     }
 
-    private static String extractBody(List<String> lines) {
-        if (lines.size() > 1 && lines.get(lines.size() - 2).isEmpty()) {
-            return lines.getLast();
+    private static Map<String, String> extractParameters(String query) {
+        Map<String, String> parameters = new HashMap<>();
+
+        if (query != null) {
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length == 2) {
+                    String key = keyValue[0];
+                    String value = URLDecoder.decode(keyValue[1], Charset.defaultCharset());
+                    parameters.put(key, value);
+                }
+            }
         }
-        return null;
+
+        return parameters;
     }
 
     private static Map<String, String> extractHeaders(List<String> lines) {
@@ -80,25 +91,18 @@ public record HttpRequest(
         return cookies;
     }
 
-    public static Map<String, String> extractParameters(String query) {
-        Map<String, String> parameters = new HashMap<>();
-
-        if (query != null) {
-            String[] pairs = query.split("&");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split("=");
-                if (keyValue.length == 2) {
-                    String key = keyValue[0];
-                    String value = URLDecoder.decode(keyValue[1], Charset.defaultCharset());
-                    parameters.put(key, value);
-                }
-            }
+    private static String extractBody(List<String> lines) {
+        if (lines.size() > 1 && lines.get(lines.size() - 2).isEmpty()) {
+            return lines.getLast();
         }
-
-        return parameters;
+        return null;
     }
 
     public HttpRequest updatePath(String path) {
         return new HttpRequest(method, path, parameters, headers, cookies, protocolVersion, body);
+    }
+
+    public Map<String, String> extractUrlEncodedBody() {
+        return extractParameters(body);
     }
 }

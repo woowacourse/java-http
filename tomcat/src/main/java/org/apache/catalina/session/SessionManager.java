@@ -13,6 +13,10 @@ public class SessionManager implements Manager {
         return INSTANCE;
     }
 
+    public boolean existsById(final String id) {
+        return SESSIONS.containsKey(id);
+    }
+
     @Override
     public void add(Session session) {
         SESSIONS.put(session.getId(), session);

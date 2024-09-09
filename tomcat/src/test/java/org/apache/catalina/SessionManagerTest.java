@@ -13,6 +13,20 @@ class SessionManagerTest {
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     @Test
+    @DisplayName("세션 존재 여부 확인 성공")
+    void existsById() {
+        // given
+        String sessionId = "1";
+        Session session = new Session(sessionId);
+        sessionManager.add(session);
+
+        assertThat(sessionManager.existsById(sessionId)).isTrue();
+
+        // after
+        sessionManager.remove(session);
+    }
+
+    @Test
     @DisplayName("세션 추가 성공")
     void add() {
         // given

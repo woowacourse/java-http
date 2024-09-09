@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
                 getRoot(httpResponse);
             } else if (path.endsWith(".html")) {
                 getHtml(httpResponse, path);
-            } else if (path.startsWith("/css") || path.startsWith("/js")) {
+            } else if (path.endsWith("css") || path.endsWith("js")) {
                 getStaticResource(httpResponse, path);
             } else if (path.startsWith("/login")) {
                 login(httpResponse, httpRequest);

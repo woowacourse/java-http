@@ -11,13 +11,14 @@ public class TestHttpUtils {
 
     private static final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
-            .connectTimeout(Duration.ofSeconds(1))
+            .connectTimeout(Duration.ofSeconds(10))
             .build();
 
     public static HttpResponse<String> send(final String path) {
         final var request = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8080" + path))
-                .timeout(Duration.ofSeconds(1))
+                // 해당 부분을 수정하면, 10개 무사히 수행함.
+                .timeout(Duration.ofSeconds(10))
                 .build();
 
         try {

@@ -1,11 +1,11 @@
-package org.apache.catalina.handler;
+package com.techcourse.handler;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.controller.Controller;
-import org.apache.catalina.controller.LoginController;
-import org.apache.catalina.controller.RegisterController;
-import org.apache.catalina.controller.ViewController;
+import com.techcourse.controller.Controller;
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.ViewController;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

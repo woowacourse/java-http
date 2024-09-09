@@ -1,4 +1,4 @@
-package org.apache.catalina.session;
+package com.techcourse.session;
 
 import java.util.HashMap;
 import java.util.Map;

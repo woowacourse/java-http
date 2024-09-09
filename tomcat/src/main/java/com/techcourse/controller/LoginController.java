@@ -1,4 +1,4 @@
-package org.apache.catalina.controller;
+package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.catalina.session.Session;
-import org.apache.catalina.session.SessionManager;
-import org.apache.catalina.view.View;
-import org.apache.catalina.view.ViewResolver;
+import com.techcourse.session.Session;
+import com.techcourse.session.SessionManager;
+import com.techcourse.view.View;
+import com.techcourse.view.ViewResolver;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;

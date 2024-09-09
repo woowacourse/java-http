@@ -2,10 +2,11 @@ package com.techcourse.db;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.coyote.http11.auth.Session;
 
 public class InMemorySessionRepository {
-    private static final List<Session> database = new ArrayList<>();
+    private static final List<Session> database = new CopyOnWriteArrayList<Session>();
 
     public static void save(Session session) {
         database.add(session);

@@ -40,9 +40,9 @@ public class ResponseHeader extends Header {
         setHeader(SET_COOKIE, cookie);
     }
 
-    public static ResponseHeader basicResponseHeader(int length) {
+    public static ResponseHeader valueOfLength(int length) {
         Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MimeType.HTML.getContentType());
+        headers.put(CONTENT_TYPE, MimeType.TEXT.getContentType());
         headers.put(CONTENT_LENGTH, String.valueOf(length));
         return new ResponseHeader(headers);
     }

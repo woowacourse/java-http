@@ -40,19 +40,19 @@ public class HttpResponse {
 
     public void basicResponse() {
         this.statusLine = new StatusLine(HttpStatus.OK);
-        this.headers = ResponseHeader.basicResponseHeader(BASIC_RESPONSE_BODY.getBytes().length);
+        this.headers = ResponseHeader.valueOfLength(BASIC_RESPONSE_BODY.getBytes().length);
         this.body = BASIC_RESPONSE_BODY;
     }
 
     public void notFoundResponses() {
         this.statusLine = new StatusLine(HttpStatus.NOT_FOUND);
-        this.headers = ResponseHeader.basicResponseHeader(0);
+        this.headers = ResponseHeader.valueOfLength(0);
         this.body = "";
     }
 
     public void serverErrorResponses() {
         this.statusLine = new StatusLine(HttpStatus.INTERNAL_SERVER_ERROR);
-        this.headers = ResponseHeader.basicResponseHeader(0);
+        this.headers = ResponseHeader.valueOfLength(0);
         this.body = "";
     }
 }

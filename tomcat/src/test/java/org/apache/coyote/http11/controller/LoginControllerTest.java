@@ -15,6 +15,7 @@ import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.BaseHttpTest;
@@ -22,6 +23,11 @@ import support.BaseHttpTest;
 class LoginControllerTest extends BaseHttpTest {
 
     private final LoginController controller = LoginController.getInstance();
+
+    @BeforeEach
+    void setUp() {
+        InMemoryUserRepository.clear();
+    }
 
     @DisplayName("url에 login이 포함되어 있다면 LoginContorller가 다룰 수 있는 요청임을 판단한다.")
     @Test

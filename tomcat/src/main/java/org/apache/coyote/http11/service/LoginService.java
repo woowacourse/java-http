@@ -6,7 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginService {
+    private static LoginService INSTANCE = new LoginService();
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
+
+    public static LoginService getInstance() {
+        return INSTANCE;
+    }
+    private LoginService() {
+    }
 
     public void checkLogin(String account, String password) {
         User user = findByAccount(account);

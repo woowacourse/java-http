@@ -15,7 +15,7 @@ public class LoginController implements Controller {
 
     public static LoginController INSTANCE = new LoginController();
 
-    private final LoginService loginService = new LoginService();
+    private final LoginService loginService = LoginService.getInstance();
 
     private LoginController() {
     }

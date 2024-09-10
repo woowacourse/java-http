@@ -46,17 +46,15 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
         }
     }
 
     private HttpResponse makeResponse(HttpRequest httpRequest) throws IOException {
-        RequestLine requestLine = httpRequest.getRequestLine();
         try {
-            if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
+            if (HandlerMapper.hasHandler(httpRequest.getRequestUri())) {
                 return resolveHandlerResponse(httpRequest);
             }
-            return resolveViewResponse(requestLine);
+            return resolveViewResponse(httpRequest);
         } catch (Exception e) {
             return handleError(e);
         }
@@ -69,10 +67,10 @@ public class Http11Processor implements Runnable, Processor {
         throw new UncheckedServletException(e);
     }
 
-    private HttpResponse resolveViewResponse(RequestLine requestLine) {
+    private HttpResponse resolveViewResponse(HttpRequest httpRequest) {
         return new HttpResponse()
                 .statusCode(HttpStatusCode.OK_200)
-                .viewUrl(requestLine.getRequestURI());
+                .viewUrl(httpRequest.getRequestUri());
     }
 
     private HttpResponse resolveHandlerResponse(HttpRequest httpRequest) {

@@ -1,5 +1,7 @@
 package com.techcourse.model;
 
+import java.util.Objects;
+
 public class User {
 
     private final Long id;
@@ -28,6 +30,24 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(getAccount(), user.getAccount())
+                && Objects.equals(password, user.password) && Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, getAccount(), password, email);
     }
 
     @Override

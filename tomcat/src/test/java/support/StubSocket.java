@@ -10,7 +10,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
 public class StubSocket extends Socket {
-
     private final String request;
     private final ByteArrayOutputStream outputStream;
 

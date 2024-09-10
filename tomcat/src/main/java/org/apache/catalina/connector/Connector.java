@@ -8,7 +8,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.RequestMapping;
+import org.apache.coyote.http11.RequestMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,19 +69,19 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        RequestMapping requestMapping = makeRequestMapping();
-        var processor = new Http11Processor(connection, requestMapping);
+        RequestMappings requestMappings = makeRequestMapping();
+        var processor = new Http11Processor(connection, requestMappings);
         new Thread(processor).start();
     }
 
-    private RequestMapping makeRequestMapping() {
+    private RequestMappings makeRequestMapping() {
         StaticResourceController staticResourceController = new StaticResourceController();
-        RequestMapping requestMapping = new RequestMapping(staticResourceController);
-        requestMapping.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
+        RequestMappings requestMappings = new RequestMappings(staticResourceController);
+        requestMappings.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
         LoginController loginController = new LoginController();
-        requestMapping.putController(loginController, "/login", "/login.html");
-        requestMapping.putController(new RegisterController(), "/register", "/register.html");
-        return requestMapping;
+        requestMappings.putController(loginController, "/login", "/login.html");
+        requestMappings.putController(new RegisterController(), "/register", "/register.html");
+        return requestMappings;
     }
 
     public void stop() {

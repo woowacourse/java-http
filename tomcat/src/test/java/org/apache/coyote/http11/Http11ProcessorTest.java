@@ -28,8 +28,8 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        RequestMapping requestMapping = makeRequestMapping();
-        final Http11Processor processor = new Http11Processor(socket, requestMapping);
+        RequestMappings requestMappings = makeRequestMapping();
+        final Http11Processor processor = new Http11Processor(socket, requestMappings);
 
         MockedStatic<Http11Cookie> http11CookieMockedStatic = Mockito.mockStatic(Http11Cookie.class);
         http11CookieMockedStatic.when(Http11Cookie::sessionCookie).thenReturn(new Http11Cookie("JSESSIONID", "test"));
@@ -48,13 +48,13 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private RequestMapping makeRequestMapping() {
+    private RequestMappings makeRequestMapping() {
         StaticResourceController staticResourceController = new StaticResourceController();
-        RequestMapping requestMapping = new RequestMapping(staticResourceController);
-        requestMapping.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
+        RequestMappings requestMappings = new RequestMappings(staticResourceController);
+        requestMappings.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
         LoginController loginController = new LoginController();
-        requestMapping.putController(loginController, "/login", "/login.html");
-        requestMapping.putController(new RegisterController(), "/register", "/register.html");
-        return requestMapping;
+        requestMappings.putController(loginController, "/login", "/login.html");
+        requestMappings.putController(new RegisterController(), "/register", "/register.html");
+        return requestMappings;
     }
 }

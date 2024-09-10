@@ -17,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    private final RequestMapping requestMapping;
+    private final RequestMappings requestMappings;
 
-    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
+    public Http11Processor(final Socket connection, RequestMappings requestMappings) {
         this.connection = connection;
-        this.requestMapping = requestMapping;
+        this.requestMappings = requestMappings;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
         String requestURI = request.requestUri();
 
-        Controller controller = requestMapping.findController(requestURI);
+        Controller controller = requestMappings.findController(requestURI);
         HttpResponse response = new HttpResponse();
         controller.service(request, response);
         outputStream.write(response.toBytes());

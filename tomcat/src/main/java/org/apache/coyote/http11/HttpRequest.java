@@ -35,7 +35,7 @@ public class HttpRequest {
         this.sessionId = sessionId;
     }
 
-    public static HttpRequest createHttp11Message(String requestLine, Header header, HttpBody requestBody, Manager sessionManager) {
+    public static HttpRequest createHttp11Request(String requestLine, Header header, HttpBody body, Manager manager) {
         String[] requestLines = requestLine.split(" ");
         HttpMethod httpMethod = HttpMethod.from(requestLines[0]);
         URI uri = URI.create(requestLines[1]);
@@ -45,8 +45,8 @@ public class HttpRequest {
                 uri,
                 HttpVersion.HTTP_1_1,
                 header,
-                requestBody,
-                sessionManager,
+                body,
+                manager,
                 header.getJSessionId().orElse("")
         );
     }

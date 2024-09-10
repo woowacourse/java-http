@@ -23,6 +23,15 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
+    public static HttpResponse createHttp11Response() {
+        return new HttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpStatus.OK,
+                Header.empty(),
+                new byte[]{}
+        );
+    }
+
     public byte[] serialize() {
         String message = String.join("\r\n", getStartLine(), getHeaders(), getBody());
         return message.getBytes();

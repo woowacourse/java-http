@@ -1,12 +1,12 @@
-package com.techcourse.handler;
+package org.was.Controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.ViewController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.was.Controller.exception.ControllerNotFoundException;
 
 public class RequestMapping {
 
@@ -26,8 +26,9 @@ public class RequestMapping {
     public Controller getController(HttpRequest request) {
         String path = request.getRequestLine().getPath();
         Controller controller = controllerMapping.get(path);
+
         if (controller == null) {
-            return new ViewController();
+            throw new ControllerNotFoundException(path);
         }
 
         return controller;

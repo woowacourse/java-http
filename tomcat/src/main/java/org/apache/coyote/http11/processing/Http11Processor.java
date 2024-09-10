@@ -19,7 +19,6 @@ import org.apache.coyote.http11.protocol.request.RequestBody;
 import org.apache.coyote.http11.protocol.request.RequestHeaders;
 import org.apache.coyote.http11.protocol.request.RequestLine;
 import org.apache.coyote.http11.protocol.response.HttpResponse;
-import org.apache.coyote.http11.protocol.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream())) {
             HttpRequestReader httpRequestReader = new HttpRequestReader(new BufferedReader(inputStreamReader));
             HttpRequest httpRequest = readHttpRequest(httpRequestReader);
-            HttpResponse httpResponse = HttpResponse.status(HttpStatus.OK).build();
+            HttpResponse httpResponse = HttpResponse.ok();
             dispatcher.dispatch(httpRequest, httpResponse);
             HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStreamWriter);
             httpResponseWriter.write(HttpResponseMessage.from(httpResponse));

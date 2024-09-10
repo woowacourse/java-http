@@ -28,6 +28,10 @@ public class HttpResponse {
         return status(HttpStatus.FOUND).header(LOCATION_HEADER_KEY, location);
     }
 
+    public static HttpResponse ok() {
+        return status(HttpStatus.OK).build();
+    }
+
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }

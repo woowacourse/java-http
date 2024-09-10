@@ -22,11 +22,7 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
-    public String getStatusLineMessage() {
+    public String convertToMessage() {
         return String.join(
                 STATUS_LINE_DELIMITER,
                 httpVersion,
@@ -34,5 +30,9 @@ public class StatusLine {
                 httpStatus.getValue(),
                 ""
         );
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 }

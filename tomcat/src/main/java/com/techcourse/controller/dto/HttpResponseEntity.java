@@ -26,6 +26,6 @@ public record HttpResponseEntity<T>(HttpStatus httpStatus, T body, Map<String, S
     }
 
     public HttpResponse<?> convertResponse() {
-        return new HttpResponse<>(httpStatus, body, headers);
+        return new HttpResponse<>(httpStatus, headers, body);
     }
 }

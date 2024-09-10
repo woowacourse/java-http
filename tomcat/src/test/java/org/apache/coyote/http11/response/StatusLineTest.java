@@ -9,13 +9,13 @@ class StatusLineTest {
 
     @DisplayName("시작 라인을 메세지로 반환한다.")
     @Test
-    void getStatusLineMessage() {
+    void convertToMessage() {
         //given
         String expected = "HTTP/1.1 200 OK ";
         StatusLine statusLine = new StatusLine();
 
         //when
-        String result = statusLine.getStatusLineMessage();
+        String result = statusLine.convertToMessage();
 
         //then
         assertThat(result).isEqualTo(expected);

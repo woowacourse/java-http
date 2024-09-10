@@ -13,15 +13,15 @@ public class HttpResponse<T> {
     private static final String SPACE = " ";
 
     private final StatusLine statusLine;
-    private final T body;
     private final Map<String, String> headers = new LinkedHashMap<>();
+    private final T body;
 
-    public HttpResponse(HttpStatus httpStatus, T body, Map<String, String> headers) {
+    public HttpResponse(HttpStatus httpStatus, Map<String, String> headers, T body) {
         this(new StatusLine(httpStatus), body);
         headers.forEach(this::addHeader);
     }
 
-    public HttpResponse(StatusLine statusLine, T body, Map<String, String> headers) {
+    public HttpResponse(StatusLine statusLine, Map<String, String> headers, T body) {
         this(statusLine, body);
         headers.forEach(this::addHeader);
     }
@@ -45,14 +45,14 @@ public class HttpResponse<T> {
         String headerMessages = headers.entrySet().stream().map(this::formatHeaderEntry)
                 .collect(Collectors.joining(CRLF));
 
-        stringBuilder.append(statusLine.getStatusLineMessage()).append(CRLF).append(headerMessages).append(CRLF)
+        stringBuilder.append(statusLine.convertToMessage()).append(CRLF).append(headerMessages).append(CRLF)
                 .append(CRLF).append(body);
 
         return stringBuilder.toString();
     }
 
     public HttpResponse<String> getFileResponse(String body) {
-        return new HttpResponse<>(statusLine, body, headers);
+        return new HttpResponse<>(statusLine, headers, body);
     }
 
     private String formatHeaderEntry(Map.Entry<String, String> entry) {

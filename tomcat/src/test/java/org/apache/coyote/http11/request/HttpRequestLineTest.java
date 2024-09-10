@@ -15,7 +15,7 @@ class HttpRequestLineTest {
         String input = null;
 
         //when //then
-        assertThatThrownBy(() -> new HttpRequestLine(input))
+        assertThatThrownBy(() -> HttpRequestLine.from(input))
                 .isInstanceOf(UncheckedHttpException.class)
                 .hasMessageContaining("Http Request Line은 비어있을 수 없습니다.");
     }
@@ -27,7 +27,7 @@ class HttpRequestLineTest {
         String input = "GET /login HTTP/1.1 daon";
 
         //when //then
-        assertThatThrownBy(() -> new HttpRequestLine(input))
+        assertThatThrownBy(() -> HttpRequestLine.from(input))
                 .isInstanceOf(UncheckedHttpException.class)
                 .hasMessageContaining("Http Request Line 형식이 잘못 되었습니다.");
     }

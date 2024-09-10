@@ -19,7 +19,7 @@ public class HttpRequestParser {
     }
 
     public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
-        HttpRequestLine requestLine = new HttpRequestLine(bufferedReader.readLine());
+        HttpRequestLine requestLine = HttpRequestLine.from(bufferedReader.readLine());
         Map<String, String> headers = new HashMap<>();
         String line = bufferedReader.readLine();
         while (!line.isEmpty()) {

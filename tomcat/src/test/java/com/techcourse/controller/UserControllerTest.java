@@ -69,7 +69,7 @@ class UserControllerTest {
         String password = "password";
         Map<String, String> params = Map.of("account", account, "password", password);
         HttpRequest httpRequest =
-                new HttpRequest(new HttpRequestLine("POST /login HTTP/1.1"), Map.of(), new RequestBody());
+                new HttpRequest(HttpRequestLine.from("POST /login HTTP/1.1"), Map.of(), new RequestBody());
 
         //when
         HttpResponseEntity<User> result = userController.login(params, httpRequest);

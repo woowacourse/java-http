@@ -23,12 +23,8 @@ public class RequestBody {
     }
 
     public boolean containsAll(String... names) {
-        for (String name : names) {
-            if (!requestBody.containsKey(name)) {
-                return false;
-            }
-        }
-        return true;
+        return Arrays.stream(names)
+                .allMatch(requestBody::containsKey);
     }
 
     public String get(String name) {

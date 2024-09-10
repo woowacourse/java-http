@@ -1,25 +1,24 @@
 package com.techcourse.controller;
 
 import org.apache.coyote.http11.HttpStatusCode;
-import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 public abstract class AbstractController implements Controller {
 
-    private final Map<HttpMethod, Function<HttpRequest, HttpResponse>> methodHandlers;
+    private final Map<HttpMethod, BiConsumer<HttpRequest, HttpResponse>> methodHandlers;
 
     protected AbstractController() {
         this.methodHandlers = new EnumMap<>(HttpMethod.class);
         initMethodHandlers();
     }
 
-    protected void registerHandler(final HttpMethod method, final Function<HttpRequest, HttpResponse> handler) {
+    protected void registerHandler(final HttpMethod method, final BiConsumer<HttpRequest, HttpResponse> handler) {
         methodHandlers.put(method, handler);
     }
 
@@ -32,32 +31,32 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public HttpResponse service(final HttpRequest request) {
-        return methodHandlers.getOrDefault(request.getMethod(), this::methodNotAllowed)
-                .apply(request);
+    public void service(final HttpRequest request, final HttpResponse response) {
+        methodHandlers.getOrDefault(request.getMethod(), this::methodNotAllowed)
+                .accept(request, response);
     }
 
-    protected HttpResponse methodNotAllowed(final HttpRequest request) {
-        return new HttpResponse(HttpStatusCode.METHOD_NOT_ALLOWED, new Headers(), "HTTP/1.1", new byte[]{});
+    protected void methodNotAllowed(final HttpRequest request, final HttpResponse response) {
+        response.setStatus(HttpStatusCode.METHOD_NOT_ALLOWED);
     }
 
-    protected HttpResponse doPost(final HttpRequest request) {
-        return methodNotAllowed(request);
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
+        methodNotAllowed(request, response);
     }
 
-    protected HttpResponse doGet(final HttpRequest request) {
-        return methodNotAllowed(request);
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
+        methodNotAllowed(request, response);
     }
 
-    protected HttpResponse doPut(final HttpRequest request) {
-        return methodNotAllowed(request);
+    protected void doPut(final HttpRequest request, final HttpResponse response) {
+        methodNotAllowed(request, response);
     }
 
-    protected HttpResponse doDelete(final HttpRequest request) {
-        return methodNotAllowed(request);
+    protected void doDelete(final HttpRequest request, final HttpResponse response) {
+        methodNotAllowed(request, response);
     }
 
-    protected HttpResponse doPatch(final HttpRequest request) {
-        return methodNotAllowed(request);
+    protected void doPatch(final HttpRequest request, final HttpResponse response) {
+        methodNotAllowed(request, response);
     }
 }

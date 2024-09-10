@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import org.apache.coyote.HttpResponseBuilder;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.Cookies;
 import org.apache.coyote.http11.executor.RequestExecutors;
@@ -39,12 +40,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             sessionManager.cleanUpSession(LocalDateTime.now());
-            final HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
-            setSession(httpRequest);
-            log.info("요청 [HTTP 메소드: {}, 경로: {}", httpRequest.getMethod(), httpRequest.getPath());
-
-            final HttpResponse response = executor.execute(httpRequest);
-
+            final HttpRequest request = HttpRequestParser.parse(inputStream);
+            final HttpResponse response = HttpResponseBuilder.build();
+            setSession(request);
+            log.info("요청 [HTTP 메소드: {}, 경로: {}", request.getMethod(), request.getPath());
+            executor.execute(request, response);
             log.info("응답 [HTTP 결과: {}, 헤더: {}", response.getStatusLine(), response.getHeaders());
 
             HttpResponseWriter.write(outputStream, response);

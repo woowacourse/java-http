@@ -12,7 +12,7 @@ public class HelloHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        URI uri = httpRequest.getUri();
+        URI uri = httpRequest.uri();
         String path = uri.getPath();
 
         return "/".equals(path);

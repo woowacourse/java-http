@@ -2,22 +2,20 @@ package org.apache.coyote.http11;
 
 import java.net.URI;
 
-public record HttpRequest(String startLine, Header header, char[] body) {
+public record HttpRequest(
+        HttpMethod httpMethod,
+        URI uri,
+        HttpVersion httpVersion,
+        Header header,
+        char[] body
+) {
 
-    public HttpMethod getMethod() {
-        return HttpMethod.from(startLine.split(" ")[0]);
-    }
+    public static HttpRequest createHttp11Message(String requestLine, Header header, char[] requestBody) {
+        String[] requestLines = requestLine.split(" ");
+        HttpMethod httpMethod = HttpMethod.from(requestLines[0]);
+        URI uri = URI.create(requestLines[1]);
 
-    public URI getUri() {
-        return URI.create(startLine.split(" ")[1]);
-    }
-
-    public HttpVersion getHttpVersion() {
-        return HttpVersion.from(startLine.split(" ")[2]);
-    }
-
-    public QueryParameter getQueryParameter() {
-        return new QueryParameter(getUri().getQuery());
+        return new HttpRequest(httpMethod, uri, HttpVersion.HTTP_1_1, header, requestBody);
     }
 
     public boolean hasNotApplicationXW3FormUrlEncodedBody() {

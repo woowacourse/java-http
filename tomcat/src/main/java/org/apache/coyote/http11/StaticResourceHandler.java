@@ -9,14 +9,14 @@ public class StaticResourceHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        URL resource = getClass().getClassLoader().getResource("static/" + httpRequest.getUri());
+        URL resource = getClass().getClassLoader().getResource("static/" + httpRequest.uri());
 
         return resource != null;
     }
 
     @Override
     public ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
-        URI uri = httpRequest.getUri();
+        URI uri = httpRequest.uri();
 
         return new ForwardResult(uri.getPath(), HttpStatus.OK);
     }

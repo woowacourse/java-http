@@ -12,10 +12,10 @@ public class GetLoginHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        URI uri = httpRequest.getUri();
+        URI uri = httpRequest.uri();
         String path = uri.getPath();
 
-        return "/login".equals(path) && httpRequest.getMethod().isGet();
+        return "/login".equals(path) && httpRequest.httpMethod().isGet();
     }
 
     @Override

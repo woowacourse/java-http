@@ -22,11 +22,11 @@ public abstract class AbstractHandler {
         header.append(HttpHeaderKey.CONTENT_TYPE, contentType);
 
         if (result.httpStatus().isRedirection()) {
-            return new HttpResponse(httpRequest.getHttpVersion(), result.httpStatus(), header, new byte[]{});
+            return new HttpResponse(httpRequest.httpVersion(), result.httpStatus(), header, new byte[]{});
         }
 
         return new HttpResponse(
-                httpRequest.getHttpVersion(),
+                httpRequest.httpVersion(),
                 result.httpStatus(),
                 header,
                 readStaticResource(resourcePath)

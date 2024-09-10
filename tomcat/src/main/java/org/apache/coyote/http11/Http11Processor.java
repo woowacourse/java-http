@@ -58,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
         Header header = createHeader(bufferedReader);
         char[] requestBody = createRequestBody(bufferedReader, header);
 
-        return new HttpRequest(requestLine, header, requestBody);
+        return HttpRequest.createHttp11Message(requestLine, header, requestBody);
     }
 
     private Header createHeader(BufferedReader bufferedReader) throws IOException {

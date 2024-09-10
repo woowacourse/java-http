@@ -12,10 +12,10 @@ public class GetRegisterHandler extends AbstractHandler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        URI uri = httpRequest.getUri();
+        URI uri = httpRequest.uri();
         String path = uri.getPath();
 
-        return "/register".equals(path) && httpRequest.getMethod().isGet();
+        return "/register".equals(path) && httpRequest.httpMethod().isGet();
     }
 
     @Override

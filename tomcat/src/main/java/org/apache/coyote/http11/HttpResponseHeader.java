@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HttpResponseHeader {
 
@@ -19,7 +18,6 @@ public class HttpResponseHeader {
     }
 
     public String buildOutput() {
-        return headers.stream()
-                .collect(Collectors.joining(HTTP_DELIMITER));
+        return String.join(HTTP_DELIMITER, headers);
     }
 }

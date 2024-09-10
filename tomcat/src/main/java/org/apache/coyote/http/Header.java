@@ -1,6 +1,7 @@
 package org.apache.coyote.http;
 
 public enum Header {
+
     ACCEPT("Accept"),
     CONNECTION("Connection"),
     CONTENT_LENGTH("Content-Length"),

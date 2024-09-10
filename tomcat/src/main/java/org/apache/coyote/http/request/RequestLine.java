@@ -30,10 +30,6 @@ public class RequestLine {
         return uri;
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
-
     @Override
     public String toString() {
         return "RequestLine{" +

@@ -2,8 +2,10 @@ package org.apache.coyote.http;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 
 public enum ContentType {
+
     HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css;charset=utf-8"),
     JS("js", "text/javascript;charset=utf-8"),
@@ -16,7 +18,8 @@ public enum ContentType {
     PDF("pdf", "application/pdf"),
     JSON("json", "application/json"),
     XML("xml", "application/xml"),
-    PLAIN("plain", "text/plain;charset=utf-8");
+    PLAIN("plain", "text/plain;charset=utf-8"),
+    ;
 
     private final String fileExtension;
     private final String mimeType;
@@ -26,11 +29,16 @@ public enum ContentType {
         this.mimeType = mimeType;
     }
 
-    public static ContentType of(File resource) {
+    public static ContentType from(File resource) {
+        Objects.requireNonNull(resource, "Resource cannot be null");
         return Arrays.stream(ContentType.values())
-                .filter(type -> resource.getName().endsWith(type.fileExtension))
+                .filter(type -> isContentTypeMatches(resource, type))
                 .findFirst()
                 .orElse(PLAIN);
+    }
+
+    private static boolean isContentTypeMatches(File resource, ContentType type) {
+        return resource.getName().endsWith(type.fileExtension);
     }
 
     public String getMimeType() {

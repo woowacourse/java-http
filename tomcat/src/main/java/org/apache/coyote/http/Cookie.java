@@ -11,7 +11,6 @@ public class Cookie {
     private static final String COOKIE_DATA_DELIMITER = "; ";
     private static final int SPLIT_LIMIT = 2;
 
-
     private final Map<String, String> cookies;
 
     public Cookie(String cookies) {

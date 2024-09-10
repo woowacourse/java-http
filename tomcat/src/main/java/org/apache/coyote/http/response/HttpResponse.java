@@ -15,8 +15,8 @@ public class HttpResponse {
 
     private final String protocol;
     private StatusCode status;
-    private final Map<String, String> headers;
-    private final Cookie cookies;
+    private Map<String, String> headers;
+    private Cookie cookies;
     private String body;
 
     private HttpResponse(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {

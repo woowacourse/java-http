@@ -70,7 +70,7 @@ public class StaticResourceController implements Controller {
     }
 
     private String getContentType(File resource) {
-        return ContentType.of(resource).getMimeType();
+        return ContentType.from(resource).getMimeType();
     }
 
     private String getResponseLength(byte[] responseBody) {

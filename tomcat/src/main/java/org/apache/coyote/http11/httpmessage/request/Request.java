@@ -1,9 +1,11 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.httpmessage.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.coyote.http11.httpmessage.HttpHeaders;
 
 public class Request {
 

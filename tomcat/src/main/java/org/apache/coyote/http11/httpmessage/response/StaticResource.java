@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.httpmessage.response;
 
 import java.io.File;
 import java.io.IOException;

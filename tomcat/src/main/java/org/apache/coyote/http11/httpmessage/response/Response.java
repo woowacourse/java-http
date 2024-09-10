@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.httpmessage.response;
 
 import java.io.IOException;
 
 import org.apache.coyote.http11.exception.NotCompleteResponseException;
-import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.httpmessage.HttpHeaders;
 
 public class Response {
 

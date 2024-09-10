@@ -7,7 +7,7 @@ import java.net.Socket;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.DefaultResourceHandler;
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.httpmessage.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.Body;
 import org.apache.coyote.http11.common.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,24 +36,11 @@ public class ResponseHandler {
 		}
 		File file = new File(url.getPath());
 		ContentType contentType = ContentType.fromPath(url.getPath());
-		String responseBody = new String(Files.readAllBytes(file.toPath()));
+		Body body = new Body(new String(Files.readAllBytes(file.toPath())));
 		return new HttpResponse("HTTP/1.1", 200, "OK",
 			Map.of("Content-Type", contentType + ";charset=utf-8",
-				"Content-Length", String.valueOf(responseBody.getBytes().length)),
-			responseBody);
-	}
-
-	private static String determineContentType(String fileName) {
-		if (fileName.endsWith("css")) {
-			return "text/css";
-		}
-		if (fileName.endsWith("js")) {
-			return "application/javascript";
-		}
-		if (fileName.endsWith("html")) {
-			return "text/html";
-		}
-		return "application/json";
+				"Content-Length", String.valueOf(body.getContentLength())),
+			body.getValue());
 	}
 
 	public static void redirect(String path, OutputStream outputStream) {

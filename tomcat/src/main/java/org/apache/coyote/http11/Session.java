@@ -20,14 +20,14 @@ public class Session {
         if (values.containsKey(name)) {
             return values.get(name);
         }
-        throw new IllegalArgumentException(name + "인 attribute 가 없습니다.");
+        throw new IllegalArgumentException("세션 속성을 찾을 수 없습니다. : " + name);
     }
 
-    public void setAttribute(final String name, final Object value) {
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 
-    public void removeAttribute(final String name) {
+    public void removeAttribute(String name) {
         values.remove(name);
     }
 

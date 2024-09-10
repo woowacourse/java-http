@@ -12,13 +12,14 @@ public class Headers {
 		this.headers = headers;
 	}
 
-	public Headers(BufferedReader reader) throws IOException {
-		this.headers = new HashMap<>();
+	public static Headers request(BufferedReader reader) throws IOException {
+		HashMap<String, String> headers = new HashMap<>();
 		String line;
 		while ((line = reader.readLine()) != null && !line.isEmpty()) {
 			String[] header = line.split(":");
 			headers.put(header[0].trim(), header[1].trim());
 		}
+		return new Headers(headers);
 	}
 
 	public String getValue(String key) {

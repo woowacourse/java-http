@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.request;
 
-public class Path {
-	private final String value;
+public record Path(String value) {
 
-	public Path(String initialLine) {
-		this.value = initialLine.split(" ")[1];
+	public static Path request(String initialLine) {
+		return new Path(initialLine.split(" ")[1]);
 	}
 }

@@ -40,7 +40,7 @@ public class ResponseHandler {
 		return new HttpResponse("HTTP/1.1", 200, "OK",
 			Map.of("Content-Type", contentType + ";charset=utf-8",
 				"Content-Length", String.valueOf(body.getContentLength())),
-			body.getValue());
+			body.value());
 	}
 
 	public static void redirect(String path, OutputStream outputStream) {

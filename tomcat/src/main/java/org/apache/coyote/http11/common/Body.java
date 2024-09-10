@@ -3,14 +3,8 @@ package org.apache.coyote.http11.common;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class Body {
+public record Body(String value) {
 	private static final String CONTENT_LENGTH = "Content-Length";
-
-	private final String value;
-
-	public Body(String value) {
-		this.value = value;
-	}
 
 	public static Body request(Headers headers, BufferedReader reader) throws IOException {
 		return new Body(parseBody(headers, reader));
@@ -30,7 +24,4 @@ public class Body {
 		return this.value.getBytes().length;
 	}
 
-	public String getValue() {
-		return value;
-	}
 }

@@ -14,10 +14,10 @@ public class HttpRequest {
 
 	public HttpRequest(BufferedReader reader) throws IOException {
 		String initialLine = reader.readLine();
-		this.method = new Method(initialLine);
-		this.path = new Path(initialLine);
-		this.headers = new Headers(reader);
-		this.body = new Body(headers, reader);
+		this.method = Method.request(initialLine);
+		this.path = Path.request(initialLine);
+		this.headers = Headers.request(reader);
+		this.body = Body.request(headers, reader);
 	}
 
 	public Method getMethod() {

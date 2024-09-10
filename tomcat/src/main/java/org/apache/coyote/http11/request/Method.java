@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.request;
 
-public class Method {
-	private final String value;
+public record Method(String value) {
 
-	public Method(String initialLine) {
-		this.value = initialLine.split(" ")[0];
+	public static Method request(String initialLine) {
+		return new Method(initialLine.split(" ")[0]);
 	}
 }

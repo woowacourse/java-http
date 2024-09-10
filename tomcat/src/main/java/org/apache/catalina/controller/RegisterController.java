@@ -2,6 +2,8 @@ package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
+import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -13,7 +15,7 @@ public class RegisterController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         HttpMethod method = request.getMethod();
 
         if (method.isPost()) {
@@ -25,8 +27,8 @@ public class RegisterController implements Controller {
         }
     }
 
-    public void doGet(HttpResponse response) {
-        response.setRedirect("/register.html");
+    public void doGet(HttpResponse response) throws IOException {
+        ResourceReader.serveResource("/register.html", response);
     }
 
     public void doPost(HttpRequest request, HttpResponse response) {

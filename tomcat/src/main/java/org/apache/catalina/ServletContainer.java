@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.catalina.controller.Controller;
-import org.apache.catalina.controller.DefaultServlet;
 import org.apache.catalina.controller.IndexController;
 import org.apache.catalina.controller.LoginController;
 import org.apache.catalina.controller.RegisterController;
+import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -18,7 +18,6 @@ public class ServletContainer {
     private static final List<String> STATIC_RESOURCE_EXTENSION = List.of(".html", ".css", ".js");
 
     private final Map<String, Controller> servletMapping;
-    private final Controller defaultServlet;
 
     public ServletContainer() {
         Map<String, Controller> servletsMapping = new HashMap<>();
@@ -28,7 +27,6 @@ public class ServletContainer {
         servletsMapping.put("/index", new IndexController());
 
         this.servletMapping = servletsMapping;
-        this.defaultServlet = new DefaultServlet();
     }
 
     public HttpResponse dispatch(HttpRequest request) throws Exception {
@@ -42,7 +40,7 @@ public class ServletContainer {
         }
 
         if (isStaticResource(requestUrl)) {
-            defaultServlet.service(request, response);
+            ResourceReader.serveResource(requestUrl, response);
             return response;
         }
 

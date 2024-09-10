@@ -2,10 +2,12 @@ package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import java.io.IOException;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.apache.catalina.session.HttpSession;
 import org.apache.catalina.session.HttpSessionManger;
+import org.apache.catalina.util.ResourceReader;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
@@ -20,7 +22,7 @@ public class LoginController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         HttpMethod method = request.getMethod();
 
         if (method.isGet()) {
@@ -32,7 +34,7 @@ public class LoginController implements Controller {
         }
     }
 
-    private void doGet(HttpRequest request, HttpResponse response) {
+    private void doGet(HttpRequest request, HttpResponse response) throws IOException {
         HttpCookie httpCookie = request.getCookie();
 
         if (httpCookie.isContains(JSESSIONID) && checkAlreadyLogin(httpCookie)) {
@@ -40,7 +42,7 @@ public class LoginController implements Controller {
             return;
         }
 
-        response.setRedirect("/login.html");
+        ResourceReader.serveResource("/login.html", response);
     }
 
     private boolean checkAlreadyLogin(HttpCookie httpCookie) {

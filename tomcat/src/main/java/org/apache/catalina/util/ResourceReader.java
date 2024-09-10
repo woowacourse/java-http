@@ -1,25 +1,19 @@
-package org.apache.catalina.controller;
+package org.apache.catalina.util;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
-public class DefaultServlet implements Controller {
+public class ResourceReader {
 
     private static final String RESOURCE_PATH = "static";
     private static final String QUERY_PARAM_DELIMITER = "\\?";
 
-    @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        serveResource(request, response);
-    }
-
-    public void serveResource(HttpRequest request, HttpResponse response) throws IOException {
-        String path = request.getRequestUrl().split(QUERY_PARAM_DELIMITER)[0];
+    public static void serveResource(String resourceUri, HttpResponse response) throws IOException {
+        String path = resourceUri.split(QUERY_PARAM_DELIMITER)[0];
         Path resourcePath = getResourcePath(path);
         String body = Files.readString(resourcePath);
         String contentType = Files.probeContentType(resourcePath);
@@ -28,8 +22,8 @@ public class DefaultServlet implements Controller {
         response.setStatus(HttpStatus.OK);
     }
 
-    private Path getResourcePath(String path) {
-        ClassLoader classLoader = getClass().getClassLoader();
+    private static Path getResourcePath(String path) {
+        ClassLoader classLoader = ResourceReader.class.getClassLoader();
 
         URL resourceUrl = classLoader.getResource(RESOURCE_PATH + path);
         if (resourceUrl == null) {

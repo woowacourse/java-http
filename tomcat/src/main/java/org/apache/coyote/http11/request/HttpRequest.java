@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.controller.ResourceLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,7 +68,7 @@ public class HttpRequest {
     }
 
     public byte[] toHttpResponseBody() throws URISyntaxException, IOException {
-        URL url = ResourceLoader.class.getClassLoader().getResource(loadResourceName(path));
+        URL url = getClass().getClassLoader().getResource(loadResourceName(path));
         if (url == null) {
             throw new IllegalArgumentException("존재하지 않는 리소스 입니다." + path);
         }

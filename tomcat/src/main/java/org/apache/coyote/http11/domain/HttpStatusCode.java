@@ -2,6 +2,7 @@ package org.apache.coyote.http11.domain;
 
 public enum HttpStatusCode {
     OK(200),
+    CREATED(201),
     FOUND(302),
     UNAUTHORIZED(401);
 

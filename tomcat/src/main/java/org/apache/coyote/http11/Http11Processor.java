@@ -46,6 +46,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             var responseBody = "Hello world!";
+            String contentType = "text/html";
+            String path = "/";
 
             String[] firstLine = bufferedReader.readLine().split(" ");
             String method = firstLine[0];
@@ -58,24 +60,33 @@ public class Http11Processor implements Runnable, Processor {
                 requestHeaders.put(line.split(": ")[0], line.split(": ")[1]);
             }
 
+            if(method.equals("GET")) {
+                path = getPathFromUrl(url);
+
+                if(!path.equals("/")) {
+                    String extension = path.split("\\.")[1];
+                    if (extension.equals("css")) {
+                        contentType = "text/css";
+                    }
+                }
+            }
+
             if(method.equals("POST")) {
                 int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
-            }
-
-            String path = getPathFromUrl(url);
-            responseBody = updateResponseBody(path, responseBody);
-            String contentType = "text/html";
-
-
-            if(!path.equals("/")) {
-                String extension = path.split("\\.")[1];
-                if (extension.equals("css")) {
-                    contentType = "text/css";
+                String[] requestBody = new String(buffer).split("&");
+                Map<String, String> userInfo = new HashMap<>();
+                for(String param : requestBody) {
+                    userInfo.put(param.split("=")[0], param.split("=")[1]);
                 }
+                User user = new User(userInfo.get("account"), userInfo.get("password"), userInfo.get("email"));
+                InMemoryUserRepository.save(user);
+                httpStatusCode = HttpStatusCode.CREATED;
+                path = "/index.html";
             }
+
+            responseBody = updateResponseBody(path, responseBody);
 
             String responseHeader = String.join("\r\n",
                     "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getName() + " ",

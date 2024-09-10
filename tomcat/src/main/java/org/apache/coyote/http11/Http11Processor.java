@@ -18,7 +18,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestBody;
 import org.apache.coyote.request.RequestLine;
-import org.apache.coyote.response.HttpHeaders;
+import org.apache.coyote.response.HttpHeaderType;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpStatusCode;
 import org.slf4j.Logger;
@@ -77,8 +77,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private RequestBody readRequestBody(BufferedReader reader, HttpHeader httpHeader) throws IOException {
-        if (httpHeader.contains(HttpHeaders.CONTENT_LENGTH.getName())) {
-            int contentLength = Integer.parseInt(httpHeader.get(HttpHeaders.CONTENT_LENGTH.getName()));
+        if (httpHeader.contains(HttpHeaderType.CONTENT_LENGTH.getName())) {
+            int contentLength = Integer.parseInt(httpHeader.get(HttpHeaderType.CONTENT_LENGTH.getName()));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new RequestBody(new String(buffer));

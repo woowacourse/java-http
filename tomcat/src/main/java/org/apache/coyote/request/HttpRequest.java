@@ -2,7 +2,7 @@ package org.apache.coyote.request;
 
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.response.HttpHeaders;
+import org.apache.coyote.response.HttpHeaderType;
 
 public class HttpRequest {
 
@@ -30,7 +30,7 @@ public class HttpRequest {
     }
 
     public HttpCookie getCookie() {
-        return new HttpCookie(httpHeader.get(HttpHeaders.COOKIE.getName()));
+        return new HttpCookie(httpHeader.get(HttpHeaderType.COOKIE.getName()));
     }
 
     public boolean hasSession() {

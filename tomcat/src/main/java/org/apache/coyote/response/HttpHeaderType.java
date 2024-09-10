@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-public enum HttpHeaders {
+public enum HttpHeaderType {
 
     CONTENT_LENGTH("Content-Length"),
     COOKIE("Cookie"),
@@ -11,7 +11,7 @@ public enum HttpHeaders {
 
     private final String name;
 
-    HttpHeaders(String name) {
+    HttpHeaderType(String name) {
         this.name = name;
     }
 

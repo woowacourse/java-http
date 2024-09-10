@@ -48,14 +48,14 @@ public class HttpResponse {
 
     public static HttpResponse redirectTo(String path) {
         HttpResponse response = new HttpResponse(HttpStatusCode.FOUND, "", ContentType.TEXT_HTML);
-        response.addHeader(HttpHeaders.LOCATION.getName(), path);
+        response.addHeader(HttpHeaderType.LOCATION.getName(), path);
         return response;
     }
 
     private HttpHeader buildInitialHeaders(String responseBody, ContentType contentType) {
         Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_LENGTH.getName(), responseBody.getBytes().length + " ");
-        headers.put(HttpHeaders.CONTENT_TYPE.getName(), contentType.getName() + ";charset=utf-8 ");
+        headers.put(HttpHeaderType.CONTENT_LENGTH.getName(), responseBody.getBytes().length + " ");
+        headers.put(HttpHeaderType.CONTENT_TYPE.getName(), contentType.getName() + ";charset=utf-8 ");
         return new HttpHeader(headers);
     }
 
@@ -64,7 +64,7 @@ public class HttpResponse {
     }
 
     public HttpResponse setCookie(HttpCookie cookie) {
-        responseHeader.add(HttpHeaders.SET_COOKIE.getName(), cookie.buildMessage());
+        responseHeader.add(HttpHeaderType.SET_COOKIE.getName(), cookie.buildMessage());
         return this;
     }
 

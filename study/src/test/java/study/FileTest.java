@@ -2,7 +2,7 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,16 +40,13 @@ class FileTest {
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다. File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() throws URISyntaxException {
+    void 파일의_내용을_읽는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
 
         URL url = getClass().getClassLoader().getResource(fileName);
         final Path path = Path.of(url.toURI());
 
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-            List<String> actual = bufferedReader.lines().toList();
-            assertThat(actual).containsOnly("nextstep");
-        } catch (Exception e) {
-        }
+        List<String> actual = Files.lines(path).toList();
+        assertThat(actual).containsOnly("nextstep");
     }
 }

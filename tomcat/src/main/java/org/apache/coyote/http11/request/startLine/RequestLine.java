@@ -36,8 +36,8 @@ public class RequestLine {
         return requestParts;
     }
 
-    public boolean matchesMethod(HttpMethod method) {
-        return httpMethod == method;
+    public boolean isMethod(HttpMethod httpMethod) {
+        return this.httpMethod == httpMethod;
     }
 
     public HttpMethod getHttpMethod() {

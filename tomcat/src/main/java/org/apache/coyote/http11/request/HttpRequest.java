@@ -39,6 +39,10 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeaders, RequestBody.empty());
     }
 
+    public boolean isMethod(HttpMethod httpMethod) {
+        return requestLine.isMethod(httpMethod);
+    }
+
     public Optional<String> getHeader(String header) {
         return requestHeaders.get(header);
     }

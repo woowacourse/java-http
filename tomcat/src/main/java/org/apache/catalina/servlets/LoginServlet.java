@@ -21,7 +21,7 @@ public class LoginServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
-    public void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    public void doGet(HttpRequest request, HttpResponse response) {
         URL resource = getClass().getClassLoader().getResource("static" + request.getRequestURI() + ".html");
         String fileContent = getFileContent(resource);
 

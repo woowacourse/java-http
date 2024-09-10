@@ -16,90 +16,121 @@ import org.apache.catalina.servlets.http.SessionManager;
 
 public class HttpRequest {
 
-    private final String request;
+    private static final String SP = " ";
+    private static final String CRLF = "\n";
+
+    private HttpMethod method;
+    private String path;
+    private String protocolVersion;
+    private Map<String, String> headers;
+    private String body = "";
 
     public HttpRequest(String request) {
-        this.request = request;
+        this.method = HttpMethod.valueOf(parseHttpMethod(request));
+        this.path = parsePath(request);
+        this.protocolVersion = parseVersion(request);
+        this.headers = parseHeaders(request);
+        this.body = parseBody(request);
     }
 
-    public String getMethod() {
-        String startLine = getStartLine();
-        return startLine.split(" ")[0];
+    private String parseHttpMethod(String request) {
+        String startLine = parseStartLine(request);
+        return startLine.split(SP)[0];
     }
 
-    public String getQueryString() {
-        String path = getStartLine().split(" ")[1];
-        int i = path.lastIndexOf("?");
-        if (i == -1) {
-            return "";
-        }
-        return path.substring(i + 1);
+    private String parsePath(String request) {
+        String[] startLine = parseStartLine(request).split(SP);
+        return startLine[1];
     }
 
-    public String getRequestURI() {
-        String requestTarget = getRequestTarget();
-        int queryStringIndex = requestTarget.indexOf('?');
-        if (queryStringIndex == -1) {
-            return requestTarget;
-        }
-        return requestTarget.substring(0, queryStringIndex);
+    private String parseVersion(String request) {
+        String[] startLine = parseStartLine(request).split(SP);
+        return startLine[2];
     }
 
-    public StringBuilder getRequestURL() {
-        String[] startLine = getStartLine().split(" ");
-        StringBuilder sb = new StringBuilder();
-        sb.append(getScheme()).append("://").append(getServerName()).append(":").append(getLocalPort());
-        sb.append(startLine[1]);
-        return sb;
-    }
-
-    private String getRequestTarget() {
-        return getStartLine().split(" ")[1];
-    }
-
-    private String getStartLine() {
+    private String parseStartLine(String request) {
         return request.split("\n")[0];
     }
 
-    private String getRequestBody() {
-        String[] requestContent = request.split("\r\n\r\n");
-        if (requestContent.length > 1) {
-            return requestContent[1];
+    private Map<String, String> parseHeaders(String request) {
+        String[] startLineAndHeaders = request.split(CRLF+CRLF)[0].split(CRLF);
+        String[] headers = Arrays.copyOfRange(startLineAndHeaders, 1, startLineAndHeaders.length);
+        return Arrays.stream(headers)
+                .map(header -> header.split(": ", 2))
+                .collect(toMap(header -> header[0], header -> header[1]));
+    }
+
+    private String parseBody(String request) {
+        String[] split = request.split("\n\n");
+        if (split.length > 1) {
+            return split[1];
         }
         return "";
     }
 
-    public String getServletPath() {
-        return "/";
+    public Map<String, String[]> getQueryParameters() {
+        int index = path.lastIndexOf("?");
+        if (index == -1) {
+            return Map.of();
+        }
+
+        String query = path.substring(index + 1);
+        String[] params = query.split("&");
+
+        return Arrays.stream(params)
+                .collect(toMap(
+                        param -> param.split("=", 2)[0],
+                        param -> param.split("=", 2)[1].split(","),
+                        (oldValue, newValue) -> newValue,
+                        LinkedHashMap::new));
+    }
+
+    public String getRequestURL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getScheme()).append("://").append(getServerName()).append(":").append(getLocalPort());
+        sb.append(getRequestURI());
+        return sb.toString();
+    }
+
+    public String getRequestURI() {
+        int queryStringIndex = path.indexOf('?');
+        if (queryStringIndex == -1) {
+            return path;
+        }
+        return path.substring(0, queryStringIndex);
+    }
+
+    private String getRequestBody() {
+        return body;
     }
 
     public String getParameter(String s) {
         String[] parameterValues = getParameterValues(s);
         if (parameterValues.length == 0) {
-            return null;
+            return "";
         }
         return getParameterValues(s)[0];
     }
 
     public Enumeration<String> getParameterNames() {
-        Map<String, String[]> map = getParameterMap();
+        Map<String, String[]> map = getParameters();
         return Collections.enumeration(map.keySet());
     }
 
     public String[] getParameterValues(String name) {
-        Map<String, String[]> map = getParameterMap();
+        Map<String, String[]> map = getParameters();
         return map.getOrDefault(name, new String[0]);
     }
 
 
-    public Map<String, String[]> getParameterMap() {
+    public Map<String, String[]> getParameters() {
         Map<String, String[]> parameterMap = new LinkedHashMap<>();
-        if (getMethod().equals("GET")) {
+        if (method == HttpMethod.GET) {
             addRequestBodyParam(parameterMap);
             addQueryStringParam(parameterMap);
             return parameterMap;
         }
-        if (getMethod().equals("POST")) {
+        if (method == HttpMethod.POST) {
             addQueryStringParam(parameterMap);
             addRequestBodyParam(parameterMap);
             return parameterMap;
@@ -113,13 +144,8 @@ public class HttpRequest {
     }
 
     private void addQueryStringParam(Map<String, String[]> parameterMap) {
-        String requestUrl = getRequestURL().toString();
-        int i = requestUrl.indexOf('?');
-        if (i == -1) {
-            return;
-        }
-        String query = requestUrl.substring(i + 1);
-        parseParam(query, parameterMap);
+        Map<String, String[]> queryParameters = getQueryParameters();
+        parameterMap.putAll(queryParameters);
     }
 
     private void parseParam(String query, Map<String, String[]> parameterMap) {
@@ -138,6 +164,43 @@ public class HttpRequest {
         }
     }
 
+    public boolean hasCookie() {
+        String cookie = headers.getOrDefault("Cookie", "");
+        return !cookie.isEmpty();
+    }
+
+    public Cookie getCookie() {
+        String values = headers.getOrDefault("Cookie", "");
+        return new Cookie(values);
+    }
+
+    public Session getSession(boolean create) {
+        Session session = new Session(UUID.randomUUID().toString());
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.add(session);
+        return session;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     public String getScheme() {
         return "http";
     }
@@ -149,38 +212,5 @@ public class HttpRequest {
 
     public int getLocalPort() {
         return 8080;
-    }
-
-    public boolean hasCookie() {
-        String cookie = getHeader("Cookie");
-        return !cookie.isEmpty();
-    }
-
-    public Cookie getCookie() {
-        String values = getHeader("Cookie");
-        return new Cookie(values);
-    }
-
-    public String getHeader(String name) {
-        Map<String, String> headers = getHeaders();
-        if (!headers.containsKey(name)) {
-            return "";
-        }
-        return headers.get(name);
-    }
-
-    public Map<String, String> getHeaders() {
-        String[] startLineAndHeaders = request.split("\r\n\r\n")[0].split("\r\n");
-        String[] headers = Arrays.copyOfRange(startLineAndHeaders, 1, startLineAndHeaders.length);
-        return Arrays.stream(headers)
-                .map(header -> header.split(": ", 2))
-                .collect(toMap(header -> header[0], header -> header[1]));
-    }
-
-    public Session getSession(boolean create) {
-        Session session = new Session(UUID.randomUUID().toString());
-        SessionManager sessionManager = SessionManager.getInstance();
-        sessionManager.add(session);
-        return session;
     }
 }

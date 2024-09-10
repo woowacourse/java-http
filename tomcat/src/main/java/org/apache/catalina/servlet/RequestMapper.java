@@ -31,6 +31,6 @@ public class RequestMapper {
                         request.uriStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
                 )
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("cannot map controller"));
+                .orElseThrow(() -> new IllegalArgumentException("cannot map controller from request: " + request));
     }
 }

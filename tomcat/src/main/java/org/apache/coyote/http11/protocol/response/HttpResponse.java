@@ -2,13 +2,9 @@ package org.apache.coyote.http11.protocol.response;
 
 import java.util.Map;
 import org.apache.coyote.http11.protocol.cookie.Cookie;
+import org.apache.coyote.http11.protocol.enums.HeaderKey;
 
 public class HttpResponse {
-
-    private static final String LOCATION_HEADER_KEY = "location";
-    private static final String SET_COOKIE_HEADER_KEY = "Set-Cookie";
-    private static final String CONTENT_TYPE_HEADER_KEY = "Content-Type";
-    private static final String CONTENT_LENGTH_HEADER_KEY = "Content-Length";
 
     private final Map<String, String> responseHeaders;
     private HttpStatus httpStatus;
@@ -25,7 +21,7 @@ public class HttpResponse {
     }
 
     public static HttpResponseBuilder redirect(String location) {
-        return status(HttpStatus.FOUND).header(LOCATION_HEADER_KEY, location);
+        return status(HttpStatus.FOUND).header(HeaderKey.LOCATION.getKey(), location);
     }
 
     public static HttpResponse ok() {
@@ -50,7 +46,7 @@ public class HttpResponse {
 
     public void setMessageBody(String body) {
         this.messageBody = body;
-        responseHeaders.put(CONTENT_LENGTH_HEADER_KEY, String.valueOf(body.getBytes().length));
+        responseHeaders.put(HeaderKey.CONTENT_LENGTH.getKey(), String.valueOf(body.getBytes().length));
     }
 
     public void setStatus(HttpStatus status) {
@@ -58,15 +54,15 @@ public class HttpResponse {
     }
 
     public void setContentType(String contentType) {
-        responseHeaders.put(CONTENT_TYPE_HEADER_KEY, contentType);
+        responseHeaders.put(HeaderKey.CONTENT_TYPE.getKey(), contentType);
     }
 
     public void setRedirect(String location) {
         this.httpStatus = HttpStatus.FOUND;
-        responseHeaders.put(LOCATION_HEADER_KEY, location);
+        responseHeaders.put(HeaderKey.LOCATION.getKey(), location);
     }
 
     public void setCookie(Cookie cookie) {
-        responseHeaders.put(SET_COOKIE_HEADER_KEY, cookie.toCookieString());
+        responseHeaders.put(HeaderKey.SET_COOKIE.getKey(), cookie.toCookieString());
     }
 }

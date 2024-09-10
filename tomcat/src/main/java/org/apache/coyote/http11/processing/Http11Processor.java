@@ -14,6 +14,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.io.HttpRequestReader;
 import org.apache.coyote.http11.io.HttpResponseWriter;
 import org.apache.coyote.http11.message.HttpResponseMessage;
+import org.apache.coyote.http11.protocol.enums.HeaderKey;
 import org.apache.coyote.http11.protocol.request.HttpRequest;
 import org.apache.coyote.http11.protocol.request.RequestBody;
 import org.apache.coyote.http11.protocol.request.RequestHeaders;
@@ -77,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readRequestBody(HttpRequestReader httpRequestReader, RequestHeaders requestHeaders)
             throws IOException {
-        String contentLengthHeader = requestHeaders.getHeader("Content-Length");
+        String contentLengthHeader = requestHeaders.getHeader(HeaderKey.CONTENT_LENGTH.getKey());
         if (contentLengthHeader == null) {
             return StringUtils.EMPTY;
         }

@@ -3,11 +3,9 @@ package org.apache.coyote.http11.protocol.response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.protocol.cookie.Cookie;
+import org.apache.coyote.http11.protocol.enums.HeaderKey;
 
 public class HttpResponseBuilder {
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, String> responseHeaders = new LinkedHashMap<>();
     private HttpStatus httpStatus;
@@ -24,7 +22,7 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder contentType(String contentType) {
-        this.responseHeaders.put(CONTENT_TYPE, contentType);
+        this.responseHeaders.put(HeaderKey.CONTENT_TYPE.getKey(), contentType);
         return this;
     }
 
@@ -34,13 +32,13 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder body(String messageBody) {
-        this.responseHeaders.put(CONTENT_LENGTH, String.valueOf(messageBody.getBytes().length));
+        this.responseHeaders.put(HeaderKey.CONTENT_LENGTH.getKey(), String.valueOf(messageBody.getBytes().length));
         this.messageBody = messageBody;
         return this;
     }
 
     public HttpResponseBuilder setCookie(Cookie cookie) {
-        header(SET_COOKIE, cookie.toCookieString());
+        header(HeaderKey.SET_COOKIE.getKey(), cookie.toCookieString());
         return this;
     }
 

@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.protocol.enums.HeaderKey;
 
 public class RequestHeaders {
-
-    private static final String COOKIE_HEADER_KEY = "Cookie";
 
     private final Map<String, String> headers;
 
@@ -33,6 +32,6 @@ public class RequestHeaders {
     }
 
     public String getCookieString() {
-        return getHeader(COOKIE_HEADER_KEY);
+        return getHeader(HeaderKey.COOKIE.getKey());
     }
 }

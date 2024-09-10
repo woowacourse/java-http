@@ -2,6 +2,7 @@ package org.apache.coyote.http11.processing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.techcourse.framework.FrameworkDispatcher;
 import com.techcourse.framework.RequestMapping;
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +17,13 @@ class Http11ProcessorTest {
     void process() throws IOException {
         final var socket = new StubSocket();
         final var requestMapping = new RequestMapping();
-        final var processor = new Http11Processor(socket, requestMapping);
+        final var dispatcher = new FrameworkDispatcher(requestMapping);
+        final var processor = new Http11Processor(socket, dispatcher);
 
         processor.process(socket);
 
         var expected = "HTTP/1.1 302 Found\r\n"
-                + "location: /index.html\r\n"
+                + "Location: /index.html\r\n"
                 + "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -38,8 +40,8 @@ class Http11ProcessorTest {
 
         final var socket = new StubSocket(httpRequest);
         final var requestMapping = new RequestMapping();
-        final Http11Processor processor = new Http11Processor(socket, requestMapping);
-
+        final var dispatcher = new FrameworkDispatcher(requestMapping);
+        final Http11Processor processor = new Http11Processor(socket, dispatcher);
         processor.process(socket);
 
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

@@ -6,7 +6,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Optional;
 import org.apache.catalina.session.JSession;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
@@ -24,20 +23,14 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse.Builder responseBuilder) {
-        HttpSession session = SessionManager.getInstance().getSession(request);
-        if (session != null) {
+        if (SessionManager.getInstance().getSession(request) != null) {
             processSessionLogin(responseBuilder);
             return;
         }
-
         if (request.hasParameters(List.of("account", "password"))) {
-            findValidUser(request).ifPresentOrElse(
-                    user -> processAccountLogin(responseBuilder, user),
-                    () -> responseBuilder.status(Status.FOUND).location("/401.html")
-            );
+            processAccountLogin(request, responseBuilder);
             return;
         }
-
         resourceController.doGet(request.updatePath("login.html"), responseBuilder);
     }
 
@@ -46,15 +39,18 @@ public class LoginController extends AbstractController {
                 .location("/index.html");
     }
 
-    private Optional<User> findValidUser(HttpRequest request) {
+    private void processAccountLogin(HttpRequest request, HttpResponse.Builder responseBuilder) {
         String account = request.parameters().get("account");
         String password = request.parameters().get("password");
 
-        return InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password));
+        InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .ifPresentOrElse(
+                        user -> processLoginSuccess(responseBuilder, user),
+                        () -> responseBuilder.status(Status.FOUND).location("/401.html"));
     }
 
-    private void processAccountLogin(Builder responseBuilder, User user) {
+    private void processLoginSuccess(Builder responseBuilder, User user) {
         HttpSession session = SessionManager.getInstance().createSession(user);
 
         log.info("로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());

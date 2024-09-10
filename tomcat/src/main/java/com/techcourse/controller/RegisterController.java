@@ -23,21 +23,29 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse.Builder responseBuilder) {
         Map<String, String> body = request.extractUrlEncodedBody();
-
-        if (!body.containsKey("account") ||
-                !body.containsKey("password") ||
-                !body.containsKey("email")) {
+        if (isValidBody(body)) {
             responseBuilder.status(Status.BAD_REQUEST);
             return;
         }
-
-        String account = body.get("account");
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+        if (existAccount(body.get("account"))) {
             responseBuilder.status(Status.CONFLICT);
             return;
         }
+        postProcess(responseBuilder, body);
+    }
 
-        InMemoryUserRepository.save(new User(account, body.get("password"), body.get("email")));
+    private boolean isValidBody(Map<String, String> body) {
+        return !body.containsKey("account") ||
+                !body.containsKey("password") ||
+                !body.containsKey("email");
+    }
+
+    private boolean existAccount(String account) {
+        return InMemoryUserRepository.findByAccount(account).isPresent();
+    }
+
+    private void postProcess(HttpResponse.Builder responseBuilder, Map<String, String> body) {
+        InMemoryUserRepository.save(new User(body));
         responseBuilder.status(Status.FOUND)
                 .location("/index.html");
     }

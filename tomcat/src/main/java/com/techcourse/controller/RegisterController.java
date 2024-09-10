@@ -19,12 +19,6 @@ public class RegisterController extends AbstractController {
     private static final String EMAIL_KEY = "email";
     private static final String PASSWORD_KEY = "password";
 
-    private final InMemoryUserRepository userRepository;
-
-    public RegisterController() {
-        userRepository = new InMemoryUserRepository();
-    }
-
     @Override
     public ForwardResult execute(HttpRequest request, Manager manager) {
         String body = request.getBody();
@@ -34,7 +28,7 @@ public class RegisterController extends AbstractController {
         String email = parsedBody.get(EMAIL_KEY);
         String password = parsedBody.get(PASSWORD_KEY);
 
-        userRepository.save(new User(account, password, email));
+        InMemoryUserRepository.save(new User(account, password, email));
 
         return new ForwardResult(HttpStatusCode.FOUND, "index.html");
     }

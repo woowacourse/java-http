@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpHeaders;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +50,7 @@ public class HttpRequest {
         }
 
         if (method.equals("POST")) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length"));
+            int contentLength = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             String body = new String(buffer);

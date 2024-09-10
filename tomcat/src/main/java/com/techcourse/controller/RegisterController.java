@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -20,9 +21,9 @@ public class RegisterController extends AbstractController {
         response.addVersion(request.getVersion());
         response.addStatusCode(302);
         response.addStatusMessage("FOUND");
-        response.addHeader("Content-Type", request.getContentType());
-        response.addHeader("Content-Length", responseBody.getBytes().length);
-        response.addHeader("Location", "/index.html");
+        response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
+        response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
+        response.addHeader(HttpHeaders.LOCATION, "/index.html");
         response.addBody(responseBody);
     }
 
@@ -33,8 +34,8 @@ public class RegisterController extends AbstractController {
         response.addVersion(request.getVersion());
         response.addStatusCode(200);
         response.addStatusMessage("OK");
-        response.addHeader("Content-Type", request.getContentType());
-        response.addHeader("Content-Length", responseBody.getBytes().length);
+        response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
+        response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
         response.addBody(responseBody);
     }
 }

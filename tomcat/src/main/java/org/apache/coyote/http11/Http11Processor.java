@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,51 +34,35 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpReader(inputStream).getHttpRequest();
+            RequestLine requestLine = httpRequest.requestLine();
 
-            RequestLine requestLine = httpRequest.getRequestLine();
-
-            String method = requestLine.getMethod();
-            String requestUrl = requestLine.getRequestUrl();
-
-            if (method.equals("GET") && requestUrl.equals("/")) {
-                responseRoot(outputStream);
+            if (requestLine.isGet() && requestLine.isRoot()) {
+                responseRoot(outputStream, requestLine);
             }
-            if (method.equals("GET") && requestUrl.equals("/index.html")) {
-                responseIndex(outputStream);
+            if (requestLine.isGet() && requestLine.isIndex()) {
+                responseIndex(outputStream, requestLine);
             }
-            if (method.equals("GET") && requestUrl.contains(".css")) {
-                responseCss(outputStream, requestUrl);
+            if (requestLine.isGet() && requestLine.hasCss()) {
+                responseCss(outputStream, requestLine);
             }
-            if (method.equals("GET") && requestUrl.contains(".js")) {
-                responseJs(outputStream, requestUrl);
+            if (requestLine.isGet() && requestLine.hasJs()) {
+                responseJs(outputStream, requestLine);
             }
-            if (method.equals("GET") && requestUrl.contains("login")) {
-                responseLogin(outputStream, requestUrl);
+            if (requestLine.isGet() && requestLine.hasLogin()) {
+                responseLogin(outputStream, requestLine);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void responseLogin(OutputStream outputStream, String requestUrl) throws IOException {
-        int index = requestUrl.indexOf("?");
-        String queryString = requestUrl.substring(index + 1);
-        String[] pairs = queryString.split("&");
-        String[] keyValue = pairs[0].split("=");
-        String account = keyValue[1];
-
-        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            User user = InMemoryUserRepository.findByAccount(account).get();
-            log.info(user.toString());
-        }
-
-        URL url = getClass().getClassLoader().getResource("static/login.html");
-        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+    private void responseRoot(OutputStream outputStream, RequestLine requestLine) throws IOException {
+        final var responseBody = "Hello world!";
 
         final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                requestLine.getProtocol() + " 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
                 "",
                 responseBody);
 
@@ -87,44 +70,14 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void responseJs(OutputStream outputStream, String requestUrl) throws IOException {
-        URL url = getClass().getClassLoader().getResource("static" + requestUrl);
-        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/js;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void responseCss(OutputStream outputStream, String requestUrl) throws IOException {
-        URL url = getClass().getClassLoader().getResource("static" + requestUrl);
-        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void responseIndex(OutputStream outputStream) throws IOException {
+    private void responseIndex(OutputStream outputStream, RequestLine requestLine) throws IOException {
         URL url = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                requestLine.getProtocol() + " 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
                 "",
                 responseBody);
 
@@ -132,13 +85,56 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void responseRoot(OutputStream outputStream) throws IOException {
-        final var responseBody = "Hello world!";
+    private void responseCss(OutputStream outputStream, RequestLine requestLine) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + requestLine.getRequestUrl());
+        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                requestLine.getProtocol() + " 200 OK",
+                "Content-Type: text/css;charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
+                "",
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseJs(OutputStream outputStream, RequestLine requestLine) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + requestLine.getRequestUrl());
+        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+
+        final var response = String.join("\r\n",
+                requestLine.getProtocol() + " 200 OK",
+                "Content-Type: text/js;charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
+                "",
+                responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void responseLogin(OutputStream outputStream, RequestLine requestLine) throws IOException {
+        if (requestLine.hasQuestion()) {
+            int queryStartIndex = requestLine.getRequestUrl().indexOf("?");
+            String queryString = requestLine.getRequestUrl().substring(queryStartIndex + 1);
+            String[] pairs = queryString.split("&");
+            String[] keyValue = pairs[0].split("=");
+            String account = keyValue[1];
+
+            InMemoryUserRepository.findByAccount(account)
+                    .ifPresent(user -> log.info(user.toString()));
+        }
+
+        URL url = getClass().getClassLoader().getResource("static/login.html");
+
+        String responseBody = new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+
+        final var response = String.join("\r\n",
+                requestLine.getProtocol() + " 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: " + responseBody.getBytes().length,
                 "",
                 responseBody);
 

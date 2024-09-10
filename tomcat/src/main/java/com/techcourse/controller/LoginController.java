@@ -21,6 +21,11 @@ public class LoginController extends AbstractController {
     private static final String STATIC_RESOURCE_PATH = "/login.html";
 
     @Override
+    public String getPath() {
+        return "/login";
+    }
+
+    @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
 

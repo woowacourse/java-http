@@ -14,6 +14,11 @@ public class StaticResourceController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(StaticResourceController.class);
 
     @Override
+    public String getPath() {
+        return "";
+    }
+
+    @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         String path = request.getPath();
         int extensionSeparatorIndex = path.lastIndexOf(".");

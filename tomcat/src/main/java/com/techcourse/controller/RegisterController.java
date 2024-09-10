@@ -19,6 +19,12 @@ public class RegisterController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String STATIC_RESOURCE_PATH = "/register.html";
 
+    @Override
+    public String getPath() {
+        return "/register";
+    }
+
+    @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));
         response.setStatus(HttpStatusCode.OK)
@@ -26,6 +32,7 @@ public class RegisterController extends AbstractController {
                 .setBody(StaticResourceManager.read(STATIC_RESOURCE_PATH));
     }
 
+    @Override
     public void doPost(HttpRequest httpRequest, HttpResponse response) {
         Map<String, String> body = Arrays.stream(httpRequest.getBody().split("&"))
                 .map(s -> s.split("="))

@@ -58,10 +58,10 @@ public class HttpResponse {
 
     public String toHttpMessage() {
         StringJoiner joiner = new StringJoiner(Constants.CRLF);
-        joiner.add(responseLine.toResponseString());
-        joiner.add(headers.toString());
-        joiner.add("");
-        joiner.add(new String(body.getBody()));
+        joiner.add(responseLine.toResponseString())
+                .add(headers.toString())
+                .add("")
+                .add(new String(body.getBody()));
         return joiner.toString();
     }
 

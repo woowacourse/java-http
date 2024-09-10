@@ -21,9 +21,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final SessionManager sessionManager = new SessionManager();
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -48,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRequest(HttpRequest request, HttpResponse response) {
-        Controller controller = RequestMapping.getController(request);
+        Controller controller = requestMapping.getController(request);
         controller.service(request, response);
     }
 

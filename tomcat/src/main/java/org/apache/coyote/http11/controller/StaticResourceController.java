@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.controller;
 
+import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 
@@ -18,7 +19,8 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public HttpResponse process(String uri) {
+    public HttpResponse process(HttpRequest request) {
+        String uri = request.getUri();
         if (EMPTY_URI.equals(uri)) {
             return HttpResponse.of(DEFAULT_URI, HttpStatusCode.OK);
         }

@@ -4,14 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Headers {
+public class RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
 
-    private final Map<String, String> headers;
+    private final Map<String, String> requestHeaders;
 
-    public Headers(List<String> headers) {
-        this.headers = toMap(headers);
+    public RequestHeaders(List<String> headers) {
+        this.requestHeaders = toMap(headers);
     }
 
     private Map<String, String> toMap(List<String> lines) {
@@ -26,7 +26,7 @@ public class Headers {
     }
 
     public int getContentLength() {
-        String contentLength = headers.get("Content-Length");
+        String contentLength = requestHeaders.get("Content-Length");
         if (contentLength == null) {
             return 0;
         }

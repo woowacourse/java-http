@@ -2,6 +2,7 @@ package org.apache.coyote.http11.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 import org.slf4j.Logger;
@@ -21,7 +22,8 @@ public class LoginController implements Controller {
     private static final String PARAMETER_KEY_OF_PASSWORD = "password";
 
     @Override
-    public HttpResponse process(String uri) {
+    public HttpResponse process(HttpRequest request) {
+        String uri = request.getUri();
         int index = uri.indexOf(QUERY_STRING_DELIMITER);
         if (index == -1) {
             return HttpResponse.of(uri + EXTENSION_OF_HTML, HttpStatusCode.OK);

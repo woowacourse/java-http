@@ -29,6 +29,17 @@ class HttpRequestTest {
     }
 
     @Test
+    @DisplayName("빈 Request Body를 처리한다.")
+    void createHttpRequestEmptyRequestBody() throws IOException {
+        RequestLine requestLine = new RequestLine("POST /index.html HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
+        RequestBody requestBody = new RequestBody("");
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, requestBody);
+
+        assertThat(httpRequest.getParameter("name")).isNull();  // 빈 본문에서 값 없음
+    }
+
+    @Test
     @DisplayName("GET 메서드일 경우 RequestLine 에서 QueryParameter 를 반환한다.")
     void getQueryParameter() throws IOException {
         RequestLine requestLine = new RequestLine("GET /index.html?name=techcourse&age=27 HTTP/1.1");
@@ -55,6 +66,4 @@ class HttpRequestTest {
                 () -> assertThat(httpRequest.getParameter("age")).isEqualTo("27")
         );
     }
-
-
 }

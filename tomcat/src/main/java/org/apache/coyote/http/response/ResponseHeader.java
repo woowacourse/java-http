@@ -5,6 +5,10 @@ import org.apache.coyote.http.MimeType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.apache.coyote.util.Constants.CRLF;
+import static org.apache.coyote.util.Constants.SPACE;
 
 public class ResponseHeader extends Header {
 
@@ -41,5 +45,11 @@ public class ResponseHeader extends Header {
         headers.put(CONTENT_TYPE, MimeType.HTML.getContentType());
         headers.put(CONTENT_LENGTH, String.valueOf(length));
         return new ResponseHeader(headers);
+    }
+
+    public String toResponse() {
+        return headers.entrySet().stream()
+                .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE)
+                .collect(Collectors.joining(CRLF));
     }
 }

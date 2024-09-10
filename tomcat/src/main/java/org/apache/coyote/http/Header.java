@@ -5,16 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.apache.coyote.util.Constants.CRLF;
-import static org.apache.coyote.util.Constants.SPACE;
-
 public abstract class Header {
 
     public static final String HEADER_SEPARATOR = ":";
     public static final String HEADER_DELIMITER = ": ";
     protected static final String CONTENT_LENGTH = "Content-Length";
 
-    private final Map<String, String> headers;
+    protected final Map<String, String> headers;
 
     protected Header(List<String> splitHeaders) {
         this(splitHeaders.stream()
@@ -44,11 +41,5 @@ public abstract class Header {
 
     public void setHeader(String key, String value) {
         headers.put(key, value);
-    }
-
-    public String toResponse() {
-        return headers.entrySet().stream()
-                .map(entry -> entry.getKey() + HEADER_DELIMITER + entry.getValue() + SPACE)
-                .collect(Collectors.joining(CRLF));
     }
 }

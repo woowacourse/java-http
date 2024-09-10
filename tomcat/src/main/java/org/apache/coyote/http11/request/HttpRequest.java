@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.coyote.http11.HttpHeaders;
+
 public class HttpRequest {
     private static final String METHOD = "Method";
     private static final String URI = "URI";
@@ -69,7 +71,7 @@ public class HttpRequest {
     public RequestBody extractRequestBody(BufferedReader bufferedReader, HttpHeaders headers) throws IOException {
         StringBuilder body = new StringBuilder();
 
-        int contentLength = 0;
+        int contentLength;
         if (headers.haveContentLength() && (contentLength = headers.getContentLength()) > 0) {
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);

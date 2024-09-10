@@ -1,30 +1,26 @@
 package org.apache.coyote.http11.response;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
 
 public class HttpResponse {
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String SET_COOKIE = "Set-Cookie";
     private static final String HTTP11 = "HTTP/1.1";
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String LOCATION = "Location";
     private static final String BLANK_DELIMITER = " ";
+    private static final String HEADER_DELIMITER = ": ";
 
     private String version;
     private HttpStatus status;
-    private Map<String, String> headers;
+    private HttpHeaders headers;
     private ResponseBody body;
 
     public HttpResponse() {
         this.version = HTTP11;
-        this.headers = new HashMap<>();
+        this.headers = new HttpHeaders();
     }
 
     public void setStatus(HttpStatus status) {
@@ -32,23 +28,19 @@ public class HttpResponse {
     }
 
     public void setCookie(String jSessionId) {
-        addHeader(SET_COOKIE, jSessionId);
+        headers.setCookie(jSessionId);
     }
 
     public void setLocation(String location) {
-        addHeader(LOCATION, location);
-    }
-
-    public void addHeader(String key, String value) {
-        this.headers.put(key, value);
+        headers.setLocation(location);
     }
 
     public void setContentType(MimeType type) {
-        addHeader(CONTENT_TYPE, type.getType());
+        headers.setContentType(type.getType());
     }
 
     public void setBody(ResponseBody body) {
-        addHeader(CONTENT_LENGTH, String.valueOf(body.getLength()));
+        headers.setContentLength(body.getLength());
         this.body = body;
     }
 
@@ -56,8 +48,8 @@ public class HttpResponse {
     public String toString() {
         StringJoiner joiner = new StringJoiner("\r\n");
         joiner.add(version + BLANK_DELIMITER + status.getMessage() + BLANK_DELIMITER);
-        for (Entry<String, String> entry : headers.entrySet()) {
-            joiner.add(entry.getKey() + ": " + entry.getValue() + BLANK_DELIMITER);
+        for (Entry<String, String> entry : headers.getHeaders().entrySet()) {
+            joiner.add(entry.getKey() + HEADER_DELIMITER + entry.getValue() + BLANK_DELIMITER);
         }
         if (Objects.nonNull(body)) {
             joiner.add("");

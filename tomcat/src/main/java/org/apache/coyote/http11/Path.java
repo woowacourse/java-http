@@ -8,16 +8,18 @@ import java.util.Objects;
 
 public class Path {
 
-    private final String value;
-    private final URL url;
-    private final String extension;
+    private static final String STATIC_FILE_PREFIX = "static";
+    private static final String STATIC_FILE_SUFFIX = ".html";
+
+    private final String requestPath;
+    private final URL absolutePath;
     private final Map<String, String> parameters;
 
     public Path(final String target) {
-        this.value = target;
-        if (target.contains("?")) {
-            this.url = getClass().getClassLoader()
-                    .getResource("static" + target.substring(0, target.indexOf("?")) + ".html");
+        if (target.contains("?")) { //TODO 객체 분리?
+            this.requestPath = target.substring(0, target.indexOf("?"));
+            this.absolutePath = getClass().getClassLoader()
+                    .getResource(STATIC_FILE_PREFIX + target.substring(0, target.indexOf("?")) + STATIC_FILE_SUFFIX);
             this.parameters = new HashMap<>();
             final var query = target.substring(target.indexOf('?') + 1);
             final var queryParams = query.split("&");
@@ -25,34 +27,29 @@ public class Path {
                 final var pair = param.split("=");
                 this.parameters.put(pair[0], pair[1]);
             }
-            this.extension = "html";
             return;
         }
         if (target.contains(".")) {
-            this.url = getClass().getClassLoader().getResource("static" + target);
-            this.extension = target.substring(target.lastIndexOf(".") + 1);
-            this.parameters = new HashMap<>();
+            this.requestPath = target;
+            this.absolutePath = getClass().getClassLoader().getResource(STATIC_FILE_PREFIX + target);
+            this.parameters = Map.of();
             return;
         }
-        this.url = getClass().getClassLoader().getResource("static" + target + ".html");
-        this.extension = "html";
-        this.parameters = new HashMap<>();
+        this.requestPath = target;
+        this.absolutePath = getClass().getClassLoader().getResource(STATIC_FILE_PREFIX + target + STATIC_FILE_SUFFIX);
+        this.parameters = Map.of();
     }
 
     public boolean isEqualPath(final String target) {
-        return Objects.equals(value, target);
+        return Objects.equals(requestPath, target);
     }
 
-    public String getContentType() { //TODO extension이 여기에 있을 필요 무
-        return extension;
+    public String getRequestPath() {
+        return requestPath;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public URL getUrl() {
-        return url;
+    public URL getAbsolutePath() {
+        return absolutePath;
     }
 
     public Map<String, String> getParameters() {
@@ -62,8 +59,7 @@ public class Path {
     @Override
     public String toString() {
         return "Path{" +
-               "value=" + value +
-               ", extension='" + extension + '\'' +
+               "value=" + requestPath +
                ", queryString=" + parameters +
                '}';
     }

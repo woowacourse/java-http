@@ -8,21 +8,20 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PathTest {
 
     @ParameterizedTest
     @DisplayName("확장자 있는 상태로 요청이 오면 경로를 반환한다.")
-    @CsvSource(value = {"/css/styles.css|css", "/index.html|html"}, delimiter = '|')
-    void requestUrlWithExtension(final String path, final String expected) {
+    @ValueSource(strings = {"/css/styles.css", "/index.html", "/favicon.ico"})
+    void requestUrlWithExtension(final String path) {
         //given
         final var request = new Path(path);
 
         //when && then
         assertAll(
-                () -> assertThat(request.getUrl().getPath()).endsWith(path),
-                () -> assertThat(request.getContentType()).isEqualTo(expected),
+                () -> assertThat(request.getAbsolutePath().getPath()).endsWith(path),
                 () -> assertThat(request.getParameters()).isEmpty()
         );
     }

@@ -29,7 +29,7 @@ public class RequestLine {
     public String toString() {
         return "RequestLine{" +
                "httpMethod=" + httpMethod +
-               ", path=" + path.getValue() +
+               ", path=" + path.getRequestPath() +
                '}';
     }
 }

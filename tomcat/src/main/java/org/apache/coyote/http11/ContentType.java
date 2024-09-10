@@ -11,7 +11,7 @@ public enum ContentType {
     TEXT_CSS("text", "css"),
     TEXT_JS("text", "js"),
     APPLICATION_JSON("application", "json"),
-    IMAGE_XICON("image", "ico");
+    IMAGE_ICON("image", "ico");
 
     private static final Map<String, ContentType> SUIT_CASE = Arrays.stream(ContentType.values())
             .collect(Collectors.toMap(ContentType::getValue, Function.identity()));
@@ -24,11 +24,13 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static ContentType from(final String target) {
-        if (SUIT_CASE.containsKey(target)) {
-            return SUIT_CASE.get(target);
+    public static ContentType from(final Path path) {
+        final var absolutePath = path.getAbsolutePath().getPath();
+        final var extension = absolutePath.substring(absolutePath.lastIndexOf(".") + 1);
+        if (SUIT_CASE.containsKey(extension)) {
+            return SUIT_CASE.get(extension);
         }
-        throw new IllegalArgumentException(target + " 는 지원하지 않는 형식입니다.");
+        throw new IllegalArgumentException(extension + " 는 지원하지 않는 형식입니다.");
     }
 
     public String getResponseText() {

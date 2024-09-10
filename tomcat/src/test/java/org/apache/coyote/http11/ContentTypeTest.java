@@ -2,11 +2,14 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.stream.Stream;
+
 import org.apache.coyote.http11.ContentType.Charset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ContentTypeTest {
 
@@ -20,11 +23,18 @@ class ContentTypeTest {
 
     @ParameterizedTest
     @DisplayName("콘텐츠 타입 변환 확인")
-    @EnumSource(ContentType.class)
-    void from(final ContentType contentType) {
-        //given
-        final ContentType find = ContentType.from(contentType.getValue());
+    @MethodSource("fromParameter")
+    void from(final Path path, final ContentType expected) {
+        final ContentType find = ContentType.from(path);
 
-        assertThat(find).isEqualTo(contentType);
+        assertThat(find).isEqualTo(expected);
+    }
+
+    static Stream<Arguments> fromParameter() {
+        return Stream.of(
+                Arguments.of(new Path("/index.html"), ContentType.TEXT_HTML),
+                Arguments.of(new Path("/login"), ContentType.TEXT_HTML),
+                Arguments.of(new Path("/favicon.ico"), ContentType.IMAGE_ICON)
+        );
     }
 }

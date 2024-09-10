@@ -17,4 +17,24 @@ class QueryStringParserTest {
         assertThat(queryString)
                 .containsExactlyInAnyOrderEntriesOf(Map.of("account", List.of("gugu"), "password", List.of("password")));
     }
+
+    @DisplayName("쿼리 문자 형식에 맞는지 확인한다. - True")
+    @Test
+    void validateQueryStringTrue() {
+        String value = "name=John&age=30&city=NewYork";
+
+        boolean isQueryString = QueryStringParser.isQueryString(value);
+
+        assertThat(isQueryString).isTrue();
+    }
+
+    @DisplayName("쿼리 문자 형식에 맞는지 확인한다. - True")
+    @Test
+    void validateQueryStringFalse() {
+        String value = "name=John&&age=30&city=NewYork";
+
+        boolean isQueryString = QueryStringParser.isQueryString(value);
+
+        assertThat(isQueryString).isFalse();
+    }
 }

@@ -30,10 +30,19 @@ public class Http11Request implements HttpRequest {
 
     private final Http11RequestStartLine startLine;
     private final Http11RequestHeader headers;
-    private final String body;
+    private final HttpRequestBody body;
     private final Session session;
 
-    private Http11Request(Http11RequestStartLine startLine, Http11RequestHeader headers, String body, Session session) {
+    private Http11Request(Http11RequestStartLine startLine, Http11RequestHeader headers, Session session) {
+        this(startLine, headers, null, session);
+    }
+
+    private Http11Request(
+            Http11RequestStartLine startLine,
+            Http11RequestHeader headers,
+            HttpRequestBody body,
+            Session session
+    ) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -48,9 +57,10 @@ public class Http11Request implements HttpRequest {
         Session session = getSession(httpHeaders);
 
         if (startLine.getMethod().hasBody()) {
-            return new Http11Request(startLine, httpHeaders, createBody(bufferedReader, httpHeaders.getContentLength()), session);
+            HttpRequestBody body = HttpRequestBody.create(createBody(bufferedReader, httpHeaders.getContentLength()));
+            return new Http11Request(startLine, httpHeaders, body, session);
         }
-        return new Http11Request(startLine, httpHeaders, null, session);
+        return new Http11Request(startLine, httpHeaders, session);
     }
 
     private static Session getSession(Http11RequestHeader httpHeaders) {
@@ -72,8 +82,10 @@ public class Http11Request implements HttpRequest {
                 .takeWhile(line -> !line.isBlank())
                 .map(line -> line.split(HEADER_KEY_VALUE_DELIMITER))
                 .filter(parts -> parts.length == HEADER_INDEX_SIZE)
-                .collect(groupingBy(parts -> parts[HEADER_KEY_INDEX].trim(),
-                        mapping(parts -> parts[HEADER_VALUE_INDEX].trim(), toList())));
+                .collect(groupingBy(
+                        parts -> parts[HEADER_KEY_INDEX].trim(),
+                        mapping(parts -> parts[HEADER_VALUE_INDEX].trim(), toList())
+                ));
     }
 
     private static String createBody(BufferedReader bufferedReader, int contentLength) throws IOException {
@@ -104,13 +116,23 @@ public class Http11Request implements HttpRequest {
     }
 
     @Override
-    public String getBody() {
-        return body;
+    public String getBodyValue() {
+        return body.getValue();
     }
 
     @Override
     public Session getSession() {
         return session;
+    }
+
+    @Override
+    public String getQueryParamFromUrl(String param) {
+        return startLine.getRequestTarget().getParam(param);
+    }
+
+    @Override
+    public String getQueryParamFromBody(String param) {
+        return body.getQueryParam(param);
     }
 
     @Override

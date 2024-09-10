@@ -15,7 +15,11 @@ public interface HttpRequest {
 
     Http11RequestHeader getHeaders();
 
-    String getBody();
+    String getBodyValue();
 
     Session getSession();
+
+    String getQueryParamFromUrl(String param);
+
+    String getQueryParamFromBody(String param);
 }

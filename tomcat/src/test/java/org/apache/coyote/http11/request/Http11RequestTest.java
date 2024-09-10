@@ -50,7 +50,7 @@ class Http11RequestTest {
         );
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
         Http11Request http11Request = Http11Request.from(inputStream);
-        String body = http11Request.getBody();
+        String body = http11Request.getBodyValue();
 
         assertThat(body).isEqualTo("account=gugu&password=password");
     }

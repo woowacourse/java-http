@@ -2,14 +2,11 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.apache.controller.AbstractController;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.session.Session;
-import org.apache.util.QueryStringParser;
 
 public class LoginController extends AbstractController {
 
@@ -19,10 +16,8 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        String body = request.getBody();
-        Map<String, List<String>> queryStrings = QueryStringParser.parseQueryString(body);
-        String account = queryStrings.get("account").getFirst();
-        String password = queryStrings.get("password").getFirst();
+        String account = request.getQueryParamFromBody("account");
+        String password = request.getQueryParamFromBody("password");
 
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         if (optionalUser.isPresent()) {

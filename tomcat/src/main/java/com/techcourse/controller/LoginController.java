@@ -22,12 +22,6 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
 
-    private final InMemoryUserRepository userRepository;
-
-    public LoginController() {
-        userRepository = new InMemoryUserRepository();
-    }
-
     @Override
     public ForwardResult execute(HttpRequest request, Manager manager) {
         String body = request.getBody();
@@ -36,7 +30,7 @@ public class LoginController extends AbstractController {
         String account = parsedBody.get(ACCOUNT_KEY);
         String password = parsedBody.get(PASSWORD_KEY);
 
-        Optional<User> optionalUser = userRepository.findByAccount(account);
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
         ResponseHeader header = new ResponseHeader();
 
         if (optionalUser.isPresent() && optionalUser.get().checkPassword(password)) {

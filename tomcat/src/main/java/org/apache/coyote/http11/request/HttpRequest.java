@@ -6,10 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.Session;
-import org.apache.catalina.manager.SessionManager;
-
 public class HttpRequest {
     private static final String METHOD = "Method";
     private static final String URI = "URI";
@@ -36,25 +32,22 @@ public class HttpRequest {
     private Map<String, String> extractRequestLine(BufferedReader bufferedReader) throws IOException {
         Map<String, String> requestMap = new HashMap<>();
         String line = bufferedReader.readLine();
-        String[] requestLine = line.split(" ");
-        if (requestLine.length >= 3) {
-            requestMap.put(METHOD, requestLine[0]);
-            requestMap.put(URI, requestLine[1]);
-            requestMap.put(VERSION, requestLine[2]);
+        if (Objects.nonNull(line)) {
+            String[] requestLine = line.split(" ");
+            if (requestLine.length >= 3) {
+                requestMap.put(METHOD, requestLine[0]);
+                requestMap.put(URI, requestLine[1]);
+                requestMap.put(VERSION, requestLine[2]);
+            }
         }
         return requestMap;
     }
 
     private Map<String, String> extractHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headerMap = new HashMap<>();
-        StringBuilder header = new StringBuilder();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            header.append(line).append(System.lineSeparator());
-        }
-        String[] headerLines = header.toString().split(System.lineSeparator());
-        for (String headerLine : headerLines) {
-            String[] headerField = headerLine.split(":", 2);
+            String[] headerField = line.split(":", 2);
             if (headerField.length == 2) {
                 headerMap.put(headerField[0].trim(), headerField[1].trim());
             }
@@ -66,8 +59,7 @@ public class HttpRequest {
         StringBuilder body = new StringBuilder();
 
         int contentLength = 0;
-        if (headers.containsKey(CONTENT_LENGTH)) {
-            contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH));
+        if (headers.containsKey(CONTENT_LENGTH) && (contentLength = Integer.parseInt(headers.get(CONTENT_LENGTH))) > 0) {
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             body.append(buffer);

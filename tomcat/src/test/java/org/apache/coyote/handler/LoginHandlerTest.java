@@ -14,20 +14,10 @@ import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.http.header.HttpHeader;
 import org.apache.http.request.HttpRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class LoginHandlerTest {
-
-    private LoginHandler loginHandler;
-    private SessionManager sessionManager;
-
-    @BeforeEach
-    void setUp() {
-        loginHandler = LoginHandler.getInstance();
-        sessionManager = SessionManager.getInstance();
-    }
 
     @Test
     @DisplayName("GET 요청 처리: 세션이 없는 경우 로그인 페이지를 반환")
@@ -37,20 +27,20 @@ class LoginHandlerTest {
 
         final HttpRequest request = new HttpRequest("GET", "/login", "HTTP/1.1", null, null);
 
-        assertTrue(loginHandler.handle(request).contains(fileContent));
+        assertTrue(LoginHandler.getInstance().handle(request).contains(fileContent));
     }
 
     @Test
     @DisplayName("GET 요청 처리: 세션이 있는 경우 index 페이지로 리다이렉트")
     void handle_GetRequest_With_ValidSession() {
         final String sessionId = UUID.randomUUID().toString();
-        sessionManager.add(new Session(sessionId));
+        SessionManager.getInstance().add(new Session(sessionId));
         final HttpRequest request = new HttpRequest("GET", "/login", "HTTP/1.1",
                 new HttpHeader[]{new HttpHeader("Cookie", "JSESSIONID=" + sessionId)}, null);
 
-        assertTrue(loginHandler.handle(request).contains("302 FOUND"));
+        assertTrue(LoginHandler.getInstance().handle(request).contains("302 Found"));
 
-        sessionManager.remove(new Session(sessionId));
+        SessionManager.getInstance().remove(new Session(sessionId));
     }
 
     @Test
@@ -59,10 +49,10 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
                 "account=gugu&password=password");
 
-        final String result = loginHandler.handle(request);
+        final String result = LoginHandler.getInstance().handle(request);
 
         assertAll(
-                () -> assertTrue(result.contains("302 FOUND")),
+                () -> assertTrue(result.contains("302 Found")),
                 () -> assertTrue(result.contains("http://localhost:8080/index.html")),
                 () -> assertTrue(result.contains("Set-Cookie: JSESSIONID="))
         );
@@ -79,7 +69,7 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
                 "account=gugu&password=wrongpassword");
 
-        assertThat(loginHandler.handle(request)).contains(fileContent);
+        assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
     }
 
     @Test
@@ -91,7 +81,7 @@ class LoginHandlerTest {
         final HttpRequest request = new HttpRequest("POST", "/login", "HTTP/1.1", null,
                 "account=nonexistent&password=anypassword");
 
-        assertThat(loginHandler.handle(request)).contains(fileContent);
+        assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
     }
 
     @Test
@@ -102,6 +92,6 @@ class LoginHandlerTest {
 
         final HttpRequest request = new HttpRequest("PUT", "/login", "HTTP/1.1", null, null);
 
-        assertThat(loginHandler.handle(request)).contains(fileContent);
+        assertThat(LoginHandler.getInstance().handle(request)).contains(fileContent);
     }
 }

@@ -9,18 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.http.request.HttpRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RegisterHandlerTest {
-
-    private RegisterHandler registerHandler;
-
-    @BeforeEach
-    void setUp() {
-        registerHandler = RegisterHandler.getInstance();
-    }
 
     @Test
     @DisplayName("GET 요청 처리: 회원가입 페이지 반환")
@@ -30,7 +22,7 @@ class RegisterHandlerTest {
 
         final HttpRequest request = new HttpRequest("GET", "/register", "HTTP/1.1", null, null);
 
-        assertThat(registerHandler.handle(request)).contains(expectedResponseBody);
+        assertThat(RegisterHandler.getInstance().handle(request)).contains(expectedResponseBody);
     }
 
     @Test
@@ -39,10 +31,10 @@ class RegisterHandlerTest {
         final HttpRequest request = new HttpRequest("POST", "/register", "HTTP/1.1", null,
                 "account=newuser&email=newuser@example.com&password=password123");
 
-        final String result = registerHandler.handle(request);
+        final String result = RegisterHandler.getInstance().handle(request);
 
         assertAll(
-                () -> assertThat(result).contains("302 FOUND"),
+                () -> assertThat(result).contains("302 Found"),
                 () -> assertThat(result).contains("http://localhost:8080/index.html")
         );
     }

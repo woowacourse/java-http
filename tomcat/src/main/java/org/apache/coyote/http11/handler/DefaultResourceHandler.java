@@ -16,11 +16,8 @@ import com.techcourse.model.User;
 
 public class DefaultResourceHandler implements RequestHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultResourceHandler.class);
-
     @Override
     public String handle(Request request) throws IOException {
-        log.info("request : {}", request);
         if (request.isStaticResourceRequest()) {
             return Response.builder()
                     .versionOf(request.getHttpVersion())
@@ -82,7 +79,6 @@ public class DefaultResourceHandler implements RequestHandler {
                     .found("/index.html")
                     .toHttpMessage();
         }
-        log.info("find resource");
 
         return Response.builder()
                 .versionOf(request.getHttpVersion())

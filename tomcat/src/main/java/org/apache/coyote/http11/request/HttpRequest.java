@@ -90,12 +90,12 @@ public class HttpRequest {
 
     public String getContentType() {
         if (path.endsWith(".css")) {
-            return "text/css;charset=utf-8";
+            return "text/css";
         }
         if (path.endsWith(".js")) {
             return "text/javascript";
         }
-        return "text/html";
+        return "text/html;charset=utf-8";
     }
 
     public String getHttpMethod() {

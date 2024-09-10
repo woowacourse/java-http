@@ -10,10 +10,11 @@ public class RequestMapping {
 
     static {
         requestMapper.put("/login", new LoginController());
+        requestMapper.put("/register", new RegisterController());
     }
 
     public Controller getController(HttpRequest request) {
-        if(requestMapper.containsKey(request.getPath())) {
+        if (requestMapper.containsKey(request.getPath())) {
             return requestMapper.get(request.getPath());
         }
         return new StaticResourceController();

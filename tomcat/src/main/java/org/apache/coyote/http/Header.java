@@ -36,13 +36,6 @@ public abstract class Header {
         return headers.containsKey(header);
     }
 
-    public String getValue(String header) {
-        if (!headers.containsKey(header)) {
-            throw new IllegalArgumentException("Header " + header + " not found");
-        }
-        return headers.get(header);
-    }
-
     public void setHeader(String key, String value) {
         headers.put(key, value);
     }

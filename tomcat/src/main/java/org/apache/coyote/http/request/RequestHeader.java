@@ -29,4 +29,11 @@ public class RequestHeader extends Header {
         }
         return new HttpCookie();
     }
+
+    private String getValue(String header) {
+        if (!headers.containsKey(header)) {
+            throw new IllegalArgumentException("Header " + header + " not found");
+        }
+        return headers.get(header);
+    }
 }

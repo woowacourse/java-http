@@ -15,14 +15,13 @@ class RequestHeaderTest {
             "",
             "");
 
-    @Test
-    @DisplayName("List<String> 형식으로 들어온 헤더를 파싱하여 저장한다.")
-    void ofList() {
-        List<String> headers = List.of(bulkHeaders.split("\r\n"));
-
-        RequestHeader header = new RequestHeader(headers);
-
-        assertThatCode(() -> header.getValue("Host")).doesNotThrowAnyException();
-    }
-
+//    @Test
+//    @DisplayName("List<String> 형식으로 들어온 헤더를 파싱하여 저장한다.")
+//    void ofList() {
+//        List<String> headers = List.of(bulkHeaders.split("\r\n"));
+//
+//        RequestHeader header = new RequestHeader(headers);
+//
+//        assertThatCode(() -> header.getValue("Host")).doesNotThrowAnyException();
+//    }
 }

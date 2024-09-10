@@ -3,6 +3,7 @@ package org.apache.coyote.http11.component.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.apache.coyote.http11.component.exception.AuthenticationException;
 import org.apache.coyote.http11.component.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ class LoginHandlerTest {
 
         // when & then
         assertThatThrownBy(() -> loginHandler.handle(request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 
     @Test
@@ -63,6 +64,6 @@ class LoginHandlerTest {
 
         // when & then
         assertThatThrownBy(() -> loginHandler.handle(request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 }

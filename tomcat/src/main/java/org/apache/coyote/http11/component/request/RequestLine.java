@@ -52,4 +52,8 @@ public class RequestLine {
     public String getPath() {
         return uri.getPath();
     }
+
+    public Method getMethod() {
+        return method;
+    }
 }

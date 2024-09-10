@@ -4,16 +4,16 @@ import org.apache.coyote.http11.component.request.HttpRequest;
 import org.apache.coyote.http11.component.resource.StaticResourceFinder;
 import org.apache.coyote.http11.component.response.HttpResponse;
 
-public class StaticResourceHandler implements HttpHandler {
+public class DefaultHandler implements HttpHandler {
 
     private final String resourcePath;
 
-    public StaticResourceHandler(final String resourcePath) {
+    public DefaultHandler(final String resourcePath) {
         this.resourcePath = resourcePath;
     }
 
     @Override
-    public String getUriPath() {
+    public String getPath() {
         return resourcePath;
     }
 

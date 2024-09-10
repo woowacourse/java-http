@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FormUrlEncodeBody implements Body<Map<String, String>> {
+public class FormUrlEncodeBody implements Body {
 
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
@@ -20,8 +20,8 @@ public class FormUrlEncodeBody implements Body<Map<String, String>> {
     }
 
     @Override
-    public Map<String, String> serialize() {
-        return content;
+    public String getContent(final String key) {
+        return content.getOrDefault(key, "");
     }
 
     @Override

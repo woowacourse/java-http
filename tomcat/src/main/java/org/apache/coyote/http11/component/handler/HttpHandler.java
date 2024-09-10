@@ -5,7 +5,7 @@ import org.apache.coyote.http11.component.response.HttpResponse;
 
 public interface HttpHandler {
 
-    String getUriPath();
+    String getPath();
 
     HttpResponse handle(HttpRequest request);
 }

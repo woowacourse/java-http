@@ -11,6 +11,7 @@ public class HandlerMapper {
         registry = new HashMap<>();
         registry.put("/", new HomeHandler("/"));
         registry.put("/login", new LoginHandler("/login"));
+        registry.put("/register", new UserRegistrationHandler("/register"));
     }
 
     private HandlerMapper() {
@@ -22,7 +23,7 @@ public class HandlerMapper {
 
     public static HttpHandler get(final String uriPath) {
         if (!registry.containsKey(uriPath)) {
-            return new StaticResourceHandler(uriPath);
+            return new DefaultHandler(uriPath);
         }
         return registry.get(uriPath);
     }

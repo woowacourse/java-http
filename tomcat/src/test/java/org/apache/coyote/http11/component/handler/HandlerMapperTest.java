@@ -12,10 +12,10 @@ class HandlerMapperTest {
     void map_handler_via_uri_path() {
         // given
         final var loginHandler = new LoginHandler("/login");
-        HandlerMapper.add(loginHandler.getUriPath(), loginHandler);
+        HandlerMapper.add(loginHandler.getPath(), loginHandler);
 
         // when
-        final var httpHandler = HandlerMapper.get(loginHandler.getUriPath());
+        final var httpHandler = HandlerMapper.get(loginHandler.getPath());
 
         // then
         assertThat(httpHandler).isInstanceOf(LoginHandler.class);

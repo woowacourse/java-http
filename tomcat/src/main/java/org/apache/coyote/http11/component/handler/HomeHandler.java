@@ -8,15 +8,15 @@ public class HomeHandler implements HttpHandler {
 
     private static final String HTML_PATH = "index.html";
 
-    private final String uriPath;
+    private final String path;
 
-    public HomeHandler(final String uriPath) {
-        this.uriPath = uriPath;
+    public HomeHandler(final String path) {
+        this.path = path;
     }
 
     @Override
-    public String getUriPath() {
-        return uriPath;
+    public String getPath() {
+        return path;
     }
 
     @Override

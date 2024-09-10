@@ -21,7 +21,7 @@ public class LoginHandler implements HttpHandler {
     }
 
     @Override
-    public String getUriPath() {
+    public String getPath() {
         return path;
     }
 
@@ -30,8 +30,8 @@ public class LoginHandler implements HttpHandler {
         if (request.hasNotQuery()) {
             return StaticResourceFinder.render(LOGIN_HTML);
         }
-        final var identifier = request.getQueryParam(ID_QUERY_NAME);
-        final var password = request.getQueryParam(PASSWORD_QUERY_NAME);
+        final var identifier = request.getQueryValue(ID_QUERY_NAME);
+        final var password = request.getQueryValue(PASSWORD_QUERY_NAME);
         validateUser(identifier, password);
         return StaticResourceFinder.renderRedirect(LOGIN_SUCCESSFUL_REDIRECT_URI);
     }

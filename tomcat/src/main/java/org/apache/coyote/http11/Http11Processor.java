@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.coyote.Processor;
@@ -39,6 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final var plaintext = readLines(bufferedReader);
+
             final HttpResponse response = convert(plaintext);
             outputStream.write(response.getResponseBytes());
             outputStream.flush();
@@ -46,16 +48,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException exception) {
             log.error("[ERROR] : {}", exception.getMessage());
         }
-    }
-
-    private String readLines(final BufferedReader bufferedReader) throws IOException {
-        final var collector = new ArrayList<String>();
-        var line = bufferedReader.readLine();
-        while (!Objects.isNull(line) && !line.isBlank()) {
-            collector.add(line);
-            line = bufferedReader.readLine();
-        }
-        return String.join("\r\n", collector);
     }
 
     private HttpResponse convert(final String plaintext) {
@@ -68,4 +60,32 @@ public class Http11Processor implements Runnable, Processor {
             return handler.handle();
         }
     }
+
+    private String readLines(final BufferedReader bufferedReader) throws IOException {
+        final var collector = new ArrayList<String>();
+        var line = bufferedReader.readLine();
+        var contentLength = 0;
+        while (!Objects.isNull(line) && !line.isBlank()) {
+            collector.add(line);
+            line = bufferedReader.readLine();
+            if (line.startsWith("Content-Length")) {
+                final List<String> content = List.of(line.replaceAll(" ", "").split(":"));
+                contentLength = Integer.parseInt(content.getLast());
+            }
+        }
+        collector.add("");
+        collector.addAll(parseBody(bufferedReader, contentLength));
+
+        return String.join("\r\n", collector);
+    }
+
+    private List<String> parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        if (contentLength > 0) {
+            var buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return List.of(new String(buffer).split("\r\n"));
+        }
+        return List.of();
+    }
+
 }

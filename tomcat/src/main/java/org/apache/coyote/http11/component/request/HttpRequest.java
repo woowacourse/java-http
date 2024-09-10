@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.coyote.http11.component.common.Method;
 import org.apache.coyote.http11.component.common.body.Body;
 import org.apache.coyote.http11.component.common.body.BodyMapper;
+import org.apache.coyote.http11.component.exception.NotFoundException;
 
 
 public class HttpRequest {
@@ -13,7 +15,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final Body<?> body;
+    private final Body body;
 
     public HttpRequest(final String plaintext) {
         Objects.requireNonNull(plaintext);
@@ -37,14 +39,14 @@ public class HttpRequest {
 
     private String extractBody(final List<String> lines) {
         final var bodyTexts = new ArrayList<String>();
-        final int clrfIndex = lines.indexOf("");
+        final var clrfIndex = lines.indexOf("");
         for (var i = clrfIndex + 1; i < lines.size(); i++) {
             bodyTexts.add(lines.get(i));
         }
         return String.join(LINE_DELIMITER, bodyTexts).replaceAll(" ", "");
     }
 
-    public String getQueryParam(final String key) {
+    public String getQueryValue(final String key) {
         return requestLine.getQueryValue(key);
     }
 
@@ -54,5 +56,17 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public boolean isSameMethod(final Method method) {
+        return requestLine.getMethod() == method;
+    }
+
+    public String getBodyContent(final String key) {
+        final var content = body.getContent(key);
+        if (content.isBlank()) {
+            throw new NotFoundException("바디 값 찾을 수 없음");
+        }
+        return content;
     }
 }

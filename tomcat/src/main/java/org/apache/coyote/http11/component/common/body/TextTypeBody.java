@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.component.common.body;
 
-public class TextTypeBody implements Body<String> {
+public class TextTypeBody implements Body {
 
     private final String content;
 
@@ -9,8 +9,8 @@ public class TextTypeBody implements Body<String> {
     }
 
     @Override
-    public String serialize() {
-        return content;
+    public String getContent(final String key) {
+        return "";
     }
 
     @Override

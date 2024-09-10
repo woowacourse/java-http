@@ -5,15 +5,15 @@ import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = SessionManager.getInstance();
 
     private final Socket connection;
 
@@ -37,189 +37,187 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
+    public void process(Socket connection) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequestParser.parse(inputStream);
-
-            if (request.isGetMethod() && resourceExists(request)) {
-                URL resource = getClass().getResource("/static" + request.getPath());
-                Path path = Path.of(resource.toURI());
-                serveFile(path, outputStream);
-            }
-
-            if (request.isGetMethod() && request.getPath().equals("/")) {
-                URL resource = getClass().getResource("/static/index.html");
-                Path path = Path.of(resource.toURI());
-                serveFile(path, outputStream);
-            }
-            if (request.isGetMethod() && request.getPath().equals("/register")) {
-                URL resource = getClass().getResource("/static/register.html");
-                Path path = Path.of(resource.toURI());
-                serveFile(path, outputStream);
-            }
-            if (request.isGetMethod() && request.getPath().startsWith("/login")) {
-                boolean hasJsessionId = request.getHeaders().findInCookie("JSESSIONID");
-
-                if (request.getPath().contains("?")) {
-                    int index = request.getPath().indexOf("?");
-                    String queryString = request.getPath().substring(index + 1);
-
-                    index = queryString.indexOf("&");
-                    String account = queryString.substring("account=".length(), index);
-                    String password = queryString.substring(index + 1 + "password=".length());
-
-                    InMemoryUserRepository.findByAccount(account)
-                            .ifPresent(user -> {
-                                if (user.checkPassword(password)) {
-                                    log.info("user : {}", InMemoryUserRepository.findByAccount(account).get());
-                                }
-                            });
-                }
-
-                if (hasJsessionId) {
-                    String jsessionId = request.getHeaders().findJsessionId();
-                    Session session = sessionManager.findSession(jsessionId);
-                    if (session != null) {
-                        URL resource = getClass().getResource("/static/index.html");
-                        Path path = Path.of(resource.toURI());
-                        serveFile(path, outputStream, "index.html");
-                        return;
-                    }
-                }
-                URL resource = getClass().getResource("/static/login.html");
-                Path path = Path.of(resource.toURI());
-                serveFile(path, outputStream);
-            }
-
-            if (request.isPostMethod() && request.getPath().equals("/register")) {
-                String body = request.getBody();
-
-                String[] bodyParts = body.split("&");
-                String account = bodyParts[0].substring("account=".length());
-                String email = bodyParts[1].substring("email=".length());
-                String password = bodyParts[2].substring("password=".length());
-
-                InMemoryUserRepository.save(new User(account, email, password));
-
-                URL fakeResource = getClass().getResource("/static/index.html");
-                Path path = Path.of(fakeResource.toURI());
-                serveFile(path, outputStream, "index.html");
-            }
-            if (request.isPostMethod() && request.getPath().equals("/login")) {
-                String[] bodyParts = request.getBody().split("&");
-                String account = bodyParts[0].substring("account=".length());
-                String password = bodyParts[1].substring("password=".length());
-
-                boolean isValidPassword = false;
-                Optional<User> savedUser = InMemoryUserRepository.findByAccount(account);
-                if (savedUser.isPresent()) {
-                    isValidPassword = savedUser.get().checkPassword(password);
-                }
-
-                boolean jsessionid = request.getHeaders().findInCookie("JSESSIONID");
-                String setCookie = null;
-                if (!jsessionid) {
-                    UUID idValue = UUID.randomUUID();
-                    Session session = new Session(idValue.toString());
-                    session.setAttribute("user", savedUser.get());
-                    sessionManager.add(session);
-
-                    Session session1 = sessionManager.findSession(session.getId());
-                    System.out.println("session1 = " + session1);
-                    setCookie = "Set-Cookie: JSESSIONID=" + idValue;
-                }
-
-                URL resource = getClass().getResource("/static/index.html");
-                Path path = Path.of(resource.toURI());
-                if (isValidPassword) {
-                    serveFile(path, outputStream, "index.html", setCookie);
-                } else {
-                    serveFile(path, outputStream, "401.html", setCookie);
-                }
-            }
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void serveFile(Path path, OutputStream outputStream) {
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-            List<String> rawBody = bufferedReader.lines().toList();
-            String body = rawBody.stream()
-                    .collect(Collectors.joining("\n")) + "\n";
-
-            String contentType = Files.probeContentType(path);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "",
-                    body);
-
-            outputStream.write(response.getBytes());
+            HttpResponse response = handleRequest(request);
+            outputStream.write(response.build().getBytes());
             outputStream.flush();
-        } catch (Exception e) {
+        } catch (IOException | UncheckedServletException exception) {
+            log.error(exception.getMessage(), exception);
         }
     }
 
-    private void serveFile(Path path, OutputStream outputStream, String locationPath) {
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-            List<String> rawBody = bufferedReader.lines().toList();
-            String body = rawBody.stream()
-                    .collect(Collectors.joining("\n")) + "\n";
-
-            String contentType = Files.probeContentType(path);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 302 FOUND ",
-                    "Location: http://localhost:8080/" + locationPath,
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "",
-                    body);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (Exception e) {
+    private HttpResponse handleRequest(HttpRequest request) {
+        if (request.isGetMethod()) {
+            return handleGetRequest(request);
+        } else if (request.isPostMethod()) {
+            return handlePostRequest(request);
         }
+        throw new IllegalArgumentException("처리할 수 없는 요청입니다.");
     }
 
-    private void serveFile(Path path, OutputStream outputStream, String locationPath, String setCookie)
-            throws IOException {
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path)) {
-            List<String> rawBody = bufferedReader.lines().toList();
-            String body = rawBody.stream()
-                    .collect(Collectors.joining("\n")) + "\n";
-
-            String contentType = Files.probeContentType(path);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 302 FOUND ",
-                    (setCookie != null ? setCookie : ""),
-                    "Location: http://localhost:8080/" + locationPath,
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + body.getBytes().length + " ",
-                    "",
-                    body);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (Exception e) {
+    private HttpResponse handleGetRequest(HttpRequest request) {
+        if (hasPath(request)) {
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
+            String body = buildResponseBody(request.getPathWithoutQueryString());
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue(request.getPathWithoutQueryString()));
+            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            return new HttpResponse(statusLine, headers, body);
         }
+
+        if (request.getPath().equals("/")) {
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
+            String body = buildResponseBody("/index.html");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            return new HttpResponse(statusLine, headers, body);
+        }
+        if (request.getPath().equals("/register")) {
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
+            String body = buildResponseBody("/register.html");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/register.html"));
+            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            return new HttpResponse(statusLine, headers, body);
+        }
+        if (request.getPathWithoutQueryString().equals("/login")) {
+            parseQueryString(request);
+
+            if (isLoggedIn(request)) {
+                StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
+                String body = buildResponseBody("/index.html");
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+                headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+                return new HttpResponse(statusLine, headers, body);
+            }
+
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.OK);
+            String body = buildResponseBody("/login.html");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/login.html"));
+            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            return new HttpResponse(statusLine, headers, body);
+        }
+
+        throw new IllegalArgumentException("처리할 수 없는 GET 요청입니다.");
     }
 
-    private boolean resourceExists(HttpRequest request) {
+    private boolean hasPath(HttpRequest request) {
         try {
-            URL resource = getClass().getResource("/static" + request.getPath());
-            Path.of(resource.toURI());
+            buildPath(request.getPath());
             return true;
-        } catch (Exception e) {
+        } catch (IllegalArgumentException exception) {
             return false;
         }
+    }
+
+    private String buildResponseBody(String path) {
+        try (BufferedReader bufferedReader = Files.newBufferedReader(buildPath(path))) {
+            return bufferedReader.lines()
+                    .collect(Collectors.joining("\n")) + "\n";
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    private String buildContentTypeValue(String path) {
+        try {
+            return Files.probeContentType(buildPath(path)) + ";charset=utf-8;";
+        } catch (IOException exception) {
+            throw new IllegalArgumentException(exception);
+        }
+    }
+
+    private Path buildPath(String path) {
+        URL resource = getClass().getResource("/static" + path);
+        try {
+            return Path.of(resource.toURI());
+        } catch (URISyntaxException exception) {
+            throw new IllegalArgumentException(exception);
+        }
+    }
+
+    private String buildContentLengthValue(String body) {
+        return String.valueOf(body.getBytes().length);
+    }
+
+    private void parseQueryString(HttpRequest request) {
+        Map<String, String> queryString = request.getQueryString();
+        Optional<User> user = InMemoryUserRepository.findByAccount(queryString.get("account"));
+        if (user.isPresent() && user.get().checkPassword(queryString.get("password"))) {
+            log.info("user : {}", user.get());
+        }
+    }
+
+    private boolean isLoggedIn(HttpRequest request) {
+        Optional<String> jsessionid = request.findCookieByName("JSESSIONID");
+        if (jsessionid.isEmpty()) {
+            return false;
+        }
+        Session session = sessionManager.findSession(jsessionid.get());
+        log.info("user : {}", session.getAttribute("user"));
+        return true;
+    }
+
+    private HttpResponse handlePostRequest(HttpRequest request) {
+        if (request.getPath().equals("/register")) {
+            registerUser(request);
+
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
+            String body = buildResponseBody("/index.html");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderType.LOCATION, buildLocationValue("/index.html"));
+            return new HttpResponse(statusLine, headers, body);
+        }
+        if (request.getPath().equals("/login")) {
+            Map<String, String> requestBody = request.getBody();
+            Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+
+            if (user.isPresent() && user.get().checkPassword(requestBody.get("password"))) {
+                StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
+                String body = buildResponseBody("/index.html");
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/index.html"));
+                headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+                headers.add(HeaderType.LOCATION, buildLocationValue("/index.html"));
+                headers.add(HeaderType.SET_COOKIE, buildSetCookieValue(user.get()));
+                return new HttpResponse(statusLine, headers, body);
+            }
+            StatusLine statusLine = new StatusLine(request.getProtocolVersion(), Status.FOUND);
+            String body = buildResponseBody("/401.html");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HeaderType.CONTENT_TYPE, buildContentTypeValue("/401.html"));
+            headers.add(HeaderType.CONTENT_LENGTH, buildContentLengthValue(body));
+            headers.add(HeaderType.LOCATION, buildLocationValue("/401.html"));
+            return new HttpResponse(statusLine, headers, body);
+        }
+
+        throw new IllegalArgumentException("처리할 수 없는 POST 요청입니다.");
+    }
+
+    private void registerUser(HttpRequest request) {
+        Map<String, String> requestBody = request.getBody();
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
+        String email = requestBody.get("email");
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
+
+    private String buildLocationValue(String path) {
+        return "http://localhost:8080" + path;
+    }
+
+    private String buildSetCookieValue(User user) {
+        Session session = Session.create();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return "JSESSIONID=" + session.getId();
     }
 }

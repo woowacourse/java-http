@@ -41,20 +41,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final var requestLine = bufferedReader.readLine();
+            final var requestLine = RequestLine.from(bufferedReader.readLine());
 
             final var httpHeaders = HttpHeaders.parse(bufferedReader);
 
-            final var texts = requestLine.split(" ");
-            final var method = HttpMethod.fromName(texts[0]);
-            final var path = new Path(texts[1]);
-            log.info("{} 요청 = {}", method, path);
+            log.info("요청 = {}", requestLine);
 
-            final var result = getFile(path);
+            final var result = getFile(requestLine.getPath());
             final var response = new Response();
 
-            if (HttpMethod.GET.equals(method)) {
-                if (path.isEqualPath("/login")) {
+            if (HttpMethod.GET.equals(requestLine.getHttpMethod())) {
+                if (requestLine.getPath().isEqualPath("/login")) {
                     final var cookie = httpHeaders.get("Cookie");
                     final var httpCookie = HttpCookie.parse(cookie);
                     if (httpCookie.containsKey("JSESSIONID")) {
@@ -62,31 +59,31 @@ public class Http11Processor implements Runnable, Processor {
                         final var session = sessionManager.findSession(jSessionId);
                         if (session == null) {
                             log.warn("유효하지 않은 세션입니다.");
-                            redirectLocation(response, path, result, "401.html");
+                            redirectLocation(response, requestLine.getPath(), result, "401.html");
                         } else {
                             final var sessionUser = (User) session.getAttribute("user");
                             log.info("이미 로그인 유저 = {}", sessionUser);
-                            redirectLocation(response, path, result, "index.html");
+                            redirectLocation(response, requestLine.getPath(), result, "index.html");
                         }
                     } else {
-                        generateOKResponse(response, path, result);
+                        generateOKResponse(response, requestLine.getPath(), result);
                     }
                 } else {
-                    generateOKResponse(response, path, result);
+                    generateOKResponse(response, requestLine.getPath(), result);
                 }
             }
 
-            if (HttpMethod.POST.equals(method)) {
+            if (HttpMethod.POST.equals(requestLine.getHttpMethod())) {
                 final var body = parseRequestBody(httpHeaders, bufferedReader);
 
-                if (path.isEqualPath("/login")) {
-                    final var user = createResponse(body, path, response, result);
+                if (requestLine.getPath().isEqualPath("/login")) {
+                    final var user = createResponse(body, requestLine.getPath(), response, result);
 
                     log.info("user login = {}", user);
-                } else if (path.isEqualPath("/register")) {
+                } else if (requestLine.getPath().isEqualPath("/register")) {
                     final var user = new User(body.get("account"), body.get("password"), body.get("email"));
                     InMemoryUserRepository.save(user);
-                    redirectLocation(response, path, result, "index.html");
+                    redirectLocation(response, requestLine.getPath(), result, "index.html");
                 }
 
                 outputStream.write(response.toHttpResponse().getBytes());
@@ -127,19 +124,19 @@ public class Http11Processor implements Runnable, Processor {
         return body;
     }
 
-    private void generateOKResponse(final Response response, final Path request, final String result) {
+    private void generateOKResponse(final Response response, final Path path, final String result) {
         response.setSc("OK");
         response.setStatusCode(200);
-        response.setContentType(request.getContentType());
+        response.setContentType(path.getContentType());
         response.setContentLength(result.getBytes().length);
         response.setSourceCode(result);
     }
 
-    private void redirectLocation(final Response response, final Path request, final String result,
+    private void redirectLocation(final Response response, final Path path, final String result,
                                   final String location) {
         response.setStatusCode(302);
         response.setSc("FOUND");
-        response.setContentType(request.getContentType());
+        response.setContentType(path.getContentType());
         response.setContentLength(result.getBytes().length);
         response.setLocation(location);
         response.setSourceCode(result);

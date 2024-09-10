@@ -13,6 +13,6 @@ public class ResponseLine {
     }
 
     public String getResponseText() {
-        return version.getResponseText() + " " + statusCode.getResponseText();
+        return version.getResponseText() + " " + statusCode.getResponseText() + " ";
     }
 }

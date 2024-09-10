@@ -1,13 +1,12 @@
 package org.apache.coyote.http11.component.request;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.apache.coyote.http11.component.common.body.Body;
 import org.apache.coyote.http11.component.common.body.BodyMapper;
+
 
 public class HttpRequest {
     private static final String LINE_DELIMITER = "\r\n";
@@ -45,23 +44,19 @@ public class HttpRequest {
         return String.join(LINE_DELIMITER, bodyTexts).replaceAll(" ", "");
     }
 
-    public URI getUri() {
-        return requestLine.getUri();
-    }
-
-    public boolean isSameUri(String uriText) {
-        return getUri().getPath().equals(uriText);
-    }
-
-    public Map<String, String> getHeadersPojo() {
-        return requestHeaders.getValues();
+    public String getQueryParam(final String key) {
+        return requestLine.getQueryValue(key);
     }
 
     public RequestHeaders getHeaders() {
         return requestHeaders;
     }
 
-    public String getMethodText() {
-        return requestLine.getMethod().getValue();
+    public String getQuery() {
+        return requestLine.getQuery();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
     }
 }

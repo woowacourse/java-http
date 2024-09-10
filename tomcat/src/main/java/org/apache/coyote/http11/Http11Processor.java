@@ -1,23 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.component.common.Version;
-import org.apache.coyote.http11.component.common.body.TextTypeBody;
-import org.apache.coyote.http11.component.request.HttpRequest;
-import org.apache.coyote.http11.component.response.HttpResponse;
-import org.apache.coyote.http11.component.response.ResponseHeader;
-import org.apache.coyote.http11.component.response.ResponseLine;
-import org.apache.coyote.http11.component.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,19 +40,6 @@ public class Http11Processor implements Runnable, Processor {
             final var plaintext = bufferedReader.lines()
                     .collect(Collectors.joining("\r\n"));
 
-            if (plaintext == null) {
-                return;
-            }
-
-            final HttpRequest httpRequest = new HttpRequest(plaintext);
-
-            if (httpRequest.isSameUri("/")) {
-                renderWelcome(outputStream);
-            } else if (httpRequest.isSameUri("/login")) {
-                renderLogin(httpRequest.getUri().toString(), outputStream);
-            } else {
-                renderOther(httpRequest.getUri().toString(), outputStream);
-            }
 
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -77,26 +55,6 @@ public class Http11Processor implements Runnable, Processor {
                 "",
                 resource);
         outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void renderLogin(final String path, final OutputStream outputStream) throws IOException {
-        final var split = path.split("\\?")[0];
-        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("FOUND", 302));
-        final var responseHeader = new ResponseHeader();
-        responseHeader.put("Location", "http://localhost:8080/index.html");
-        final var response = new HttpResponse(ok, responseHeader, new TextTypeBody(""));
-        outputStream.write(response.getResponseText().getBytes());
-        outputStream.flush();
-    }
-
-    private void renderOther(final String path, final OutputStream outputStream) throws IOException {
-        final var resource = getClass().getClassLoader().getResource("static/" + path);
-        final var ok = new ResponseLine(new Version(1, 1), new StatusCode("OK", 200));
-        final var responseHeader = new ResponseHeader();
-        final var response = new HttpResponse(ok, responseHeader,
-                new TextTypeBody(new String(Files.readAllBytes(new File(resource.getFile()).toPath()))));
-        outputStream.write(response.getResponseText().getBytes());
         outputStream.flush();
     }
 

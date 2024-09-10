@@ -12,8 +12,4 @@ public abstract class Headers {
     protected String getValue(final String key) {
         return values.get(key);
     }
-
-    public Map<String, String> getValues() {
-        return values;
-    }
 }

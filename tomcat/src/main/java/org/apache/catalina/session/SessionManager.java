@@ -1,6 +1,5 @@
 package org.apache.catalina.session;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Session findSession(final String id) throws IOException {
+    public static Session findSession(final String id) {
         return SESSIONS.get(id);
     }
 

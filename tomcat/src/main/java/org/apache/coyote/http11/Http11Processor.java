@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
@@ -29,6 +31,16 @@ public class Http11Processor implements Runnable, Processor {
     public static final String STATIC_PATH = "static";
     public static final String INDEX_PAGE = "/index.html";
     public static final String ACCESS_DENIED_PAGE = "/401.html";
+    public static final String CSS_PATH = "/css/styles.css";
+    public static final String JS_PATH = "/js/scripts.js";
+    public static final String LOGIN_PATH = "/login";
+    public static final String REGISTER_PATH = "/register";
+    public static final String ASSETS_PATH = "/assets/.*\\.js";
+    public static final String LINE_BREAK = "\n";
+    public static final String USER_SESSION_NAME = "user";
+    public static final String ACCOUNT_PARAM_NAME = "account";
+    public static final String PASSWORD_PARAM_NAME = "password";
+    public static final String EMAIL_PARAM_NAME = "email";
 
     private final Socket connection;
 
@@ -64,25 +76,25 @@ public class Http11Processor implements Runnable, Processor {
             if (INDEX_PAGE.equals(url)) {
                 buildHtmlResponse(outputStream, url);
             }
-            if ("/css/styles.css".equals(url)) {
+            if (CSS_PATH.equals(url)) {
                 buildStyleSheetResponse(outputStream, url);
             }
-            if ("/js/scripts.js".equals(url)) {
+            if (JS_PATH.equals(url)) {
                 buildScriptResponse(outputStream, url);
             }
-            if (url.matches("/assets/.*\\.js")) {
+            if (url.matches(ASSETS_PATH)) {
                 buildScriptResponse(outputStream, url);
             }
-            if ("/login".equals(url) && "GET".equals(method) && !isLogin(request, outputStream)) {
+            if (LOGIN_PATH.equals(url) && GET.name().equals(method) && !isLogin(request, outputStream)) {
                 buildHtmlResponse(outputStream, url);
             }
-            if ("/login".equals(url) && "POST".equals(method)) {
+            if (LOGIN_PATH.equals(url) && POST.name().equals(method)) {
                 login(outputStream, request);
             }
-            if ("/register".equals(url) && "GET".equals(method)) {
+            if (REGISTER_PATH.equals(url) && GET.name().equals(method)) {
                 buildHtmlResponse(outputStream, url);
             }
-            if ("/register".equals(url) && "POST".equals(method)) {
+            if (REGISTER_PATH.equals(url) && POST.name().equals(method)) {
                 register(outputStream, request);
             }
 
@@ -110,10 +122,10 @@ public class Http11Processor implements Runnable, Processor {
     private void login(final OutputStream outputStream, final HttpRequest request) {
         Map<String, String> params = request.parseRequestQuery();
 
-        InMemoryUserRepository.findByAccount(params.get("account")).ifPresentOrElse(user -> {
-            if (user.checkPassword(params.get("password"))) {
+        InMemoryUserRepository.findByAccount(params.get(ACCOUNT_PARAM_NAME)).ifPresentOrElse(user -> {
+            if (user.checkPassword(params.get(PASSWORD_PARAM_NAME))) {
                 Session session = createSession(user);
-                createCookie(outputStream, session);
+                addCookieOnResponseHeader(outputStream, session);
                 log.info("user: {}", user);
                 return;
             }
@@ -124,16 +136,16 @@ public class Http11Processor implements Runnable, Processor {
     private Session createSession(final User user) {
         final UUID id = UUID.randomUUID();
         final Session session = new Session(id.toString());
-        session.setAttribute("user", user);
+        session.setAttribute(USER_SESSION_NAME, user);
         SessionManager.add(session);
 
         return session;
     }
 
-    private static void createCookie(final OutputStream outputStream, final Session session) {
+    private void addCookieOnResponseHeader(final OutputStream outputStream, final Session session) {
         try {
-            HttpCookie cookie = new HttpCookie("JSESSIONID=" + session.getId());
-            log.info("cookie: {}", cookie.getCookieValue(JSESSIONID));
+            HttpCookie cookie = HttpCookie.from(session);
+            log.info("cookie: {}", session.getId());
             outputStream.write(HttpResponse.found(INDEX_PAGE, cookie));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -143,7 +155,10 @@ public class Http11Processor implements Runnable, Processor {
     private void register(final OutputStream outputStream, final HttpRequest request) throws IOException {
         final Map<String, String> userInfos = request.parseRequestQuery();
 
-        final User user = new User(userInfos.get("account"), userInfos.get("password"), userInfos.get("email"));
+        final User user = new User(userInfos.get(ACCOUNT_PARAM_NAME),
+                userInfos.get(PASSWORD_PARAM_NAME),
+                userInfos.get(EMAIL_PARAM_NAME)
+        );
         InMemoryUserRepository.save(user);
 
         outputStream.write(HttpResponse.found(INDEX_PAGE));
@@ -153,7 +168,7 @@ public class Http11Processor implements Runnable, Processor {
         final var resourceName = STATIC_PATH + filePath;
         final var path = Path.of(this.getClass().getClassLoader().getResource(resourceName).getPath());
 
-        return String.join("\n", Files.readAllLines(path)) + "\n";
+        return String.join(LINE_BREAK, Files.readAllLines(path)) + LINE_BREAK;
     }
 
     private void buildHtmlResponse(final OutputStream outputStream, final String filePath) {

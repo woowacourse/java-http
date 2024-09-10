@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.HttpCookie;
 
 public class HttpRequest {
+    public static final String HEADER_DELIMITER = ": ";
+    public static final String QUERY_STRING_DELIMITER = "&";
+    public static final String QUERY_TOKEN_DELIMITER = "=";
+
     private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final String requestBody;
@@ -36,7 +40,7 @@ public class HttpRequest {
         var header = reader.readLine();
 
         while (!"".equals(header)) {
-            final var tokens = header.split(": ");
+            final var tokens = header.split(HEADER_DELIMITER);
             headers.put(tokens[0], tokens[1]);
             header = reader.readLine();
         }
@@ -68,14 +72,17 @@ public class HttpRequest {
 
     public HttpCookie getCookies() {
         final String cookieString = headers.getOrDefault("Cookie", "");
-        return new HttpCookie(cookieString);
+        return HttpCookie.from(cookieString);
     }
 
     public Map<String, String> parseRequestQuery() {
-        final var params = requestBody.split("&");
+        if ("".equals(requestBody)) {
+            return new HashMap<>();
+        }
+        final var params = requestBody.split(QUERY_STRING_DELIMITER);
 
         return Arrays.stream(params)
-                .map(param -> param.split("="))
+                .map(param -> param.split(QUERY_TOKEN_DELIMITER))
                 .collect(Collectors.toMap(token -> token[0], token -> token[1]));
     }
 }

@@ -104,7 +104,7 @@ class HttpRequestTest {
         );
 
         // when&then
-        assertThat(request.getSessionFromCookie().get()).isEqualTo("session");
+        assertThat(request.getSessionFromCookie()).get().isEqualTo("session");
     }
 
     @DisplayName("쿠키에서 세션이 존재하지 않으면 Optional.empty()를 반환한다.")

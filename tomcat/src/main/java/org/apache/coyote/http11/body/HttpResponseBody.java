@@ -8,7 +8,7 @@ public class HttpResponseBody {
         this.value = "";
     }
 
-    public CharSequence getValue() {
+    public String getValue() {
         return value;
     }
 

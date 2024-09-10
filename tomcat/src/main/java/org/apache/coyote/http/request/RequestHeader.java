@@ -14,8 +14,8 @@ public class RequestHeader extends Header {
         super(splitHeaders);
     }
 
-    public String getContentLength() {
-        return getValue(CONTENT_LENGTH);
+    public int getContentLength() {
+        return Integer.parseInt(getValue(CONTENT_LENGTH));
     }
 
     public boolean hasCookieWithSession() {

@@ -27,13 +27,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.hasCookieWithSession()) {
-            alreadyLoggedIn(request, response);
-        }
         try {
+            if (request.hasCookieWithSession()) {
+                alreadyLoggedIn(request, response);
+            }
             Path path = request.getPath();
             HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.OK, response);
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             new NotFoundController().doGet(request, response);
         } catch (IOException e) {
             new InternalServerErrorController().doGet(request, response);
@@ -42,10 +42,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.hasCookieWithSession()) {
-            alreadyLoggedIn(request, response);
-        }
         try {
+            if (request.hasCookieWithSession()) {
+                alreadyLoggedIn(request, response);
+            }
             Path path = request.getPath();
             HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
             if (!isLoginSuccess(request, response)) {

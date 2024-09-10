@@ -13,11 +13,17 @@ public class HttpRequest {
     private String body;
 
     public static HttpRequest of(String request) {
+        if (request == null || request.isEmpty()) {
+            throw new IllegalArgumentException("request cannot be null or empty");
+        }
         List<String> requests = List.of(request.split(CRLF));
         return of(requests);
     }
 
     public static HttpRequest of(List<String> requests) {
+        if (requests.isEmpty()) {
+            throw new IllegalArgumentException("request cannot be null or empty");
+        }
         return new HttpRequest(
                 RequestLine.of(requests.get(REQUEST_LINE_INDEX)),
                 new RequestHeader(requests.subList(REQUEST_LINE_INDEX + 1, requests.size())));
@@ -41,7 +47,7 @@ public class HttpRequest {
     }
 
     public int getContentLength() {
-        return Integer.parseInt(headers.getContentLength());
+        return headers.getContentLength();
     }
 
     public String getBody() {

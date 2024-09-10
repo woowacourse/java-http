@@ -25,5 +25,4 @@ class HttpMethodTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown http method: GETT");
     }
-
 }

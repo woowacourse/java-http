@@ -8,7 +8,6 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.auth.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBuilder;
 import org.apache.coyote.http11.service.LoginService;
 
 
@@ -31,18 +30,17 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        return LoginControllerAdapter.adapt(httpRequest);
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
+        LoginControllerAdapter.adapt(httpRequest, httpResponse);
     }
 
-    public HttpResponse loginView() {
-        return new ResponseBuilder()
+    public void loginView(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpResponse
                 .statusCode(HttpStatusCode.OK_200)
-                .viewUrl("/login.html")
-                .build();
+                .viewUrl("/login.html");
     }
 
-    public HttpResponse checkSession(HttpRequest httpRequest) {
+    public void checkSession(HttpRequest httpRequest, HttpResponse httpResponse) {
         Cookie cookie = httpRequest.getCookie();
         String jsessionid = cookie.getByKey("JSESSIONID");
 
@@ -50,23 +48,21 @@ public class LoginController implements Controller {
             throw new SecurityException("잘못된 세션 정보입니다.");
         }
 
-        return new ResponseBuilder()
+        httpResponse
                 .statusCode(HttpStatusCode.FOUND_302)
-                .location("/index.html")
-                .build();
+                .location("/index.html");
     }
 
-    public HttpResponse checkLogin(HttpRequest httpRequest) {
+    public void checkLogin(HttpRequest httpRequest, HttpResponse httpResponse) {
         Map<String, String> parameters = httpRequest.getQueryParameters();
         loginService.checkLogin(parameters.get("account"), parameters.get("password"));
         User user = loginService.findByAccount(parameters.get("account"));
         Cookie userSessionCookie = makeUserSessionCookie(user);
 
-        return new ResponseBuilder()
+        httpResponse
                 .statusCode(HttpStatusCode.FOUND_302)
                 .location("/index.html")
-                .setCookie(userSessionCookie)
-                .build();
+                .setCookie(userSessionCookie);
     }
 
     private Cookie makeUserSessionCookie(User user) {

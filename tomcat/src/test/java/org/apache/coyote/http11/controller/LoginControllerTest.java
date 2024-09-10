@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.techcourse.db.InMemoryUserRepository;
@@ -8,8 +9,6 @@ import com.techcourse.model.User;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.coyote.http11.HttpHeaders;
@@ -41,8 +40,14 @@ class LoginControllerTest extends BaseHttpTest {
     void loginView() throws URISyntaxException, IOException {
         URL url = getClass().getClassLoader().getResource("static/login.html");
         String expected = resolve200Response("html", url);
+        HttpRequest validLoginRequest = new HttpRequest(
+                new RequestLine("GET /login HTTP/1.1 "),
+                new HttpHeaders(Map.of("Content-Type", "text/html;charset=utf-8")),
+                Optional.empty()
+        );
+        HttpResponse response = new HttpResponse();
 
-        HttpResponse response = controller.loginView();
+        controller.loginView(validLoginRequest, response);
 
         assertThat(response.serialize()).isEqualTo(expected);
     }
@@ -58,10 +63,29 @@ class LoginControllerTest extends BaseHttpTest {
                 new HttpHeaders(Map.of("Content-Type", "text/html; charset=utf-8")),
                 Optional.empty()
         );
+        HttpResponse response = new HttpResponse();
 
-        HttpResponse response = controller.checkLogin(validLoginRequest);
+        controller.checkLogin(validLoginRequest, response);
 
         String expected = resolve302Response("/index.html");
         assertThat(response.serialize()).contains(expected);
+    }
+
+    @DisplayName("잘못된 로그인 시도 시, SecurityException을 반환한다")
+    @Test
+    void checkLoginFail() {
+        User user = new User("testAccount", "testPassword", "testEmail");
+        InMemoryUserRepository.save(user);
+
+        HttpRequest validLoginRequest = new HttpRequest(
+                new RequestLine("GET " + "/login?account=wrongAccount&password=wrongPassword" + " HTTP/1.1 "),
+                new HttpHeaders(Map.of("Content-Type", "text/html; charset=utf-8")),
+                Optional.empty()
+        );
+        HttpResponse response = new HttpResponse();
+
+
+        assertThatThrownBy(() -> controller.checkLogin(validLoginRequest, response))
+                .isInstanceOf(SecurityException.class);
     }
 }

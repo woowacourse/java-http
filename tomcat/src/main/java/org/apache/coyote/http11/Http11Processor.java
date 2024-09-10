@@ -14,7 +14,6 @@ import org.apache.coyote.http11.error.ErrorHandlerMapper;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestLine;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,20 +56,29 @@ public class Http11Processor implements Runnable, Processor {
             if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
                 return resolveHandlerResponse(httpRequest);
             }
-            return new ResponseBuilder()
-                    .statusCode(HttpStatusCode.OK_200)
-                    .viewUrl(requestLine.getRequestURI())
-                    .build();
+            return resolveViewResponse(requestLine);
         } catch (Exception e) {
-            if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
-                return ErrorHandlerMapper.handleError(e.getClass());
-            }
-            throw new UncheckedServletException(e);
+            return handleError(e);
         }
     }
 
+    private HttpResponse handleError(Exception e) {
+        if (ErrorHandlerMapper.hasErrorHandler(e.getClass())) {
+            return ErrorHandlerMapper.handleError(e.getClass());
+        }
+        throw new UncheckedServletException(e);
+    }
+
+    private HttpResponse resolveViewResponse(RequestLine requestLine) {
+        return new HttpResponse()
+                .statusCode(HttpStatusCode.OK_200)
+                .viewUrl(requestLine.getRequestURI());
+    }
+
     private HttpResponse resolveHandlerResponse(HttpRequest httpRequest) {
+        HttpResponse httpResponse = new HttpResponse();
         Controller controller = HandlerMapper.mapTo(httpRequest.getRequestUri());
-        return controller.handle(httpRequest);
+        controller.service(httpRequest, httpResponse);
+        return httpResponse;
     }
 }

@@ -6,12 +6,11 @@ import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.ResponseBuilder;
 import org.apache.coyote.http11.service.UserService;
 
 public class UserController implements Controller {
 
-    private final UserService userService = new UserService();
+    private final UserService userService = UserService.getInstance();
 
     @Override
     public boolean canHandle(String url) {
@@ -19,21 +18,18 @@ public class UserController implements Controller {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpRequest.isMethod(HttpMethod.POST)) {
             UserInfo userInfo = UserInfo.read(httpRequest.getRequestBody());
             User user = new User(userInfo);
             userService.save(user);
 
-            return new ResponseBuilder()
-                    .statusCode(HttpStatusCode.FOUND_302)
-                    .location("/index.html")
-                    .build();
+            httpResponse.statusCode(HttpStatusCode.FOUND_302)
+                    .location("/index.html");
+            return;
         }
 
-        return new ResponseBuilder()
-                .statusCode(HttpStatusCode.OK_200)
-                .viewUrl("/register.html")
-                .build();
+        httpResponse.statusCode(HttpStatusCode.OK_200)
+                .viewUrl("/register.html");
     }
 }

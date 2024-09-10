@@ -22,4 +22,13 @@ public enum HttpMethod {
             throw new UncheckedServletException(new IllegalArgumentException("유효한 HTTP Method가 아닙니다."));
         }
     }
+
+    public static boolean isGet(HttpMethod method) {
+        return GET == method;
+    }
+
+
+    public static boolean isPost(HttpMethod method) {
+        return POST == method;
+    }
 }

@@ -9,10 +9,10 @@ public abstract class AbstractRequestHandler implements RequestHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (HttpMethod.GET.equals(httpRequest.getMethod())) {
+        if (HttpMethod.isGet(httpRequest.getMethod())) {
             get(httpRequest, httpResponse);
         }
-        if (HttpMethod.POST.equals(httpRequest.getMethod())) {
+        if (HttpMethod.isPost(httpRequest.getMethod())) {
             post(httpRequest, httpResponse);
         }
     }

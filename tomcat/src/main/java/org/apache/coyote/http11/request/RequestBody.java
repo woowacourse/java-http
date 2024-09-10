@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestBody {
-    private final String body;
+    private final Map<String, String> body;
 
     public RequestBody(String body) {
-        this.body = body;
+        this.body = parseRequestBody(body);
     }
 
-    public Map<String, String> parseRequestBody() {
+    private Map<String, String> parseRequestBody(String body) {
         Map<String, String> bodyParams = new HashMap<>();
         String[] pairs = body.split("&");
         for (String pair : pairs) {
@@ -24,5 +24,13 @@ public class RequestBody {
             }
         }
         return bodyParams;
+    }
+
+    public Map<String, String> getBody() {
+        return Map.copyOf(body);
+    }
+
+    public String getAttribute(String attribute) {
+        return body.get(attribute);
     }
 }

@@ -17,9 +17,9 @@ class RequestBodyTest {
         RequestBody requestBody = new RequestBody("account=validUser&password=wrongPassword");
 
         // when
-        Map<String, String> result = requestBody.parseRequestBody();
+        RequestBody result = requestBody;
 
         // then
-        assertThat(result).containsAllEntriesOf(expected);
+        assertThat(result.getBody()).containsAllEntriesOf(expected);
     }
 }

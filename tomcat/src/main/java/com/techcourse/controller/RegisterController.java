@@ -1,10 +1,10 @@
 package com.techcourse.controller;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +39,10 @@ public class RegisterController extends Controller {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws IOException {
-        Map<String, String> requestBody = request.getBody().parseRequestBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
-        String email = requestBody.get("email");
+        RequestBody requestBody = request.getBody();
+        String account = requestBody.getAttribute("account");
+        String password = requestBody.getAttribute("password");
+        String email = requestBody.getAttribute("email");
 
         User user = userService.register(account, password, email);
         log.info("User registered: {}", user);

@@ -1,7 +1,6 @@
 package com.techcourse.controller;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -10,6 +9,7 @@ import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +47,9 @@ public class LoginController extends Controller {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws IOException {
-        Map<String, String> requestBody = request.getBody().parseRequestBody();
-        String account = requestBody.get("account");
-        String password = requestBody.get("password");
+        RequestBody requestBody = request.getBody();
+        String account = requestBody.getAttribute("account");
+        String password = requestBody.getAttribute("password");
 
         User user = userService.login(account, password);
         log.info("User found: {}", user);

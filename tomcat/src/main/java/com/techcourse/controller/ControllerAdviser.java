@@ -13,8 +13,6 @@ import org.apache.coyote.view.ViewResolver;
 
 public class ControllerAdviser {
 
-    private ControllerAdviser() {}
-
     public static void service(UncheckedServletException exception, HttpRequest request, HttpResponse response) {
         if (exception instanceof BadRequestException) {
             response.setStatus(HttpStatus.BAD_REQUEST);

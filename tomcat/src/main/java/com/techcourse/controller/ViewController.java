@@ -7,7 +7,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.view.ViewResolver;
 
-public class FileController implements Controller{
+public class ViewController implements Controller{
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {

@@ -20,18 +20,23 @@ public class ControllerAdviser {
             response.setStatus(HttpStatus.BAD_REQUEST);
         }
         if (exception instanceof UnauthorizedException) {
-            response.setStatus(HttpStatus.UNAUTHORIZED);
-            response.setView(ViewResolver.getView("401.html"));
+            setErrorResponse(response, HttpStatus.UNAUTHORIZED, "401.html");
+            return;
         }
         if (exception instanceof NotFoundException) {
-            response.setStatus(HttpStatus.NOT_FOUND);
-            response.setView(ViewResolver.getView("404.html"));
+            setErrorResponse(response, HttpStatus.NOT_FOUND, "404.html");
+            return;
         }
         if (exception instanceof InternalServerException) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_EXCEPTION);
-            response.setView(ViewResolver.getView("500.html"));
+            setErrorResponse(response, HttpStatus.INTERNAL_SERVER_EXCEPTION, "500.html");
+            return;
         }
 
         response.setHeaders(HttpHeaders.create(request, response));
+    }
+
+    private static void setErrorResponse(HttpResponse response, HttpStatus httpStatus, String viewName) {
+        response.setStatus(httpStatus);
+        response.setView(ViewResolver.getView(viewName));
     }
 }

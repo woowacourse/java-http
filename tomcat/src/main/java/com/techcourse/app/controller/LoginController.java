@@ -28,27 +28,18 @@ public class LoginController extends AbstractController {
             return;
         }
 
+        response.setRedirect("/login.html");
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
-
         if (account == null || password == null) {
             response.setRedirect("/login.html");
             return;
         }
-
-        try {
-            User user = userService.login(account, password);
-
-            String sessionId = UUID.randomUUID().toString();
-            Cookie cookie = createSessionIdCookie(sessionId);
-            createSession(sessionId, user);
-
-            response.setRedirect("/index.html");
-            response.setCookie(cookie);
-        } catch (AuthenticationException e) {
-            response.setRedirect("/401.html");
-        }
-
+        login(response, account, password);
     }
 
     private boolean isAlreadyLogin(HttpRequest request) {
@@ -75,6 +66,19 @@ public class LoginController extends AbstractController {
             return user != null;
         }
         return false;
+    }
+
+    private void login(HttpResponse response, String account, String password) {
+        try {
+            User user = userService.login(account, password);
+            
+            String sessionId = UUID.randomUUID().toString();
+            createSession(sessionId, user);
+            response.setRedirect("/index.html");
+            response.setCookie(createSessionIdCookie(sessionId));
+        } catch (AuthenticationException e) {
+            response.setRedirect("/401.html");
+        }
     }
 
     private void createSession(String sessionId, User user) {

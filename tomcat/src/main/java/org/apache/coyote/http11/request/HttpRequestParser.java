@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -9,9 +11,19 @@ import org.slf4j.LoggerFactory;
 
 public class HttpRequestParser {
 
+    private static final HttpRequestParser INSTANCE = new HttpRequestParser();
     private static final Logger log = LoggerFactory.getLogger(HttpRequestParser.class);
 
-    public HttpRequest parseRequest(BufferedReader reader) throws IOException {
+    private HttpRequestParser() {
+    }
+
+    public static HttpRequestParser getInstance() {
+        return INSTANCE;
+    }
+
+    public HttpRequest parse(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
         RequestLine requestLine = extractRequestLine(reader);
         RequestHeader requestHeader = extractHeaders(reader);
         RequestBody requestBody = extractRequestBody(reader, requestHeader);

@@ -5,7 +5,15 @@ import java.util.Map.Entry;
 
 public class HttpResponseConverter {
 
+    private static final HttpResponseConverter INSTANCE = new HttpResponseConverter();
     private static final String CRLF = "\r\n";
+
+    private HttpResponseConverter() {
+    }
+
+    public static HttpResponseConverter getInstance() {
+        return INSTANCE;
+    }
 
     public byte[] convert(HttpResponse response) {
         StringBuilder stringBuilder = new StringBuilder();

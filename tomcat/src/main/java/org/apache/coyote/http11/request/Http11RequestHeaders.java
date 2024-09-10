@@ -17,6 +17,8 @@ public class Http11RequestHeaders {
     private static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final int HEADER_LENGTH = 2;
+    private static final int HEADER_NAME_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
 
     private final Map<String, String> headers;
     private final HttpCookie cookie;
@@ -26,8 +28,8 @@ public class Http11RequestHeaders {
         this.cookie = new HttpCookie();
         for (String header : headers) {
             validateHeader(header);
-            String key = header.split(HEADER_DELIMITER)[0];
-            String value = header.split(HEADER_DELIMITER)[1];
+            String key = header.split(HEADER_DELIMITER)[HEADER_NAME_INDEX];
+            String value = header.split(HEADER_DELIMITER)[HEADER_VALUE_INDEX];
             append(key, value);
         }
     }

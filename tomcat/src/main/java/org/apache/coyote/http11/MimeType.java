@@ -10,7 +10,8 @@ public enum MimeType {
     JS("text/js"),
     ALL("*/*");
 
-    public static final String EXTENSION_DELIMITER = ".";
+    private static final String EXTENSION_DELIMITER = ".";
+
     private final String value;
 
     MimeType(String value) {
@@ -22,8 +23,7 @@ public enum MimeType {
                 .filter(mimeType -> mimeType.value.equals(name))
                 .findAny()
                 .orElseThrow(
-                        () -> new UncheckedServletException(
-                                new IllegalArgumentException(String.format("유효한 Mime Type 이 아닙니다. %s", name))));
+                        () -> new UncheckedServletException(new IllegalArgumentException("유효한 Mime Type 이 아닙니다.")));
     }
 
     public static MimeType fromFileName(String fileName) {

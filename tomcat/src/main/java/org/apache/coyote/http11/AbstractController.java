@@ -18,6 +18,10 @@ public non-sealed abstract class AbstractController implements Controller {
             SESSION_MANAGER.add(new Session(sessionCookie.value()));
             response.addCookie(sessionCookie);
         }
+        if (request.hasSessionCookie() && request.findSessionCookie().map(Http11Cookie::value)
+                .map(SESSION_MANAGER::findSession).isEmpty()) {
+            SESSION_MANAGER.add(new Session(request.findSessionCookie().get().value()));
+        }
 
         switch (getMethod(request)) {
             case GET -> doGet(request, response);

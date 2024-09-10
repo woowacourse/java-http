@@ -9,7 +9,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.cookie.HttpCookie;
+import org.apache.coyote.http11.cookie.Cookie;
+import org.apache.coyote.http11.cookie.HttpCookies;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResourceLoader;
@@ -40,102 +41,105 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            String response = generateResponse(inputStream);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            sendResponse(inputStream, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String generateResponse(InputStream inputStream) throws IOException {
+    private void sendResponse(InputStream inputStream, OutputStream outputStream) throws IOException {
         HttpRequest request = HttpRequest.of(inputStream);
         if (request.isGet() && request.isSameUri("/")) {
-            return renderDefaultPage(request);
+            renderDefaultPage(outputStream, request);
+            return;
         }
         if (request.isGet() && ContentMimeType.isEndsWithExtension(request.getPath())) {
-            return renderStaticResource(request);
+            renderStaticResource(outputStream, request);
+            return;
         }
         if (request.isSameUri("/login")) {
-            return login(request);
+            login(outputStream, request);
+            return;
         }
         if (request.isSameUri("/register")) {
-            return register(request);
+            register(outputStream, request);
+            return;
         }
-        return renderHtmlPage(request);
+        renderHtmlPage(outputStream, request);
     }
 
-    private String renderDefaultPage(HttpRequest request) {
-        HttpResponse response = new HttpResponse(HttpStatus.OK, request.getProtocolVersion(), new ResponseBody("text/html", "Hello world!"));
-        return response.getResponse();
+    private void renderDefaultPage(OutputStream outputStream, HttpRequest request) throws IOException {
+        HttpResponse response = new HttpResponse(outputStream, HttpStatus.OK, request.getProtocolVersion(), new ResponseBody("text/html", "Hello world!"));
+        response.sendResponse();
     }
 
-    private String renderStaticResource(HttpRequest request) throws IOException {
+    private void renderStaticResource(OutputStream outputStream, HttpRequest request) throws IOException {
         ResponseBody responseBody = ResourceLoader.loadStaticResource(request.getPath());
-        HttpResponse response = new HttpResponse(HttpStatus.OK, request.getProtocolVersion(), responseBody);
-        return response.getResponse();
+        HttpResponse response = new HttpResponse(outputStream, HttpStatus.OK, request.getProtocolVersion(), responseBody);
+        response.sendResponse();
     }
 
-    private String renderHtmlPage(HttpRequest request) throws IOException {
-        HttpResponse response = new HttpResponse(HttpStatus.OK, request.getProtocolVersion(), ResourceLoader.loadHtmlResource(request.getPath()));
-        return response.getResponse();
+    private void renderHtmlPage(OutputStream outputStream, HttpRequest request) throws IOException {
+        HttpResponse response = new HttpResponse(outputStream, HttpStatus.OK, request.getProtocolVersion(), ResourceLoader.loadHtmlResource(request.getPath()));
+        response.sendResponse();
     }
 
-    private String login(final HttpRequest request) throws IOException {
+    private void login(OutputStream outputStream, HttpRequest request) throws IOException {
         if (request.isGet()) {
-            final var cookie = new HttpCookie(request.getCookie());
-            return createResponseBasedOnCookie(request, cookie);
+            HttpCookies cookie = new HttpCookies(request.getCookie());
+            createResponseBasedOnCookie(outputStream, request, cookie);
+            return;
         }
         if (request.isPost()) {
-            return postLogin(request);
+            postLogin(outputStream, request);
+            return;
         }
-        return renderHtmlPage(request);
+        renderHtmlPage(outputStream, request);
     }
 
-    private String createResponseBasedOnCookie(HttpRequest request, HttpCookie cookie) throws IOException {
+    private void createResponseBasedOnCookie(OutputStream outputStream, HttpRequest request, HttpCookies cookie) throws IOException {
         if (!cookie.hasJSESSIONID()) {
-            return renderHtmlPage(request);
+            renderHtmlPage(outputStream, request);
+            return;
         }
-        return createResponseBasedOnSession(request, cookie);
+        createResponseBasedOnSession(outputStream, request, cookie);
     }
 
-    private String createResponseBasedOnSession(HttpRequest request, HttpCookie cookie) throws IOException {
+    private void createResponseBasedOnSession(OutputStream outputStream, HttpRequest request, HttpCookies cookie) throws IOException {
         if (SessionManager.getInstance().hasSession(cookie.getJSESSIONID())) {
-            return handleSessionExist(request, cookie);
+            handleSessionExist(outputStream, request, cookie);
         }
-        return renderHtmlPage(request);
+        renderHtmlPage(outputStream, request);
     }
 
-    private String handleSessionExist(HttpRequest request, HttpCookie cookie) throws IOException {
-        final var session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
-        final var user = (User) session.getAttribute("user");
+    private void handleSessionExist(OutputStream outputStream, HttpRequest request, HttpCookies cookie) throws IOException {
+        Session session = SessionManager.getInstance().findSession(cookie.getJSESSIONID());
+        User user = (User) session.getAttribute("user");
         if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
-            return renderHtmlPage(request);
+            renderHtmlPage(outputStream, request);
+            return;
         }
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
-        response.setRedirect("/index.html");
-        return response.getResponse();
+        HttpResponse response = new HttpResponse(outputStream, HttpStatus.FOUND, request.getProtocolVersion());
+        response.sendRedirect("/index.html");
     }
 
-    private String postLogin(HttpRequest request) {
+    private void postLogin(OutputStream outputStream, HttpRequest request) throws IOException {
         if (isAuthenticateUser(request)) {
-            HttpCookie cookie = new HttpCookie(request.getCookie());
-            return getLoginResponse(request, cookie);
+            HttpCookies cookie = new HttpCookies(request.getCookie());
+            getLoginResponse(outputStream, request, cookie);
+            return;
         }
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
-        response.setRedirect("/401.html");
-        return response.getResponse();
+        HttpResponse response = new HttpResponse(outputStream, HttpStatus.FOUND, request.getProtocolVersion());
+        response.sendRedirect("/401.html");
     }
 
-    private String getLoginResponse(HttpRequest request, HttpCookie cookie) {
-        HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
-        response.setRedirect("/index.html");
+    private void getLoginResponse(OutputStream outputStream, HttpRequest request, HttpCookies cookie) throws IOException {
+        HttpResponse response = new HttpResponse(outputStream, HttpStatus.FOUND, request.getProtocolVersion());
         if (!cookie.hasJSESSIONID() || !SessionManager.getInstance().hasSession(cookie.getJSESSIONID())) {
-            final var session = getSession(request);
-            response.setCookie("JSESSIONID", session.getId());
+            Session session = getSession(request);
+            response.setCookie(Cookie.createSessionCookie(session.getId()));
         }
-        return response.getResponse();
+        response.sendRedirect("/index.html");
     }
 
     private Session getSession(HttpRequest request) {
@@ -145,16 +149,15 @@ public class Http11Processor implements Runnable, Processor {
         return session;
     }
 
-    private String register(final HttpRequest request) throws IOException {
+    private void register(OutputStream outputStream, HttpRequest request) throws IOException {
         if (request.isPost()) {
-            final var newUser =
+            User newUser =
                     new User(request.findBodyValueByKey("account"), request.findBodyValueByKey("password"), request.findBodyValueByKey("email"));
             InMemoryUserRepository.save(newUser);
-            HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
-            response.setRedirect("/index.html");
-            return response.getResponse();
+            HttpResponse response = new HttpResponse(outputStream, HttpStatus.FOUND, request.getProtocolVersion());
+            response.sendRedirect("/index.html");
         }
-        return renderHtmlPage(request);
+        renderHtmlPage(outputStream, request);
     }
 
     private boolean isAuthenticateUser(final HttpRequest request) {

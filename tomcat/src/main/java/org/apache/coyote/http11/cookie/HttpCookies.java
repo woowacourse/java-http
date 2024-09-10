@@ -3,11 +3,11 @@ package org.apache.coyote.http11.cookie;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpCookie {
+public class HttpCookies {
 
     private final Map<String, String> cookies;
 
-    public HttpCookie(String cookies) {
+    public HttpCookies(String cookies) {
         Map<String, String> result = new HashMap<>();
         String[] pairs = cookies.split("; ");
         for (String pair : pairs) {
@@ -19,6 +19,7 @@ public class HttpCookie {
         this.cookies = result;
     }
 
+    // TODO: 상수로 관리하기
     public boolean hasJSESSIONID() {
         return cookies.containsKey("JSESSIONID");
     }

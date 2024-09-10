@@ -40,8 +40,8 @@ public class DefaultResourceHandler implements RequestHandler {
     }
 
     private String loginResponse(Request request) throws IOException {
-        if (request.getTarget().contains("?")) {
-            QueryParameters queryParams = QueryParameters.parseFrom(request.getTarget().split("\\?")[1]);
+        if (request.isPost()) {
+            QueryParameters queryParams = QueryParameters.parseFrom(request.getBody());
             boolean isLogin = login(
                     queryParams.getParam("account"),
                     queryParams.getParam("password")

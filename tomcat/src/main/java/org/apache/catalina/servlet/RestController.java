@@ -21,9 +21,7 @@ public abstract class RestController extends Controller {
         };
     }
 
-    protected boolean doGet(HttpRequest request, HttpResponse response) {
-        return responseResource(response, request.getTargetPath());
-    }
+    protected abstract boolean doGet(HttpRequest request, HttpResponse response);
 
     protected abstract boolean doPost(HttpRequest request, HttpResponse response);
 }

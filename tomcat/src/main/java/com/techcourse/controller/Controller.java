@@ -13,8 +13,8 @@ public class Controller {
     }
 
     public String getLogin(HttpRequest request) {
-        String requestAccount = request.getQueryStringData("account");
-        String requestPassword = request.getQueryStringData("password");
+        String requestAccount = request.getQueryData("account");
+        String requestPassword = request.getQueryData("password");
         InMemoryUserRepository.findByAccount(requestAccount)
                 .filter(user -> user.checkPassword(requestPassword))
                 .ifPresent(user -> LOGGER.info(user.toString()));

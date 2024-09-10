@@ -19,7 +19,7 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public String getQueryStringData(String input) {
+    public String getQueryData(String input) {
         return queryString.get(input);
     }
 

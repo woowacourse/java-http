@@ -163,4 +163,27 @@ class Http11ProcessorTest {
                 "Set-Cookie: JSESSIONID=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}\r\n\r\n";
         assertThat(socket.output()).matches(expectedPattern);
     }
+
+    @Test
+    void register() throws IOException {
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: 50 ",
+                "",
+                "account=libi&email=libi@test.com&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expectedPattern = "HTTP/1.1 302 Found\r\n" +
+                "Location: http://localhost:8080/index.html\r\n\r\n";
+        assertThat(socket.output()).isEqualTo(expectedPattern);
+    }
 }

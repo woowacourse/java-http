@@ -106,7 +106,7 @@ class Http11ProcessorTest {
     void alreadyLogin() throws IOException {
         // given
         Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
-        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
+        session.addAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
 
@@ -136,7 +136,7 @@ class Http11ProcessorTest {
     void invalidJsessionLogin() throws IOException {
         // given
         Session session = new Session("656cef62-e3c4-40bc-a8df-94732920ed46");
-        session.setAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
+        session.addAttribute("user", InMemoryUserRepository.findByAccount("gugu").get());
         SessionManager sessionManager = SessionManager.getInstance();
         sessionManager.add(session);
 

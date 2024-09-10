@@ -12,6 +12,9 @@ public class SessionManager implements Manager {
         return instance;
     }
 
+    private SessionManager() {
+    }
+
     @Override
     public void add(final Session session) {
         sessions.put(session.getId(), session);
@@ -28,8 +31,5 @@ public class SessionManager implements Manager {
     @Override
     public void remove(final String id) {
         sessions.remove(id);
-    }
-
-    private SessionManager() {
     }
 }

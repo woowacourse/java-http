@@ -45,9 +45,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             // 3단계에 request를 처리해줄 클래스로 분리할 예정입니다.
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String[] httpRequestFirstLine = bufferedReader.readLine().split(" ");
-            String httpMethod = httpRequestFirstLine[0];
-            String uri = httpRequestFirstLine[1];
+            String[] requestLine = bufferedReader.readLine().split(" ");
+            String httpMethod = requestLine[0];
+            String uri = requestLine[1];
             Map<String, String> headers = getHeaders(bufferedReader);
 
             if ("GET".equals(httpMethod)) {
@@ -126,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
             if (user.checkPassword(password)) {
                 log.info("로그인 성공 ! 아이디 : {}", user.getAccount());
                 Session session = new Session(UUID.randomUUID().toString());
-                session.setAttribute("user", user);
+                session.addAttribute("user", user);
                 sessionManager.add(session);
                 redirectToHomeSettingCookie(session.getId(), outputStream);
                 return;

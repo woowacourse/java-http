@@ -40,14 +40,23 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequestReader.readHttpRequest(bufferedReader);
-            final HandlerMapping handlerMapping = new HandlerMapping();
-            final Handler handler = handlerMapping.getHandler(httpRequest);
-            final String response = handler.handle(httpRequest);
+            final String response = process(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private String process(final HttpRequest httpRequest) {
+        final HandlerMapping handlerMapping = HandlerMapping.getInstance();
+        final Handler handler = handlerMapping.getHandler(httpRequest);
+
+        try {
+            return handler.handle(httpRequest);
+        } catch (Exception e) {
+            return handlerMapping.getHandlerByException(e).handle(httpRequest);
         }
     }
 }

@@ -22,7 +22,7 @@ public class HttpResponseWriter {
             builder.append("%s: %s".formatted(entry.getKey(), entry.getValue()));
             builder.append(CRLF);
         }
-        builder.append("\r\n");
+        builder.append(CRLF);
         builder.append(content);
         return builder.toString();
     }

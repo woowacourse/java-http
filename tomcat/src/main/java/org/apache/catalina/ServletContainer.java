@@ -2,6 +2,7 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.DefaultServlet;
@@ -50,14 +51,21 @@ public class ServletContainer {
         servletMapping.keySet().stream()
                 .filter(requestUrl::startsWith)
                 .findFirst()
-                .ifPresentOrElse(mappingUrl -> {
-                    try {
-                        servletMapping.get(mappingUrl).service(request, response);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }, () -> response.setRedirect("/404.html"));
+                .ifPresentOrElse(
+                        doService(request, response),
+                        () -> response.setRedirect("/404.html")
+                );
 
         return response;
+    }
+
+    private Consumer<String> doService(HttpRequest request, HttpResponse response) {
+        return mappingUrl -> {
+            try {
+                servletMapping.get(mappingUrl).service(request, response);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }

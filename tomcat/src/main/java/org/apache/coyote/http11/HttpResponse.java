@@ -12,10 +12,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public HttpResponse(HttpHeader httpHeader, HttpStatus httpStatus) {
-        this(httpHeader, httpStatus, null);
-    }
-
     public HttpResponse() {
         this(new HttpHeader(), null, null);
     }

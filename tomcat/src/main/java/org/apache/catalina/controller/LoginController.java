@@ -35,16 +35,18 @@ public class LoginController implements Controller {
     private void doGet(HttpRequest request, HttpResponse response) {
         HttpCookie httpCookie = request.getCookie();
 
-        if (httpCookie.isContains(JSESSIONID)) {
-            String sessionId = httpCookie.findCookie(JSESSIONID);
-            HttpSession session = HTTP_SESSION_MANGER.findSession(sessionId);
-            if (session.getAttribute("user") != null) {
-                response.setRedirect("/index.html");
-                return;
-            }
+        if (httpCookie.isContains(JSESSIONID) && checkAlreadyLogin(httpCookie)) {
+            response.setRedirect("/index.html");
+            return;
         }
 
         response.setRedirect("/login.html");
+    }
+
+    private boolean checkAlreadyLogin(HttpCookie httpCookie) {
+        String sessionId = httpCookie.findCookie(JSESSIONID);
+        HttpSession session = HTTP_SESSION_MANGER.findSession(sessionId);
+        return session.getAttribute("user") != null;
     }
 
     private void doPost(HttpRequest request, HttpResponse response) {

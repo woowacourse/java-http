@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.catalina.ServletContainer;
-import org.apache.catalina.session.HttpSessionManger;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HttpSessionManger HTTP_SESSION_MANGER = new HttpSessionManger();
-    private static final String RESOURCE_PATH = "static";
-    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 

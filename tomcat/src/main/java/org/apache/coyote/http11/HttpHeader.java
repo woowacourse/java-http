@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 public class HttpHeader {
 
+    private static final String DELIMITER = ": ";
+
     private final Map<String, String> headers;
 
     public HttpHeader(Map<String, String> headers) {
@@ -16,13 +18,13 @@ public class HttpHeader {
     public HttpHeader(List<String> rawHeaders) {
         this.headers = rawHeaders.stream()
                 .peek(rawHeader -> {
-                    if (!rawHeader.contains(": ")) {
+                    if (!rawHeader.contains(DELIMITER)) {
                         throw new UncheckedServletException("형식이 올바르지 않은 헤더가 포함되어 있습니다.");
                     }
                 })
                 .collect(Collectors.toMap(
-                        rawHeader -> rawHeader.substring(0, rawHeader.indexOf(": ")),
-                        rawHeader -> rawHeader.substring(rawHeader.indexOf(": ") + 2)
+                        rawHeader -> rawHeader.substring(0, rawHeader.indexOf(DELIMITER)),
+                        rawHeader -> rawHeader.substring(rawHeader.indexOf(DELIMITER) + 2)
                 ));
     }
 
@@ -40,7 +42,7 @@ public class HttpHeader {
 
     public String buildMessage() {
         return headers.keySet().stream()
-                .map(key -> key + ": " + headers.get(key))
+                .map(key -> key + DELIMITER + headers.get(key))
                 .collect(Collectors.joining("\r\n"));
     }
 }

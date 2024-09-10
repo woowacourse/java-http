@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String NAME_VALUE_DELIMITER = "=";
 
     private final Map<String, String> cookies;
 
@@ -31,16 +33,16 @@ public class HttpCookie {
             return Collections.emptyMap();
         }
 
-        return Arrays.stream(rawCookies.split("; "))
-                .map(cookie -> cookie.split("="))
+        return Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
+                .map(cookie -> cookie.split(NAME_VALUE_DELIMITER))
                 .filter(data -> data.length == 2)
                 .collect(Collectors.toMap(data -> data[0], data -> data[1]));
     }
 
     public String buildMessage() {
         return cookies.keySet().stream()
-                .map(key -> key + "=" + cookies.get(key))
-                .collect(Collectors.joining("; "));
+                .map(key -> key + NAME_VALUE_DELIMITER + cookies.get(key))
+                .collect(Collectors.joining(COOKIE_DELIMITER));
     }
 
     public boolean hasSession() {

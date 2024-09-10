@@ -42,7 +42,7 @@ public class ResponseHeader extends Header {
 
     public static ResponseHeader valueOfLength(int length) {
         Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, MimeType.TEXT.getContentType());
+        headers.put(CONTENT_TYPE, MimeType.HTML.getContentType());
         headers.put(CONTENT_LENGTH, String.valueOf(length));
         return new ResponseHeader(headers);
     }

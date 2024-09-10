@@ -5,6 +5,7 @@ import static org.apache.coyote.util.Constants.CRLF;
 public class HttpResponse {
 
     private static final String BASIC_RESPONSE_BODY = "Hello world!";
+    private static final String EMPTY_BODY = "";
 
     private StatusLine statusLine;
     private ResponseHeader headers;
@@ -13,7 +14,7 @@ public class HttpResponse {
     public HttpResponse() {
         this.statusLine = new StatusLine(HttpStatus.OK);
         this.headers = new ResponseHeader();
-        this.body = "";
+        this.body = EMPTY_BODY;
     }
 
     public void setResponse(StatusLine statusLine, ResponseHeader headers, String body) {
@@ -35,7 +36,7 @@ public class HttpResponse {
     public String toResponse() {
         return String.join(CRLF,
                 statusLine.toResponse() + headers.toResponse(),
-                "", body);
+                EMPTY_BODY, body);
     }
 
     public void basicResponse() {
@@ -46,13 +47,13 @@ public class HttpResponse {
 
     public void notFoundResponses() {
         this.statusLine = new StatusLine(HttpStatus.NOT_FOUND);
-        this.headers = ResponseHeader.valueOfLength(0);
-        this.body = "";
+        this.headers = ResponseHeader.valueOfLength(EMPTY_BODY.getBytes().length);
+        this.body = EMPTY_BODY;
     }
 
     public void serverErrorResponses() {
         this.statusLine = new StatusLine(HttpStatus.INTERNAL_SERVER_ERROR);
-        this.headers = ResponseHeader.valueOfLength(0);
-        this.body = "";
+        this.headers = ResponseHeader.valueOfLength(EMPTY_BODY.getBytes().length);
+        this.body = EMPTY_BODY;
     }
 }

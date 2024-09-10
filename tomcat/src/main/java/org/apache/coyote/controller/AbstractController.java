@@ -11,9 +11,11 @@ public abstract class AbstractController implements Controller {
         HttpMethod method = request.getMethod();
         if (method.equals(HttpMethod.GET)) {
             doGet(request, response);
+            return ;
         }
         if (method.equals(HttpMethod.POST)) {
             doPost(request, response);
+            return ;
         }
         throw new UnsupportedOperationException(method.getMethod());
     }

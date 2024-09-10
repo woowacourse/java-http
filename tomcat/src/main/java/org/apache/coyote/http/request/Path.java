@@ -7,6 +7,10 @@ import java.util.Map;
 
 public class Path {
 
+    private static final String PATH_SEPARATOR = "/";
+    private static final String QUERY_STRING_SEPARATOR = "?";
+    private static final String EXTENSION_SEPARATOR = ".";
+
     private final String uri;
     private final Map<String, String> parameters;
 
@@ -20,27 +24,27 @@ public class Path {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("Path cannot be null or empty");
         }
-        if (!path.startsWith("/")) {
-            throw new IllegalArgumentException("Path must start with '/'");
+        if (!path.startsWith(PATH_SEPARATOR)) {
+            throw new IllegalArgumentException("Path must start with '" + PATH_SEPARATOR + "'");
         }
     }
 
     private String findPath(String path) {
-        if (path.contains("?")) {
-            return path.substring(0, path.indexOf("?"));
+        if (path.contains(QUERY_STRING_SEPARATOR)) {
+            return path.substring(0, path.indexOf(QUERY_STRING_SEPARATOR));
         }
         return path;
     }
 
     private Map<String, String> findParameters(String path) {
-        if (path.contains("?")) {
-            return StringUtils.separateKeyValue(path.substring(path.indexOf("?") + 1));
+        if (path.contains(QUERY_STRING_SEPARATOR)) {
+            return StringUtils.separateKeyValue(path.substring(path.indexOf(QUERY_STRING_SEPARATOR) + 1));
         }
         return new HashMap<>();
     }
 
     public boolean isResourceUri() {
-        return uri.contains(".");
+        return uri.contains(EXTENSION_SEPARATOR);
     }
 
     public boolean hasQueryParameter() {

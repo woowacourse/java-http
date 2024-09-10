@@ -5,11 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.apache.coyote.util.Constants.KEY_INDEX;
+import static org.apache.coyote.util.Constants.VALUE_INDEX;
+
 public abstract class Header {
 
-    public static final String HEADER_SEPARATOR = ":";
-    public static final String HEADER_DELIMITER = ": ";
+    protected static final String HEADER_SEPARATOR = ":";
+    protected static final String HEADER_DELIMITER = ": ";
     protected static final String CONTENT_LENGTH = "Content-Length";
+
 
     protected final Map<String, String> headers;
 
@@ -17,7 +21,7 @@ public abstract class Header {
         this(splitHeaders.stream()
                 .filter(header -> header.contains(HEADER_SEPARATOR))
                 .map(header -> header.split(HEADER_SEPARATOR))
-                .collect(Collectors.toMap(arr -> arr[0].trim(), arr -> arr[1].trim())));
+                .collect(Collectors.toMap(header -> header[KEY_INDEX].trim(), header -> header[VALUE_INDEX].trim())));
     }
 
     protected Header() {

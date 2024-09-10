@@ -47,11 +47,10 @@ public class LoginController extends AbstractController {
         }
         try {
             Path path = request.getPath();
-            if (login(request, response)) {
-                HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
-                return;
+            HttpMessageGenerator.generateStaticResponse(path.getUri() + MimeType.HTML.getExtension(), HttpStatus.FOUND, response);
+            if (!isLoginSuccess(request, response)) {
+                HttpMessageGenerator.generateStaticResponse(UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED, response);
             }
-            HttpMessageGenerator.generateStaticResponse(UNAUTHORIZED_LOCATION, HttpStatus.UNAUTHORIZED, response);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
             doGet(request, response);
@@ -69,7 +68,7 @@ public class LoginController extends AbstractController {
         response.setRedirectLocation(REDIRECT_LOCATION);
     }
 
-    private boolean login(HttpRequest request, HttpResponse response) {
+    private boolean isLoginSuccess(HttpRequest request, HttpResponse response) {
         try {
             LoginRequestDto loginRequestDto = LoginRequestDto.of(StringUtils.separateKeyValue(request.getBody()));
             User user = loginService.login(loginRequestDto);

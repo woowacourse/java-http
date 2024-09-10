@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;

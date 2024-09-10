@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.catalina.Session;
 import org.apache.catalina.manager.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.catalina.Session;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;

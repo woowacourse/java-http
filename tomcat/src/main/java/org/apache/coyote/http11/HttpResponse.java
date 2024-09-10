@@ -7,10 +7,13 @@ import java.nio.file.Files;
 
 public class HttpResponse {
     //TODO: http상태코드 관리
-    private final String httpStatus;
-    private final String mimeType;
-    private final int contentLength;
-    private final String body;
+    private String httpStatus;
+    private String mimeType;
+    private int contentLength;
+    private String body;
+
+    public HttpResponse() {
+    }
 
     public HttpResponse(String httpStatus, File file) throws IOException {
         this.httpStatus = httpStatus;

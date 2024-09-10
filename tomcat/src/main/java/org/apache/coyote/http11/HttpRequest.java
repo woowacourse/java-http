@@ -9,24 +9,26 @@ import java.util.Map;
 
 //TODO: getAccept에서 text/html 등 리턴하도록 만들
 public class HttpRequest {
-    private final HttpMethod method;
-    private final HttpProtocol protocol;
-    private final String path;
-    private final Map<String, String> queries;
-    private final Map<String, String> headers;
+    private HttpMethod method;
+    private HttpProtocol protocol;
+    private String httpVersion;
+    private String path;
+    private Map<String, String> queries;
+    private Map<String, String> headers;
 
     public static HttpRequest from(BufferedReader request) {
         try {
-            String[] requestFirstLine = request.readLine().split(" ");
-            HttpMethod method = HttpMethod.findByValue(requestFirstLine[0]);
-            Map<String, String> queries = getQueries(requestFirstLine);
-            String path = requestFirstLine[1];
-            String protocol = requestFirstLine[2].split("/")[0];
-            String version = requestFirstLine[2].split("/")[1];
+            String[] requestLine = request.readLine().split(" ");
+            HttpMethod method = HttpMethod.findByValue(requestLine[0]);
+            String httpVersion = requestLine[2];
+            Map<String, String> queries = getQueries(requestLine);
+            String path = requestLine[1];
+            String protocol = requestLine[2].split("/")[0];
+            String version = requestLine[2].split("/")[1];
             HttpProtocol httpProtocol = new HttpProtocol(protocol, version);
             Map<String, String> headers = getHttpHeaders(request);
 
-            return new HttpRequest(method, httpProtocol, path, queries, headers);
+            return new HttpRequest(method, httpProtocol, httpVersion, path, queries, headers);
 
         } catch (IOException e) {
             throw new IllegalArgumentException("HTTP 요청 정보를 파싱하는 중에 에러가 발생했습니다.", e);
@@ -70,10 +72,11 @@ public class HttpRequest {
         return httpHeader;
     }
 
-    public HttpRequest(HttpMethod method, HttpProtocol protocol, String path, Map<String, String> queries,
+    public HttpRequest(HttpMethod method, HttpProtocol protocol, String httpVersion, String path, Map<String, String> queries,
                        Map<String, String> headers) {
         this.method = method;
         this.protocol = protocol;
+        this.httpVersion = httpVersion;
         this.path = path;
         this.queries = queries;
         this.headers = headers;

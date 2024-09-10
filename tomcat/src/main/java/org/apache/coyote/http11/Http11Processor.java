@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import org.apache.coyote.Processor;
@@ -36,25 +35,29 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest request = HttpRequest.from(input);
+            HttpResponse response = new HttpResponse();
 
-            boolean success = processFileRequest(request, outputStream);
+            boolean success = processFileRequest(request, response);
             if (!success) {
-                processControllerRequest(request, outputStream);
+                processControllerRequest(request, response);
             }
+
+            outputStream.write(response.toMessage().getBytes());
+            outputStream.flush();
         } catch (IOException |
                  UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private boolean processFileRequest(HttpRequest request, OutputStream outputStream) {
+    private boolean processFileRequest(HttpRequest request, HttpResponse response) {
         try {
             if (request.getPath().equals("/")) {
-                processString("Hello world!", "200 OK", outputStream);
+                processBody("Hello world!", "200 OK", response);
             } else {
                 try {
                     File requestFile = getRequestFile(request);
-                    processFile(requestFile, "200 OK", outputStream);
+                    processBody(requestFile, "200 OK", response);
                 } catch (NullPointerException e) {
                     log.warn("존재하지 않는 파일 호출 (Path: %s)".formatted(request.getPath()));
                     return false;
@@ -69,32 +72,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void processFile(File file, String httpStatus, OutputStream outputStream) throws IOException {
-        HttpResponse response = new HttpResponse(httpStatus, file);
-        outputStream.write(response.toMessage().getBytes());
-        outputStream.flush();
+    private void processBody(File file, String httpStatus, HttpResponse response) throws IOException {
+        response = new HttpResponse(httpStatus, file);
     }
 
-    private void processString(String body, String httpStatus, OutputStream outputStream) throws IOException {
-        HttpResponse response = new HttpResponse(httpStatus, body);
-        outputStream.write(response.toMessage().getBytes());
-        outputStream.flush();
+    private void processBody(String body, String httpStatus, HttpResponse response) throws IOException {
+        response = new HttpResponse(httpStatus, body);
     }
 
-    private void processControllerRequest(HttpRequest request, OutputStream outputStream) throws IOException {
+    private void processControllerRequest(HttpRequest request, HttpResponse response) throws IOException {
         try {
             FrontController frontController = FrontController.getInstance();
             Controller controller = frontController.mapController(request.getMethod(), request.getPath());
             controller.service(request);
         } catch (Exception e) {
             log.warn("요청을 처리할 수 없습니다.");
-            processNotFoundPage(outputStream);
+            processNotFoundPage(response);
         }
     }
 
-    private void processNotFoundPage(OutputStream outputStream) throws IOException {
+    private void processNotFoundPage(HttpResponse response) throws IOException {
         File file = getFile("/404.html");
-        processFile(file, "404 NOT FOUND", outputStream);
+        processBody(file, "404 NOT FOUND", response);
     }
 
     private File getRequestFile(HttpRequest httpRequest) throws NullPointerException {

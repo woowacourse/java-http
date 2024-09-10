@@ -41,11 +41,11 @@ public class DefaultResourceHandler implements RequestHandler {
     }
 
     private String loginResponse(Request request) throws IOException {
-        QueryParameters methodRequest = QueryParameters.parseFrom(request.getTarget().split("/")[1]);
         if (request.getTarget().contains("?")) {
+            QueryParameters queryParams = QueryParameters.parseFrom(request.getTarget().split("\\?")[1]);
             boolean isLogin = login(
-                    methodRequest.getParam("account"),
-                    methodRequest.getParam("password")
+                    queryParams.getParam("account"),
+                    queryParams.getParam("password")
             );
             if (isLogin) {
                 return Response.writeAsFound(request, "/index.html");

@@ -9,8 +9,10 @@ import java.util.Optional;
 public class Header {
 
     private static final String PAIR_DELIMITER = ":";
+    private static final String JSESSION_ID_KEY = "JSESSIONID";
 
     private final Map<String, String> header = new HashMap<>();
+    private final Cookie cookie;
 
     public static Header empty() {
         return new Header(Collections.emptyList());
@@ -18,6 +20,9 @@ public class Header {
 
     public Header(List<String> header) {
         parseHeader(header);
+
+        this.cookie = new Cookie(this.get(HttpHeaderKey.COOKIE).orElse(""));
+
     }
 
     private void parseHeader(List<String> header) {
@@ -39,6 +44,10 @@ public class Header {
         append(key, value);
     }
 
+    public void appendJSessionId(String id) {
+        append(HttpHeaderKey.SET_COOKIE, JSESSION_ID_KEY + " = " + id);
+    }
+
     public void append(HttpHeaderKey key, String value) {
         append(key.getName(), value);
     }
@@ -53,6 +62,10 @@ public class Header {
 
     public Optional<String> get(String key) {
         return Optional.ofNullable(header.get(key));
+    }
+
+    public Optional<String> getJSessionId() {
+        return cookie.get(JSESSION_ID_KEY);
     }
 
     public Map<String, String> getHeader() {

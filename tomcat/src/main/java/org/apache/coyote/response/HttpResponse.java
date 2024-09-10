@@ -68,7 +68,11 @@ public class HttpResponse {
         return this;
     }
 
-    public String build() {
+    public byte[] getBytes() {
+        return this.build().getBytes();
+    }
+
+    private String build() {
         return String.join("\r\n",
                 httpStatusCode.buildMessage(),
                 responseHeader.buildMessage(),

@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpHeader httpHeader = new HttpHeader(readRequestHeaders(reader));
             RequestBody requestBody = readRequestBody(reader, httpHeader);
 
-            final String response = handle(new HttpRequest(requestLine, httpHeader, requestBody));
+            HttpResponse response = handle(new HttpRequest(requestLine, httpHeader, requestBody));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -86,10 +86,9 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String handle(HttpRequest request) {
+    private HttpResponse handle(HttpRequest request) {
         if (request.pointsTo(GET, "/")) {
-            return HttpResponse.ofContent("Hello world!")
-                    .build();
+            return HttpResponse.ofContent("Hello world!");
         }
 
         if (request.pointsTo(GET, "/login")) {
@@ -104,19 +103,18 @@ public class Http11Processor implements Runnable, Processor {
             return saveUser(request);
         }
 
-        return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK)
-                .build();
+        return HttpResponse.ofStaticFile(request.getPath().substring(1), HttpStatusCode.OK);
     }
 
-    private String getLoginPage(HttpRequest request) {
+    private HttpResponse getLoginPage(HttpRequest request) {
         if (request.hasSession() && sessionManager.hasId(request.getSession())) {
-            return HttpResponse.redirectTo("/index.html").build();
+            return HttpResponse.redirectTo("/index.html");
         }
 
-        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK).build();
+        return HttpResponse.ofStaticFile("login.html", HttpStatusCode.OK);
     }
 
-    private String login(HttpRequest request) {
+    private HttpResponse login(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
 
         if (!requestBody.containsAll("account", "password")) {
@@ -131,14 +129,13 @@ public class Http11Processor implements Runnable, Processor {
             String sessionId = saveSessionAndGetId(user);
             sessionManager.add(sessionId, Session.ofUser(user));
             return HttpResponse.redirectTo("/index.html")
-                    .setCookie(HttpCookie.ofSessionId(sessionId))
-                    .build();
+                    .setCookie(HttpCookie.ofSessionId(sessionId));
         }
 
-        return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED).build();
+        return HttpResponse.ofStaticFile("401.html", HttpStatusCode.UNAUTHORIZED);
     }
 
-    private String saveUser(HttpRequest request) {
+    private HttpResponse saveUser(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
 
         if (!requestBody.containsAll("account", "email", "password")) {
@@ -154,8 +151,7 @@ public class Http11Processor implements Runnable, Processor {
             InMemoryUserRepository.save(user);
             String sessionId = saveSessionAndGetId(user);
             return HttpResponse.redirectTo("/index.html")
-                    .setCookie(HttpCookie.ofSessionId(sessionId))
-                    .build();
+                    .setCookie(HttpCookie.ofSessionId(sessionId));
         }
 
         throw new UncheckedServletException("이미 존재하는 ID입니다.");

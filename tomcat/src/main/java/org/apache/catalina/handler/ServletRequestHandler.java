@@ -11,8 +11,8 @@ import org.apache.coyote.http11.Http11Response;
 public class ServletRequestHandler {
 
     private static final String SUCCESS_STATUS_CODE = "200 OK";
-    private static final String FOUND_STATUS_CODE = "302 FOUND";
-    private static final String UNAUTHORIZED_STATUS_CODE = "401 UNAUTHORIZED";
+    private static final String FOUND_STATUS_CODE = "302 Found";
+    private static final String UNAUTHORIZED_STATUS_CODE = "401 Unauthorized";
     private static final String STATIC_PATH_PREFIX = "static";
     private static final String DEFAULT_HTML_PATH = ".html";
 
@@ -24,19 +24,18 @@ public class ServletRequestHandler {
 
     public Http11Response handle(Http11Request request) {
         final Http11Method httpMethod = request.getHttpMethod();
-        final String requestURI = request.getRequestURI();
         if (Http11Method.POST.equals(httpMethod)) {
             return handlePost(request);
         }
         if (Http11Method.GET.equals(httpMethod)) {
             return handleGet(request);
         }
-        throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI);
+        throw new IllegalArgumentException("해당 메서드는 지원하지 않습니다: " + httpMethod); // TODO: 405 처리
     }
 
     private Http11Response handlePost(Http11Request request) {
         final String requestURI = request.getRequestURI();
-        return createResponse(SUCCESS_STATUS_CODE, DEFAULT_HTML_PATH, requestURI);
+        throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
 
     private Http11Response handleGet(Http11Request request) {
@@ -51,7 +50,7 @@ public class ServletRequestHandler {
         if (requestURI.contains(".")) {
             return handleGetStatic(requestURI);
         }
-        return createResponse(SUCCESS_STATUS_CODE, DEFAULT_HTML_PATH, requestURI);
+        throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
 
     private Http11Response handleGetLogin(Map<String, String> queryString) {

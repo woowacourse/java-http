@@ -12,7 +12,7 @@ public class ViewResolver {
     public String resolve(String resourcePath) {
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
         if (resource == null) {
-            throw new IllegalArgumentException("해당 경로의 응답 파일이 존재하지 않습니다: " + resourcePath);
+            throw new IllegalArgumentException("해당 경로의 응답 파일이 존재하지 않습니다: " + resourcePath); // TODO: 404 처리
         }
         try {
             final Path path = Paths.get(resource.toURI());

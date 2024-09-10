@@ -7,8 +7,8 @@ import org.apache.coyote.http11.httpmessage.HttpHeaders;
 
 public class Response {
 
-    private final HttpHeaders headers;
     private final StatusLine statusLine;
+    private final HttpHeaders headers;
     private final String content;
 
     public static ResponseBuilder builder() {
@@ -16,8 +16,8 @@ public class Response {
     }
 
     public Response(StatusLine statusLine, HttpHeaders headers, String content) {
-        this.headers = headers;
         this.statusLine = statusLine;
+        this.headers = headers;
         this.content = content;
     }
 

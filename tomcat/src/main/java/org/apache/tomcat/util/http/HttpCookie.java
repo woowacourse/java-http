@@ -1,4 +1,4 @@
-package org.apache.catalina.connector.http;
+package org.apache.tomcat.util.http;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.catalina.connector.http.HttpResponse;
-import org.apache.catalina.engine.CatalinaServletEngine;
+import org.apache.catalina.connector.HttpResponse;
+import org.apache.catalina.core.StandardContext;
 import org.apache.coyote.Processor;
+import org.apache.tomcat.util.http.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
                 String body = parseBody(bufferedReader, headers);
                 HttpResponse httpResponse = HttpResponse.from("HTTP/1.1");
 
-                CatalinaServletEngine.processRequest(requestLineElements, headers, body, httpResponse);
+                StandardContext.processRequest(requestLineElements, headers, body, httpResponse);
 
                 outputStream.write(httpResponse.buildResponse().getBytes());
                 outputStream.flush();

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.tomcat.util.http;
 
 public enum RequestLine {
     HTTP_METHOD,

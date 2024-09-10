@@ -1,7 +1,7 @@
-package org.apache.catalina.engine;
+package org.apache.catalina.core;
 
-import static org.apache.coyote.http11.RequestLine.HTTP_METHOD;
-import static org.apache.coyote.http11.RequestLine.REQUEST_URI;
+import static org.apache.tomcat.util.http.RequestLine.HTTP_METHOD;
+import static org.apache.tomcat.util.http.RequestLine.REQUEST_URI;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,22 +17,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.catalina.connector.http.HttpCookie;
-import org.apache.catalina.connector.http.HttpResponse;
-import org.apache.catalina.connector.http.HttpStatus;
+import org.apache.tomcat.util.http.HttpCookie;
+import org.apache.catalina.connector.HttpResponse;
+import org.apache.tomcat.util.http.HttpStatus;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.RequestLine;
+import org.apache.tomcat.util.http.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 
-public class CatalinaServletEngine {
+public class StandardContext {
 
-    private static final Logger log = LoggerFactory.getLogger(CatalinaServletEngine.class);
+    private static final Logger log = LoggerFactory.getLogger(StandardContext.class);
 
     public static void processRequest(Map<RequestLine, String> requestLine, Map<String, String> headers, String body, HttpResponse response) {
         if (requestLine.get(REQUEST_URI).equals("/")) {
@@ -97,7 +97,7 @@ public class CatalinaServletEngine {
 
     private static String probeContentType(String url) {
         try {
-            return Files.probeContentType(Paths.get(Objects.requireNonNull(CatalinaServletEngine.class.getClassLoader()
+            return Files.probeContentType(Paths.get(Objects.requireNonNull(StandardContext.class.getClassLoader()
                     .getResource("static" + url)).toURI()));
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
@@ -106,7 +106,7 @@ public class CatalinaServletEngine {
 
     private static String findStaticFile(String url) {
         try {
-            URL resource = CatalinaServletEngine.class.getClassLoader().getResource("static" + url);
+            URL resource = StandardContext.class.getClassLoader().getResource("static" + url);
             if (Objects.isNull(resource)) {
                 return StringUtils.EMPTY;
             }

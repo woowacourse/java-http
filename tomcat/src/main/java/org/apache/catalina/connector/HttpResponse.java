@@ -1,10 +1,11 @@
-package org.apache.catalina.connector.http;
+package org.apache.catalina.connector;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.HttpStatus;
 
 public class HttpResponse {
     private final String httpVersion;

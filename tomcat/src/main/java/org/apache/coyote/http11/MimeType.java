@@ -5,9 +5,10 @@ import java.util.Arrays;
 
 public enum MimeType {
 
-    HTML("text/html;charset=utf-8"),
+    HTML("text/html"),
     CSS("text/css"),
-    JS("text/js");
+    JS("text/js"),
+    ALL("*/*");
 
     public static final String EXTENSION_DELIMITER = ".";
     private final String value;
@@ -18,10 +19,11 @@ public enum MimeType {
 
     public static MimeType from(String name) {
         return Arrays.stream(values())
-                .filter(mimeType -> mimeType.name().equalsIgnoreCase(name))
+                .filter(mimeType -> mimeType.value.equals(name))
                 .findAny()
                 .orElseThrow(
-                        () -> new UncheckedServletException(new IllegalArgumentException("유효한 Mime Type 이 아닙니다.")));
+                        () -> new UncheckedServletException(
+                                new IllegalArgumentException(String.format("유효한 Mime Type 이 아닙니다. %s", name))));
     }
 
     public static MimeType fromFileName(String fileName) {

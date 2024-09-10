@@ -53,7 +53,7 @@ public class HttpResponse {
     }
 
     private static int calculateContentLength(String content) {
-        return content.replaceAll("\r\n", "\n").getBytes(StandardCharsets.UTF_8).length;
+        return content.getBytes(StandardCharsets.UTF_8).length;
     }
 
     private static String getContentType(String uri) {

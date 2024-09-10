@@ -33,10 +33,7 @@ public class QueryStrings {
         if (source == null || source.isBlank()) {
             return false;
         }
-        if (QUERY_STRING_PATTERN.matcher(source).matches()) {
-            return true;
-        }
-        return false;
+        return QUERY_STRING_PATTERN.matcher(source).matches();
     }
 
     private static Map<String, List<String>> parseQueryString(String source) {

@@ -10,7 +10,7 @@ import org.apache.coyote.HttpResponse;
 public class Http11Response implements HttpResponse {
 
     private Http11ResponseStartLine startLine;
-    private Http11ResponseHeaders headers;
+    private final Http11ResponseHeaders headers;
     private String body;
 
     private Http11Response(Http11ResponseStartLine startLine, Http11ResponseHeaders headers, String body) {

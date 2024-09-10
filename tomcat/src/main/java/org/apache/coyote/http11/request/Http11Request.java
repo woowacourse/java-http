@@ -10,13 +10,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.session.Session;
 import org.apache.coyote.session.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Http11Request implements HttpRequest {
 
@@ -25,7 +22,6 @@ public class Http11Request implements HttpRequest {
     private static final int HEADER_VALUE_INDEX = 1;
     private static final int HEADER_INDEX_SIZE = 2;
     private static final SessionManager sessionManager = new SessionManager();
-    private static final Logger log = LoggerFactory.getLogger(Http11Request.class);
 
     private final Http11RequestStartLine startLine;
     private final Http11RequestHeader headers;
@@ -53,7 +49,7 @@ public class Http11Request implements HttpRequest {
 
         Http11RequestStartLine startLine = Http11RequestStartLine.from(bufferedReader.readLine());
         Http11RequestHeader httpHeaders = Http11RequestHeader.from(createHttpHeaderMap(bufferedReader));
-        Session session = getSession(httpHeaders);
+        Session session = getOrCreateSession(httpHeaders);
 
         if (startLine.getMethod().hasBody()) {
             HttpRequestBody body = HttpRequestBody.create(createBody(bufferedReader, httpHeaders.getContentLength()));
@@ -62,15 +58,21 @@ public class Http11Request implements HttpRequest {
         return new Http11Request(startLine, httpHeaders, session);
     }
 
-    private static Session getSession(Http11RequestHeader httpHeaders) {
-        Optional<String> optionalSessionId = httpHeaders.getCookieValue(Session.SESSION_COOKIE_KEY);
-        if (optionalSessionId.isPresent()) {
-            String sessionId = optionalSessionId.get();
-            try {
-                return sessionManager.findSession(sessionId);
-            } catch (IllegalArgumentException e) {
-            }
+    private static Session getOrCreateSession(Http11RequestHeader httpHeaders) {
+        return httpHeaders.getCookieValue(Session.SESSION_COOKIE_KEY)
+                .map(Http11Request::getOrCreateSession)
+                .orElseGet(Http11Request::createSession);
+    }
+
+    private static Session getOrCreateSession(String sessionId) {
+        try {
+            return sessionManager.findSession(sessionId);
+        } catch (IllegalArgumentException e) {
+            return createSession();
         }
+    }
+
+    private static Session createSession() {
         Session session = new Session(UUID.randomUUID().toString());
         sessionManager.add(session);
         return session;

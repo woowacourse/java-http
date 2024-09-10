@@ -5,7 +5,7 @@ import java.util.List;
 
 public class HandlerContainer {
 
-    private static List<Controller> handlers = new ArrayList<>();
+    private static final List<Controller> handlers = new ArrayList<>();
 
     static {
         handlers.add(new HomeController());

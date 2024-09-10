@@ -6,11 +6,17 @@ import org.apache.coyote.http11.HttpResponse;
 
 public class FrontController {
 
+    private static final FrontController instance = new FrontController();
+
     private final RequestHandlerMapper requestHandlerMapper = new RequestHandlerMapper();
 
-    public FrontController() {
+    private FrontController() {
         requestHandlerMapper.register(new LoginRequestHandler());
         requestHandlerMapper.register(new StaticResourceRequestHandler());
+    }
+
+    public static FrontController getInstance() {
+        return instance;
     }
 
     public HttpResponse service(HttpRequest request) {

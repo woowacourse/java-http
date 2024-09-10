@@ -13,9 +13,9 @@ public class HttpRequest {
 	private final Body body;
 
 	public HttpRequest(BufferedReader reader) throws IOException {
-		String initialLine = reader.readLine();
-		this.method = Method.request(initialLine);
-		this.path = Path.request(initialLine);
+		String requestLine = reader.readLine();
+		this.method = Method.request(requestLine);
+		this.path = Path.request(requestLine);
 		this.headers = Headers.request(reader);
 		this.body = Body.request(headers, reader);
 	}

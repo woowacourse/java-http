@@ -32,6 +32,6 @@ public class HttpResponseGenerator {
 
     public static String getInternalServerErrorResponse() {
         return String.join("\r\n",
-                "HTTP/1.1 401 Internal Server Error ");
+                "HTTP/1.1 500 Internal Server Error ");
     }
 }

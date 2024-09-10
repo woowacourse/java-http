@@ -35,7 +35,7 @@ public class LoginController implements Controller {
         return LoginControllerAdapter.adapt(httpRequest);
     }
 
-    public HttpResponse loginView(HttpRequest httpRequest) {
+    public HttpResponse loginView() {
         return new ResponseBuilder()
                 .statusCode(HttpStatusCode.OK_200)
                 .viewUrl("/login.html")

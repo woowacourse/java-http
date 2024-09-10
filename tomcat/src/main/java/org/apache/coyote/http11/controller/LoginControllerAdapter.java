@@ -42,6 +42,6 @@ public enum LoginControllerAdapter {
     }
 
     private static HttpResponse loginView(HttpRequest request) {
-        return loginController.loginView(request);
+        return loginController.loginView();
     }
 }

@@ -5,13 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import support.BaseHttpTest;
 import support.StubSocket;
 
-class Http11ProcessorTest {
+class Http11ProcessorTest extends BaseHttpTest {
 
     @Test
     @DisplayName("GET / 요청 시 index.html 파일을 반환한다")
@@ -70,7 +69,7 @@ class Http11ProcessorTest {
     @Test
     void loginSuccess() {
         // given
-        final String httpRequest = resolveGetRequestByPath("http://localhost:8080/login?account=gugu&password=password");
+        final String httpRequest = resolveGetRequestByPath("/login?account=gugu&password=password");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
@@ -87,7 +86,7 @@ class Http11ProcessorTest {
     @Test
     void loginFail() throws URISyntaxException, IOException {
         // given
-        final String httpRequest = resolveGetRequestByPath("http://localhost:8080/login?account=wrong&password=wrongpassword");
+        final String httpRequest = resolveGetRequestByPath("/login?account=wrong&password=wrongpassword");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
@@ -140,30 +139,5 @@ class Http11ProcessorTest {
         // then
         final String expected = resolve302Response("/index.html");
         assertThat(socket.output()).startsWith(expected);
-    }
-
-    private String resolve200Response(String extension, URL url) throws URISyntaxException, IOException {
-        String file = Files.readString(Path.of(url.toURI()));
-        return "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/" + extension + ";charset=utf-8 \r\n" +
-                "Content-Length: " + file.getBytes().length + " \r\n" +
-                "\r\n" +
-                file;
-    }
-
-    private String resolve302Response(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location
-        );
-    }
-
-    private String resolveGetRequestByPath(String path) {
-        return String.join("\r\n",
-                "GET " + path + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
     }
 }

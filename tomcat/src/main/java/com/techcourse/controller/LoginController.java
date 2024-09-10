@@ -7,9 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.catalina.controller.Handler;
-import org.apache.catalina.controller.HttpEndpoint;
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Queries;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -20,14 +18,13 @@ import org.apache.coyote.http11.response.ResponseFile;
 public class LoginController extends AbstractController {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final HttpEndpoint LOGIN_POST = new HttpEndpoint("/login", HttpMethod.POST);
-    private static final HttpEndpoint LOGIN_GET = new HttpEndpoint("/login", HttpMethod.GET);
+    private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE = "/login.html";
 
     public LoginController() {
         List<Handler> handlers = List.of(
-                new Handler(LOGIN_POST, this::doLoginPost),
-                new Handler(LOGIN_GET, this::doLoginGet)
+                Handler.ofGet(LOGIN_PATH, this::doLoginGet),
+                Handler.ofPost(LOGIN_PATH, this::doLoginPost)
         );
         registerHandlers(handlers);
     }

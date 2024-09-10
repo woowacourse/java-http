@@ -1,13 +1,13 @@
-package org.apache.coyote.http11.view;
+package org.apache.coyote.http11.io;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class InputView {
+public class HttpRequestReader {
 
     private final BufferedReader bufferedReader;
 
-    public InputView(BufferedReader bufferedReader) {
+    public HttpRequestReader(BufferedReader bufferedReader) {
         this.bufferedReader = bufferedReader;
     }
 

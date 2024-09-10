@@ -18,9 +18,9 @@ import org.apache.coyote.http11.domain.request.RequestHeaders;
 import org.apache.coyote.http11.domain.request.RequestLine;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 import org.apache.coyote.http11.domain.response.HttpStatus;
-import org.apache.coyote.http11.dto.HttpResponseDto;
-import org.apache.coyote.http11.view.InputView;
-import org.apache.coyote.http11.view.OutputView;
+import org.apache.coyote.http11.io.HttpRequestReader;
+import org.apache.coyote.http11.io.HttpResponseWriter;
+import org.apache.coyote.http11.message.HttpResponseMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,44 +49,45 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStreamReader = new InputStreamReader(connection.getInputStream());
              final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream())) {
-            InputView inputView = new InputView(new BufferedReader(inputStreamReader));
-            HttpRequest httpRequest = readHttpRequest(inputView);
+            HttpRequestReader httpRequestReader = new HttpRequestReader(new BufferedReader(inputStreamReader));
+            HttpRequest httpRequest = readHttpRequest(httpRequestReader);
             HttpResponse httpResponse = HttpResponse.status(HttpStatus.OK).build();
 
             Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);
 
-            OutputView outputView = new OutputView(outputStreamWriter);
-            outputView.write(HttpResponseDto.from(httpResponse));
+            HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStreamWriter);
+            httpResponseWriter.write(HttpResponseMessage.from(httpResponse));
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest readHttpRequest(InputView inputView) throws IOException {
-        RequestLine requestLine = new RequestLine(inputView.readLine());
-        RequestHeaders requestHeaders = new RequestHeaders(readHttpHeaders(inputView));
-        RequestBody requestBody = new RequestBody(readRequestBody(inputView, requestHeaders));
+    private HttpRequest readHttpRequest(HttpRequestReader httpRequestReader) throws IOException {
+        RequestLine requestLine = new RequestLine(httpRequestReader.readLine());
+        RequestHeaders requestHeaders = new RequestHeaders(readHttpHeaders(httpRequestReader));
+        RequestBody requestBody = new RequestBody(readRequestBody(httpRequestReader, requestHeaders));
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
-    private List<String> readHttpHeaders(InputView inputView) throws IOException {
+    private List<String> readHttpHeaders(HttpRequestReader httpRequestReader) throws IOException {
         List<String> headerLines = new ArrayList<>();
         String line;
-        while (!StringUtils.isEmpty(line = inputView.readLine())) {
+        while (!StringUtils.isEmpty(line = httpRequestReader.readLine())) {
             headerLines.add(line);
         }
 
         return headerLines;
     }
 
-    private String readRequestBody(InputView inputView, RequestHeaders requestHeaders) throws IOException {
+    private String readRequestBody(HttpRequestReader httpRequestReader, RequestHeaders requestHeaders)
+            throws IOException {
         String contentLengthHeader = requestHeaders.getHeader("Content-Length");
         if (contentLengthHeader == null) {
             return StringUtils.EMPTY;
         }
 
         int contentLength = Integer.parseInt(contentLengthHeader);
-        return inputView.read(contentLength);
+        return httpRequestReader.read(contentLength);
     }
 }

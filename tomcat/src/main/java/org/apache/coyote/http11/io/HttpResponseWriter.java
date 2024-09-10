@@ -1,23 +1,23 @@
-package org.apache.coyote.http11.view;
+package org.apache.coyote.http11.io;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.http11.dto.HttpResponseDto;
+import org.apache.coyote.http11.message.HttpResponseMessage;
 
-public class OutputView {
+public class HttpResponseWriter {
 
     private static final String STATUS_LINE = "HTTP/1.1 %d %s";
     private static final String HEADER_LINE = "%s: %s";
 
     private final OutputStreamWriter outputStreamWriter;
 
-    public OutputView(OutputStreamWriter outputStreamWriter) {
+    public HttpResponseWriter(OutputStreamWriter outputStreamWriter) {
         this.outputStreamWriter = outputStreamWriter;
     }
 
-    public void write(HttpResponseDto httpResponse) throws IOException {
+    public void write(HttpResponseMessage httpResponse) throws IOException {
         writeStatusLine(httpResponse.httpStatusCode(), httpResponse.reasonPhrase());
         writeHeaders(httpResponse.responseHeaders());
         writeNewLine();

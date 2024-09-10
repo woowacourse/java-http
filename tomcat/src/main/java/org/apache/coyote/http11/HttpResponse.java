@@ -4,9 +4,9 @@ public class HttpResponse {
 
     private final HttpHeaders headers;
     private final StatusCode statusCode;
-    private final String body;
+    private final HttpBody body;
 
-    public HttpResponse(HttpHeaders headers, StatusCode statusCode, String body) {
+    public HttpResponse(HttpHeaders headers, StatusCode statusCode, HttpBody body) {
         this.headers = headers;
         this.statusCode = statusCode;
         this.body = body;
@@ -24,7 +24,7 @@ public class HttpResponse {
         return statusCode;
     }
 
-    public String getBody() {
-        return body;
+    public String getContent() {
+        return body.getContent();
     }
 }

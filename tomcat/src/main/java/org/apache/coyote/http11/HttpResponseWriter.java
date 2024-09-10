@@ -13,7 +13,7 @@ public class HttpResponseWriter {
     public static String write(HttpResponse response) {
         StatusCode statusCode = response.getStatusCode();
         HttpHeaders headers = response.getHeaders();
-        String body = response.getBody();
+        String content = response.getContent();
 
         StringBuilder builder = new StringBuilder();
         builder.append("%s %s %s".formatted(HTTP_VERSION, statusCode.getCode(), statusCode.getMessage()));
@@ -23,7 +23,7 @@ public class HttpResponseWriter {
             builder.append(CRLF);
         }
         builder.append("\r\n");
-        builder.append(body);
+        builder.append(content);
         return builder.toString();
     }
 }

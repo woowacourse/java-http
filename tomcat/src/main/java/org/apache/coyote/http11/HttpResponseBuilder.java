@@ -5,7 +5,7 @@ public class HttpResponseBuilder {
     private final HttpHeaders headers = new HttpHeaders();
 
     private StatusCode statusCode;
-    private String body;
+    private HttpBody body;
 
     HttpResponseBuilder() {
     }
@@ -25,9 +25,13 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder body(String body) {
+    public HttpResponseBuilder body(HttpBody body) {
         this.body = body;
         return this;
+    }
+
+    public HttpResponseBuilder body(String content) {
+        return body(new HttpBody(content));
     }
 
     public HttpResponseBuilder ok() {
@@ -48,7 +52,7 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
-        long contentLength = body == null ? 0 : body.getBytes().length;
+        long contentLength = body.getContentLength();
         headers.put("Content-Length", String.valueOf(contentLength));
         return new HttpResponse(headers, statusCode, body);
     }

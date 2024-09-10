@@ -13,10 +13,11 @@ import org.apache.http.response.HttpResponseGenerator;
 public class StaticResourceHandler extends Handler {
 
     private static final Map<String, String> STATIC_RESOURCE_EXTENSIONS = Map.of(
-            "css", "css",
-            "js", "assets"
+            "html", "",
+            "css", "/css",
+            "js", "/assets"
     );
-    private static final String STATIC_RESOURCE_ROOT_PATH = "static/";
+    private static final String STATIC_RESOURCE_ROOT_PATH = "static";
     private static final String DEFAULT_EXTENSION = ".html";
     private static final String PATH_DELIMITER = "/";
 
@@ -49,8 +50,6 @@ public class StaticResourceHandler extends Handler {
 
         if (STATIC_RESOURCE_EXTENSIONS.containsKey(extension)) {
             return STATIC_RESOURCE_ROOT_PATH
-                    .concat(STATIC_RESOURCE_EXTENSIONS.get(extension))
-                    .concat(PATH_DELIMITER)
                     .concat(path);
         }
 

@@ -22,7 +22,7 @@ class StaticResourceHandlerTest {
         final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
-        final String response = handler.handle(new HttpRequest("GET", "404.html", "HTTP/1.1", null, null));
+        final String response = handler.handle(new HttpRequest("GET", "/404.html", "HTTP/1.1", null, null));
 
         assertThat(response).contains(responseBody);
     }
@@ -34,7 +34,7 @@ class StaticResourceHandlerTest {
         final String fileContent = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
-        final String response = handler.handle(new HttpRequest("GET", "styles.css", "HTTP/1.1", null, null));
+        final String response = handler.handle(new HttpRequest("GET", "/css/styles.css", "HTTP/1.1", null, null));
 
         assertThat(response).contains(fileContent);
     }
@@ -46,7 +46,7 @@ class StaticResourceHandlerTest {
         final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
 
         final StaticResourceHandler handler = StaticResourceHandler.getInstance();
-        final String response = handler.handle(new HttpRequest("GET", "404", "HTTP/1.1", null, null));
+        final String response = handler.handle(new HttpRequest("GET", "/404", "HTTP/1.1", null, null));
 
         assertThat(response).contains(responseBody);
     }

@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
 
-    private final String request = """
-            GET /login/hello?account=account&password=password HTTP/1.1
-            Host: localhost:8080
-            Connection: keep-alive
-            Accept: */*
-            Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
-            Custom: hello: hi
-            
-            nickname=hi&role=member""";
+    private final String request = String.join("\r\n",
+            "GET /login/hello?account=account&password=password HTTP/1.1",
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Accept: */*",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+            "Custom: hello: hi",
+            "",
+            "nickname=hi&role=member");
 
     @Test
     @DisplayName("요청 메시지에서 method를 파싱해서 저장한다.")
@@ -102,15 +102,15 @@ class HttpRequestTest {
     @Test
     @DisplayName("모든 파라미터를 가져온다.")
     void getParameters() {
-        String request = """
-                GET /login/hello?account=account&password=password HTTP/1.1
-                Host: localhost:8080
-                Connection: keep-alive
-                Accept: */*
-                Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
-                Custom: hello: hi
-                
-                nickname=hi,hello,bye&role=member""";
+        String request = String.join("\r\n",
+                "GET /login/hello?account=account&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "Custom: hello: hi",
+                "",
+                "nickname=hi,hello,bye&role=member");
 
         HttpRequest httpRequest = new HttpRequest(request);
 

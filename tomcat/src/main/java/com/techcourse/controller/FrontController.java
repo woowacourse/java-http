@@ -42,24 +42,21 @@ public class FrontController extends Controller {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        Controller handler = getHandler(request.getURI());
-        String fileName = getFileName(request.getURI());
+        String uri = request.getURI();
+        Controller handler = getHandler(uri);
+        String fileName = getFileName(uri);
         if (Objects.isNull(handler) && FileExtension.isFileExtension(fileName)) {
             try {
-                HttpResponse response = new HttpResponse();
-                ResponseBody responseBody = new ResponseBody(readResource(fileName));
-                response.setStatus(HttpStatus.OK);
-                response.setContentType(MimeType.getMimeType(fileName));
-                response.setBody(responseBody);
+                HttpResponse response = getResourceResponse(fileName);
                 return response;
             } catch (InvalidResourceException e) {
-                log.error("Error processing request for endpoint: {}, message: {}", request.getURI(), e.getMessage());
+                log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
 
                 handler = NotFoundController.getInstance();
             }
         }
         if (Objects.isNull(handler)) {
-            log.error("Error processing request for endpoint: {}", request.getURI());
+            log.error("Error processing request for endpoint: {}", uri);
 
             handler = NotFoundController.getInstance();
         }
@@ -67,12 +64,21 @@ public class FrontController extends Controller {
             HttpResponse response = handler.handle(request);
             return response;
         } catch (UnsupportedMethodException e) {
-            log.error("Error processing request for endpoint: {}, message: {}", request.getURI(), e.getMessage());
+            log.error("Error processing request for endpoint: {}, message: {}", uri, e.getMessage());
 
             handler = MethodNotAllowedController.getInstance();
             HttpResponse response = handler.handle(request);
             return response;
         }
+    }
+
+    private HttpResponse getResourceResponse(String fileName) throws IOException {
+        HttpResponse response = new HttpResponse();
+        ResponseBody responseBody = new ResponseBody(readResource(fileName));
+        response.setStatus(HttpStatus.OK);
+        response.setContentType(MimeType.getMimeType(fileName));
+        response.setBody(responseBody);
+        return response;
     }
 
     private Controller getHandler(String uri) {

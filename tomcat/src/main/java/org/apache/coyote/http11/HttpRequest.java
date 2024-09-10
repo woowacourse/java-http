@@ -59,7 +59,7 @@ public class HttpRequest {
     }
 
     public boolean uriStartsWith(String startsWith) {
-        return httpRequestLine.targetStartsWith(startsWith);
+        return httpRequestLine.uriStartsWith(startsWith);
     }
 
     public Optional<String> getSessionFromCookie() {

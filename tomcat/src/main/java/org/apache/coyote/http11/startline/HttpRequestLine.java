@@ -48,7 +48,7 @@ public class HttpRequestLine {
         return requestUri.isBlank();
     }
 
-    public boolean targetStartsWith(String startsWith) {
+    public boolean uriStartsWith(String startsWith) {
         return requestUri.startsWith(startsWith);
     }
 

@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<RequestLine, String> requestLineElements = extractRequestLine(bufferedReader);
             Map<String, String> headers = parseHeaders(bufferedReader);
             String body = parseBody(bufferedReader, headers);
-            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1");
+            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
 
             StandardContext.processRequest(requestLineElements, headers, body, httpResponse);
 

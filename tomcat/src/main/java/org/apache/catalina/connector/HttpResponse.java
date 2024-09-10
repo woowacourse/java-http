@@ -13,12 +13,8 @@ public class HttpResponse {
     private Map<String, String> headers = new HashMap<>();
     private String body;
 
-    private HttpResponse(String httpVersion) {
+    public HttpResponse(String httpVersion) {
         this.httpVersion = httpVersion;
-    }
-
-    public static HttpResponse from(String httpVersion) {
-        return new HttpResponse(httpVersion);
     }
 
     public void addHttpStatus(HttpStatus httpStatus) {

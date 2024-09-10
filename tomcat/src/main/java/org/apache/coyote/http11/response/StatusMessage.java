@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.response;
 
-public class StatusMessage {
-	private final String value;
+public record StatusMessage(String value) {
 
-	public StatusMessage(String initialLine) {
-		this.value = initialLine.split(" ")[2];
+	public static StatusMessage request(String initialLine) {
+		return new StatusMessage(initialLine.split(" ")[2]);
 	}
 }

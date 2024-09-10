@@ -8,11 +8,15 @@ public class Body {
 
 	private final String value;
 
-	public Body(Headers headers, BufferedReader reader) throws IOException {
-		this.value = parseBody(headers, reader);
+	public Body(String value) {
+		this.value = value;
 	}
 
-	private String parseBody(Headers headers, BufferedReader reader) throws IOException {
+	public static Body request(Headers headers, BufferedReader reader) throws IOException {
+		return new Body(parseBody(headers, reader));
+	}
+
+	private static String parseBody(Headers headers, BufferedReader reader) throws IOException {
 		int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH));
 		if(contentLength > 0) {
 			char[] body = new char[contentLength];

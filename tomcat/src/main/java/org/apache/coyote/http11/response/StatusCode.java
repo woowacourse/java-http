@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.response;
 
-public class StatusCode {
-	private final int value;
+public record StatusCode(int value) {
 
-	public StatusCode(String initialLine) {
-		this.value = Integer.parseInt(initialLine.split(" ")[1]);
+	public static StatusCode request(String initialLine) {
+		return new StatusCode(Integer.parseInt(initialLine.split(" ")[1]));
 	}
 }

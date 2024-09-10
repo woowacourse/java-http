@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.common;
 
-public class VersionOfProtocol {
-	private final String value;
+public record VersionOfProtocol(String value) {
 
-	public VersionOfProtocol(String initialLine) {
-		this.value = initialLine.split(" ")[0];
+	public static VersionOfProtocol request(String initialLine) {
+		return new VersionOfProtocol(initialLine.split(" ")[0]);
 	}
 }

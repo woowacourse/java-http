@@ -24,4 +24,8 @@ public class Headers {
 	public String getValue(String key) {
 		return headers.get(key);
 	}
+
+	public Map<String, String> getHeaders() {
+		return headers;
+	}
 }

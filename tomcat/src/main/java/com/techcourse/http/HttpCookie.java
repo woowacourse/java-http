@@ -31,4 +31,8 @@ public class HttpCookie {
     public String getCookie(String key) {
         return cookies.get(key);
     }
+
+    public void clear() {
+        cookies.clear();
+    }
 }

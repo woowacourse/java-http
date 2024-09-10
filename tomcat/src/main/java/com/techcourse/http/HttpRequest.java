@@ -23,6 +23,14 @@ public class HttpRequest {
         this.cookie = new HttpCookie();
     }
 
+    public boolean hasNotParameter(String key) {
+        return !parameters.containsKey(key);
+    }
+
+    public boolean hasNotParameters() {
+        return parameters.isEmpty();
+    }
+
     public String getParameter(String key) {
         return parameters.get(key);
     }

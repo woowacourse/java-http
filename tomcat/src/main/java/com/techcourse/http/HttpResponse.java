@@ -19,32 +19,30 @@ public class HttpResponse {
     private HttpCookie cookie;
     private String body;
 
-    private HttpResponse(HttpStatusCode statusCode, String body) {
-        this(statusCode, new HashMap<>(), new HttpCookie(), body);
+    public HttpResponse() {
+        this(HttpStatusCode.OK, new HashMap<>(), new HttpCookie(), "");
     }
 
-    private HttpResponse(int statusCode, String body) {
-        this(HttpStatusCode.from(statusCode), new HashMap<>(), new HttpCookie(), body);
+    public HttpResponse ok(String body) {
+        httpStatusCode = HttpStatusCode.OK;
+        this.body = body;
+        return this;
     }
 
-    private HttpResponse(HttpStatusCode statusCode) {
-        this(statusCode, "");
+    public HttpResponse found(String location) {
+        httpStatusCode = HttpStatusCode.FOUND;
+        headers.put("Location", location);
+        return this;
     }
 
-    public static HttpResponse ok(String body) {
-        return new HttpResponse(HttpStatusCode.OK, body);
+    public HttpResponse notFound() {
+        httpStatusCode = HttpStatusCode.NOT_FOUND;
+        return this;
     }
 
-    public static HttpResponse found(String location) {
-        return new HttpResponse(HttpStatusCode.FOUND).setHeader("Location", location);
-    }
-
-    public static HttpResponse notFound() {
-        return new HttpResponse(HttpStatusCode.NOT_FOUND);
-    }
-
-    public static HttpResponse internalServerError() {
-        return new HttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR);
+    public HttpResponse internalServerError() {
+        httpStatusCode = HttpStatusCode.INTERNAL_SERVER_ERROR;
+        return this;
     }
 
     public String build() {
@@ -56,7 +54,14 @@ public class HttpResponse {
         }
 
         return "%s %d %s \r\n%s\r\n%s"
-                .formatted(HTTP_VERSION, httpStatusCode.getCode(), httpStatusCode.getMessage(), getHeadersString(), body);
+                .formatted(HTTP_VERSION, httpStatusCode.getCode(), httpStatusCode.getMessage(), getHeadersString(),
+                        body);
+    }
+
+    public void clear() {
+        headers.clear();
+        cookie.clear();
+        body = "";
     }
 
     private String getHeadersString() {
@@ -69,6 +74,11 @@ public class HttpResponse {
                     .append(CRLF);
         }
         return headersString.toString();
+    }
+
+    public HttpResponse setStatusCode(HttpStatusCode httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
+        return this;
     }
 
     public HttpResponse setHeader(String key, String value) {

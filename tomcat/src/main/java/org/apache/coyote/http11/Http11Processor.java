@@ -96,8 +96,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestURL.equals("/register")) {
-            register(requestBody);
-            String path = "/success";
+            String path = register(requestBody);
             doGet(path, outputStream);
         }
     }
@@ -109,19 +108,31 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private void register(String requestBody) {
+    private String register(String requestBody) {
         Map<String, String> userInfo = parseUserInfo(requestBody);
 
         String account = userInfo.get("account");
         String password = userInfo.get("password");
         String email = userInfo.get("email");
 
-        User newUser = new User(account, password, email);
-        InMemoryUserRepository.save(newUser);
-        log.info("user: {}의 회원가입이 완료되었습니다.", newUser.getAccount());
+        try {
+            InMemoryUserRepository.findByAccount(account)
+                    .ifPresentOrElse(
+                            user -> {
+                                throw new IllegalArgumentException("이미 존재하는 계정명입니다.");
+                            },
+                            () -> {
                                 UserInfo userRegisterInfo = new UserInfo(account, password, email);
                                 User newUser = InMemoryUserRepository.save(userRegisterInfo);
                                 log.info("user: {}의 회원가입이 완료되었습니다.", newUser.getAccount());
+                            }
+                    );
+        } catch (IllegalArgumentException e) {
+            log.info("오류 발생: {}", e.getMessage());
+            return "/fail";
+        }
+
+        return "/success";
     }
 
     private void doGet(final String requestURL, final OutputStream outputStream) throws IOException {
@@ -154,6 +165,12 @@ public class Http11Processor implements Runnable, Processor {
         if (requestURL.equals("/success")) {
             result[0] = "201 CREATED";
             result[1] = "/static/index.html";
+            return result;
+        }
+
+        if (requestURL.equals("/fail")) {
+            result[0] = "400 BAD REQUEST";
+            result[1] = "/static/register.html";
             return result;
         }
 
@@ -199,7 +216,13 @@ public class Http11Processor implements Runnable, Processor {
         result[0] = "302 FOUND";
 
         int index = requestURL.indexOf(QUERY_PARAMETER);
-        boolean isMember = isValidUser(parseUserInfo(requestURL.substring(index + 1)));
+        boolean isMember = false;
+
+        try {
+            isMember = isValidUser(parseUserInfo(requestURL.substring(index + 1)));
+        } catch (IllegalArgumentException e) {
+            log.info("오류 발생: {}", e.getMessage());
+        }
 
         if (!isMember) {
             result[0] = "401 UNAUTHORIZED";

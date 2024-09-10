@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +10,8 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -246,6 +249,29 @@ class Http11ProcessorTest {
                     "");
 
             assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @DisplayName("회원가입 폼 입력이 올바르지 않는 경우 예외가 발생한다.")
+        @ParameterizedTest
+        @ValueSource(strings = {"account=gugu", "wrongaccount=gugu&password=password&email=hkkang%40woowahan.com"})
+        void registerFailure(String invalidBody) {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 80 ",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "Accept: */* ",
+                    "",
+                    invalidBody);
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when & then
+            assertThatThrownBy(() -> processor.process(socket))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
     }
 }

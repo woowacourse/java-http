@@ -157,6 +157,9 @@ public class Http11Processor implements Runnable, Processor {
                     email = tokenizer.nextToken();
                 }
             }
+            if (account.isBlank() || password.isBlank() || email.isBlank()) { // TODO: 예외처리 개선
+                throw new IllegalArgumentException("올바르지 않은 request body 형식입니다.");
+            }
             InMemoryUserRepository.save(new User(account, password, email));
             return String.join("\r\n",
                     "HTTP/1.1 302 Found ",

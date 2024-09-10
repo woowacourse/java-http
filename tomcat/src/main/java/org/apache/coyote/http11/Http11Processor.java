@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.ObjectMapper;
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.RequestHandler;
 import org.apache.coyote.RequestHandlerMapping;
-import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final Http11Request request = ObjectMapper.deserialize(bufferedReader);
+            final HttpRequest request = ObjectMapper.deserialize(bufferedReader);
 
             RequestHandler requestHandler = requestHandlerMapping.getRequestHandler(request);
             HttpResponse response = new Http11Response();

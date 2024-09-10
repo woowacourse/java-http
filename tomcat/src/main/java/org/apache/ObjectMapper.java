@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.Http11RequestBody;
@@ -19,15 +20,16 @@ public class ObjectMapper {
         return response.getResponseMessage().getBytes();
     }
 
-    public static Http11Request deserialize(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest deserialize(BufferedReader bufferedReader) throws IOException {
         return readRequest(bufferedReader);
     }
 
-    private static Http11Request readRequest(BufferedReader bufferedReader) throws IOException {
+    private static HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
         final Http11RequestLine requestLine = getLine(bufferedReader);
         final Http11RequestHeaders requestHeaders = getHeaders(bufferedReader);
-        final Http11RequestBody requestBody = getBody(bufferedReader, requestHeaders.getValue("Content-Length"));
-        final Http11Request request = new Http11Request(requestLine, requestHeaders, requestBody);
+        final Http11RequestBody requestBody = getBody(bufferedReader,
+                requestHeaders.getValue("Content-Type"));
+        final HttpRequest request = new Http11Request(requestLine, requestHeaders, requestBody);
         return request;
     }
 

@@ -1,9 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-
 public class AbstractController implements Controller {
 
     @Override
@@ -24,12 +20,7 @@ public class AbstractController implements Controller {
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
     }
 
-    protected byte[] readResource(String resourceName) {
-        String resourcePath = getClass().getClassLoader().getResource("static/" + resourceName).getPath();
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(resourcePath))) {
-            return bufferedInputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    protected final byte[] readResource(String resourceName) {
+        return ResourceFinder.readResource(resourceName, getClass().getClassLoader());
     }
 }

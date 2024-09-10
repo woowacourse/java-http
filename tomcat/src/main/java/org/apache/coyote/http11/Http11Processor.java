@@ -3,12 +3,13 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.component.handler.HandlerMapper;
+import org.apache.coyote.http11.component.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,26 +37,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
-
             final var plaintext = bufferedReader.lines()
                     .collect(Collectors.joining("\r\n"));
 
-
+            final var request = new HttpRequest(plaintext);
+            log.info("Request Path: {}", request.getPath());
+            final var response = HandlerMapper.get(request.getPath()).handle(request);
+            outputStream.write(response.getResponseText().getBytes());
+            outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void renderWelcome(final OutputStream outputStream) throws IOException {
-        final String resource = "Hello world!";
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resource.getBytes().length + " ",
-                "",
-                resource);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 
 }

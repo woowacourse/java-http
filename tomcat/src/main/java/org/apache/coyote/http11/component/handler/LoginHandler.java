@@ -15,19 +15,19 @@ public class LoginHandler implements HttpHandler {
     private static final String ID_QUERY_NAME = "account";
     private static final String PASSWORD_QUERY_NAME = "password";
 
-    private final HttpRequest request;
+    private final String path;
 
-    public LoginHandler(final HttpRequest request) {
-        this.request = request;
+    public LoginHandler(final String path) {
+        this.path = path;
     }
 
     @Override
     public String getUriPath() {
-        return request.getPath();
+        return path;
     }
 
     @Override
-    public HttpResponse handle() {
+    public HttpResponse handle(final HttpRequest request) {
         final var identifier = request.getQueryParam(ID_QUERY_NAME);
         final var password = request.getQueryParam(PASSWORD_QUERY_NAME);
         validateUser(identifier, password);

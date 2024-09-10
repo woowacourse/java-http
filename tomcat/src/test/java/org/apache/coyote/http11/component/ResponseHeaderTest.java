@@ -21,7 +21,7 @@ class ResponseHeaderTest {
         final var actual = responseHeader.getResponseText();
 
         // then
-        assertThat(actual).contains("Content-type:application-json\r\n");
+        assertThat(actual).contains("Content-type: application-json\r\n");
     }
 
 }

@@ -19,10 +19,10 @@ class LoginHandlerTest {
                         "Host: http://localhost:8080",
                         "")
         );
-        final var loginHandler = new LoginHandler(request);
+        final var loginHandler = new LoginHandler("/login");
 
         // when
-        final var response = loginHandler.handle();
+        final var response = loginHandler.handle(request);
 
         // then
         assertThat(response.getResponseText())
@@ -42,10 +42,10 @@ class LoginHandlerTest {
                         "Host: http://localhost:8080",
                         "")
         );
-        final var loginHandler = new LoginHandler(request);
+        final var loginHandler = new LoginHandler("/login");
 
         // when & then
-        assertThatThrownBy(loginHandler::handle)
+        assertThatThrownBy(() -> loginHandler.handle(request))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -59,10 +59,10 @@ class LoginHandlerTest {
                         "Host: http://localhost:8080",
                         "")
         );
-        final var loginHandler = new LoginHandler(request);
+        final var loginHandler = new LoginHandler("login");
 
         // when & then
-        assertThatThrownBy(loginHandler::handle)
+        assertThatThrownBy(() -> loginHandler.handle(request))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -24,4 +24,8 @@ public class HttpCookie {
         }
         return cookies;
     }
+
+    public String get(String key) {
+        return cookies.get(key);
+    }
 }

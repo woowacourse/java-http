@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.httprequest;
 
+import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.httpresponse.HttpCookie;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,17 @@ public class RequestHeaders {
 
     public boolean hasCookie() {
         return headers.containsKey("Cookie");
+    }
+
+    public String getJSessionId() {
+        HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+        return httpCookie.get("JSESSIONID");
+    }
+
+    public Session getSession() {
+        HttpCookie httpCookie = new HttpCookie(headers.get("Cookie"));
+        String jsessionid = httpCookie.get("JSESSIONID");
+        return new Session(jsessionid);
     }
 
     public int getContentLength() {

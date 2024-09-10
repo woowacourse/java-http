@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.httprequest;
 
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.InputReader;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class HttpRequest {
 
@@ -28,12 +30,31 @@ public class HttpRequest {
         return requestLine.hasQueryParameter();
     }
 
+    public boolean hasJSessionCookie() {
+        return headers.hasJSessionCookie();
+    }
+
     public QueryParameter getQueryParameter() {
         return requestLine.getQueryParameter();
     }
 
-    public boolean hasJSessionCookie() {
-        return headers.hasJSessionCookie();
+    public Session getSession(boolean flag) {
+        if (hasJSessionCookie()) {
+            return headers.getSession();
+        }
+        if (flag) {
+            return getSession();
+        }
+        return null;
+    }
+
+    public Session getSession() {
+        String uuid = UUID.randomUUID().toString();
+        return new Session(uuid);
+    }
+
+    public String getJSessionId() {
+        return headers.getJSessionId();
     }
 
     public String getUri() {

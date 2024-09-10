@@ -23,6 +23,10 @@ public class ResponseHeaders {
                 .collect(Collectors.joining("\r\n"));
     }
 
+    public void setLocation(String location) {
+        headers.put("Location", location);
+    }
+
     public void setCookie(String key, String value) {
         headers.put(key, value);
     }

@@ -29,6 +29,14 @@ public class HttpResponse {
         }
     }
 
+    public void addCookie(String cookie) {
+        headers.setCookie("Set-Cookie", cookie);
+    }
+
+    public void sendRedirect(String location) {
+        headers.setLocation(location);
+    }
+
     public String getResponse() {
         return String.join("\r\n",
                 String.format("%s", statusLine.getMessage()),

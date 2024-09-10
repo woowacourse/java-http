@@ -3,7 +3,6 @@ package org.apache.catalina.manager;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.Session;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,16 +20,16 @@ public class SessionManager implements Manager {
 
     @Override
     public void add(Session session) {
-
+        SESSIONS.put(session.getId(), session);
     }
 
     @Override
-    public Session findSession(String id) throws IOException {
-        return null;
+    public Session findSession(String id) {
+        return SESSIONS.get(id);
     }
 
     @Override
     public void remove(Session session) {
-
+        SESSIONS.remove(session.getId());
     }
 }

@@ -222,12 +222,14 @@ class Http11ProcessorTest {
         @DisplayName("회원가입 로직 성공 테스트")
         void registerSuccess() throws IOException {
             // given
+            String requestBody = "account=HoeSeong123&password=eyeTwinkle&email=chorong@wooteco.com";
             final String httpRequest = String.join("\r\n",
                     "POST /register HTTP/1.1 ",
+                    "Content-Length: " + requestBody.getBytes().length,
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
-                    "account=HoeSeong123&password=eyeTwinkle&email=chorong@wooteco.com");
+                    requestBody);
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

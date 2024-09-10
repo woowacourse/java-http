@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
 import com.techcourse.controller.StaticResourceController;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,16 +28,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        StaticResourceController staticResourceController = new StaticResourceController();
-        RequestMapping requestMapping = new RequestMapping(staticResourceController);
-        requestMapping.putController("/*.js", staticResourceController);
-        requestMapping.putController("/*.css", staticResourceController);
-        LoginController loginController = new LoginController();
-        requestMapping.putController("/login", loginController);
-        requestMapping.putController("/login.html", loginController);
-        requestMapping.putController("/", staticResourceController);
-        requestMapping.putController("/index", staticResourceController);
-        requestMapping.putController("/index.html", staticResourceController);
+        RequestMapping requestMapping = makeRequestMapping();
         final Http11Processor processor = new Http11Processor(socket, requestMapping);
 
         MockedStatic<Http11Cookie> http11CookieMockedStatic = Mockito.mockStatic(Http11Cookie.class);
@@ -54,5 +46,15 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(Path.of(resource.toURI())));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private RequestMapping makeRequestMapping() {
+        StaticResourceController staticResourceController = new StaticResourceController();
+        RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        requestMapping.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
+        LoginController loginController = new LoginController();
+        requestMapping.putController(loginController, "/login", "/login.html");
+        requestMapping.putController(new RegisterController(), "/register", "/register.html");
+        return requestMapping;
     }
 }

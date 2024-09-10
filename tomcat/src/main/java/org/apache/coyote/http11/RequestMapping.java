@@ -14,7 +14,13 @@ public class RequestMapping {
         this.basicController = basicController;
     }
 
-    public void putController(String requestUri, Controller controller) {
+    public void putController(Controller controller, String... requestUris) {
+        for (String uri : requestUris) {
+            putController(uri, controller);
+        }
+    }
+
+    private void putController(String requestUri, Controller controller) {
         pathControllerMap.put(requestUri, controller);
     }
 

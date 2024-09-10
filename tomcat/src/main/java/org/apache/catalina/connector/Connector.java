@@ -69,19 +69,19 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        StaticResourceController staticResourceController = new StaticResourceController();
-        RequestMapping requestMapping = new RequestMapping(staticResourceController);
-        requestMapping.putController("/*.js", staticResourceController);
-        requestMapping.putController("/*.css", staticResourceController);
-        LoginController loginController = new LoginController();
-        requestMapping.putController("/login", loginController);
-        requestMapping.putController("/login.html", loginController);
-        requestMapping.putController("/", staticResourceController);
-        requestMapping.putController("/index", staticResourceController);
-        requestMapping.putController("/index.html", staticResourceController);
-        requestMapping.putController("/register", new RegisterController());
+        RequestMapping requestMapping = makeRequestMapping();
         var processor = new Http11Processor(connection, requestMapping);
         new Thread(processor).start();
+    }
+
+    private RequestMapping makeRequestMapping() {
+        StaticResourceController staticResourceController = new StaticResourceController();
+        RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        requestMapping.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
+        LoginController loginController = new LoginController();
+        requestMapping.putController(loginController, "/login", "/login.html");
+        requestMapping.putController(new RegisterController(), "/register", "/register.html");
+        return requestMapping;
     }
 
     public void stop() {

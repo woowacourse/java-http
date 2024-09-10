@@ -8,6 +8,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.HttpStatusCode;
@@ -42,7 +46,24 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             var responseBody = "Hello world!";
-            String url = bufferedReader.readLine().split(" ")[1];
+
+            String[] firstLine = bufferedReader.readLine().split(" ");
+            String method = firstLine[0];
+            String url = firstLine[1];
+            String version = firstLine[2];
+
+            Map<String, String> requestHeaders = new HashMap<>();
+            String line;
+            while(!(line = bufferedReader.readLine()).isEmpty()) {
+                requestHeaders.put(line.split(": ")[0], line.split(": ")[1]);
+            }
+
+            if(method.equals("POST")) {
+                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+            }
 
             String path = getPathFromUrl(url);
             responseBody = updateResponseBody(path, responseBody);
@@ -94,6 +115,9 @@ public class Http11Processor implements Runnable, Processor {
         if (url.startsWith("/login")) {
             path = separateQueryString(url, path);
         }
+        if (url.startsWith("/register")) {
+            path = register(path);
+        }
         return path;
     }
 
@@ -121,5 +145,10 @@ public class Http11Processor implements Runnable, Processor {
         location = "Location: /index.html ";
         log.info(user.toString());
         return "/index";
+    }
+
+    private String register(String path) {
+
+        return "/register.html";
     }
 }

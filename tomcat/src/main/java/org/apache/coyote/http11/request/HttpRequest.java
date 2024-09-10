@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,13 +17,13 @@ public class HttpRequest {
 
     private static final String HEADER_SPLIT_DELIMITER = ": ";
 
-    private final String method;
+    private final HttpMethod method;
     private final String path;
     private final String version;
     private final Map<String, String> headers;
     private final String body;
 
-    public HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
+    public HttpRequest(HttpMethod method, String path, String version, Map<String, String> headers, String body) {
         this.method = method;
         this.path = path;
         this.version = version;
@@ -35,7 +36,7 @@ public class HttpRequest {
         String startLine = bufferedReader.readLine();
 
         String[] parsedStartLine = HttpRequestParser.parseStartLine(startLine);
-        String method = parsedStartLine[0];
+        HttpMethod method = HttpMethod.from(parsedStartLine[0]);
         String path = parsedStartLine[1];
         String version = parsedStartLine[2];
 
@@ -49,7 +50,7 @@ public class HttpRequest {
             headers.put(headerParts[0], headerParts[1]);
         }
 
-        if (method.equals("POST")) {
+        if (method.isPost()) {
             int contentLength = Integer.parseInt(headers.get(HttpHeaders.CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
@@ -61,11 +62,11 @@ public class HttpRequest {
     }
 
     public boolean isGet() {
-        return method.equals("GET");
+        return method.isGet();
     }
 
     public boolean isPost() {
-        return method.equals("POST");
+        return method.isPost();
     }
 
     public byte[] toHttpResponseBody() throws URISyntaxException, IOException {
@@ -98,7 +99,7 @@ public class HttpRequest {
         return "text/html;charset=utf-8";
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return method;
     }
 

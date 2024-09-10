@@ -34,11 +34,7 @@ public class RequestLine {
     }
 
     public String getPath() {
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return uri;
-        }
-        return uri.substring(0, index);
+        return uri.split(QUERY_PARAMETER_DELIMITER)[0];
     }
 
     public String getUri() {

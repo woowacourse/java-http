@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpHeaders {
 
     private static final String HEADER_DELIMETER = ": ";
 
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpHeaders() {
     }

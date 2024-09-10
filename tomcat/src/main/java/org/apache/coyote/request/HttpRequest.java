@@ -1,6 +1,8 @@
 package org.apache.coyote.request;
 
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpHeader;
+import org.apache.coyote.response.HttpHeaders;
 
 public class HttpRequest {
 
@@ -27,7 +29,7 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public String getHeader(String name) {
-        return httpHeader.get(name);
+    public HttpCookie getCookie() {
+        return new HttpCookie(httpHeader.get(HttpHeaders.COOKIE.getName()));
     }
 }

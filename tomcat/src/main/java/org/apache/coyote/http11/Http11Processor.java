@@ -90,7 +90,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handle(HttpRequest request) {
-        HttpCookie cookie = new HttpCookie(request.getHeader(HttpHeaders.COOKIE.getName()));
+        HttpCookie cookie = request.getCookie();
         RequestBody requestBody = request.getRequestBody();
 
         if (request.pointsTo(GET, "/")) {

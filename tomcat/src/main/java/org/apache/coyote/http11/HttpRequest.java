@@ -12,7 +12,7 @@ import static org.apache.Method.POST;
 
 public class HttpRequest {
 
-    private final String[] requestLine;
+    private final RequestLine requestLine;
     private final Map<String, String> requestHeaders;
     private String requestBody = ""; // 추후 GET, POST 리팩토링
 
@@ -20,20 +20,16 @@ public class HttpRequest {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        try {
-            this.requestLine = readRequestLine(bufferedReader);
-            this.requestHeaders = readRequestHeaders(bufferedReader);
+        this.requestLine = readRequestLine(bufferedReader);
+        this.requestHeaders = readRequestHeaders(bufferedReader);
 
-            if (isMethod(POST)) {
-                this.requestBody = readRequestBody(bufferedReader);
-            }
-        } catch (IOException ioException) {
-            throw new IOException("IOException 발생했습니다.");
+        if (isMethod(POST)) {
+            this.requestBody = readRequestBody(bufferedReader);
         }
     }
 
-    private String[] readRequestLine(BufferedReader bufferedReader) throws IOException {
-        return bufferedReader.readLine().split(" ");
+    private RequestLine readRequestLine(BufferedReader bufferedReader) throws IOException {
+        return new RequestLine(bufferedReader);
     }
 
     private Map<String, String> readRequestHeaders(BufferedReader bufferedReader) throws IOException {
@@ -77,21 +73,11 @@ public class HttpRequest {
     }
 
     public boolean isMethod(Method method) {
-        return method.name().equals(requestLine[0]);
+        return requestLine.isMethod(method);
     }
 
     public String getPath() {
-        if (requestLine[0].equals("GET")) {
-            if (requestLine[1].equals("/login") || requestLine[1].equals("/register")) {
-                requestLine[1] = requestLine[1] + ".html";
-            }
-
-            if (requestLine[1].equals("/")) {
-                requestLine[1] = "home.html";
-            }
-        }
-
-        return requestLine[1];
+        return requestLine.getPath();
     }
 
     public String getCookie() {

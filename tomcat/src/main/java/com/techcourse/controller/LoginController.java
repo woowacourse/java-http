@@ -32,8 +32,7 @@ public class LoginController extends RestController {
     private boolean loginAndRedirectToIndex(HttpResponse response, User user) {
         String jSessionId = SessionManager.addUser(user);
         response.addSessionToCookies(jSessionId);
-        redirectTo(response, "/index");
-        return response.isValid();
+        return redirectTo(response, "/index");
     }
 
     private boolean responsePage401(HttpResponse response) {

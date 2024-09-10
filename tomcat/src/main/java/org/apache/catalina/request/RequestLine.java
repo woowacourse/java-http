@@ -7,11 +7,10 @@ public class RequestLine {
     private final String path;
     private final VersionOfProtocol versionOfProtocol;
 
-
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(SPACE);
         if (parts.length < 3) {
-            throw new IllegalArgumentException("요청 헤더의 형식이 올바르지 않습니다.");
+            throw new IllegalArgumentException(requestLine + ": 요청 헤더의 형식이 올바르지 않습니다.");
         }
         this.httpMethod = HttpMethod.of(parts[0]);
         this.path = parts[1];

@@ -2,6 +2,8 @@ package org.apache.catalina.cookie;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import javax.annotation.Nullable;
 
 public class Cookie {
@@ -33,5 +35,29 @@ public class Cookie {
     @Nullable
     public String getSessionId() {
         return values.get(SESSION_ID);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Cookie cookie = (Cookie) object;
+        return Objects.equals(values, cookie.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Cookie.class.getSimpleName() + "[", "]")
+                .add("values=" + values)
+                .toString();
     }
 }

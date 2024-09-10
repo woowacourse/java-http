@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import org.apache.controller.AbstractController;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -15,7 +14,7 @@ import org.apache.util.QueryStringParser;
 public class LoginController extends AbstractController {
 
     public LoginController() {
-        super.endPointPattern = Pattern.compile("^/login");
+        super("/login");
     }
 
     @Override

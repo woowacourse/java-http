@@ -10,6 +10,10 @@ public abstract class AbstractController implements Controller {
 
     protected Pattern endPointPattern;
 
+    protected AbstractController(String regex) {
+        this.endPointPattern = Pattern.compile("^" + regex);
+    }
+
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         HttpMethod method = request.getMethod();

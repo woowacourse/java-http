@@ -4,7 +4,6 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.apache.controller.AbstractController;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -13,7 +12,7 @@ import org.apache.util.QueryStringParser;
 public class RegisterController extends AbstractController {
 
     public RegisterController() {
-        super.endPointPattern = Pattern.compile("^/register");
+        super("/register");
     }
 
     @Override

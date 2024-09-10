@@ -223,11 +223,11 @@ class Http11ProcessorTest {
         void registerSuccess() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
-                    "GET /register?account=HoeSeong123&password=eyeTwinkle&email=chorong@wooteco.com HTTP/1.1 ",
+                    "POST /register HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
-                    "");
+                    "account=HoeSeong123&password=eyeTwinkle&email=chorong@wooteco.com");
 
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);

@@ -36,7 +36,7 @@ public class LoginController extends Controller {
         } catch (UnauthorizedException e) {
             log.error("Error processing request for endpoint: {}", request.getURI(), e);
 
-            return redirect("401.html", new HttpResponse());
+            return redirect("401.html");
         }
     }
 
@@ -68,7 +68,15 @@ public class LoginController extends Controller {
         if (httpCookie.hasJSessionId()) {
             return redirect("index.html", new HttpResponse());
         }
-        return redirect("login.html", new HttpResponse());
+        return redirect("login.html");
+    }
+
+    private static HttpResponse redirect(String location) {
+        HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.FOUND);
+        response.setLocation(location);
+
+        return response;
     }
 
     private static HttpResponse redirect(String location, HttpResponse response) {

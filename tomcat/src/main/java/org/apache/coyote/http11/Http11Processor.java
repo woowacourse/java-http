@@ -61,22 +61,24 @@ public class Http11Processor implements Runnable, Processor {
             String contentType;
             byte[] responseBody;
 
-            String httpStatus = "200 OK ";
-            String resourcePath = determineResourcePath(requestURL);
+            String[] searchResourcePath = determineResourcePath(requestURL);
+            String httpStatus = searchResourcePath[0];
+            String resourcePath = searchResourcePath[1];
+
             contentType = determineContentType(resourcePath);
 
             URL resource = getClass().getResource(resourcePath);
 
             if (resource == null) {
                 resource = getClass().getResource("/static/404.html");
-                httpStatus = "404 NOT FOUND ";
+                httpStatus = "404 NOT FOUND";
             }
 
             responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
 
             final var response = String.join("\r\n",
-                    "HTTP/1.1 " + httpStatus,
-                    "Content-Type: " + contentType,
+                    "HTTP/1.1 " + httpStatus + " ",
+                    "Content-Type: " + contentType + " ",
                     "Content-Length: " + responseBody.length + " ",
                     "",
                     "");
@@ -90,48 +92,67 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String determineResourcePath(String requestURL) {
+    private String[] determineResourcePath(String requestURL) {
+        String[] result = new String[2];
+        result[0] = "200 OK";
+
         if (requestURL.equals("/") || requestURL.equals("/index.html")) {
-            return "/static/index.html";
+            result[1] = "/static/index.html";
+            return result;
         }
 
         if (requestURL.endsWith(SVG)) {
-            return STATIC + "/assets/img/error-404-monochrome.svg";
+            result[1] = STATIC + "/assets/img/error-404-monochrome.svg";
+            return result;
         }
 
         if (requestURL.contains(QUERY_PARAMETER)) {
-            String path = parseLoginQueryString(requestURL);
-            return STATIC + path + HTML;
+            String[] statusAndPath = parseLoginQueryString(requestURL);
+
+            statusAndPath[1] = STATIC + statusAndPath[1] + HTML;
+            return statusAndPath;
         }
 
         if (requestURL.endsWith(HTML) || requestURL.endsWith(CSS) || requestURL.endsWith(JS)) {
-            return STATIC + requestURL;
+            result[1] = STATIC + requestURL;
+            return result;
         }
 
-        return STATIC + requestURL + HTML;
+        result[1] = STATIC + requestURL + HTML;
+        return result;
     }
 
     private String determineContentType(String resourcePath) {
         if (resourcePath.endsWith(CSS)) {
-            return "text/css ";
+            return "text/css";
         }
 
         if (resourcePath.endsWith(JS)) {
-            return "application/javascript ";
+            return "application/javascript";
         }
 
         if (resourcePath.endsWith(SVG)) {
-            return "image/svg+xml ";
+            return "image/svg+xml";
         }
 
-        return "text/html;charset=utf-8 ";
+        return "text/html;charset=utf-8";
     }
 
-    private String parseLoginQueryString(String requestURL) {
-        int index = requestURL.indexOf(QUERY_PARAMETER);
-        findUser(parseUserInfo(requestURL.substring(index + 1)));
+    private String[] parseLoginQueryString(String requestURL) {
+        String[] result = new String[2];
+        result[0] = "302 FOUND";
 
-        return requestURL.substring(0, index);
+        int index = requestURL.indexOf(QUERY_PARAMETER);
+        boolean isMember = isValidUser(parseUserInfo(requestURL.substring(index + 1)));
+
+        if (!isMember) {
+            result[0] = "401 UNAUTHORIZED";
+            result[1] = "/401";
+            return result;
+        }
+        result[1] = "/index";
+
+        return result;
     }
 
     private Map<String, String> parseUserInfo(String queryString) {
@@ -150,7 +171,7 @@ public class Http11Processor implements Runnable, Processor {
         return userInfo;
     }
 
-    private void findUser(Map<String, String> userInfo) {
+    private boolean isValidUser(Map<String, String> userInfo) {
         String account = userInfo.get("account");
         String password = userInfo.get("password");
 
@@ -158,13 +179,19 @@ public class Http11Processor implements Runnable, Processor {
 
         if (loginUser.isEmpty()) {
             log.info(account + "는(은) 등록되지 않은 계정입니다.");
-            return;
+            return false;
         }
 
-        loginUser.filter(user -> user.checkPassword(password))
-                .ifPresentOrElse(
-                        user -> log.info("user : {}", user),
-                        () -> log.info(account + "의 비밀번호가 잘못 입력되었습니다.")
-                );
+        return loginUser.filter(user -> user.checkPassword(password))
+                .map(
+                        user -> {
+                            log.info("user : {}", user);
+                            return true;
+                        }
+                )
+                .orElseGet(() -> {
+                    log.info(account + "의 비밀번호가 잘못 입력되었습니다.");
+                    return false;
+                });
     }
 }

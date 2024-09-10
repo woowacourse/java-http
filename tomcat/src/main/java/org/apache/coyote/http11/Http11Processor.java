@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.controller.Handler;
+import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.RequestMapping;
-import org.apache.coyote.controller.StaticResourceHandler;
+import org.apache.coyote.controller.StaticResourceController;
+import org.apache.coyote.http.StatusCode;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -39,7 +40,12 @@ public class Http11Processor implements Runnable, Processor {
             final var request = RequestGenerator.accept(requestReader);
             final var response = HttpResponse.create();
             log.info("request: {}", request);
-            service(request, response);
+            try {
+                service(request, response);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                response.setStatus(StatusCode.INTERNAL_SERVER_ERROR);
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -48,12 +54,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void service(HttpRequest request, HttpResponse response) throws IOException {
-        Handler handler = RequestMapping.findHandler(request);
-        if (handler != null) {
-            handler.handle(request, response);
+    private void service(HttpRequest request, HttpResponse response) throws Exception {
+        Controller controller = RequestMapping.getController(request);
+        if (controller != null) {
+            controller.service(request, response);
         }
         // todo: GET 메서드가 아닌 경우 405 Method Not Allowed 응답을 반환
-        StaticResourceHandler.getInstance().handle(request, response);
+        StaticResourceController.getInstance().service(request, response);
     }
 }

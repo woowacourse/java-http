@@ -11,20 +11,20 @@ import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.session.Session;
 
-public class StaticResourceHandler implements Handler {
+public class StaticResourceController implements Controller {
 
     private static final String STATIC_RESOURCE_PATH = "static";
-    private static final StaticResourceHandler INSTANCE = new StaticResourceHandler();
+    private static final StaticResourceController INSTANCE = new StaticResourceController();
 
-    private StaticResourceHandler() {
+    private StaticResourceController() {
     }
 
-    public static StaticResourceHandler getInstance() {
+    public static StaticResourceController getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    public void service(HttpRequest request, HttpResponse response) {
         Session session = request.getSession();
         if (request.getUri().contains("/login") && session.getAttribute("user") != null) {
             response.setStatus(StatusCode.FOUND);

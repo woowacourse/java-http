@@ -4,28 +4,23 @@ import java.util.Arrays;
 import org.apache.coyote.http.request.HttpRequest;
 
 public enum RequestMapping {
-    LOGIN("POST", "/login", new LoginHandler()),
-    REGISTER("POST", "/register", new RegisterHandler()),
+
+    LOGIN("/login", new LoginController()),
+    REGISTER("/register", new RegisterController()),
     ;
 
-    private final String method;
     private final String path;
-    private final Handler handler;
+    private final Controller controller;
 
-    RequestMapping(String method, String path, Handler handler) {
-        this.method = method;
+    RequestMapping(String path, Controller controller) {
         this.path = path;
-        this.handler = handler;
+        this.controller = controller;
     }
 
-    public static Handler findHandler(HttpRequest request) {
-        return findHandler(request.getMethod(), request.getUri());
-    }
-
-    private static Handler findHandler(String method, String path) {
+    public static Controller getController(HttpRequest request) {
         return Arrays.stream(values())
-                .filter(handlerMapper -> handlerMapper.method.equals(method) && handlerMapper.path.equals(path))
-                .map(handlerMapper -> handlerMapper.handler)
+                .filter(requestMapping -> requestMapping.path.equals(request.getUri()))
+                .map(requestMapping -> requestMapping.controller)
                 .findFirst()
                 .orElse(null);
     }

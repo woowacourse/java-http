@@ -50,8 +50,8 @@ public class LoginController implements Controller {
     }
 
     private void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getBody().get("account");
-        String password = request.getBody().get("password");
+        String account = request.getBody("account");
+        String password = request.getBody("password");
 
         InMemoryUserRepository.findByAccount(account)
                 .ifPresentOrElse(

@@ -30,14 +30,14 @@ public class HttpRequest {
         HttpMethod method = HttpMethod.valueOf(requestLine[0]);
         String requestUrl = requestLine[1];
 
-        Map<String, String> body = getBody(rawBody);
+        Map<String, String> body = parseBody(rawBody);
         HttpHeader httpHeader = HttpHeader.from(header);
         HttpCookie httpCookie = HttpCookie.from(httpHeader.getHeader(HttpHeaderName.COOKIE));
 
         return new HttpRequest(httpHeader, method, requestUrl, httpCookie, body);
     }
 
-    private static Map<String, String> getBody(String rawBody) {
+    private static Map<String, String> parseBody(String rawBody) {
         if (rawBody.isEmpty()) {
             return new HashMap<>();
         }
@@ -57,8 +57,8 @@ public class HttpRequest {
         return requestUrl;
     }
 
-    public Map<String, String> getBody() {
-        return body;
+    public String getBody(String key) {
+        return body.get(key);
     }
 
     public HttpCookie getCookie() {

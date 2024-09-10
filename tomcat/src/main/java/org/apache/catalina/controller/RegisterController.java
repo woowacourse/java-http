@@ -2,7 +2,6 @@ package org.apache.catalina.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
-import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -31,10 +30,9 @@ public class RegisterController implements Controller {
     }
 
     public void doPost(HttpRequest request, HttpResponse response) {
-        Map<String, String> body = request.getBody();
-        String account = body.get("account");
-        String password = body.get("password");
-        String email = body.get("email");
+        String account = request.getBody("account");
+        String password = request.getBody("password");
+        String email = request.getBody("email");
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

@@ -21,7 +21,7 @@ class HttpMethodTest {
     void validateMethod2() {
         String test = "GETT";
 
-        assertThatThrownBy(() -> HttpMethod.findByMethod(test))
+        assertThatThrownBy(() -> HttpMethod.findMethodByMethodName(test))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unknown http method: GETT");
     }

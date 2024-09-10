@@ -25,9 +25,9 @@ public class RequestLine {
         String originPath = requestLines.get(PATH_INDEX);
         String originVersion = requestLines.get(VERSION_INDEX);
         return new RequestLine(
-                HttpMethod.findByMethod(originMethod),
+                HttpMethod.findMethodByMethodName(originMethod),
                 new Path(originPath),
-                HttpVersion.findByVersion(originVersion));
+                HttpVersion.findVersionByProtocolVersion(originVersion));
     }
 
     private RequestLine(HttpMethod method, Path path, HttpVersion version) {

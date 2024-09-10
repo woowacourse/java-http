@@ -27,8 +27,8 @@ public enum HttpMethod {
         return Arrays.stream(HttpMethod.values()).anyMatch(httpMethod -> httpMethod.getMethod().equals(method));
     }
 
-    public static HttpMethod findByMethod(String method) {
-        return Arrays.stream(HttpMethod.values()).filter(httpMethod -> httpMethod.getMethod().equals(method)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown http method: " + method));
+    public static HttpMethod findMethodByMethodName(String name) {
+        return Arrays.stream(HttpMethod.values()).filter(httpMethod -> httpMethod.getMethod().equals(name)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown http method: " + name));
     }
 }

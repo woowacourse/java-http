@@ -14,23 +14,27 @@ public class ResourceController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         String staticFilePath = STATIC_PATH + request.getPath();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
+        response.setStatus(HttpStatus.OK);
+        response.setContentType(ContentTypeResolver.getContentType(staticFilePath));
+        setMessageBody(request, response);
+    }
 
-        if (inputStream == null) {
+    private void setMessageBody(HttpRequest request, HttpResponse response) {
+        String staticFilePath = STATIC_PATH + request.getPath();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath)) {
+            validateFileExist(inputStream);
+            response.setMessageBody(new String(inputStream.readAllBytes()));
+        } catch (IllegalArgumentException e) {
             response.setStatus(HttpStatus.NOT_FOUND);
-            return;
-        }
-
-        try {
-            String responseBody = new String(inputStream.readAllBytes());
-            response.setStatus(HttpStatus.OK);
-            response.setContentType(ContentTypeResolver.getContentType(staticFilePath));
-            response.setMessageBody(responseBody);
-
         } catch (IOException e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    private void validateFileExist(InputStream inputStream) {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("File not found");
+        }
+    }
 }
 

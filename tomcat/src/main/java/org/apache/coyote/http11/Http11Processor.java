@@ -1,13 +1,10 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -43,47 +40,31 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            // 3단계에 request를 처리해줄 클래스로 분리할 예정입니다.
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String[] requestLine = bufferedReader.readLine().split(" ");
-            String httpMethod = requestLine[0];
-            String uri = requestLine[1];
-            Map<String, String> headers = getHeaders(bufferedReader);
+            HttpRequest request = new HttpRequest(inputStream);
 
-            if ("GET".equals(httpMethod)) {
-                handleGetRequest(uri, new HttpCookie(headers.get("Cookie")), outputStream);
+            if (request.isGetMethod()) {
+                handleGetRequest(request, outputStream);
+                return;
             }
-            if ("POST".equals(httpMethod)) {
-                handlePostRequest(uri, getRequestBody(headers, bufferedReader), outputStream);
+            if (request.isPostMethod()) {
+                handlePostRequest(request, outputStream);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Map<String, String> getHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        while (true) {
-            String header = bufferedReader.readLine();
-            if (header.isBlank()) {
-                break;
-            }
-            String[] splitHeader = header.split(":");
-            headers.put(splitHeader[0].trim(), splitHeader[1].trim());
-        }
-        return headers;
-    }
-
-    private void handleGetRequest(String uri, HttpCookie httpCookie, OutputStream outputStream) throws IOException {
-        if ("/favicon.ico".equals(uri)) {
+    private void handleGetRequest(HttpRequest request, OutputStream outputStream) throws IOException {
+        String path = request.getPath();
+        if ("/favicon.ico".equals(path)) {
             handleFaviconRequest(outputStream);
             return;
         }
-        if ("/login".equals(uri) && doesLoggedIn(httpCookie)) {
+        if ("/login".equals(path) && doesLoggedIn(request.getCookie())) {
             redirectTo("/index.html", outputStream);
             return;
         }
-        serveStaticFile(addHtmlExtension(uri), outputStream);
+        serveStaticFile(addHtmlExtension(path), outputStream);
     }
 
     private void handleFaviconRequest(OutputStream outputStream) throws IOException {
@@ -98,26 +79,19 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.doesExistAttribute("user");
     }
 
-    public void handlePostRequest(String uri, String requestBody, OutputStream outputStream) throws IOException {
-        if ("/login".equals(uri)) {
-            handleLogin(requestBody, outputStream);
+    public void handlePostRequest(HttpRequest request, OutputStream outputStream) throws IOException {
+        String path = request.getPath();
+        if ("/login".equals(path)) {
+            handleLogin(request, outputStream);
             return;
         }
-        if ("/register".equals(uri)) {
-            handleRegister(requestBody, outputStream);
+        if ("/register".equals(path)) {
+            handleRegister(request, outputStream);
         }
     }
 
-    private String getRequestBody(Map<String, String> headers, BufferedReader bufferedReader) throws IOException {
-        int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-
-        return new String(buffer);
-    }
-
-    private void handleLogin(String requestBody, OutputStream outputStream) throws IOException {
-        Map<String, String> pairs = getPairs(requestBody);
+    private void handleLogin(HttpRequest request, OutputStream outputStream) throws IOException {
+        Map<String, String> pairs = request.getBodyQueryString();
 
         String account = pairs.get("account");
         String password = pairs.get("password");
@@ -135,23 +109,11 @@ public class Http11Processor implements Runnable, Processor {
         redirectTo("/401.html", outputStream);
     }
 
-    private void handleRegister(String requestBody, OutputStream outputStream) throws IOException {
-        Map<String, String> pairs = getPairs(requestBody);
+    private void handleRegister(HttpRequest request, OutputStream outputStream) throws IOException {
+        Map<String, String> pairs = request.getBodyQueryString();
 
         InMemoryUserRepository.save(new User(pairs.get("account"), pairs.get("password"), pairs.get("email")));
         redirectTo("/index.html", outputStream);
-    }
-
-    private Map<String, String> getPairs(String requestBody) {
-        Map<String, String> queryStringPairs = new HashMap<>();
-        for (String pairs : requestBody.split("&")) {
-            String[] pair = pairs.split("=");
-            if (pair.length == 2) {
-                queryStringPairs.put(pair[0], pair[1]);
-            }
-        }
-
-        return queryStringPairs;
     }
 
     private void redirectToHomeSettingCookie(String jSessionId, OutputStream outputStream) throws IOException {
@@ -169,38 +131,38 @@ public class Http11Processor implements Runnable, Processor {
         writeResponse(outputStream, response);
     }
 
-    private String addHtmlExtension(String uri) {
-        if (!"/".equals(uri) && !uri.contains(".")) {
-            return uri + ".html";
+    private String addHtmlExtension(String path) {
+        if (!"/".equals(path) && !path.contains(".")) {
+            return path + ".html";
         }
-        return uri;
+        return path;
     }
 
-    private void serveStaticFile(String uri, OutputStream outputStream) throws IOException {
-        var responseBody = getStaticFileContent(uri);
+    private void serveStaticFile(String path, OutputStream outputStream) throws IOException {
+        var responseBody = getStaticFileContent(path);
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/" + getFileExtension(uri) + ";charset=utf-8 ",
+                "Content-Type: text/" + getFileExtension(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
         writeResponse(outputStream, response);
     }
 
-    private String getStaticFileContent(String uri) throws IOException {
-        if (Objects.equals(uri, "/")) {
+    private String getStaticFileContent(String path) throws IOException {
+        if (Objects.equals(path, "/")) {
             return "Hello world!";
         }
-        String staticPath = "static" + uri;
+        String staticPath = "static" + path;
         File file = new File(getClass().getClassLoader().getResource(staticPath).getPath());
         return new String(Files.readAllBytes(file.toPath()));
     }
 
-    private String getFileExtension(String uri) {
-        if (Objects.equals(uri, "/")) {
+    private String getFileExtension(String path) {
+        if (Objects.equals(path, "/")) {
             return "html";
         }
-        String[] splitPath = uri.split("\\.");
+        String[] splitPath = path.split("\\.");
         return splitPath[splitPath.length - 1];
     }
 

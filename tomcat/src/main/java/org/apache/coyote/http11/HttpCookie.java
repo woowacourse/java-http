@@ -7,11 +7,11 @@ public class HttpCookie {
 
     private final Map<String, String> cookiePairs = new HashMap<>();
 
-    public HttpCookie(String cookie) {
-        if (cookie == null) {
+    public HttpCookie(String rawCookie) {
+        if (rawCookie == null) {
             return;
         }
-        for (String rawCookiePair : cookie.split(";")) {
+        for (String rawCookiePair : rawCookie.split(";")) {
             String[] cookiePair = rawCookiePair.split("=");
             cookiePairs.put(cookiePair[0].trim(), cookiePair[1].trim());
         }

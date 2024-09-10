@@ -23,8 +23,9 @@ public class AbstractControllerTest {
     void setUp() {
         controller = new AbstractController() {
             @Override
-            protected HttpResponse doGet(HttpRequest request) {
-                return HttpResponse.status(HttpStatus.OK).body("GET request handled").build();
+            protected void doGet(HttpRequest request, HttpResponse response) {
+                response.setStatus(HttpStatus.OK);
+                response.setMessageBody("GET request handled");
             }
         };
     }
@@ -36,8 +37,9 @@ public class AbstractControllerTest {
         RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
         RequestBody requestBody = new RequestBody("test body");
         HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpResponse response = HttpResponse.status(HttpStatus.OK).build();
 
-        HttpResponse response = controller.service(request);
+        controller.service(request, response);
 
         assertAll(
                 () -> assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.OK),
@@ -52,8 +54,9 @@ public class AbstractControllerTest {
         RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
         RequestBody requestBody = new RequestBody("test body");
         HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpResponse response = HttpResponse.status(HttpStatus.OK).build();
 
-        HttpResponse response = controller.service(request);
+        controller.service(request, response);
 
         assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.NOT_IMPLEMENTED);
     }

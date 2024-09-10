@@ -7,8 +7,8 @@ import org.apache.coyote.http11.domain.response.HttpResponse;
 public class HomeController extends AbstractController {
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.redirect("/index.html").build();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setRedirect("/index.html");
     }
 
 }

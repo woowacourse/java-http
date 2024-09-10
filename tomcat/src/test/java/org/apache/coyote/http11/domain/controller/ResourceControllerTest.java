@@ -22,11 +22,12 @@ class ResourceControllerTest {
         RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
         RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
         RequestBody requestBody = new RequestBody("test body");
-        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpResponse response = HttpResponse.status(HttpStatus.OK).build();
 
-        HttpResponse httpResponse = resourceController.service(httpRequest);
+        resourceController.service(request, response);
 
-        assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -37,9 +38,10 @@ class ResourceControllerTest {
         RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
         RequestBody requestBody = new RequestBody("test body");
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpResponse response = HttpResponse.status(HttpStatus.OK).build();
 
-        HttpResponse httpResponse = resourceController.service(httpRequest);
+        resourceController.service(httpRequest, response);
 
-        assertThat(httpResponse.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

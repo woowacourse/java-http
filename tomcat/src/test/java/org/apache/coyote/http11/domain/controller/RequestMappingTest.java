@@ -23,8 +23,9 @@ class RequestMappingTest {
         RequestMapping requestMapping = new RequestMapping(Map.of(
                 "/test", new AbstractController() {
                     @Override
-                    protected HttpResponse doGet(HttpRequest request) {
-                        return HttpResponse.status(HttpStatus.OK).body("test body").build();
+                    protected void doGet(HttpRequest request, HttpResponse response) {
+                        response.setStatus(HttpStatus.OK);
+                        response.setMessageBody("test body");
                     }
                 }
         ));
@@ -32,8 +33,9 @@ class RequestMappingTest {
         RequestHeaders requestHeaders = new RequestHeaders(List.of("Host: localhost:8080", "Connection: keep-alive"));
         RequestBody requestBody = new RequestBody("test body");
         HttpRequest request = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpResponse response = HttpResponse.status(HttpStatus.OK).build();
 
-        HttpResponse response = requestMapping.getController(request).service(request);
+        requestMapping.getController(request).service(request, response);
 
         assertAll(
                 () -> assertThat(response.getHttpStatus()).isEqualTo(HttpStatus.OK),

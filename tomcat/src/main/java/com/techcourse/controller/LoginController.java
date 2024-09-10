@@ -20,16 +20,18 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (isAlreadyLogin(request)) {
-            return HttpResponse.redirect("/index.html").build();
+            response.setRedirect("/index.html");
+            return;
         }
 
         String account = request.getParameter("account");
         String password = request.getParameter("password");
 
         if (account == null || password == null) {
-            return HttpResponse.redirect("/login.html").build();
+            response.setRedirect("/login.html");
+            return;
         }
 
         try {
@@ -39,9 +41,10 @@ public class LoginController extends AbstractController {
             Cookie cookie = createSessionIdCookie(sessionId);
             createSession(sessionId, user);
 
-            return HttpResponse.redirect("/index.html").setCookie(cookie).build();
+            response.setRedirect("/index.html");
+            response.setCookie(cookie);
         } catch (AuthenticationException e) {
-            return HttpResponse.redirect("/401.html").build();
+            response.setRedirect("/401.html");
         }
 
     }

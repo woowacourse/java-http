@@ -12,23 +12,23 @@ public class ResourceController extends AbstractController {
     private static final String STATIC_PATH = "static";
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         String staticFilePath = STATIC_PATH + request.getPath();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(staticFilePath);
 
         if (inputStream == null) {
-            return HttpResponse.status(HttpStatus.NOT_FOUND).build();
+            response.setStatus(HttpStatus.NOT_FOUND);
+            return;
         }
 
         try {
             String responseBody = new String(inputStream.readAllBytes());
-            return HttpResponse.status(HttpStatus.OK)
-                    .contentType(ContentTypeResolver.getContentType(staticFilePath))
-                    .body(responseBody)
-                    .build();
+            response.setStatus(HttpStatus.OK);
+            response.setContentType(ContentTypeResolver.getContentType(staticFilePath));
+            response.setMessageBody(responseBody);
 
         } catch (IOException e) {
-            return HttpResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

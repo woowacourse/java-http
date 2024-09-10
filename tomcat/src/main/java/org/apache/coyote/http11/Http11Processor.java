@@ -17,6 +17,7 @@ import org.apache.coyote.http11.domain.request.RequestBody;
 import org.apache.coyote.http11.domain.request.RequestHeaders;
 import org.apache.coyote.http11.domain.request.RequestLine;
 import org.apache.coyote.http11.domain.response.HttpResponse;
+import org.apache.coyote.http11.domain.response.HttpStatus;
 import org.apache.coyote.http11.dto.HttpResponseDto;
 import org.apache.coyote.http11.view.InputView;
 import org.apache.coyote.http11.view.OutputView;
@@ -50,9 +51,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStreamWriter = new OutputStreamWriter(connection.getOutputStream())) {
             InputView inputView = new InputView(new BufferedReader(inputStreamReader));
             HttpRequest httpRequest = readHttpRequest(inputView);
+            HttpResponse httpResponse = HttpResponse.status(HttpStatus.OK).build();
 
             Controller controller = requestMapping.getController(httpRequest);
-            HttpResponse httpResponse = controller.service(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
             OutputView outputView = new OutputView(outputStreamWriter);
             outputView.write(HttpResponseDto.from(httpResponse));

@@ -2,7 +2,7 @@ package org.apache.coyote.http11.domain.controller;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.domain.request.HttpRequest;
 import org.apache.coyote.http11.domain.response.HttpResponse;
@@ -10,7 +10,7 @@ import org.apache.coyote.http11.domain.response.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
-    private final Map<HttpMethod, Function<HttpRequest, HttpResponse>> methods = new EnumMap<>(HttpMethod.class);
+    private final Map<HttpMethod, BiConsumer<HttpRequest, HttpResponse>> methods = new EnumMap<>(HttpMethod.class);
 
     public AbstractController() {
         methods.put(HttpMethod.GET, this::doGet);
@@ -24,41 +24,41 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) {
         HttpMethod method = request.getMethod();
-        Function<HttpRequest, HttpResponse> handler = methods.get(method);
-        return handler.apply(request);
+        BiConsumer<HttpRequest, HttpResponse> handler = methods.get(method);
+        handler.accept(request, response);
     }
 
-    protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doPost(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doHead(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doHead(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doOptions(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doOptions(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doPut(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doPut(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doDelete(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doDelete(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doTrace(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doTrace(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    protected HttpResponse doConnect(HttpRequest request) {
-        return HttpResponse.status(HttpStatus.NOT_IMPLEMENTED).build();
+    protected void doConnect(HttpRequest request, HttpResponse response) {
+        response.setStatus(HttpStatus.NOT_IMPLEMENTED);
     }
 }

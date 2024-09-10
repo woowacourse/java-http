@@ -16,12 +16,12 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.redirect("/register.html").build();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.setRedirect("/register.html");
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         RequestBody requestBody = request.getRequestBody();
 
         String account = requestBody.get("account");
@@ -29,12 +29,13 @@ public class RegisterController extends AbstractController {
         String password = requestBody.get("password");
 
         if (account == null || email == null || password == null) {
-            return HttpResponse.redirect("/register.html").build();
+            response.setRedirect("/register.html");
+            return;
         }
 
         userService.register(account, password, email);
 
-        return HttpResponse.redirect("/index.html").build();
+        response.setRedirect("/index.html");
     }
 
 }

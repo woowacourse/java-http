@@ -25,12 +25,11 @@ class HttpRequestMessageReaderTest {
                 "Content-Length: " + body.length(),
                 "",
                 body
-        ).reduce((s1, s2) -> String.join(Constants.CRLF, s1, s2)).orElseThrow();
+        ).reduce((key, value) -> String.join(Constants.CRLF, key, value)).orElseThrow();
 
         // when
         InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes());
         HttpRequest request = HttpRequestMessageReader.read(inputStream);
-        request.setBody(body);
 
         // then
         assertAll(
@@ -45,7 +44,7 @@ class HttpRequestMessageReaderTest {
 
     @DisplayName("Body가 없을 때 HTTP 요청의 메서드와 경로, 버전, 헤더를 파싱한다.")
     @Test
-    void httpRequestWithOutBodyTest() {
+    void httpRequestWithOutBodyTest() throws IOException {
         // given
         String body = "Hello, World!";
         String rawRequest = Stream.of(
@@ -53,10 +52,11 @@ class HttpRequestMessageReaderTest {
                 "Cookie: JSESSIONID=1234",
                 "Content-Length: " + body.length(),
                 "", ""
-        ).reduce((s1, s2) -> String.join(Constants.CRLF, s1, s2)).orElseThrow();
+        ).reduce((key, value) -> String.join(Constants.CRLF, key, value)).orElseThrow();
 
         // when
-        HttpRequest request = HttpRequest.from(rawRequest);
+        InputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes());
+        HttpRequest request = HttpRequestMessageReader.read(inputStream);
 
         // then
         assertAll(

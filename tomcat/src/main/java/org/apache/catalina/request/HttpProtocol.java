@@ -11,6 +11,6 @@ public enum HttpProtocol {
         return Arrays.stream(values())
                 .filter(httpProtocol -> httpProtocol.name().equals(value))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HttpProtocol 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(value + "는 존재하지 않는 HttpProtocol 입니다."));
     }
 }

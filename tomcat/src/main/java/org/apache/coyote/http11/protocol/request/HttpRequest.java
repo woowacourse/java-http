@@ -3,12 +3,8 @@ package org.apache.coyote.http11.protocol.request;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.coyote.http11.protocol.cookie.Cookie;
-import org.apache.coyote.http11.protocol.session.Session;
-import org.apache.coyote.http11.protocol.session.SessionManager;
 
 public class HttpRequest {
-
-    private static final String SESSION_ID_KEY = "JSESSIONID";
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -57,16 +53,6 @@ public class HttpRequest {
             return null;
         }
         return new Cookie(requestHeaders.getCookieString());
-    }
-
-    public Session getSession() {
-        Cookie cookie = getCookie();
-        if (cookie == null) {
-            return null;
-        }
-        String sessionId = cookie.getValue(SESSION_ID_KEY);
-        SessionManager sessionManager = SessionManager.getInstance();
-        return sessionManager.findSession(sessionId);
     }
 
     public String getHttpVersion() {

@@ -13,6 +13,8 @@ import org.apache.coyote.http11.protocol.session.SessionManager;
 
 public class LoginController extends AbstractController {
 
+    public static final String SESSION_ID_KEY = "JSESSIONID";
+
     private final UserService userService;
 
     public LoginController(UserService userService) {
@@ -50,7 +52,24 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isAlreadyLogin(HttpRequest request) {
-        Session session = request.getSession();
+        String sessionId = getSessionIdFromCookie(request);
+        if (sessionId == null) {
+            return false;
+        }
+        return isUserLoggedIn(sessionId);
+    }
+
+    private String getSessionIdFromCookie(HttpRequest request) {
+        Cookie cookie = request.getCookie();
+        if (cookie == null) {
+            return null;
+        }
+        return cookie.getValue(SESSION_ID_KEY);
+    }
+
+    private boolean isUserLoggedIn(String sessionId) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = sessionManager.findSession(sessionId);
         if (session != null) {
             User user = (User) session.getAttribute("user");
             return user != null;
@@ -67,7 +86,7 @@ public class LoginController extends AbstractController {
 
     private Cookie createSessionIdCookie(String sessionId) {
         Cookie cookie = new Cookie();
-        cookie.setValue("JSESSIONID", sessionId);
+        cookie.setValue(SESSION_ID_KEY, sessionId);
         return cookie;
     }
 }

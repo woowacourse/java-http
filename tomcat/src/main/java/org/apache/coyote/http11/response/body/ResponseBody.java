@@ -13,4 +13,8 @@ public class ResponseBody {
     public static ResponseBody empty() {
         return new ResponseBody(EMPTY_BODY);
     }
+
+    public String write() {
+        return responseBody;
+    }
 }

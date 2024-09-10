@@ -10,7 +10,7 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public String compose() {
+    public String write() {
         return PROTOCOL_VERSION + " " + httpStatus.compose();
     }
 }

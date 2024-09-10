@@ -11,6 +11,10 @@ public record RequestLine (
         return new RequestLine(Method.findByName(token[0]), token[1], token[2]);
     }
 
+    public boolean isPost() {
+        return method == Method.POST;
+    }
+
     public boolean isStaticResourceRequest() {
         String[] pathToken = target.split("/");
         String extension = pathToken[pathToken.length - 1];

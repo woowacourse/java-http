@@ -63,10 +63,9 @@ public class DefaultResourceHandler implements RequestHandler {
     }
 
     private String registerResponse(Request request) throws IOException {
-        if (request.getTarget().contains("?")) {
-            QueryParameters queryParameters = QueryParameters.parseFrom(
-                    request.getTarget().split("/")[1]);
-            register(queryParameters);
+        if (request.isPost()) {
+            QueryParameters methodRequest = QueryParameters.parseFrom(request.getBody());
+            register(methodRequest);
             return Response.writeAsFound(request, "/index.html");
         }
         log.info("find resource");
@@ -75,11 +74,11 @@ public class DefaultResourceHandler implements RequestHandler {
         return Response.writeAsStaticResource(request, resource.getContentType(), resource.getContent());
     }
 
-    private void register(QueryParameters methodRequest) {
+    private void register(QueryParameters queryParams) {
         InMemoryUserRepository.save(new User(
-                methodRequest.getParam("account"),
-                methodRequest.getParam("password"),
-                methodRequest.getParam("email")
+                queryParams.getParam("account"),
+                queryParams.getParam("password"),
+                queryParams.getParam("email")
         ));
     }
 }

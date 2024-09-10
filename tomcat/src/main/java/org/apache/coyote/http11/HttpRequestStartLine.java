@@ -39,8 +39,8 @@ public class HttpRequestStartLine {
         return httpQuery.findByKey(key);
     }
 
-    public boolean hasQuery() {
-        return httpQuery != null;
+    public boolean hasNoQuery() {
+        return httpQuery == null;
     }
 
     public boolean isSameMethod(HttpMethod method) {

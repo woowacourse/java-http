@@ -62,8 +62,8 @@ public class HttpRequest {
         return body.findByKey(key);
     }
 
-    public boolean hasQuery() {
-        return startLine.hasQuery();
+    public boolean hasNoQuery() {
+        return startLine.hasNoQuery();
     }
 
 

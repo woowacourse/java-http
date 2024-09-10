@@ -136,7 +136,7 @@ class Http11ProcessorTest {
         void 로그인에_성공하면_메인_페이지를_가져온다() {
             // given
             final String httpRequest= String.join("\r\n",
-                    "GET /login?account=gugu&password=password HTTP/1.1 ",
+                    "POST /login?account=gugu&password=password HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Accept: text/html,*/*;q=0.1 ",
                     "Connection: keep-alive ",

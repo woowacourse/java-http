@@ -10,19 +10,24 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.view.ViewResolver;
 
-public class LoginController implements Controller{
+public class LoginController extends AbstractController{
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         if (alreadyLogin(request)) {
             redirectMain(request, response);
             return;
         }
-        if (request.hasQuery()) {
-            requestLogin(request, response);
+        requestLoginPage(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        if (alreadyLogin(request) || request.hasNoQuery()) {
+            redirectMain(request, response);
             return;
         }
-        requestLoginPage(request, response);
+        requestLogin(request, response);
     }
 
     private static boolean alreadyLogin(HttpRequest request) {
@@ -40,6 +45,12 @@ public class LoginController implements Controller{
         response.addHeader("Location", "/index.html");
     }
 
+    private void requestLoginPage(HttpRequest request, HttpResponse response) {
+        response.setView(ViewResolver.getView("login.html"));
+        response.setStatus(HttpStatus.OK);
+        response.setHeaders(HttpHeaders.create(request, response));
+    }
+
     private static void requestLogin(HttpRequest request, HttpResponse response) {
         User user = LoginService.login(request.findFromQueryParam("account"),
                 request.findFromQueryParam("password"));
@@ -47,11 +58,5 @@ public class LoginController implements Controller{
         response.addHeader("Set-Cookie", SessionService.createCookie(user));
         log.info("[Login Success] = {}", user);
         setRedirectHeaderToMain(response);
-    }
-
-    private void requestLoginPage(HttpRequest request, HttpResponse response) {
-        response.setView(ViewResolver.getView("login.html"));
-        response.setStatus(HttpStatus.OK);
-        response.setHeaders(HttpHeaders.create(request, response));
     }
 }

@@ -41,7 +41,7 @@ class LoginControllerTest {
         void 로그인에_성공하면_302를_반환한다() {
             // given
             HttpRequestStartLine startLine = HttpRequestStartLine.create(
-                    "GET /login?account=gugu&password=password HTTP/1.1 ");
+                    "POST /login?account=gugu&password=password HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
             FrontController controller = FrontController.getInstance();
@@ -57,7 +57,7 @@ class LoginControllerTest {
         void 로그인에_실패하면_401를_반환한다() {
             // given
             HttpRequestStartLine startLine = HttpRequestStartLine.create(
-                    "GET /login?account=NoExist&password=NoExist HTTP/1.1 ");
+                    "POST /login?account=NoExist&password=NoExist HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
             FrontController controller = FrontController.getInstance();
@@ -73,7 +73,7 @@ class LoginControllerTest {
         void 로그인을_성공하면_헤더에_쿠키를_포함한다() {
             // given
             HttpRequestStartLine startLine = HttpRequestStartLine.create(
-                    "GET /login?account=gugu&password=password HTTP/1.1 ");
+                    "POST /login?account=gugu&password=password HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
             FrontController controller = FrontController.getInstance();

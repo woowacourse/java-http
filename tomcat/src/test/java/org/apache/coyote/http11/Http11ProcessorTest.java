@@ -274,8 +274,41 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("로그인된 상태에서 login 페이지에 접근하면, index.html 페이지로 리다이렉트한다.")
+    @Test
+    void redirectIndexPageIfAlreadyLoginWhenAccessLoginPage() {
+        // given
+        makeFakeSession();
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + FAKE_SESSION_ID,
+                "",
+                "");
 
-    private long getFileSize(URL resource) {
-        return new File(resource.getFile()).length();
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html",
+                "",
+                "");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private void makeFakeSession() {
+        final SessionManager sessionManager = SessionManager.getInstance();
+        final User user = new User("gugu", "password", "hkkang%40woowahan.com");
+        final Session session = new Session(FAKE_SESSION_ID);
+
+        session.setAttribute("user", user);
+        sessionManager.add(session);
     }
 }

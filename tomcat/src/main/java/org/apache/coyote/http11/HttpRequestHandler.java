@@ -47,7 +47,7 @@ public class HttpRequestHandler {
     private HttpResponse loginPage(String url, HttpCookies cookies) {
         String sessionId = cookies.getSessionId();
         if (!sessionId.isEmpty()) {
-            Session session = SessionManager.getInstance().getSession(sessionId);
+            Session session = SessionManager.getInstance().findSessionById(sessionId);
             User user = (User) session.findValue(USER_SESSION_INFO_NAME);
             log.info("session user : {}", user);
             return HttpResponse.builder()

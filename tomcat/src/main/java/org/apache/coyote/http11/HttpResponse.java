@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class HttpResponse {
 
@@ -65,7 +66,8 @@ public class HttpResponse {
         HttpCookies cookies = new HttpCookies();
         Session session = new Session();
         session.store(name, object);
-        cookies.createSession(session);
+        String sessionId = SessionManager.getInstance().storeSession(session);
+        cookies.addSession(sessionId);
         this.headers.addHeader("Set-Cookie", cookies.buildOutput());
         return this;
     }

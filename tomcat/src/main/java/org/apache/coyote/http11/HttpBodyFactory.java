@@ -11,12 +11,6 @@ public class HttpBodyFactory {
         classifier.put(ContentType.APPLICATION_X_WWW_FORM_URL_ENCODED, HttpXW3UrlEncodedBody::new);
     }
 
-    public static HttpBody generateDefault(char[] body) {
-        HttpBodyConstructor httpBodyConstructor = classifier.get(ContentType.APPLICATION_X_WWW_FORM_URL_ENCODED);
-
-        return httpBodyConstructor.newInstance(body);
-    }
-
     public static HttpBody generateHttpBody(ContentType contentType, char[] body) {
         HttpBodyConstructor httpBodyConstructor = classifier.getOrDefault(contentType, HttpXW3UrlEncodedBody::new);
 

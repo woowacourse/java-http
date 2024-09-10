@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 public class Response {
 
-    private static final String SPACE = " ";
+    private static final String SPACE_AND_LINE_SEPARATOR = " \r\n";
     private static final String LINE_SEPARATOR = "\r\n";
 
     private String sourceCode;
@@ -33,20 +33,16 @@ public class Response {
     }
 
     public String toHttpResponse() {
-        final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("HTTP/1.1 ").append(httpStatusCode.toHttpResponse()).append(SPACE).append(LINE_SEPARATOR);
-
+        final var builder = new StringBuilder();
+        builder.append("HTTP/1.1 ").append(httpStatusCode.toHttpResponse()).append(SPACE_AND_LINE_SEPARATOR);
         for (final var header : headers.getHeaders().entrySet()) {
-            stringBuilder.append(header.getKey()).append(": ").append(header.getValue())
-                    .append(SPACE).append(LINE_SEPARATOR);
+            builder.append(header.getKey()).append(": ").append(header.getValue()).append(SPACE_AND_LINE_SEPARATOR);
         }
-
-        stringBuilder.append(LINE_SEPARATOR);
+        builder.append(LINE_SEPARATOR);
         if (sourceCode != null) {
-            stringBuilder.append(sourceCode);
+            builder.append(sourceCode);
         }
-
-        return stringBuilder.toString();
+        return builder.toString();
     }
 
     public HttpHeaders getHeaders() {

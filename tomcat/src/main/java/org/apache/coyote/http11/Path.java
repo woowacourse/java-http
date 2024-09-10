@@ -16,17 +16,11 @@ public class Path {
     private final Map<String, String> parameters;
 
     public Path(final String target) {
-        if (target.contains("?")) { //TODO 객체 분리?
+        if (target.contains("?")) {
             this.requestPath = target.substring(0, target.indexOf("?"));
             this.absolutePath = getClass().getClassLoader()
                     .getResource(STATIC_FILE_PREFIX + target.substring(0, target.indexOf("?")) + STATIC_FILE_SUFFIX);
-            this.parameters = new HashMap<>();
-            final var query = target.substring(target.indexOf('?') + 1);
-            final var queryParams = query.split("&");
-            for (final var param : queryParams) {
-                final var pair = param.split("=");
-                this.parameters.put(pair[0], pair[1]);
-            }
+            this.parameters = parseQueryParam(target.substring(target.indexOf('?') + 1));
             return;
         }
         if (target.contains(".")) {
@@ -38,6 +32,16 @@ public class Path {
         this.requestPath = target;
         this.absolutePath = getClass().getClassLoader().getResource(STATIC_FILE_PREFIX + target + STATIC_FILE_SUFFIX);
         this.parameters = Map.of();
+    }
+
+    private static Map<String, String> parseQueryParam(final String query) {
+        final var result = new HashMap<String, String>();
+        final var queryParams = query.split("&");
+        for (final var param : queryParams) {
+            final var keyValue = param.split("=");
+            result.put(keyValue[0], keyValue[1]);
+        }
+        return result;
     }
 
     public boolean isEqualPath(final String target) {

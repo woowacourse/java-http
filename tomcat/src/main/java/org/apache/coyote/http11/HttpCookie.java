@@ -8,23 +8,21 @@ public class HttpCookie {
 
     private final Map<String, String> header;
 
-    public HttpCookie() {
-        this.header = new HashMap<>();
+    public HttpCookie(final Map<String, String> header) {
+        this.header = header;
     }
 
     public static HttpCookie parse(final String str) {
-        final var httpCookie = new HttpCookie();
         if (str == null || str.isBlank()) {
-            return httpCookie;
+            return new HttpCookie(Collections.emptyMap());
         }
-        final var cookies = str.split(";");
-        for (final var cookie : cookies) {
+        final var header = new HashMap<String, String>();
+        for (final var cookie : str.split(";")) {
             final var key = cookie.split("=")[0].strip();
             final var value = cookie.split("=")[1].strip();
-            httpCookie.header.put(key, value);
+            header.put(key, value);
         }
-
-        return httpCookie;
+        return new HttpCookie(header);
     }
 
     public boolean containsKey(final String key) {

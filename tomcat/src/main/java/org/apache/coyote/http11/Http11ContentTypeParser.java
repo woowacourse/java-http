@@ -12,6 +12,9 @@ public class Http11ContentTypeParser {
         if (path.endsWith(".js")) {
             return "application/javascript";
         }
-        throw new IllegalArgumentException("지원하지 않는 ContentType입니다.");
+        if (path.endsWith(".ico")) {
+            return "image/x-icon";
+        }
+        throw new IllegalArgumentException("ContentType을 지원하지 않는 경로입니다: " + path);
     }
 }

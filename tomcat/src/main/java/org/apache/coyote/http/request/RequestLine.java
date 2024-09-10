@@ -21,13 +21,15 @@ public class RequestLine {
         if (requestLines.size() != REQUEST_LINE_PARAMETERS_COUNT) {
             throw new IllegalArgumentException("Invalid request line: " + requestLines);
         }
-        String originMethod = requestLines.get(METHOD_INDEX);
-        String originPath = requestLines.get(PATH_INDEX);
-        String originVersion = requestLines.get(VERSION_INDEX);
         return new RequestLine(
-                HttpMethod.findMethodByMethodName(originMethod),
-                new Path(originPath),
-                HttpVersion.findVersionByProtocolVersion(originVersion));
+                requestLines.get(METHOD_INDEX), requestLines.get(PATH_INDEX), requestLines.get(VERSION_INDEX));
+    }
+
+    private RequestLine(String method, String path, String version) {
+        this(
+                HttpMethod.findMethodByMethodName(method),
+                new Path(path),
+                HttpVersion.findVersionByProtocolVersion(version));
     }
 
     private RequestLine(HttpMethod method, Path path, HttpVersion version) {

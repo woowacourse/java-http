@@ -1,13 +1,24 @@
 package org.apache.coyote.http11;
 
+import org.apache.catalina.Manager;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public non-sealed abstract class AbstractController implements Controller {
 
+    protected static final Manager SESSION_MANAGER = new SessionManager();
+
     @Override
     public final void service(HttpRequest request, HttpResponse response) {
+        if (!request.hasSessionCookie()) {
+            Http11Cookie sessionCookie = Http11Cookie.sessionCookie();
+            SESSION_MANAGER.add(new Session(sessionCookie.value()));
+            response.addCookie(sessionCookie);
+        }
+
         switch (getMethod(request)) {
             case GET -> doGet(request, response);
             case PUT -> doPut(request, response);

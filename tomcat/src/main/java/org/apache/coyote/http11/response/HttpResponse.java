@@ -9,11 +9,28 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11Header;
 
-public record HttpResponse(Http11StatusCode statusCode, List<Http11Header> headers, List<Http11Cookie> cookies,
-                           byte[] body) {
+public final class HttpResponse {
 
     private static final Http11ContentTypeFinder contentTypeFinder = new Http11ContentTypeFinder();
     private static final String CRLF = "\r\n";
+    private Http11StatusCode statusCode;
+    private final List<Http11Header> headers;
+    private final List<Http11Cookie> cookies;
+    private byte[] body;
+
+    public HttpResponse(Http11StatusCode statusCode, List<Http11Header> headers, List<Http11Cookie> cookies,
+                        byte[] body) {
+        this.statusCode = statusCode;
+        this.headers = headers;
+        this.cookies = cookies;
+        this.body = body;
+    }
+
+    public HttpResponse() {
+        headers = new ArrayList<>();
+        cookies = new ArrayList<>();
+        statusCode = Http11StatusCode.OK;
+    }
 
     public static HttpResponse ok(List<Http11Header> headers, List<Http11Cookie> cookies, Path path)
             throws IOException {
@@ -74,5 +91,47 @@ public record HttpResponse(Http11StatusCode statusCode, List<Http11Header> heade
         System.arraycopy(startLineAndHeaders, 0, response, 0, startLineAndHeaders.length);
         System.arraycopy(body, 0, response, startLineAndHeaders.length, body.length);
         return response;
+    }
+
+    public void addHeader(Http11Header header) {
+        headers.add(header);
+    }
+
+    public void addCookie(Http11Cookie cookie) {
+        cookies.add(cookie);
+    }
+
+    public void setStatusCode(Http11StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setBodyAndContentType(Path path) {
+        this.body = readStaticData(path);
+        addHeader(new Http11Header("Content-Length", body.length + ""));
+        addHeader(new Http11Header("Content-Type", contentTypeFinder.find(path) + ";charset=utf-8"));
+    }
+
+    private byte[] readStaticData(Path path) {
+        try {
+            return Files.readAllBytes(path);
+        } catch (IOException e) {
+            return new byte[0];
+        }
+    }
+
+    public Http11StatusCode getStatusCode() {
+        return statusCode;
+    }
+
+    public List<Http11Header> getHeaders() {
+        return headers;
+    }
+
+    public List<Http11Cookie> getCookies() {
+        return cookies;
+    }
+
+    public byte[] getBody() {
+        return body;
     }
 }

@@ -9,11 +9,12 @@ public abstract class AbstractController implements Controller {
     public HttpResponse service(HttpRequest httpRequest) {
         if (httpRequest.isMethod("GET")) {
             return doGet(httpRequest);
-        } else if (httpRequest.isMethod("POST")) {
+        }
+        if (httpRequest.isMethod("POST")) {
             return doPost(httpRequest);
         }
 
-        throw new RuntimeException();
+        throw new IllegalArgumentException("유효하지 않은 메소드입니다.");
     }
 
     abstract protected HttpResponse doPost(HttpRequest httpRequest);

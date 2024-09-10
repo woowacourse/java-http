@@ -13,7 +13,7 @@ public class UnauthorizedController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        throw new RuntimeException();
+        throw new IllegalArgumentException();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class UnauthorizedController extends AbstractController {
                     .responseBody(responseBody)
                     .build();
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

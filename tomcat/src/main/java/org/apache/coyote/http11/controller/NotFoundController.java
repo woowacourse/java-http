@@ -13,7 +13,7 @@ public class NotFoundController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
-        throw new RuntimeException();
+        throw new IllegalArgumentException("유효하지 않은 메소드 입니다.");
     }
 
     @Override
@@ -31,7 +31,7 @@ public class NotFoundController extends AbstractController {
                     .responseBody(responseBody)
                     .build();
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

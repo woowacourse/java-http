@@ -86,7 +86,7 @@ public class LoginController extends AbstractController {
                     .location("/index.html")
                     .build();
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 

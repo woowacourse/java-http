@@ -17,7 +17,7 @@ public class HttpRequestConvertor {
         try {
             String requestLine = bufferedReader.readLine();
             if (requestLine == null) {
-                throw new RuntimeException("요청이 비어 있습니다.");
+                throw new IllegalArgumentException("요청이 비어 있습니다.");
             }
 
             HttpRequestLine httpRequestLine = new HttpRequestLine(requestLine);
@@ -34,7 +34,7 @@ public class HttpRequestConvertor {
 
             return new HttpRequest(httpRequestLine, httpRequestHeader);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 

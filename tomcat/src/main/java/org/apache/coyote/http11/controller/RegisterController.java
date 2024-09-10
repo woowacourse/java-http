@@ -68,7 +68,7 @@ public class RegisterController extends AbstractController {
                     .responseBody(responseBody)
                     .build();
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

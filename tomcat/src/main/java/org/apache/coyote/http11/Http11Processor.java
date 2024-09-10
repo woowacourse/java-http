@@ -1,12 +1,15 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.io.IOException;
+import java.net.Socket;
+import org.apache.catalina.servlets.http.request.HttpRequest;
+import org.apache.catalina.servlets.http.response.HttpResponse;
+import org.apache.catalina.mapper.Mapper;
+import org.apache.catalina.servlets.Servlet;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,20 +31,21 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int read = inputStream.read(buffer);
+            HttpRequest request = new HttpRequest(new String(buffer, 0, read));
 
-            final var responseBody = "Hello world!";
+            Servlet servlet = Mapper.getInstance().getServlet(request.getRequestURI());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponse response = new HttpResponse();
+            servlet.service(request, response);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
+
+
 }

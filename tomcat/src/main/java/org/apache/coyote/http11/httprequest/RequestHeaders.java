@@ -8,25 +8,25 @@ public class RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
 
-    private final Map<String, String> requestHeaders;
+    private final Map<String, String> headers;
 
     public RequestHeaders(List<String> headers) {
-        this.requestHeaders = toMap(headers);
+        this.headers = toMap(headers);
     }
 
-    private Map<String, String> toMap(List<String> lines) {
+    private Map<String, String> toMap(List<String> headerLines) {
         Map<String, String> headers = new LinkedHashMap<>();
 
-        for (String line : lines) {
-            int index = line.indexOf(HEADER_DELIMITER);
-            headers.put(line.substring(0, index), line.substring(index + 2));
+        for (String headerLine : headerLines) {
+            String[] headerInfo = headerLine.split(HEADER_DELIMITER);
+            headers.put(headerInfo[0], headerInfo[1]);
         }
 
         return headers;
     }
 
     public int getContentLength() {
-        String contentLength = requestHeaders.get("Content-Length");
+        String contentLength = headers.get("Content-Length");
         if (contentLength == null) {
             return 0;
         }

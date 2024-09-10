@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.exception.FileNotFoundException;
+import org.apache.coyote.http11.exception.FileException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class ResponseFile {
         URL resource = CLASS_LOADER.getResource(RESOURCE_PREFIX + requestPath);
         if (resource == null) {
             log.warn("존재하지 않는 자원입니다: {}", requestPath);
-            throw new FileNotFoundException();
+            throw new FileException("존재하지 않는 파일입니다.");
         }
 
         return createFileResponse(requestPath, resource);
@@ -42,7 +42,7 @@ public class ResponseFile {
             return new ResponseFile(contentType, responseBody);
         } catch (IOException e) {
             log.error("파일 읽기 실패: {}", requestPath);
-            throw new IllegalArgumentException("파일 정보를 읽지 못했습니다.");
+            throw new FileException("파일 정보를 읽지 못했습니다.");
         }
     }
 

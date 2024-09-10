@@ -22,7 +22,7 @@ public class SignupRequestHandler extends AbstractRequestHandler {
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setContentTypeHeader(MimeType.HTML.value());
+        httpResponse.setContentTypeHeader(MimeType.HTML);
         httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 

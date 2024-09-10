@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.apache.catalina.Session;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MimeType;
 
 public class Http11Response implements HttpResponse {
 
@@ -50,8 +51,8 @@ public class Http11Response implements HttpResponse {
     }
 
     @Override
-    public void setContentTypeHeader(String value) {
-        this.headers.put("Content-Type", value);
+    public void setContentTypeHeader(MimeType mimeType) {
+        this.headers.put("Content-Type", mimeType.value());
     }
 
     @Override

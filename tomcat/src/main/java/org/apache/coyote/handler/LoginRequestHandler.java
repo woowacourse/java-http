@@ -33,7 +33,7 @@ public class LoginRequestHandler extends AbstractRequestHandler {
             return;
         }
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setContentTypeHeader(MimeType.HTML.value());
+        httpResponse.setContentTypeHeader(MimeType.HTML);
         httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 

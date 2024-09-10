@@ -13,7 +13,7 @@ public class RootRequestHandler extends AbstractRequestHandler {
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setContentTypeHeader(MimeType.HTML.value());
+        httpResponse.setContentTypeHeader(MimeType.HTML);
         httpResponse.setBody(ROOT_RESOURCE);
 
     }

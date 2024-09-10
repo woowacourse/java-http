@@ -14,7 +14,7 @@ public class NotFoundHandler extends AbstractRequestHandler {
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.NOT_FOUND);
-        httpResponse.setContentTypeHeader(MimeType.HTML.value());
+        httpResponse.setContentTypeHeader(MimeType.HTML);
         httpResponse.setBody(ResourceReader.readFile(NOT_FOUND_RESOURCE));
     }
 

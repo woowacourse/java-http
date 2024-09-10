@@ -1,10 +1,15 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.ContentType.Charset;
+
 public class Response {
+
+    private static final String SPACE = " ";
+    private static final String LINE_SEPARATOR = "\r\n";
 
     private int statusCode;
     private String sc;
-    private String contentType;
+    private ContentType contentType1;
     private int contentLength;
     private String location;
     private String sourceCode;
@@ -26,12 +31,8 @@ public class Response {
         this.sc = sc;
     }
 
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(final String contentType) {
-        this.contentType = contentType;
+    public void setContentType1(final ContentType contentType1) {
+        this.contentType1 = contentType1;
     }
 
     public int getContentLength() {
@@ -67,36 +68,22 @@ public class Response {
     }
 
     public String toHttpResponse() {
-        if (location == null && cookie == null) {
-            return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + contentLength + " ",
-                    "",
-                    sourceCode);
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("HTTP/1.1 ").append(statusCode).append(" ")
+                .append(sc).append(SPACE).append(LINE_SEPARATOR);
+        stringBuilder.append(contentType1.getResponseText(Charset.UTF_8)).append(SPACE).append(LINE_SEPARATOR);
+        stringBuilder.append("Content-Length: ").append(contentLength).append(SPACE).append(LINE_SEPARATOR);
+
+        if (location != null) {
+            stringBuilder.append("Location: ").append(location).append(SPACE).append(LINE_SEPARATOR);
         }
-        if (location != null && cookie == null) {
-            return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + contentLength + " ",
-                    "Location: " + location,
-                    "",
-                    sourceCode);
+        if (cookie != null) {
+            stringBuilder.append("Set-Cookie: ").append(cookie).append(SPACE).append(LINE_SEPARATOR);
         }
-        if (location == null) {
-            return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
-                    "Set-Cookie: " + cookie + " ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + contentLength + " ",
-                    "",
-                    sourceCode);
-        }
-        return String.join("\r\n", "HTTP/1.1 " + statusCode + " " + sc + " ",
-                "Set-Cookie: " + cookie + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + contentLength + " ",
-                "Location: " + location,
-                "",
-                sourceCode);
+        stringBuilder.append(LINE_SEPARATOR);
+        stringBuilder.append(sourceCode);
+
+        return stringBuilder.toString();
     }
 
     @Override
@@ -104,7 +91,7 @@ public class Response {
         return "Response{" +
                "statusCode=" + statusCode +
                ", sc='" + sc + '\'' +
-               ", contentType='" + contentType + '\'' +
+               ", contentType='" + contentType1 + '\'' +
                ", contentLength=" + contentLength +
                ", location='" + location + '\'' +
                '}';

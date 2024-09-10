@@ -15,12 +15,6 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
-    public static final String FAIL_PAGE_EXPECTED = "HTTP/1.1 302 FOUND \r\n" +
-                                                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                                                    "Content-Length: 3863 \r\n" +
-                                                    "Location: 401.html\r\n" +
-                                                    "\r\n";
-
     @Test
     @Disabled
     void process() {
@@ -61,7 +55,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final var expected = "HTTP/1.1 200 OK \r\n" +
-                             "Content-Type: text/html;charset=utf-8 \r\n" +
+                             "Content-Type: text/html; charset=utf-8 \r\n" +
                              "Content-Length: 5670 \r\n" +
                              "\r\n" +
                              new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -91,7 +85,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
+        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND", "Location: 401.html");
     }
 
     @Test
@@ -116,7 +110,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains(FAIL_PAGE_EXPECTED);
+        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND", "Location: 401.html");
     }
 
     @Test

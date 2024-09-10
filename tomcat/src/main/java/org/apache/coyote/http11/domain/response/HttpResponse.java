@@ -17,7 +17,7 @@ public class HttpResponse {
     }
 
     public static HttpResponseBuilder status(HttpStatus httpStatus) {
-        return new HttpResponseBuilder().withHttpStatus(httpStatus);
+        return new HttpResponseBuilder().status(httpStatus);
     }
 
     public static HttpResponseBuilder redirect(String location) {

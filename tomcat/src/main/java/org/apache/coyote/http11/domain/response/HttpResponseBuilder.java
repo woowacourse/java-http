@@ -13,7 +13,7 @@ public class HttpResponseBuilder {
     private HttpStatus httpStatus;
     private String messageBody;
 
-    public HttpResponseBuilder withHttpStatus(HttpStatus httpStatus) {
+    public HttpResponseBuilder status(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
         return this;
     }

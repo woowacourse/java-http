@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +7,10 @@ import java.util.Map;
 
 public class Headers {
 	private final Map<String, String> headers;
+
+	public Headers(Map<String, String> headers) {
+		this.headers = headers;
+	}
 
 	public Headers(BufferedReader reader) throws IOException {
 		this.headers = new HashMap<>();

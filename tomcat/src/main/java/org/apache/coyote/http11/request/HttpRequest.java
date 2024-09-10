@@ -2,12 +2,11 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.apache.coyote.http11.common.Body;
+import org.apache.coyote.http11.common.Headers;
 
 public class HttpRequest {
-
-
 	private final Method method;
 	private final Path path;
 	private final Headers headers;

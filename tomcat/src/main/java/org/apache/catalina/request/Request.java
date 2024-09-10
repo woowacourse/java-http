@@ -11,23 +11,15 @@ public class Request {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
 
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private Map<String, String> body = new HashMap<>();
     private Map<String, String> queryParam = new HashMap<>();
-    private final HttpMethod httpMethod;
-    private final String urlIncludeQuery;
-    private final String url;
     private final String fileType;
 
     public Request(String requestLine, Map<String, String> headers) {
-        String[] parts = requestLine.split(" ");
-        if (parts.length < 2) {
-            throw new IllegalArgumentException("요청 헤더의 형식이 올바르지 않습니다.");
-        }
+        this.requestLine = new RequestLine(requestLine);
         this.headers = new HashMap<>(headers);
-        this.httpMethod = HttpMethod.of(parts[0]);
-        this.urlIncludeQuery = parts[1];
-        this.url = urlIncludeQuery.split("\\?", 2)[0];
         this.fileType = extractMainFileType(headers.get("Accept"));
     }
 
@@ -60,15 +52,15 @@ public class Request {
     }
 
     public String getHttpMethod() {
-        return httpMethod.name();
+        return requestLine.getHttpMethod().name();
     }
 
-    public String getUrlIncludeQuery() {
-        return urlIncludeQuery;
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public String getUrl() {
-        return url;
+        return requestLine.getPathWithoutQuery();
     }
 
     public String getFileType() {

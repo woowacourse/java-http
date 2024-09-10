@@ -23,7 +23,7 @@ public class RequestReader {
 
         Map<String, String> headers = parseHeaders(headerLines);
         Request request = new Request(headerLines.getFirst(), headers);
-        request.setQueryParam(getQueryParams(request.getUrlIncludeQuery()));
+        request.setQueryParam(getQueryParams(request.getPath()));
         request.setBody(getBody(reader, request.getContentLength()));
         return request;
     }

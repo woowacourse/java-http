@@ -71,7 +71,7 @@ class RequestTest {
     void getUrlIncludeQuery() {
         Request request = new Request("GET /index?id=123 HTTP/1.1", Map.of());
 
-        String actual = request.getUrlIncludeQuery();
+        String actual = request.getPath();
 
         assertThat(actual).isEqualTo("/index?id=123");
     }

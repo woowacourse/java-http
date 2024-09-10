@@ -12,8 +12,10 @@
 ### 시작 가이드
 
 1. 미션을 시작하기 전에 파일, 입출력 스트림 학습 테스트를 먼저 진행합니다.
-  - [File, I/O Stream](study/src/test/java/study)
-  - 나머지 학습 테스트는 다음 강의 시간에 풀어봅시다.
+
+- [File, I/O Stream](study/src/test/java/study)
+- 나머지 학습 테스트는 다음 강의 시간에 풀어봅시다.
+
 2. 학습 테스트를 완료하면 LMS의 1단계 미션부터 진행합니다.
 
 ## 학습 테스트
@@ -62,11 +64,11 @@
 
 ### 3단계
 
-- [ ] HttpRequest 클래스 구현 
-  - [ ] Request Line 분석  
+- [ ] HttpRequest 클래스 구현
+  - [x] Request Line 분석
     - [x] Method 클래스 (enum)
-    - [ ] Path 클래스 
-    - [ ] Version 클래스
+    - [x] Path 클래스
+    - [x] Version 클래스
     - [x] Protocol 클래스 (enum)
   - [ ] Headers 분석
 
@@ -82,11 +84,11 @@
   - [ ] 컨트롤러를 구현한 추상 클래스 구현
   - [ ] 도메인에 맞는 컨트롤러 구현
     - [ ] 루트 컨트롤러
-      - get / 
+      - get /
     - [ ] 페이지 로드 컨트롤러
       - get /*.html (* : 페이지 이름)
     - [ ] 로그인 컨트롤러
-      - get /login 
+      - get /login
       - get /login?account=gugu&password=password
     - [ ] 회원가입 컨트롤러
       - get /register

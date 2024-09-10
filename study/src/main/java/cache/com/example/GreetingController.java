@@ -6,13 +6,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 @Controller
 public class GreetingController {
 
     @GetMapping("/")
     public String index() {
-        return "index";
+        return "index.html";
     }
 
     /**
@@ -29,7 +30,7 @@ public class GreetingController {
     }
 
     @GetMapping("/etag")
-    public String etag() {
+    public String etag(final HttpServletResponse response) {
         return "index";
     }
 

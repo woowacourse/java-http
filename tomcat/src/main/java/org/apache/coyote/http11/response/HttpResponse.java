@@ -1,39 +1,40 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.HttpHeaderKey;
 import org.apache.coyote.http11.HttpStatus;
 
 public class HttpResponse {
 
     private final HttpStatus status;
     private final String protocolVersion;
-    private final ResponseHeader header;
-    private ResponseBody body;
+    private final ResponseHeaders header;
+    private final ResponseBody body;
 
-    public HttpResponse(HttpStatus status, String protocolVersion, ResponseHeader header, ResponseBody body) {
+    public HttpResponse(HttpStatus status, String protocolVersion, ResponseHeaders header, ResponseBody body) {
         this.status = status;
         this.protocolVersion = protocolVersion;
         this.header = header;
         this.body = body;
     }
 
-    public HttpResponse(final HttpStatus status) {
-        this(status, "HTTP/1.1", new ResponseHeader(), null);
+    public HttpResponse(HttpStatus status, String protocolVersion) {
+        this(status, protocolVersion, new ResponseHeaders(), null);
     }
 
-    public HttpResponse(final HttpStatus status, final ResponseBody body) {
-        this(status, "HTTP/1.1", new ResponseHeader(), body);
-        header.add("Content-Type", body.getContentType() + ";charset=utf-8");
-        header.add("Content-Length", body.getContentLength());
+    public HttpResponse(HttpStatus status, String protocolVersion, ResponseBody body) {
+        this(status, protocolVersion, new ResponseHeaders(), body);
+        header.add(HttpHeaderKey.CONTENT_TYPE, body.getContentType() + ";charset=utf-8");
+        header.add(HttpHeaderKey.CONTENT_LENGTH, body.getContentLength());
     }
 
     public void setRedirect(final String location) {
-        header.add("Location", location);
-        header.add("Content-Length", "0");
-        header.add("Connection", "close");
+        header.add(HttpHeaderKey.LOCATION, location);
+        header.add(HttpHeaderKey.CONTENT_LENGTH, "0");
+        header.add(HttpHeaderKey.CONNECTION, "close");
     }
 
     public void setCookie(final String name, final String value) {
-        header.add("Set-Cookie", name + "=" + value);
+        header.add(HttpHeaderKey.SET_COOKIE, name + "=" + value);
     }
 
     public String getResponse() {

@@ -68,4 +68,8 @@ public class HttpRequest {
     public String getPath() {
         return requestLine.getPath();
     }
+
+    public String getProtocolVersion() {
+        return requestLine.getProtocolVersion();
+    }
 }

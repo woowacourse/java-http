@@ -35,4 +35,8 @@ public class RequestLine {
     public String getPath() {
         return path;
     }
+
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
 }

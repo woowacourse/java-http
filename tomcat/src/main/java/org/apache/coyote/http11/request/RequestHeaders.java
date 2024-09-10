@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// TODO: HttpHeaderKey enum 사용 고려
 public class RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";

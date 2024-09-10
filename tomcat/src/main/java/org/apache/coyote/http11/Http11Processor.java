@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
 
-            final var response = generateResponse(inputStream);
+            String response = generateResponse(inputStream);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
     private String generateResponse(InputStream inputStream) throws IOException {
         HttpRequest request = HttpRequest.of(inputStream);
         if (request.isGet() && request.isSameUri("/")) {
-            return renderDefaultPage();
+            return renderDefaultPage(request);
         }
         if (request.isGet() && ContentMimeType.isEndsWithExtension(request.getPath())) {
             return renderStaticResource(request);
@@ -66,19 +66,19 @@ public class Http11Processor implements Runnable, Processor {
         return renderHtmlPage(request);
     }
 
-    private String renderDefaultPage() {
-        final var response = new HttpResponse(HttpStatus.OK, new ResponseBody("text/html", "Hello world!"));
+    private String renderDefaultPage(HttpRequest request) {
+        HttpResponse response = new HttpResponse(HttpStatus.OK, request.getProtocolVersion(), new ResponseBody("text/html", "Hello world!"));
         return response.getResponse();
     }
 
     private String renderStaticResource(HttpRequest request) throws IOException {
-        final var responseBody = ResourceLoader.loadStaticResource(request.getPath());
-        final var response = new HttpResponse(HttpStatus.OK, responseBody);
+        ResponseBody responseBody = ResourceLoader.loadStaticResource(request.getPath());
+        HttpResponse response = new HttpResponse(HttpStatus.OK, request.getProtocolVersion(), responseBody);
         return response.getResponse();
     }
 
     private String renderHtmlPage(HttpRequest request) throws IOException {
-        final var response = new HttpResponse(HttpStatus.OK, ResourceLoader.loadHtmlResource(request.getPath()));
+        HttpResponse response = new HttpResponse(HttpStatus.OK, request.getProtocolVersion(), ResourceLoader.loadHtmlResource(request.getPath()));
         return response.getResponse();
     }
 
@@ -113,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
         if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
             return renderHtmlPage(request);
         }
-        final var response = new HttpResponse(HttpStatus.FOUND);
+        HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
         response.setRedirect("/index.html");
         return response.getResponse();
     }
@@ -123,13 +123,13 @@ public class Http11Processor implements Runnable, Processor {
             HttpCookie cookie = new HttpCookie(request.getCookie());
             return getLoginResponse(request, cookie);
         }
-        final var response = new HttpResponse(HttpStatus.FOUND);
+        HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
         response.setRedirect("/401.html");
         return response.getResponse();
     }
 
     private String getLoginResponse(HttpRequest request, HttpCookie cookie) {
-        final var response = new HttpResponse(HttpStatus.FOUND);
+        HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
         response.setRedirect("/index.html");
         if (!cookie.hasJSESSIONID() || !SessionManager.getInstance().hasSession(cookie.getJSESSIONID())) {
             final var session = getSession(request);
@@ -150,7 +150,7 @@ public class Http11Processor implements Runnable, Processor {
             final var newUser =
                     new User(request.findBodyValueByKey("account"), request.findBodyValueByKey("password"), request.findBodyValueByKey("email"));
             InMemoryUserRepository.save(newUser);
-            final var response = new HttpResponse(HttpStatus.FOUND);
+            HttpResponse response = new HttpResponse(HttpStatus.FOUND, request.getProtocolVersion());
             response.setRedirect("/index.html");
             return response.getResponse();
         }

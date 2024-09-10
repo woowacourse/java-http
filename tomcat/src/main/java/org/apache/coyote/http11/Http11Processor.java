@@ -38,17 +38,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            if (bufferedReader.ready()) {
-                Map<RequestLine, String> requestLineElements = extractRequestLine(bufferedReader);
-                Map<String, String> headers = parseHeaders(bufferedReader);
-                String body = parseBody(bufferedReader, headers);
-                HttpResponse httpResponse = HttpResponse.from("HTTP/1.1");
+            Map<RequestLine, String> requestLineElements = extractRequestLine(bufferedReader);
+            Map<String, String> headers = parseHeaders(bufferedReader);
+            String body = parseBody(bufferedReader, headers);
+            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1");
 
-                StandardContext.processRequest(requestLineElements, headers, body, httpResponse);
+            StandardContext.processRequest(requestLineElements, headers, body, httpResponse);
 
-                outputStream.write(httpResponse.buildResponse().getBytes());
-                outputStream.flush();
-            }
+            outputStream.write(httpResponse.buildResponse().getBytes());
+            outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

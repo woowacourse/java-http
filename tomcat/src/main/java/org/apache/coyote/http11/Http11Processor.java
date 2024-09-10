@@ -37,8 +37,9 @@ public class Http11Processor implements Runnable, Processor {
              final var requestReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final var request = RequestGenerator.accept(requestReader);
+            final var response = HttpResponse.create();
             log.info("request: {}", request);
-            final var response = getResponse(request);
+            service(request, response);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -47,12 +48,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getResponse(HttpRequest request) throws IOException {
-        Handler handler = RequestMapping.findHandler(request.getMethod(), request.getUri());
+    private void service(HttpRequest request, HttpResponse response) throws IOException {
+        Handler handler = RequestMapping.findHandler(request);
         if (handler != null) {
-            return handler.handle(request);
+            handler.handle(request, response);
         }
         // todo: GET 메서드가 아닌 경우 405 Method Not Allowed 응답을 반환
-        return StaticResourceHandler.getInstance().handle(request);
+        StaticResourceHandler.getInstance().handle(request, response);
     }
 }

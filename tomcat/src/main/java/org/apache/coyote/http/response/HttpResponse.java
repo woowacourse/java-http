@@ -1,5 +1,6 @@
 package org.apache.coyote.http.response;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -13,10 +14,10 @@ public class HttpResponse {
     private static final String BLANK_SPACE = " ";
 
     private final String protocol;
-    private final StatusCode status;
+    private StatusCode status;
     private final Map<String, String> headers;
     private final Cookie cookies;
-    private final String body;
+    private String body;
 
     private HttpResponse(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {
         this.protocol = protocol;
@@ -28,6 +29,26 @@ public class HttpResponse {
 
     public HttpResponse(StatusCode status, Map<String, String> headers, String body) {
         this(DEFAULT_PROTOCOL, status, headers, Cookie.empty(), body);
+    }
+
+    public static HttpResponse create() {
+        return new HttpResponse(StatusCode.OK, new HashMap<>(), "");
+    }
+
+    public void setStatus(StatusCode status) {
+        this.status = status;
+    }
+
+    public void setHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers.putAll(headers);
+    }
+
+    public void setBody(byte[] responseBody) {
+        this.body = new String(responseBody);
     }
 
     public byte[] getBytes() {

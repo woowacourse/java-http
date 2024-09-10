@@ -16,7 +16,8 @@ public class HttpRequest {
     private final RequestBody body;
     private final Session session;
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters, RequestBody body) {
+    public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters,
+                       RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.cookie = parseCookie();

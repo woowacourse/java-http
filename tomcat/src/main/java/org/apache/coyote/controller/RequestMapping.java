@@ -1,6 +1,7 @@
 package org.apache.coyote.controller;
 
 import java.util.Arrays;
+import org.apache.coyote.http.request.HttpRequest;
 
 public enum RequestMapping {
     LOGIN("POST", "/login", new LoginHandler()),
@@ -17,7 +18,11 @@ public enum RequestMapping {
         this.handler = handler;
     }
 
-    public static Handler findHandler(String method, String path) {
+    public static Handler findHandler(HttpRequest request) {
+        return findHandler(request.getMethod(), request.getUri());
+    }
+
+    private static Handler findHandler(String method, String path) {
         return Arrays.stream(values())
                 .filter(handlerMapper -> handlerMapper.method.equals(method) && handlerMapper.path.equals(path))
                 .map(handlerMapper -> handlerMapper.handler)

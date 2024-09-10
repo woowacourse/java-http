@@ -15,17 +15,16 @@ public class LoginHandler implements Handler {
     public static final String PASSWORD_FIELD = "password";
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         try {
             login(request);
         } catch (IllegalArgumentException e) {
-            return StaticResourceHandler.getInstance().handle(request, StatusCode.UNAUTHORIZED);
+            StaticResourceHandler.getInstance().handle(request, response, StatusCode.UNAUTHORIZED);
+            return;
         }
-        return new HttpResponse(
-                StatusCode.FOUND,
-                Map.of(Header.LOCATION.value(), "/index.html",
-                       Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()),
-                null);
+        response.setStatus(StatusCode.FOUND);
+        response.setHeaders(Map.of(Header.LOCATION.value(), "/index.html",
+                                   Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()));
     }
 
     private void login(HttpRequest request) {

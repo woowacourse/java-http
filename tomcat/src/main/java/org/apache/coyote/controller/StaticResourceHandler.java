@@ -24,24 +24,23 @@ public class StaticResourceHandler implements Handler {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         Session session = request.getSession();
         if (request.getUri().contains("/login") && session.getAttribute("user") != null) {
-            return new HttpResponse(
-                    StatusCode.FOUND,
-                    Map.of(Header.LOCATION.value(), "/index.html",
-                           Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()),
-                    null);
+            response.setStatus(StatusCode.FOUND);
+            response.setHeaders(Map.of(Header.LOCATION.value(), "/index.html",
+                                       Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()));
+            return;
         }
-        return handle(request, StatusCode.OK);
+        handle(request, response, StatusCode.OK);
     }
 
-    public HttpResponse handle(HttpRequest request, StatusCode statusCode) {
+    public void handle(HttpRequest request, HttpResponse response, StatusCode statusCode) {
         File responseBody = getStaticResource(request.getUri());
         try {
-            return makeResponse(responseBody, statusCode);
+            makeResponse(response, responseBody, statusCode);
         } catch (IOException e) {
-            return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, Map.of(), null);
+            response.setStatus(StatusCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -61,12 +60,13 @@ public class StaticResourceHandler implements Handler {
         return file;
     }
 
-    private HttpResponse makeResponse(File resource, StatusCode statusCode) throws IOException {
+    private void makeResponse(HttpResponse response, File resource, StatusCode statusCode) throws IOException {
         byte[] responseBody = Files.readAllBytes(resource.toPath());
-        return new HttpResponse(statusCode,
-                                Map.of("Content-Type", getContentType(resource),
-                                   "Content-Length", getResponseLength(responseBody)),
-                                new String(responseBody));
+        Map<String, String> headers = Map.of(Header.CONTENT_TYPE.value(), getContentType(resource),
+                                             Header.CONTENT_LENGTH.value(), getResponseLength(responseBody));
+        response.setBody(responseBody);
+        response.setStatus(statusCode);
+        response.setHeaders(headers);
     }
 
     private String getContentType(File resource) {

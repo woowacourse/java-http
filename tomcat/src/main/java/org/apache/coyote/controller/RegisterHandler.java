@@ -17,17 +17,16 @@ public class RegisterHandler implements Handler {
     private static final String EMAIL_FIELD = "email";
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public void handle(HttpRequest request, HttpResponse response) {
         String account = request.getParameter(ACCOUNT_FIELD);
         String password = request.getParameter(PASSWORD_FIELD);
         String email = request.getParameter(EMAIL_FIELD);
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return new HttpResponse(BAD_REQUEST, Map.of(), null);
+            response.setStatus(BAD_REQUEST);
         }
         InMemoryUserRepository.save(new User(account, password, email));
-        return new HttpResponse(StatusCode.FOUND,
-                                Map.of(Header.LOCATION.value(), "/index.html"),
-                                null);
+        response.setStatus(StatusCode.FOUND);
+        response.setHeaders(Map.of(Header.LOCATION.value(), "/login.html"));
     }
 }

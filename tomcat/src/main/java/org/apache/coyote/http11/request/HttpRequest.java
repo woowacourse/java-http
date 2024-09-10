@@ -38,6 +38,12 @@ public class HttpRequest {
         return headers.getHeader(key);
     }
 
+    public boolean matchHeader(String key, String expectedValue) {
+        return headers.getHeader(key)
+                .map(value -> value.equals(expectedValue))
+                .orElse(false);
+    }
+
     public HttpRequestHeaders getHeaders() {
         return headers;
     }

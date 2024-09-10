@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestCreatorTest {
@@ -19,7 +20,10 @@ class HttpRequestCreatorTest {
                 "");;
         BufferedReader reader = new BufferedReader(new StringReader(httpRequest));
         HttpRequestStartLine startLine = new HttpRequestStartLine("GET", "/", "HTTP/1.1");
-        HttpRequest expected = new HttpRequest(startLine, null, null);
+        HttpRequestHeaders headers = new HttpRequestHeaders(Map.of(
+                "Host", "localhost:8080", "Connection", "keep-alive"));
+        String body = "";
+        HttpRequest expected = new HttpRequest(startLine, headers, body);
 
         HttpRequest actual = HttpRequestCreator.createHttpRequest(reader);
 

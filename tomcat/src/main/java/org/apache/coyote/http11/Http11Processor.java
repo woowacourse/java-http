@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.domain.HttpCookie;
+import org.apache.coyote.http11.domain.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +96,12 @@ public class Http11Processor implements Runnable, Processor {
             result[1] = "static" + url;
             return result;
         }
+        if (url.equals("/login") && isAlreadyLogin(requestHeaders)) {
+            result[0] = "302 FOUND";
+            result[1] = "static/index.html";
+            result[2] = "Location: /index.html";
+
+        }
         result[1] = "static" + url + ".html";
         return result;
     }
@@ -134,6 +140,7 @@ public class Http11Processor implements Runnable, Processor {
         String[] result = new String[3];
         result[0] = "302 FOUND";
         result[1] = "static/index.html";
+        result[2] = "Location: /index.html";
 
         String account = requestBody[0].split("=")[1];
         String password = requestBody[1].split("=")[1];
@@ -146,22 +153,38 @@ public class Http11Processor implements Runnable, Processor {
             result[2] = "Location: /401.html";
             return result;
         }
-
         log.info(user.toString());
-        result[2] = checkCookie(requestHeaders);
+
+        Cookie cookie = createCookie();
+        createSession(user, cookie.getSessionId());
+        result[2] = String.join("\r\n",
+                result[2],
+                "Set-Cookie: JSESSIONID=" + cookie.getSessionId());
         return result;
     }
 
-    private String checkCookie(Map<String, String> requestHeaders) {
-        String result = "Location: /index.html ";
-        HttpCookie httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
-        if (!httpCookie.containsJSessionId()) {
-            result = String.join("\r\n",
-                    result,
-                    "Set-Cookie: JSESSIONID=" + UUID.randomUUID().toString() + " ");
+    private boolean isAlreadyLogin(Map<String, String> requestHeaders) {
+        if (requestHeaders.containsKey("Cookie")) {
+            String sessionId = requestHeaders.get("Cookie").split("=")[1];
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = sessionManager.findSession(sessionId);
+            return session != null;
         }
+        return false;
+    }
 
-        return result;
+    private Cookie createCookie() {
+        String sessionId = UUID.randomUUID().toString();
+        Cookie cookie = new Cookie();
+        cookie.setCookie("JSESSIONID", sessionId);
+        return cookie;
+    }
+
+    private void createSession(User user, String sessionId) {
+        SessionManager sessionManager = SessionManager.getInstance();
+        Session session = new Session(sessionId);
+        sessionManager.add(session);
+        session.setAttribute("user", user);
     }
 
     private String[] readRequestBody(Map<String, String> requestHeaders, BufferedReader reader) throws IOException {

@@ -2,14 +2,26 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 
-public record HttpResponse(
-        HttpVersion httpVersion,
-        HttpStatus httpStatus,
-        Header header,
-        byte[] responseBody
-) {
+public class HttpResponse {
 
     private static final String RESPONSE_HEADER_FORMAT = "%s: %s \r\n";
+
+    private HttpVersion httpVersion;
+    private HttpStatus httpStatus;
+    private Header header;
+    private byte[] responseBody;
+
+    public HttpResponse(
+            HttpVersion httpVersion,
+            HttpStatus httpStatus,
+            Header header,
+            byte[] responseBody
+    ) {
+        this.httpVersion = httpVersion;
+        this.httpStatus = httpStatus;
+        this.header = header;
+        this.responseBody = responseBody;
+    }
 
     public byte[] serialize() {
         String message = String.join("\r\n", getStartLine(), getHeaders(), getBody());
@@ -32,5 +44,26 @@ public record HttpResponse(
 
     private String getBody() {
         return new String(responseBody);
+    }
+
+    public Header getHeader() {
+        return header;
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void setResponseBody(byte[] responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.header.append(HttpHeaderKey.CONTENT_TYPE, contentType.getName());
+    }
+
+    public void sendRedirect(String redirectionPath) {
+        this.httpStatus = HttpStatus.FOUND;
+        this.header.append(HttpHeaderKey.LOCATION, redirectionPath);
     }
 }

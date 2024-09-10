@@ -1,18 +1,18 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.exception.UncheckedServletException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
-import org.was.Controller.Controller;
-import org.was.Controller.RequestMapping;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.was.Controller.FrontController;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -32,20 +32,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-             final var outputStream = connection.getOutputStream()) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequestParser httpRequestParser = new HttpRequestParser();
-            HttpRequest request = httpRequestParser.parseRequest(reader);
-
+            HttpRequestParser requestParser = HttpRequestParser.getInstance();
+            HttpRequest request = requestParser.parse(inputStream);
             HttpResponse response = new HttpResponse();
 
-            RequestMapping requestMapping = RequestMapping.getInstance();
-            Controller controller = requestMapping.getController(request);
-            controller.service(request, response);
+            FrontController frontController = FrontController.getInstance();
+            frontController.service(request, response);
 
-            outputStream.write(response.getResponse().getBytes());
+            HttpResponseConverter responseConverter = HttpResponseConverter.getInstance();
+            outputStream.write(responseConverter.convert(response));
             outputStream.flush();
 
         } catch (IOException | UncheckedServletException e) {

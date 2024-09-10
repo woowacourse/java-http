@@ -34,6 +34,8 @@ public class LoginController extends AbstractController {
         if (loginSuccess) {
             addSessionAttribute(request, "user", user);
             response.setRedirect("/index.html");
+            return;
         }
+        response.setRedirect("/401.html");
     }
 }

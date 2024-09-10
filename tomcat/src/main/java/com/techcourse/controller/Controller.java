@@ -16,11 +16,8 @@ public class Controller {
         String requestAccount = request.getQueryStringData("account");
         String requestPassword = request.getQueryStringData("password");
         InMemoryUserRepository.findByAccount(requestAccount)
-                .ifPresent(user -> {
-                    if (user.checkPassword(requestPassword)) {
-                        LOGGER.info(user.toString());
-                    }
-                });
+                .filter(user -> user.checkPassword(requestPassword))
+                .ifPresent(user -> LOGGER.info(user.toString()));
         return "/login.html";
     }
 }

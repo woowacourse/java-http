@@ -25,4 +25,8 @@ public class StaticResource {
     public String getContent() throws IOException {
         return new String(Files.readAllBytes(file.toPath()));
     }
+
+    public long getContentLength() throws IOException {
+        return getContent().getBytes().length;
+    }
 }

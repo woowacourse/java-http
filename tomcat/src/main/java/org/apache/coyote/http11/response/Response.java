@@ -1,29 +1,59 @@
 package org.apache.coyote.http11.response;
 
+import java.io.IOException;
+
 import org.apache.coyote.http11.exception.NotCompleteResponseException;
 import org.apache.coyote.http11.request.HttpHeaders;
 
 public class Response {
 
     private final HttpHeaders headers;
-    private StatusLine statusLine;
-    private String content;
+    private final StatusLine statusLine;
+    private final String content;
 
-    public Response() {
-        headers = new HttpHeaders();
+    public static ResponseBuilder builder() {
+        return new ResponseBuilder();
     }
 
-    public void setStatus(String protocolVersion, int statusCode, String statusText) {
-        statusLine = new StatusLine(protocolVersion, statusCode, statusText);
-    }
-
-    public void addHeaders(String key, String value) {
-        headers.addHeader(key, value);
-    }
-
-    public void addContent(String content) {
-        headers.addHeader("Content-Length", Integer.toString(content.getBytes().length));
+    public Response(StatusLine statusLine, HttpHeaders headers, String content) {
+        this.headers = headers;
+        this.statusLine = statusLine;
         this.content = content;
+    }
+
+    public static class ResponseBuilder {
+        private String ProtocolVersion;
+        private HttpHeaders headers = new HttpHeaders();
+
+        private ResponseBuilder() {
+            ProtocolVersion = "HTTP/1.1";
+        }
+
+        public ResponseBuilder versionOf(String protocolVersion) {
+            this.ProtocolVersion = protocolVersion;
+            return this;
+        }
+
+        public Response found(String target) {
+            this.headers.addHeader("Location", target);
+
+            return new Response(
+                    new StatusLine(this.ProtocolVersion, 301, "FOUND"),
+                    this.headers,
+                    null
+            );
+        }
+
+        public Response ofStaticResource(StaticResource resource) throws IOException {
+            headers.addHeader("Content-Type", resource.getContentType() + ";charset=utf-8");
+            headers.addHeader("Content-Length", Long.toString(resource.getContentLength()));
+
+            return new Response(
+                    new StatusLine(this.ProtocolVersion, 200, "OK"),
+                    this.headers,
+                    resource.getContent()
+            );
+        }
     }
 
     public String toHttpMessage() {

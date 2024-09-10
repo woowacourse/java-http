@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,29 +21,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
-
-    @DisplayName("InputStream을 request 형식으로 정상적으로 파싱한다.")
-    @Test
-    void parse() throws IOException {
-        // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive",
-                "Content-Length: 30",
-                "Cookie: JSESSIONID=session",
-                "",
-                "account=gugu&password=password"
-        );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-
-        // when
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
-
-        // then
-        assertThat(parsedRequest).isNotNull();
-    }
 
     @DisplayName("요청의 대상이 정적 파일이면 true를 반환한다.")
     @Test
@@ -228,5 +206,37 @@ class HttpRequestTest {
 
         // when&then
         assertThat(request.getHttpVersion()).isEqualTo("HTTP/1.1");
+    }
+
+    @DisplayName("InputStream을 request 형식으로 정상적으로 파싱한다.")
+    @Test
+    void parse() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Accept: text/html",
+                "Connection: keep-alive",
+                "Content-Length: 30",
+                "Cookie: JSESSIONID=session",
+                "",
+                "account=gugu&password=password"
+        );
+        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+
+        // when
+        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
+
+        // then
+        assertAll(
+                () -> assertThat(parsedRequest.getHttpMethod()).isEqualTo(HttpMethod.POST),
+                () -> assertThat(parsedRequest.isTargetBlank()).isFalse(),
+                () -> assertThat(parsedRequest.isTargetStatic()).isFalse(),
+                () -> assertThat(parsedRequest.uriStartsWith("/login")).isTrue(),
+                () -> assertThat(parsedRequest.getHttpVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(parsedRequest.getSessionFromCookie()).get().isEqualTo("session"),
+                () -> assertThat(parsedRequest.getFromBody("account")).isEqualTo("gugu"),
+                () -> assertThat(parsedRequest.getFromBody("password")).isEqualTo("password")
+        );
     }
 }

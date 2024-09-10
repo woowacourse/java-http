@@ -36,22 +36,29 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = HttpRequest.parse(inputStream);
-            HttpResponse response = new HttpResponse(
-                    new HttpResponseLine(request.getHttpVersion()),
-                    new HttpHeaders(),
-                    new HttpResponseBody()
-            );
-
+            HttpResponse response = createResponse(request);
             Controller controller = RequestMapper.getController(request);
-            boolean isResponseValid = controller.service(request, response);
 
-            if (!isResponseValid) {
-                throw new CatalinaException("Response not valid: \n" + response);
-            }
+            boolean isResponseValid = controller.service(request, response);
+            validateResponse(isResponseValid, response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse createResponse(HttpRequest request) {
+        return new HttpResponse(
+                new HttpResponseLine(request.getHttpVersion()),
+                new HttpHeaders(),
+                new HttpResponseBody()
+        );
+    }
+
+    private void validateResponse(boolean isResponseValid, HttpResponse response) {
+        if (!isResponseValid) {
+            throw new CatalinaException("Response not valid: \n" + response);
         }
     }
 }

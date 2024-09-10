@@ -2,6 +2,7 @@ package org.apache.coyote.http11.config;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class UnauthorizedInterceptor {
@@ -18,6 +19,6 @@ public class UnauthorizedInterceptor {
     }
 
     public boolean checkPath(HttpRequest httpRequest) {
-        return !httpRequest.containsKey("Location") && unauthorizedPaths.contains(httpRequest.getPath());
+        return !httpRequest.containsKey(HttpHeaderName.LOCATION) && unauthorizedPaths.contains(httpRequest.getPath());
     }
 }

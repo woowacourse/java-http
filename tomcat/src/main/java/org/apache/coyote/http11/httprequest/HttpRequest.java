@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.httprequest;
 
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
@@ -30,8 +31,16 @@ public class HttpRequest {
         return httpRequestHeader.containsKey(key);
     }
 
+    public boolean containsKey(HttpHeaderName httpHeaderName) {
+        return httpRequestHeader.containsKey(httpHeaderName);
+    }
+
     public String getValue(String key) {
         return httpRequestHeader.getValue(key);
+    }
+
+    public String getValue(HttpHeaderName httpHeaderName) {
+        return httpRequestHeader.getValue(httpHeaderName);
     }
 
     public HttpMethod getMethod() {

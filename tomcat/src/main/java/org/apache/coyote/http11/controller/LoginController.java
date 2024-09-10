@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.UUID;
+import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.httprequest.HttpCookie;
 import org.apache.coyote.http11.httprequest.HttpCookieConvertor;
@@ -59,11 +60,11 @@ public class LoginController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
         try {
-            if (!httpRequest.containsKey("Cookie")) {
+            if (!httpRequest.containsKey(HttpHeaderName.COOKIE)) {
                 return redirectLoginPage(httpRequest);
             }
 
-            HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getValue("Cookie"));
+            HttpCookie httpCookie = HttpCookieConvertor.convertHttpCookie(httpRequest.getValue(HttpHeaderName.COOKIE));
             if (!httpCookie.containsKey("JSESSIONID")) {
                 return redirectLoginPage(httpRequest);
             }

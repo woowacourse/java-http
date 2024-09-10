@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String NOT_FOUND_PATH = "/404.html";
 
     private final Socket connection;
 
@@ -63,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
             return controller.service(httpRequest);
         } catch (NotFoundException e) {
             return HttpResponse.found(httpRequest)
-                    .location("/404.html")
+                    .location(NOT_FOUND_PATH)
                     .build();
         } catch (URISyntaxException | IOException e) {
             throw new IllegalArgumentException(e);

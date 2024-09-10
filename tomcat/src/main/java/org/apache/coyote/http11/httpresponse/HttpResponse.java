@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaderName;
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.exception.NotFoundException;
@@ -112,7 +113,7 @@ public class HttpResponse {
             Path filePath = Path.of(resourceUrl.toURI());
             String responseBody = new String(Files.readAllBytes(filePath));
 
-            contentType(Files.probeContentType(filePath) + ";charset=utf-8");
+            contentType(Files.probeContentType(filePath) + ContentType.UTF_8.getCharset());
             contentLength(String.valueOf(responseBody.getBytes().length));
             this.httpResponseBody = new HttpResponseBody(responseBody);
 

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httprequest;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpHeaderName;
 
 public class HttpRequestHeader {
 
@@ -14,7 +15,15 @@ public class HttpRequestHeader {
         return headers.containsKey(key);
     }
 
+    public boolean containsKey(HttpHeaderName httpHeaderName) {
+        return headers.containsKey(httpHeaderName.getName());
+    }
+
     public String getValue(String key) {
         return headers.get(key);
+    }
+
+    public String getValue(HttpHeaderName httpHeaderName) {
+        return headers.get(httpHeaderName.getName());
     }
 }

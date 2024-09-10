@@ -25,7 +25,7 @@ public class HttpRequestConvertor {
 
         HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headers);
 
-        if (httpRequestHeader.containsKey("Content-Length")) {
+        if (httpRequestHeader.containsKey(HttpHeaderName.CONTENT_LENGTH)) {
             HttpRequestBody httpRequestBody = getHttpRequestBody(bufferedReader, httpRequestHeader);
 
             return new HttpRequest(httpRequestLine, httpRequestHeader, httpRequestBody);
@@ -38,7 +38,7 @@ public class HttpRequestConvertor {
             BufferedReader bufferedReader,
             HttpRequestHeader httpRequestHeader
     ) throws IOException {
-        int contentLength = Integer.parseInt(httpRequestHeader.getValue("Content-Length"));
+        int contentLength = Integer.parseInt(httpRequestHeader.getValue(HttpHeaderName.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         String body = new String(buffer);

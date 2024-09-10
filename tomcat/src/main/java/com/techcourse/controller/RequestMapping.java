@@ -1,5 +1,6 @@
 package com.techcourse.controller;
 
+import com.techcourse.util.StaticResourceManager;
 import java.util.Map;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.common.HttpMethod;
@@ -7,6 +8,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {
 
+    private static final StaticResourceController staticResourceController = new StaticResourceController();
     private static final GreetingController greetingController = new GreetingController();
     private static final LoginController loginController = new LoginController();
     private static final RegisterController registerController = new RegisterController();
@@ -20,6 +22,10 @@ public class RequestMapping {
     public static Controller getController(HttpRequest request) {
         HttpMethod method = request.getMethod();
         String path = request.getPath();
+
+        if (StaticResourceManager.isExist(path)) {
+            return staticResourceController;
+        }
 
         if (!controllers.containsKey(path)) {
             throw new IllegalArgumentException("Handler not found for " + method + " " + path);

@@ -11,11 +11,13 @@ import java.util.Optional;
 
 public class StaticResourceManager {
 
+    private static final String STATIC_RESOURCE_PREFIX = "static";
+
     private StaticResourceManager() {
     }
 
     public static boolean isExist(String filePath) {
-        URL resource = ClassLoader.getSystemClassLoader().getResource(filePath);
+        URL resource = ClassLoader.getSystemClassLoader().getResource(STATIC_RESOURCE_PREFIX + filePath);
         try {
             File file = new File(Objects.requireNonNull(resource).toURI());
             return file.exists() && file.isFile();
@@ -25,7 +27,7 @@ public class StaticResourceManager {
     }
 
     public static String read(String filePath) {
-        URL resource = ClassLoader.getSystemClassLoader().getResource(filePath);
+        URL resource = ClassLoader.getSystemClassLoader().getResource(STATIC_RESOURCE_PREFIX + filePath);
 
         try {
             Path path = Optional.ofNullable(resource)

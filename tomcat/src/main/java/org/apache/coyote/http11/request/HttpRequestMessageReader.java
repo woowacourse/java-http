@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 public class HttpRequestMessageReader {
 
-    private static final String HEADER_DELIMITER = ":";
+    private static final String HEADER_DELIMITER = ": ";
 
     private HttpRequestMessageReader() {
     }

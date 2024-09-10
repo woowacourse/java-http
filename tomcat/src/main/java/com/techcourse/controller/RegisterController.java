@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
-    private static final String STATIC_RESOURCE_PATH = "static/register.html";
+    private static final String STATIC_RESOURCE_PATH = "/register.html";
 
     public void doGet(HttpRequest request, HttpResponse response) {
         MediaType mediaType = MediaType.fromAcceptHeader(request.getHeaders().get("Accept"));

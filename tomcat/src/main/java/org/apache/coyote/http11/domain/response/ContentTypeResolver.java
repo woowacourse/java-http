@@ -2,7 +2,6 @@ package org.apache.coyote.http11.domain.response;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
@@ -21,22 +20,15 @@ public class ContentTypeResolver {
     );
 
     public static String getContentType(String filePath) {
-        Path path = Paths.get(filePath);
         String contentType;
         try {
-            contentType = Files.probeContentType(path);
+            contentType = Files.probeContentType(Paths.get(filePath));
         } catch (IOException e) {
-            return DEFAULT_MIME_TYPE;
-        }
-
-        if (contentType == null) {
             contentType = DEFAULT_MIME_TYPE;
         }
-
         if (isTextBased(contentType)) {
-            contentType += CHARSET;
+            return contentType + CHARSET;
         }
-
         return contentType;
     }
 

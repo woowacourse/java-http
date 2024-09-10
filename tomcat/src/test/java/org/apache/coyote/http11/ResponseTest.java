@@ -11,9 +11,7 @@ class ResponseTest {
     @DisplayName("응답 객체 문자열 확인")
     void toHttpResponse() {
         //given
-        final Response response = new Response();
-        response.setStatusCode(200);
-        response.setSc("OK");
+        final Response response = new Response(HttpStatusCode.OK);
         response.putHeader("Location", "http://localhost:8080/");
 
         //when && then

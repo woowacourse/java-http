@@ -125,8 +125,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void generateOKResponse(final Response response, final Path path, final String result) {
-        response.setSc("OK");
-        response.setStatusCode(200);
+        response.setHttpStatusCode(HttpStatusCode.OK);
         response.setSourceCode(result);
         response.putHeader("Content-Length", result.getBytes().length);
         response.putHeader("Content-Type", ContentType.from(path).toResponseText());
@@ -134,8 +133,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void redirectLocation(final Response response, final Path path, final String result,
                                   final String location) {
-        response.setStatusCode(302);
-        response.setSc("FOUND");
+        response.setHttpStatusCode(HttpStatusCode.FOUND);
         response.setSourceCode(result);
         response.putHeader("Content-Length", result.getBytes().length);
         response.putHeader("Content-Type", ContentType.from(path).toResponseText());

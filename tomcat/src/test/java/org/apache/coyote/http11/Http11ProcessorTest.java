@@ -86,7 +86,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND", "Location: 401.html");
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: 401.html");
     }
 
     @Test
@@ -111,7 +111,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND", "Location: 401.html");
+        assertThat(socket.output()).contains("HTTP/1.1 302 Found", "Location: 401.html");
     }
 
     @Test

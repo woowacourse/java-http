@@ -47,4 +47,14 @@ public class HttpRequest {
         }
         return Map.of();
     }
+
+    public String getProtocolVersion() {
+        return requestLine.getProtocolVersion();
+    }
+
+    public Map<String, String> getBody() {
+        return Arrays.stream(body.split("&"))
+                .map(query -> query.split("=", 2))
+                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+    }
 }

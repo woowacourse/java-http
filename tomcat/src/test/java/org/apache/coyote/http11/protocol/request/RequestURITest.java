@@ -39,4 +39,48 @@ class RequestURITest {
 
         );
     }
+
+    @Test
+    @DisplayName("빈 URI 를 처리한다.")
+    void createRequestURIWithEmptyURI() {
+        String requestURIString = "";
+        String expectedPath = "";
+
+        RequestURI requestURI = new RequestURI(requestURIString);
+
+        assertAll(
+                () -> assertThat(requestURI.getPath()).isEqualTo(expectedPath),
+                () -> assertThat(requestURI.getQueryParameters()).isEmpty()
+        );
+    }
+
+    @Test
+    @DisplayName("쿼리스트링이 있지만 값이 없는 경우를 처리한다.")
+    void createRequestURIWithEmptyQueryString() {
+        String requestURIString = "/index.html?";
+        String expectedPath = "/index.html";
+
+        RequestURI requestURI = new RequestURI(requestURIString);
+
+        assertAll(
+                () -> assertThat(requestURI.getPath()).isEqualTo(expectedPath),
+                () -> assertThat(requestURI.getQueryParameters()).isEmpty()
+        );
+    }
+
+    @Test
+    @DisplayName("잘못된 형식의 URI 를 처리한다.")
+    void createRequestURIWithMalformedQueryString() {
+        String requestURIString = "/index.html?name=lee&age";
+        String expectedPath = "/index.html";
+        Map<String, String> expectedQueryParameters = Map.of("name", "lee");
+
+        RequestURI requestURI = new RequestURI(requestURIString);
+
+        assertAll(
+                () -> assertThat(requestURI.getPath()).isEqualTo(expectedPath),
+                () -> assertThat(requestURI.getQueryParameters())
+                        .containsExactlyInAnyOrderEntriesOf(expectedQueryParameters)
+        );
+    }
 }

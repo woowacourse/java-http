@@ -32,9 +32,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Manager SESSION_MANAGER = new SessionManager();
 
-    public Http11Processor(final Socket connection) {
+    private final RequestMapping requestMapping;
+
+    public Http11Processor(final Socket connection, RequestMapping requestMapping) {
         this.connection = connection;
         this.resourceFinder = new Http11ResourceFinder();
+        this.requestMapping = requestMapping;
     }
 
     @Override

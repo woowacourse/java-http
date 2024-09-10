@@ -158,7 +158,7 @@ public class StandardContext {
         log.info("user: {}", user);
         SessionManager sessionManager = new SessionManager();
         String sessionId = httpCookie.get("JSESSIONID");
-        if (Objects.isNull(sessionId)) {
+        if (Objects.isNull(sessionId) || Objects.isNull(sessionManager.findSession(sessionId))) {
             Session session = new Session(user);
             sessionManager.add(session);
             response.addHeader("Set-Cookie", "JSESSIONID=" + session.getSessionId());

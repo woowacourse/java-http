@@ -11,7 +11,7 @@ public enum ContentType {
     APPLICATION_X_WWW_FORM_URLENCODED("application/x-www-form-urlencoded", "");
 
     public static final String HEADER = "Content-Type";
-    private static final String CHARSET = "charset=utf-8";
+    private static final String CHARSET = ";charset=utf-8";
 
     private final String mediaType;
     private final String extension;
@@ -19,10 +19,6 @@ public enum ContentType {
     ContentType(String mediaType, String extension) {
         this.mediaType = mediaType;
         this.extension = extension;
-    }
-
-    public static String findWithCharset(String path) {
-        return findByExtension(path).mediaType + ";" + CHARSET;
     }
 
     public static ContentType findByExtension(String path) {
@@ -37,6 +33,10 @@ public enum ContentType {
                 .filter(contentType -> contentType.mediaType.equalsIgnoreCase(mediaType))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("MediaType과 일치하는 ContentType이 존재하지 않습니다."));
+    }
+
+    public String value() {
+        return mediaType + CHARSET;
     }
 
     public String getMediaType() {

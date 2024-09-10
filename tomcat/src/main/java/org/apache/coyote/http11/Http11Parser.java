@@ -19,7 +19,8 @@ public class Http11Parser {
             lines.add(line);
             line = bufferedReader.readLine();
         }
-        return new Http11Request(lines);
+        Http11RequestStartLine startLine = Http11RequestStartLineParser.parse(lines);
+        return new Http11Request(startLine);
     }
 
     public static String writeHttpResponse(final Http11Response response) {

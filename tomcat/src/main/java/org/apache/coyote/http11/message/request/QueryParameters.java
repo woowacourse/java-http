@@ -19,4 +19,8 @@ public final class QueryParameters {
 
         return parameters.get(key).getFirst();
     }
+
+    public boolean hasParameters() {
+        return !parameters.isEmpty();
+    }
 }

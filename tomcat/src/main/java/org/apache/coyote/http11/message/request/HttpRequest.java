@@ -29,6 +29,10 @@ public class HttpRequest {
         return new HttpRequest(method, HttpUrlParser.parseUrl(url), headers, body);
     }
 
+    public boolean hasQueryString() {
+        return url.hasQueryString();
+    }
+
     public HttpRequestInfo getRequestInfo() {
         return new HttpRequestInfo(method, getUrlPath());
     }
@@ -49,7 +53,7 @@ public class HttpRequest {
         return body;
     }
 
-    public QueryParameters getQueryParameters() {
-        return url.getQueryParameters();
+    public String getQueryParameter(String key) {
+        return url.getQueryParameter(key);
     }
 }

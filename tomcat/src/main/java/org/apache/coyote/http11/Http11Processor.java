@@ -1,12 +1,23 @@
 package org.apache.coyote.http11;
 
+import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.model.User;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringTokenizer;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,19 +40,168 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            final String response = getResponse(inputStream);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(InputStream requestStream) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
+
+        String line = bufferedReader.readLine();
+        String method = "";
+        String path = "";
+        if (line != null) {
+            StringTokenizer tokenizer = new StringTokenizer(line);
+            method = tokenizer.nextToken();
+            path = tokenizer.nextToken();
+        }
+
+        Map<String, String> requestHeader = new HashMap<>();
+        while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
+            StringTokenizer tokenizer = new StringTokenizer(line, ": ");
+            requestHeader.put(tokenizer.nextToken(), tokenizer.nextToken());
+        }
+
+        String contentLength = requestHeader.getOrDefault("Content-Length", "0");
+        int length = Integer.parseInt(contentLength);
+        char[] buffer = new char[length];
+        bufferedReader.read(buffer, 0, length);
+        String requestBody = new String(buffer);
+
+        if (method.equals("GET")) {
+            return doGet(path);
+        }
+        if (method.equals("POST")) {
+            return doPost(path, requestBody);
+        }
+        return null;
+    }
+
+    private String doGet(String path) throws IOException {
+        if (path.contains(".css")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/css;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.contains(".js")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/javascript;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.contains(".svg")) {
+            URL resource = getClass().getClassLoader().getResource("static" + path);
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: image/svg+xml ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (path.equals("/")) {
+            String responseBody = "Hello world!";
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (!path.contains(".html")) {
+            path += ".html";
+        }
+        URL resource = getClass().getClassLoader().getResource("static" + path);
+        if (resource != null) {
+            String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+        return null;
+    }
+
+    private String doPost(String path, String requestBody) {
+        if (path.equals("/register")) {
+            StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
+            String account = "";
+            String password = "";
+            String email = "";
+            while (tokenizer.hasMoreTokens()) {
+                String key = tokenizer.nextToken();
+                if (key.equals("account") && tokenizer.hasMoreTokens()) {
+                    account = tokenizer.nextToken();
+                } else if (key.equals("password") && tokenizer.hasMoreTokens()) {
+                    password = tokenizer.nextToken();
+                } else if (key.equals("email") && tokenizer.hasMoreTokens()) {
+                    email = tokenizer.nextToken();
+                }
+            }
+            if (account.isBlank() || password.isBlank() || email.isBlank()) { // TODO: 예외처리 개선
+                throw new IllegalArgumentException("올바르지 않은 request body 형식입니다.");
+            }
+            InMemoryUserRepository.save(new User(account, password, email));
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/index.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
+        }
+
+        if (path.equals("/login")) {
+            StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
+            String account = "";
+            String password = "";
+            while (tokenizer.hasMoreTokens()) {
+                String key = tokenizer.nextToken();
+                if (key.equals("account") && tokenizer.hasMoreTokens()) {
+                    account = tokenizer.nextToken();
+                } else if (key.equals("password") && tokenizer.hasMoreTokens()) {
+                    password = tokenizer.nextToken();
+                }
+            }
+
+            Optional<User> loginUser = InMemoryUserRepository.findByAccount(account);
+            if (loginUser.isPresent()) {
+                final User user = loginUser.get();
+                if (user.checkPassword(password)) {
+                    log.info("로그인 성공! 아이디: {}", user.getAccount());
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 Found ",
+                            "Location: http://localhost:8080/index.html ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: 0 ",
+                            "");
+                }
+            }
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: http://localhost:8080/401.html ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: 0 ",
+                    "");
+        }
+        return null;
     }
 }

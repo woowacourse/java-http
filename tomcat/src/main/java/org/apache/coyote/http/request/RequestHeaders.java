@@ -1,8 +1,9 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http.request;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http.Header;
 
 public class RequestHeaders {
 

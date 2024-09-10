@@ -1,8 +1,10 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http.response;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.apache.coyote.http.Cookie;
+import org.apache.coyote.http.StatusCode;
 
 public class Response {
 

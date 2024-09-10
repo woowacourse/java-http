@@ -6,12 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
-import org.apache.coyote.RequestGenerator;
-import org.apache.coyote.common.Request;
-import org.apache.coyote.common.Response;
-import org.apache.coyote.handler.Handler;
-import org.apache.coyote.handler.HandlerMapper;
-import org.apache.coyote.handler.StaticResourceHandler;
+import org.apache.coyote.controller.Handler;
+import org.apache.coyote.controller.HandlerMapper;
+import org.apache.coyote.controller.StaticResourceHandler;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

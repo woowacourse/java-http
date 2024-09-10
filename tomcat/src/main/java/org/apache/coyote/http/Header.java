@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http;
 
 public enum Header {
     ACCEPT("Accept"),

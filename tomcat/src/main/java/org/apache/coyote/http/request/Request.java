@@ -1,8 +1,9 @@
-package org.apache.coyote.common;
+package org.apache.coyote.http.request;
 
 import java.util.UUID;
-import org.apache.coyote.session.Session;
-import org.apache.coyote.session.SessionManager;
+import org.apache.coyote.http.Cookie;
+import org.apache.coyote.http.session.Session;
+import org.apache.coyote.http.session.SessionManager;
 
 public class Request {
 
@@ -56,7 +57,6 @@ public class Request {
     public RequestBody getBody() {
         return body;
     }
-
 
     public String getParameter(String key) {
         return parameters.getValue(key);

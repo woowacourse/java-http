@@ -1,12 +1,12 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.coyote.common.Request;
-import org.apache.coyote.common.RequestBody;
-import org.apache.coyote.common.RequestHeaders;
-import org.apache.coyote.common.RequestLine;
-import org.apache.coyote.common.RequestParameters;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.request.RequestBody;
+import org.apache.coyote.http.request.RequestHeaders;
+import org.apache.coyote.http.request.RequestLine;
+import org.apache.coyote.http.request.RequestParameters;
 
 public class RequestGenerator {
 

@@ -1,15 +1,15 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.controller;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Map;
-import org.apache.coyote.common.ContentType;
-import org.apache.coyote.common.Header;
-import org.apache.coyote.common.Request;
-import org.apache.coyote.common.Response;
-import org.apache.coyote.common.StatusCode;
-import org.apache.coyote.session.Session;
+import org.apache.coyote.http.ContentType;
+import org.apache.coyote.http.Header;
+import org.apache.coyote.http.StatusCode;
+import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.session.Session;
 
 public class StaticResourceHandler implements Handler {
 

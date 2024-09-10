@@ -3,27 +3,38 @@ package org.apache.coyote.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.util.Map;
-import org.apache.coyote.annotaion.GetMapping;
-import org.apache.coyote.annotaion.PostMapping;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.util.IdGenerator;
 import org.apache.coyote.util.RequestBodyParser;
+import org.apache.coyote.util.Session;
+import org.apache.coyote.util.SessionManager;
 import org.apache.coyote.util.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    @GetMapping("/login")
-    public void loginPage(HttpRequest request, HttpResponse response) {
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        if (request.hasSession()) {
+            String sessionId = request.getSessionId();
+            SessionManager sessionManager = SessionManager.getInstance();
+            Session session = sessionManager.findSession(sessionId);
+            User user = session.getUser();
+            if (user != null) {
+                response.sendRedirect("/index.html");
+                return;
+            }
+        }
         ViewResolver.resolveView("login.html", response);
     }
 
-    @PostMapping("/login")
-    public void login(HttpRequest request, HttpResponse response) {
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
         Map<String, String> formData = RequestBodyParser.parseFormData(request.getBody());
         String account = formData.get("account");
         String password = formData.get("password");
@@ -35,6 +46,15 @@ public class LoginController implements Controller {
                 });
         validatePassword(request, response, user, password);
         log.info("{} - 회원 로그인 성공", user);
+
+        if (!request.hasSession()) {
+            String sessionId = IdGenerator.generateUUID();
+            response.addCookie("JSESSIONID", sessionId);
+            Session session = new Session(sessionId);
+            session.setUser(user);
+            SessionManager sessionManager = SessionManager.getInstance();
+            sessionManager.add(session);
+        }
         response.sendRedirect("/index.html");
     }
 

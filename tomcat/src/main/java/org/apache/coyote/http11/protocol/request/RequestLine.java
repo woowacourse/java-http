@@ -7,6 +7,11 @@ import org.apache.commons.lang3.StringUtils;
 
 public class RequestLine {
 
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int REQUEST_URI_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
+    private static final int VALID_REQUEST_LINE_LENGTH = 3;
+
     private final HttpMethod method;
     private final RequestURI requestURI;
     private final String httpVersion;
@@ -16,9 +21,9 @@ public class RequestLine {
         List<String> tokens = Arrays.stream(line.split(StringUtils.SPACE)).toList();
         validateTokenLength(tokens);
 
-        this.method = HttpMethod.ofName(tokens.get(0));
-        this.requestURI = new RequestURI(tokens.get(1));
-        this.httpVersion = tokens.get(2);
+        this.method = HttpMethod.ofName(tokens.get(HTTP_METHOD_INDEX));
+        this.requestURI = new RequestURI(tokens.get(REQUEST_URI_INDEX));
+        this.httpVersion = tokens.get(HTTP_VERSION_INDEX);
     }
 
     private void validateLineEmpty(String line) {
@@ -28,7 +33,7 @@ public class RequestLine {
     }
 
     private void validateTokenLength(List<String> tokens) {
-        if (tokens.size() != 3) {
+        if (tokens.size() != VALID_REQUEST_LINE_LENGTH) {
             throw new IllegalArgumentException("Invalid Request Line Length: " + tokens.size());
         }
     }

@@ -18,7 +18,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         boolean alreadyLogin = request.findSessionCookie().map(Http11Cookie::value).map(SESSION_MANAGER::findSession)
-                .map(session -> session.getAttribute("account"))
+                .map(session -> session.getAttribute("user"))
                 .isPresent();
         if (alreadyLogin) {
             response.setRedirect("/index.html");
@@ -40,7 +40,7 @@ public class LoginController extends AbstractController {
             request.findSessionCookie()
                     .map(Http11Cookie::value)
                     .map(SESSION_MANAGER::findSession)
-                    .ifPresent(session -> session.setAttribute("account", user));
+                    .ifPresent(session -> session.setAttribute("user", user));
             response.setRedirect("/index.html");
         }
     }

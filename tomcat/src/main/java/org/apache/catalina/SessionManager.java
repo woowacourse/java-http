@@ -1,4 +1,4 @@
-package org.apache.catalina.manager;
+package org.apache.catalina;
 
 import java.io.IOException;
 import java.util.Map;

@@ -27,8 +27,7 @@ public class ObjectMapper {
     private static HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
         final Http11RequestLine requestLine = getLine(bufferedReader);
         final Http11RequestHeaders requestHeaders = getHeaders(bufferedReader);
-        final Http11RequestBody requestBody = getBody(bufferedReader,
-                requestHeaders.getValue("Content-Type"));
+        final Http11RequestBody requestBody = getBody(bufferedReader, requestHeaders.getValue("Content-Length"));
         final HttpRequest request = new Http11Request(requestLine, requestHeaders, requestBody);
         return request;
     }

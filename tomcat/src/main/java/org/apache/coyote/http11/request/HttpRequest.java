@@ -88,6 +88,10 @@ public class HttpRequest {
         return body.getBody();
     }
 
+    public boolean hasBody() {
+        return getContentLength() > 0;
+    }
+
     public int getContentLength() {
         return Integer.parseInt(header.headers().getOrDefault("Content-Length", "0"));
     }

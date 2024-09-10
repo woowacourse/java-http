@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class StaticResourceManager {
-    
+
     private StaticResourceManager() {
     }
 
@@ -19,7 +19,7 @@ public class StaticResourceManager {
         try {
             File file = new File(Objects.requireNonNull(resource).toURI());
             return file.exists() && file.isFile();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | NullPointerException e) {
             return false;
         }
     }

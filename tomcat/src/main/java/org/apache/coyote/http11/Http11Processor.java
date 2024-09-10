@@ -13,6 +13,7 @@ import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.Controller;
 import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequestMessageReader;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
 import org.apache.coyote.Processor;
@@ -42,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = readRequest(inputStream);
+            HttpRequest request = HttpRequestMessageReader.read(inputStream);
             HttpResponse response = new HttpResponse(HttpStatusCode.OK);
             createResponse(request, response);
 
@@ -52,29 +53,6 @@ public class Http11Processor implements Runnable, Processor {
             log.error(e.getMessage(), e);
         }
         log.info("현재 세션: {}", sessionManager.getSessions());
-    }
-
-    private HttpRequest readRequest(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder sb = new StringBuilder();
-        String line;
-
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append(Constants.CRLF);
-            if (line.isEmpty()) {
-                break;
-            }
-        }
-        HttpRequest request = HttpRequest.from(sb.toString());
-
-        if (request.getContentLength() > 0) {
-            char[] body = new char[request.getContentLength()];
-            reader.read(body);
-            request.setBody(new String(body));
-        }
-        log.info("Request: {}", request);
-
-        return request;
     }
 
     private void createResponse(HttpRequest request, HttpResponse response) {

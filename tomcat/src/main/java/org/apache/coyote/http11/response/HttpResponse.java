@@ -14,10 +14,6 @@ public class HttpResponse {
     private final HttpHeader headers;
     private ResponseBody body;
 
-    public HttpResponse(HttpStatusCode statusCode, HttpHeader headers) {
-        this(statusCode, headers, null);
-    }
-
     public HttpResponse(HttpStatusCode statusCode) {
         this(statusCode, new HttpHeader(new HashMap<>()), null);
     }

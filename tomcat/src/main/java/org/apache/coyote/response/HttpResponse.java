@@ -11,8 +11,6 @@ import org.apache.coyote.util.FileReader;
 public class HttpResponse {
 
     private static final FileReader FILE_READER = FileReader.getInstance();
-
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String NOT_FOUND_FILENAME = "404.html";
 
     private final HttpStatusCode httpStatusCode;
@@ -56,9 +54,9 @@ public class HttpResponse {
     }
 
     public HttpResponse cookie(HttpCookie cookie) {
-        if (!cookie.contains(JSESSIONID)) {
+        if (!cookie.hasSession()) {
             HttpCookie httpCookie = new HttpCookie();
-            httpCookie.add(JSESSIONID, UUID.randomUUID().toString());
+            httpCookie.setSession(UUID.randomUUID().toString());
             this.addHeader(HttpHeaders.SET_COOKIE.getName(), httpCookie.buildMessage());
         }
         return this;

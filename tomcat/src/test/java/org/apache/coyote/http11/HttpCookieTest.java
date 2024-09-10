@@ -15,13 +15,11 @@ class HttpCookieTest {
                 .isIn("name1=value1; name2=value2", "name2=value2; name1=value1");
     }
 
-    @DisplayName("쿠키 정보 추가")
+    @DisplayName("쿠키에 세션 추가")
     @Test
-    void add() {
+    void addSession() {
         HttpCookie httpCookie = new HttpCookie();
-        httpCookie.add("name1", "value1");
-        httpCookie.add("name2", "value2");
-        assertThat(httpCookie.buildMessage())
-                .isIn("name1=value1; name2=value2", "name2=value2; name1=value1");
+        httpCookie.setSession("value1");
+        assertThat(httpCookie.buildMessage()).isEqualTo("JSESSIONID=value1");
     }
 }

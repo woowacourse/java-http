@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    private static final String JSESSIONID = "JSESSIONID";
+
     private final Map<String, String> cookies;
 
     public HttpCookie() {
@@ -29,21 +31,21 @@ public class HttpCookie {
                 .collect(Collectors.toMap(data -> data[0], data -> data[1]));
     }
 
-    public void add(String name, String value) {
-        cookies.put(name, value);
-    }
-
-    public String get(String name) {
-        return cookies.get(name);
-    }
-
     public String buildMessage() {
         return cookies.keySet().stream()
                 .map(key -> key + "=" + cookies.get(key))
                 .collect(Collectors.joining("; "));
     }
 
-    public boolean contains(String name) {
-        return cookies.containsKey(name);
+    public boolean hasSession() {
+        return cookies.containsKey(JSESSIONID);
+    }
+
+    public String getSession() {
+        return cookies.get(JSESSIONID);
+    }
+
+    public void setSession(String value) {
+        cookies.put(JSESSIONID, value);
     }
 }

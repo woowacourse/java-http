@@ -101,6 +101,9 @@ public class HttpResponse {
         }
 
         public Builder staticResource(String path) throws IOException, URISyntaxException {
+            if (!path.contains(".")) {
+                path += ".html";
+            }
             String fileName = "static" + path;
             var resourceUrl = getClass().getClassLoader().getResource(fileName);
             if (resourceUrl == null) {

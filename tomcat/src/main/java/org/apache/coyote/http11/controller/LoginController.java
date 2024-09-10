@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String LOGIN_PATH = "/login.html";
+    private static final String LOGIN_PATH = "/login";
 
     private final Session session = Session.getInstance();
 
@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
         if (checkToken(token)) {
             log.error("일부 항목이 누락되었습니다.");
             return HttpResponse.found(httpRequest)
-                    .location("/login")
+                    .location(LOGIN_PATH)
                     .build();
         }
         String account = token[0].split("=")[1];

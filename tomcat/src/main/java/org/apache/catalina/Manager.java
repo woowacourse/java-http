@@ -1,8 +1,9 @@
 package org.apache.catalina;
 
 import java.io.IOException;
+import java.util.Optional;
 
-import org.apache.coyote.http11.Session;
+import org.apache.coyote.http11.request.HttpRequest;
 
 /**
  * A <b>Manager</b> manages the pool of Sessions that are associated with a
@@ -42,7 +43,7 @@ public interface Manager {
      * @throws IOException           if an input/output error occurs while
      *                               processing this request
      */
-    Session findSession(String id) throws IOException;
+    Optional<Session> findSession(HttpRequest request) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.

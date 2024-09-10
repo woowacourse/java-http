@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
     private static final String METHOD = "Method";
@@ -23,7 +24,7 @@ public class HttpRequest {
     private static final int HEADER_KEY_POSITION = 0;
     private static final int HEADER_VALUE_POSITION = 1;
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String version;
     private final HttpHeaders headers;
@@ -31,7 +32,7 @@ public class HttpRequest {
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         Map<String, String> requestLine = extractRequestLine(bufferedReader);
-        this.method = requestLine.getOrDefault(METHOD, DEFAULT);
+        this.method = HttpMethod.of(requestLine.getOrDefault(METHOD, DEFAULT));
         this.uri = requestLine.getOrDefault(URI, DEFAULT);
         this.version = requestLine.getOrDefault(VERSION, DEFAULT);
         this.headers = extractHeaders(bufferedReader);
@@ -89,7 +90,7 @@ public class HttpRequest {
         return uri;
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return method;
     }
 

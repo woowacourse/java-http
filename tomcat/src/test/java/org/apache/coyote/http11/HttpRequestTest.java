@@ -31,7 +31,7 @@ class HttpRequestTest {
 
         // then
         assertAll(
-                () -> assertThat(httpRequest.getHttpMethod()).isEqualTo("POST"),
+                () -> assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(httpRequest.getURI()).isEqualTo("/login"),
                 () -> assertThat(httpRequest.getBody()).isNotNull()
         );

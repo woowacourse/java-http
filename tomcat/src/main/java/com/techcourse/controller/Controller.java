@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import java.io.IOException;
 
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -18,11 +19,11 @@ public abstract class Controller {
     protected abstract HttpResponse doGet(HttpRequest request) throws IOException;
 
     protected HttpResponse operate(HttpRequest request) throws IOException {
-        String method = request.getHttpMethod();
-        if (POST.equalsIgnoreCase(method)) {
+        HttpMethod method = request.getHttpMethod();
+        if (method.isPost()) {
             return doPost(request);
         }
-        if (GET.equalsIgnoreCase(method)) {
+        if (method.isGet()) {
             return doGet(request);
         }
         throw new UnsupportedMethodException("Method is not supported: " + method);

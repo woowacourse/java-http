@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ public class ResponseHandler {
 			outputStream.write(httpResponse.toPlainText().getBytes());
 			outputStream.flush();
 		} catch (IOException e) {
-		e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
@@ -33,7 +34,7 @@ public class ResponseHandler {
 				"HTTP/1.1", 404, "Not Found", Map.of("Content-Length", "0"));
 		}
 		File file = new File(url.getPath());
-		String contentType = determineContentType(fileName);
+		ContentType contentType = ContentType.fromPath(url.getPath());
 		String responseBody = new String(Files.readAllBytes(file.toPath()));
 		return new HttpResponse("HTTP/1.1", 200, "OK",
 			Map.of("Content-Type", contentType + ";charset=utf-8",
@@ -48,40 +49,40 @@ public class ResponseHandler {
 		if (fileName.endsWith("js")) {
 			return "application/javascript";
 		}
-		if(fileName.endsWith("html")) {
+		if (fileName.endsWith("html")) {
 			return "text/html";
 		}
 		return "application/json";
 	}
 
 	public static void redirect(String path, OutputStream outputStream) {
-	    try {
-	        String contentType = "text/html";
-	        var response = "HTTP/1.1 302 Found \r\n" +
-	            "Location: http://localhost:8080" + path + "\r\n" +
-	            String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
-	            "Content-Length: 0";
+		try {
+			String contentType = "text/html";
+			var response = "HTTP/1.1 302 Found \r\n" +
+				"Location: http://localhost:8080" + path + "\r\n" +
+				String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+				"Content-Length: 0";
 
-	        outputStream.write(response.getBytes());
-	        outputStream.flush();
-	    } catch (IOException | UncheckedServletException e) {
-	        log.error(e.getMessage(), e);
+			outputStream.write(response.getBytes());
+			outputStream.flush();
+		} catch (IOException | UncheckedServletException e) {
+			log.error(e.getMessage(), e);
 		}
 	}
 
 	public static void redirectWithSetCookie(String path, String sessionId, OutputStream outputStream) {
-	    try {
-	        String contentType = "text/html";
-	        var response = "HTTP/1.1 302 Found \r\n" +
-	            "Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
-	            "Location: http://localhost:8080" + path + " \r\n" +
-	            String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
-	            "Content-Length: 0";
+		try {
+			String contentType = "text/html";
+			var response = "HTTP/1.1 302 Found \r\n" +
+				"Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
+				"Location: http://localhost:8080" + path + " \r\n" +
+				String.format("Content-Type: %s;charset=utf-8 \r\n", contentType) +
+				"Content-Length: 0";
 
-	        outputStream.write(response.getBytes());
-	        outputStream.flush();
-	    } catch (IOException | UncheckedServletException e) {
-	        log.error(e.getMessage(), e);
-	    }
+			outputStream.write(response.getBytes());
+			outputStream.flush();
+		} catch (IOException | UncheckedServletException e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 }

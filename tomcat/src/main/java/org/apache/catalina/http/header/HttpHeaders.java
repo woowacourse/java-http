@@ -73,7 +73,7 @@ public class HttpHeaders {
     public String stringify(String delimiter) {
         StringJoiner joiner = new StringJoiner(delimiter);
         headers.forEach((key, value) -> joiner.add(key + SEPARATOR + value));
-        joiner.add("Set-Cookie" + SEPARATOR + cookies.stringify());
+        joiner.add(HttpHeader.SET_COOKIE.getValue() + SEPARATOR + cookies.stringify());
         return joiner.toString();
     }
 }

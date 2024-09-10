@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class Session {
 
+    public static final String SESSION_COOKIE_KEY = "JSESSIONID";
+
     private final String id;
     private final Map<String, Object> values;
 

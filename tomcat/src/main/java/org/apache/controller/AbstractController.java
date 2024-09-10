@@ -1,5 +1,6 @@
 package org.apache.controller;
 
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.coyote.HttpRequest;
@@ -15,7 +16,7 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         HttpMethod method = request.getMethod();
 
         if (method == HttpMethod.GET) {
@@ -33,6 +34,6 @@ public abstract class AbstractController implements Controller {
         return matcher.matches();
     }
 
-    protected abstract void doPost(HttpRequest request, HttpResponse response) throws Exception;
-    protected abstract void doGet(HttpRequest request, HttpResponse response) throws Exception;
+    protected abstract void doPost(HttpRequest request, HttpResponse response);
+    protected abstract void doGet(HttpRequest request, HttpResponse response) throws IOException;
 }

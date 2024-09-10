@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Request implements HttpRequest {
 
-    private static final String JSESSIONID = "JSESSIONID";
     private static final String HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
@@ -64,7 +63,7 @@ public class Http11Request implements HttpRequest {
     }
 
     private static Session getSession(Http11RequestHeader httpHeaders) {
-        Optional<String> optionalSessionId = httpHeaders.getCookieValue(JSESSIONID);
+        Optional<String> optionalSessionId = httpHeaders.getCookieValue(Session.SESSION_COOKIE_KEY);
         if (optionalSessionId.isPresent()) {
             String sessionId = optionalSessionId.get();
             try {

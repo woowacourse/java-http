@@ -1,11 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.util.QueryStringParser;
-
 public class Http11RequestTarget {
 
     private static final int ENDPOINT_INDEX = 0;
@@ -14,9 +8,9 @@ public class Http11RequestTarget {
     private static final String QUERY_DELIMITER_REGEX = "\\?";
 
     private final String endPoint;
-    private final Map<String, List<String>> queryStrings;
+    private final QueryStrings queryStrings;
 
-    private Http11RequestTarget(String endPoint, Map<String, List<String>> queryStrings) {
+    private Http11RequestTarget(String endPoint, QueryStrings queryStrings) {
         this.endPoint = endPoint;
         this.queryStrings = queryStrings;
     }
@@ -24,36 +18,21 @@ public class Http11RequestTarget {
     public static Http11RequestTarget from(String value) {
         if (value.contains(QUERY_DELIMITER)) {
             String[] values = value.split(QUERY_DELIMITER_REGEX);
-            return new Http11RequestTarget(values[ENDPOINT_INDEX], QueryStringParser.parseQueryString(values[QUERY_INDEX]));
+            return new Http11RequestTarget(values[ENDPOINT_INDEX], QueryStrings.from(values[QUERY_INDEX]));
         }
-        return new Http11RequestTarget(value, Map.of());
-    }
-
-    public boolean hasParam(String key) {
-        return queryStrings.containsKey(key);
+        return new Http11RequestTarget(value, QueryStrings.from(""));
     }
 
     public String getParam(String key) {
-        if (hasParam(key)) {
-            return queryStrings.get(key).get(0);
-        }
-        return "";
+        return queryStrings.getQuery(key);
     }
 
     public String getEndPoint() {
         return endPoint;
     }
 
-    public Map<String, List<String>> getQueryStrings() {
-        return Collections.unmodifiableMap(queryStrings);
-    }
-
     @Override
     public String toString() {
-        String queryStrings = this.queryStrings.entrySet().stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue())
-                .collect(Collectors.joining(","));
-
         return "RequestTarget{" +
                "endPoint='" + endPoint + '\'' +
                ", queryStrings=" + queryStrings +

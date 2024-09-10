@@ -10,7 +10,7 @@ import org.apache.coyote.http11.domain.session.SessionManager;
 public class HttpRequest {
 
     private static final String SESSION_ID_KEY = "JSESSIONID";
-    
+
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
@@ -43,7 +43,10 @@ public class HttpRequest {
     }
 
     public String getParameter(String key) {
-        return requestLine.getQueryParameter(key);
+        if (getMethod() == HttpMethod.GET) {
+            return requestLine.getQueryParameter(key);
+        }
+        return requestBody.get(key);
     }
 
     public Map<String, String> getParameters() {

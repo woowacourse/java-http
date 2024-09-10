@@ -3,7 +3,6 @@ package com.techcourse.controller;
 import com.techcourse.service.UserService;
 import org.apache.coyote.http11.domain.controller.AbstractController;
 import org.apache.coyote.http11.domain.request.HttpRequest;
-import org.apache.coyote.http11.domain.request.RequestBody;
 import org.apache.coyote.http11.domain.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
@@ -22,11 +21,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        RequestBody requestBody = request.getRequestBody();
-
-        String account = requestBody.get("account");
-        String email = requestBody.get("email");
-        String password = requestBody.get("password");
+        String account = request.getParameter("account");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
 
         if (account == null || email == null || password == null) {
             response.setRedirect("/register.html");

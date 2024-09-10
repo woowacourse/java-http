@@ -14,7 +14,7 @@ public class ResponseBody {
         if (Objects.isNull(body) || body.isEmpty()) {
             return 0;
         }
-        return body.getBytes().length;
+        return body.getBytes(Charset.defaultCharset()).length;
     }
 
     public String getBody() {

@@ -4,12 +4,8 @@ import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import java.util.Optional;
-import org.apache.catalina.Session;
-import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11ResourceFinder;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.Http11StatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
@@ -18,35 +14,19 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        boolean alreadyLogin = request.findSessionCookie().map(Http11Cookie::value).map(SESSION_MANAGER::findSession)
-                .map(session -> session.getAttribute("account"))
-                .isPresent();
-        if (alreadyLogin) {
+        if (isLogin(request)) {
             response.setRedirect("/index.html");
             return;
         }
+
         Path path = resourceFinder.find(request.requestUri());
         response.setBodyAndContentType(path);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        Optional<Http11Cookie> sessionCookie = request.findSessionCookie();
-        if (sessionCookie.isEmpty()) {
-            return;
-        }
-
-        String sessionId = sessionCookie.get().value();
-        Session session = SESSION_MANAGER.findSession(sessionId);
-        if (session == null) { // 쿠키를 만료시켜야 함
-            SESSION_MANAGER.add(new Session(sessionId));
-            session = SESSION_MANAGER.findSession(sessionId);
-        }
-
-        if (session.hasAttribute("user")) { // 로그인 되어있음
-            Path path = resourceFinder.find("/index.html");
-            response.setBodyAndContentType(path);
-            response.setStatusCode(Http11StatusCode.FOUND);
+        if (isLogin(request)) {
+            response.setRedirect("/index.html");
             return;
         }
 

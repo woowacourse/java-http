@@ -1,6 +1,6 @@
 package com.techcourse.controller;
 
-import org.apache.catalina.Manager;
+import com.techcourse.infra.SessionManagerWrapper;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.Controller;
@@ -11,17 +11,17 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 
-    protected static final Manager SESSION_MANAGER = new SessionManager();
+    protected static final SessionManagerWrapper SESSION_MANAGER = new SessionManagerWrapper(new SessionManager());
 
     @Override
     public final void service(HttpRequest request, HttpResponse response) {
-        if (!request.hasSessionCookie()) {
+        if (!hasSessionCookie(request)) {
             Http11Cookie sessionCookie = Http11Cookie.sessionCookie();
             SESSION_MANAGER.add(new Session(sessionCookie.value()));
             response.addCookie(sessionCookie);
         }
-        if (request.hasSessionCookie() && request.findSessionCookie().map(Http11Cookie::value)
-                .map(SESSION_MANAGER::findSession).isEmpty()) {
+
+        if (hasSessionCookie(request) && sessionNotFound(request)) {
             SESSION_MANAGER.add(new Session(request.findSessionCookie().get().value()));
         }
 
@@ -36,6 +36,27 @@ public abstract class AbstractController implements Controller {
             case OPTIONS -> doOptions(request, response);
             case null, default -> throw new RuntimeException("지원하지 않는 메서드 입니다.");
         }
+    }
+
+    private boolean hasSessionCookie(HttpRequest request) {
+        return request.hasSessionCookie();
+    }
+
+    private boolean sessionNotFound(HttpRequest request) {
+        return request.findSessionCookie().flatMap(SESSION_MANAGER::findBySessionCookie).isEmpty();
+    }
+
+    protected final boolean isLogin(HttpRequest request) {
+        return request.findSessionCookie()
+                .flatMap(SESSION_MANAGER::findBySessionCookie)
+                .map(session -> session.hasAttribute("user"))
+                .orElse(false);
+
+    }
+
+    protected final <T> void addSessionAttribute(HttpRequest request, String key, T value) {
+        request.findSessionCookie().flatMap(SESSION_MANAGER::findBySessionCookie)
+                .ifPresent(session -> session.setAttribute(key, value));
     }
 
     private Http11Method getMethod(HttpRequest request) {

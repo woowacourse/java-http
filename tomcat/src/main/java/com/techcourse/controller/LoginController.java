@@ -5,7 +5,6 @@ import com.techcourse.model.User;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Optional;
-import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11ResourceFinder;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -16,10 +15,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        boolean alreadyLogin = request.findSessionCookie().map(Http11Cookie::value).map(SESSION_MANAGER::findSession)
-                .map(session -> session.getAttribute("user"))
-                .isPresent();
-        if (alreadyLogin) {
+        if (isLogin(request)) {
             response.setRedirect("/index.html");
             return;
         }
@@ -36,10 +32,7 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         boolean loginSuccess = user.isPresent() && user.get().checkPassword(password);
         if (loginSuccess) {
-            request.findSessionCookie()
-                    .map(Http11Cookie::value)
-                    .map(SESSION_MANAGER::findSession)
-                    .ifPresent(session -> session.setAttribute("user", user));
+            addSessionAttribute(request, "user", user);
             response.setRedirect("/index.html");
         }
     }

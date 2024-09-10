@@ -47,7 +47,7 @@ public class LoginController implements HttpRequestHandler {
 
         Optional<User> found = InMemoryUserRepository.findByAccount(account);
         if (found.isEmpty() || !found.get().checkPassword(password)) {
-            return HttpResponse.ok(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
+            return HttpResponse.unauthorized(FileUtils.readFile(LOGIN_FAIL_PAGE), "html");
         }
 
         UUID jsessionId = UUID.randomUUID();

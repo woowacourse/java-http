@@ -131,7 +131,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        var expected = "HTTP/1.1 200 OK\r\n" +
+        var expected = "HTTP/1.1 401 Unauthorized\r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
                 "\r\n" +

@@ -16,6 +16,10 @@ public class ResponseLine {
         return new ResponseLine(HttpStatus.OK, HttpProtocol.HTTP_11);
     }
 
+    public static ResponseLine createUnauthorizedLine() {
+        return new ResponseLine(HttpStatus.UNAUTHORIZED, HttpProtocol.HTTP_11);
+    }
+
     public static ResponseLine createFoundLine() {
         return new ResponseLine(HttpStatus.FOUND, HttpProtocol.HTTP_11);
     }

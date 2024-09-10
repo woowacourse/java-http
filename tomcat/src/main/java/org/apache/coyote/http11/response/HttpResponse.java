@@ -33,6 +33,16 @@ public class HttpResponse {
         return new HttpResponse(line, headers, body);
     }
 
+    public static HttpResponse unauthorized(String responseBody, String contentType) {
+        ResponseLine line = ResponseLine.createUnauthorizedLine();
+        HttpMessageBody body = new HttpMessageBody(responseBody);
+        HttpHeaders headers = new HttpHeaders();
+        headers.putHeader("Content-Type", "text/" + contentType + ";charset=utf-8 ");
+        headers.putHeader("Content-Length", body.getBytes().length + " ");
+
+        return new HttpResponse(line, headers, body);
+    }
+
     public static HttpResponse redirect(String uri) {
         ResponseLine line = ResponseLine.createFoundLine();
         HttpMessageBody body = HttpMessageBody.createEmptyBody();

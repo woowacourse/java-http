@@ -8,3 +8,14 @@ server:
     threads:
       min-spare: 2
       max: 2
+  compression:
+    enabled: true
+    min-response-size: 128
+
+spring:
+  resources:
+    cache:
+      cache-control:
+        max-age: 365d
+        public: true
+

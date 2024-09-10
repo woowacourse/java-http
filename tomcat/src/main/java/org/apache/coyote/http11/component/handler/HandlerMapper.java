@@ -22,7 +22,7 @@ public class HandlerMapper {
 
     public static HttpHandler get(final String uriPath) {
         if (!registry.containsKey(uriPath)) {
-            throw new IllegalArgumentException("등록되지 않은 핸들러 URI");
+            return new StaticResourceHandler(uriPath);
         }
         return registry.get(uriPath);
     }

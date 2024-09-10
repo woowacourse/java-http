@@ -32,6 +32,11 @@ public class HttpResponse {
         );
     }
 
+    public void sendRedirect(String redirectionPath) {
+        this.httpStatus = HttpStatus.FOUND;
+        this.header.append(HttpHeaderKey.LOCATION, redirectionPath);
+    }
+
     public byte[] serialize() {
         String message = String.join("\r\n", getStartLine(), getHeaders(), getBody());
         return message.getBytes();
@@ -69,10 +74,5 @@ public class HttpResponse {
 
     public void setContentType(ContentType contentType) {
         this.header.append(HttpHeaderKey.CONTENT_TYPE, contentType.getName());
-    }
-
-    public void sendRedirect(String redirectionPath) {
-        this.httpStatus = HttpStatus.FOUND;
-        this.header.append(HttpHeaderKey.LOCATION, redirectionPath);
     }
 }

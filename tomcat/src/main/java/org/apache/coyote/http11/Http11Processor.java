@@ -9,7 +9,7 @@ import org.apache.catalina.controller.ExceptionHandler;
 import org.apache.catalina.controller.RequestMapping;
 import org.apache.catalina.session.SessionGenerator;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.FileNotFoundException;
+import org.apache.coyote.http11.exception.FileException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestReader;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
             controller.service(request, response);
 
             return response;
-        } catch (FileNotFoundException fileNotFoundException) {
+        } catch (FileException fileException) {
             return HttpResponse.createRedirectResponse(HttpStatus.FOUND, "/404.html");
         } catch (Exception e) {
             return exceptionHandler.handle(e);

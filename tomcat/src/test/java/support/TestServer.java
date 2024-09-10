@@ -4,7 +4,7 @@ import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.http11.executor.ControllerExecutor;
+import org.apache.coyote.controller.ControllerExecutor;
 import org.apache.coyote.http11.session.SessionManager;
 
 import java.util.Map;

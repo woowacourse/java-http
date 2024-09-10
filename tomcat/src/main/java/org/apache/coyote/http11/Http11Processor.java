@@ -4,7 +4,7 @@ import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.HttpResponseBuilder;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.cookie.Cookies;
-import org.apache.coyote.http11.executor.ControllerExecutor;
+import org.apache.coyote.controller.ControllerExecutor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.session.SessionManager;

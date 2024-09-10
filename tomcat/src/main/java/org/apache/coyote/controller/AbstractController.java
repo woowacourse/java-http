@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package org.apache.coyote.controller;
 
 import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.method.HttpMethod;

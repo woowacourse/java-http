@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
-import org.apache.coyote.http11.executor.ControllerExecutor;
+import org.apache.coyote.controller.ControllerExecutor;
 import org.apache.coyote.http11.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;

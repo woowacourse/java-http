@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.request;
 
-import com.techcourse.controller.Controller;
+import org.apache.coyote.controller.Controller;
 
 import java.util.Map;
 

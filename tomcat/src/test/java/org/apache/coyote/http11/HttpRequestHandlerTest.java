@@ -16,7 +16,7 @@ class HttpRequestHandlerTest {
     @Test
     void rootUrl() {
         // given
-        RequestLine requestLine = new RequestLine("GET /test HTTP/1.1");
+        RequestLine requestLine = new RequestLine("GET / HTTP/1.1");
         RequestHeaders requestHeaders = new RequestHeaders(List.of());
         String responseBody = "Hello world!";
         HttpRequest request = new HttpRequest(requestLine, requestHeaders, "");

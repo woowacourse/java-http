@@ -14,6 +14,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
                 .filter(httpMethod -> httpMethod.name().equals(value))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 HttpMethod 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(value + "는 존재하지 않는 HttpMethod 입니다."));
     }
 }

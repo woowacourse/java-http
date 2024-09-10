@@ -53,8 +53,8 @@ public class HttpRequest {
         return requestLine.getUri();
     }
 
-    public boolean hasUri(String uri) {
-        return requestLine.hasUri(uri);
+    public boolean hasPath(String path) {
+        return requestLine.hasPath(path);
     }
 
     public HttpHeaders getHeaders() {

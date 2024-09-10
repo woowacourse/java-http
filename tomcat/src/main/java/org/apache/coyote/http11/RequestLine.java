@@ -23,9 +23,9 @@ public class RequestLine {
         this.version = tokens[2];
     }
 
-    public boolean hasUri(String uri) {
-        String requestUri = this.uri.toString();
-        return requestUri.equals(uri);
+    public boolean hasPath(String path) {
+        String requestLinePath = uri.getPath();
+        return requestLinePath.equals(path);
     }
 
     public HttpMethod getMethod() {

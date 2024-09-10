@@ -8,9 +8,9 @@ import org.apache.coyote.http11.domain.HttpMethod;
 
 public class RequestLine {
 
-    HttpMethod method;
-    RequestURI requestURI;
-    String httpVersion;
+    private final HttpMethod method;
+    private final RequestURI requestURI;
+    private final String httpVersion;
 
     public RequestLine(String line) {
         validateLineEmpty(line);

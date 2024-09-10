@@ -14,12 +14,13 @@ public class Http11InputStreamReader {
     private static final Logger log = LoggerFactory.getLogger(Http11InputStreamReader.class);
 
     public static List<String> read(InputStream inputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            List<String> lines = new ArrayList<>(readHeaders(reader));
-            int contentLength = getContentLength(lines);
-            lines.add(readBody(contentLength, reader));
-            return lines;
-        }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        List<String> lines = new ArrayList<>(readHeaders(reader));
+        int contentLength = getContentLength(lines);
+        lines.add(readBody(contentLength, reader));
+
+        return lines;
     }
 
     private static int getContentLength(List<String> headers) {

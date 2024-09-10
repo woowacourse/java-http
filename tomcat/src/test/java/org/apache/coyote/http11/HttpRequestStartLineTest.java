@@ -13,7 +13,7 @@ class HttpRequestStartLineTest {
         @Test
         void 문자열로_객체를_생성할_수_있다() {
             // given & when
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /login?account=gugu&password=password HTTP/1.1 ");
 
             // then

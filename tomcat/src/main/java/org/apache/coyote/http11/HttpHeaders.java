@@ -27,11 +27,11 @@ public class HttpHeaders {
         this.store = store;
     }
 
-    public static HttpHeaders of(HttpRequest request, HttpResponse response) {
-        return of(response.getView(), ContentType.findByPath(request.getPath()));
+    public static HttpHeaders create(HttpRequest request, HttpResponse response) {
+        return create(response.getView(), ContentType.findByPath(request.getPath()));
     }
 
-    public static HttpHeaders of(View view, ContentType contentType) {
+    public static HttpHeaders create(View view, ContentType contentType) {
         Map<String, String> store = new LinkedHashMap<>();
         if (view != null && contentType != null) {
             store.put("Content-Type", contentType.getValue() + ";charset=utf-8");

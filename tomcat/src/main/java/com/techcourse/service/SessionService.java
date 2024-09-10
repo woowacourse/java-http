@@ -12,6 +12,8 @@ public class SessionService {
     private static final String JSESSIONID = "JSESSIONID";
     private static final Map<String, User> store = new ConcurrentHashMap<>();
 
+    private SessionService() {}
+
     public static String createCookie(User user) {
         String uuid = UUID.randomUUID().toString();
         store.put(uuid, user);

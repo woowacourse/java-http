@@ -15,7 +15,7 @@ public class RegisterController implements Controller{
         if (request.isSameMethod(HttpMethod.GET)) {
             response.setView(ViewResolver.getView("register.html"));
             response.setStatus(HttpStatus.OK);
-            response.setHeaders(HttpHeaders.of(request, response));
+            response.setHeaders(HttpHeaders.create(request, response));
         }
         if (request.isSameMethod(HttpMethod.POST)) {
             RegisterService.addUser(request.findFromBody("account"),
@@ -24,7 +24,7 @@ public class RegisterController implements Controller{
             log.info("[REGISTER] {}", request.findFromBody("account"));
             response.setView(ViewResolver.getView("register.html"));
             response.setStatus(HttpStatus.FOUND);
-            response.setHeaders(HttpHeaders.of(request, response));
+            response.setHeaders(HttpHeaders.create(request, response));
             response.addHeader("Location", "/index.html");
         }
     }

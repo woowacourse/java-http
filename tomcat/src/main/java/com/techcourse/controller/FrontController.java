@@ -8,6 +8,8 @@ public class FrontController {
 
     private static FrontController instance = new FrontController();
 
+    private FrontController() {}
+
     public static FrontController getInstance() {
         return instance;
     }

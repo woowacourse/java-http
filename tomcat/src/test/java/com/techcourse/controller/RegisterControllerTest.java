@@ -20,7 +20,7 @@ class RegisterControllerTest {
         @Test
         void 페이지를_반환한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /register HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
@@ -39,7 +39,7 @@ class RegisterControllerTest {
         @Test
         void 회원가입_POST_요청을_처리한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "POST /register HTTP/1.1 ");
             Query query = Query.create("account=tacan&email=tacam@gmail.com&password=1234");
             HttpRequest request = new HttpRequest(startLine, null, query);

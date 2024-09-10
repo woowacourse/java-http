@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
             byte[] bytes = new byte[18000]; // TODO refactor
             int readByteCount = inputStream.read(bytes);
             String requestString = new String(bytes, 0, readByteCount, StandardCharsets.UTF_8);
-            return HttpRequest.createByString(requestString);
+            return HttpRequest.create(requestString);
         } catch (IOException e) {
             log.error("IO Exception occur during make request object");
         }

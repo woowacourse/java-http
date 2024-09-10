@@ -31,7 +31,7 @@ public class LoginController implements Controller{
     }
 
     private static void redirectMain(HttpRequest request, HttpResponse response) {
-        response.setHeaders(HttpHeaders.of(request, response));
+        response.setHeaders(HttpHeaders.create(request, response));
         setRedirectHeaderToMain(response);
     }
 
@@ -43,7 +43,7 @@ public class LoginController implements Controller{
     private static void requestLogin(HttpRequest request, HttpResponse response) {
         User user = LoginService.login(request.findFromQueryParam("account"),
                 request.findFromQueryParam("password"));
-        response.setHeaders(HttpHeaders.of(request, response));
+        response.setHeaders(HttpHeaders.create(request, response));
         response.addHeader("Set-Cookie", SessionService.createCookie(user));
         log.info("[Login Success] = {}", user);
         setRedirectHeaderToMain(response);
@@ -52,6 +52,6 @@ public class LoginController implements Controller{
     private void requestLoginPage(HttpRequest request, HttpResponse response) {
         response.setView(ViewResolver.getView("login.html"));
         response.setStatus(HttpStatus.OK);
-        response.setHeaders(HttpHeaders.of(request, response));
+        response.setHeaders(HttpHeaders.create(request, response));
     }
 }

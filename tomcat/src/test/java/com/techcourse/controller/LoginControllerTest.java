@@ -12,13 +12,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
+
     @Nested
     class 로그인 {
 
         @Test
         void 쿼리가_없으면_로그인_페이지를_반환한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /login HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
@@ -39,7 +40,7 @@ class LoginControllerTest {
         @Test
         void 로그인에_성공하면_302를_반환한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /login?account=gugu&password=password HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
@@ -55,7 +56,7 @@ class LoginControllerTest {
         @Test
         void 로그인에_실패하면_401를_반환한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /login?account=NoExist&password=NoExist HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();
@@ -71,7 +72,7 @@ class LoginControllerTest {
         @Test
         void 로그인을_성공하면_헤더에_쿠키를_포함한다() {
             // given
-            HttpRequestStartLine startLine = HttpRequestStartLine.createByString(
+            HttpRequestStartLine startLine = HttpRequestStartLine.create(
                     "GET /login?account=gugu&password=password HTTP/1.1 ");
             HttpRequest request = new HttpRequest(startLine, null, null);
             HttpResponse response = new HttpResponse();

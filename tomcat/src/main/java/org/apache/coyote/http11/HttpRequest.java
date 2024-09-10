@@ -17,9 +17,9 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest createByString(String raw) {
+    public static HttpRequest create(String raw) {
         String[] lines = raw.split("\r\n");
-        HttpRequestStartLine startLine = HttpRequestStartLine.createByString(lines[START_LINE_INDEX]);
+        HttpRequestStartLine startLine = HttpRequestStartLine.create(lines[START_LINE_INDEX]);
         HttpHeaders headers = new HttpHeaders();
         Query body = null;
         int i = 1;

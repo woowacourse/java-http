@@ -33,6 +33,6 @@ public class ControllerAdviser {
             response.setView(ViewResolver.getView("500.html"));
         }
 
-        response.setHeaders(HttpHeaders.of(request, response));
+        response.setHeaders(HttpHeaders.create(request, response));
     }
 }

@@ -19,7 +19,7 @@ public class HttpRequestStartLine {
         this.httpQuery = httpQuery;
     }
 
-    public static HttpRequestStartLine createByString(String raw) {
+    public static HttpRequestStartLine create(String raw) {
         String[] split = raw.trim().split(" ");
         HttpMethod method = HttpMethod.findByName(split[0]);
         String uri = split[1].trim();

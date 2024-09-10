@@ -23,10 +23,14 @@ public class HttpResponse {
     }
 
     public HttpResponse responseBody(String body) {
-        this.headers.addHeader("Content-Type", "text/html;charset=utf-8");
-        this.headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        setDefaultHaders(HttpContentType.TEXT, body);
         this.body = body;
         return this;
+    }
+
+    private void setDefaultHaders(HttpContentType httpContentType, String body) {
+        this.headers.addHeader("Content-Type", "text/html;charset=utf-8");
+        this.headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
     }
 
     public HttpResponse staticResource(String path) {
@@ -39,8 +43,7 @@ public class HttpResponse {
         }
 
         HttpContentType contentType = HttpContentType.matchContentType(path);
-        headers.addHeader("Content-Type", contentType.getContentType() + ";charset=utf-8");
-        headers.addHeader("Content-Length", String.valueOf(resource.getBytes().length));
+        setDefaultHaders(contentType, resource);
         this.body = resource;
         return this;
     }
@@ -56,9 +59,8 @@ public class HttpResponse {
 
     public HttpResponse redirect(String uri) {
         this.body = "";
+        setDefaultHaders(HttpContentType.TEXT, "");
         headers.addHeader("Location", uri);
-        headers.addHeader("Content-Type", "text/html;charset=utf-8");
-        headers.addHeader("Content-Length", String.valueOf(body.getBytes().length));
         return this;
     }
 

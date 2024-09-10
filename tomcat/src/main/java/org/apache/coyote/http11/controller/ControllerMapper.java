@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
 
 import java.util.HashMap;
 import java.util.Map;

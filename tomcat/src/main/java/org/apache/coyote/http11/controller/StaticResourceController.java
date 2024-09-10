@@ -1,4 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.controller;
+
+import org.apache.coyote.http11.httpresponse.HttpResponse;
+import org.apache.coyote.http11.httpresponse.HttpStatusCode;
 
 public class StaticResourceController implements Controller {
 

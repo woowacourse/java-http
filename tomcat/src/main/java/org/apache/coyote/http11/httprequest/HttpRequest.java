@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.httprequest;
+
+import org.apache.coyote.http11.InputReader;
 
 import java.io.IOException;
 

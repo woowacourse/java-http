@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.httpresponse;
+
+import org.apache.coyote.http11.FileReader;
 
 import java.io.IOException;
 import java.nio.file.Files;

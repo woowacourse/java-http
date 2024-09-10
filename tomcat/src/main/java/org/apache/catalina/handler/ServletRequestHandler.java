@@ -1,5 +1,6 @@
 package org.apache.catalina.handler;
 
+import com.techcourse.exception.TechcourseException;
 import com.techcourse.model.UserService;
 import java.util.Map;
 import org.apache.coyote.http11.Http11ContentTypeParser;
@@ -10,6 +11,8 @@ import org.apache.coyote.http11.Http11Response;
 public class ServletRequestHandler {
 
     private static final String SUCCESS_STATUS_CODE = "200 OK";
+    private static final String FOUND_STATUS_CODE = "302 FOUND";
+    private static final String UNAUTHORIZED_STATUS_CODE = "401 UNAUTHORIZED";
     private static final String STATIC_PATH_PREFIX = "static";
     private static final String DEFAULT_HTML_PATH = ".html";
 
@@ -53,10 +56,24 @@ public class ServletRequestHandler {
 
     private Http11Response handleGetLogin(Map<String, String> queryString) {
         final UserService userService = new UserService();
-        userService.login(queryString.get("account"), queryString.get("password"));
-        final String path = parseStaticPath("/login.html");
+        try {
+            userService.login(queryString.get("account"), queryString.get("password"));
+            return handleGetLoginSuccess();
+        } catch (TechcourseException e) {
+            return handleGetLoginFailed();
+        }
+    }
+
+    private Http11Response handleGetLoginSuccess() {
+        final String path = parseStaticPath("/index.html");
         final String body = viewResolver.resolve(path);
-        return createResponse(SUCCESS_STATUS_CODE, path, body);
+        return createResponse(FOUND_STATUS_CODE, path, body);
+    }
+
+    private Http11Response handleGetLoginFailed() {
+        final String path = parseStaticPath("/401.html");
+        final String body = viewResolver.resolve(path);
+        return createResponse(UNAUTHORIZED_STATUS_CODE, path, body);
     }
 
     private Http11Response handleGetRoot() {

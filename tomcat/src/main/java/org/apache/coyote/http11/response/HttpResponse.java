@@ -15,6 +15,7 @@ public class HttpResponse {
     private static final String HTTP11 = "HTTP/1.1";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String LOCATION = "Location";
+    private static final String BLANK_DELIMITER = " ";
 
     private String version;
     private HttpStatus status;
@@ -50,9 +51,9 @@ public class HttpResponse {
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner("\r\n");
-        joiner.add(version + " " + status.getMessage() + " ");
+        joiner.add(version + BLANK_DELIMITER + status.getMessage() + BLANK_DELIMITER);
         for (Entry<String, String> entry : headers.entrySet()) {
-            joiner.add(entry.getKey() + ": " + entry.getValue() + " ");
+            joiner.add(entry.getKey() + ": " + entry.getValue() + BLANK_DELIMITER);
         }
         if (Objects.nonNull(body)) {
             joiner.add("");

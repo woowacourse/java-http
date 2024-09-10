@@ -16,6 +16,7 @@ public class HttpRequest {
     private static final String VERSION = "Version";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
+    private static final String DEFAULT = "";
 
     private final String method;
     private final String uri;
@@ -25,9 +26,9 @@ public class HttpRequest {
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         Map<String, String> requestLine = extractRequestLine(bufferedReader);
-        this.method = requestLine.getOrDefault(METHOD, "");
-        this.uri = requestLine.getOrDefault(URI, "");
-        this.version = requestLine.getOrDefault(VERSION, "");
+        this.method = requestLine.getOrDefault(METHOD, DEFAULT);
+        this.uri = requestLine.getOrDefault(URI, DEFAULT);
+        this.version = requestLine.getOrDefault(VERSION, DEFAULT);
         this.headers = extractHeaders(bufferedReader);
         this.body = extractRequestBody(bufferedReader, headers);
     }

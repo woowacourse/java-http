@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.RequestMapping;
 import org.apache.coyote.http11.RequestMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,13 +76,12 @@ public class Connector implements Runnable {
     }
 
     private RequestMappings makeRequestMapping() {
-        StaticResourceController staticResourceController = new StaticResourceController();
-        RequestMappings requestMappings = new RequestMappings(staticResourceController);
-        requestMappings.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
-        LoginController loginController = new LoginController();
-        requestMappings.putController(loginController, "/login", "/login.html");
-        requestMappings.putController(new RegisterController(), "/register", "/register.html");
-        return requestMappings;
+        return new RequestMappings(
+                RequestMapping.from(new LoginController(), "login", "login.html"),
+                RequestMapping.from(new RegisterController(), "register", "register.html"),
+                RequestMapping.from(new StaticResourceController(), ".js", ".css", ".html", "/", "/index",
+                        "/index.html")
+        );
     }
 
     public void stop() {

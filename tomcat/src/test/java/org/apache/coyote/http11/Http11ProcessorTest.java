@@ -49,12 +49,10 @@ class Http11ProcessorTest {
     }
 
     private RequestMappings makeRequestMapping() {
-        StaticResourceController staticResourceController = new StaticResourceController();
-        RequestMappings requestMappings = new RequestMappings(staticResourceController);
-        requestMappings.putController(staticResourceController, "/*.js", "/*.css", "/", "/index", "/index.html");
-        LoginController loginController = new LoginController();
-        requestMappings.putController(loginController, "/login", "/login.html");
-        requestMappings.putController(new RegisterController(), "/register", "/register.html");
-        return requestMappings;
+        return new RequestMappings(
+                RequestMapping.from(new LoginController(), "/login", "/login.html"),
+                RequestMapping.from(new RegisterController(), "/register", "/register.html"),
+                RequestMapping.from(new StaticResourceController(), "/*.js", "/*.css", "/", "/index", "/index.html")
+        );
     }
 }

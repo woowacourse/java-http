@@ -1,30 +1,25 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 public class RequestMappings {
 
-    private final Map<String, Controller> pathControllerMap;
+    private final List<RequestMapping> requestMappings;
 
-    private final Controller basicController;
-
-    public RequestMappings(Controller basicController) {
-        this.pathControllerMap = new HashMap<>();
-        this.basicController = basicController;
+    public RequestMappings(RequestMapping... requestMappings) {
+        this(List.of(requestMappings));
     }
 
-    public void putController(Controller controller, String... requestUris) {
-        for (String uri : requestUris) {
-            putController(uri, controller);
-        }
-    }
-
-    private void putController(String requestUri, Controller controller) {
-        pathControllerMap.put(requestUri, controller);
+    public RequestMappings(List<RequestMapping> requestMappings) {
+        this.requestMappings = requestMappings;
     }
 
     public Controller findController(String requestUri) {
-        return pathControllerMap.getOrDefault(requestUri, basicController);
+        return requestMappings.stream()
+                .map(requestMapping -> requestMapping.getControllerIfMapped(requestUri))
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseThrow();
     }
 }

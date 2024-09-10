@@ -24,10 +24,17 @@ public class QueryParams {
     }
 
     protected String get(String key) {
+        validateNotEmptyParams();
         if (!queryParams.containsKey(key)) {
-            throw new IllegalArgumentException("Query parameter가 존재하지 않습니다.");
+            throw new IllegalArgumentException("Query parameter에 해당 key가 존재하지 않습니다. key: %s".formatted(key));
         }
         return queryParams.get(key);
+    }
+
+    private void validateNotEmptyParams() {
+        if (!existQueryParams()) {
+            throw new IllegalArgumentException("Query parameter가 존재하지 않습니다.");
+        }
     }
 
     protected boolean existQueryParams() {

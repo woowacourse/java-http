@@ -19,24 +19,29 @@ public class HttpHeaders {
     private final HttpCookies cookies;
 
     public HttpHeaders() {
-        headers = new HashMap<>();
-        cookies = new HttpCookies();
+        this(new HashMap<>(), new HttpCookies());
     }
 
-    public HttpHeaders(List<String> headers) {
-        this.headers = headers.stream()
+    public HttpHeaders(Map<String, String> headers, HttpCookies cookies) {
+        this.headers = headers;
+        this.cookies = cookies;
+    }
+
+    public static HttpHeaders parse(List<String> httpHeaders) {
+        Map<String, String> headers = httpHeaders.stream()
                 .filter(header -> !header.startsWith(COOKIE_HEADER))
                 .map(HttpHeaders::validateAndSplit)
                 .collect(Collectors.toMap(
                         header -> header[0],
                         header -> header[1]
                 ));
-        this.cookies = headers.stream()
+        HttpCookies httpCookies = httpHeaders.stream()
                 .filter(header -> header.startsWith(COOKIE_HEADER))
                 .findAny()
                 .map(header -> header.substring(COOKIE_HEADER.length()))
                 .map(HttpCookies::parse)
                 .orElse(new HttpCookies());
+        return new HttpHeaders(headers, httpCookies);
     }
 
     private static String[] validateAndSplit(String header) {

@@ -8,7 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.coyote.http11.body.HttpRequestBody;
+import org.apache.coyote.http11.header.HttpCookies;
+import org.apache.coyote.http11.header.HttpHeaders;
 import org.apache.coyote.http11.startline.HttpMethod;
+import org.apache.coyote.http11.startline.HttpRequestLine;
+import org.apache.coyote.http11.startline.RequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,234 +46,187 @@ class HttpRequestTest {
 
     @DisplayName("요청의 대상이 정적 파일이면 true를 반환한다.")
     @Test
-    void isTargetStatic_true() throws IOException {
+    void isTargetStatic_true() {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.isTargetStatic()).isTrue();
+        assertThat(request.isTargetStatic()).isTrue();
     }
 
     @DisplayName("요청의 대상이 정적 파일이 아니면 false를 반환한다.")
     @Test
-    void isTargetStatic_false() throws IOException {
+    void isTargetStatic_false() {
         // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.isTargetStatic()).isFalse();
+        assertThat(request.isTargetStatic()).isFalse();
     }
 
     @DisplayName("요청 대상이 존재하지 않으면 true를 반환한다.")
     @Test
-    void isTargetBlank_true() throws IOException {
+    void isTargetBlank_true() {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET  HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.GET, new RequestUri(""), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.isTargetBlank()).isTrue();
+        assertThat(request.isTargetBlank()).isTrue();
     }
 
     @DisplayName("요청 대상이 존재하면 false를 반환한다.")
     @Test
-    void isTargetBlank_false() throws IOException {
+    void isTargetBlank_false() {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.isTargetBlank()).isFalse();
+        assertThat(request.isTargetBlank()).isFalse();
     }
 
     @DisplayName("request uri가 주어진 문자로 시작하는지 아닌지 판별한다.")
     @Test
-    void uriStartsWith() throws IOException {
+    void uriStartsWith() {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/index"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.uriStartsWith("/ind")).isTrue();
-        assertThat(parsedRequest.uriStartsWith("/index/")).isFalse();
+        assertThat(request.uriStartsWith("/ind")).isTrue();
+        assertThat(request.uriStartsWith("/index/")).isFalse();
     }
 
     @DisplayName("쿠키에서 세션을 가져온다.")
     @Test
-    void getSessionFromCookie() throws IOException {
+    void getSessionFromCookie() {
         // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive",
-                "Cookie: JSESSIONID=session"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(new HashMap<>(), new HttpCookies(Map.of("JSESSIONID", "session"))),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.getSessionFromCookie().get()).isEqualTo("session");
+        assertThat(request.getSessionFromCookie().get()).isEqualTo("session");
     }
 
     @DisplayName("쿠키에서 세션이 존재하지 않으면 Optional.empty()를 반환한다.")
     @Test
-    void getSessionFromCookie_noSession() throws IOException {
+    void getSessionFromCookie_noSession() {
         // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.getSessionFromCookie()).isEmpty();
+        assertThat(request.getSessionFromCookie()).isEmpty();
     }
 
     @DisplayName("요청의 HTTP 메서드를 반환한다.")
     @Test
-    void getHttpMethod() throws IOException {
+    void getHttpMethod() {
         // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.POST);
     }
 
     @DisplayName("요청 uri의 path를 반환한다.")
     @Test
-    void getTargetPath() throws IOException, URISyntaxException {
+    void getTargetPath() throws URISyntaxException {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
         Path expected = Path.of(getClass().getClassLoader().getResource("static/index.html").toURI());
-        assertThat(parsedRequest.getTargetPath()).isEqualTo(expected);
+        assertThat(request.getTargetPath()).isEqualTo(expected);
     }
 
     @DisplayName("요청 uri의 파일이 존재하지 않으면 예외를 던진다.")
     @Test
-    void getTargetPath_targetNotFound() throws IOException {
+    void getTargetPath_targetNotFound() {
         // given
-        String httpRequest = String.join("\r\n",
-                "GET /india HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/invalidUrl"), "HTTP/1.1"),
+                new HttpHeaders(),
+                HttpRequestBody.empty()
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThatThrownBy(parsedRequest::getTargetPath)
+        assertThatThrownBy(request::getTargetPath)
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("요청 body에서 특정 값을 꺼내온다.")
     @Test
-    void getFromBody() throws IOException {
+    void getFromBody() {
         // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive",
-                "Content-Length: 30",
-                "",
-                "account=gugu&password=password"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.getFromBody("account")).isEqualTo("gugu");
-        assertThat(parsedRequest.getFromBody("password")).isEqualTo("password");
+        assertThat(request.getFromBody("account")).isEqualTo("gugu");
+        assertThat(request.getFromBody("password")).isEqualTo("password");
     }
 
     @DisplayName("요청 body에서 존재하지 않는 값을 꺼내오면 예외를 던진다.")
     @Test
-    void getFromBody_keyNotFound() throws IOException {
+    void getFromBody_keyNotFound() {
         // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive",
-                "Content-Length: 30",
-                "",
-                "account=gugu&password=password"
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThatThrownBy(() -> parsedRequest.getFromBody("notKey"))
+        assertThatThrownBy(() -> request.getFromBody("notKey"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("요청의 HTTP 버전을 가져온다.")
     @Test
-    void getHttpVersion() throws IOException {
-        // given
-        String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1",
-                "Host: localhost:8080",
-                "Accept: text/html",
-                "Connection: keep-alive"
+    void getHttpVersion() {
+        HttpRequest request = new HttpRequest(
+                new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), "HTTP/1.1"),
+                new HttpHeaders(),
+                new HttpRequestBody(Map.of("account", "gugu", "password", "password"))
         );
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.getHttpVersion()).isEqualTo("HTTP/1.1");
+        assertThat(request.getHttpVersion()).isEqualTo("HTTP/1.1");
     }
 }

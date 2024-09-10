@@ -38,7 +38,7 @@ public class HttpRequest {
             }
             headers.add(header);
         }
-        HttpHeaders httpHeaders = new HttpHeaders(headers);
+        HttpHeaders httpHeaders = HttpHeaders.parse(headers);
 
         if (!httpRequestReader.ready()) {
             return new HttpRequest(startLine, httpHeaders, HttpRequestBody.empty());

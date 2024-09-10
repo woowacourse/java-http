@@ -43,6 +43,9 @@ public class ServletRequestHandler {
         if (requestURI.startsWith("/login")) {
             return handleGetLogin(queryString);
         }
+        if (requestURI.equals("/register")) {
+            return handleGetRegister();
+        }
         if (requestURI.equals("/")) {
             return handleGetRoot();
         }
@@ -72,6 +75,12 @@ public class ServletRequestHandler {
         final String path = "/401.html";
         final String body = viewResolver.resolve(path);
         return createResponse(UNAUTHORIZED_STATUS_CODE, path, body);
+    }
+
+    private Http11Response handleGetRegister() {
+        final String path = "/register.html";
+        final String body = viewResolver.resolve(path);
+        return createResponse(SUCCESS_STATUS_CODE, path, body);
     }
 
     private Http11Response handleGetRoot() {

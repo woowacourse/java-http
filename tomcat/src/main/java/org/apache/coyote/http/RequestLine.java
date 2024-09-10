@@ -2,12 +2,12 @@ package org.apache.coyote.http;
 
 public class RequestLine {
 
-    private final String method;
+    private final RequestMethod method;
     private final String path;
     private final String version;
 
     private RequestLine(String method, String path, String version) {
-        this.method = method;
+        this.method = RequestMethod.fromString(method);
         this.path = path;
         this.version = version;
     }
@@ -24,7 +24,7 @@ public class RequestLine {
         return requestLine.split(" ");
     }
 
-    public String getMethod() {
+    public RequestMethod getMethod() {
         return method;
     }
 

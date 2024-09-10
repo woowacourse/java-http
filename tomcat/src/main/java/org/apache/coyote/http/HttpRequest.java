@@ -53,7 +53,7 @@ public class HttpRequest {
         return headers.containsKey("Cookie");
     }
 
-    public String getMethod() {
+    public RequestMethod getMethod() {
         return requestLine.getMethod();
     }
 

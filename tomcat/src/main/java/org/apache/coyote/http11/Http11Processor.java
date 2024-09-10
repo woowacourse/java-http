@@ -191,7 +191,7 @@ public class Http11Processor implements Runnable, Processor {
         if (sessionId.isEmpty()) {
             return false;
         }
-        Session session = sessionManager.findSession(sessionId);
+        Session session = (Session) sessionManager.findSession(sessionId);
 
         if (session != null) {
             User user = (User) session.getAttribute("user");

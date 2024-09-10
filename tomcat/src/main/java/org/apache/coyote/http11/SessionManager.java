@@ -3,9 +3,12 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SessionManager {
+import jakarta.servlet.http.HttpSession;
 
-    private static final Map<String, Session> SESSIONS = new HashMap<>();
+import org.apache.catalina.Manager;
+
+public class SessionManager implements Manager {
+    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
     private static SessionManager instance = null;
 
@@ -16,12 +19,19 @@ public class SessionManager {
         return instance;
     }
 
-    public void add(Session session) {
+    @Override
+    public void add(HttpSession session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    public Session findSession(String id) {
-        return SESSIONS.getOrDefault(id, null);
+    @Override
+    public HttpSession findSession(String id) {
+        return SESSIONS.get(id);
+    }
+
+    @Override
+    public void remove(HttpSession session) {
+        SESSIONS.remove(session.getId());
     }
 
     private SessionManager() {

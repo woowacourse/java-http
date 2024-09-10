@@ -25,13 +25,11 @@ class RequestReaderTest {
 
         // when
         RequestReader requestReader = new RequestReader(inputStream);
-        RequestLine requestLine = requestReader.getRequestLine();
-        RequestHeaders requestHeaders = requestReader.getRequestHeaders();
-
+        HttpRequest request = requestReader.getHttpRequest();
         // then
         assertAll(
-                () -> assertThat(requestLine.getUrl()).isEqualTo("/index.html"),
-                () -> assertThat(requestHeaders.getHeaderValue("Connection")).isEqualTo("keep-alive")
+                () -> assertThat(request.getPath()).isEqualTo("/index.html"),
+                () -> assertThat(request.getMethod()).isEqualTo("GET")
         );
 
         inputStream.close();
@@ -41,20 +39,22 @@ class RequestReaderTest {
     @Test
     void readPostHttpRequest() throws IOException {
         // given
-        String expected = "account=poke&email=poke@zzang.com&password=password";
+        String responseBody = "account=poke&email=poke@zzang.com&password=password";
         String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost",
                 "Connection: keep-alive",
-                "Content-Length: " + expected.getBytes().length,
+                "Content-Length: " + responseBody.getBytes().length,
                 "",
-                expected);
+                responseBody);
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+        String expected = "poke@zzang.com";
 
         // when
         RequestReader requestReader = new RequestReader(inputStream);
-        String actual = requestReader.getRequestBody();
-
+        HttpRequest request = requestReader.getHttpRequest();
+        QueryParam queryParam = request.getQueryParam();
+        String actual = queryParam.getValue("email");
         // then
         assertThat(actual).isEqualTo(expected);
         inputStream.close();

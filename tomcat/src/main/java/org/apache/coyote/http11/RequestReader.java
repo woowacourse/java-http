@@ -9,15 +9,14 @@ import java.util.List;
 
 public class RequestReader {
 
-    private final RequestLine requestLine;
-    private final RequestHeaders requestHeaders;
-    private final String requestBody;
+    private final HttpRequest request;
 
     public RequestReader(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        this.requestLine = readRequestLine(reader);
-        this.requestHeaders = readRequestHeaders(reader);
-        this.requestBody = readRequestBody(reader, this.requestHeaders);
+        RequestLine requestLine = readRequestLine(reader);
+        RequestHeaders requestHeaders = readRequestHeaders(reader);
+        String requestBody = readRequestBody(reader, requestHeaders);
+        this.request = new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
     private RequestLine readRequestLine(BufferedReader reader) throws IOException {
@@ -47,15 +46,7 @@ public class RequestReader {
         return new String(buffer);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
-    public RequestHeaders getRequestHeaders() {
-        return requestHeaders;
-    }
-
-    public String getRequestBody() {
-        return requestBody;
+    public HttpRequest getHttpRequest() {
+        return request;
     }
 }

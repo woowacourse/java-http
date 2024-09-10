@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +16,10 @@ class HttpRequestHandlerTest {
     @Test
     void rootUrl() {
         // given
-        RequestLine requestLine = new RequestLine("GET / HTTP/1.1");
+        RequestLine requestLine = new RequestLine("GET /test HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of());
         String responseBody = "Hello world!";
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, "");
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -27,7 +30,7 @@ class HttpRequestHandlerTest {
 
         // when
         HttpRequestHandler handler = new HttpRequestHandler();
-        HttpResponse response = handler.handle(requestLine);
+        HttpResponse response = handler.handle(request);
         String actual = response.build();
 
         // then
@@ -39,6 +42,8 @@ class HttpRequestHandlerTest {
     void indexHtml() throws IOException {
         // given
         RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of());
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, "");
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -52,7 +57,7 @@ class HttpRequestHandlerTest {
 
         // when
         HttpRequestHandler handler = new HttpRequestHandler();
-        HttpResponse response = handler.handle(requestLine);
+        HttpResponse response = handler.handle(request);
         String actual = response.build();
 
         // then
@@ -64,6 +69,8 @@ class HttpRequestHandlerTest {
     void wrongHtml() throws IOException {
         // given
         RequestLine requestLine = new RequestLine("GET /wrong.html HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of());
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, "");
         URL resource = getClass().getClassLoader().getResource("static/404.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -77,7 +84,30 @@ class HttpRequestHandlerTest {
 
         // when
         HttpRequestHandler handler = new HttpRequestHandler();
-        HttpResponse response = handler.handle(requestLine);
+        HttpResponse response = handler.handle(request);
+        String actual = response.build();
+
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("지원하지 않은 메서드를 요청하면 405 응답을 반환한다.")
+    @Test
+    void methodNotAllow() throws IOException {
+        // given
+        RequestLine requestLine = new RequestLine("GET /register HTTP/1.1");
+        RequestHeaders requestHeaders = new RequestHeaders(List.of());
+        HttpRequest request = new HttpRequest(requestLine, requestHeaders, "");
+        String expected = String.join("\r\n",
+                "HTTP/1.1 405 Method Not Allowed ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 0 ",
+                "\r\n"
+        );
+
+        // when
+        HttpRequestHandler handler = new HttpRequestHandler();
+        HttpResponse response = handler.handle(request);
         String actual = response.build();
 
         // then

@@ -27,19 +27,14 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             RequestReader reader = new RequestReader(inputStream);
-            RequestLine requestLine = reader.getRequestLine();
-            RequestHeaders requestHeaders = reader.getRequestHeaders();
-            HttpCookies cookies = requestHeaders.getCookies();
-            String requestBody = reader.getRequestBody();
+            HttpRequest request = reader.getHttpRequest();
 
             HttpRequestHandler handler = new HttpRequestHandler();
-            HttpResponse response = handler.handle(requestLine, requestBody, cookies);
+            HttpResponse response = handler.handle(request);
 
             outputStream.write(response.build().getBytes());
             outputStream.flush();
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

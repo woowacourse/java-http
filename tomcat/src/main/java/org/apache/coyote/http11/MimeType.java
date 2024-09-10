@@ -39,4 +39,14 @@ public enum MimeType {
         }
         throw new IllegalArgumentException("Unknown mime type: " + extension);
     }
+
+    public static boolean isValidType(final String uri) {
+        for (MimeType mimeType : values()) {
+            if (uri.endsWith(mimeType.getExtension())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

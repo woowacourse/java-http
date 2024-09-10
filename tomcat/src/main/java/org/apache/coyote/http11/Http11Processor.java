@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
-import com.techcourse.model.User;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -10,10 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -36,27 +32,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-//            System.out.println("시작");
-//            final String s = bufferedReader.lines().
-//                    filter(line -> line.startsWith("Accept")).
-//                    findFirst().
-//                    orElse("???");
-//            System.out.println("s"+s);
-
-//            bufferedReader.lines()
-//                    .forEach(System.out::println);
-
-
-
-
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
+            HttpResponse httpResponse;
+            try {
+                httpResponse = ResponseGenerator.generate(httpRequest);
+            } catch (Exception e) {
+                httpResponse = new HttpResponse(httpRequest.getVersion(), "500 INTERNATIONAL ERROR", MimeType.HTML.getMimeType(), "/500.html");
+            }
 
-
-            final String response = ResponseGenerator.generate(httpRequest, bufferedReader);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.makeResponse().getBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

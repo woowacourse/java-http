@@ -4,13 +4,24 @@ import java.util.UUID;
 
 public class Cookie {
 
-    private final String jsessionid;
+    private final String value;
 
-    public Cookie(final String id) {
-        jsessionid = "JSESSIONID=" + id;
+    public Cookie(final String cookie) {
+        this.value = cookie;
     }
 
-    public String getJsessionid() {
-        return jsessionid;
+    public boolean isJSessionCookie() {
+        if (value == null) {
+            return false;
+        }
+        return value.contains("JSESSIONID=");
+    }
+
+    public String getJSessionId() {
+        return value.split("=")[1];
+    }
+
+    public String getValue() {
+        return value;
     }
 }

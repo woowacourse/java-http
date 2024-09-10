@@ -36,7 +36,7 @@ Connection: keep-alive
     - [x] 회원가입을 버튼을 누르면 HTTP method POST 사용
     - [x] 회원가입을 완료하면 index.html로 리다이렉트
 
-- [ ] 로그인 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경
+- [x] 로그인 버튼을 눌렀을 때 POST 방식으로 전송하도록 변경
 
 - [ ] Cookie에 JSESSIONID 값 저장
 - [ ] Session 구현

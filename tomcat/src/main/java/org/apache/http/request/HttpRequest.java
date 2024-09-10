@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.http.HttpCookie;
 import org.apache.http.HttpMethod;
 import org.apache.http.header.HttpHeader;
+import org.apache.http.header.StandardHttpHeader;
 
 public class HttpRequest {
     private final HttpMethod method;
@@ -27,7 +28,7 @@ public class HttpRequest {
     private HttpCookie parseCookie(HttpHeader[] headers) {
         return Optional.ofNullable(headers)
                 .flatMap(hs -> Arrays.stream(hs)
-                        .filter(header -> header.getKey().equalsIgnoreCase("Cookie"))
+                        .filter(header -> StandardHttpHeader.COOKIE.equalsIgnoreCase(header.getKey()))
                         .findFirst()
                         .map(header -> HttpCookie.of(header.getValue())))
                 .orElse(null);

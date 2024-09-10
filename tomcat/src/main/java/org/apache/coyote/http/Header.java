@@ -12,6 +12,7 @@ public abstract class Header {
 
     public static final String HEADER_SEPARATOR = ":";
     public static final String HEADER_DELIMITER = ": ";
+    protected static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> headers;
 

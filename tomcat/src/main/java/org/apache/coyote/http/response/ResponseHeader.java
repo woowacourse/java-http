@@ -9,7 +9,6 @@ import java.util.Map;
 public class ResponseHeader extends Header {
 
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
 

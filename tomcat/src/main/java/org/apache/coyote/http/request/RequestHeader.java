@@ -7,7 +7,6 @@ import java.util.List;
 
 public class RequestHeader extends Header {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
     private static final String COOKIE = "Cookie";
     private static final String COOKIE_NAME_WITH_SESSION = "JSESSIONID";
 

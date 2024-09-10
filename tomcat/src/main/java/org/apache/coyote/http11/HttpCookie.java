@@ -9,7 +9,7 @@ public class HttpCookie {
     private final Map<String, String> cookies = new HashMap<>();
 
     public HttpCookie(String cookieHeader) {
-        if(Objects.nonNull(cookieHeader) && !cookieHeader.isEmpty()) {
+        if (Objects.nonNull(cookieHeader) && !cookieHeader.isEmpty()) {
             parseCookies(cookieHeader);
         }
     }
@@ -30,5 +30,9 @@ public class HttpCookie {
 
     public boolean hasJSessionId() {
         return cookies.containsKey(JSESSIONID);
+    }
+
+    public String getJsessionid() {
+        return cookies.get(JSESSIONID);
     }
 }

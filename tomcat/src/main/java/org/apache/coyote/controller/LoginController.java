@@ -25,12 +25,16 @@ public class LoginController extends AbstractController {
             SessionManager sessionManager = SessionManager.getInstance();
             Session session = sessionManager.findSession(sessionId);
             User user = session.getUser();
-            if (user != null) {
-                response.sendRedirect("/index.html");
-                return;
-            }
+            redirectHomeAuthUser(response, user);
+            return;
         }
         ViewResolver.resolveView("login.html", response);
+    }
+
+    private void redirectHomeAuthUser(HttpResponse response, User user) {
+        if (user != null) {
+            response.sendRedirect("/index.html");
+        }
     }
 
     @Override

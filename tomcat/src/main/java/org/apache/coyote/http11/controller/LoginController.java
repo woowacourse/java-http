@@ -6,6 +6,7 @@ import org.apache.coyote.http11.httprequest.HttpRequest;
 import org.apache.coyote.http11.httprequest.QueryParameter;
 import org.apache.coyote.http11.httpresponse.HttpResponse;
 import org.apache.coyote.http11.httpresponse.HttpStatusCode;
+import org.apache.coyote.http11.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,24 +14,21 @@ public class LoginController implements Controller {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private static final String EXTENSION_OF_HTML = ".html";
-    private static final String PARAMETER_KEY_OF_ACCOUNT = "account";
-    private static final String PARAMETER_KEY_OF_PASSWORD = "password";
-
     @Override
     public HttpResponse process(HttpRequest request) {
         if (hasNotQueryParameter(request)) {
-            return HttpResponse.of(request.getUri() + EXTENSION_OF_HTML, HttpStatusCode.OK);
+            String location = request.getUri() + Constants.EXTENSION_OF_HTML;
+            return HttpResponse.of(location, HttpStatusCode.OK);
         }
 
         QueryParameter queryParameter = request.getQueryParameter();
-        String account = queryParameter.get(PARAMETER_KEY_OF_ACCOUNT);
-        String password = queryParameter.get(PARAMETER_KEY_OF_PASSWORD);
+        String account = queryParameter.get(Constants.PARAMETER_KEY_OF_ACCOUNT);
+        String password = queryParameter.get(Constants.PARAMETER_KEY_OF_PASSWORD);
 
         try {
             User user = findUserByAccountAndPassword(account, password);
             log.info("로그인 성공! 아이디 : {}", user.getAccount());
-            return HttpResponse.of("/index.html", HttpStatusCode.FOUND);
+            return HttpResponse.of(Constants.DEFAULT_URI, HttpStatusCode.FOUND);
         } catch (IllegalArgumentException e) {
             log.info("로그인 실패 : {}", e.getMessage(), e);
             return HttpResponse.of("/401.html", HttpStatusCode.FOUND);

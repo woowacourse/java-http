@@ -35,7 +35,7 @@ class RequestTest {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(requestStream));
 
 
-            Request request = Request.parseFrom(bufferedReader.lines().toList());
+            Request request = Request.readFrom(bufferedReader);
 
             //then
             assertAll(

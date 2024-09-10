@@ -17,12 +17,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.tomcat.util.http.HttpCookie;
 import org.apache.catalina.connector.HttpResponse;
-import org.apache.tomcat.util.http.HttpStatus;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.HttpCookie;
+import org.apache.tomcat.util.http.HttpStatus;
 import org.apache.tomcat.util.http.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,10 +65,7 @@ public class StandardContext {
         }
         String content = findStaticFile(requestLine.get(REQUEST_URI));
         if (!StringUtils.isEmpty(content)) {
-            String contentType = probeContentType(requestLine.get(REQUEST_URI));
-            response.addHttpStatus(HttpStatus.OK);
-            response.addHeader("Content-Type", contentType);
-            response.setBody(content);
+            responseStaticPage(requestLine, response, content);
         }
     }
 
@@ -90,6 +87,13 @@ public class StandardContext {
     private static void responseRegisterPage(HttpResponse response) {
         String contentType = probeContentType("/register.html");
         String content = findStaticFile("/register.html");
+        response.addHttpStatus(HttpStatus.OK);
+        response.addHeader("Content-Type", contentType);
+        response.setBody(content);
+    }
+
+    private static void responseStaticPage(Map<RequestLine, String> requestLine, HttpResponse response, String content) {
+        String contentType = probeContentType(requestLine.get(REQUEST_URI));
         response.addHttpStatus(HttpStatus.OK);
         response.addHeader("Content-Type", contentType);
         response.setBody(content);

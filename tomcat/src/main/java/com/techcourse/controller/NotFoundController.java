@@ -7,13 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.MimeType;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseBody;
 
-import com.techcourse.exception.UncheckedServletException;
+import com.techcourse.exception.InvalidResourceException;
 import com.techcourse.exception.UnsupportedMethodException;
 
 public class NotFoundController extends Controller {
@@ -50,7 +50,7 @@ public class NotFoundController extends Controller {
     private String readResource(String fileName) throws IOException {
         URL resource = findResource(fileName);
         if (Objects.isNull(resource)) {
-            throw new UncheckedServletException("Cannot find resource with name: " + fileName);
+            throw new InvalidResourceException("Cannot find resource with name: " + fileName);
         }
         Path path = new File(resource.getFile()).toPath();
         return Files.readString(path);

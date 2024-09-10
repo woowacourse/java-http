@@ -5,32 +5,25 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
     private static final String CRLF = "\r\n";
     
-    private String httpVersion;
-    private int httpStatusCode;
-    private String httpStatusMessage;
+    private HttpStatusLine httpStatusLine;
     private HttpResponseHeader httpResponseHeader;
     private String httpResponseBody;
 
     public HttpResponse() {
-        this.httpVersion = "HTTP/1.1";
-        this.httpStatusCode = 200;
-        this.httpStatusMessage = "OK";
+        this.httpStatusLine = new HttpStatusLine("HTTP/1.1", HttpStatus.OK);
         this.httpResponseHeader = new HttpResponseHeader();
         this.httpResponseBody = "";
     }
 
-    public void setHttpStatusCode(int httpStatusCode) {
-        this.httpStatusCode = httpStatusCode;
-    }
-
-    public void setHttpStatusMessage(String httpStatusMessage) {
-        this.httpStatusMessage = httpStatusMessage;
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatusLine.setHttpStatus(httpStatus);
     }
 
     public void addHttpResponseHeader(String key, String value) {
@@ -75,7 +68,12 @@ public class HttpResponse {
     public String toHttpResponse() {
         StringBuilder httpResponse = new StringBuilder();
 
-        String responseStatusLine = String.format("%s %d %s ", this.httpVersion, this.httpStatusCode, this.httpStatusMessage);
+        String responseStatusLine = String.format(
+                "%s %d %s ",
+                this.httpStatusLine.getHttpVersion(),
+                this.httpStatusLine.getHttpStatusCode(),
+                this.httpStatusLine.getHttpStatusMessage()
+        );
         httpResponse.append(responseStatusLine).append(CRLF);
 
         appendHeader(httpResponse, "Set-Cookie", this.httpResponseHeader.getSetCookieValue());

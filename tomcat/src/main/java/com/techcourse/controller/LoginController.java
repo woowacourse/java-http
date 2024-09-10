@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.UUID;
 import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.Session;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -26,8 +27,7 @@ public class LoginController extends AbstractController {
         Session session = sessionManager.findSession(request.getJSessionId());
         if (isAuthenticated(session)) {
             response.addHttpResponseHeader("Location", "/index.html");
-            response.setHttpStatusCode(302);
-            response.setHttpStatusMessage("FOUND");
+            response.setHttpStatus(HttpStatus.FOUND);
             return;
         }
         response.setContentType(request);
@@ -55,16 +55,14 @@ public class LoginController extends AbstractController {
             
             response.setJSessionId(session.getId());
             response.addHttpResponseHeader("Location", "/index.html");
-            response.setHttpStatusCode(302);
-            response.setHttpStatusMessage("FOUND");
+            response.setHttpStatus(HttpStatus.FOUND);
             response.setContentType(request);
             response.setHttpResponseBody(request.getUrlPath());
             log.info("user : {}", user);
 
         } catch (IllegalArgumentException e) {
             response.addHttpResponseHeader("Location", "/401.html");
-            response.setHttpStatusCode(302);
-            response.setHttpStatusMessage("FOUND");
+            response.setHttpStatus(HttpStatus.FOUND);
             response.setContentType(request);
             response.setHttpResponseBody(request.getUrlPath());
         }

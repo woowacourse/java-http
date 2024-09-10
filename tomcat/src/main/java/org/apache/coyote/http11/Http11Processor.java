@@ -62,8 +62,11 @@ public class Http11Processor implements Runnable, Processor {
 
         Map<String, String> requestHeader = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            StringTokenizer tokenizer = new StringTokenizer(line, ": ");
-            requestHeader.put(tokenizer.nextToken(), tokenizer.nextToken());
+            String[] header = line.split(": ");
+            if (header.length != 2) {
+                throw new IllegalArgumentException("잘못된 header 형식입니다.");
+            }
+            requestHeader.put(header[0].strip(), header[1].strip());
         }
 
         String contentLength = requestHeader.getOrDefault("Content-Length", "0");
@@ -76,7 +79,7 @@ public class Http11Processor implements Runnable, Processor {
             return doGet(path);
         }
         if (method.equals("POST")) {
-            return doPost(path, requestBody);
+            return doPost(path, requestHeader, requestBody);
         }
         return null;
     }
@@ -141,7 +144,7 @@ public class Http11Processor implements Runnable, Processor {
         return null;
     }
 
-    private String doPost(String path, String requestBody) {
+    private String doPost(String path, Map<String, String> requestHeader, String requestBody) {
         if (path.equals("/register")) {
             StringTokenizer tokenizer = new StringTokenizer(requestBody, "=|&");
             String account = "";
@@ -187,9 +190,19 @@ public class Http11Processor implements Runnable, Processor {
                 final User user = loginUser.get();
                 if (user.checkPassword(password)) {
                     log.info("로그인 성공! 아이디: {}", user.getAccount());
+                    String cookies = requestHeader.getOrDefault("Cookie", "");
+                    if (new HttpCookie(cookies).hasKey("JSESSIONID")) {
+                        return String.join("\r\n",
+                                "HTTP/1.1 302 Found ",
+                                "Location: http://localhost:8080/index.html ",
+                                "Content-Type: text/html;charset=utf-8 ",
+                                "Content-Length: 0 ",
+                                "");
+                    }
                     return String.join("\r\n",
                             "HTTP/1.1 302 Found ",
                             "Location: http://localhost:8080/index.html ",
+                            "Set-Cookie: " + CookieManager.setCookie(),
                             "Content-Type: text/html;charset=utf-8 ",
                             "Content-Length: 0 ",
                             "");

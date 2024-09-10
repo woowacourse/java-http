@@ -23,7 +23,7 @@
         - 회원가입 완료 시, `index.html`로 리다이렉트한다.(GET)
     - [x] 로그인 버튼을 눌러 로그인할 수 있다.(POST)
         - 로그인 완료 시, `index.html`로 리다이렉트한다.(GET)
-- [ ] Cookie에 JSESSIONID 값 저장하기
+- [x] Cookie에 JSESSIONID 값 저장하기
     - Cookie 클래스를 추가한다.
     - HTTP Request Header의 Cookie에 JSESSIONID가 없으면 Response Header에 Set-Cookie를 반환한다.
 - [ ] Session 구현하기

@@ -140,6 +140,7 @@ class Http11ProcessorTest {
             final String httpRequest = String.join("\r\n",
                     "POST /login HTTP/1.1 ",
                     "Host: localhost:8080 ",
+                    "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                     "Content-Length: 30 ",
                     "Connection: keep-alive ",
                     "",
@@ -272,6 +273,28 @@ class Http11ProcessorTest {
             // when & then
             assertThatThrownBy(() -> processor.process(socket))
                     .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @DisplayName("로그인 시, Cookie에 JSESSIONID가 없으면 응답 헤더에 Set-Cookie를 반환한다.")
+        @Test
+        void setCookieWithNoCookieLogin() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Content-Length: 30 ",
+                    "Connection: keep-alive ",
+                    "",
+                    "account=gugu&password=password ");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            assertThat(socket.output()).contains("Set-Cookie: JSESSIONID");
         }
     }
 }

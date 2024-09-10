@@ -19,6 +19,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
+        boolean alreadyLogin = request.findSessionCookie().map(Http11Cookie::value).map(SESSION_MANAGER::findSession)
+                .map(session -> session.getAttribute("account"))
+                .isPresent();
+        if (alreadyLogin) {
+            response.setRedirect("/index.html");
+            return;
+        }
         Path path = resourceFinder.find(request.requestUri());
         response.setBodyAndContentType(path);
     }

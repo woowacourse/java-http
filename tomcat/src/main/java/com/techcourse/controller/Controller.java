@@ -25,6 +25,6 @@ public abstract class Controller {
         if (GET.equalsIgnoreCase(method)) {
             return doGet(request);
         }
-        throw new UnsupportedMethodException("Method is not supported");
+        throw new UnsupportedMethodException("Method is not supported: "+ method);
     }
 }

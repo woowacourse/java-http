@@ -1,7 +1,6 @@
 package org.apache.catalina.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
 
@@ -13,7 +12,7 @@ public class RequestMapping {
         this.endpointControllers = endpointControllers;
     }
 
-    public static RequestMapping of(List<AbstractController> controllers) {
+    public static RequestMapping of(AbstractController... controllers) {
         Map<HttpEndpoint, Controller> endpointControllers = new HashMap<>();
         for (AbstractController controller : controllers) {
             controller.getEndpoints()

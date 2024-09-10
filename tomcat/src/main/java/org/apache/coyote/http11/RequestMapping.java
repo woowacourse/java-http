@@ -2,21 +2,23 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class RequestMapping {
 
     private final Map<String, Controller> pathControllerMap;
 
-    public RequestMapping() {
+    private final Controller basicController;
+
+    public RequestMapping(Controller basicController) {
         this.pathControllerMap = new HashMap<>();
+        this.basicController = basicController;
     }
 
     public void putController(String requestUri, Controller controller) {
         pathControllerMap.put(requestUri, controller);
     }
 
-    public Optional<Controller> findController(String requestUri) {
-        return Optional.ofNullable(pathControllerMap.get(requestUri));
+    public Controller findController(String requestUri) {
+        return pathControllerMap.getOrDefault(requestUri, basicController);
     }
 }

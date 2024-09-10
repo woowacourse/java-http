@@ -38,6 +38,15 @@ public class HttpRequest {
         return startLine.isSameMethod(method);
     }
 
+    public boolean isGet() {
+        return startLine.isGet();
+    }
+
+    public boolean isPost() {
+        return startLine.isPost();
+    }
+
+
     public String findFromQueryParam(String key) {
         return startLine.findQuery(key);
     }

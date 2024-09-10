@@ -12,4 +12,12 @@ public enum HttpMethod {
                 .findAny()
                 .orElseThrow(() -> new BadRequestException("잘못된 HTTP 메서드입니다. = " + name));
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
 }

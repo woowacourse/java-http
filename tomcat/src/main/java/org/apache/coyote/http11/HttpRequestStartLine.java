@@ -47,6 +47,14 @@ public class HttpRequestStartLine {
         return this.method == method;
     }
 
+    public boolean isGet() {
+        return method.isGet();
+    }
+
+    public boolean isPost() {
+        return method.isPost();
+    }
+
     public HttpMethod getMethod() {
         return method;
     }

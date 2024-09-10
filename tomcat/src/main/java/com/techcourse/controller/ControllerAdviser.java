@@ -18,7 +18,6 @@ public class ControllerAdviser {
     public static void service(UncheckedServletException exception, HttpRequest request, HttpResponse response) {
         if (exception instanceof BadRequestException) {
             response.setStatus(HttpStatus.BAD_REQUEST);
-            response.setView(ViewResolver.getView("400.html"));
         }
         if (exception instanceof UnauthorizedException) {
             response.setStatus(HttpStatus.UNAUTHORIZED);

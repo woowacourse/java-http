@@ -24,10 +24,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private HttpStatusCode httpStatusCode;
+    private String location = "";
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.httpStatusCode = HttpStatusCode.OK;
     }
 
     @Override
@@ -56,10 +56,19 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final var response = String.join("\r\n",
+            String responseHeader = String.join("\r\n",
                     "HTTP/1.1 " + httpStatusCode.getCode() + " " + httpStatusCode.getName() + " ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + responseBody.getBytes().length + " ");
+
+            if(!location.isBlank()) {
+                responseHeader = String.join("\r\n",
+                        responseHeader,
+                        location);
+            }
+
+            final var response = String.join("\r\n",
+                    responseHeader,
                     "",
                     responseBody);
 
@@ -81,7 +90,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getPathFromUrl(String url) {
         String path = url;
-        if (url.contains("/login")) {
+        httpStatusCode = HttpStatusCode.OK;
+        if (url.startsWith("/login")) {
             path = separateQueryString(url, path);
         }
         return path;
@@ -104,9 +114,11 @@ public class Http11Processor implements Runnable, Processor {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (!user.checkPassword(password)) {
             httpStatusCode = HttpStatusCode.UNAUTHORIZED;
+            location = "Location: /401.html ";
             return "/401";
         }
         httpStatusCode = HttpStatusCode.FOUND;
+        location = "Location: /index.html ";
         log.info(user.toString());
         return "/index";
     }

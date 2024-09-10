@@ -110,6 +110,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -138,6 +139,7 @@ class Http11ProcessorTest {
         var expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
+                "Location: /401.html \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

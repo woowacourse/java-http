@@ -5,9 +5,9 @@ import com.techcourse.model.User;
 import java.util.Map;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.StatusCode;
-import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
-import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.response.HttpResponse;
 
 public class LoginHandler implements Handler {
 
@@ -15,20 +15,20 @@ public class LoginHandler implements Handler {
     public static final String PASSWORD_FIELD = "password";
 
     @Override
-    public Response handle(Request request) {
+    public HttpResponse handle(HttpRequest request) {
         try {
             login(request);
         } catch (IllegalArgumentException e) {
             return StaticResourceHandler.getInstance().handle(request, StatusCode.UNAUTHORIZED);
         }
-        return new Response(
+        return new HttpResponse(
                 StatusCode.FOUND,
                 Map.of(Header.LOCATION.value(), "/index.html",
                        Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()),
                 null);
     }
 
-    private void login(Request request) {
+    private void login(HttpRequest request) {
         RequestBody requestBody = request.getBody();
         String account = requestBody.getValue(ACCOUNT_FIELD);
         String password = requestBody.getValue(PASSWORD_FIELD);

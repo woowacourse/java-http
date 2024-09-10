@@ -5,7 +5,7 @@ import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.session.Session;
 import org.apache.coyote.http.session.SessionManager;
 
-public class Request {
+public class HttpRequest {
 
     private static final SessionManager sessionManager = new SessionManager();
 
@@ -16,7 +16,7 @@ public class Request {
     private final RequestBody body;
     private final Session session;
 
-    public Request(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters, RequestBody body) {
+    public HttpRequest(RequestLine requestLine, RequestHeaders headers, RequestParameters parameters, RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.cookie = parseCookie();

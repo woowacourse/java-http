@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.coyote.http.ContentType;
 import org.apache.coyote.http.Header;
 import org.apache.coyote.http.StatusCode;
-import org.apache.coyote.http.request.Request;
-import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.session.Session;
 
 public class StaticResourceHandler implements Handler {
@@ -24,10 +24,10 @@ public class StaticResourceHandler implements Handler {
     }
 
     @Override
-    public Response handle(Request request) {
+    public HttpResponse handle(HttpRequest request) {
         Session session = request.getSession();
         if (request.getUri().contains("/login") && session.getAttribute("user") != null) {
-            return new Response(
+            return new HttpResponse(
                     StatusCode.FOUND,
                     Map.of(Header.LOCATION.value(), "/index.html",
                            Header.SET_COOKIE.value(), "JSESSIONID=" + request.getSession().getId()),
@@ -36,12 +36,12 @@ public class StaticResourceHandler implements Handler {
         return handle(request, StatusCode.OK);
     }
 
-    public Response handle(Request request, StatusCode statusCode) {
+    public HttpResponse handle(HttpRequest request, StatusCode statusCode) {
         File responseBody = getStaticResource(request.getUri());
         try {
             return makeResponse(responseBody, statusCode);
         } catch (IOException e) {
-            return new Response(StatusCode.INTERNAL_SERVER_ERROR, Map.of(), null);
+            return new HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, Map.of(), null);
         }
     }
 
@@ -61,12 +61,12 @@ public class StaticResourceHandler implements Handler {
         return file;
     }
 
-    private Response makeResponse(File resource, StatusCode statusCode) throws IOException {
+    private HttpResponse makeResponse(File resource, StatusCode statusCode) throws IOException {
         byte[] responseBody = Files.readAllBytes(resource.toPath());
-        return new Response(statusCode,
-                            Map.of("Content-Type", getContentType(resource),
+        return new HttpResponse(statusCode,
+                                Map.of("Content-Type", getContentType(resource),
                                    "Content-Length", getResponseLength(responseBody)),
-                            new String(responseBody));
+                                new String(responseBody));
     }
 
     private String getContentType(File resource) {

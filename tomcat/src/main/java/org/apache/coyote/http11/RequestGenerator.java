@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.coyote.http.request.Request;
+import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.request.RequestBody;
 import org.apache.coyote.http.request.RequestHeaders;
 import org.apache.coyote.http.request.RequestLine;
@@ -10,13 +10,13 @@ import org.apache.coyote.http.request.RequestParameters;
 
 public class RequestGenerator {
 
-    public static Request accept(BufferedReader reader) throws IOException {
+    public static HttpRequest accept(BufferedReader reader) throws IOException {
         String firstLine = reader.readLine();
         RequestLine requestLine = parseRequestLine(firstLine);
         RequestHeaders requestHeaders = readHeaders(reader);
         RequestParameters requestParameters = parseParameters(firstLine);
         RequestBody requestBody = readRequestBody(reader, requestHeaders.getContentLength());
-        return new Request(requestLine, requestHeaders, requestParameters, requestBody);
+        return new HttpRequest(requestLine, requestHeaders, requestParameters, requestBody);
     }
 
     private static RequestLine parseRequestLine(String line) {

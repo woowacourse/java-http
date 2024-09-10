@@ -1,8 +1,8 @@
 package org.apache.coyote.controller;
 
-import org.apache.coyote.http.request.Request;
-import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 
 public interface Handler {
-    Response handle(Request request);
+    HttpResponse handle(HttpRequest request);
 }

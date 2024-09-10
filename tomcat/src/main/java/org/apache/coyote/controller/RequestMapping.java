@@ -2,7 +2,7 @@ package org.apache.coyote.controller;
 
 import java.util.Arrays;
 
-public enum HandlerMapper {
+public enum RequestMapping {
     LOGIN("POST", "/login", new LoginHandler()),
     REGISTER("POST", "/register", new RegisterHandler()),
     ;
@@ -11,7 +11,7 @@ public enum HandlerMapper {
     private final String path;
     private final Handler handler;
 
-    HandlerMapper(String method, String path, Handler handler) {
+    RequestMapping(String method, String path, Handler handler) {
         this.method = method;
         this.path = path;
         this.handler = handler;

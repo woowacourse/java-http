@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import org.apache.coyote.http.Cookie;
 import org.apache.coyote.http.StatusCode;
 
-public class Response {
+public class HttpResponse {
 
     private static final String DEFAULT_PROTOCOL = "HTTP/1.1";
     private static final String LINE_SEPARATOR = "\r\n";
@@ -18,7 +18,7 @@ public class Response {
     private final Cookie cookies;
     private final String body;
 
-    private Response(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {
+    private HttpResponse(String protocol, StatusCode status, Map<String, String> headers, Cookie cookies, String body) {
         this.protocol = protocol;
         this.status = status;
         this.headers = headers;
@@ -26,7 +26,7 @@ public class Response {
         this.body = body;
     }
 
-    public Response(StatusCode status, Map<String, String> headers, String body) {
+    public HttpResponse(StatusCode status, Map<String, String> headers, String body) {
         this(DEFAULT_PROTOCOL, status, headers, Cookie.empty(), body);
     }
 

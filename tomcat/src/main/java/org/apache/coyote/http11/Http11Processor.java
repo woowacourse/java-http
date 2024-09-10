@@ -7,10 +7,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Handler;
-import org.apache.coyote.controller.HandlerMapper;
+import org.apache.coyote.controller.RequestMapping;
 import org.apache.coyote.controller.StaticResourceHandler;
-import org.apache.coyote.http.request.Request;
-import org.apache.coyote.http.response.Response;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +47,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Response getResponse(Request request) throws IOException {
-        Handler handler = HandlerMapper.findHandler(request.getMethod(), request.getUri());
+    private HttpResponse getResponse(HttpRequest request) throws IOException {
+        Handler handler = RequestMapping.findHandler(request.getMethod(), request.getUri());
         if (handler != null) {
             return handler.handle(request);
         }

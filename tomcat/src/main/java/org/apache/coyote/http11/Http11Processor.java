@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
             RequestMapping requestMapping = new RequestMapping();
 
-            Controller controller = requestMapping.getController(httpRequest.getPath());
+            Controller controller = requestMapping.getController(httpRequest);
 
             HttpResponse httpResponse = controller.service(httpRequest);
 

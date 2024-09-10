@@ -2,6 +2,7 @@ package org.apache.coyote.http11.config;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class UnauthorizedInterceptor {
 
@@ -16,7 +17,7 @@ public class UnauthorizedInterceptor {
         unauthorizedPaths.add("/500.html");
     }
 
-    public boolean checkPath(String path) {
-        return unauthorizedPaths.contains(path);
+    public boolean checkPath(HttpRequest httpRequest) {
+        return !httpRequest.containsKey("Location") && unauthorizedPaths.contains(httpRequest.getPath());
     }
 }

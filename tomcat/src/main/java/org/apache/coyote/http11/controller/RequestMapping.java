@@ -3,6 +3,7 @@ package org.apache.coyote.http11.controller;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.http11.config.UnauthorizedInterceptor;
+import org.apache.coyote.http11.httprequest.HttpRequest;
 
 public class RequestMapping {
 
@@ -15,11 +16,12 @@ public class RequestMapping {
         controllers.put("/register", new RegisterController());
     }
 
-    public Controller getController(String path) {
-        if (unauthorizedInterceptor.checkPath(path)) {
+    public Controller getController(HttpRequest httpRequest) {
+        if (unauthorizedInterceptor.checkPath(httpRequest)) {
             return new UnauthorizedController();
         }
 
+        String path = httpRequest.getPath();
         if (controllers.containsKey(path)) {
             return controllers.get(path);
         }

@@ -15,6 +15,7 @@ public class Http11RequestHeaders {
     private static final String ACCEPT = "Accept";
     private static final String ACCEPT_HEADER_DELIMITER = ",";
     private static final String COOKIE = "Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final int HEADER_LENGTH = 2;
 
     private final Map<String, String> headers;
@@ -51,6 +52,10 @@ public class Http11RequestHeaders {
 
     public String getCookie(String key) {
         return cookie.getValue(key);
+    }
+
+    public String getContentLength() {
+        return headers.get(CONTENT_LENGTH);
     }
 
     public boolean existsCookie(String key) {

@@ -25,11 +25,10 @@ public class ObjectMapper {
     }
 
     private static HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
-        final Http11RequestLine requestLine = getLine(bufferedReader);
-        final Http11RequestHeaders requestHeaders = getHeaders(bufferedReader);
-        final Http11RequestBody requestBody = getBody(bufferedReader, requestHeaders.getValue("Content-Length"));
-        final HttpRequest request = new Http11Request(requestLine, requestHeaders, requestBody);
-        return request;
+        Http11RequestLine requestLine = getLine(bufferedReader);
+        Http11RequestHeaders requestHeaders = getHeaders(bufferedReader);
+        Http11RequestBody requestBody = getBody(bufferedReader, requestHeaders.getContentLength());
+        return new Http11Request(requestLine, requestHeaders, requestBody);
     }
 
     private static Http11RequestLine getLine(BufferedReader bufferedReader) throws IOException {
@@ -37,7 +36,7 @@ public class ObjectMapper {
     }
 
     private static Http11RequestHeaders getHeaders(BufferedReader bufferedReader) throws IOException {
-        final List<String> lines = new LinkedList<>();
+        List<String> lines = new LinkedList<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
             lines.add(line);

@@ -141,24 +141,24 @@ public class Http11Processor implements Runnable, Processor {
     private String saveUser(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
 
-        if (requestBody.containsAll("account", "email", "password")) {
-            String account = requestBody.get("account");
-            String email = requestBody.get("email");
-            String password = requestBody.get("password");
-
-            if (!InMemoryUserRepository.existsByAccount(account)) {
-                User user = new User(account, password, email);
-                InMemoryUserRepository.save(user);
-                String sessionId = saveSessionAndGetId(user);
-                return HttpResponse.redirectTo("/index.html")
-                        .setCookie(HttpCookie.ofSessionId(sessionId))
-                        .build();
-            }
-
-            throw new UncheckedServletException("이미 존재하는 ID입니다.");
+        if (!requestBody.containsAll("account", "email", "password")) {
+            throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
         }
 
-        throw new UncheckedServletException("올바르지 않은 Request Body 형식입니다.");
+        String account = requestBody.get("account");
+        String email = requestBody.get("email");
+        String password = requestBody.get("password");
+
+        if (!InMemoryUserRepository.existsByAccount(account)) {
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+            String sessionId = saveSessionAndGetId(user);
+            return HttpResponse.redirectTo("/index.html")
+                    .setCookie(HttpCookie.ofSessionId(sessionId))
+                    .build();
+        }
+
+        throw new UncheckedServletException("이미 존재하는 ID입니다.");
     }
 
     private String saveSessionAndGetId(User user) {

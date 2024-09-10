@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.UUID;
-
 public class Http11Cookie {
 
     private static final String SESSION_COOKIE = "JSESSIONID";
@@ -14,8 +12,8 @@ public class Http11Cookie {
         this.value = value;
     }
 
-    public static Http11Cookie sessionCookie() {
-        return new Http11Cookie(SESSION_COOKIE, UUID.randomUUID().toString());
+    public static Http11Cookie sessionCookie(String value) {
+        return new Http11Cookie(SESSION_COOKIE, value);
     }
 
     public String getKey() {

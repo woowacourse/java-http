@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
 import com.techcourse.model.User;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
 
@@ -11,7 +11,7 @@ public class Session {
     private final Map<String, User> userMap;
 
     private Session() {
-        this.userMap = new ConcurrentHashMap<>();
+        this.userMap = new HashMap<>();
     }
 
     public static Session getInstance() {

@@ -1,77 +1,50 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private final HttpRequestMethod method;
-    private final String path;
-    private final String protocolVersion;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private String body;
 
-    public HttpRequest(String requestLine) {
-        String[] startLineParts = requestLine.split(" ", 3);
-
-        this.method = HttpRequestMethod.valueOf(startLineParts[0]);
-        this.path = startLineParts[1];
-        this.protocolVersion = startLineParts[2];
-        this.headers = new HttpHeaders();
-        this.body = null;
-    }
-
-    public void addHeader(String headerLine) {
-        headers.add(headerLine);
-    }
-
-    public void addBody(String body) {
+    public HttpRequest(String rawRequestLine, HttpHeaders headers, String body) {
+        this.requestLine = new RequestLine(rawRequestLine);
+        this.headers = headers;
         this.body = body;
     }
 
-    public HttpRequestMethod getMethod() {
-        return method;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
-    public HttpHeaders getHeaders() {
-        return headers;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public int getContentLength() {
-        return headers.findContentLength();
-    }
-
-    
     public boolean isGetMethod() {
-        return method.isGet();
+        return requestLine.getMethod().isGet();
     }
 
     public boolean isPostMethod() {
-        return method.isPost();
+        return requestLine.getMethod().isPost();
     }
 
-    public boolean isHtmlPath() {
-        return path.endsWith(".html");
+    public Optional<String> findCookieByName(String name) {
+        return headers.findCookieByName(name);
     }
 
-    @Override
-    public String toString() {
-        return "HttpRequest{" +
-                "method=" + method +
-                ", path='" + path + '\'' +
-                ", protocolVersion='" + protocolVersion + '\'' +
-                ", headers=" + headers +
-                ", body='" + body + '\'' +
-                '}';
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getPathWithoutQueryString() {
+        return getPath().split("\\?")[0];
+    }
+
+    public Map<String, String> getQueryString() {
+        if (getPath().contains("?")) {
+            String queryString = getPath().substring(getPathWithoutQueryString().length());
+
+            return Arrays.stream(queryString.split("&"))
+                    .map(query -> query.split("=", 2))
+                    .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+        }
+        return Map.of();
     }
 }

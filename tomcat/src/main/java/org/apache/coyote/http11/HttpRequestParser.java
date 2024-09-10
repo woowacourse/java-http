@@ -11,20 +11,17 @@ public class HttpRequestParser {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         String requestLine = bufferedReader.readLine();
-        HttpRequest request = new HttpRequest(requestLine);
 
-        String headerLine;
-        while (!(headerLine = bufferedReader.readLine()).isEmpty()) {
-            request.addHeader(headerLine);
-        }
+        HttpHeaders headers = new HttpHeaders();
+        bufferedReader.lines()
+                .takeWhile(line -> !line.isEmpty())
+                .forEach(headers::add);
 
-        if (request.isPostMethod()) {
-            int contentLength = request.getContentLength();
-            char[] rawBody = new char[contentLength];
-            bufferedReader.read(rawBody, 0, contentLength);
-            request.addBody(new String(rawBody));
-        }
+        int contentLength = headers.getContentLength();
+        char[] rawBody = new char[contentLength];
+        bufferedReader.read(rawBody, 0, contentLength);
+        String body = new String(rawBody);
 
-        return request;
+        return new HttpRequest(requestLine, headers, body);
     }
 }

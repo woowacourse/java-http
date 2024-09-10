@@ -32,7 +32,7 @@ class RegisterControllerTest {
             // then
             Assertions.assertAll(
                     () -> assertThat(response.getCode()).isEqualTo(HttpStatus.OK.getCode()),
-                    () -> assertThat(response.getView().getContent()).isEqualTo(ViewResolver.getView("register.html").getContent())
+                    () -> assertThat(response.getView()).isEqualTo(ViewResolver.getView("register.html"))
             );
         }
 
@@ -50,9 +50,7 @@ class RegisterControllerTest {
             controller.service(request, response);
 
             // then
-            Assertions.assertAll(
-                    () -> assertThat(response.getCode()).isEqualTo(HttpStatus.FOUND.getCode())
-            );
+            assertThat(response.getCode()).isEqualTo(HttpStatus.FOUND.getCode());
         }
     }
 }

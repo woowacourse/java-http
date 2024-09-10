@@ -31,8 +31,7 @@ class LoginControllerTest {
             // then
             Assertions.assertAll(
                     () -> assertThat(response.getCode()).isEqualTo(HttpStatus.OK.getCode()),
-                    () -> assertThat(response.getView().getContent()).isEqualTo(
-                            ViewResolver.getView("login.html").getContent())
+                    () -> assertThat(response.getView()).isEqualTo(ViewResolver.getView("login.html"))
             );
         }
 

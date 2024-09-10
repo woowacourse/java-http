@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.coyote.Processor;
@@ -44,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader requestBufferedReader = new BufferedReader(inputStreamReader);
              var outputStream = connection.getOutputStream()) {
 
-            Request request = Request.parseFrom(getPlainRequest(requestBufferedReader));
+            Request request = Request.readFrom(requestBufferedReader);
             log.info("request : {}", request);
             String response = getResponse(request);
 
@@ -63,9 +61,5 @@ public class Http11Processor implements Runnable, Processor {
             }
         }
         throw new NoHandlerException("핸들러가 존재하지 않습니다. request : " + request);
-    }
-
-    private List<String> getPlainRequest(BufferedReader requestBufferedReader) throws IOException {
-        return requestBufferedReader.lines().toList();
     }
 }

@@ -16,6 +16,10 @@ public class HttpBody {
         this(new String(content));
     }
 
+    public static HttpBody empty() {
+        return new HttpBody("");
+    }
+
     public long getContentLength() {
         return content.getBytes().length;
     }

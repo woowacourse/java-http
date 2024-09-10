@@ -2,12 +2,18 @@ package org.apache.coyote.http11;
 
 public class HttpResponseBuilder {
 
-    private final HttpHeaders headers = new HttpHeaders();
+    private final HttpHeaders headers;
+    private final StatusCode statusCode;
+    private final HttpBody body;
 
-    private StatusCode statusCode;
-    private HttpBody body;
+    private HttpResponseBuilder(HttpHeaders headers, StatusCode statusCode, HttpBody body) {
+        this.headers = headers;
+        this.statusCode = statusCode;
+        this.body = body;
+    }
 
     HttpResponseBuilder() {
+        this(new HttpHeaders(), null, HttpBody.empty());
     }
 
     public HttpResponseBuilder addHeader(String name, String value) {
@@ -21,13 +27,11 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder statusCode(StatusCode statusCode) {
-        this.statusCode = statusCode;
-        return this;
+        return new HttpResponseBuilder(headers, statusCode, body);
     }
 
     public HttpResponseBuilder body(HttpBody body) {
-        this.body = body;
-        return this;
+        return new HttpResponseBuilder(headers, statusCode, body);
     }
 
     public HttpResponseBuilder body(String content) {
@@ -47,13 +51,16 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder found(String location) {
-        headers.put("Location", location);
+        headers.setLocation(location);
         return statusCode(StatusCode.FOUND);
     }
 
     public HttpResponse build() {
+        if (statusCode == null) {
+            throw new IllegalStateException("Status code is not set");
+        }
         long contentLength = body.getContentLength();
-        headers.put("Content-Length", String.valueOf(contentLength));
+        headers.setContentLength(contentLength);
         return new HttpResponse(headers, statusCode, body);
     }
 }

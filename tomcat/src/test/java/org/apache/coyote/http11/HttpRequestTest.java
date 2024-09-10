@@ -28,7 +28,7 @@ class HttpRequestTest {
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.POST),
                 () -> assertThat(httpRequest.getUri()).hasToString("/ping"),
-                () -> assertThat(httpRequest.getBody()).isEqualTo("This is Body\nHello, World!\n")
+                () -> assertThat(httpRequest.getContent()).isEqualTo("This is Body\nHello, World!\n")
         );
     }
 }

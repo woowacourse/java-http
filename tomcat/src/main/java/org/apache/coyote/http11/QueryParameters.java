@@ -31,6 +31,10 @@ public class QueryParameters {
         return parameters.get(name);
     }
 
+    public long size() {
+        return parameters.size();
+    }
+
     @Override
     public String toString() {
         return parameters.toString();

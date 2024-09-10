@@ -18,7 +18,7 @@ class RequestMapperTest {
 
     @DisplayName("요청이 오면 RequestMapping 어노테이션의 값에 따라 컨트롤러를 반환한다.")
     @Test
-    void getController_dynamic() {
+    void getController() {
         // given
         HttpRequest requestLogin = new HttpRequest(
                 new HttpRequestLine(HttpMethod.POST, new RequestUri("/login"), HttpVersion.HTTP11),
@@ -38,5 +38,22 @@ class RequestMapperTest {
         // then
         assertThat(loginController.getClass()).isEqualTo(LoginController.class);
         assertThat(registerController.getClass()).isEqualTo(RegisterController.class);
+    }
+
+    @DisplayName("요청에 응답할 컨트롤러가 없다면 ResourceController를 반환한다.")
+    @Test
+    void getController_noneMatch() {
+        // given
+        HttpRequest requestResource = new HttpRequest(
+                new HttpRequestLine(HttpMethod.GET, new RequestUri("/index"), HttpVersion.HTTP11),
+                new HttpHeaders(),
+                new HttpRequestBody()
+        );
+
+        // when
+        Controller resourceController = RequestMapper.getController(requestResource);
+
+        // then
+        assertThat(resourceController.getClass()).isEqualTo(ResourceController.class);
     }
 }

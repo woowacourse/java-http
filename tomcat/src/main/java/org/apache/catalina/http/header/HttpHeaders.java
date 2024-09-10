@@ -11,7 +11,7 @@ import org.apache.catalina.exception.CatalinaException;
 public class HttpHeaders {
 
     private static final String SEPARATOR = ": ";
-    public static final String COOKIE_HEADER = HttpHeader.COOKIE + SEPARATOR;
+    public static final String COOKIE_HEADER = HttpHeader.COOKIE.getValue() + SEPARATOR;
 
     private final Map<String, String> headers;
     private final HttpCookies cookies;

@@ -20,6 +20,7 @@ public abstract class Controller {
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private static final String DELIMITER = "\r\n";
     private static final String END_OF_LINE = "";
+    public static final String UTF_8_ENCODING = ";charset=utf-8";
 
     public abstract boolean service(HttpRequest request, HttpResponse response);
 
@@ -38,7 +39,7 @@ public abstract class Controller {
         try {
             String responseBody = readResource(path);
             String contentType = Files.probeContentType(path);
-            response.addHeader(HttpHeader.CONTENT_TYPE, contentType + ";charset=utf-8");
+            response.addHeader(HttpHeader.CONTENT_TYPE, contentType + UTF_8_ENCODING);
             response.setBody(responseBody);
             return response.isValid();
         } catch (NullPointerException | IOException e) {

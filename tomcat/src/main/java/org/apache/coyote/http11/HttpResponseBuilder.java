@@ -2,7 +2,8 @@ package org.apache.coyote.http11;
 
 public class HttpResponseBuilder {
 
-    private HttpHeaders headers = new HttpHeaders();
+    private final HttpHeaders headers = new HttpHeaders();
+
     private StatusCode statusCode;
     private String body;
 

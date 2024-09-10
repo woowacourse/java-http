@@ -35,6 +35,10 @@ public class HttpRequest {
         return startLine.getQueryParameter(key);
     }
 
+    public Map<String, String> getQueryParameters() {
+        return startLine.getQueryParameters();
+    }
+
     public boolean matchHeader(String key, String expectedValue) {
         return headers.getHeader(key)
                 .map(value -> value.equals(expectedValue))

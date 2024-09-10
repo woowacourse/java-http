@@ -64,6 +64,10 @@ public class HttpUrl {
         return Optional.ofNullable(queryParameters.get(key));
     }
 
+    public Map<String, String> getParameters() {
+        return queryParameters;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import com.techcourse.exception.UncheckedServletException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -32,6 +33,10 @@ public class HttpRequestStartLine {
 
     public Optional<String> getQueryParameter(String key) {
         return url.getParameter(key);
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return url.getParameters();
     }
 
     public String getPath() {

@@ -11,6 +11,8 @@ import org.apache.coyote.http11.httprequest.HttpRequestLine;
 
 public class HttpRequestConvertor {
 
+    private static final String HEADER_DELIMITER = ":";
+
     public static HttpRequest convertHttpRequest(BufferedReader bufferedReader) {
         try {
             String requestLine = bufferedReader.readLine();
@@ -51,7 +53,7 @@ public class HttpRequestConvertor {
         String line;
         Map<String, String> headers = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            String[] requestLine = line.split(":");
+            String[] requestLine = line.split(HEADER_DELIMITER);
             headers.put(requestLine[0], parseHeaderValue(requestLine));
         }
 

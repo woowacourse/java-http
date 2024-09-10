@@ -5,6 +5,8 @@ import org.apache.coyote.http11.HttpHeaderName;
 
 public class HttpResponseHeader {
 
+    private static final String HEADER_DELIMITER = ": ";
+
     private final Map<HttpHeaderName, String> headers;
 
     public HttpResponseHeader(Map<HttpHeaderName, String> headers) {
@@ -17,10 +19,10 @@ public class HttpResponseHeader {
         int i = 1;
         for (HttpHeaderName key : headers.keySet()) {
             if (i < size) {
-                sb.append(key.getName()).append(": ").append(headers.get(key)).append(" \r\n");
+                sb.append(key.getName()).append(HEADER_DELIMITER).append(headers.get(key)).append(" \r\n");
                 size++;
             } else {
-                sb.append(key.getName()).append(": ").append(headers.get(key));
+                sb.append(key.getName()).append(HEADER_DELIMITER).append(headers.get(key));
             }
         }
 

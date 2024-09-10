@@ -13,8 +13,12 @@ public class HttpStatusLine {
     }
 
     public String getString() {
-        return version + " " + httpStatusCode.getCode() + " "
-                + httpStatusCode.getMessage();
+        return String.join(
+                " ",
+                version,
+                String.valueOf(httpStatusCode.getCode()),
+                httpStatusCode.getMessage()
+        );
     }
 
     public String getVersion() {

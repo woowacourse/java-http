@@ -33,10 +33,15 @@ import com.techcourse.model.User;
 public class StandardContext {
 
     private static final Logger log = LoggerFactory.getLogger(StandardContext.class);
+    private static final String INDEX_PAGE_URL = "/index.html";
+    private static final String LOGIN_PAGE_URL = "/login.html";
+    private static final String REGISTER_PAGE_URL = "/register.html";
+    private static final String NOT_FOUND_PAGE_URL = "/404.html";
+    private static final String UN_AUTHORIZED_PAGE_URL = "/401.html";
 
     public static void processRequest(Map<RequestLine, String> requestLine, Map<String, String> headers, String body, HttpResponse response) {
         if (requestLine.get(REQUEST_URI).equals("/")) {
-            responseIndexPage(HttpStatus.OK, response);
+            responseStaticPage(INDEX_PAGE_URL, response, findStaticFile(INDEX_PAGE_URL));
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("GET")) {
@@ -45,10 +50,10 @@ public class StandardContext {
             String sessionId = httpCookie.get("JSESSIONID");
             Session session = sessionManager.findSession(sessionId);
             if (Objects.nonNull(session)) {
-                responseIndexPage(HttpStatus.FOUND, response);
+                responseRedirectPage(INDEX_PAGE_URL, response);
                 return;
             }
-            responseLoginPage(response);
+            responseStaticPage(LOGIN_PAGE_URL, response, findStaticFile(LOGIN_PAGE_URL));
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/login") && requestLine.get(HTTP_METHOD).equals("POST")) {
@@ -56,7 +61,7 @@ public class StandardContext {
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("GET")) {
-            responseRegisterPage(response);
+            responseStaticPage(REGISTER_PAGE_URL, response, findStaticFile(REGISTER_PAGE_URL));
             return;
         }
         if (requestLine.get(REQUEST_URI).equals("/register") && requestLine.get(HTTP_METHOD).equals("POST")) {
@@ -65,37 +70,23 @@ public class StandardContext {
         }
         String content = findStaticFile(requestLine.get(REQUEST_URI));
         if (!StringUtils.isEmpty(content)) {
-            responseStaticPage(requestLine, response, content);
+            String url = requestLine.get(REQUEST_URI);
+            responseStaticPage(url, response, content);
+            return;
         }
+        responseRedirectPage(NOT_FOUND_PAGE_URL, response);
     }
 
-    private static void responseIndexPage(HttpStatus httpStatus, HttpResponse response) {
-        response.addHttpStatus(httpStatus);
-        response.addHeader("Location", "/index.html");
-        response.addHeader("Content-Type", probeContentType("/index.html"));
-        response.setBody(findStaticFile("/index.html"));
+    private static void responseRedirectPage(String url, HttpResponse response) {
+        response.addHttpStatus(HttpStatus.FOUND);
+        response.addHeader("Location", url);
+        response.addHeader("Content-Type", probeContentType(url));
+        response.setBody(findStaticFile(url));
     }
 
-    private static void responseLoginPage(HttpResponse response) {
-        String contentType = probeContentType("/login.html");
-        String content = findStaticFile("/login.html");
+    private static void responseStaticPage(String url, HttpResponse response, String content) {
         response.addHttpStatus(HttpStatus.OK);
-        response.addHeader("Content-Type", contentType);
-        response.setBody(content);
-    }
-
-    private static void responseRegisterPage(HttpResponse response) {
-        String contentType = probeContentType("/register.html");
-        String content = findStaticFile("/register.html");
-        response.addHttpStatus(HttpStatus.OK);
-        response.addHeader("Content-Type", contentType);
-        response.setBody(content);
-    }
-
-    private static void responseStaticPage(Map<RequestLine, String> requestLine, HttpResponse response, String content) {
-        String contentType = probeContentType(requestLine.get(REQUEST_URI));
-        response.addHttpStatus(HttpStatus.OK);
-        response.addHeader("Content-Type", contentType);
+        response.addHeader("Content-Type", probeContentType(url));
         response.setBody(content);
     }
 
@@ -145,18 +136,12 @@ public class StandardContext {
 
     private static void loginWithInvalidAccount(HttpResponse response, String account) {
         log.error("inputAccount={}, 해당하는 사용자를 찾을 수 없습니다.", account);
-        response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader("Location", "/404.html");
-        response.addHeader("Content-Type", probeContentType("/404.html"));
-        response.setBody(findStaticFile("/404.html"));
+        responseRedirectPage(NOT_FOUND_PAGE_URL, response);
     }
 
     private static void loginWithInvalidPassword(HttpResponse response, User user, String password) {
         log.error("user: {}, inputPassword={}, 비밀번호가 올바르지 않습니다.", user, password);
-        response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader("Location", "/401.html");
-        response.addHeader("Content-Type", probeContentType("/401.html"));
-        response.setBody(findStaticFile("/401.html"));
+        responseRedirectPage(UN_AUTHORIZED_PAGE_URL, response);
     }
 
     private static void normalLogin(HttpCookie httpCookie, HttpResponse response, User user) {
@@ -168,7 +153,7 @@ public class StandardContext {
             sessionManager.add(session);
             response.addHeader("Set-Cookie", "JSESSIONID=" + session.getSessionId());
         }
-        responseIndexPage(HttpStatus.FOUND, response);
+        responseRedirectPage(INDEX_PAGE_URL, response);
     }
 
     private static Map<String, String> parseQueryStringType(String queryString) {
@@ -196,16 +181,13 @@ public class StandardContext {
 
     private static void registerFailure(HttpResponse response, String account, String password, String email) {
         log.error("account={}, password={}, email={}, 회원가입에 실패하였습니다.", account, password, email);
-        response.addHttpStatus(HttpStatus.FOUND);
-        response.addHeader("Location", "/404.html");
-        response.addHeader("Content-Type", probeContentType("/404.html"));
-        response.setBody(findStaticFile("/404.html"));
+        responseRedirectPage(UN_AUTHORIZED_PAGE_URL, response);
     }
 
     private static void registerSuccess(HttpResponse response, String account, String password, String email) {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info("save user: {}", user);
-        responseIndexPage(HttpStatus.FOUND, response);
+        responseRedirectPage(INDEX_PAGE_URL, response);
     }
 }

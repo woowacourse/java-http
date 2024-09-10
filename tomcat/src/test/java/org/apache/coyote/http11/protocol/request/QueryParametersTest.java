@@ -18,6 +18,7 @@ class QueryParametersTest {
     }
 
     @Test
+    @DisplayName("QueryParameters 를 생성한다.")
     void getParameters() {
         QueryParameters queryParameters = new QueryParameters("name=Jinseok&age=27");
 

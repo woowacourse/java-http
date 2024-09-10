@@ -38,4 +38,16 @@ class StaticResourceHandlerTest {
 
         assertThat(response).contains(fileContent);
     }
+
+    @Test
+    @DisplayName("정적 리소스 처리: 확장자가 없는 경우, /static 경로에 있는 html 리소스를 반환")
+    void handle_When_Extension_NotExist() throws IOException {
+        final URL resourceURL = getClass().getClassLoader().getResource("static/404.html");
+        final String responseBody = Files.readString(Path.of(resourceURL.getPath()));
+
+        final StaticResourceHandler handler = StaticResourceHandler.getInstance();
+        final String response = handler.handle(new HttpRequest("GET", "404", "HTTP/1.1", null, null));
+
+        assertThat(response).contains(responseBody);
+    }
 }

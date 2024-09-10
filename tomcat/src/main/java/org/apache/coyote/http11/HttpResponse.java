@@ -15,14 +15,14 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpResponse(String httpStatus, File file) throws IOException {
+    public void setResponse(String httpStatus, File file) throws IOException {
         this.httpStatus = httpStatus;
         this.mimeType = Files.probeContentType(file.toPath());
         this.body = new String(Files.readAllBytes(file.toPath()));
         this.contentLength = Files.readAllBytes(file.toPath()).length;
     }
 
-    public HttpResponse(String httpStatus, String body) {
+    public void setResponse(String httpStatus, String body) {
         this.httpStatus = httpStatus;
         this.mimeType = "text/html";
         this.body = body;

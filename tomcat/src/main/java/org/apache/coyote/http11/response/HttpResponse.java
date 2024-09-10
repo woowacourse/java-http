@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpResponse {
 
@@ -19,7 +20,7 @@ public class HttpResponse {
     private String body;
 
     public HttpResponse() {
-        this(null, new HashMap<>(), null);
+        this(null, new HashMap<>(), "");
     }
 
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headers) {
@@ -105,5 +106,23 @@ public class HttpResponse {
         headers.put("Content-Type", responseFile.getContentType());
         headers.put("Content-Length", String.valueOf(responseFile.getContentLength()));
         body = responseFile.getContent();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpResponse response = (HttpResponse) o;
+        return protocol == response.protocol && httpStatus == response.httpStatus && Objects.equals(headers,
+                response.headers) && Objects.equals(body, response.body);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(protocol, httpStatus, headers, body);
     }
 }

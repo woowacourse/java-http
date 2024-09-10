@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -58,5 +59,29 @@ public class RequestHeadersTest {
 
         // then
         assertThat(actual).isEqualTo(expect);
+    }
+
+    @DisplayName("header 추출 시 \":\" 로 구분하고 각 예외사항을 고려한다.")
+    @Test
+    void parseRequestHeaderWithSpecialCase() {
+        // given
+        List<String> rawRequestHeaders = List.of(
+                "headerA:    value;   ",
+                "Content-Length:   53 ",
+                "emptyHeader:"
+        );
+        RequestHeaders requestHeaders = new RequestHeaders(rawRequestHeaders);
+
+        // when
+        String headerA = requestHeaders.getHeaderValue("headerA");
+        String contentLength = requestHeaders.getHeaderValue("Content-Length");
+        String emptyHeader = requestHeaders.getHeaderValue("emptyHeader");
+
+        // then
+        assertAll(
+                () -> assertThat(headerA).isEqualTo("value;"),
+                () -> assertThat(contentLength).isEqualTo("53"),
+                () -> assertThat(emptyHeader).isEmpty()
+        );
     }
 }

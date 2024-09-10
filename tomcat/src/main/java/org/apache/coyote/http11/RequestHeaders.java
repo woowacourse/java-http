@@ -6,18 +6,24 @@ import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
+    private static final String MESSAGE_HEADER_SEPARATOR = ":";
     private static final String COOKIE_HEADER_NAME = "Cookie";
 
     private final Map<String, String> headers;
 
     public RequestHeaders(List<String> rawRequestHeaders) {
         headers = rawRequestHeaders.stream()
-                .map(rawRequestHeader -> rawRequestHeader.split(": "))
-                .filter(requestHeaderPart -> requestHeaderPart.length == 2)
-                .collect(Collectors.toMap(
-                        requestHeaderPart -> requestHeaderPart[0].toLowerCase(),
-                        requestHeaderPart -> requestHeaderPart[1])
-                );
+                .collect(Collectors.toMap(this::parseFieldName, this::parseFieldValue));
+    }
+
+    private String parseFieldName(String requestHeaderPart) {
+        int separatorIndex = requestHeaderPart.indexOf(MESSAGE_HEADER_SEPARATOR);
+        return requestHeaderPart.substring(0, separatorIndex).toLowerCase();
+    }
+
+    private String parseFieldValue(String requestHeaderPart) {
+        int separatorIndex = requestHeaderPart.indexOf(MESSAGE_HEADER_SEPARATOR);
+        return requestHeaderPart.substring(separatorIndex + 1).trim();
     }
 
     public String getHeaderValue(String name) {

@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.Controller;
+import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
 import org.apache.coyote.Processor;

@@ -2,7 +2,7 @@ package com.techcourse.controller;
 
 import java.util.Map;
 import org.apache.catalina.controller.Controller;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class RequestMapping {

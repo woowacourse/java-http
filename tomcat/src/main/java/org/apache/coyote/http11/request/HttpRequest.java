@@ -3,8 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.common.HttpHeader;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
 

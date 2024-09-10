@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Collections;
 import java.util.Map;
-import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public record RequestLine(
         HttpMethod method,

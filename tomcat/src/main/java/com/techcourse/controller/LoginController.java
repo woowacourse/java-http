@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.apache.catalina.Session;
 import org.apache.catalina.controller.AbstractController;
 import org.apache.coyote.MediaType;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;

@@ -2,8 +2,8 @@ package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.StringJoiner;
-import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.common.HttpHeader;
+import org.apache.coyote.http11.common.HttpStatusCode;
 
 public class HttpResponse {
 

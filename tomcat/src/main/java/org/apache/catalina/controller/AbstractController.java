@@ -2,7 +2,7 @@ package org.apache.catalina.controller;
 
 
 import org.apache.catalina.SessionManager;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 

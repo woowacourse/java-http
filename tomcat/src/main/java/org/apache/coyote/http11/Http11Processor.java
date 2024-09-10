@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import org.apache.catalina.SessionManager;
 import org.apache.catalina.controller.Controller;
+import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpStatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.MediaType;
@@ -59,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
         String line;
 
         while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\r\n");
+            sb.append(line).append(Constants.CRLF);
             if (line.isEmpty()) {
                 break;
             }

@@ -2,13 +2,13 @@ package org.apache.coyote.http11.response;
 
 import java.util.HashMap;
 import java.util.StringJoiner;
+import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpHeader;
 import org.apache.coyote.http11.common.HttpStatusCode;
 
 public class HttpResponse {
 
     private static final double VERSION = 1.1;
-    private static final String CRLF = "\r\n";
 
     private final ResponseLine responseLine;
     private final HttpHeader headers;
@@ -61,7 +61,7 @@ public class HttpResponse {
     }
 
     public String toHttpMessage() {
-        StringJoiner joiner = new StringJoiner(CRLF);
+        StringJoiner joiner = new StringJoiner(Constants.CRLF);
         joiner.add(responseLine.toResponseString());
         joiner.add(headers.toString());
         joiner.add("");

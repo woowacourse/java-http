@@ -3,13 +3,13 @@ package org.apache.coyote.http11.request;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.coyote.http11.common.Constants;
 import org.apache.coyote.http11.common.HttpHeader;
 import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
 
     private static final String HEADER_DELIMITER = ":";
-    private static final String CRLF = "\r\n";
 
     private final RequestLine requestLine;
     private final HttpHeader header;
@@ -22,7 +22,7 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(String rawRequest) {
-        String[] lines = rawRequest.split(CRLF);
+        String[] lines = rawRequest.split(Constants.CRLF);
         RequestLine requestLine = RequestLine.from(lines[0]);
         HttpHeader header = parseHeader(lines);
         RequestBody body = RequestBody.empty();

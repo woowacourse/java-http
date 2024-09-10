@@ -21,4 +21,21 @@ public class Http11Parser {
         }
         return new Http11Request(lines);
     }
+
+    public static String writeHttpResponse(final Http11Response response) {
+        StringBuilder serializedResponse = new StringBuilder();
+        serializedResponse.append("HTTP/1.1 ").append(response.getStatusCode()).append(" \r\n");
+        if (response.getLocation() != null) {
+            serializedResponse.append("Location: ").append(response.getLocation()).append(" \r\n");
+            serializedResponse.append("Content-Length: 0 \r\n");
+            serializedResponse.append("\r\n");
+        }
+        if (response.getContent() != null) {
+            serializedResponse.append("Content-Type: ").append(response.getContentType()).append(";charset=utf-8 \r\n");
+            serializedResponse.append("Content-Length: ").append(response.getContentLength()).append(" \r\n");
+            serializedResponse.append("\r\n");
+            serializedResponse.append(response.getBody());
+        }
+        return serializedResponse.toString();
+    }
 }

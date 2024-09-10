@@ -18,20 +18,27 @@ public class Http11Response {
         this.content = content;
     }
 
-    public String serializeResponse() { // TODO: 객체 분리
-        StringBuilder response = new StringBuilder();
-        response.append("HTTP/1.1 ").append(statusCode).append(" \r\n");
-        if (location != null) {
-            response.append("Location: ").append(location).append(" \r\n");
-            response.append("Content-Length: 0 \r\n");
-            response.append("\r\n");
-        }
-        if (content != null) {
-            response.append("Content-Type: ").append(content.getContentType()).append(";charset=utf-8 \r\n");
-            response.append("Content-Length: ").append(content.getContentLength()).append(" \r\n");
-            response.append("\r\n");
-            response.append(content.getBody());
-        }
-        return response.toString();
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Http11ResponseContent getContent() {
+        return content;
+    }
+
+    public String getContentType() {
+        return content.getContentType(); // TODO: null 검증 처리
+    }
+
+    public int getContentLength() {
+        return content.getContentLength();
+    }
+
+    public String getBody() {
+        return content.getBody();
     }
 }

@@ -46,7 +46,7 @@ public class LoginHandler extends Handler {
             return StaticResourceHandler.getInstance().handle(new HttpRequest("GET", "/login.html", "HTTP/1.1", null, null));
         }
 
-        return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
+        return HttpResponseGenerator.getFoundResponse("/index.html");
     }
 
     private String processLoginPostRequest(final HttpRequest httpRequest) {
@@ -62,7 +62,7 @@ public class LoginHandler extends Handler {
         session.setAttribute("user", userOptional.get());
         sessionManager.add(session);
         return addCookie(
-                HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
+                HttpResponseGenerator.getFoundResponse("/index.html"),
                 HttpCookie.of("JSESSIONID=" + session.getId()));
     }
 

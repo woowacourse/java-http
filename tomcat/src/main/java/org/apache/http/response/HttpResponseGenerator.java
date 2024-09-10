@@ -14,10 +14,10 @@ public class HttpResponseGenerator {
                 responseBody);
     }
 
-    public static String getFoundResponse(String url) {
+    public static String getFoundResponse(String resourcePath) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location:  " + url);
+                "Location: http://localhost:8080" + resourcePath);
     }
 
     public static String getNotFountResponse() {

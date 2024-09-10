@@ -113,7 +113,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         assertThat(socket.output()).isEqualTo(
-                HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"));
+                HttpResponseGenerator.getFoundResponse("/index.html"));
     }
 
     @Test
@@ -136,7 +136,7 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(
-                HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"),
+                HttpResponseGenerator.getFoundResponse("/index.html"),
                 "Set-Cookie: JSESSIONID=");
     }
 
@@ -186,6 +186,6 @@ class Http11ProcessorTest {
 
         // then
         assertThat(socket.output()).contains(
-                HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html"));
+                HttpResponseGenerator.getFoundResponse("/index.html"));
     }
 }

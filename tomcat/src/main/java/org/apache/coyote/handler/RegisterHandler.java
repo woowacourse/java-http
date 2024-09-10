@@ -36,6 +36,6 @@ public class RegisterHandler extends Handler {
         String email = body[1].split("=")[1];
         String password = body[2].split("=")[1];
         InMemoryUserRepository.save(new User(account, password, email));
-        return HttpResponseGenerator.getFoundResponse("http://localhost:8080/index.html");
+        return HttpResponseGenerator.getFoundResponse("/index.html");
     }
 }

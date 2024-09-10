@@ -8,13 +8,16 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
+    private static final String QUERY_PARAM_DELIMETER = "&";
+    private static final String QUERY_PARAM_VALUE_DELIMETER = "=";
     private final HttpMethod method;
     private final String requestUrl;
     private final HttpHeader header;
     private final HttpCookie httpCookie;
     private final Map<String, String> body;
 
-    public HttpRequest(HttpHeader header, HttpMethod method, String requestUrl, HttpCookie httpCookie, Map<String, String> body) {
+    public HttpRequest(HttpHeader header, HttpMethod method, String requestUrl, HttpCookie httpCookie,
+                       Map<String, String> body) {
         this.header = header;
         this.method = method;
         this.requestUrl = requestUrl;
@@ -29,7 +32,7 @@ public class HttpRequest {
 
         Map<String, String> body = getBody(rawBody);
         HttpHeader httpHeader = HttpHeader.from(header);
-        HttpCookie httpCookie = HttpCookie.from(httpHeader.getHeader("Cookie"));
+        HttpCookie httpCookie = HttpCookie.from(httpHeader.getHeader(HttpHeaderName.COOKIE));
 
         return new HttpRequest(httpHeader, method, requestUrl, httpCookie, body);
     }
@@ -39,8 +42,11 @@ public class HttpRequest {
             return new HashMap<>();
         }
 
-        return Arrays.stream(rawBody.split("&"))
-                .collect(Collectors.toMap(s -> s.split("=")[0], s -> s.split("=")[1]));
+        return Arrays.stream(rawBody.split(QUERY_PARAM_DELIMETER))
+                .collect(Collectors.toMap(
+                        s -> s.split(QUERY_PARAM_VALUE_DELIMETER)[0],
+                        s -> s.split(QUERY_PARAM_VALUE_DELIMETER)[1])
+                );
     }
 
     public HttpMethod getMethod() {

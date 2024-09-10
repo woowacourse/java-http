@@ -46,7 +46,7 @@ public class LoginController implements Controller {
     private boolean checkAlreadyLogin(HttpCookie httpCookie) {
         String sessionId = httpCookie.findCookie(JSESSIONID);
         HttpSession session = HTTP_SESSION_MANGER.findSession(sessionId);
-        return session.getAttribute("user") != null;
+        return session.getAttribute(HttpSession.USER_ATTRIBUTE) != null;
     }
 
     private void doPost(HttpRequest request, HttpResponse response) {
@@ -79,7 +79,7 @@ public class LoginController implements Controller {
         String sessionId = String.valueOf(UUID.randomUUID());
 
         HttpSession httpSession = new HttpSession(sessionId);
-        httpSession.setAttribute("user", user);
+        httpSession.setAttribute(HttpSession.USER_ATTRIBUTE, user);
         HTTP_SESSION_MANGER.add(httpSession);
 
         return sessionId;

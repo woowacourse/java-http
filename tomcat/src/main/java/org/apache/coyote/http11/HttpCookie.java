@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
+    public static final String COOKIE_VALUE_DELIMITER = "=";
+    private static final String COOKIE_DELIMITER = "; ";
+
     private final Map<String, String> cookies;
 
     private HttpCookie(Map<String, String> cookies) {
@@ -18,8 +21,12 @@ public class HttpCookie {
             return new HttpCookie(new HashMap<>());
         }
 
-        Map<String, String> cookies = Arrays.stream(rawCookies.split("; "))
-                .collect(Collectors.toMap(cookie -> cookie.split("=")[0], cookie -> cookie.split("=")[1]));
+        Map<String, String> cookies = Arrays.stream(rawCookies.split(COOKIE_DELIMITER))
+                .collect(Collectors.toMap(
+                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[0],
+                        cookie -> cookie.split(COOKIE_VALUE_DELIMITER)[1])
+                );
+
         return new HttpCookie(cookies);
     }
 

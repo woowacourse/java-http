@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
+    private static final String PROTOCOL = "HTTP/1.1 ";
+
     private final HttpHeader httpHeader;
     private HttpStatus httpStatus;
     private String body;
@@ -17,7 +19,7 @@ public class HttpResponse {
     }
 
     public String toHttpResponse() {
-        String statusLine = "HTTP/1.1 " + httpStatus.getValue() + " " + httpStatus.getReason() + " ";
+        String statusLine = PROTOCOL + httpStatus.getValue() + " " + httpStatus.getReason() + " ";
 
         if (body == null) {
             return String.join("\r\n", statusLine, httpHeader.toHttpHeader(), "");
@@ -26,19 +28,22 @@ public class HttpResponse {
     }
 
     public void setBody(String body, String contentType) {
-        httpHeader.addHeader("Content-Type", contentType + ";charset=utf-8");
-        httpHeader.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        httpHeader.addHeader(HttpHeaderName.CONTENT_TYPE, contentType + ";charset=utf-8");
+        httpHeader.addHeader(HttpHeaderName.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 
         this.body = body;
     }
 
     public void setRedirect(String redirectUrl) {
-        httpHeader.addHeader("Location", redirectUrl);
+        httpHeader.addHeader(HttpHeaderName.LOCATION, redirectUrl);
         httpStatus = HttpStatus.FOUND;
     }
 
     public void setCookie(String cookieName, String cookieValue) {
-        httpHeader.addHeader("Set-Cookie", cookieName + "=" + cookieValue);
+        httpHeader.addHeader(
+                HttpHeaderName.SET_COOKIE,
+                cookieName + HttpCookie.COOKIE_VALUE_DELIMITER + cookieValue
+        );
     }
 
     public void setStatus(HttpStatus httpStatus) {

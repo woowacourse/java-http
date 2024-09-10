@@ -11,6 +11,7 @@ import org.apache.coyote.http11.HttpStatus;
 public class DefaultServlet implements Controller {
 
     private static final String RESOURCE_PATH = "static";
+    private static final String QUERY_PARAM_DELIMITER = "\\?";
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
@@ -18,7 +19,7 @@ public class DefaultServlet implements Controller {
     }
 
     public void serveResource(HttpRequest request, HttpResponse response) throws IOException {
-        String path = request.getRequestUrl().split("\\?")[0];
+        String path = request.getRequestUrl().split(QUERY_PARAM_DELIMITER)[0];
         Path resourcePath = getResourcePath(path);
         String body = Files.readString(resourcePath);
         String contentType = Files.probeContentType(resourcePath);

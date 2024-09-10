@@ -54,8 +54,8 @@ public class Http11Processor implements Runnable, Processor {
         int contentLength = 0;
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
-            if (line.startsWith("Content-Length")) {
-                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            if (line.startsWith(HttpHeaderName.CONTENT_LENGTH.getHeaderName())) {
+                contentLength = Integer.parseInt(line.split(HttpHeader.HEADER_DELIMITER)[1].trim());
             }
             header.add(line);
         }

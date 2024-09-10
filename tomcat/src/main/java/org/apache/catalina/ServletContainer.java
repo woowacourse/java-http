@@ -1,20 +1,21 @@
 package org.apache.catalina;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 import org.apache.catalina.controller.Controller;
 import org.apache.catalina.controller.DefaultServlet;
 import org.apache.catalina.controller.IndexController;
 import org.apache.catalina.controller.LoginController;
 import org.apache.catalina.controller.RegisterController;
-import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
 
 public class ServletContainer {
+
+    private static final List<String> STATIC_RESOURCE_EXTENSION = List.of(".html", ".css", ".js");
 
     private final Map<String, Controller> servletMapping;
     private final Controller defaultServlet;
@@ -32,18 +33,15 @@ public class ServletContainer {
 
     public HttpResponse dispatch(HttpRequest request) throws Exception {
         String requestUrl = request.getRequestUrl();
-
-        HttpHeader responseHeader = new HttpHeader();
+        HttpResponse response = new HttpResponse();
 
         if (requestUrl.equals("/")) {
-            String responseBody = "Hello world!";
-            responseHeader.addHeader("Content-Type", "text/html;charset=utf-8");
-            responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
-            return new HttpResponse(responseHeader, HttpStatus.OK, responseBody);
+            response.setBody("Hello world!", "text/html");
+            response.setStatus(HttpStatus.OK);
+            return response;
         }
 
-        HttpResponse response = new HttpResponse();
-        if (Stream.of(".html", ".css", ".js").anyMatch(requestUrl::endsWith)) {
+        if (isStaticResource(requestUrl)) {
             defaultServlet.service(request, response);
             return response;
         }
@@ -57,6 +55,11 @@ public class ServletContainer {
                 );
 
         return response;
+    }
+
+    private boolean isStaticResource(String requestUrl) {
+        return STATIC_RESOURCE_EXTENSION.stream()
+                .anyMatch(requestUrl::endsWith);
     }
 
     private Consumer<String> doService(HttpRequest request, HttpResponse response) {

@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import com.techcourse.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.Dispatcher;
-import org.apache.coyote.http.request.HttpMethod;
+import org.apache.coyote.http.HttpMessageGenerator;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -13,8 +13,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,13 +39,9 @@ public class Http11Processor implements Runnable, Processor {
 
             Dispatcher dispatcher = new Dispatcher();
 
-            HttpRequest request = getRequestHeader(bufferedReader);
+            HttpRequest request = HttpMessageGenerator.generateRequest(bufferedReader);
             log.info("\nrequest uri: {}\nrequest method: {}\nrequest body: {}",
                     request.getPath().getUri(), request.getMethod().getMethod(), request.getBody());
-
-            if (request.getMethod().equals(HttpMethod.POST)) {
-                getRequestBody(bufferedReader, request);
-            }
 
             HttpResponse response = new HttpResponse();
 
@@ -59,25 +53,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest getRequestHeader(final BufferedReader reader) throws IOException {
-        List<String> headerLines = new ArrayList<>();
-        String line;
-
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            headerLines.add(line);
-        }
-
-        return HttpRequest.of(headerLines);
-    }
-
-
-    private void getRequestBody(final BufferedReader bufferedReader, final HttpRequest request) throws IOException {
-        int contentLength = request.getContentLength();
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        request.setBody(requestBody);
     }
 }

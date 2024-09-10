@@ -43,13 +43,13 @@ public class ServletRequestHandler {
             return handleGetLogin(queryString);
         }
         if (requestURI.equals("/register")) {
-            return handleGetRegister();
+            return handleGetRegisterPage();
         }
         if (requestURI.equals("/")) {
-            return handleGetRoot();
+            return handleGetRootPage();
         }
         if (requestURI.contains(".")) {
-            return handleGetStatic(requestURI);
+            return handleGetStaticPage(requestURI);
         }
         throw new IllegalArgumentException("해당 uri는 지원하지 않습니다: " + requestURI); // TODO: 404 처리
     }
@@ -74,18 +74,18 @@ public class ServletRequestHandler {
         return new Http11Response(FOUND_STATUS_CODE, location);
     }
 
-    private Http11Response handleGetRegister() {
+    private Http11Response handleGetRegisterPage() {
         final String path = "/register.html";
         final String body = viewResolver.resolve(path);
         return new Http11Response(SUCCESS_STATUS_CODE, new Http11ResponseContent(path, body));
     }
 
-    private Http11Response handleGetRoot() {
+    private Http11Response handleGetRootPage() {
         final String body = "Hello world!";
         return new Http11Response(SUCCESS_STATUS_CODE, new Http11ResponseContent(DEFAULT_HTML_PATH, body));
     }
 
-    private Http11Response handleGetStatic(String requestURI) {
+    private Http11Response handleGetStaticPage(String requestURI) {
         final String path = requestURI;
         final String body = viewResolver.resolve(path);
         return new Http11Response(SUCCESS_STATUS_CODE, new Http11ResponseContent(path, body));

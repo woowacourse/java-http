@@ -1,4 +1,4 @@
-package org.apache.catalina;
+package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.request.Http11Method;
 import org.apache.coyote.http11.request.Http11Request;

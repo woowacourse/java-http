@@ -16,6 +16,9 @@ public class Cookie {
     }
 
     public Cookie(String cookieString) {
+        if (cookieString == null) {
+            return;
+        }
         parseCookieString(cookieString);
     }
 
@@ -23,6 +26,8 @@ public class Cookie {
         Arrays.stream(cookieString.split(COOKIE_DELIMITER))
                 .filter(cookiePair -> cookiePair.contains(KEY_VALUE_DELIMITER))
                 .map(cookiePair -> cookiePair.split(KEY_VALUE_DELIMITER))
+                .filter(keyValue -> keyValue.length == 2)
+                .filter(keyValue -> !keyValue[0].isEmpty())
                 .forEach(keyValue -> cookies.put(keyValue[0], keyValue[1]));
     }
 

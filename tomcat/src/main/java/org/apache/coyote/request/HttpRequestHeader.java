@@ -3,6 +3,8 @@ package org.apache.coyote.request;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.util.CookieUtil;
 
 public class HttpRequestHeader {
 
@@ -17,6 +19,25 @@ public class HttpRequestHeader {
             return Integer.parseInt(values.get("Content-Length").getFirst());
         }
         return 0;
+    }
+
+    public Cookie getCookie() {
+        if (hasCookie()) {
+            return CookieUtil.read(values.get("Cookie"));
+        }
+        return null;
+    }
+
+    public boolean hasCookie() {
+        return values.containsKey("Cookie");
+    }
+
+    public boolean hasSession() {
+        if (hasCookie()) {
+            Cookie cookie = CookieUtil.read(values.get("Cookie"));
+            return cookie.containsSessionId();
+        }
+        return false;
     }
 
     @Override

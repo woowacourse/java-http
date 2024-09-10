@@ -8,7 +8,7 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.util.IdGenerator;
 import org.apache.coyote.util.RequestBodyParser;
-import org.apache.coyote.util.Session;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.util.SessionManager;
 import org.apache.coyote.util.ViewResolver;
 import org.slf4j.Logger;

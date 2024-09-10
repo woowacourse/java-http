@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.HttpVersion;
+import org.apache.coyote.http11.Cookie;
 
 public class HttpRequest {
 
@@ -76,6 +77,22 @@ public class HttpRequest {
 
     public HttpRequestHeader getHeaders() {
         return headers;
+    }
+
+    public Cookie getCookie() {
+        return headers.getCookie();
+    }
+
+    public boolean hasCookie() {
+        return headers.hasCookie();
+    }
+
+    public String getSessionId() {
+        return headers.getCookie().getSessionId();
+    }
+
+    public boolean hasSession() {
+        return headers.hasSession();
     }
 
     public HttpRequestBody getBody() {

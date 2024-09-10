@@ -20,6 +20,10 @@ public class HttpResponse {
         return new HttpResponse(startLine, new HttpResponseHeader(), new HttpResponseBody(null));
     }
 
+    public void addCookie(String key, String value) {
+        headers.addCookie(key, value);
+    }
+
     public void addContentType(String contentType) {
         headers.addContentType(contentType);
     }

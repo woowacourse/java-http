@@ -11,16 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class HttpReader {
 
-    private final InputStream inputStream;
     private final HttpRequest httpRequest;
 
     public HttpReader(InputStream inputStream) throws IOException {
-        this.inputStream = inputStream;
         this.httpRequest = getRequest(inputStream);
-    }
-
-    public HttpRequest getHttpRequest() {
-        return httpRequest;
     }
 
     private HttpRequest getRequest(InputStream inputStream) throws IOException {
@@ -34,6 +28,15 @@ public class HttpReader {
         return new HttpRequest(requestLine, headers);
     }
 
+    private RequestLine getRequestLine(String firstLine) {
+        StringTokenizer stringTokenizer = new StringTokenizer(firstLine);
+
+        String method = stringTokenizer.nextToken();
+        String requestUrl = stringTokenizer.nextToken();
+        String protocol = stringTokenizer.nextToken();
+        return new RequestLine(method, requestUrl, protocol);
+    }
+
     private HttpHeader getHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
 
@@ -45,12 +48,7 @@ public class HttpReader {
         return new HttpHeader(headers);
     }
 
-    private RequestLine getRequestLine(String firstLine) {
-        StringTokenizer stringTokenizer = new StringTokenizer(firstLine);
-
-        String method = stringTokenizer.nextToken();
-        String requestUrl = stringTokenizer.nextToken();
-        String protocol = stringTokenizer.nextToken();
-        return new RequestLine(method, requestUrl, protocol);
+    public HttpRequest getHttpRequest() {
+        return httpRequest;
     }
 }

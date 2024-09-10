@@ -28,7 +28,7 @@
     - HTTP Request Header의 Cookie에 JSESSIONID가 없으면 Response Header에 Set-Cookie를 반환한다.
 - [ ] Session 구현하기
     - JSESSIONID의 값으로 로그인 여부를 체크한다.
-    - 성공 : Session 객체의 값으로 User 객체를 저장한다.
+    - [x] 로그인 성공 시 Session 객체의 값으로 User 객체를 저장한다.
     - [ ] 로그인된 상태에서 `/login` 페이지에 접근하면, `index.html` 페이지로 리다이렉트 한다.
 
 ---

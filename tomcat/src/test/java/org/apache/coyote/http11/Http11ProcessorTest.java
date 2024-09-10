@@ -3,10 +3,12 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.techcourse.model.User;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.apache.catalina.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -295,6 +297,30 @@ class Http11ProcessorTest {
 
             // then
             assertThat(socket.output()).contains("Set-Cookie: JSESSIONID");
+        }
+
+        @DisplayName("로그인 성공 시 Session 객체의 값으로 User 객체를 저장한다.")
+        @Test
+        void addSession() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Content-Length: 30 ",
+                    "Connection: keep-alive ",
+                    "",
+                    "account=gugu&password=password ");
+
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            SessionManager sessionManager = SessionManager.getInstance();
+            User user = (User) sessionManager.findSession("gugu").getAttribute("user");
+            assertThat(user.checkPassword("password")).isTrue();
         }
     }
 }

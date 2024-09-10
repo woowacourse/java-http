@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +191,10 @@ public class Http11Processor implements Runnable, Processor {
             if (loginUser.isPresent()) {
                 final User user = loginUser.get();
                 if (user.checkPassword(password)) {
+                    Session session = new Session(user.getAccount());
+                    session.setAttribute("user", user);
+                    SessionManager.getInstance().add(session);
+
                     log.info("로그인 성공! 아이디: {}", user.getAccount());
                     String cookies = requestHeader.getOrDefault("Cookie", "");
                     if (new HttpCookie(cookies).hasKey("JSESSIONID")) {

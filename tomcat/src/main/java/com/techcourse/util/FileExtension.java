@@ -16,8 +16,8 @@ public enum FileExtension {
     }
 
     public static boolean isFileExtension(String path) {
-        for (FileExtension ext : values()) {
-            if (path.endsWith(ext.getExtension())) {
+        for (FileExtension extension : values()) {
+            if (path.endsWith(extension.getExtension())) {
                 return true;
             }
         }

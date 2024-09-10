@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class Session {
     private final String id;
-    private final Map<String, String> values;
+    private final Map<String, Object> values;
 
     private Session(String id) {
         this.id = id;
@@ -25,7 +25,7 @@ public class Session {
         return values.get(id);
     }
 
-    public void setAttribute(String name, String value) {
+    public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
 

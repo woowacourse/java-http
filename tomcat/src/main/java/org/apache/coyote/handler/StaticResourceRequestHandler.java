@@ -5,20 +5,21 @@ import org.apache.ResourceReader;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.MimeType;
 
 public class StaticResourceRequestHandler extends AbstractRequestHandler {
 
     @Override
     protected void get(HttpRequest httpRequest, HttpResponse httpResponse) {
         httpResponse.setStatus(HttpStatus.OK);
-        httpResponse.setHeader("Content-Type", getContentType(httpRequest));
+        httpResponse.setContentTypeHeader(getContentType(httpRequest));
         httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 
     private String getContentType(HttpRequest httpRequest) {
         if (httpRequest.getHeader("Accept") == null) {
-            int index = httpRequest.getRequestURI().indexOf(".");
-            return "text/" + httpRequest.getRequestURI().substring(index + 1) + ";charset=utf-8 ";
+            MimeType mimeType = MimeType.fromFileName(httpRequest.getRequestURI());
+            return mimeType.value();
         }
         return httpRequest.getHeader("Accept").split(",")[0];
     }

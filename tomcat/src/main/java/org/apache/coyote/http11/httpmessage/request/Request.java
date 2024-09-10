@@ -23,16 +23,16 @@ public class Request {
     private Request(RequestLine requestLine, HttpHeaders headers, String body) {
         this.requestLine = requestLine;
         this.headers = headers;
-        if (headers.contains("Cookie")) {
-            this.cookies = HttpCookie.parseFrom(headers.get("Cookie"));
+        if (headers.contains(HttpHeaders.COOKIE)) {
+            this.cookies = HttpCookie.parseFrom(headers.get(HttpHeaders.COOKIE));
         } else {
             this.cookies = new HttpCookie();
         }
         this.body = body;
 
-        if (cookies.contains("JSESSIONID")) {
+        if (cookies.contains(HttpHeaders.JSESSIONID)) {
             SessionManager sessionManager = SessionManager.getInstance();
-            this.session = sessionManager.findSession(cookies.getCookie("JSESSIONID"));
+            this.session = sessionManager.findSession(cookies.getCookie(HttpHeaders.JSESSIONID));
         }
     }
 

@@ -43,7 +43,7 @@ public class Response {
         }
 
         public Response found(String target) {
-            this.headers.addHeader("Location", target);
+            this.headers.addHeader(HttpHeaders.LOCATION, target);
 
             return build(
                     new StatusLine(this.ProtocolVersion, 301, "FOUND"),
@@ -53,8 +53,8 @@ public class Response {
         }
 
         public Response ofStaticResource(StaticResource resource) throws IOException {
-            headers.addHeader("Content-Type", resource.getContentType() + ";charset=utf-8");
-            headers.addHeader("Content-Length", Long.toString(resource.getContentLength()));
+            headers.addHeader(HttpHeaders.CONTENT_TYPE, resource.getContentType() + ";charset=utf-8");
+            headers.addHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(resource.getContentLength()));
 
             return build(
                     new StatusLine(this.ProtocolVersion, 200, "OK"),
@@ -70,7 +70,7 @@ public class Response {
 
         private void setCookie(HttpHeaders headers) {
             if(!httpCookie.isEmpty()) {
-                headers.addHeader("Set-Cookie", httpCookie.toHttpMessage());
+                headers.addHeader(HttpHeaders.SET_COOKIE, httpCookie.toHttpMessage());
             }
         }
     }

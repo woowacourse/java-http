@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package org.apache.catalina.servlet;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,6 +10,7 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.startline.HttpStatus;
+import org.apache.coyote.http11.startline.RequestUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +18,19 @@ public abstract class Controller {
 
     private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private static final String DELIMITER = "\r\n";
+    private static final String END_OF_LINE = "";
 
     public abstract boolean service(HttpRequest request, HttpResponse response);
 
-    protected void redirectTo(HttpResponse response, String target) {
+    protected boolean redirectTo(HttpResponse response, String target) {
         response.setStatus(HttpStatus.FOUND);
         response.addHeader(HttpHeader.LOCATION, target);
+        return response.isValid();
+    }
+
+    protected boolean responseResource(HttpResponse response, String path) {
+        RequestUri requestUri = new RequestUri(path);
+        return responseResource(response, requestUri.getPath());
     }
 
     protected boolean responseResource(HttpResponse response, Path path) {
@@ -48,7 +56,7 @@ public abstract class Controller {
         for (String fileLine : fileLines) {
             joiner.add(fileLine);
         }
-        joiner.add("");
+        joiner.add(END_OF_LINE);
         return joiner.toString();
     }
 }

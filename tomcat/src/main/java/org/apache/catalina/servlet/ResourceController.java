@@ -1,4 +1,4 @@
-package com.techcourse.controller;
+package org.apache.catalina.servlet;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -16,15 +16,8 @@ public class ResourceController extends Controller {
             return true;
         }
         if (request.isTargetStatic()) {
-            return responseFile(request, response);
+            return responseResource(response, request.getTargetPath());
         }
         return false;
-    }
-
-    private boolean responseFile(HttpRequest request, HttpResponse response) {
-        if (request.uriStartsWith("/login") && request.getSessionFromCookie().isPresent()) {
-            redirectTo(response, "/index");
-        }
-        return responseResource(response, request.getTargetPath());
     }
 }

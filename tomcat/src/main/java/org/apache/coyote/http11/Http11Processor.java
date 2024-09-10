@@ -1,9 +1,9 @@
 package org.apache.coyote.http11;
 
-import com.techcourse.controller.Controller;
 import com.techcourse.exception.UncheckedServletException;
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.catalina.servlet.Controller;
 import org.apache.catalina.servlet.RequestMapper;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.body.HttpResponseBody;
@@ -17,11 +17,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final RequestMapper requestMapper;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        this.requestMapper = new RequestMapper();
     }
 
     @Override
@@ -41,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
                     new HttpResponseBody()
             );
 
-            Controller controller = requestMapper.getController(request);
+            Controller controller = RequestMapper.getController(request);
             boolean isResponseValid = controller.service(request, response);
 
             if (!isResponseValid) {

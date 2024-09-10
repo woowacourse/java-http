@@ -1,36 +1,26 @@
 package org.apache.catalina.servlet;
 
-import com.techcourse.controller.Controller;
 import com.techcourse.controller.LoginController;
 import com.techcourse.controller.RegisterController;
-import com.techcourse.controller.ResourceController;
-import com.techcourse.controller.RestController;
 import java.util.Set;
 import org.apache.coyote.http11.HttpRequest;
 
 public class RequestMapper {
 
-    private final Set<RestController> controllers;
-    private final Controller resourceController;
+    private static final Set<Controller> controllers = Set.of(
+            new LoginController(),
+            new RegisterController()
+    );
 
-    public RequestMapper() {
-        this.resourceController = new ResourceController();
-        this.controllers = Set.of(
-                new LoginController(),
-                new RegisterController()
-        );
+    private RequestMapper() {
     }
 
-    public Controller getController(HttpRequest request) {
-        if (request.isTargetBlank() || request.isTargetStatic()) {
-            return resourceController;
-        }
-
+    public static Controller getController(HttpRequest request) {
         return controllers.stream()
                 .filter(controller ->
                         request.uriStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
                 )
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("cannot map controller from request: " + request));
+                .orElse(new ResourceController());
     }
 }

@@ -3,11 +3,9 @@ package com.techcourse.controller;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
 import com.techcourse.session.SessionManager;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.Optional;
 import org.apache.catalina.servlet.RequestMapping;
+import org.apache.catalina.servlet.RestController;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.startline.HttpStatus;
@@ -16,12 +14,14 @@ import org.apache.coyote.http11.startline.HttpStatus;
 public class LoginController extends RestController {
 
     @Override
-    boolean doGet(HttpRequest request, HttpResponse response) {
-        return false;
+    protected boolean doGet(HttpRequest request, HttpResponse response) {
+        return request.getSessionFromCookie()
+                .map(session -> redirectTo(response, "/index"))
+                .orElseGet(() -> responseResource(response, request.getTargetPath()));
     }
 
     @Override
-    boolean doPost(HttpRequest request, HttpResponse response) {
+    protected boolean doPost(HttpRequest request, HttpResponse response) {
         Optional<User> nullableUser = InMemoryUserRepository.findByAccount(request.getFromBody("account"));
         return nullableUser
                 .filter(user -> user.checkPassword(request.getFromBody("password")))
@@ -38,16 +38,8 @@ public class LoginController extends RestController {
 
     private boolean responsePage401(HttpResponse response) {
         String path = "static/401.html";
-        URL resource = getClass().getClassLoader().getResource(path);
-        if (resource == null) {
-            throw new IllegalArgumentException("Could not find resource " + path);
-        }
         response.setStatus(HttpStatus.UNAUTHORIZED);
 
-        try {
-            return responseResource(response, Path.of(resource.toURI()));
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("cannot convert to URI: " + resource);
-        }
+        return responseResource(response, path);
     }
 }

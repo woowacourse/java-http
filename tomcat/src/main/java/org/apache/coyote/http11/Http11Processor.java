@@ -87,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String doGet(String path, Map<String, String> requestHeader) throws IOException {
-        if (path.contains(".css")) {
+        if (path.endsWith(".css")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             return String.join("\r\n",
@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody);
         }
 
-        if (path.contains(".js")) {
+        if (path.endsWith(".js")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             return String.join("\r\n",
@@ -109,7 +109,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody);
         }
 
-        if (path.contains(".svg")) {
+        if (path.endsWith(".svg")) {
             URL resource = getClass().getClassLoader().getResource("static" + path);
             String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             return String.join("\r\n",
@@ -143,7 +143,7 @@ public class Http11Processor implements Runnable, Processor {
                     responseBody);
         }
 
-        if (!path.contains(".html")) {
+        if (!path.endsWith(".html")) {
             path += ".html";
         }
         URL resource = getClass().getClassLoader().getResource("static" + path);

@@ -17,6 +17,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,8 +42,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
-
             String path = httpRequest.getPath();
+
+            if (path == null) {
+                throw new IllegalArgumentException("path is null");
+            }
 
             if (path.equals("/")) {
                 processHome(outputStream);
@@ -159,8 +163,14 @@ public class Http11Processor implements Runnable, Processor {
 
         if (httpRequest.getMethod().equals("POST")) {
             Map<String, List<String>> body = httpRequest.getBody();
-            User user = InMemoryUserRepository.findByAccount(body.get("account").getFirst()).get();
-            log.info("user : {}", user);
+            String account = Optional.ofNullable(body.get("account"))
+                    .filter(list -> !list.isEmpty())
+                    .map(List::getFirst)
+                    .orElseThrow(() -> new IllegalArgumentException("account not found"));
+
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException("user not found"));
+
             if (!body.containsKey("password")) {
                 return;
             }

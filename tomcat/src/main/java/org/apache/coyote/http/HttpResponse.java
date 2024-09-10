@@ -6,14 +6,14 @@ import java.util.Map;
 
 public class HttpResponse {
 
-    private final String httpVersion;
-    private final String statusCode;
+    private final HttpVersion httpVersion;
+    private final StatusCode statusCode;
     private final Map<String, String> headers;
     private final String responseBody;
 
     private HttpResponse(String httpVersion, String statusCode, Map<String, String> headers, String responseBody) {
-        this.httpVersion = httpVersion;
-        this.statusCode = statusCode;
+        this.httpVersion = new HttpVersion(httpVersion);
+        this.statusCode = new StatusCode(statusCode);
         this.headers = headers;
         this.responseBody = responseBody;
     }
@@ -56,7 +56,8 @@ public class HttpResponse {
     public byte[] getBytes() {
         StringBuilder responseBuilder = new StringBuilder();
 
-        responseBuilder.append(httpVersion).append(" ").append(statusCode).append(" ").append("\r\n");
+        responseBuilder.append(httpVersion.version()).append(" ")
+                .append(statusCode.statusCode()).append(" ").append("\r\n");
 
         for (Map.Entry<String, String> header : headers.entrySet()) {
             responseBuilder.append(header.getKey()).append(": ").append(header.getValue()).append(" ").append("\r\n");

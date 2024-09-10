@@ -34,7 +34,7 @@ public class Dispatcher {
     public HttpRequestHandler mappedHandler(HttpRequest request) {
         return handlers.stream()
                 .filter(httpRequestHandler -> httpRequestHandler.supports(request))
-                .findAny()
+                .findFirst()
                 .orElseThrow(() -> new UncheckedServletException("지원하지 않는 자원 요청입니다"));
     }
 }

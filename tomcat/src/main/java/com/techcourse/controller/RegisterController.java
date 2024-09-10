@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -19,8 +20,7 @@ public class RegisterController extends AbstractController {
         String responseBody = new String(request.toHttpResponseBody());
 
         response.addVersion(request.getVersion());
-        response.addStatusCode(302);
-        response.addStatusMessage("FOUND");
+        response.addHttpStatus(HttpStatus.FOUND);
         response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
         response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
         response.addHeader(HttpHeaders.LOCATION, "/index.html");
@@ -32,8 +32,7 @@ public class RegisterController extends AbstractController {
         String responseBody = new String(request.toHttpResponseBody());
 
         response.addVersion(request.getVersion());
-        response.addStatusCode(200);
-        response.addStatusMessage("OK");
+        response.addHttpStatus(HttpStatus.OK);
         response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
         response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
         response.addBody(responseBody);

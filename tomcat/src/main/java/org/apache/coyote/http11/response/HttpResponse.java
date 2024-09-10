@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.HttpStatus;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -9,16 +10,13 @@ import java.util.Map.Entry;
 public class HttpResponse {
 
     private String version;
-    private int statusCode;
-    private String statusMessage;
+    private HttpStatus httpStatus;
     private Map<String, Object> headers;
     private String body;
 
-    public HttpResponse(String version, int statusCode, String statusMessage, Map<String, Object> headers,
-                        String body) {
+    public HttpResponse(String version, HttpStatus httpStatus, Map<String, Object> headers, String body) {
         this.version = version;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+        this.httpStatus = httpStatus;
         this.headers = headers;
         this.body = body;
     }
@@ -31,12 +29,8 @@ public class HttpResponse {
         this.version = version;
     }
 
-    public void addStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public void addStatusMessage(String statusMessage) {
-        this.statusMessage = statusMessage;
+    public void addHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 
     public void addHeader(String key, Object value) {
@@ -50,7 +44,8 @@ public class HttpResponse {
     public void send(OutputStream outputStream) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append(version).append(" ").append(statusCode).append(" ").append(statusMessage).append(" \r\n");
+            sb.append(version).append(" ").append(httpStatus.getCode())
+                    .append(" ").append(httpStatus.getMessage()).append(" \r\n");
             for (Entry<String, Object> entry : headers.entrySet()) {
                 sb.append(entry.getKey());
                 sb.append(": ");

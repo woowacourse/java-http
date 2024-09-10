@@ -2,6 +2,7 @@ package com.techcourse.controller;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
@@ -34,8 +35,7 @@ public class LoginController extends AbstractController {
             sessionManager.add(session);
 
             response.addVersion(request.getVersion());
-            response.addStatusCode(302);
-            response.addStatusMessage("FOUND");
+            response.addHttpStatus(HttpStatus.FOUND);
             response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
             response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
             response.addHeader(HttpHeaders.LOCATION, "/index.html");
@@ -44,8 +44,7 @@ public class LoginController extends AbstractController {
 
         } else {
             response.addVersion(request.getVersion());
-            response.addStatusCode(302);
-            response.addStatusMessage("FOUND");
+            response.addHttpStatus(HttpStatus.FOUND);
             response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
             response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
             response.addHeader(HttpHeaders.LOCATION, "/401.html");
@@ -65,24 +64,21 @@ public class LoginController extends AbstractController {
             if (session != null && session.getAttribute("user") != null) {
 
                 response.addVersion(request.getVersion());
-                response.addStatusCode(302);
-                response.addStatusMessage("FOUND");
+                response.addHttpStatus(HttpStatus.FOUND);
                 response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
                 response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
                 response.addHeader(HttpHeaders.LOCATION, "/index.html");
                 response.addBody(responseBody);
             } else {
                 response.addVersion(request.getVersion());
-                response.addStatusCode(200);
-                response.addStatusMessage("OK");
+                response.addHttpStatus(HttpStatus.OK);
                 response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
                 response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
                 response.addBody(responseBody);
             }
         } else {
             response.addVersion(request.getVersion());
-            response.addStatusCode(200);
-            response.addStatusMessage("OK");
+            response.addHttpStatus(HttpStatus.OK);
             response.addHeader(HttpHeaders.CONTENT_TYPE, request.getContentType());
             response.addHeader(HttpHeaders.CONTENT_LENGTH, responseBody.getBytes().length);
             response.addBody(responseBody);

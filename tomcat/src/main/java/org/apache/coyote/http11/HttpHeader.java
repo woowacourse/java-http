@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 public class HttpHeader {
 
     private static final String DELIMITER = ": ";
+    private static final String CRLF = "\r\n";
 
     private final Map<String, String> headers;
 
@@ -43,6 +44,6 @@ public class HttpHeader {
     public String buildMessage() {
         return headers.keySet().stream()
                 .map(key -> key + DELIMITER + headers.get(key))
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(CRLF));
     }
 }

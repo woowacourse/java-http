@@ -11,6 +11,7 @@ public class HttpResponse {
 
     private static final FileReader FILE_READER = FileReader.getInstance();
     private static final String NOT_FOUND_FILENAME = "404.html";
+    private static final String CRLF = "\r\n";
 
     private final HttpStatusCode httpStatusCode;
     private final HttpHeader responseHeader;
@@ -73,7 +74,7 @@ public class HttpResponse {
     }
 
     private String build() {
-        return String.join("\r\n",
+        return String.join(CRLF,
                 httpStatusCode.buildMessage(),
                 responseHeader.buildMessage(),
                 "",

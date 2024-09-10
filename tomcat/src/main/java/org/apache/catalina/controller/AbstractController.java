@@ -11,11 +11,15 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        Handler requestHandler = handlers.stream()
+        Handler requestHandler = findHandler(request);
+        requestHandler.handle(request, response);
+    }
+
+    private Handler findHandler(HttpRequest request) {
+        return handlers.stream()
                 .filter(handler -> handler.canHandle(request))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("요청을 처리할 수 없는 컨트롤러입니다."));
-        requestHandler.handle(request, response);
     }
 
     public List<HttpEndpoint> getEndpoints() {

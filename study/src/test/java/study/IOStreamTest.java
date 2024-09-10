@@ -53,6 +53,7 @@ class IOStreamTest {
              * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -68,6 +69,52 @@ class IOStreamTest {
          * flush() 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면
          * 데드락(deadlock) 상태가 되기 때문에 flush로 해제해야 한다.
+         *
+         * 데드락 발생 상황
+         * 버퍼링과 플러시: BufferedOutputStream을 사용하여 데이터를 전송할 때,
+         * 버퍼가 가득 차지 않으면 실제 데이터 전송이 이루어지지 않습니다.
+         * 만약 버퍼가 가득 차기 전에 다른 스레드가 해당 자원에 접근하려고 기다린다면,
+         * 상황에 따라 데드락이 발생할 수 있습니다.
+         *
+         * 스레드 간의 상호 의존성: 예를 들어, 스레드 A가 OutputStream을 통해 데이터를 쓰고 있고,
+         * 스레드 B가 같은 OutputStream을 읽으려고 할 때, A가 버퍼를 플러시하지 않으면 B는 데이터를 읽지 못하고 대기하게 됩니다.
+         * 이때 A가 B의 작업을 기다리게 되면 데드락이 발생할 수 있습니다.
+         *
+         * 예시
+         * 스레드 A: BufferedOutputStream을 사용하여 데이터를 쓰고 있음 (버퍼가 가득 차지 않음).
+         * 스레드 B: 같은 OutputStream을 읽으려 함 (A의 작업이 완료되기를 기다림).
+         * 만약 스레드 A가 버퍼가 가득 차기를 기다리고 있고, 스레드 B가 A의 작업을 기다리고 있다면,
+         * 두 스레드는 서로를 기다리게 되어 데드락 상태가 됩니다.
+         *
+         * 해결 방법
+         * flush 호출: 버퍼가 가득 차지 않더라도 주기적으로 flush()를 호출하여 버퍼의 내용을 전송하도록 합니다.
+         * 적절한 스레드 관리: 여러 스레드가 동일한 자원에 접근할 때는 적절한 동기화 기법을 사용하여 데드락을 방지합니다.
+         * 예를 들어, synchronized 블록이나 ReentrantLock을 사용할 수 있습니다.
+         *
+         * 요약
+         * 따라서, BufferedOutputStream을 사용할 때는 버퍼가 가득 차지 않더라도
+         * flush() 메서드를 사용하여 버퍼의 내용을 강제로 전송하는 것이 중요합니다.
+         * 이를 통해 데드락 상황을 예방할 수 있습니다.
+         *
+         * 버퍼를 flush()하면 쌓인 데이터는 연결된 출력 스트림으로 전송됩니다.
+         * 예를 들어, BufferedOutputStream의 경우 다음과 같은 방식으로 동작합니다:
+         *
+         * 출력 스트림: BufferedOutputStream은 내부적으로 다른 OutputStream
+         * (예: FileOutputStream, SocketOutputStream 등)을 감싸고 있습니다.
+         * flush()를 호출하면, 버퍼에 쌓인 데이터가 이 연결된 출력 스트림으로 전달됩니다.
+         *
+         * 데이터 전송: flush()가 호출되면, 내부 버퍼의 내용이 즉시 해당 출력 스트림에 기록되어
+         * 실제로 물리적 저장소(파일, 네트워크 등)로 전송됩니다.
+         *
+         * 예시
+         * java
+         *
+         *
+         * try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("output.txt"))) {
+         *     bos.write("Hello, World!".getBytes());
+         *     bos.flush(); // 여기서 버퍼에 쌓인 데이터가 "output.txt"로 전송됨
+         * }
+         * 위 코드에서 flush()를 호출하면, "Hello, World!"라는 문자열이 output.txt 파일로 즉시 기록됩니다.
          */
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
@@ -78,6 +125,7 @@ class IOStreamTest {
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -96,6 +144,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (outputStream) {
+
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -128,7 +179,11 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            String actual = new String(inputStream.readAllBytes());
+//            String actual = "";
+//            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+//                actual = bufferedReader.readLine();
+//            }
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -148,6 +203,9 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (inputStream) {
+
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -167,14 +225,23 @@ class IOStreamTest {
          * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.
          * InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
+         *
+         * BufferedInputStream의 기본 버퍼 크기는 8192 바이트(8KB)입니다.
+         * 버퍼 크기를 지정하지 않으면, 이 기본 크기가 사용됩니다.
+         *
+         * 버퍼의 크기를 명시적으로 설정하려면 생성자에 원하는 크기를 전달하면 됩니다. 예를 들어:
+         *
+         * java
+         * BufferedInputStream bis = new BufferedInputStream(inputStream, 16384); // 16KB 버퍼
+         * 이렇게 하면 16KB 크기의 버퍼를 사용할 수 있습니다.
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -197,15 +264,18 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-
             final StringBuilder actual = new StringBuilder();
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            bufferedReader.lines()
+                    .forEach(line -> actual.append(line).append("\r\n"));
 
             assertThat(actual).hasToString(emoji);
         }

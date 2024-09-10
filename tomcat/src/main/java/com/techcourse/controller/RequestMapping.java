@@ -26,13 +26,11 @@ public class RequestMapping {
             return staticResourceController;
         }
 
-        for (Map.Entry<String, Controller> entry : controllers.entrySet()) {
-            if (path.contains(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-
-        return new NotFoundController();
+        return controllers.entrySet().stream()
+                .filter(entry -> path.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(new NotFoundController());
     }
 
     private boolean isStaticResource(String path) {

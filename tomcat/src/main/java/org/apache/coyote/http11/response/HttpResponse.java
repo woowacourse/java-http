@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11Header;
 
-public record Http11Response(Http11StatusCode statusCode, List<Http11Header> headers, List<Http11Cookie> cookies,
-                             byte[] body) {
+public record HttpResponse(Http11StatusCode statusCode, List<Http11Header> headers, List<Http11Cookie> cookies,
+                           byte[] body) {
 
     private static final Http11ContentTypeFinder contentTypeFinder = new Http11ContentTypeFinder();
     private static final String CRLF = "\r\n";
 
-    public static Http11Response ok(List<Http11Header> headers, List<Http11Cookie> cookies, Path path)
+    public static HttpResponse ok(List<Http11Header> headers, List<Http11Cookie> cookies, Path path)
             throws IOException {
         String contentTypes = contentTypeFinder.find(path);
 
@@ -25,12 +25,12 @@ public record Http11Response(Http11StatusCode statusCode, List<Http11Header> hea
         copyHeader.add(new Http11Header("Content-Length", responseBody.length + ""));
         copyHeader.add(new Http11Header("Content-Type", contentTypes + ";charset=utf-8"));
 
-        return new Http11Response(Http11StatusCode.OK, copyHeader, cookies, responseBody);
+        return new HttpResponse(Http11StatusCode.OK, copyHeader, cookies, responseBody);
     }
 
-    public static Http11Response found(String uri, Http11Cookie... cookies) {
+    public static HttpResponse found(String uri, Http11Cookie... cookies) {
         List<Http11Header> headers = List.of(new Http11Header("Location", uri));
-        return new Http11Response(Http11StatusCode.FOUND, headers, List.of(cookies), new byte[0]);
+        return new HttpResponse(Http11StatusCode.FOUND, headers, List.of(cookies), new byte[0]);
     }
 
     public boolean isHtml() {

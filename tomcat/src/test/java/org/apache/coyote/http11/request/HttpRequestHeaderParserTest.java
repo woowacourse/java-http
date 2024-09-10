@@ -7,7 +7,7 @@ import org.apache.coyote.http11.Http11Header;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class Http11RequestHeaderParserTest {
+class HttpRequestHeaderParserTest {
 
     private final Http11RequestHeaderParser requestHeaderParser = new Http11RequestHeaderParser(
             new Http11StartLineParser());

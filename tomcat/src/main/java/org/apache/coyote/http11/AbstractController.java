@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.request.Http11Method;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public non-sealed abstract class AbstractController implements Controller {
 
     @Override
-    public final void service(Http11Request request, Http11Response response) {
+    public final void service(HttpRequest request, HttpResponse response) {
         switch (getMethod(request)) {
             case GET -> doGet(request, response);
             case PUT -> doPut(request, response);
@@ -21,39 +21,39 @@ public non-sealed abstract class AbstractController implements Controller {
         }
     }
 
-    private Http11Method getMethod(Http11Request request) {
+    private Http11Method getMethod(HttpRequest request) {
         return request.method();
     }
 
-    protected void doGet(Http11Request request, Http11Response response) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doPut(Http11Request request, Http11Response response) {
+    protected void doPut(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doHead(Http11Request request, Http11Response response) {
+    protected void doHead(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doPost(Http11Request request, Http11Response response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doTrace(Http11Request request, Http11Response response) {
+    protected void doTrace(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doDelete(Http11Request request, Http11Response response) {
+    protected void doDelete(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doConnect(Http11Request request, Http11Response response) {
+    protected void doConnect(HttpRequest request, HttpResponse response) {
 
     }
 
-    protected void doOptions(Http11Request request, Http11Response response) {
+    protected void doOptions(HttpRequest request, HttpResponse response) {
 
     }
 }

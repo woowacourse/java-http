@@ -17,8 +17,8 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Method;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
     private void sendResponse(Socket connection) throws IOException {
         InputStream inputStream = connection.getInputStream();
         OutputStream outputStream = connection.getOutputStream();
-        Http11Request request = Http11Request.from(inputStream);
+        HttpRequest request = HttpRequest.from(inputStream);
 
         String requestURI = request.requestUri();
 
@@ -71,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         sendStaticResourceResponse(path, request, outputStream);
     }
 
-    private void login(Http11Request request, OutputStream outputStream) throws IOException {
+    private void login(HttpRequest request, OutputStream outputStream) throws IOException {
         Optional<Http11Cookie> sessionCookie = request.findSessionCookie();
         if (sessionCookie.isEmpty()) {
             return;
@@ -110,12 +110,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void sendRedirect(String uri, OutputStream outputStream) throws IOException {
-        Http11Response response = Http11Response.found(uri);
+        HttpResponse response = HttpResponse.found(uri);
         outputStream.write(response.toBytes());
         outputStream.flush();
     }
 
-    private void register(Http11Request request, OutputStream outputStream) throws IOException {
+    private void register(HttpRequest request, OutputStream outputStream) throws IOException {
         Optional<Http11Cookie> sessionCookie = request.findSessionCookie();
         if (sessionCookie.isEmpty()) {
             return;
@@ -147,13 +147,13 @@ public class Http11Processor implements Runnable, Processor {
         sendRedirect("/index.html", outputStream);
     }
 
-    private void sendStaticResourceResponse(Path path, Http11Request request, OutputStream outputStream)
+    private void sendStaticResourceResponse(Path path, HttpRequest request, OutputStream outputStream)
             throws IOException {
-        Http11Response response = Http11Response.ok(new ArrayList<>(), new ArrayList<>(), path);
+        HttpResponse response = HttpResponse.ok(new ArrayList<>(), new ArrayList<>(), path);
         if (!request.hasSessionCookie() && response.isHtml()) {
             Http11Cookie sessionCookie = Http11Cookie.sessionCookie();
             SESSION_MANAGER.add(new Session(sessionCookie.value()));
-            response = Http11Response.ok(new ArrayList<>(), List.of(sessionCookie), path);
+            response = HttpResponse.ok(new ArrayList<>(), List.of(sessionCookie), path);
         }
         outputStream.write(response.toBytes());
         outputStream.flush();

@@ -7,9 +7,9 @@ import java.util.Optional;
 import org.apache.coyote.http11.Http11Cookie;
 import org.apache.coyote.http11.Http11Header;
 
-public record Http11Request(Http11Method method, String requestUri, List<Http11Query> queries,
-                            List<Http11Header> headers, List<Http11Cookie> cookies,
-                            LinkedHashMap<String, String> body) {
+public record HttpRequest(Http11Method method, String requestUri, List<Http11Query> queries,
+                          List<Http11Header> headers, List<Http11Cookie> cookies,
+                          LinkedHashMap<String, String> body) {
 
     private static final Http11RequestParser REQUEST_PARSER = new Http11RequestParser();
 
@@ -25,7 +25,7 @@ public record Http11Request(Http11Method method, String requestUri, List<Http11Q
 
     private static final Http11QueryParser queryStringParser = new Http11QueryParser();
 
-    public static Http11Request from(InputStream inputStream) {
+    public static HttpRequest from(InputStream inputStream) {
         String rawRequest = REQUEST_PARSER.readAsString(inputStream);
         Http11Method http11Method = METHOD_PARSER.parseMethod(rawRequest);
         String requestUri = REQUEST_URI_PARSER.parseRequestURI(rawRequest);
@@ -34,7 +34,7 @@ public record Http11Request(Http11Method method, String requestUri, List<Http11Q
         List<Http11Header> http11Headers = HEADER_PARSER.parseHeaders(rawRequest);
         List<Http11Cookie> cookies = COOKIE_PARSER.parseCookies(rawRequest);
         LinkedHashMap<String, String> body = REQUEST_PARSER.parseBody(rawRequest);
-        return new Http11Request(http11Method, requestUri, http11Queries, http11Headers, cookies, body);
+        return new HttpRequest(http11Method, requestUri, http11Queries, http11Headers, cookies, body);
     }
 
     public boolean hasSessionCookie() {

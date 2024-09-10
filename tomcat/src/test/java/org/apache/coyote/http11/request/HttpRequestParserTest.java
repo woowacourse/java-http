@@ -10,7 +10,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class Http11RequestParserTest {
+class HttpRequestParserTest {
 
     private final Http11RequestParser requestParser = new Http11RequestParser();
 

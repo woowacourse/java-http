@@ -15,7 +15,7 @@ public class StringHttpHandler implements HttpHandler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        HttpResponse response = HttpResponse.of(HttpStatus.OK, body);
+        HttpResponse response = HttpResponse.of(HttpStatus.OK, body.getBytes());
         response.setHeader("Content-Type", "text/plain;charset=utf-8");
         return response;
     }

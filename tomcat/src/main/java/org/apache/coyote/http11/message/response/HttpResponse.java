@@ -7,33 +7,34 @@ import org.apache.coyote.http11.message.HttpHeaders;
 
 public class HttpResponse {
 
-    private final HttpStatus status;
+    private static final byte[] EMPTY_BODY = new byte[0];
+    private HttpStatus status;
     private final HttpHeaders headers;
-    private final String body;
+    private final byte[] body;
 
-    public HttpResponse(HttpStatus status, HttpHeaders headers, String body) {
+    public HttpResponse(HttpStatus status, HttpHeaders headers, byte[] body) {
         this.status = status;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpResponse of(HttpStatus status, String body) {
+    public static HttpResponse of(HttpStatus status, byte[] body) {
         HttpHeaders headers = new HttpHeaders(Map.of(
-                "Content-Length", String.valueOf(body.getBytes().length)
+                "Content-Length", String.valueOf(body.length)
         ));
         return new HttpResponse(status, headers, body);
     }
 
     public static HttpResponse from(HttpStatus status) {
         HttpHeaders headers = new HttpHeaders(new HashMap<>());
-        return new HttpResponse(status, headers, "");
+        return new HttpResponse(status, headers, EMPTY_BODY);
     }
 
     public HttpStatus getStatus() {
         return status;
     }
 
-    public String getBody() {
+    public byte[] getBody() {
         return body;
     }
 
@@ -43,5 +44,9 @@ public class HttpResponse {
 
     public void setHeader(String name, String field) {
         headers.setHeader(name, field);
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 }

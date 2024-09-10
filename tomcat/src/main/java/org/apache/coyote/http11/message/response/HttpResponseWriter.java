@@ -23,10 +23,11 @@ public class HttpResponseWriter {
                 .add(statusLine)
                 .add(headerLines)
                 .add("")
-                .add(response.getBody())
+                .add("")
                 .toString();
 
         outputStream.write(responseMessage.getBytes());
+        outputStream.write(response.getBody());
         outputStream.flush();
     }
 }

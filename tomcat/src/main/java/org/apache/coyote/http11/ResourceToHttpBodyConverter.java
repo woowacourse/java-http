@@ -10,8 +10,6 @@ import org.apache.coyote.http11.message.response.HttpStatus;
 
 public class ResourceToHttpBodyConverter {
 
-    private static final String LINE_FEED = "\n";
-
     private ResourceToHttpBodyConverter() {
     }
 
@@ -21,9 +19,8 @@ public class ResourceToHttpBodyConverter {
         }
 
         Path path = Paths.get(resource.getPath());
-        String responseBody = String.join(LINE_FEED, Files.readAllLines(path)) + LINE_FEED;
 
-        HttpResponse response = HttpResponse.of(HttpStatus.OK, responseBody);
+        HttpResponse response = HttpResponse.of(HttpStatus.OK, Files.readAllBytes(path));
         String contentType = probeContentType(path);
         response.setHeader("Content-Type", contentType);
 

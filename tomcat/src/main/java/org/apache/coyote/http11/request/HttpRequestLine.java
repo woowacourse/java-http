@@ -1,19 +1,21 @@
 package org.apache.coyote.http11.request;
 
+import org.apache.coyote.http11.HttpMethod;
+
 public class HttpRequestLine {
 
-    private String httpMethod;
+    private HttpMethod httpMethod;
     private String urlPath;
     private String httpVersion;
 
-    public HttpRequestLine(String httpMethod, String urlPath, String httpVersion) {
+    public HttpRequestLine(HttpMethod httpMethod, String urlPath, String httpVersion) {
         this.httpMethod = httpMethod;
         this.urlPath = urlPath;
         this.httpVersion = httpVersion;
     }
 
-    public boolean matchesMethod(String method) {
-        return this.httpMethod.equals(method);
+    public boolean matchesMethod(HttpMethod other) {
+        return this.httpMethod == other;
     }
 
     public boolean matchesFileExtension(String fileExtension) {

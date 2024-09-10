@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
@@ -26,7 +27,7 @@ public class HttpRequest {
         String line = bufferedReader.readLine();
         validateNotNull(line);
         String[] tokens = splitByDelimiter(line, " ", 3);
-        return new HttpRequestLine(tokens[0], tokens[1], tokens[2]);
+        return new HttpRequestLine(HttpMethod.findByName(tokens[0]), tokens[1], tokens[2]);
     }
 
     private void validateNotNull(String line) {
@@ -73,8 +74,8 @@ public class HttpRequest {
         }
     }
 
-    public boolean matchesMethod(String method) {
-        return this.httpRequestLine.matchesMethod(method);
+    public boolean matchesMethod(HttpMethod httpMethod) {
+        return this.httpRequestLine.matchesMethod(httpMethod);
     }
 
     public boolean matchesFileExtension(String fileExtension) {

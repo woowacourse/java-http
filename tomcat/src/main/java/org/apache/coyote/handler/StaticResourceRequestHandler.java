@@ -16,12 +16,11 @@ public class StaticResourceRequestHandler extends AbstractRequestHandler {
         httpResponse.setBody(ResourceReader.readFile(httpRequest.getRequestURI()));
     }
 
-    private String getContentType(HttpRequest httpRequest) {
+    private MimeType getContentType(HttpRequest httpRequest) {
         if (httpRequest.getHeader("Accept") == null) {
-            MimeType mimeType = MimeType.fromFileName(httpRequest.getRequestURI());
-            return mimeType.value();
+            return MimeType.fromFileName(httpRequest.getRequestURI());
         }
-        return httpRequest.getHeader("Accept").split(",")[0];
+        return httpRequest.getAcceptMimeType();
     }
 
     @Override

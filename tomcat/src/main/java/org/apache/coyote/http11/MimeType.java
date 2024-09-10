@@ -16,6 +16,14 @@ public enum MimeType {
         this.value = value;
     }
 
+    public static MimeType from(String name) {
+        return Arrays.stream(values())
+                .filter(mimeType -> mimeType.name().equalsIgnoreCase(name))
+                .findAny()
+                .orElseThrow(
+                        () -> new UncheckedServletException(new IllegalArgumentException("유효한 Mime Type 이 아닙니다.")));
+    }
+
     public static MimeType fromFileName(String fileName) {
         return Arrays.stream(values())
                 .filter(mimeType -> mimeType.name().equalsIgnoreCase(extractExtension(fileName)))

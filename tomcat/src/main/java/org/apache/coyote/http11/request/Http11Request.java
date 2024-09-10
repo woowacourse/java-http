@@ -6,6 +6,7 @@ import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.MimeType;
 
 public class Http11Request implements HttpRequest {
 
@@ -48,6 +49,11 @@ public class Http11Request implements HttpRequest {
     @Override
     public String getHeader(String header) {
         return headers.getValue(header);
+    }
+
+    @Override
+    public MimeType getAcceptMimeType() {
+        return MimeType.from(getHeader("Accept").split(",")[0]);
     }
 
     @Override

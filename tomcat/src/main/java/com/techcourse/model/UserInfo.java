@@ -28,6 +28,7 @@ public class UserInfo {
 
         for (String element : elements) {
             String[] parsedElement = element.split(INFO_ELEMENT_DELIMITER);
+            //todo 예외 처리
             registerInfo.put(parsedElement[ELEMENT_KEY_INDEX], parsedElement[ELEMENT_VALUE_INDEX]);
         }
 

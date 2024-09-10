@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.coyote.http11.auth.Session;
 
+//TODO SessionMaanger로 리팩터링
 public class InMemorySessionRepository {
     private static final List<Session> database = new CopyOnWriteArrayList<Session>();
 

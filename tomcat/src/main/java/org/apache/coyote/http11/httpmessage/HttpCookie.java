@@ -29,6 +29,14 @@ public class HttpCookie {
         cookies.put(key, value);
     }
 
+    public boolean contains(String key) {
+        return cookies.containsKey(key);
+    }
+
+    public String getCookie(String key) {
+        return cookies.get(key);
+    }
+
     public boolean isEmpty() {
         return cookies.isEmpty();
     }

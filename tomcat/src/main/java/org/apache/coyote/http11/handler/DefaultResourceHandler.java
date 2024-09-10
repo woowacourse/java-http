@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.exception.CanNotHandleRequest;
@@ -9,6 +8,8 @@ import org.apache.coyote.http11.exception.NoSuchUserException;
 import org.apache.coyote.http11.httpmessage.request.Request;
 import org.apache.coyote.http11.httpmessage.response.Response;
 import org.apache.coyote.http11.httpmessage.response.StaticResource;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -40,22 +41,7 @@ public class DefaultResourceHandler implements RequestHandler {
 
     private String loginResponse(Request request) throws IOException {
         if (request.isPost()) {
-            QueryParameters queryParams = QueryParameters.parseFrom(request.getBody());
-            boolean isLogin = login(
-                    queryParams.getParam("account"),
-                    queryParams.getParam("password")
-            );
-            if (isLogin) {
-                return Response.builder()
-                        .versionOf(request.getHttpVersion())
-                        .addCookie("JSESSIONID", UUID.randomUUID().toString())
-                        .found("/index.html")
-                        .toHttpMessage();
-            }
-            return Response.builder()
-                    .versionOf(request.getHttpVersion())
-                    .found("/401.html")
-                    .toHttpMessage();
+            return login(request).toHttpMessage();
         }
 
         return Response.builder()
@@ -64,10 +50,26 @@ public class DefaultResourceHandler implements RequestHandler {
                 .toHttpMessage();
     }
 
-    private boolean login(String account, String password) throws NoSuchUserException {
+    private Response login(Request request) throws NoSuchUserException {
+        QueryParameters queryParams = QueryParameters.parseFrom(request.getBody());
+        String account = queryParams.getParam("account");
+        String password = queryParams.getParam("password");
         User user = InMemoryUserRepository.findByAccount(account).
                 orElseThrow(() -> new NoSuchUserException(account + " 에 해당하는 유저를 찾을 수 없습니다."));
-        return user.checkPassword(password);
+
+        if (user.checkPassword(password)) {
+            Session session = request.getSession(true);
+            session.setAttribute("user", user);
+            SessionManager.getInstance().add(session);
+            return Response.builder()
+                    .versionOf(request.getHttpVersion())
+                    .addCookie("JSESSIONID", session.getId())
+                    .found("/index.html");
+        }
+
+        return Response.builder()
+                .versionOf(request.getHttpVersion())
+                .found("/401.html");
     }
 
     private String registerResponse(Request request) throws IOException {

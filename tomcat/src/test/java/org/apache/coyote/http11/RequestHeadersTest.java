@@ -20,8 +20,10 @@ public class RequestHeadersTest {
         );
         // when
         RequestHeaders requestHeaders = new RequestHeaders(rawRequestHeaders);
+        String actual = requestHeaders.getHeaderValue("Cookie");
+
         // then
-        assertThat(requestHeaders.getHeaderValue("Cookie")).isEqualTo("JSESSIONID=f123234234;");
+        assertThat(actual).isEqualTo("JSESSIONID=f123234234;");
     }
 
     @DisplayName("Request 값이 없을 경우 빈 값을 반환한다.")
@@ -29,9 +31,32 @@ public class RequestHeadersTest {
     void getEmptyHeaderValue() {
         // given
         List<String> rawRequestHeaders = List.of();
+
         // when
         RequestHeaders requestHeaders = new RequestHeaders(rawRequestHeaders);
+        String actual = requestHeaders.getHeaderValue("Cookie");
+
         // then
-        assertThat(requestHeaders.getHeaderValue("Cookie")).isEqualTo("");
+        assertThat(actual).isEqualTo("");
+    }
+
+    @DisplayName("header 조회 시 case-insensitive 하게 처리되어야 한다.")
+    @Test
+    void getHeaderValue_WithCaseInsensitive() {
+        // given
+        List<String> rawRequestHeaders = List.of(
+                "Cookie: JSESSIONID=f123234234;",
+                "Content-Length: 53 ",
+                "Accept: someValue",
+                "Host: localhost"
+        );
+        RequestHeaders requestHeaders = new RequestHeaders(rawRequestHeaders);
+
+        // when
+        String expect = requestHeaders.getHeaderValue("AcCept");
+        String actual = requestHeaders.getHeaderValue("accept");
+
+        // then
+        assertThat(actual).isEqualTo(expect);
     }
 }

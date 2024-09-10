@@ -6,23 +6,25 @@ import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
-    final Map<String, String> headers;
+    private static final String COOKIE_HEADER_NAME = "Cookie";
+
+    private final Map<String, String> headers;
 
     public RequestHeaders(List<String> rawRequestHeaders) {
         headers = rawRequestHeaders.stream()
                 .map(rawRequestHeader -> rawRequestHeader.split(": "))
                 .filter(requestHeaderPart -> requestHeaderPart.length == 2)
                 .collect(Collectors.toMap(
-                        requestHeaderPart -> requestHeaderPart[0],
+                        requestHeaderPart -> requestHeaderPart[0].toLowerCase(),
                         requestHeaderPart -> requestHeaderPart[1])
                 );
     }
 
     public String getHeaderValue(String name) {
-        return headers.getOrDefault(name, "");
+        return headers.getOrDefault(name.toLowerCase(), "");
     }
 
     public HttpCookies getCookies() {
-        return new HttpCookies(getHeaderValue("Cookie"));
+        return new HttpCookies(getHeaderValue(COOKIE_HEADER_NAME));
     }
 }

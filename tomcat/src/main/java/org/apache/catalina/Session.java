@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,13 +27,5 @@ public class Session {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
-    }
-
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
     }
 }

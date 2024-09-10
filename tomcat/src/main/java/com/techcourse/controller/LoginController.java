@@ -7,7 +7,6 @@ import com.techcourse.model.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.apache.catalina.session.JSession;
 import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
@@ -56,15 +55,12 @@ public class LoginController extends AbstractController {
     }
 
     private void processAccountLogin(Builder responseBuilder, User user) {
-        String sessionId = UUID.randomUUID().toString();
-        JSession jSession = new JSession(sessionId);
-        jSession.setAttribute("user", user);
-        SessionManager.getInstance().add(jSession);
+        HttpSession session = SessionManager.getInstance().createSession(user);
 
-        log.info("로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), sessionId);
+        log.info("로그인 성공! - 아이디 : {}, 세션 ID : {}", user.getAccount(), session.getId());
 
         responseBuilder.status(Status.FOUND)
                 .location("/index.html")
-                .addCookie(JSession.COOKIE_NAME, sessionId);
+                .addCookie(JSession.COOKIE_NAME, session.getId());
     }
 }

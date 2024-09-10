@@ -1,6 +1,6 @@
 package hoony.was;
 
-import com.techcourse.controller.LoginRequestHandler;
+import com.techcourse.handler.LoginRequestHandler;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 

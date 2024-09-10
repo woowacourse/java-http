@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = parseInput(inputStream);
 
             String resourceName = requestMapper.requestMapping(request);
-            String responseBody = parseStartLine(resourceName);
+            String responseBody = getResource(resourceName);
             String resourceExtension = getExtension(resourceName);
 
             HttpResponse response = new HttpResponse(responseBody, resourceExtension);
@@ -104,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
         return resourceName.substring(extensionIndex);
     }
 
-    private String parseStartLine(String resourceName) throws URISyntaxException, IOException {
+    private String getResource(String resourceName) throws URISyntaxException, IOException {
         URL resource = getClass().getClassLoader()
                 .getResource("static" + resourceName);
 

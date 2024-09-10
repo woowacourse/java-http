@@ -30,7 +30,7 @@ public class SessionManager implements Manager {
     public Optional<Session> findSession(HttpRequest request) throws IOException {
         HttpCookie cookie = new HttpCookie(request.getCookie());
         if (cookie.hasJSessionId()) {
-            return Optional.of(SESSIONS.get(cookie.getJsessionid()));
+            return Optional.ofNullable(SESSIONS.get(cookie.getJsessionid()));
         }
         return Optional.empty();
     }

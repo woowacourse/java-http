@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class SessionManagerTest {
     @Test
-    @DisplayName("Session 조회 기능 테스트 - 세션이 존재할 때")
+    @DisplayName("존재하는 세션을 조회해온다.")
     void findSessionExists() throws IOException {
         // given
         SessionManager sessionManager = SessionManager.getInstance();

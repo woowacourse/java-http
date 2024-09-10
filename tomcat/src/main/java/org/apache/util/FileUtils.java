@@ -21,7 +21,7 @@ public class FileUtils {
         return fileName.substring(lastDotIndex + 1);
     }
 
-    public static String readFile(final String fileName) throws IOException {
+    public static String readFile(String fileName) throws IOException {
         URL resource = FileUtils.class.getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }

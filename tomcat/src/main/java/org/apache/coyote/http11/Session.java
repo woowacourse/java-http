@@ -8,7 +8,7 @@ public class Session {
     private final String sessionId;
     private final Map<String, Object> attributes = new HashMap<>();
 
-    public Session(final String sessionId) {
+    public Session(String sessionId) {
         this.sessionId = sessionId;
     }
 

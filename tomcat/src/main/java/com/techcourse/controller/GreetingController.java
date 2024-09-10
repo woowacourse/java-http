@@ -13,14 +13,14 @@ public class GreetingController implements HttpRequestHandler {
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
 
     @Override
-    public boolean supports(final HttpRequest request) {
+    public boolean supports(HttpRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 request.isUriHome();
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         return HttpResponse.ok("Hello world!", "html");
     }
 }

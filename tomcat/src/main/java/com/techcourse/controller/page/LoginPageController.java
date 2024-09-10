@@ -20,14 +20,14 @@ public class LoginPageController implements HttpRequestHandler {
     private static final SessionManager sessionManager = SessionManager.getInstance();
 
     @Override
-    public boolean supports(final HttpRequest request) {
+    public boolean supports(HttpRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 request.uriEquals(SUPPORTING_URI);
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         if (sessionManager.hasSession(request.getSessionId())) {
             return HttpResponse.redirect(LOGIN_SUCCESS_REDIRECT_URI);
         }

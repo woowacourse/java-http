@@ -8,7 +8,7 @@ public class RequestLine {
     private final Uri uri;
     private final HttpProtocol protocol;
 
-    public RequestLine(final Method method, final Uri uri, final HttpProtocol protocol) {
+    public RequestLine(Method method, Uri uri, HttpProtocol protocol) {
         this.method = method;
         this.uri = uri;
         this.protocol = protocol;
@@ -23,16 +23,8 @@ public class RequestLine {
         return method;
     }
 
-    public Uri getUri() {
-        return uri;
-    }
-
     public String getUriPath() {
         return uri.getPath();
-    }
-
-    public HttpProtocol getProtocol() {
-        return protocol;
     }
 
     public String getQueryParameter(String name) {
@@ -43,11 +35,11 @@ public class RequestLine {
         return method.equals(target);
     }
 
-    public boolean isHttpProtocol(final HttpProtocol target) {
+    public boolean isHttpProtocol(HttpProtocol target) {
         return protocol.equals(target);
     }
 
-    public boolean isUri(final Uri target) {
+    public boolean isUri(Uri target) {
         return uri.equals(target);
     }
 

@@ -24,7 +24,4 @@ public class SessionManager {
         sessions.put(sessionId, session);
     }
 
-    public void invalidateSession(String sessionId) {
-        sessions.remove(sessionId);
-    }
 }

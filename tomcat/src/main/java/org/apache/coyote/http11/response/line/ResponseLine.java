@@ -7,7 +7,7 @@ public class ResponseLine {
     private final HttpStatus httpStatus;
     private final HttpProtocol protocol;
 
-    public ResponseLine(final HttpStatus httpStatus, final HttpProtocol protocol) {
+    public ResponseLine(HttpStatus httpStatus, HttpProtocol protocol) {
         this.httpStatus = httpStatus;
         this.protocol = protocol;
     }

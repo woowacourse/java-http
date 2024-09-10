@@ -14,11 +14,7 @@ public class HttpRequest {
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 
-    public HttpRequest(
-            final RequestLine requestLine,
-            final HttpHeaders httpHeaders,
-            final HttpMessageBody httpMessageBody
-    ) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.httpMessageBody = httpMessageBody;
@@ -40,19 +36,11 @@ public class HttpRequest {
         return requestLine.isUriHome();
     }
 
-    public boolean uriStartsWith(Uri uri) {
-        return requestLine.isUriStartsWith(uri);
-    }
-
     public String getUriPath() {
         return requestLine.getUriPath();
     }
 
-    public String getQueryParameter(final String paramterName) {
-        return requestLine.getQueryParameter(paramterName);
-    }
-
-    public String getFormData(final String name) {
+    public String getFormData(String name) {
         return httpMessageBody.getFormData(name);
     }
 

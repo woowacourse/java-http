@@ -24,14 +24,14 @@ public class StaticResourceController implements HttpRequestHandler {
 
     @Override
     public HttpResponse handle(HttpRequest request) throws IOException {
-        final String fileName = request.getUriPath();
+        String fileName = request.getUriPath();
         String fileContent = FileUtils.readFile(fileName);
         return HttpResponse.ok(fileContent, FileUtils.getFileExtension(fileName));
     }
 
     private boolean resourceAvailable(String fileName) {
         try {
-            final String filePath = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName).getFile();
+            String filePath = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName).getFile();
         } catch (NullPointerException e) {
             return false;
         }

@@ -9,7 +9,7 @@ public class Uri {
 
     private final String path;
 
-    public Uri(final String path) {
+    public Uri(String path) {
         this.path = path;
     }
 
@@ -46,6 +46,10 @@ public class Uri {
         return path;
     }
 
+    public boolean isHome() {
+        return HOME.equals(path);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -61,9 +65,5 @@ public class Uri {
     @Override
     public int hashCode() {
         return Objects.hash(path);
-    }
-
-    public boolean isHome() {
-        return HOME.equals(path);
     }
 }

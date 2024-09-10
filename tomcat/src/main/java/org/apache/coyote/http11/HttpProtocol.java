@@ -9,7 +9,7 @@ public enum HttpProtocol {
 
     private final String httpMessage;
 
-    HttpProtocol(final String httpMessage) {
+    HttpProtocol(String httpMessage) {
         this.httpMessage = httpMessage;
     }
 

@@ -13,11 +13,7 @@ public class HttpResponse {
     private final HttpHeaders httpHeaders;
     private final HttpMessageBody httpMessageBody;
 
-    public HttpResponse(
-            final ResponseLine responseLine,
-            final HttpHeaders httpHeaders,
-            final HttpMessageBody httpMessageBody
-    ) {
+    public HttpResponse(ResponseLine responseLine, HttpHeaders httpHeaders, HttpMessageBody httpMessageBody) {
         this.responseLine = responseLine;
         this.httpHeaders = httpHeaders;
         this.httpMessageBody = httpMessageBody;

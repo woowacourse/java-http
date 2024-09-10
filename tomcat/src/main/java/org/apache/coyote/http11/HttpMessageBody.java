@@ -6,16 +6,12 @@ public class HttpMessageBody {
 
     private final String body;
 
-    public HttpMessageBody(final String body) {
+    public HttpMessageBody(String body) {
         this.body = body;
     }
 
     public static HttpMessageBody createEmptyBody() {
         return new HttpMessageBody("");
-    }
-
-    public String getBody() {
-        return body;
     }
 
     public byte[] getBytes() {
@@ -26,7 +22,7 @@ public class HttpMessageBody {
         return body;
     }
 
-    public String getFormData(final String name) {
+    public String getFormData(String name) {
         String[] pairs = body.split("&");
         for (String pair : pairs) {
             String[] keyValue = pair.split("=");

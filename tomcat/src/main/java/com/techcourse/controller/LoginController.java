@@ -27,14 +27,14 @@ public class LoginController implements HttpRequestHandler {
     private static final HttpProtocol SUPPORTING_PROTOCOL = HttpProtocol.HTTP_11;
 
     @Override
-    public boolean supports(final HttpRequest request) {
+    public boolean supports(HttpRequest request) {
         return request.methodEquals(SUPPORTING_METHOD) &&
                 request.protocolEquals(SUPPORTING_PROTOCOL) &&
                 request.uriEquals(SUPPORTING_URI);
     }
 
     @Override
-    public HttpResponse handle(final HttpRequest request) throws IOException {
+    public HttpResponse handle(HttpRequest request) throws IOException {
         String account = request.getFormData(ACCOUNT);
         String password = request.getFormData(PASSWORD);
 

@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         RequestLine requestLine = httpRequest.getRequestLine();
         try {
             if (HandlerMapper.hasHandler(requestLine.getRequestURI())) {
-                return resolveHandlerResponse2(httpRequest);
+                return resolveHandlerResponse(httpRequest);
             }
             return new ResponseBuilder()
                     .statusCode(HttpStatusCode.OK_200)
@@ -69,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse resolveHandlerResponse2(HttpRequest httpRequest) {
+    private HttpResponse resolveHandlerResponse(HttpRequest httpRequest) {
         Controller controller = HandlerMapper.mapTo(httpRequest.getRequestUri());
         return controller.handle(httpRequest);
     }

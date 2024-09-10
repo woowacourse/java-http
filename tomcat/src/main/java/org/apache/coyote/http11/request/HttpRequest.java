@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 
@@ -32,6 +33,11 @@ public class HttpRequest {
 
     public boolean hasBodyData() {
         return requestBody != null;
+    }
+
+    public HttpMethod getMethod() {
+        String method = requestLine.getMethod();
+        return HttpMethod.valueOf(method);
     }
 
     public RequestLine getRequestLine() {

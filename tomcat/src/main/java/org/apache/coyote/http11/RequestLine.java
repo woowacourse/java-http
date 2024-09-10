@@ -12,6 +12,34 @@ public class RequestLine {
         this.protocol = protocol;
     }
 
+    public boolean isGet() {
+        return method.equals("GET");
+    }
+
+    public boolean isRoot() {
+        return requestUrl.equals("/");
+    }
+
+    public boolean isIndex() {
+        return requestUrl.equals("/index.html");
+    }
+
+    public boolean hasCss() {
+        return requestUrl.contains(".css");
+    }
+
+    public boolean hasJs() {
+        return requestUrl.contains(".js");
+    }
+
+    public boolean hasLogin() {
+        return requestUrl.contains("login");
+    }
+
+    public boolean hasQuestion() {
+        return requestUrl.contains("?");
+    }
+
     public String getMethod() {
         return method;
     }

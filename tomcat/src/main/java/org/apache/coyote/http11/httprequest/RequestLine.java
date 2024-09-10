@@ -4,23 +4,23 @@ public class RequestLine {
 
     private static final String REQUEST_LINE_DELIMITER = " ";
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String uri;
     private final String httpVersion;
 
     public RequestLine(String requestLine) {
         String[] parts = requestLine.split(REQUEST_LINE_DELIMITER);
-        this.httpMethod = parts[0];
+        this.httpMethod = HttpMethod.from(parts[0]);
         this.uri = parts[1];
         this.httpVersion = parts[2];
     }
 
     public boolean isGetMethod() {
-        return "GET".equals(httpMethod);
+        return httpMethod.isGet();
     }
 
     public boolean isPostMethod() {
-        return "POST".equals(httpMethod);
+        return httpMethod.isPost();
     }
 
     public String getPath() {

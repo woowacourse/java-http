@@ -215,9 +215,6 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
 
-            System.out.println("start");
-            System.out.println(emoji);
-            System.out.println("end");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

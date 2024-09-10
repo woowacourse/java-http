@@ -82,5 +82,5 @@ HTTP 서버는 세션을 사용해서 서버에 로그인 여부를 저장한다
 
 ### 4. Session 구현하기
 > 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있어야 한다.
-- [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
-- [ ] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
+- [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
+- [x] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.

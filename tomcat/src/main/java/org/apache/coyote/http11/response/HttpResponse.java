@@ -35,6 +35,10 @@ public class HttpResponse {
         addHeader(SET_COOKIE, jSessionId);
     }
 
+    public void setLocation(String location) {
+        addHeader(LOCATION, location);
+    }
+
     public void addHeader(String key, String value) {
         this.headers.put(key, value);
     }
@@ -60,9 +64,5 @@ public class HttpResponse {
             joiner.add(body.getBody());
         }
         return joiner.toString();
-    }
-
-    public void setLocation(String location) {
-        headers.put(LOCATION, location);
     }
 }

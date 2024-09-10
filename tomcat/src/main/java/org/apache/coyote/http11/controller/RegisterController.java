@@ -21,27 +21,28 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
+        HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
         String requestBody = httpRequest.getBody();
         String[] token = requestBody.split("&");
         if (checkToken(token)) {
             log.error("일부 항목이 누락되었습니다.");
-            return new HttpResponse.Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND))
+            return new HttpResponse.Builder(httpStatusLine)
                     .location("/register")
                     .build();
         }
+
         String account = token[0].split("=")[1];
         if (InMemoryUserRepository.containsByAccount(account)) {
             log.error("이미 존재하는 account입니다");
-            return new HttpResponse.Builder(new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND))
+            return new HttpResponse.Builder(httpStatusLine)
                     .location("/register")
                     .build();
         }
+
         String email = token[1].split("=")[1];
         String password = token[2].split("=")[1];
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-
-        HttpStatusLine httpStatusLine = new HttpStatusLine(httpRequest.getVersion(), HttpStatusCode.FOUND);
 
         return new HttpResponse.Builder(httpStatusLine)
                 .location("/index.html")

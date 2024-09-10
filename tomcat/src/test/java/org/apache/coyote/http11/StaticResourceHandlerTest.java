@@ -28,6 +28,6 @@ class StaticResourceHandlerTest {
     }
 
     private HttpRequest createHttpRequest(String startLine) {
-        return new HttpRequest(startLine, Header.empty(), "".toCharArray());
+        return HttpRequest.createHttp11Message(startLine, Header.empty(), new HttpXW3UrlEncodedBody(null));
     }
 }

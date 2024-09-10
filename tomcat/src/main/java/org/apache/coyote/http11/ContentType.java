@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 public enum ContentType {
 
@@ -25,7 +24,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(it -> it.name.equals(contentTypeName))
                 .findFirst()
-                .orElseThrow(NoSuchElementException::new);
+                .orElse(PLAIN);
     }
 
     public static ContentType determineContentType(String resourcePath) {
@@ -36,10 +35,6 @@ public enum ContentType {
         }
 
         return ContentType.PLAIN;
-    }
-
-    public boolean isApplicationXW3FormUrlEncoded() {
-        return this.equals(APPLICATION_X_WWW_FORM_URL_ENCODED);
     }
 
     public String getName() {

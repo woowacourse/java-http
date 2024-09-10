@@ -2,6 +2,7 @@ package com.techcourse.handler;
 
 import org.apache.coyote.http11.Header;
 import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.HttpXW3UrlEncodedBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,6 @@ class GetLoginHandlerTest {
     }
 
     private HttpRequest createHttpRequest(String startLine) {
-        return new HttpRequest(startLine, Header.empty(), "".toCharArray());
+        return HttpRequest.createHttp11Message(startLine, Header.empty(), new HttpXW3UrlEncodedBody(null));
     }
 }

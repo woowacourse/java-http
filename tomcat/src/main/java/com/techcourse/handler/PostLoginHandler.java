@@ -7,10 +7,10 @@ import org.apache.catalina.Manager;
 import org.apache.coyote.http11.AbstractHandler;
 import org.apache.coyote.http11.ForwardResult;
 import org.apache.coyote.http11.Header;
+import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpHeaderKey;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.QueryParameter;
 
 import java.net.URI;
 
@@ -26,17 +26,13 @@ public class PostLoginHandler extends AbstractHandler {
 
     @Override
     protected ForwardResult forward(HttpRequest httpRequest, Manager sessionManager) {
-        if (httpRequest.hasNotApplicationXW3FormUrlEncodedBody()) {
-            throw new RuntimeException();
-        }
-
-        QueryParameter queryParameter = new QueryParameter(httpRequest.body());
+        HttpBody body = httpRequest.body();
         Header header = Header.empty();
         String redirectionPath = "401.html";
 
-        if (isLoggedIn(queryParameter)) {
+        if (isLoggedIn(body)) {
             HttpSession session = findSessionOrCreate(sessionManager, createCookie(httpRequest));
-            session.setAttribute("user", getUser(queryParameter));
+            session.setAttribute("user", getUser(body));
             header.append(HttpHeaderKey.SET_COOKIE, getSessionKey() + "=" + session.getId());
             redirectionPath = "index.html";
         }
@@ -45,17 +41,17 @@ public class PostLoginHandler extends AbstractHandler {
         return new ForwardResult(HttpStatus.FOUND, header);
     }
 
-    private boolean isLoggedIn(QueryParameter queryParameter) {
-        String password = queryParameter.get("password").orElse("");
+    private boolean isLoggedIn(HttpBody body) {
+        String password = body.get("password").orElse("");
 
-        return queryParameter.get("account")
+        return body.get("account")
                 .flatMap(InMemoryUserRepository::findByAccount)
                 .map(it -> it.checkPassword(password))
                 .orElse(false);
     }
 
-    private User getUser(QueryParameter queryParameter) {
-        String account = queryParameter.get("account").orElseThrow();
+    private User getUser(HttpBody body) {
+        String account = body.get("account").orElseThrow();
         return InMemoryUserRepository.findByAccount(account).orElseThrow();
     }
 }

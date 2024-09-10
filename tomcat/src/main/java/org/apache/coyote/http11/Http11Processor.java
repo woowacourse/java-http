@@ -56,9 +56,9 @@ public class Http11Processor implements Runnable, Processor {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String requestLine = bufferedReader.readLine();
         Header header = createHeader(bufferedReader);
-        char[] requestBody = createRequestBody(bufferedReader, header);
+        HttpBody body = createRequestBody(bufferedReader, header);
 
-        return HttpRequest.createHttp11Message(requestLine, header, requestBody);
+        return HttpRequest.createHttp11Message(requestLine, header, body);
     }
 
     private Header createHeader(BufferedReader bufferedReader) throws IOException {
@@ -72,12 +72,13 @@ public class Http11Processor implements Runnable, Processor {
         return new Header(headerTokens);
     }
 
-    private char[] createRequestBody(BufferedReader bufferedReader, Header header) throws IOException {
-        int length = Integer.parseInt(header.get(HttpHeaderKey.CONTENT_LENGTH.getName()).orElse("0"));
-        char[] requestBody = new char[length];
+    private HttpBody createRequestBody(BufferedReader bufferedReader, Header header) throws IOException {
+        String contentLength = header.get(HttpHeaderKey.CONTENT_LENGTH.getName()).orElse("0");
+        String contentType = header.get(HttpHeaderKey.CONTENT_TYPE).orElse("");
+        char[] requestBody = new char[Integer.parseInt(contentLength)];
         bufferedReader.read(requestBody);
 
-        return requestBody;
+        return HttpBodyFactory.generateHttpBody(ContentType.from(contentType), requestBody);
     }
 
     private HttpResponse respondResource(HttpRequest httpRequest) throws IOException {

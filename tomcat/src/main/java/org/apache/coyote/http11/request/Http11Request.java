@@ -12,8 +12,6 @@ import org.apache.coyote.http11.MimeType;
 public class Http11Request implements HttpRequest {
 
     private static final String JSESSIONID = "JSESSIONID";
-    public static final String ACCEPT = "Accept";
-    public static final String ACCEPT_HEADER_DLELIMITER = ",";
 
     private final Http11RequestLine requestLine;
     private final Http11RequestHeaders headers;
@@ -51,7 +49,7 @@ public class Http11Request implements HttpRequest {
 
     @Override
     public boolean existsAccept() {
-        return headers.getValue(ACCEPT) != null;
+        return headers.existsAccept();
     }
 
     @Override
@@ -62,7 +60,7 @@ public class Http11Request implements HttpRequest {
     @Override
     public MimeType getAcceptMimeType() {
         if (existsAccept()) {
-            return MimeType.from(getHeader(ACCEPT).split(ACCEPT_HEADER_DLELIMITER)[0]);
+            return MimeType.from(headers.getFirstAcceptMimeType());
         }
         throw new UncheckedServletException(new IllegalArgumentException("요청에 Accept 헤더가 존재하지 않습니다."));
     }

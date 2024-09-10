@@ -1,14 +1,20 @@
 package org.apache.coyote.http11.request;
 
+import com.techcourse.exception.UncheckedServletException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.HttpCookie;
 
 public class Http11RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
+    private static final String ACCEPT = "Accept";
+    private static final String ACCEPT_HEADER_DELIMITER = ",";
+    private static final String COOKIE = "Cookie";
     private static final int HEADER_LENGTH = 2;
 
     private final Map<String, String> headers;
@@ -26,7 +32,7 @@ public class Http11RequestHeaders {
     }
 
     private void append(String key, String value) {
-        if ("Cookie".equals(key)) {
+        if (COOKIE.equals(key)) {
             cookie.setCookie(value);
             return;
         }
@@ -49,5 +55,19 @@ public class Http11RequestHeaders {
 
     public boolean existsCookie(String key) {
         return cookie.isExists(key);
+    }
+
+    public boolean existsAccept() {
+        return headers.containsKey(ACCEPT);
+    }
+
+    public String getFirstAcceptMimeType() {
+        try {
+            return Arrays.stream(getValue(ACCEPT).split(ACCEPT_HEADER_DELIMITER))
+                    .toList()
+                    .getFirst();
+        } catch (NoSuchElementException e) {
+            throw new UncheckedServletException(e);
+        }
     }
 }

@@ -6,29 +6,40 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Set;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 import org.apache.catalina.session.UuidSessionGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
 
-    @DisplayName("요청 쿼리 스트링을 파싱한다.")
+    @DisplayName("요청 문자열을 올바르게 변환한다.")
     @Test
-    void parseQuery() throws IOException {
+    void parseHttpRequest() throws IOException {
+        Session session = new Session("1234");
+        new SessionManager().add(session);
         String rawRequest = String.join("\r\n",
-                "GET /subway?bread=white&sauce=pepper HTTP/1.1 ",
+                "POST /hello?me=potato&you=gamja HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "Content-Length: 4",
+                "Cookie: JSESSIONID=1234",
                 "",
-                "");
-        BufferedReader requestReader = new BufferedReader(new StringReader(rawRequest));
-        HttpRequest httpRequest = new HttpRequestReader(requestReader, new UuidSessionGenerator()).read();
-
-        Queries queries = httpRequest.getQueries();
+                "body");
+        BufferedReader bufferedReader = new BufferedReader(new StringReader(rawRequest));
+        HttpRequest request = new HttpRequestReader(bufferedReader, new UuidSessionGenerator())
+                .read();
 
         assertAll(
-                () -> assertThat(queries.get("bread")).isEqualTo("white"),
-                () -> assertThat(queries.get("sauce")).isEqualTo("pepper")
+                () -> assertThat(request.getPath()).isEqualTo("/hello"),
+                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.POST),
+                () -> assertThat(request.getSession()).isEqualTo(session),
+                () -> assertThat(request.getBody()).isEqualTo("body"),
+                () -> assertThat(request.getQuery("me")).isEqualTo("potato"),
+                () -> assertThat(request.getQuery("you")).isEqualTo("gamja"),
+                () -> assertThat(request.getQueryKeys()).isEqualTo(Set.of("me", "you"))
         );
     }
+
 }

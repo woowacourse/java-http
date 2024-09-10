@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Map;
@@ -41,37 +40,37 @@ public class Http11Processor implements Runnable, Processor {
         try (var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
+            HttpResponse response = new HttpResponse(outputStream);
 
             if (request.isGetMethod()) {
-                handleGetRequest(request, outputStream);
+                handleGetRequest(request, response);
                 return;
             }
             if (request.isPostMethod()) {
-                handlePostRequest(request, outputStream);
+                handlePostRequest(request, response);
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handleGetRequest(HttpRequest request, OutputStream outputStream) throws IOException {
+    private void handleGetRequest(HttpRequest request, HttpResponse response) throws IOException {
         String path = request.getPath();
         if ("/favicon.ico".equals(path)) {
-            handleFaviconRequest(outputStream);
+            handleFaviconRequest(response);
             return;
         }
         if ("/login".equals(path) && doesLoggedIn(request.getCookie())) {
-            redirectTo("/index.html", outputStream);
+            redirectTo(response, "/index.html");
             return;
         }
-        serveStaticFile(addHtmlExtension(path), outputStream);
+        serveStaticFile(request, response);
     }
 
-    private void handleFaviconRequest(OutputStream outputStream) throws IOException {
-        final var response = "HTTP/1.1 204 No Content \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-        writeResponse(outputStream, response);
+    private void handleFaviconRequest(HttpResponse response) throws IOException {
+        response.addStatusLine("HTTP/1.1 204 No Content");
+        response.addHeader("Content-Length", "0");
+        response.writeResponse();
     }
 
     private boolean doesLoggedIn(HttpCookie httpCookie) {
@@ -79,18 +78,18 @@ public class Http11Processor implements Runnable, Processor {
         return session != null && session.doesExistAttribute("user");
     }
 
-    public void handlePostRequest(HttpRequest request, OutputStream outputStream) throws IOException {
+    public void handlePostRequest(HttpRequest request, HttpResponse response) throws IOException {
         String path = request.getPath();
         if ("/login".equals(path)) {
-            handleLogin(request, outputStream);
+            handleLogin(request, response);
             return;
         }
         if ("/register".equals(path)) {
-            handleRegister(request, outputStream);
+            handleRegister(request, response);
         }
     }
 
-    private void handleLogin(HttpRequest request, OutputStream outputStream) throws IOException {
+    private void handleLogin(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> pairs = request.getBodyQueryString();
 
         String account = pairs.get("account");
@@ -102,33 +101,31 @@ public class Http11Processor implements Runnable, Processor {
                 Session session = new Session(UUID.randomUUID().toString());
                 session.addAttribute("user", user);
                 sessionManager.add(session);
-                redirectToHomeSettingCookie(session.getId(), outputStream);
+                redirectToHomeSettingCookie(response, session.getId());
                 return;
             }
         }
-        redirectTo("/401.html", outputStream);
+        redirectTo(response, "/401.html");
     }
 
-    private void handleRegister(HttpRequest request, OutputStream outputStream) throws IOException {
+    private void handleRegister(HttpRequest request, HttpResponse response) throws IOException {
         Map<String, String> pairs = request.getBodyQueryString();
 
         InMemoryUserRepository.save(new User(pairs.get("account"), pairs.get("password"), pairs.get("email")));
-        redirectTo("/index.html", outputStream);
+        redirectTo(response, "/index.html");
     }
 
-    private void redirectToHomeSettingCookie(String jSessionId, OutputStream outputStream) throws IOException {
-        final var response = "HTTP/1.1 302 Found \r\n" +
-                "Set-Cookie: JSESSIONID=" + jSessionId + " \r\n" +
-                "Location: http://localhost:8080/index.html \r\n" +
-                "\r\n";
-        writeResponse(outputStream, response);
+    private void redirectToHomeSettingCookie(HttpResponse response, String jSessionId) throws IOException {
+        response.addStatusLine("HTTP/1.1 302 Found");
+        response.addHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+        response.addHeader("Location", "http://localhost:8080/index.html");
+        response.writeResponse();
     }
 
-    private void redirectTo(String location, OutputStream outputStream) throws IOException {
-        final var response = "HTTP/1.1 302 Found \r\n" +
-                "Location: http://localhost:8080" + location + " \r\n" +
-                "\r\n";
-        writeResponse(outputStream, response);
+    private void redirectTo(HttpResponse response, String location) throws IOException {
+        response.addStatusLine("HTTP/1.1 302 Found");
+        response.addHeader("Location", "http://localhost:8080" + location);
+        response.writeResponse();
     }
 
     private String addHtmlExtension(String path) {
@@ -138,15 +135,15 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private void serveStaticFile(String path, OutputStream outputStream) throws IOException {
-        var responseBody = getStaticFileContent(path);
-        final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/" + getFileExtension(path) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        writeResponse(outputStream, response);
+    private void serveStaticFile(HttpRequest request, HttpResponse response) throws IOException {
+        String path = addHtmlExtension(request.getPath());
+        String body = getStaticFileContent(path);
+
+        response.addStatusLine("HTTP/1.1 200 OK");
+        response.addHeader("Content-Type", "text/" + getFileExtension(path) + ";charset=utf-8");
+        response.addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        response.addBody(body);
+        response.writeResponse();
     }
 
     private String getStaticFileContent(String path) throws IOException {
@@ -164,10 +161,5 @@ public class Http11Processor implements Runnable, Processor {
         }
         String[] splitPath = path.split("\\.");
         return splitPath[splitPath.length - 1];
-    }
-
-    private void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 }

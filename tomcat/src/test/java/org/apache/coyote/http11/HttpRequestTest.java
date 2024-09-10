@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,13 +24,15 @@ class HttpRequestTest {
                 "Connection: keep-alive ",
                 "",
                 "");
-        HttpRequest request = new HttpRequest(new ByteArrayInputStream(httpRequestMessage.getBytes()));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+        HttpRequest request = new HttpRequest(inputStream);
 
         // when
         String path = request.getPath();
 
         // then
         assertThat(path).isEqualTo("/index.html");
+        inputStream.close();
     }
 
     @DisplayName("http request로부터 Cookie를 파싱할 수 있다.")
@@ -44,7 +46,8 @@ class HttpRequestTest {
                 "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
-        HttpRequest request = new HttpRequest(new ByteArrayInputStream(httpRequestMessage.getBytes()));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+        HttpRequest request = new HttpRequest(inputStream);
 
         // when
         HttpCookie cookie = request.getCookie();
@@ -55,6 +58,7 @@ class HttpRequestTest {
                 () -> assertThat(cookie.get("tasty_cookie")).isEqualTo("strawberry"),
                 () -> assertThat(cookie.get("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
         );
+        inputStream.close();
     }
 
     @DisplayName("request body가 쿼리스트링 형식일 때, key, value 쌍을 만들 수 있다.")
@@ -71,7 +75,8 @@ class HttpRequestTest {
                 "",
                 "account=gugu&password=password ",
                 "");
-        HttpRequest request = new HttpRequest(new ByteArrayInputStream(httpRequestMessage.getBytes()));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+        HttpRequest request = new HttpRequest(inputStream);
 
         // when
         Map<String, String> bodyQueryString = request.getBodyQueryString();
@@ -81,6 +86,7 @@ class HttpRequestTest {
                 () -> assertThat(bodyQueryString.get("account")).isEqualTo("gugu"),
                 () -> assertThat(bodyQueryString.get("password")).isEqualTo("password")
         );
+        inputStream.close();
     }
 
     @DisplayName("HttpRequest가 GET 요청이면 true를 반환한다.")
@@ -92,18 +98,20 @@ class HttpRequestTest {
     void isGetMethod(String method, boolean expected) throws IOException {
         // given
         String httpRequestMessage = String.join("\r\n",
-                method+ " /index.html HTTP/1.1 ",
+                method + " /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
-        HttpRequest requset = new HttpRequest(new ByteArrayInputStream(httpRequestMessage.getBytes()));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+        HttpRequest requset = new HttpRequest(inputStream);
 
         // when
         boolean isGetMethod = requset.isGetMethod();
 
         // then
         assertThat(isGetMethod).isEqualTo(expected);
+        inputStream.close();
     }
 
     @DisplayName("HttpRequest가 POST 요청이면 true를 반환한다.")
@@ -115,17 +123,19 @@ class HttpRequestTest {
     void isPostMethod(String method, boolean expected) throws IOException {
         // given
         String httpRequestMessage = String.join("\r\n",
-                method+ " /index.html HTTP/1.1 ",
+                method + " /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
-        HttpRequest request = new HttpRequest(new ByteArrayInputStream(httpRequestMessage.getBytes()));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequestMessage.getBytes());
+        HttpRequest request = new HttpRequest(inputStream);
 
         // when
         boolean isPostMethod = request.isPostMethod();
 
         // then
         assertThat(isPostMethod).isEqualTo(expected);
+        inputStream.close();
     }
 }

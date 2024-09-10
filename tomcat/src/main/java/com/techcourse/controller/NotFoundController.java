@@ -39,12 +39,12 @@ public class NotFoundController extends Controller {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws IOException {
-        throw new UnsupportedMethodException("Method is not supported");
+        throw new UnsupportedMethodException("Method is not supported: POST");
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
-        throw new UnsupportedMethodException("Method is not supported");
+        throw new UnsupportedMethodException("Method is not supported: GET");
     }
 
     private String readResource(String fileName) throws IOException {

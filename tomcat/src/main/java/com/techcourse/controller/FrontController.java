@@ -53,7 +53,7 @@ public class FrontController extends Controller {
                 response.setBody(responseBody);
                 return response;
             } catch (InvalidResourceException e) {
-                log.error("Error processing request for endpoint: {}", request.getURI());
+                log.error("Error processing request for endpoint: {}, message: {}", request.getURI(), e.getMessage());
 
                 handler = NotFoundController.getInstance();
             }
@@ -67,7 +67,7 @@ public class FrontController extends Controller {
             HttpResponse response = handler.handle(request);
             return response;
         } catch (UnsupportedMethodException e) {
-            log.error("Error processing request for endpoint: {}", request.getURI());
+            log.error("Error processing request for endpoint: {}, message: {}", request.getURI(), e.getMessage());
 
             handler = MethodNotAllowedController.getInstance();
             HttpResponse response = handler.handle(request);
@@ -107,11 +107,11 @@ public class FrontController extends Controller {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws IOException {
-        throw new UnsupportedMethodException("Method is not supported");
+        throw new UnsupportedMethodException("Method is not supported: POST");
     }
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws IOException {
-        throw new UnsupportedMethodException("Method is not supported");
+        throw new UnsupportedMethodException("Method is not supported: GET");
     }
 }

@@ -44,3 +44,9 @@
   - [x] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크
   - [x] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장
   - [x] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트
+
+### 3단계 리팩토링
+- [ ] HttpRequest 구현하기
+- [ ] HttpResponse 구현하기
+- [ ] Controller 인터페이스 추가하기
+  - [ ] 컨트롤러 인터페이스를 추가하고 각 분기에 있는 로직마다 AbstractController를 상속한 구현체로 만들기

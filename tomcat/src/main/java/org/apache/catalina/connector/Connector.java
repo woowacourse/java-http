@@ -1,5 +1,8 @@
 package org.apache.catalina.connector;
 
+import com.techcourse.controller.LoginController;
+import com.techcourse.controller.RegisterController;
+import com.techcourse.controller.StaticResourceController;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
@@ -66,7 +69,18 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        var processor = new Http11Processor(connection, new RequestMapping());
+        StaticResourceController staticResourceController = new StaticResourceController();
+        RequestMapping requestMapping = new RequestMapping(staticResourceController);
+        requestMapping.putController("/*.js", staticResourceController);
+        requestMapping.putController("/*.css", staticResourceController);
+        LoginController loginController = new LoginController();
+        requestMapping.putController("/login", loginController);
+        requestMapping.putController("/login.html", loginController);
+        requestMapping.putController("/", staticResourceController);
+        requestMapping.putController("/index", staticResourceController);
+        requestMapping.putController("/index.html", staticResourceController);
+        requestMapping.putController("/register", new RegisterController());
+        var processor = new Http11Processor(connection, requestMapping);
         new Thread(processor).start();
     }
 

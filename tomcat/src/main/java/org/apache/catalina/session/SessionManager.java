@@ -1,20 +1,18 @@
 package org.apache.catalina.session;
 
-import com.techcourse.model.User;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SessionManager {
 
     private static final Map<String, Session> sessions = new HashMap<>();
-    private static final String ATTRIBUTE_USER = "user";
 
     private SessionManager() {
     }
 
-    public static String addUser(User user) {
+    public static String add(String key, Object object) {
         Session session = new Session();
-        session.setAttribute(ATTRIBUTE_USER, user);
+        session.setAttribute(key, object);
         sessions.put(session.getId(), session);
         return session.getId();
     }

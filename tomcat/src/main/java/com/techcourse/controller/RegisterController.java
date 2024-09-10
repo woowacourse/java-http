@@ -25,7 +25,7 @@ public class RegisterController extends RestController {
         );
         InMemoryUserRepository.save(user);
 
-        String jSessionId = SessionManager.addUser(user);
+        String jSessionId = SessionManager.add("user", user);
         response.addSessionToCookies(jSessionId);
 
         return redirectTo(response, "/index");

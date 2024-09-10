@@ -125,7 +125,7 @@ class Http11ProcessorTest {
     void redirectWhenAlreadyLoggedIn() {
         // given
         User user = new User("account", "password", "mail@mail.com");
-        String jSessionId = SessionManager.addUser(user);
+        String jSessionId = SessionManager.add("user", user);
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1",
                 "Host: localhost:8080",

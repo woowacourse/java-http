@@ -1,7 +1,7 @@
 package org.apache.catalina.connector;
 
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.http11.executor.ExecutorService;
+import org.apache.coyote.http11.executor.RequestExecutors;
 import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,17 +17,20 @@ public class Connector implements Runnable {
 
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
-    private static final int MAX_INACTIVE_INTERVAL = 60 * 1000 * 15; // 15분
 
     private final ServerSocket serverSocket;
+    private final RequestExecutors requestExecutors;
+    private final SessionManager sessionManager;
     private boolean stopped;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(final RequestExecutors requestExecutors, final SessionManager sessionManager) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, requestExecutors, sessionManager);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, final RequestExecutors requestExecutors, final SessionManager sessionManager) {
         this.serverSocket = createServerSocket(port, acceptCount);
+        this.requestExecutors = requestExecutors;
+        this.sessionManager = sessionManager;
         this.stopped = false;
     }
 
@@ -69,7 +72,7 @@ public class Connector implements Runnable {
         if (connection == null) {
             return;
         }
-        final var processor = new Http11Processor(connection, new ExecutorService(), new SessionManager(MAX_INACTIVE_INTERVAL));
+        final var processor = new Http11Processor(connection, requestExecutors, sessionManager);
         new Thread(processor).start();
     }
 

@@ -3,16 +3,14 @@ package org.apache.coyote.http11;
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.exception.UncheckedServletException;
 import com.techcourse.model.User;
+import jakarta.servlet.http.Cookie;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -55,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             if (path.equals("/register")) {
                 processRegister(httpRequest, outputStream);
             }
-            processFilesWithStatus(outputStream, httpRequest.getPath(), httpRequest.getFileType(), HttpStatus.OK);
+            processFilesWithStatus(outputStream, httpRequest.getPath(), httpRequest.getFileType(), 200, "OK");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -75,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void processFilesWithStatus(OutputStream outputStream, String path, String fileType, HttpStatus httpStatus) throws IOException {
+    private void processFilesWithStatus(OutputStream outputStream, String path, String fileType, Integer httpStatusCode, String HttpStatusPhrase) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
             return;
@@ -83,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-                "HTTP/1.1 " + httpStatus.value() + " " + httpStatus.getReasonPhrase(),
+                "HTTP/1.1 " + httpStatusCode + " " + HttpStatusPhrase,
                 "Content-Type: text/" + fileType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -93,7 +91,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void processFilesWithStatus(OutputStream outputStream, String path, String fileType, HttpStatus httpStatus, String Cookie) throws IOException {
+    private void processFilesWithStatus(OutputStream outputStream, String path, String fileType, Integer httpStatusCode, String HttpStatusPhrase, String Cookie) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + path);
         if (resource == null) {
             return;
@@ -101,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
         final var responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         final var response = String.join("\r\n",
-                "HTTP/1.1 " + httpStatus.value() + " " + httpStatus.getReasonPhrase(),
+                "HTTP/1.1 " + httpStatusCode + " " + HttpStatusPhrase,
                 "Set-Cookie:" + Cookie+ " ",
                 "Content-Type: text/" + fileType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
@@ -134,7 +132,7 @@ public class Http11Processor implements Runnable, Processor {
             String email = queryParams.get("email").get(0);
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            processFilesWithStatus(outputStream, "/index.html", "html", HttpStatus.OK);
+            processFilesWithStatus(outputStream, "/index.html", "html", 200, "OK");
         }
     }
 
@@ -143,7 +141,7 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> cookies = httpRequest.getCookies();
             if (cookies.containsKey("JSESSIONID")) {
                 if (sessionManager.findSession(cookies.get("JSESSIONID")) != null) {
-                    processFilesWithStatus(outputStream, "/index.html", "html", HttpStatus.valueOf(302));
+                    processFilesWithStatus(outputStream, "/index.html", "html", 302, "Found");
                 }
             }
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
@@ -171,10 +169,10 @@ public class Http11Processor implements Runnable, Processor {
                 session.setAttribute("user", user);
                 Http11Cookie http11Cookie = Http11Cookie.sessionCookie(session.getId());
                 sessionManager.add(session);
-                processFilesWithStatus(outputStream, "/index.html", "html", HttpStatus.valueOf(302), http11Cookie.toString());
+                processFilesWithStatus(outputStream, "/index.html", "html", 302, "Found", http11Cookie.toString());
                 return;
             }
-            processFilesWithStatus(outputStream, "/401.html", "html", HttpStatus.valueOf(401));
+            processFilesWithStatus(outputStream, "/401.html", "html", 401, "Unauthorized");
         }
 
     }

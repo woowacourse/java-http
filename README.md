@@ -64,7 +64,7 @@
 
 - [ ] HttpRequest 클래스 구현 
   - [ ] Request Line 분석  
-    - [ ] Method 클래스 (enum)
+    - [x] Method 클래스 (enum)
     - [ ] Path 클래스 
     - [ ] Version 클래스 (enum)
     - [ ] Protocol 클래스 (enum)

@@ -14,7 +14,7 @@ public class Request {
     private final Map<String, String> headers;
     private Map<String, String> body = new HashMap<>();
     private Map<String, String> queryParam = new HashMap<>();
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String urlIncludeQuery;
     private final String url;
     private final String fileType;
@@ -25,7 +25,7 @@ public class Request {
             throw new IllegalArgumentException("요청 헤더의 형식이 올바르지 않습니다.");
         }
         this.headers = new HashMap<>(headers);
-        this.httpMethod = parts[0];
+        this.httpMethod = HttpMethod.of(parts[0]);
         this.urlIncludeQuery = parts[1];
         this.url = urlIncludeQuery.split("\\?", 2)[0];
         this.fileType = extractMainFileType(headers.get("Accept"));
@@ -60,7 +60,7 @@ public class Request {
     }
 
     public String getHttpMethod() {
-        return httpMethod;
+        return httpMethod.name();
     }
 
     public String getUrlIncludeQuery() {

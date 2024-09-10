@@ -131,9 +131,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (httpRequest.getMethod().equals("POST")) {
             Map<String, List<String>> queryParams = httpRequest.getQueryParams();
-            String account = queryParams.get("account").get(0);
-            String password = queryParams.get("password").get(0);
-            String email = queryParams.get("email").get(0);
+            String account = queryParams.get("account").getFirst();
+            String password = queryParams.get("password").getFirst();
+            String email = queryParams.get("email").getFirst();
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
             processFilesWithStatus(outputStream, "/index.html", "html", 200, "OK");

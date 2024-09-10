@@ -44,6 +44,17 @@ public class HttpRequestFixture {
 			"POST /register HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
+			"Content-Length: 60 ",
+			"",
+			"account=gugugu&password=password&email=hkkang%40woowahan.com");
+		return HttpRequest.from(new ByteArrayInputStream(requestString.getBytes()));
+	}
+
+	public static HttpRequest createRegisterPostMethodWithAlreadyExistAccount() throws IOException {
+		String requestString = String.join("\r\n",
+			"POST /register HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
 			"Content-Length: 58 ",
 			"",
 			"account=gugu&password=password&email=hkkang%40woowahan.com");

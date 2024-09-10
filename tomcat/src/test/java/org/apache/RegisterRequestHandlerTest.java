@@ -49,4 +49,17 @@ class RegisterRequestHandlerTest {
 		assertThat(response.getHeaders()).contains("Location: /index.html");
 	}
 
+
+	@DisplayName("이미 존재하는 account로 회원가입을 시도할 경우 401.html을 리다이렉트한다.")
+	@Test
+	void handle_POST_alreadyExist() throws IOException {
+		// given
+		HttpRequest request = HttpRequestFixture.createRegisterPostMethodWithAlreadyExistAccount();
+
+		// when
+		HttpResponse response = handler.handle(request);
+
+		// then
+		assertThat(response.getHeaders()).contains("Location: /401.html");
+	}
 }

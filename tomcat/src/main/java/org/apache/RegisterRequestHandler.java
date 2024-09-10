@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
@@ -46,13 +47,19 @@ public class RegisterRequestHandler implements RequestHandler {
 
 	private boolean register(String account, String password, String email) {
 		try {
-			User user = new User(
+			Optional<User> user = InMemoryUserRepository.findByAccount(account);
+			if (user.isPresent()) {
+				throw new IllegalArgumentException("already exist account: " + account);
+			}
+
+			User newUser = new User(
 				(InMemoryUserRepository.getLastId() + 1),
 				account,
 				password,
 				email);
-			InMemoryUserRepository.save(user);
-			log.info(user.toString());
+			InMemoryUserRepository.save(newUser);
+			log.info(newUser.toString());
+
 			return true;
 		} catch (RuntimeException exception) {
 			return false;

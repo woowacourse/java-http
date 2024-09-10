@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Http11RequestHeader {
 
@@ -36,5 +37,17 @@ public class Http11RequestHeader {
 
     public Map<String, List<String>> getHeaders() {
         return headers;
+    }
+
+    @Override
+    public String toString() {
+        String headerKeyValue = headers.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(",", "(", ")"));
+
+        return "Http11RequestHeader{" +
+               "headers=" + headerKeyValue +
+               ", cookies=" + cookies +
+               '}';
     }
 }

@@ -10,6 +10,8 @@ import org.apache.coyote.session.Session;
 
 public class LoginController extends AbstractController {
 
+    public static final String SESSION_USER_KEY = "user";
+
     public LoginController() {
         super("/login");
     }
@@ -24,6 +26,7 @@ public class LoginController extends AbstractController {
                         user -> {
                             if (user.checkPassword(password)) {
                                 acceptLogin(request, response, user);
+                                return;
                             }
                             response.sendRedirect("/401.html");
                         },
@@ -33,7 +36,7 @@ public class LoginController extends AbstractController {
 
     private void acceptLogin(HttpRequest request, HttpResponse response, User user) {
         Session session = request.getSession();
-        session.setAttribute("user", user);
+        session.setAttribute(SESSION_USER_KEY, user);
         response.addCookie(Session.SESSION_COOKIE_KEY, session.getId());
         response.sendRedirect("/index.html");
     }
@@ -48,12 +51,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean hasUser(HttpRequest request) {
-        try {
-            Session session = request.getSession();
-            session.getAttribute("user");
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+        Session session = request.getSession();
+        return session.hasAttribute(SESSION_USER_KEY);
     }
 }

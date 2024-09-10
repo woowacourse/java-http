@@ -20,10 +20,14 @@ public class Session {
     }
 
     public Object getAttribute(final String name) {
-        if (values.containsKey(name)) {
+        if (hasAttribute(name)) {
             return values.get(name);
         }
         throw new IllegalArgumentException("존재하지 않습니다.");
+    }
+
+    public boolean hasAttribute(String name) {
+        return values.containsKey(name);
     }
 
     public void setAttribute(final String name, final Object value) {

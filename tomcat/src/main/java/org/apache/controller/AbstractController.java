@@ -5,14 +5,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.http11.request.Http11RequestStartLine;
 import org.apache.coyote.http11.request.HttpMethod;
 
 public abstract class AbstractController implements Controller {
 
     protected Pattern endPointPattern;
 
-    protected AbstractController(String regex) {
-        this.endPointPattern = Pattern.compile("^" + regex);
+    protected AbstractController(String path) {
+        this.endPointPattern = Pattern.compile("^" + path + "$");
     }
 
     @Override
@@ -29,7 +30,8 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public boolean isMatch(String endPoint) {
+    public boolean isMatch(Http11RequestStartLine startLine) {
+        String endPoint = startLine.getEndPoint();
         Matcher matcher = endPointPattern.matcher(endPoint);
         return matcher.matches();
     }

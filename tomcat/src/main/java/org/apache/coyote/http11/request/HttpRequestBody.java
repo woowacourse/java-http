@@ -21,4 +21,12 @@ public class HttpRequestBody {
     public String getQueryParam(String param) {
         return queryStrings.getQuery(param);
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequestBody{" +
+               "value='" + value + '\'' +
+               ", queryStrings=" + queryStrings +
+               '}';
+    }
 }

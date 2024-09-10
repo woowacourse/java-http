@@ -28,7 +28,7 @@ public class RequestMapper {
 
         return controllers.stream()
                 .filter(controller ->
-                        request.targetStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
+                        request.uriStartsWith(controller.getClass().getAnnotation(RequestMapping.class).value())
                 )
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("cannot map controller"));

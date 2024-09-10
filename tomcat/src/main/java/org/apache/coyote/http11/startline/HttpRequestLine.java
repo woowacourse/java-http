@@ -9,17 +9,25 @@ public class HttpRequestLine {
     private static final Logger log = LoggerFactory.getLogger(HttpRequestLine.class);
 
     private final HttpMethod httpMethod;
-    private final RequestTarget requestTarget;
+    private final RequestUri requestUri;
     private final String httpVersion;
 
-    public HttpRequestLine(String startLine) {
-        String[] separatedStartLine = validateAndSplit(startLine);
-        this.httpMethod = HttpMethod.valueOf(separatedStartLine[0]);
-        this.requestTarget = new RequestTarget(separatedStartLine[1]);
-        this.httpVersion = separatedStartLine[2];
+    public HttpRequestLine(HttpMethod httpMethod, RequestUri requestUri, String httpVersion) {
+        this.httpMethod = httpMethod;
+        this.requestUri = requestUri;
+        this.httpVersion = httpVersion;
     }
 
-    private String[] validateAndSplit(String startLine) {
+    public static HttpRequestLine parse(String startLine) {
+        String[] separatedStartLine = validateAndSplit(startLine);
+        return new HttpRequestLine(
+                HttpMethod.valueOf(separatedStartLine[0]),
+                new RequestUri(separatedStartLine[1]),
+                separatedStartLine[2]
+        );
+    }
+
+    private static String[] validateAndSplit(String startLine) {
         String[] values = startLine.split(" ");
         if (values.length == 2) {
             return new String[]{values[0], "", values[1]};
@@ -33,19 +41,19 @@ public class HttpRequestLine {
     }
 
     public boolean isTargetStatic() {
-        return httpMethod.equals(HttpMethod.GET) && requestTarget.isResource();
+        return httpMethod.equals(HttpMethod.GET) && requestUri.isResource();
     }
 
     public boolean isTargetBlank() {
-        return requestTarget.isBlank();
+        return requestUri.isBlank();
     }
 
     public boolean targetStartsWith(String startsWith) {
-        return requestTarget.startsWith(startsWith);
+        return requestUri.startsWith(startsWith);
     }
 
     public Path getTargetPath() {
-        return requestTarget.getPath();
+        return requestUri.getPath();
     }
 
     public HttpMethod getHttpMethod() {

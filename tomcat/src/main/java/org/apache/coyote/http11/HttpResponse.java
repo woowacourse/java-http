@@ -15,10 +15,10 @@ public class HttpResponse {
     private final HttpHeaders httpHeaders;
     private final HttpResponseBody httpResponseBody;
 
-    public HttpResponse(String httpVersion) {
-        this.httpResponseLine = new HttpResponseLine(httpVersion);
-        this.httpHeaders = new HttpHeaders();
-        this.httpResponseBody = new HttpResponseBody();
+    public HttpResponse(HttpResponseLine httpResponseLine, HttpHeaders httpHeaders, HttpResponseBody httpResponseBody) {
+        this.httpResponseLine = httpResponseLine;
+        this.httpHeaders = httpHeaders;
+        this.httpResponseBody = httpResponseBody;
     }
 
     public byte[] getBytes() {

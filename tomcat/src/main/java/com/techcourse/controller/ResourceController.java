@@ -22,7 +22,7 @@ public class ResourceController extends Controller {
     }
 
     private boolean responseFile(HttpRequest request, HttpResponse response) {
-        if (request.targetStartsWith("/login") && request.getSessionFromCookie().isPresent()) {
+        if (request.uriStartsWith("/login") && request.getSessionFromCookie().isPresent()) {
             redirectTo(response, "/index");
         }
         return responseResource(response, request.getTargetPath());

@@ -20,7 +20,7 @@ public class HttpRequest {
     private final HttpHeaders httpHeaders;
     private final HttpRequestBody httpRequestBody;
 
-    private HttpRequest(HttpRequestLine httpRequestLine, HttpHeaders httpHeaders, HttpRequestBody httpRequestBody) {
+    public HttpRequest(HttpRequestLine httpRequestLine, HttpHeaders httpHeaders, HttpRequestBody httpRequestBody) {
         this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
         this.httpRequestBody = httpRequestBody;
@@ -28,7 +28,7 @@ public class HttpRequest {
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader httpRequestReader = new BufferedReader(new InputStreamReader(inputStream));
-        HttpRequestLine startLine = new HttpRequestLine(httpRequestReader.readLine());
+        HttpRequestLine startLine = HttpRequestLine.parse(httpRequestReader.readLine());
 
         List<String> headers = new ArrayList<>();
         while (httpRequestReader.ready()) {
@@ -58,7 +58,7 @@ public class HttpRequest {
         return httpRequestLine.isTargetBlank();
     }
 
-    public boolean targetStartsWith(String startsWith) {
+    public boolean uriStartsWith(String startsWith) {
         return httpRequestLine.targetStartsWith(startsWith);
     }
 

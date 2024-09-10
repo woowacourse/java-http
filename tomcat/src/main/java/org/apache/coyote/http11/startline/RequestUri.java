@@ -4,11 +4,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 
-public class RequestTarget {
+public class RequestUri {
 
     private final String value;
 
-    public RequestTarget(String value) {
+    public RequestUri(String value) {
         this.value = value;
     }
 

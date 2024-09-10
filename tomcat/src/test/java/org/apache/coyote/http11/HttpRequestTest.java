@@ -105,9 +105,9 @@ class HttpRequestTest {
         assertThat(parsedRequest.isTargetBlank()).isFalse();
     }
 
-    @DisplayName("request target이 주어진 문자로 시작하는지 아닌지 판별한다.")
+    @DisplayName("request uri가 주어진 문자로 시작하는지 아닌지 판별한다.")
     @Test
-    void targetStartsWith() throws IOException {
+    void uriStartsWith() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /index HTTP/1.1",
@@ -119,8 +119,8 @@ class HttpRequestTest {
         HttpRequest parsedRequest = HttpRequest.parse(inputStream);
 
         // when&then
-        assertThat(parsedRequest.targetStartsWith("/ind")).isTrue();
-        assertThat(parsedRequest.targetStartsWith("/index/")).isFalse();
+        assertThat(parsedRequest.uriStartsWith("/ind")).isTrue();
+        assertThat(parsedRequest.uriStartsWith("/index/")).isFalse();
     }
 
     @DisplayName("쿠키에서 세션을 가져온다.")
@@ -175,7 +175,7 @@ class HttpRequestTest {
         assertThat(parsedRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
     }
 
-    @DisplayName("요청의 target의 path를 반환한다.")
+    @DisplayName("요청 uri의 path를 반환한다.")
     @Test
     void getTargetPath() throws IOException, URISyntaxException {
         // given
@@ -193,7 +193,7 @@ class HttpRequestTest {
         assertThat(parsedRequest.getTargetPath()).isEqualTo(expected);
     }
 
-    @DisplayName("요청의 target이 존재하지 않으면 예외를 던진다.")
+    @DisplayName("요청 uri의 파일이 존재하지 않으면 예외를 던진다.")
     @Test
     void getTargetPath_targetNotFound() throws IOException {
         // given

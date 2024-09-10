@@ -28,16 +28,9 @@ public class LoginController implements HttpRequestHandler {
 
     @Override
     public boolean supports(final HttpRequest request) {
-        if (request.methodNotEqual(SUPPORTING_METHOD)) {
-            return false;
-        }
-        if (request.protocolNotEqual(SUPPORTING_PROTOCOL)) {
-            return false;
-        }
-        if (request.uriNotStartsWith(SUPPORTING_URI)) {
-            return false;
-        }
-        return true;
+        return request.methodEquals(SUPPORTING_METHOD) &&
+                request.protocolEquals(SUPPORTING_PROTOCOL) &&
+                request.uriEquals(SUPPORTING_URI);
     }
 
     @Override

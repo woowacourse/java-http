@@ -24,24 +24,24 @@ public class HttpRequest {
         this.httpMessageBody = httpMessageBody;
     }
 
-    public boolean methodNotEqual(Method method) {
-        return !requestLine.isMethod(method);
+    public boolean methodEquals(Method method) {
+        return requestLine.isMethod(method);
     }
 
-    public boolean protocolNotEqual(HttpProtocol httpProtocol) {
-        return !requestLine.isHttpProtocol(httpProtocol);
+    public boolean protocolEquals(HttpProtocol httpProtocol) {
+        return requestLine.isHttpProtocol(httpProtocol);
     }
 
-    public boolean uriNotEqual(Uri uri) {
-        return !requestLine.isUri(uri);
+    public boolean uriEquals(Uri uri) {
+        return requestLine.isUri(uri);
     }
 
     public boolean isUriHome() {
         return requestLine.isUriHome();
     }
 
-    public boolean uriNotStartsWith(Uri uri) {
-        return !requestLine.isUriStartsWith(uri);
+    public boolean uriStartsWith(Uri uri) {
+        return requestLine.isUriStartsWith(uri);
     }
 
     public String getUriPath() {

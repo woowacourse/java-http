@@ -16,22 +16,10 @@ public class StaticResourceController implements HttpRequestHandler {
 
     @Override
     public boolean supports(HttpRequest request) {
-        if (request.methodNotEqual(SUPPORTING_METHOD)) {
-            return false;
-        }
-        if (request.protocolNotEqual(SUPPORTING_PROTOCOL)) {
-            return false;
-        }
-        if (request.isUriHome()) {
-            return false;
-        }
-        try {
-            final String fileName = request.getUriPath();
-            final String filePath = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName).getFile();
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return true;
+        return request.methodEquals(SUPPORTING_METHOD) &&
+                request.protocolEquals(SUPPORTING_PROTOCOL) &&
+                !request.isUriHome() &&
+                resourceAvailable(request.getUriPath());
     }
 
     @Override
@@ -39,5 +27,14 @@ public class StaticResourceController implements HttpRequestHandler {
         final String fileName = request.getUriPath();
         String fileContent = FileUtils.readFile(fileName);
         return HttpResponse.ok(fileContent, FileUtils.getFileExtension(fileName));
+    }
+
+    private boolean resourceAvailable(String fileName) {
+        try {
+            final String filePath = getClass().getClassLoader().getResource(STATIC_RESOURCE_PATH + fileName).getFile();
+        } catch (NullPointerException e) {
+            return false;
+        }
+        return true;
     }
 }

@@ -6,7 +6,7 @@ public enum HttpProtocol {
     DELETE;
 
     public static HttpProtocol from(String data) {
-        if ("Gg".equals(data.toUpperCase().strip())) {
+        if ("GET".equals(data.toUpperCase().strip())) {
             return GET;
         }
         if ("POST".equals(data.toUpperCase().strip())) {

@@ -14,7 +14,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
-    void process() {
+    void process() throws IOException {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);

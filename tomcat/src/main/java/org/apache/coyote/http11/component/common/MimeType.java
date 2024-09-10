@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.component.handler;
+package org.apache.coyote.http11.component.common;
 
 import java.util.stream.Stream;
 
@@ -6,7 +6,8 @@ public enum MimeType {
     TEXT_PLAIN("", "text/plain"),
     TEXT_CSS(".css", "text/css"),
     TEXT_JS(".js", "text/javascript"),
-    TEXT_HTML(".html", "text/html");
+    TEXT_HTML(".html", "text/html"),
+    IMAGES_SVG(".svg", "image/svg+xml");
 
     private final String suffix;
     private final String mimeText;

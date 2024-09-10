@@ -9,8 +9,8 @@ public class HandlerMapper {
 
     static {
         registry = new HashMap<>();
-        HandlerMapper.add("/", new HomeHandler("/"));
-        HandlerMapper.add("/login", new LoginHandler("/login"));
+        registry.put("/", new HomeHandler("/"));
+        registry.put("/login", new LoginHandler("/login"));
     }
 
     private HandlerMapper() {

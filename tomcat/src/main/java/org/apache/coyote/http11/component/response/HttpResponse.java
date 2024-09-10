@@ -21,4 +21,10 @@ public class HttpResponse {
                 + LINE_DELIMITER
                 + body.deserialize();
     }
+
+    public byte[] getResponseBytes() {
+        return (responseLine.getResponseText() + LINE_DELIMITER + responseHeader.getResponseText() + LINE_DELIMITER
+                + LINE_DELIMITER
+                + body.deserialize()).getBytes();
+    }
 }

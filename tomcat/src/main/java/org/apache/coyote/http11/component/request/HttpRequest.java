@@ -48,12 +48,8 @@ public class HttpRequest {
         return requestLine.getQueryValue(key);
     }
 
-    public RequestHeaders getHeaders() {
-        return requestHeaders;
-    }
-
-    public String getQuery() {
-        return requestLine.getQuery();
+    public boolean hasNotQuery() {
+        return Objects.isNull(requestLine.getQuery()) || requestLine.getQuery().isBlank();
     }
 
     public String getPath() {

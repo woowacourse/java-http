@@ -18,15 +18,20 @@ public class RequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
+    private final RequestParser requestParser;
     private final String requestUri;
 
-    public RequestHandler(String requestUri) {
-        this.requestUri = requestUri;
+    public RequestHandler(RequestParser requestParser) throws IOException {
+        this.requestParser = requestParser;
+        this.requestUri = requestParser.getRequestUri();
     }
 
     public String getResponse() throws IOException {
         if (Objects.equals(requestUri, "/")) {
             return generate200Response("/", "Hello world!");
+        }
+        if (requestUri.startsWith("/register")) {
+            return generateRegisterResponse();
         }
         if (requestUri.startsWith("/login")) {
             return generateLoginResponse();
@@ -35,26 +40,46 @@ public class RequestHandler {
         return generate200Response(requestUri, responseBody);
     }
 
-    private String generateLoginResponse() throws IOException {
-        int index = requestUri.indexOf("?");
-        if (index == -1) {
+    private String generateRegisterResponse() throws IOException {
+        if (requestParser.getMethod().equals("GET")) {
             String responseBody = generateResponseBody("static" + requestUri);
             return generate200Response(requestUri, responseBody);
         }
 
-        if (login(index)) {
+        String body = requestParser.getBody();
+        Optional<Map<String, String>> parsed = parseQueryString(body);
+        Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
+        register(queryPairs);
+        return generate302Response("/index.html");
+    }
+
+    private void register(Map<String, String> parsed) {
+        User newbie = new User(
+                parsed.get("account"),
+                parsed.get("password"),
+                parsed.get("email")
+        );
+        InMemoryUserRepository.save(newbie);
+    }
+
+    private String generateLoginResponse() throws IOException {
+        if (requestParser.getMethod().equals("GET")) {
+            String responseBody = generateResponseBody("static" + requestUri);
+            return generate200Response(requestUri, responseBody);
+        }
+        String body = requestParser.getBody();
+        Optional<Map<String, String>> parsed = parseQueryString(body);
+        Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
+        if (login(queryPairs)) {
             return generate302Response("/index.html");
         }
         return generate302Response("/401.html");
     }
 
-    private boolean login(int index) {
-        Optional<Map<String, String>> parsed = parseQueryString(requestUri, index);
-        Map<String, String> queryPairs = parsed.orElseThrow(() -> new NoSuchElementException("invalid query string"));
-
-        Optional<User> account = InMemoryUserRepository.findByAccount(queryPairs.get("account"));
-        if (account.isPresent() && account.get().checkPassword(queryPairs.get("password"))) {
-            log.info("user : {}", account);
+    boolean login(Map<String, String> parsed) {
+        Optional<User> account = InMemoryUserRepository.findByAccount(parsed.get("account"));
+        if (account.isPresent() && account.get().checkPassword(parsed.get("password"))) {
+            log.info("로그인 성공! 아이디 : {}", account.get().getAccount());
             return true;
         }
         return false;
@@ -69,8 +94,7 @@ public class RequestHandler {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private Optional<Map<String, String>> parseQueryString(String requestUri, int index) {
-        String queryString = requestUri.substring(index + 1);
+    private Optional<Map<String, String>> parseQueryString(String queryString) {
         String[] queryParameters = queryString.split("&");
 
         Map<String, String> keyValue = new HashMap<>();

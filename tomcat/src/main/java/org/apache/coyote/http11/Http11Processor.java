@@ -32,8 +32,8 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final var requestUri = getRequestUri(bufferedReader);
-            RequestHandler requestHandler = new RequestHandler(requestUri);
+            RequestParser requestParser = new RequestParser(bufferedReader);
+            RequestHandler requestHandler = new RequestHandler(requestParser);
             final var response = requestHandler.getResponse();
 
             outputStream.write(response.getBytes());
@@ -41,13 +41,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getRequestUri(BufferedReader bufferedReader) throws IOException {
-        String requestStartLine = bufferedReader.readLine();
-        log.info("requestStartLine : {}", requestStartLine);
-
-        String[] split = requestStartLine.split(" ");
-        return split[1];
     }
 }

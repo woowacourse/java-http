@@ -20,6 +20,14 @@ public class HttpHeaders {
         headers.put(key, value);
     }
 
+    public boolean contains(String key) {
+        return headers.containsKey(key);
+    }
+
+    public String get(String key) {
+        return headers.get(key);
+    }
+
     public int getContentLength() {
         return Integer.parseInt(
                 Optional.ofNullable(headers.get("Content-Length"))

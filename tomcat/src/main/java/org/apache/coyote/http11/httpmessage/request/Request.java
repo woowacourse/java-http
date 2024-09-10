@@ -5,17 +5,24 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeaders;
 
 public class Request {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
+    private final HttpCookie cookies;
     private final String body;
 
     private Request(RequestLine requestLine, HttpHeaders headers, String body) {
         this.requestLine = requestLine;
         this.headers = headers;
+        if (headers.contains("Cookie")) {
+            this.cookies = HttpCookie.parseFrom(headers.get("Cookie"));
+        } else {
+            this.cookies = new HttpCookie();
+        }
         this.body = body;
     }
 

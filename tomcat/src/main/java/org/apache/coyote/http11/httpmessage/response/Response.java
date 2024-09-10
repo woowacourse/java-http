@@ -3,6 +3,7 @@ package org.apache.coyote.http11.httpmessage.response;
 import java.io.IOException;
 
 import org.apache.coyote.http11.exception.NotCompleteResponseException;
+import org.apache.coyote.http11.httpmessage.HttpCookie;
 import org.apache.coyote.http11.httpmessage.HttpHeaders;
 
 public class Response {
@@ -23,10 +24,12 @@ public class Response {
 
     public static class ResponseBuilder {
         private String ProtocolVersion;
+        private HttpCookie httpCookie;
         private HttpHeaders headers = new HttpHeaders();
 
         private ResponseBuilder() {
             ProtocolVersion = "HTTP/1.1";
+            httpCookie = new HttpCookie();
         }
 
         public ResponseBuilder versionOf(String protocolVersion) {
@@ -34,13 +37,18 @@ public class Response {
             return this;
         }
 
+        public ResponseBuilder addCookie(String key, String value) {
+            httpCookie.addCookie(key, value);
+            return this;
+        }
+
         public Response found(String target) {
             this.headers.addHeader("Location", target);
 
-            return new Response(
+            return build(
                     new StatusLine(this.ProtocolVersion, 301, "FOUND"),
                     this.headers,
-                    null
+                    ""
             );
         }
 
@@ -48,11 +56,22 @@ public class Response {
             headers.addHeader("Content-Type", resource.getContentType() + ";charset=utf-8");
             headers.addHeader("Content-Length", Long.toString(resource.getContentLength()));
 
-            return new Response(
+            return build(
                     new StatusLine(this.ProtocolVersion, 200, "OK"),
                     this.headers,
                     resource.getContent()
             );
+        }
+
+        public Response build(StatusLine statusLine, HttpHeaders headers, String content) {
+            setCookie(headers);
+            return new Response(statusLine, headers, content);
+        }
+
+        private void setCookie(HttpHeaders headers) {
+            if(!httpCookie.isEmpty()) {
+                headers.addHeader("Set-Cookie", httpCookie.toHttpMessage());
+            }
         }
     }
 

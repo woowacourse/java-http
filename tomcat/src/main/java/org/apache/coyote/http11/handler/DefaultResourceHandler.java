@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.apache.coyote.http11.RequestHandler;
 import org.apache.coyote.http11.exception.CanNotHandleRequest;
@@ -8,8 +9,6 @@ import org.apache.coyote.http11.exception.NoSuchUserException;
 import org.apache.coyote.http11.httpmessage.request.Request;
 import org.apache.coyote.http11.httpmessage.response.Response;
 import org.apache.coyote.http11.httpmessage.response.StaticResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.techcourse.db.InMemoryUserRepository;
 import com.techcourse.model.User;
@@ -49,6 +48,7 @@ public class DefaultResourceHandler implements RequestHandler {
             if (isLogin) {
                 return Response.builder()
                         .versionOf(request.getHttpVersion())
+                        .addCookie("JSESSIONID", UUID.randomUUID().toString())
                         .found("/index.html")
                         .toHttpMessage();
             }

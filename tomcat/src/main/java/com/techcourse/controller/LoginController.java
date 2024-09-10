@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.apache.coyote.http11.AbstractController;
 import org.apache.coyote.http11.Http11ResourceFinder;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.Http11StatusCode;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
@@ -30,9 +29,7 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         boolean loginSuccess = user.isPresent() && user.get().checkPassword(password);
         if (loginSuccess) {
-            Path path = resourceFinder.find("/index.html");
-            response.setBodyAndContentType(path);
-            response.setStatusCode(Http11StatusCode.FOUND);
+            response.setRedirect("/index.html");
         }
     }
 }

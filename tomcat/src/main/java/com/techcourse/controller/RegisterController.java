@@ -51,8 +51,6 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(account, password, email));
 
-        Path path = resourceFinder.find("/index.html");
-        response.setBodyAndContentType(path);
-        response.setStatusCode(Http11StatusCode.FOUND);
+        response.setRedirect("/index.html");
     }
 }

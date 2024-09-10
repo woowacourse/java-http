@@ -105,6 +105,12 @@ public final class HttpResponse {
         this.statusCode = statusCode;
     }
 
+    public void setRedirect(String redirectUri) {
+        addHeader(new Http11Header("Location", redirectUri));
+        setStatusCode(Http11StatusCode.FOUND);
+        body = new byte[0];
+    }
+
     public void setBodyAndContentType(Path path) {
         this.body = readStaticData(path);
         addHeader(new Http11Header("Content-Length", body.length + ""));

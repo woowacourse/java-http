@@ -22,14 +22,10 @@ public class DefaultResourceHandler implements RequestHandler {
     public String handle(Request request) throws IOException {
         log.info("request : {}", request);
         if (request.isStaticResourceRequest()) {
-            StaticResource staticResource = new StaticResource(request.getTarget());
-            return Response.writeAsStaticResource(request, staticResource.getContentType(),
-                    staticResource.getContent());
+            return fromStaticResource(request.getHttpVersion(), request.getTarget()).toHttpMessage();
         }
         if (request.getTarget().equals("/")) {
-            StaticResource staticResource = new StaticResource("/index.html");
-            return Response.writeAsStaticResource(request, staticResource.getContentType(),
-                    staticResource.getContent());
+            return fromStaticResource(request.getHttpVersion(), "/index.html").toHttpMessage();
         }
         if (request.getTarget().contains("login")) {
             return loginResponse(request);
@@ -40,7 +36,17 @@ public class DefaultResourceHandler implements RequestHandler {
         throw new CanNotHandleRequest("처리할 수 없는 요청입니다. : " + request.getTarget());
     }
 
+    private Response fromStaticResource(String protocolVersion, String path) throws IOException {
+        StaticResource staticResource = new StaticResource(path);
+        Response response = new Response();
+        response.addHeaders("Content-Type", staticResource.getContentType() + ";charset=utf-8");
+        response.addContent(staticResource.getContent());
+        response.setStatus(protocolVersion, 200, "OK");
+        return response;
+    }
+
     private String loginResponse(Request request) throws IOException {
+        Response response = new Response();
         if (request.getTarget().contains("?")) {
             QueryParameters queryParams = QueryParameters.parseFrom(request.getTarget().split("\\?")[1]);
             boolean isLogin = login(
@@ -48,12 +54,16 @@ public class DefaultResourceHandler implements RequestHandler {
                     queryParams.getParam("password")
             );
             if (isLogin) {
-                return Response.writeAsFound(request, "/index.html");
+                response.addHeaders("Location", "/index.html");
+                response.setStatus(request.getHttpVersion(), 301, "FOUND");
+                return response.toHttpMessage();
             }
-            return Response.writeAsFound(request, "/401.html");
+            response.addHeaders("Location", "/401.html");
+            response.setStatus(request.getHttpVersion(), 301, "FOUND");
+
+            return response.toHttpMessage();
         }
-        StaticResource resource = new StaticResource("/login.html");
-        return Response.writeAsStaticResource(request, resource.getContentType(), resource.getContent());
+        return fromStaticResource(request.getHttpVersion(), "/login.html").toHttpMessage();
     }
 
     private boolean login(String account, String password) throws NoSuchUserException {
@@ -66,12 +76,15 @@ public class DefaultResourceHandler implements RequestHandler {
         if (request.isPost()) {
             QueryParameters methodRequest = QueryParameters.parseFrom(request.getBody());
             register(methodRequest);
-            return Response.writeAsFound(request, "/index.html");
+            Response response = new Response();
+            response.addHeaders("Location", "/index.html");
+            response.setStatus(request.getHttpVersion(), 301, "FOUND");
+            return response.toHttpMessage();
         }
         log.info("find resource");
         StaticResource resource = new StaticResource("/register.html");
         log.info("resource = {}", resource);
-        return Response.writeAsStaticResource(request, resource.getContentType(), resource.getContent());
+        return fromStaticResource(request.getHttpVersion(), "/register.html").toHttpMessage();
     }
 
     private void register(QueryParameters queryParams) {

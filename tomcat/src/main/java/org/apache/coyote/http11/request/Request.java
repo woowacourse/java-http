@@ -72,6 +72,7 @@ public class Request {
     public String toString() {
         return "Request{" +
                 "requestLine=" + requestLine +
+                ", headers=" + headers +
                 ", body='" + body + '\'' +
                 '}';
     }

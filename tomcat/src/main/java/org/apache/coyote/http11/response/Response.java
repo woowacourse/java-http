@@ -1,24 +1,41 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.exception.NotCompleteResponseException;
+import org.apache.coyote.http11.request.HttpHeaders;
 
 public class Response {
-    public static String writeAsStaticResource(Request request, String contentType, String content) {
-        if (content == null) {
-            return null;
-        }
-        return String.join("\r\n",
-                String.format("%s 200 OK ", request.getHttpVersion()),
-                String.format("Content-Type: %s;charset=utf-8 ",contentType),
-                "Content-Length: " + content.getBytes().length + " ",
-                "",
-                content);
+
+    private final HttpHeaders headers;
+    private StatusLine statusLine;
+    private String content;
+
+    public Response() {
+        headers = new HttpHeaders();
     }
 
-    public static String writeAsFound(Request request, String target) {
+    public void setStatus(String protocolVersion, int statusCode, String statusText) {
+        statusLine = new StatusLine(protocolVersion, statusCode, statusText);
+    }
+
+    public void addHeaders(String key, String value) {
+        headers.addHeader(key, value);
+    }
+
+    public void addContent(String content) {
+        headers.addHeader("Content-Length", Integer.toString(content.getBytes().length));
+        this.content = content;
+    }
+
+    public String toHttpMessage() {
+        if (statusLine == null) {
+            throw new NotCompleteResponseException("응답이 완성되지 않았습니다.");
+        }
+        System.out.println("statusLine.toHttpMessage() = " + statusLine.toHttpMessage());
+        System.out.println("headers.toHttpMessage() = " + headers.toHttpMessage());
         return String.join("\r\n",
-                String.format("%s 301 FOUND ", request.getHttpVersion()),
-                String.format("Location: %s ",target),
-                "\r\n");
+                statusLine.toHttpMessage(),
+                headers.toHttpMessage(),
+                "",
+                content);
     }
 }

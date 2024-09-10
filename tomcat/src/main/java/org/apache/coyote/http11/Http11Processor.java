@@ -65,36 +65,28 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> readRequestHeaders(BufferedReader reader) {
-        try {
-            List<String> rawHeaders = new ArrayList<>();
+    private List<String> readRequestHeaders(BufferedReader reader) throws IOException {
+        List<String> rawHeaders = new ArrayList<>();
 
-            while (reader.ready()) {
-                String line = reader.readLine();
-                if (line.isBlank()) {
-                    break;
-                }
-                rawHeaders.add(line);
+        while (reader.ready()) {
+            String line = reader.readLine();
+            if (line.isBlank()) {
+                break;
             }
-
-            return rawHeaders;
-        } catch (IOException e) {
-            throw new UncheckedServletException("헤더를 읽는 데 실패하였습니다.");
+            rawHeaders.add(line);
         }
+
+        return rawHeaders;
     }
 
-    private RequestBody readRequestBody(BufferedReader reader, HttpHeader httpHeader) {
-        try {
-            if (httpHeader.contains(HttpHeaders.CONTENT_LENGTH.getName())) {
-                int contentLength = Integer.parseInt(httpHeader.get(HttpHeaders.CONTENT_LENGTH.getName()));
-                char[] buffer = new char[contentLength];
-                reader.read(buffer, 0, contentLength);
-                return new RequestBody(new String(buffer));
-            }
-            return null;
-        } catch (IOException e) {
-            throw new UncheckedServletException("Request Body를 읽는 데 실패하였습니다.");
+    private RequestBody readRequestBody(BufferedReader reader, HttpHeader httpHeader) throws IOException {
+        if (httpHeader.contains(HttpHeaders.CONTENT_LENGTH.getName())) {
+            int contentLength = Integer.parseInt(httpHeader.get(HttpHeaders.CONTENT_LENGTH.getName()));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new RequestBody(new String(buffer));
         }
+        return null;
     }
 
     private String handle(HttpRequest request) {

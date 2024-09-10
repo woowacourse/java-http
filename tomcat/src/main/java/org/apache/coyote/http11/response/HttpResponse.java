@@ -6,6 +6,7 @@ import org.apache.coyote.http11.HttpStatusCode;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.header.ResponseHeader;
 import org.apache.coyote.http11.path.Path;
+import org.apache.coyote.http11.version.HttpVersion;
 import util.BiValue;
 import util.StringUtil;
 
@@ -15,7 +16,7 @@ import static org.apache.coyote.http11.response.ContentType.*;
 public class HttpResponse {
     private HttpStatusCode statusCode;
     private final Headers headers;
-    private String version;
+    private HttpVersion version;
     private byte[] body;
 
     public HttpResponse() {
@@ -23,7 +24,7 @@ public class HttpResponse {
         this.body = new byte[0];
     }
 
-    public HttpResponse(final HttpStatusCode statusCode, final Headers headers, final String version, final byte[] body) {
+    public HttpResponse(final HttpStatusCode statusCode, final Headers headers, final HttpVersion version, final byte[] body) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.version = version;
@@ -31,7 +32,7 @@ public class HttpResponse {
     }
 
     public String getStatusLine() {
-        return String.join(" ", version, statusCode.getCodeString(), statusCode.getReasonPhrase()) + " ";
+        return String.join(" ", version.getVersion(), statusCode.getCodeString(), statusCode.getReasonPhrase()) + " ";
     }
 
     public Headers getHeaders() {
@@ -64,7 +65,7 @@ public class HttpResponse {
         body = resource.getBytes();
     }
 
-    public void setVersion(final String version) {
+    public void setVersion(final HttpVersion version) {
         this.version = version;
     }
 

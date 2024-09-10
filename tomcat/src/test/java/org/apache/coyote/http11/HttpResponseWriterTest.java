@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.version.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -16,7 +17,7 @@ class HttpResponseWriterTest {
     void some() throws IOException {
 
         final HttpResponse response = new HttpResponse(HttpStatusCode.OK,
-                new Headers(Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", "5564")), "HTTP/1.1",
+                new Headers(Map.of("Content-Type", "text/html;charset=utf-8", "Content-Length", "5564")), HttpVersion.HTTP_1_1,
                 "".getBytes());
         final OutputStream outputStream = new ByteArrayOutputStream();
         HttpResponseWriter.write(outputStream, response);

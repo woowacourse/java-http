@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import org.apache.coyote.http11.method.HttpMethod;
 import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.request.RequestLine;
+import org.apache.coyote.http11.version.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +17,6 @@ class RequestLineTest {
         final RequestLine line = RequestLine.create("GET /static/img/header-background.png HTTP/1.1");
         assertThat(line.getHttpMethod()).isEqualTo(HttpMethod.GET);
         assertThat(line.getPath()).isEqualTo(Path.from("/static/img/header-background.png"));
-        assertThat(line.getVersion()).isEqualTo("HTTP/1.1");
+        assertThat(line.getVersion()).isEqualTo(HttpVersion.HTTP_1_1);
     }
 }

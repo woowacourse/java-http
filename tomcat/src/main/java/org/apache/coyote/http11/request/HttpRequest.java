@@ -1,17 +1,18 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.cookie.Cookies;
-import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.header.Headers;
 import org.apache.coyote.http11.method.HttpMethod;
+import org.apache.coyote.http11.path.Path;
 import org.apache.coyote.http11.queryparam.QueryParams;
 import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.version.HttpVersion;
 
 public class HttpRequest {
     private final HttpMethod method;
     private final Path path;
     private final QueryParams queryParams;
-    private final String version;
+    private final HttpVersion version;
     private final Headers headers;
     private final RequestBody body;
     private final Cookies cookies;
@@ -40,7 +41,7 @@ public class HttpRequest {
     }
 
     public String getVersion() {
-        return version;
+        return version.getVersion();
     }
 
     public QueryParams getQueryParams() {
